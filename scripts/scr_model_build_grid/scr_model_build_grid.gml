@@ -23,9 +23,9 @@ function scr_model_build_grid() {
 	}
 	
 	// Create the root center lines
-	scr_model_build_line(gridVbuff, -size, 0, 0, size, 0, 0, Colors3D.red, 1);
-	scr_model_build_line(gridVbuff, 0, -size, 0, 0, size, 0, Colors3D.blue, 1);
-	scr_model_build_line(gridVbuff, 0, 0, -size, 0, 0, size, Colors3D.green, 1);
+	scr_model_build_line(gridVbuff, -size, 0, 0, size, 0, 0, Colors3D.x, 1);
+	scr_model_build_line(gridVbuff, 0, -size, 0, 0, size, 0, Colors3D.y, 1);
+	scr_model_build_line(gridVbuff, 0, 0, -size, 0, 0, size, Colors3D.z, 1);
 	
 	scr_model_end_mesh(gridVbuff);
 }

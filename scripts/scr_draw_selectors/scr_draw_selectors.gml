@@ -16,14 +16,10 @@ function scr_draw_selectors(replaceColors) {
 		// When specified, set the selection shader color
 		if (replaceColors) {
 			shader_set(shdr_replace_color);
-			shader_set_uniform_f(shdrReplaceCol_uCol, selector.selectionR*.0039, selector.selectionG*.0039, selector.selectionB*.0039);
-		} else if (selectedObj == selector) {	
-			// If the model is selected, blend the color via shader
-			shader_set(shdr_blend_color);
-			shader_set_uniform_f(shdrBlendCol_uCol, Colors3D.selectionR, Colors3D.selectionG, Colors3D.selectionB);
+			shader_set_uniform_f(shdrReplaceCol_uCol, selector.selectionR, selector.selectionG, selector.selectionB);
 		}
 		
-		vertex_submit(selector.vb, pr_trianglelist, selector.texture);
+		vertex_submit(selector.vbuff, pr_trianglelist, selector.texture);
 		
 		if (selectedObj != -1) shader_reset();
 	}

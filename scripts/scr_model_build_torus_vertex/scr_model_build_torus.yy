@@ -2,11 +2,11 @@
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
-    "name": "Meshes",
-    "path": "folders/Models/Prefabs/Gizmo/Meshes.yy",
+    "name": "Models",
+    "path": "folders/Models.yy",
   },
   "resourceVersion": "1.0",
-  "name": "scr_model_build_square_xz",
+  "name": "scr_model_build_torus",
   "tags": [],
   "resourceType": "GMScript",
 }

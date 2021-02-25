@@ -1,25 +1,23 @@
-alarm[0] = 1; // AA
+alarm[0] = 1; // Set display AA
 device_mouse_dbclick_enable(false);
 show_debug_overlay(true);
 
 enum Colors3D {
 	// Transform 
-	red = $3a1be0,  
-	green = $18d415,
-	blue = $e05402,
-  
-	// Selection
-	selection = $0dc7d1,
-	selectionR = 209,
-	selectionG = 199,
-	selectionB = 13,
-	
-	// Hover
-	hover = $6be5ff,
-	hoverR = 0,
-	hoverG = 0,
-	hoverB = 0
+	x = $3a1be0,  
+	y = $00b300,
+	z = $e05402,
+	hover = $0dc7d1,
+	selection = $6be5ff,
 }
+
+#macro ColorHoverR 209 * .0039
+#macro ColorHoverG 199 * .0039
+#macro ColorHoverB 13 * .0039
+
+#macro ColorSelectionR 255 * .0039
+#macro ColorSelectionG 229 * .0039
+#macro ColorSelectionB 107 * .0039
 
 enum ObjectType {
 	model,
@@ -39,12 +37,17 @@ window_command_run(window_command_minimize);
 window_command_run(window_command_maximize);
 
 // Variables
-x = 200;
-y = 150;
-z = 60;
-direction = 130;
+x = 130;
+y = -50;
+z = 50;
+cameraXT = 0;
+cameraYT = 0;
+cameraZT = 0;
+cameraF = 0;
+direction = 110;
 zdir = 20;
-camFov = 60;
+cameraFov = 60;
+cameraAspectRatio = view_get_wport(0)/view_get_hport(0);
 stats = {
 	models: 0, // Models
 	meshes: 0, // Meshes
@@ -59,7 +62,14 @@ winOldMouseX = 0;
 winOldMouseY = 0;
 winOldW = 0;
 winOldH = 0;
-aa_enabled = false//true;
+winMouse3DX = 0;
+winMouse3DY = 0;
+winOldMouse3DX = 0;
+winOldMouse3DY = 0;
+winMouse3DZ = 0;
+winOldMouse3DZ = 0;
+aaEnabled = true;
+fogEnabled = true;
 lightEnabled = true;
 models = []; // List of models
 pxSurface = -1;
@@ -91,8 +101,6 @@ scr_model_build_gizmo();
 
 // Create a default cube
 tex_cube = sprite_get_texture(s_cube, 0);
-//tex_cube_texel_w = texture_get_texel_width(tex_cube);
-//tex_cube_texel_h = texture_get_texel_height(tex_cube);
 scr_model_add_default_cube();
 
 // Shaders variables

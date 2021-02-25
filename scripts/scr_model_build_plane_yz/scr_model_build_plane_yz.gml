@@ -1,4 +1,4 @@
-function scr_model_build_plane_xz(vbuff, x1, y1, z1, x2, y2, z2, col, alpha) {
+function scr_model_build_plane_yz(vbuff, x1, y1, z1, x2, y2, z2, col, alpha) {
 	// First triangle
 	vertex_position_3d(vbuff, x2, y2, z2);
 	vertex_texcoord(vbuff, 1, 0);

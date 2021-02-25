@@ -6,7 +6,7 @@
     "path": "folders/Models/Prefabs/Gizmo/Meshes.yy",
   },
   "resourceVersion": "1.0",
-  "name": "scr_model_build_plane_xz",
+  "name": "scr_model_build_square_yz",
   "tags": [],
   "resourceType": "GMScript",
 }

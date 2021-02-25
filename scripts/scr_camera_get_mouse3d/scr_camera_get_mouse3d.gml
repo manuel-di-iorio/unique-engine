@@ -1,18 +1,24 @@
 /**
  * Get the mouse 3D position from the XY screen-space position
  */
- // @todo: not working properly
 function scr_camera_get_mouse3d() {
-	var abs_zdir = abs(abs(zdir)-90);
-	var zdir2 = 90 - abs_zdir;
+	var _x = winMouseX;
+	var _y = winH - winMouseY;
+	var V = camViewMat;
+	var P = camProjMat;
 
-	var xto = x + (dcos(direction) * dcos(-zdir)) * abs(z) / dsin(zdir2);  
-	var yto = y + (dsin(direction) * -dcos(-zdir)) * abs(z) / dsin(zdir2); 
+	var mx = 2 * (_x / winW - .5) / P[0];
+	var my = 2 * (_y / winH - .5) / P[5];
+	var camX = - (V[12] * V[0] + V[13] * V[1] + V[14] * V[2]);
+	var camY = - (V[12] * V[4] + V[13] * V[5] + V[14] * V[6]);
+	var camZ = - (V[12] * V[8] + V[13] * V[9] + V[14] * V[10]);
 
-	var mdir = point_direction(winW/2, winH/2, winMouseX, winMouseY); 
-	var mdis = point_distance(winW/2, winH/2, winMouseX, winMouseY);
-	var deg = direction - 90 + mdir;
-
-	winMouse3DX = -(xto + lengthdir_x(mdis * (-z/(winW/(2+abs_zdir)*2)), deg));
-	winMouse3DY = -(yto + lengthdir_y(mdis * (-z/(winW/(2+abs_zdir)*2)), deg));
+	var dx = V[2]  + mx * V[0] + my * V[1];
+	var dy = V[6]  + mx * V[4] + my * V[5];
+	var dz = V[10] + mx * V[8] + my * V[9];
+				
+	var zSign = sign(z);
+	winMouse3DX = x + dx*z * zSign;
+	winMouse3DY = y + dy*z * zSign;
+	winMouse3DZ = z + dz*z*5 * zSign;
 }

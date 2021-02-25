@@ -6,10 +6,13 @@ function scr_draw_models(replaceColors) {
 		
 		// Check if the model has been selected
 		var selected = selectedPxCol == model.selectionId && mouse_check_button_pressed(mb_left);
-		if (selected) selectedObj = model;
+		if (selected) {
+			selectedObj = model;
+			alarm[1] = 1;
+		}
 
 		// Transform the model
-		var  mat = matrix_build(
+		var mat = matrix_build(
 			model.x, model.y, model.z, 
 			model.xrot, model.yrot, model.zrot,
 			model.xscale, model.yscale, model.zscale
@@ -19,11 +22,7 @@ function scr_draw_models(replaceColors) {
 		// When specified, set the selection shader color
 		if (replaceColors) {
 			shader_set(shdr_replace_color);
-			shader_set_uniform_f(shdrReplaceCol_uCol, model.selectionR*.0039, model.selectionG*.0039, model.selectionB*.0039);
-		} else if (selectedObj == model) {
-			// If the model is selected, blend the color via shader
-			//shader_set(shdr_blend_color);
-			//shader_set_uniform_f(shdrBlendCol_uCol, 102*.0039, 204*.0039, 255*.0039);
+			shader_set_uniform_f(shdrReplaceCol_uCol, model.selectionR, model.selectionG, model.selectionB);
 		}
 		
 		// Draw the model's meshes

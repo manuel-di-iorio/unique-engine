@@ -2,11 +2,11 @@
  * Handle the camera transform on user input (mouse/keyword)
  */
 function scr_transform_camera() {
-	var dx = camLookatMatrix[2];
-	var dy = camLookatMatrix[6];
-	var dz = camLookatMatrix[10];
-	var cameraSpeed = 5;
-	var shiftSpd = keyboard_check(vk_shift) * 10;
+	var dx = camViewMat[2];
+	var dy = camViewMat[6];
+	var dz = camViewMat[10];
+	var cameraSpeed = 2;
+	var shiftSpd = keyboard_check(vk_shift) * 4;
 	
 	// Lateral movement
 	if (keyboard_check(ord("A"))) {
@@ -42,10 +42,10 @@ function scr_transform_camera() {
 	
 	// Elevate/descend
 	if (keyboard_check(ord("E"))) {
-		z += 2;	
+		z += 1;	
 	}
 	if (keyboard_check(ord("Q"))) {
-		z -= 2;
+		z -= 1;
 	}
 	
 	// Move the camera towards the direction its facing

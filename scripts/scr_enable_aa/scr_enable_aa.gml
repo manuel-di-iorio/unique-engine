@@ -1,5 +1,6 @@
 function scr_enable_aa() {
-	if (!aa_enabled) return;
+	if (!aaEnabled) return;
+	
 	if (display_aa > 8) {
 		display_reset(8, false);
 	} else if (display_aa > 4) {
