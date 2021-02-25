@@ -68,5 +68,5 @@ function scr_draw_gizmo(replaceColors) {
 	//vertex_submit(vertex_buffer, pr_trianglelist, -1)
 	
 	matrix_set(matrix_world, matrix_build_identity());
-	draw_set_lighting(o_ctrl.lightEnabled);
+	scr_lightning_enable();
 }

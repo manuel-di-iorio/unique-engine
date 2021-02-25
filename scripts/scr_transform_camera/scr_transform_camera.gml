@@ -5,8 +5,11 @@ function scr_transform_camera() {
 	var dx = camViewMat[2];
 	var dy = camViewMat[6];
 	var dz = camViewMat[10];
+	
 	var cameraSpeed = 2;
 	var shiftSpd = keyboard_check(vk_shift) * 4;
+	var mouseSensX = settings.mouse.xsens;
+	var mouseSensY = settings.mouse.ysens;
 	
 	// Lateral movement
 	if (keyboard_check(ord("A"))) {
@@ -30,8 +33,8 @@ function scr_transform_camera() {
 	if(mouse_check_button(mb_right)) {
 		window_set_cursor(cr_none);
 		cursorSprite = s_cursor_eye;
-		direction -= (winMouseX - winOldMouseX) / 10;
-		zdir += (winMouseY - winOldMouseY) / 10;
+		direction -= (winMouseX - winOldMouseX) / (10 / mouseSensX);
+		zdir += (winMouseY - winOldMouseY) / (10 / mouseSensY);
 			
 		if (zdir < -89) {
 			zdir = -89;
@@ -88,7 +91,7 @@ function scr_transform_camera() {
 		} else { 
 			shfDir = 0;
 		}
-		var delta = abs(winMouseY - winOldMouseY)/5;
+		var delta = abs(winMouseY - winOldMouseY) / (5 / mouseSensY);
 		if (shfDir != 0) {
 			z -= -dsin(o_ctrl.zdir+shfDir) * delta;
 		}

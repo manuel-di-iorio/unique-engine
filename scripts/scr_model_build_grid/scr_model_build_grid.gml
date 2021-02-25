@@ -1,24 +1,37 @@
 function scr_model_build_grid() {
+	if (gridVbuff != -1) {
+		// Rebuild the grid
+		vertex_delete_buffer(gridVbuff);
+	}
+	
 	gridVbuff = scr_model_create_mesh();
 	
 	var alpha;
-	var dist = 32;
 	var size = 100000;
-	var count = ceil(size*2/dist);		
+	
+	var xdist = settings.grid.xoffset;
+	var xcount = ceil(size*2/xdist);
+	
+	var ydist = settings.grid.yoffset;
+	var ycount = ceil(size*2/ydist);	
 
-	for (var i=0; i<count; i++) {
+	for (var i=0; i<xcount; i++) {
 		if (i % 10 == 0) { alpha = .8; } else { alpha = .4; }
 		
 		// Horizontal
-		vertex_position_3d(gridVbuff, -size+i*dist, -size, 0);
+		vertex_position_3d(gridVbuff, -size+i*xdist, -size, 0);
 		vertex_color(gridVbuff, c_gray, alpha);
-		vertex_position_3d(gridVbuff, -size+i*dist, size, 0);
+		vertex_position_3d(gridVbuff, -size+i*xdist, size, 0);
 		vertex_color(gridVbuff, c_gray, alpha);
+	}
+	
+	for (var i=0; i<ycount; i++) {
+		if (i % 10 == 0) { alpha = .8; } else { alpha = .4; }
 		
 		// Vertical
-		vertex_position_3d(gridVbuff, -size, -size+i*dist, 0);
+		vertex_position_3d(gridVbuff, -size, -size+i*ydist, 0);
 		vertex_color(gridVbuff, c_gray, alpha);
-		vertex_position_3d(gridVbuff, size, -size+i*dist, 0);
+		vertex_position_3d(gridVbuff, size, -size+i*ydist, 0);
 		vertex_color(gridVbuff, c_gray, alpha);
 	}
 	

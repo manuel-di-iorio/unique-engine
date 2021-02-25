@@ -1,6 +1,14 @@
-alarm[0] = 1; // Set display AA
+// Load the settings
+scr_load_settings();
+
+// Set display AA/VSync
+alarm[0] = 1; 
+
+// Show debug overlay
+if (settings.debug.overlay) show_debug_overlay(true);
+
+// Disable the double click support (to reduce click delay)
 device_mouse_dbclick_enable(false);
-show_debug_overlay(true);
 
 enum Colors3D {
 	// Transform 
@@ -31,7 +39,10 @@ enum Tools {
 	scale
 }
 
-// Maximize the window (twice to fix gm draw resize)
+// Set the room background color
+layer_background_blend(layer_background_get_id("Background"), settings.camera.bgcol)
+
+// Maximize the window
 window_command_run(window_command_maximize);
 window_command_run(window_command_minimize);
 window_command_run(window_command_maximize);
@@ -68,9 +79,6 @@ winOldMouse3DX = 0;
 winOldMouse3DY = 0;
 winMouse3DZ = 0;
 winOldMouse3DZ = 0;
-aaEnabled = true;
-fogEnabled = true;
-lightEnabled = true;
 models = []; // List of models
 pxSurface = -1;
 selectedPxCol = 0;
@@ -91,9 +99,11 @@ tex_audio_source = sprite_get_texture(s_audio, 0);
 // Resize the editor
 scr_on_window_resize();
 
+// Setup the 3D environment and projection
 scr_setup_3d();
 
 // Create the grid
+gridVbuff = -1;
 scr_model_build_grid();
 
 // Create the gizmo model

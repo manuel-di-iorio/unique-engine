@@ -3,6 +3,8 @@
  */
 function scr_transform_objs() {
     if (selectedGizmo == -1) return;
+	
+	var mouseSensY = settings.mouse.ysens;
     
     /** Translate **/
     switch (selectedGizmo.gizmo) {
@@ -15,17 +17,17 @@ function scr_transform_objs() {
         break;
         
         case GizmoComponent.translateZ:
-            selectedObj.z -= (winMouseY - winOldMouseY)/10;
+            selectedObj.z -= (winMouseY - winOldMouseY)/ (10 / mouseSensY);
         break;
         
         case GizmoComponent.translatePlaneYZ:
             selectedObj.y += winMouse3DY - winOldMouse3DY;
-            selectedObj.z -= (winMouseY - winOldMouseY)/10;
+            selectedObj.z -= (winMouseY - winOldMouseY) / (10 / mouseSensY);
         break;
         
         case GizmoComponent.translatePlaneXZ:
             selectedObj.x += winMouse3DX - winOldMouse3DX;
-            selectedObj.z -= (winMouseY - winOldMouseY)/10;
+            selectedObj.z -= (winMouseY - winOldMouseY) / (10 / mouseSensY);
         break;
         
         case GizmoComponent.translatePlaneXY:

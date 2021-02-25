@@ -4,9 +4,7 @@ vertex_submit(gridVbuff, pr_linelist, -1);
 // Draw the scene
 scr_draw_scene(false);
 
-
-
-var mesh = scr_model_create_mesh()
+/*var mesh = scr_model_create_mesh()
 vertex_position_3d(mesh, winMouse3DX, winMouse3DY, winMouse3DZ)
 vertex_color(mesh, c_orange, 1)
 

@@ -17,7 +17,7 @@ function scr_setup_3d() {
 	scr_fog_enable();
 	
 	// Lightning
-	draw_set_lighting(lightEnabled);
+	scr_lightning_enable();
 	draw_light_define_ambient($202020);
 	draw_light_define_point(0, 0, 0, 0, 1000, $D6F4FF);
 	draw_light_enable(0, true);
