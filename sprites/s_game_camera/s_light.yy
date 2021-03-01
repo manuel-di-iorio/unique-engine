@@ -7,10 +7,10 @@
   "edgeFiltering": false,
   "collisionTolerance": 0,
   "swfPrecision": 2.525,
-  "bbox_left": 10,
-  "bbox_right": 53,
-  "bbox_top": 3,
-  "bbox_bottom": 60,
+  "bbox_left": 0,
+  "bbox_right": 63,
+  "bbox_top": 2,
+  "bbox_bottom": 61,
   "HTile": false,
   "VTile": false,
   "For3D": true,
@@ -24,12 +24,12 @@
   "gridX": 0,
   "gridY": 0,
   "frames": [
-    {"compositeImage":{"FrameId":{"name":"4bd90578-d128-4862-b830-dbe4d710535f","path":"sprites/s_audio/s_audio.yy",},"LayerId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMSpriteBitmap",},"images":[
-        {"FrameId":{"name":"4bd90578-d128-4862-b830-dbe4d710535f","path":"sprites/s_audio/s_audio.yy",},"LayerId":{"name":"1d6c3b45-5d12-4a04-b8ee-0cdc2f0599a8","path":"sprites/s_audio/s_audio.yy",},"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMSpriteBitmap",},
-      ],"parent":{"name":"s_audio","path":"sprites/s_audio/s_audio.yy",},"resourceVersion":"1.0","name":"4bd90578-d128-4862-b830-dbe4d710535f","tags":[],"resourceType":"GMSpriteFrame",},
+    {"compositeImage":{"FrameId":{"name":"8e91b951-b7cc-4ed3-92e4-2357d870e1d7","path":"sprites/s_light/s_light.yy",},"LayerId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMSpriteBitmap",},"images":[
+        {"FrameId":{"name":"8e91b951-b7cc-4ed3-92e4-2357d870e1d7","path":"sprites/s_light/s_light.yy",},"LayerId":{"name":"b5c82b99-61d0-4e5c-aec7-ad1624705454","path":"sprites/s_light/s_light.yy",},"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMSpriteBitmap",},
+      ],"parent":{"name":"s_light","path":"sprites/s_light/s_light.yy",},"resourceVersion":"1.0","name":"8e91b951-b7cc-4ed3-92e4-2357d870e1d7","tags":[],"resourceType":"GMSpriteFrame",},
   ],
   "sequence": {
-    "spriteId": {"name":"s_audio","path":"sprites/s_audio/s_audio.yy",},
+    "spriteId": {"name":"s_light","path":"sprites/s_light/s_light.yy",},
     "timeUnits": 1,
     "playback": 1,
     "playbackSpeed": 30.0,
@@ -41,7 +41,7 @@
     "moments": {"Keyframes":[],"resourceVersion":"1.0","resourceType":"KeyframeStore<MomentsEventKeyframe>",},
     "tracks": [
       {"name":"frames","spriteId":null,"keyframes":{"Keyframes":[
-            {"id":"76dcdc7f-71a8-4118-a897-5d8f7b94455f","Key":0.0,"Length":1.0,"Stretch":false,"Disabled":false,"IsCreationKey":false,"Channels":{"0":{"Id":{"name":"4bd90578-d128-4862-b830-dbe4d710535f","path":"sprites/s_audio/s_audio.yy",},"resourceVersion":"1.0","resourceType":"SpriteFrameKeyframe",},},"resourceVersion":"1.0","resourceType":"Keyframe<SpriteFrameKeyframe>",},
+            {"id":"45881ee6-3b0e-4a3c-9901-53a277250dfc","Key":0.0,"Length":1.0,"Stretch":false,"Disabled":false,"IsCreationKey":false,"Channels":{"0":{"Id":{"name":"8e91b951-b7cc-4ed3-92e4-2357d870e1d7","path":"sprites/s_light/s_light.yy",},"resourceVersion":"1.0","resourceType":"SpriteFrameKeyframe",},},"resourceVersion":"1.0","resourceType":"Keyframe<SpriteFrameKeyframe>",},
           ],"resourceVersion":"1.0","resourceType":"KeyframeStore<SpriteFrameKeyframe>",},"trackColour":0,"inheritsTrackColour":true,"builtinName":0,"traits":0,"interpolation":1,"tracks":[],"events":[],"modifiers":[],"isCreationTrack":false,"resourceVersion":"1.0","tags":[],"resourceType":"GMSpriteFramesTrack",},
     ],
     "visibleRange": null,
@@ -58,21 +58,21 @@
     "yorigin": 0,
     "eventToFunction": {},
     "eventStubScript": null,
-    "parent": {"name":"s_audio","path":"sprites/s_audio/s_audio.yy",},
+    "parent": {"name":"s_light","path":"sprites/s_light/s_light.yy",},
     "resourceVersion": "1.3",
-    "name": "s_audio",
+    "name": "s_light",
     "tags": [],
     "resourceType": "GMSequence",
   },
   "layers": [
-    {"visible":true,"isLocked":false,"blendMode":0,"opacity":100.0,"displayName":"default","resourceVersion":"1.0","name":"1d6c3b45-5d12-4a04-b8ee-0cdc2f0599a8","tags":[],"resourceType":"GMImageLayer",},
+    {"visible":true,"isLocked":false,"blendMode":0,"opacity":100.0,"displayName":"default","resourceVersion":"1.0","name":"b5c82b99-61d0-4e5c-aec7-ad1624705454","tags":[],"resourceType":"GMImageLayer",},
   ],
   "parent": {
-    "name": "Selector Sprites",
-    "path": "folders/Editor/Selector Sprites.yy",
+    "name": "Editor",
+    "path": "folders/Editor.yy",
   },
   "resourceVersion": "1.0",
-  "name": "s_audio",
+  "name": "s_light",
   "tags": [],
   "resourceType": "GMSprite",
 }

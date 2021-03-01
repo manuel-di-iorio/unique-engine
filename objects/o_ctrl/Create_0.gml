@@ -1,3 +1,5 @@
+OS_CONFIG_RELEASE = os_get_config() == "release";
+
 // Load the settings
 scr_load_settings();
 
@@ -29,7 +31,8 @@ enum Colors3D {
 
 enum ObjectType {
 	model,
-	selector
+	selector,
+	camera
 }
 
 enum Tools {
@@ -40,7 +43,7 @@ enum Tools {
 }
 
 // Set the room background color
-layer_background_blend(layer_background_get_id("Background"), settings.camera.bgcol)
+layer_background_blend(layer_background_get_id("Background"), settings.camera.bgcol);
 
 // Maximize the window
 window_command_run(window_command_maximize);
@@ -48,15 +51,15 @@ window_command_run(window_command_minimize);
 window_command_run(window_command_maximize);
 
 // Variables
-x = 130;
-y = -50;
-z = 50;
+x = 30;
+y = 150;
+z = 60;
 cameraXT = 0;
 cameraYT = 0;
 cameraZT = 0;
 cameraF = 0;
 direction = 110;
-zdir = 20;
+zdir = 10;
 cameraFov = 60;
 cameraAspectRatio = view_get_wport(0)/view_get_hport(0);
 stats = {
@@ -88,16 +91,15 @@ selectedObj = -1; // Selected object (model/selector)
 selectedGizmo = -1; // Selected gizmo component
 selectedTool = Tools.translate; // Selected tool
 cursorSprite = -1;
+history_list = ds_list_create(); // History of performed actions
+history_index = 0; // Current history list position
 
-// Default light
-tex_light = sprite_get_texture(s_light, 0);
-scr_model_add_selector(0, 0, 0, 0, tex_light);
+// Default light source
+var tex_light = sprite_get_texture(s_light, 0);
+scr_model_add_selector(-70, 70, 30, 0, tex_light);
 
-// Audio texture
-tex_audio_source = sprite_get_texture(s_audio, 0);
-
-// Resize the editor
-scr_on_window_resize();
+// Audio source texture
+var tex_audio_source = sprite_get_texture(s_audio, 0);
 
 // Setup the 3D environment and projection
 scr_setup_3d();
@@ -109,10 +111,17 @@ scr_model_build_grid();
 // Create the gizmo model
 scr_model_build_gizmo();
 
+// Create the game camera source model
+scr_model_add_game_camera();
+
 // Create a default cube
 tex_cube = sprite_get_texture(s_cube, 0);
-scr_model_add_default_cube();
+scr_model_add_default_cube(0, 0);
+scr_model_add_default_cube(50, -50);
 
 // Shaders variables
 shdrReplaceCol_uCol = shader_get_uniform(shdr_replace_color,  "u_col");
 shdrBlendCol_uCol = shader_get_uniform(shdr_blend_color,  "u_col");
+
+// Resize the editor
+scr_on_window_resize();

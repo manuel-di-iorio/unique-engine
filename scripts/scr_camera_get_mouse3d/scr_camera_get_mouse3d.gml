@@ -18,7 +18,7 @@ function scr_camera_get_mouse3d() {
 	var dz = V[10] + mx * V[8] + my * V[9];
 				
 	var zSign = sign(z);
-	winMouse3DX = x + dx*z*2 * zSign;
-	winMouse3DY = y + dy*z*2 * zSign;
-	winMouse3DZ = z + dz*z*2 * zSign;
+	winMouse3DX = x + dx*z * zSign;
+	winMouse3DY = y + dy*z * zSign;
+	winMouse3DZ = z + dz*z * zSign;
 }

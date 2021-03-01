@@ -20,7 +20,7 @@ function scr_model_build_gizmo() {
 	/** Translate mesh **/
 	
 	// Cylinders
-	var cylinderLength = 25;
+	var cylinderLength = 20;
 	var cylinderRadius = .3;
 	vbuff = scr_model_build_cylinder(0, 0, 0, cylinderRadius, cylinderLength, Colors3D.x, alpha);
 	gizmos.translate.x = { gizmo: GizmoComponent.translateX, prim: pr_trianglestrip, vbuff: vbuff };

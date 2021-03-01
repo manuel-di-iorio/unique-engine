@@ -68,8 +68,8 @@
     {"visible":true,"isLocked":false,"blendMode":0,"opacity":100.0,"displayName":"default","resourceVersion":"1.0","name":"b5c82b99-61d0-4e5c-aec7-ad1624705454","tags":[],"resourceType":"GMImageLayer",},
   ],
   "parent": {
-    "name": "Editor",
-    "path": "folders/Editor.yy",
+    "name": "Selector Sprites",
+    "path": "folders/Editor/Selector Sprites.yy",
   },
   "resourceVersion": "1.0",
   "name": "s_light",

@@ -9,30 +9,30 @@ function scr_transform_objs() {
     /** Translate **/
     switch (selectedGizmo.gizmo) {
         case GizmoComponent.translateX:
-            selectedObj.x += (winMouse3DX - winOldMouse3DX);
+            selectedObj.x += (winMouse3DX - winOldMouse3DX) * 2;
         break;
         
         case GizmoComponent.translateY:
-            selectedObj.y += (winMouse3DY - winOldMouse3DY);
+            selectedObj.y += (winMouse3DY - winOldMouse3DY) * 2;
         break;
         
         case GizmoComponent.translateZ:
-            selectedObj.z -= (winMouseY - winOldMouseY)/ (10 / mouseSensY);
+            selectedObj.z -= (winMouseY - winOldMouseY)/ (5 / mouseSensY);
         break;
         
         case GizmoComponent.translatePlaneYZ:
-            selectedObj.y += winMouse3DY - winOldMouse3DY;
+            selectedObj.y += (winMouse3DY - winOldMouse3DY) * 2;
             selectedObj.z -= (winMouseY - winOldMouseY) / (10 / mouseSensY);
         break;
         
         case GizmoComponent.translatePlaneXZ:
-            selectedObj.x += winMouse3DX - winOldMouse3DX;
+            selectedObj.x += (winMouse3DX - winOldMouse3DX) * 2;
             selectedObj.z -= (winMouseY - winOldMouseY) / (10 / mouseSensY);
         break;
         
         case GizmoComponent.translatePlaneXY:
-            selectedObj.x += winMouse3DX - winOldMouse3DX;
-            selectedObj.y += winMouse3DY - winOldMouse3DY;
+            selectedObj.x += (winMouse3DX - winOldMouse3DX) * 2;
+            selectedObj.y += (winMouse3DY - winOldMouse3DY) * 2;
         break;
     }
 }

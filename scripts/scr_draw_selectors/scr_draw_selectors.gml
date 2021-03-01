@@ -5,7 +5,7 @@ function scr_draw_selectors(replaceColors) {
 		var selector = selectors[i];
 		
 		// Check if the model has been selected
-		var selected = selectedPxCol == selector.selectionId && mouse_check_button_pressed(mb_left);
+		var selected = selectedObj != selector && selectedPxCol == selector.selectionId && mouse_check_button_pressed(mb_left);
 		if (selected) selectedObj = selector;
 		
 		var camDirX = point_direction(0, -o_ctrl.z, point_distance(o_ctrl.x, o_ctrl.y, selector.x, selector.y), -selector.z) ;

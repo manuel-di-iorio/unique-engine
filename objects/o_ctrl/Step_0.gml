@@ -31,3 +31,12 @@ scr_getpixel_pxsurface(winMouseX, winMouseY);
 if (selectedObj != -1 && selectedGizmo == -1 && selectedPxCol == 0 && mouse_check_button_released(mb_left) ) {
 	selectedObj = -1;	
 }
+
+// History
+if (keyboard_check(vk_control)) {
+	if (keyboard_check_pressed(ord("Z"))) {
+		scr_history_undo();
+	} else if (keyboard_check_pressed(ord("Y"))) {
+		scr_history_redo();
+	}
+}

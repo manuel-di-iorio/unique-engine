@@ -1,0 +1,12 @@
+{
+  "isDnD": false,
+  "isCompatibility": false,
+  "parent": {
+    "name": "Editor",
+    "path": "folders/Editor.yy",
+  },
+  "resourceVersion": "1.0",
+  "name": "scr_undoredo_add",
+  "tags": [],
+  "resourceType": "GMScript",
+}

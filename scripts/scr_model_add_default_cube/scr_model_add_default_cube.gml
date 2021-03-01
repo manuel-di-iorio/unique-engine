@@ -1,7 +1,7 @@
 /**
  * Create a cube mesh
  */
-function scr_model_add_default_cube() {
+function scr_model_add_default_cube(xpos, ypos) {
 	var xx = -16;
 	var yy = -16;
 	var zz = -16;
@@ -204,12 +204,12 @@ function scr_model_add_default_cube() {
 	o_ctrl.stats.meshes++;
 	o_ctrl.stats.triangles += 12;
 	
-	var objCube = {
+	var obj = {
 		type: ObjectType.model,
 		meshes: [{ vbuff: vbuff, texture: tex_cube }],		
 		meshesCount: 1,
-		x: 100 ,
-		y: -100,
+		x: xpos,
+		y: ypos,
 		z: 16,
 		xrot: 0,
 		yrot: 0,
@@ -218,8 +218,6 @@ function scr_model_add_default_cube() {
 		yscale: 1,
 		zscale: 1
 	};
-	scr_obj_set_selection_id(objCube);
-	array_push(o_ctrl.models, objCube);
-	
-	return vbuff;
+	scr_obj_set_selection_id(obj);
+	array_push(o_ctrl.models, obj);
 }

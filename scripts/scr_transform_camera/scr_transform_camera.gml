@@ -45,23 +45,23 @@ function scr_transform_camera() {
 	
 	// Elevate/descend
 	if (keyboard_check(ord("E"))) {
-		z += 1;	
+		z += 2;	
 	}
 	if (keyboard_check(ord("Q"))) {
-		z -= 1;
+		z -= 2;
 	}
 	
 	// Move the camera towards the direction its facing
 	if (mouse_wheel_up()) {
-		x += dx*cameraSpeed*2;
-		y += dy*cameraSpeed*2;
-		z += dz*cameraSpeed*2;
+		x += dx*cameraSpeed*3;
+		y += dy*cameraSpeed*3;
+		z += dz*cameraSpeed*3;
 	}
 	
 	if (mouse_wheel_down()) {
-		x -= dx*cameraSpeed*2;
-		y -= dy*cameraSpeed*2;
-		z -= dz*cameraSpeed*2;
+		x -= dx*cameraSpeed*3;
+		y -= dy*cameraSpeed*3;
+		z -= dz*cameraSpeed*3;
 	}
 	
 	// Camera Pan

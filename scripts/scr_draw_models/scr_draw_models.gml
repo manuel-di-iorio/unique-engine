@@ -1,14 +1,13 @@
 function scr_draw_models(replaceColors) {
-	var modelsCount = stats.models;
-	
-   	for (var i=0; i<modelsCount; i++) {
+   	for (var i=0, l=stats.models; i<l; i++) {
 		var model = models[i];
 		
 		// Check if the model has been selected
-		var selected = selectedPxCol == model.selectionId && mouse_check_button_pressed(mb_left);
+		var selected = selectedObj != model && selectedPxCol == model.selectionId && mouse_check_button_pressed(mb_left);
 		if (selected) {
 			selectedObj = model;
 			alarm[1] = 1;
+			scr_history_push(model);
 		}
 
 		// Transform the model
@@ -27,9 +26,8 @@ function scr_draw_models(replaceColors) {
 		
 		// Draw the model's meshes
 		var meshes = model.meshes;		
-		var meshesCount = model.meshesCount;
-		for (var j=0; j<meshesCount; j++) {
-			var mesh = meshes[i];
+		for (var j=0, k=model.meshesCount; j<k; j++) {
+			var mesh = meshes[j];
 			vertex_submit(mesh.vbuff, pr_trianglelist, mesh.texture);
 		}
 		

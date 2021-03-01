@@ -9,27 +9,27 @@ function scr_draw_gizmo(replaceColors) {
 	
 	draw_set_lighting(false);
 	
-	var length = 25;
+	var length = 20;
 	var halfLength = length/2;
 	
 	/** Traslate */
 	var translateAxisDist = 6;
 	
-	// Planes
-	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.planeYZ, xx, yy, zz, 0, 0, 0, 1, 1, 1);
-	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.planeXZ, xx, yy, zz, 0, 0, 0, 1, 1, 1);
-	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.planeXY, xx, yy, zz, 0, 0, 0, 1, 1, 1);
-	
 	// Cylinders
-	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.x, xx+halfLength+translateAxisDist, yy, zz, 0, 90, 0, 1, 1, 1, 15);
-	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.y, xx, yy+halfLength+translateAxisDist, zz, 90, 0, 0, 1, 1, 1, 15);
-	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.z, xx, yy, zz+halfLength+translateAxisDist, 0, 0, 0, 1, 1, 1, 15);
+	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.x, xx+halfLength+translateAxisDist, yy, zz, 0, 90, 0, 1, 1, 1, 10);
+	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.y, xx, yy+halfLength+translateAxisDist, zz, 90, 0, 0, 1, 1, 1, 10);
+	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.z, xx, yy, zz+halfLength+translateAxisDist, 0, 0, 0, 1, 1, 1, 10);
 	
 	// Cones	
 	var translateConeDist = translateAxisDist - 2;
 	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.coneX, xx+length+translateConeDist, yy, zz, 0, 270, 0, 1, 1, 1, 5);
 	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.coneY, xx, yy+length+translateConeDist, zz, 90, 0, 0, 1, 1, 1, 5);
 	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.coneZ, xx, yy, length+zz+translateConeDist, 0, 0, 0, 1, 1, 1, 5);
+	
+	// Planes
+	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.planeYZ, xx, yy, zz, 0, 0, 0, 1, 1, 1);
+	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.planeXZ, xx, yy, zz, 0, 0, 0, 1, 1, 1);
+	scr_model_draw_gizmo_component(replaceColors, gizmos.translate.planeXY, xx, yy, zz, 0, 0, 0, 1, 1, 1);
 	
 	matrix_set(matrix_world, matrix_build(xx, yy, zz, 0, 0, 0, 1, 1, 1));
 	vertex_submit(gizmoMeshPlaneBorder, pr_linelist, -1); // Plane borders

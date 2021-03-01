@@ -2,6 +2,8 @@
  * Load the settings
  */
 function scr_load_settings() {
+	file_delete("settings.json"); // @todo
+
 	try {
 		if (file_exists("settings.json")) {
 			var f = file_text_open_read("settings.json");
@@ -17,6 +19,7 @@ function scr_load_settings() {
 		show_error(err.message, false);
 	}
 	 
+	 // Default settings
 	settings = {
 		mouse: {
 			xsens: 1,
@@ -27,7 +30,7 @@ function scr_load_settings() {
 			show: true,
 			xoffset: 32,
 			yoffset: 32,
-			//snap: true, // @todo
+			snap: true,
 		},
 	
 		camera: {
@@ -43,7 +46,7 @@ function scr_load_settings() {
 		},
 		
 		debug: {
-			overlay: false
+			overlay: !OS_CONFIG_RELEASE
 		}
 	};
 	

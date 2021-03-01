@@ -13,4 +13,6 @@ function scr_on_window_resize() {
 	buffer_resize(pxBuffer, winW * winH * 4);	
 	if (!surface_exists(pxSurface)) pxSurface = surface_create(winW, winH);
 	surface_resize(pxSurface, winW, winH);
+	
+	scr_update_pxsurface();
 }

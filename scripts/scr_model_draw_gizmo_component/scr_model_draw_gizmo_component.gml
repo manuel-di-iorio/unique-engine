@@ -9,6 +9,7 @@ function scr_model_draw_gizmo_component(replaceColors, component, xx, yy, zz, ro
 	if (selectedGizmo.selectionId == selectionId && mouse_check_button_released(mb_left)) {
 		selectedGizmo = -1;
 		scr_update_pxsurface();
+		scr_history_push(selectedObj);
 	} else if (selectedPxCol == selectionId) {
 		is_hovering = true;
 		if (mouse_check_button_pressed(mb_left)) {
