@@ -70,6 +70,8 @@ stats = {
 	audioSources: 0, // Audio sources
 	selectors: 0
 };
+
+// Mouse variables
 winMouseX = 0;
 winMouseY = 0;
 winOldMouseX = 0;
@@ -78,10 +80,19 @@ winOldW = 0;
 winOldH = 0;
 winMouse3DX = 0;
 winMouse3DY = 0;
+winMouse3DZ = 0;
+winMouse3DY_planeX = 0;
+winMouse3DZ_planeX = 0;
+winMouse3DX_planeY = 0;
+winMouse3DZ_planeY = 0;
 winOldMouse3DX = 0;
 winOldMouse3DY = 0;
-winMouse3DZ = 0;
 winOldMouse3DZ = 0;
+winOldMouse3DY_planeX = 0;
+winOldMouse3DZ_planeX = 0;
+winOldMouse3DX_planeY = 0;
+winOldMouse3DZ_planeY = 0;
+
 models = []; // List of models
 pxSurface = -1;
 selectedPxCol = 0;
@@ -93,10 +104,11 @@ selectedTool = Tools.translate; // Selected tool
 cursorSprite = -1;
 history_list = ds_list_create(); // History of performed actions
 history_index = 0; // Current history list position
+surfHudAxis = -1; // HUD axis icon surface
 
 // Default light source
 var tex_light = sprite_get_texture(s_light, 0);
-scr_model_add_selector(-70, 70, 30, 0, tex_light);
+scr_model_add_selector(0, 0, 100, 0, tex_light);
 
 // Audio source texture
 var tex_audio_source = sprite_get_texture(s_audio, 0);
@@ -113,6 +125,9 @@ scr_model_build_gizmo();
 
 // Create the game camera source model
 scr_model_add_game_camera();
+
+// Init the HUD axis icon
+scr_hudaxis_init();
 
 // Create a default cube
 tex_cube = sprite_get_texture(s_cube, 0);

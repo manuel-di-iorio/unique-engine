@@ -11,7 +11,6 @@ function scr_update_pxsurface() {
 	draw_clear_alpha(c_black, 0);  
 	scr_draw_scene(true);
 	surface_reset_target();
-	camera_apply(camera);
 	scr_fog_enable();	
 	scr_enable_aa();	
 	

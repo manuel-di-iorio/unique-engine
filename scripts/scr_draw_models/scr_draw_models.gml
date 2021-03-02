@@ -8,6 +8,8 @@ function scr_draw_models(replaceColors) {
 			selectedObj = model;
 			alarm[1] = 1;
 			scr_history_push(model);
+			winMouse3DX_press = winMouse3DX;
+			winMouse3DY_press = winMouse3DY;		
 		}
 
 		// Transform the model

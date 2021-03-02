@@ -2,10 +2,10 @@
  * Create a cube mesh
  */
 function scr_model_add_default_cube(xpos, ypos) {
-	var xx = -16;
-	var yy = -16;
-	var zz = -16;
-	var size = 32;
+	var xx = -10;
+	var yy = -10;
+	var zz = -10;
+	var size = 20;
 	var col = c_white;
 	var alpha = 1;
 	
@@ -210,7 +210,7 @@ function scr_model_add_default_cube(xpos, ypos) {
 		meshesCount: 1,
 		x: xpos,
 		y: ypos,
-		z: 16,
+		z: 10,
 		xrot: 0,
 		yrot: 0,
 		zrot: 0,

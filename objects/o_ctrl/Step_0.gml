@@ -17,11 +17,14 @@ if (winW != 0 && winH != 0 && (winW != winOldW || winH != winOldH)) {
 // Get the mouse 3D position
 scr_camera_get_mouse3d();
 
-// Transform the obs based on the gizmos input
-scr_transform_objs();
-
 // Handle the camera transform on user input
 scr_transform_camera();
+
+// Update the HUD axis icon surface
+scr_hudaxis_update();
+
+// Transform the obs based on the gizmos input
+scr_transform_objs();
 
 // Get the pixel color on mouse click
 if (mouse_check_button_pressed(mb_left)) scr_update_pxsurface();

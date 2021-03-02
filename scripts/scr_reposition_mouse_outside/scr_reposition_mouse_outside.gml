@@ -27,5 +27,10 @@ function scr_reposition_mouse_outside_windows() {
 		scr_camera_get_mouse3d();
 		winOldMouse3DX = winMouse3DX;
 		winOldMouse3DY = winMouse3DY;
+		winOldMouse3DZ = winMouse3DZ;
+		winOldMouse3DY_planeX = winMouse3DY_planeX;
+		winOldMouse3DZ_planeX = winMouse3DZ_planeX;
+		winOldMouse3DX_planeY = winMouse3DX_planeY;
+		winOldMouse3DZ_planeY = winMouse3DZ_planeY;
 	}
 }

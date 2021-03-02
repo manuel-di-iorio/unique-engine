@@ -43,6 +43,7 @@ function scr_load_settings() {
 		display: {
 			aa: -1,
 			vsync: false,
+			texfilter: true,
 		},
 		
 		debug: {
