@@ -1,7 +1,9 @@
-gpu_set_fog(false, 0, 0, 0);
-draw_set_halign(fa_left);
-draw_set_valign(fa_top);
-draw_set_font(-1);
+gpu_set_fog(false, 0, 0, 0); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(-1);
+
+// Draw the selection outline surface
+if (selectedObj != -1 && selectedObj.type == ObjectType.model && surface_exists(surfSelectionOutline)) {
+	 draw_surface(surfSelectionOutline, 0, 0);
+}
 
 //if (surface_exists(pxSurface)) draw_surface(pxSurface, 0, 0); // @debug
 

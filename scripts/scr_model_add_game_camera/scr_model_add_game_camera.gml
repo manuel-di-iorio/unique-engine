@@ -8,7 +8,7 @@ function scr_model_add_game_camera() {
 	var col = c_white;
 	var alpha = .8;
 	
-	// V of UV are reversed
+	// V component of UV are reversed
 	// First triangle
 	vertex_position_3d(vbuff, x2, 0, z2);
 	vertex_texcoord(vbuff, 1, 0);
@@ -50,7 +50,9 @@ function scr_model_add_game_camera() {
 		zscale: 1,
 		texture: sprite_get_texture(s_game_camera, 0)
 	};
+	scr_model_prebuild_matrix(obj);
 	scr_obj_set_selection_id(obj);
 	array_push(o_ctrl.selectors, obj);
 	stats.selectors++;
+	return obj;
 }

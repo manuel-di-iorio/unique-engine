@@ -27,7 +27,7 @@ scr_hudaxis_update();
 scr_transform_objs();
 
 // Get the pixel color on mouse click
-if (mouse_check_button_pressed(mb_left)) scr_update_pxsurface();
+if (mouse_check_button_pressed(mb_left)) scr_on_scene_transform();
 scr_getpixel_pxsurface(winMouseX, winMouseY);
 
 // Delesect the current selected object

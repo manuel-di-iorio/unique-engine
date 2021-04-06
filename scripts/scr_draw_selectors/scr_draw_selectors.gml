@@ -16,7 +16,7 @@ function scr_draw_selectors(replaceColors) {
 		// When specified, set the selection shader color
 		if (replaceColors) {
 			shader_set(shdr_replace_color);
-			shader_set_uniform_f(shdrReplaceCol_uCol, selector.selectionR, selector.selectionG, selector.selectionB);
+			shader_set_uniform_f(shdrReplaceCol_uCol, selector.selectionR, selector.selectionG, selector.selectionB, 1);
 		}
 		
 		vertex_submit(selector.vbuff, pr_trianglelist, selector.texture);

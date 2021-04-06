@@ -7,6 +7,7 @@ function scr_model_add_selector(x, y, z, yrot, texture) {
 	scr_model_end_mesh(vbuff);
 	
 	var object = { type: ObjectType.selector, x: x, y: y, z: z, xrot: 0, yrot: yrot, zrot: 0, xscale: 1, yscale: 1, zscale: 1, vbuff: vbuff, texture: texture  };
+	scr_model_prebuild_matrix(object);
 	scr_obj_set_selection_id(object);
 	stats.selectors++;
 	array_push(selectors, object);

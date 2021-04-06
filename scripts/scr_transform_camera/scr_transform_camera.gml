@@ -6,7 +6,7 @@ function scr_transform_camera() {
 	var dy = camViewMat[6];
 	var dz = camViewMat[10];
 	
-	var cameraSpeed = 2;
+	var cameraSpeed = 1;
 	var shiftSpd = keyboard_check(vk_shift) * 4;
 	var mouseSensX = settings.mouse.xsens;
 	var mouseSensY = settings.mouse.ysens;
@@ -45,23 +45,23 @@ function scr_transform_camera() {
 	
 	// Elevate/descend
 	if (keyboard_check(ord("E"))) {
-		z += 2;	
+		z += 1;	
 	}
 	if (keyboard_check(ord("Q"))) {
-		z -= 2;
+		z -= 1;
 	}
 	
 	// Move the camera towards the direction its facing
 	if (mouse_wheel_up()) {
-		x += dx*cameraSpeed*3;
-		y += dy*cameraSpeed*3;
-		z += dz*cameraSpeed*3;
+		x += dx*cameraSpeed*2;
+		y += dy*cameraSpeed*2;
+		z += dz*cameraSpeed*2;
 	}
 	
 	if (mouse_wheel_down()) {
-		x -= dx*cameraSpeed*3;
-		y -= dy*cameraSpeed*3;
-		z -= dz*cameraSpeed*3;
+		x -= dx*cameraSpeed*2;
+		y -= dy*cameraSpeed*2;
+		z -= dz*cameraSpeed*2;
 	}
 	
 	// Camera Pan
@@ -103,7 +103,7 @@ function scr_transform_camera() {
 	keyboard_check_released(ord("E")) || mouse_check_button_released(mb_right) ||
 	keyboard_check_released(ord("Q")) || mouse_check_button_released(mb_middle) ||
 	mouse_wheel_up() || mouse_wheel_down()) {
-		scr_update_pxsurface();
+		scr_on_scene_transform();
 		window_set_cursor(cr_default);
 		cursorSprite = -1;
 	}

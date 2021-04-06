@@ -3,17 +3,12 @@
  */
 function scr_update_pxsurface() {
 	if (!surface_exists(pxSurface)) pxSurface = surface_create(winW, winH);
-
-	if (settings.display.aa != 0) display_reset(0, settings.display.vsync);
-	gpu_set_fog(false, 0, 0, 0);
+	if (settings.display.aa != 0) display_reset(0, settings.display.vsync);	
 	surface_set_target(pxSurface);
 	camera_apply(camera);
 	draw_clear_alpha(c_black, 0);  
 	scr_draw_scene(true);
-	surface_reset_target();
-	scr_fog_enable();	
-	scr_enable_aa();	
-	
-  	// Copy the content of the surface into the buffer
+	surface_reset_target();	
 	buffer_get_surface(pxBuffer, pxSurface, 0);
+	scr_enable_aa();	
 }

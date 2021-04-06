@@ -201,12 +201,11 @@ function scr_model_add_default_cube(xpos, ypos) {
 	
 	// Add the model to the models list
 	o_ctrl.stats.models++;
-	o_ctrl.stats.meshes++;
-	o_ctrl.stats.triangles += 12;
+	o_ctrl.stats.drawCalls++;
 	
 	var obj = {
 		type: ObjectType.model,
-		meshes: [{ vbuff: vbuff, texture: tex_cube }],		
+		meshes: [{ vbuff: vbuff, sprite: -1, texture: tex_cube }],		
 		meshesCount: 1,
 		x: xpos,
 		y: ypos,
@@ -218,6 +217,7 @@ function scr_model_add_default_cube(xpos, ypos) {
 		yscale: 1,
 		zscale: 1
 	};
+	scr_model_prebuild_matrix(obj);
 	scr_obj_set_selection_id(obj);
 	array_push(o_ctrl.models, obj);
 }

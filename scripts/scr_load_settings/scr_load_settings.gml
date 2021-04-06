@@ -6,13 +6,7 @@ function scr_load_settings() {
 
 	try {
 		if (file_exists("settings.json")) {
-			var f = file_text_open_read("settings.json");
-			var content = "";
-			while (!file_text_eof(f)) {
-				content += file_text_readln(f);
-			}
-			file_text_close(f);
-			settings = json_parse(content);
+			settings = scr_load_json_from_file("settings.json").json;
 			return;
 		} 	
 	} catch (err) {
@@ -51,5 +45,5 @@ function scr_load_settings() {
 		}
 	};
 	
-	scr_save_settings();
+	scr_save_json_to_file("settings.json", settings);
 }

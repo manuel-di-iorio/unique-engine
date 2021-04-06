@@ -25,10 +25,10 @@ function scr_model_draw_gizmo_component(replaceColors, component, xx, yy, zz, ro
 	if (replaceColors) {
 		// Replace the color for the selection surface		
 		shader_set(shdr_replace_color);
-		shader_set_uniform_f(shdrReplaceCol_uCol, component.selectionR, component.selectionG, component.selectionB);
+		shader_set_uniform_f(shdrReplaceCol_uCol, component.selectionR, component.selectionG, component.selectionB, 1);
 	} else if (selectedGizmo.selectionId == selectionId) {
 		shader_set(shdr_replace_color);
-		shader_set_uniform_f(shdrReplaceCol_uCol, ColorSelectionR, ColorSelectionG, ColorSelectionB);
+		shader_set_uniform_f(shdrReplaceCol_uCol, ColorSelectionR, ColorSelectionG, ColorSelectionB, 1);
 	} else if (selectedGizmo == -1 && is_hovering) {
 		shader_set(shdr_blend_color);
 		shader_set_uniform_f(shdrBlendCol_uCol, ColorHoverR, ColorHoverG, ColorHoverB);
