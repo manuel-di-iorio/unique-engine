@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scrTreeTrunkMesh",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scrTreeTrunkMesh",
+  "parent":{
+    "name":"Unique_NEW",
+    "path":"Unique_NEW.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scrTreeTopMesh",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scrTreeTopMesh",
+  "parent":{
+    "name":"Unique_NEW",
+    "path":"Unique_NEW.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
