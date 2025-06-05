@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"scrTreeTopMesh",
+  "%Name":"ue_plane",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scrTreeTopMesh",
+  "name":"ue_plane",
   "parent":{
-    "name":"Unique_NEW",
-    "path":"Unique_NEW.yyp",
+    "name":"Math",
+    "path":"folders/Unique Engine/Math.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

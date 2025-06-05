@@ -1,7 +1,8 @@
 function Quat(_x = 0, _y = 0, _z = 0) constructor {
+    
     /// Clone the quaternion
     function clone() {
-        return new Quat(self.x, self.y, self.z, self.w);
+        return new Quat(self.x, self.y, self.z);
     }
 
     /// Copy from another quaternion
@@ -106,13 +107,18 @@ function Quat(_x = 0, _y = 0, _z = 0) constructor {
     /// @param {any*} axis
     /// @param {real} angle in deegres
     /// @returns {struct}
+    //function rotate(axis, angle) {
+        //var halfAngle = degtorad(angle) * 0.5;
+        //var s = sin(halfAngle);
+        //var q = new Quat(axis.x * s, axis.y * s, axis.z * s, cos(halfAngle));
+        //multiply(q);
+        //return self;
+    //};    
     function rotate(axis, angle) {
-        var halfAngle = degtorad(angle) * 0.5;
-        var s = sin(halfAngle);
-        var q = new Quat(axis.x * s, axis.y * s, axis.z * s, cos(halfAngle));
+        var q = new Quat().setFromAxisAngle(axis, degtorad(angle));
         multiply(q);
         return self;
-    };
+    }
 
     // Rotate around X axis
     function rotateX(angle) {

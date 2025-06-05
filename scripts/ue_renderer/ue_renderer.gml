@@ -9,6 +9,7 @@ function Renderer(data = {}): Object3D(data) constructor {
     
     /// Render the scene
     function render(scene) {
+        draw_set_color(c_white);
         var lightState = _buildLightState(scene.lights);
         
         for (var i = 0, len = array_length(scene.children); i < len; i++) {

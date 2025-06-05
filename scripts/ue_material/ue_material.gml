@@ -61,7 +61,7 @@ function Material(data = {}): Object3D(data) constructor {
      
     /// Apply material before drawing
     function use(lightState) {
-        if (shader == undefined) return self; 
+        if (shader == undefined || !shader_is_compiled(shader)) return self;
         shader_set(shader);
         
         // Set the light uniform values

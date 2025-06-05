@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"scrUpdateCamera",
+  "%Name":"ue_sphere_mesh",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scrUpdateCamera",
+  "name":"ue_sphere_mesh",
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"Primitives",
+    "path":"folders/Unique Engine/Primitives.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -1,19 +1,37 @@
 varying vec3 v_vWorldPosition;
+varying vec3 v_vWorldNormal;
 varying vec2 v_vTexcoord;
 varying vec4 v_vColour;
 varying vec3 v_vNormal;
 
-// Lights
+/* Ambient light */
 uniform vec3 u_ueAmbient;
 
+/* Directional lights */
+
+// 0
 uniform vec3 u_ueDirLightDir0;
 uniform vec3 u_ueDirLightColor0;
 uniform float u_ueDirLightIntensity0;
 
+// 1
+uniform vec3 u_ueDirLightDir1;
+uniform vec3 u_ueDirLightColor1;
+uniform float u_ueDirLightIntensity1;
+
+/* Point lights */
+
+// 0
 uniform vec3 u_uePointLightPosition0;
 uniform vec3 u_uePointLightRange0;
 uniform vec3 u_uePointLightColor0;
 uniform float u_uePointLightIntensity0;
+
+// 1
+uniform vec3 u_uePointLightPosition1;
+uniform vec3 u_uePointLightRange1;
+uniform vec3 u_uePointLightColor1;
+uniform float u_uePointLightIntensity1;
 
 void main()
 {

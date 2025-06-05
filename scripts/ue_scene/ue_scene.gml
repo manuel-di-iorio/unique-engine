@@ -6,9 +6,15 @@ function Scene(data = {}): Object3D(data) constructor {
             
         for (var i=0, len=array_length(_children); i<len; i++) {
             var child = _children[i];
+            
             switch (child.type) {
-                case "Light": array_push(lights, child); break;
-                default: array_push(children, child);
+                case "Light": 
+                    array_push(lights, child); 
+                break;
+                
+                default: 
+                    removeFromParent(child);
+                    array_push(children, child);
             }
             
             child.parent = self;

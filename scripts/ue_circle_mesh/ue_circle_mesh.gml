@@ -2,10 +2,9 @@ function CircleMesh(data = {}): Mesh(data) constructor {
     var _radius   = data[$ "radius"]   ?? 100;
     var _segments = data[$ "segments"] ?? 32;
     var _color    = data[$ "color"]    ?? c_white;
+    var _alpha    = data[$ "alpha"]    ?? 1;
 
     var vertices = [];
-    var normals  = [];
-    var uvs      = [];
 
     for (var i = 0; i < _segments; i++) {
         var angle0 = (i     / _segments) * pi * 2;
@@ -17,26 +16,51 @@ function CircleMesh(data = {}): Mesh(data) constructor {
         var x1 = cos(angle1) * _radius;
         var z1 = sin(angle1) * _radius;
 
-        // Center point (0, 0, 0)
-        array_push(vertices, 0, 0, 0);
-        array_push(normals, 0, 1, 0);
-        array_push(uvs, 0.5, 0.5);
+        // Vertex: center
+        array_push(vertices, {
+            x: 0,
+            y: 0,
+            z: 0,
+            nx: 0,
+            ny: 1,
+            nz: 0,
+            u: 0.5,
+            v: 0.5,
+            color: _color,
+            alpha: _alpha,
+            custom: {}
+        });
 
-        // First edge point
-        array_push(vertices, x0, z0, 0);
-        array_push(normals, 0, 1, 0);
-        array_push(uvs, (x0 / (_radius * 2)) + 0.5, (z0 / (_radius * 2)) + 0.5);
+        // Vertex: edge 1
+        array_push(vertices, {
+            x: x0,
+            y: z0,
+            z: 0,
+            nx: 0,
+            ny: 1,
+            nz: 0,
+            u: (x0 / (_radius * 2)) + 0.5,
+            v: (z0 / (_radius * 2)) + 0.5,
+            color: _color,
+            alpha: _alpha,
+            custom: {}
+        });
 
-        // Second edge point
-        array_push(vertices, x1, z1, 0);
-        array_push(normals, 0, 1, 0);
-        array_push(uvs, (x1 / (_radius * 2)) + 0.5, (z1 / (_radius * 2)) + 0.5);
+        // Vertex: edge 2
+        array_push(vertices, {
+            x: x1,
+            y: z1,
+            z: 0,
+            nx: 0,
+            ny: 1,
+            nz: 0,
+            u: (x1 / (_radius * 2)) + 0.5,
+            v: (z1 / (_radius * 2)) + 0.5,
+            color: _color,
+            alpha: _alpha,
+            custom: {}
+        });
     }
 
-    geometry = new Geometry({
-        vertices,
-        normals,
-        uvs,
-        color: _color
-    }).freeze();
+    geometry = new Geometry({ vertices }).freeze();
 }

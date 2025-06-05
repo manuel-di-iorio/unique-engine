@@ -9,8 +9,8 @@
   "name":"o_test",
   "overriddenProperties":[],
   "parent":{
-    "name":"Unique_NEW",
-    "path":"Unique_NEW.yyp",
+    "name":"Unique Engine",
+    "path":"Unique Engine.yyp",
   },
   "parentObjectId":null,
   "persistent":false,

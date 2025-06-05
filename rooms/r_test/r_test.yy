@@ -17,8 +17,8 @@
   ],
   "name":"r_test",
   "parent":{
-    "name":"Unique_NEW",
-    "path":"Unique_NEW.yyp",
+    "name":"Unique Engine",
+    "path":"Unique Engine.yyp",
   },
   "parentRoom":null,
   "physicsSettings":{

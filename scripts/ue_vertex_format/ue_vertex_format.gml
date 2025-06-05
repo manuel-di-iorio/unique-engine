@@ -24,37 +24,27 @@ function VertexFormat() constructor {
         return self;
     }
     
-    function custom(type) {
-        array_push(attrs, { kind: "custom", type });
+    function custom(name, type) {
+        array_push(attrs, { kind: "custom", name, type });
         return self;
     }
 
     function build() {
         vertex_format_begin();
 
-        for (var i = 0, len = array_length(self.attrs); i < len; i++) {
-            var attr = self.attrs[i];
+        for (var i = 0, len = array_length(attrs); i < len; i++) {
+            var attr = attrs[i];
             
             switch (attr.kind) {
-                case "position":
-                    vertex_format_add_position_3d();
-                    break;
-                case "normal":
-                    vertex_format_add_normal();
-                    break;
-                case "uv":
-                    vertex_format_add_texcoord();
-                    break;
-                case "color":
-                    vertex_format_add_color();
-                    break; 
-                case "custom":
-                    vertex_format_add_custom(attr.type, vertex_usage_texcoord);
-                    break;
+                case "position": vertex_format_add_position_3d(); break;
+                case "normal": vertex_format_add_normal(); break;
+                case "uv": vertex_format_add_texcoord(); break;
+                case "color": vertex_format_add_color(); break; 
+                case "custom": vertex_format_add_custom(attr.type, vertex_usage_texcoord); break;
             }
         }
         
         vf = vertex_format_end();
-        return vf;
+        return self;
     }
 }

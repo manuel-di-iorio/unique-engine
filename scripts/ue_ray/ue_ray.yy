@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"scrTreeTrunkMesh",
+  "%Name":"ue_ray",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scrTreeTrunkMesh",
+  "name":"ue_ray",
   "parent":{
-    "name":"Unique_NEW",
-    "path":"Unique_NEW.yyp",
+    "name":"Math",
+    "path":"folders/Unique Engine/Math.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
