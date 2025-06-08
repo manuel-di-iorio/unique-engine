@@ -3,13 +3,12 @@ function Object3D(data = {}): Transform(data) constructor {
     visible = data[$ "visible"] ?? true;
     parent = data[$ "parent"] ?? undefined;
     children = [];
+    renderOrder = data[$ "renderOrder"] ?? 0;
 
-    /// Add a child. If the child already has a parent, it will be removed from it parent first
-    function add(_children) {
-        if (!is_array(_children)) _children = [_children];
-            
-        for (var i=0, len=array_length(_children); i<len; i++) {
-            var child = _children[i];
+    /// @param ...objects
+    function add() {
+        for (var i=0; i<argument_count; i++) {
+            var child = argument[i];
             removeFromParent(child);
             array_push(children, child);
             child.parent = self;

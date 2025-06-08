@@ -103,5 +103,13 @@ function Vec3(_x = 0, _y = 0, _z = 0) constructor {
         return sqrt(dx * dx + dy * dy + dz * dz);
     }
     
+    /// Like distanceTo() but squared. Faster since it avoids the sqrt, useful for render sorting
+    function distanceSquaredTo(vec) {
+        var dx = self.x - vec.x;
+        var dy = self.y - vec.y;
+        var dz = self.z - vec.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+    
     
 }

@@ -1,17 +1,23 @@
 function Material(data = {}): Object3D(data) constructor {
     color = data[$ "color"] ?? c_white;
-    
-    // Opacity and transparency
     transparent = data[$ "transparent"] ?? false;
-    opacity = data[$ "opacity"] ?? 1.0;
+    opacity = data[$ "opacity"] ?? 1;
+    side = data[$ "side"] ?? cull_counterclockwise;
+    depthTest = data[$ "depthTest"] ?? true;
+    depthWrite = data[$ "depthWrite"] ?? true;
+    forceSinglePass = data[$ "forceSinglePass"] ?? false; // @todo: not supported for now
+    alphaTest = data[$ "alphaTest"] ?? 0;
 
     // Shader
-    shader = data[$ "shader"] ?? undefined;
+    shader = data[$ "shader"] ?? ue_shader_light;
     
     // Uniforms
     uniforms = data[$ "uniforms"] ?? {};
     _uniform_handlers = {};
     _sampler_handlers = {};
+    
+    uniforms[$ "ueModelPosition"] = { type: "array" };
+    uniforms[$ "ueCameraPosition"] = { type: "array" };
     
     // Light uniforms
     lights = data[$ "lights"] ?? 1;
@@ -52,7 +58,8 @@ function Material(data = {}): Object3D(data) constructor {
         });
     
         // Cache sampler texture stages
-        struct_foreach(textures, function(name, texture) { 
+        struct_foreach(textures, function(name, texture) {
+            if (texture == undefined) return;
             _sampler_handlers[$ name] = shader_get_sampler_index(shader, $"s_{name}");
         });
         
@@ -60,12 +67,24 @@ function Material(data = {}): Object3D(data) constructor {
     }
      
     /// Apply material before drawing
-    function use(lightState) {
+    function use(renderState, mesh) {
+        gpu_set_cullmode(renderState[$ "side"] ?? side); // Set the backface culling mode
+        gpu_set_ztestenable(true); // Enable depth testing
+        gpu_set_zwriteenable(true); // Enable writing to the depth buffer
+        gpu_set_alphatestenable(transparent);
+        gpu_set_alphatestref(alphaTest);
+        
+        var lightState = renderState.lightState;
+        var camera = renderState.camera;
+        
         if (shader == undefined || !shader_is_compiled(shader)) return self;
         shader_set(shader);
         
+        shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], [mesh.position.x, mesh.position.y, mesh.position.z]);
+        shader_set_uniform_f_array(_uniform_handlers[$ "ueCameraPosition"], [camera.position.x, camera.position.y, camera.position.z]);
+        
         // Set the light uniform values
-        if (lights) {
+        if (lights) { 
             shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState.ambient);    
             
             var dirLightsNum = array_length(lightState.directional);
@@ -111,7 +130,7 @@ function Material(data = {}): Object3D(data) constructor {
         // Set the texture samplers
         struct_foreach(textures, function(name, texture) {
             if (texture == undefined) return;
-            texture_set_stage(_sampler_stages[$ name], texture);
+            texture_set_stage(_sampler_handlers[$ name], texture);
         });
         
         return self;

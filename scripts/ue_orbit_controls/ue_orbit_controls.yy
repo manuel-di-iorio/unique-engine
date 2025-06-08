@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"scrUpdateCamera",
+  "%Name":"ue_orbit_controls",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scrUpdateCamera",
+  "name":"ue_orbit_controls",
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"Controls",
+    "path":"folders/Unique Engine/Controls.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

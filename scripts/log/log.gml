@@ -1,3 +1,4 @@
+/// @param ...variables
 function log() {
     var str = "";
 	

@@ -7,7 +7,18 @@ function Camera(data = {}): Object3D(data) constructor {
     camera = camera_create();
     target = new Vec3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
     autoUse = data[$ "autoUse"] ?? true;
-    onUpdate = data[$ "onUpdate"];
+    
+    onUpdate = data[$ "onUpdate"] ?? function() {
+        var camera = o_test.camera;
+        var position = camera.position;
+        var target = camera.target;
+        
+        camera_set_view_mat(camera.camera, matrix_build_lookat(
+            position.x, position.y, position.z,  // From
+            target.x, target.y, target.z, // To
+            0, 0, -1 // Up
+        ));
+    };
     
     // Build the perspective projection
     function use() {

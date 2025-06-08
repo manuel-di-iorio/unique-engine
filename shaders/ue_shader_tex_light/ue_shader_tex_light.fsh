@@ -56,5 +56,8 @@ void main()
     float lightDiff1 = max(dot(norm, lightDir1), 0.0); 
     finalColor += u_uePointLightColor0 * lightDiff1 * attenuation * u_uePointLightIntensity0;
     
+    // Diffuse texture
+    finalColor *= texture2D(s_map, v_vTexcoord).rgb;
+     
     gl_FragColor = vec4(finalColor, v_vColour.a);
 }
