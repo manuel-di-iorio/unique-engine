@@ -1,4 +1,5 @@
 function Renderer(data = {}): Object3D(data) constructor {
+    isRenderer = true;
     
     // Recursively collect renderable objects and split them into opaque and transparent queues
     function _collectObjectQueues(objects, cameraPos, opaqueQueue, transparentQueue) {
@@ -72,9 +73,7 @@ function Renderer(data = {}): Object3D(data) constructor {
             if (child.material != undefined && child.material.forceSinglePass) {
                 child.render(renderState);
             } else {
-                renderState.side = cull_clockwise;
-                child.render(renderState);
-                renderState.side = cull_counterclockwise;
+                renderState.side = cull_noculling;
                 child.render(renderState);
                 delete renderState.side;
             }

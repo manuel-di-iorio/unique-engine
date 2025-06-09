@@ -62,5 +62,5 @@ function CircleMesh(data = {}): Mesh(data) constructor {
         });
     }
 
-    geometry = new Geometry({ vertices }).freeze();
+    geometry = new BufferGeometry({ vertices }).freeze();
 }

@@ -1,4 +1,5 @@
 function Camera(data = {}): Object3D(data) constructor { 
+    isCamera = true;
     fov  = data[$ "fov"]  ?? 60;
     near = data[$ "near"] ?? 0.1;
     far  = data[$ "far"]  ?? 64000;

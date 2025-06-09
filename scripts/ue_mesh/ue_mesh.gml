@@ -1,5 +1,5 @@
 function Mesh(data = {}): Object3D(data) constructor {
-    type = "Mesh";
+    isMesh = true;
     geometry = data[$ "geometry"] ?? undefined;
     material = data[$ "material"] ?? new Material();
     primitive = pr_trianglelist;

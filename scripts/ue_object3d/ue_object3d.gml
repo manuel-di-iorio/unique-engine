@@ -1,5 +1,10 @@
+global.UNIQUE_ENGINE_OBJECT_ID = 0;
+
 function Object3D(data = {}): Transform(data) constructor {
-    name = data[$ "name"] ?? undefined; 
+    isObject3D = true;
+    id = global.UNIQUE_ENGINE_OBJECT_ID++; 
+    name = data[$ "name"] ?? undefined;
+    uuid = uuid_generate();
     visible = data[$ "visible"] ?? true;
     parent = data[$ "parent"] ?? undefined;
     children = [];
@@ -9,9 +14,9 @@ function Object3D(data = {}): Transform(data) constructor {
     function add() {
         for (var i=0; i<argument_count; i++) {
             var child = argument[i];
+            child.parent = self;
             removeFromParent(child);
             array_push(children, child);
-            child.parent = self;
         }
         
         return self;
@@ -26,17 +31,17 @@ function Object3D(data = {}): Transform(data) constructor {
     /// Remove this object from its parent
     function removeFromParent(_object = undefined) {
         _object = _object ?? self;
-        if (!_object.parent) return;
+        if (_object.parent == undefined) return;
         var parentChildren = _object.parent.children;
         
         for (var i = 0, len = array_length(parentChildren); i < len; i++) {
-            if (parentChildren[i] == child) {
+            if (parentChildren[i] == _object) {
                 array_delete(parentChildren, i, 1);
                 break;
             }
         }
         
-        object.parent = undefined;
+        _object.parent = undefined;
         return self;
     }
     

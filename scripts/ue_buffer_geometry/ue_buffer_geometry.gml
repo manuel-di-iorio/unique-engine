@@ -1,4 +1,5 @@
-function Geometry(data = {}): Object3D(data) constructor {
+function BufferGeometry(data = {}): Object3D(data) constructor {
+    isBufferGeometry = true;
     vertices = data[$ "vertices"] ?? [];
     indices = data[$ "indices"] ?? [];
     vformat = data[$ "vformat"] ?? global.UE_DEFAULT_VERTEX_FORMAT;

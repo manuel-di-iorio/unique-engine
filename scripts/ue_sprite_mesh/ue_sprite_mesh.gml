@@ -1,3 +1,4 @@
+/// Billboard
 function SpriteMesh(data = {}): SquareMesh(data) constructor {
     material = new Material({ 
         map: data[$ "map"],
@@ -6,3 +7,4 @@ function SpriteMesh(data = {}): SquareMesh(data) constructor {
         transparent: data[$ "transparent"] ?? true
     });
 }
+

@@ -10,9 +10,9 @@ camera = new Camera();
 orbitControls = new OrbitControls(camera, { radius: 230, elevation: 30 });
 
 // Load the textures and create the materials
-var tex_pyramid = sprite_get_texture(spr_tex_pyramid, 0);
-var tex_sand = sprite_get_texture(spr_tex_sand, 0);
-var tex_palm_tree = sprite_get_texture(spr_tex_palm_tree, 0);
+var tex_pyramid = new Texture({ image: spr_tex_pyramid });
+var tex_sand = new Texture({ image: spr_tex_sand  });
+var tex_palm_tree = new Texture({ image: spr_tex_palm_tree });
 
 material_sand = new Material({ map: tex_sand, shader: ue_shader_tex_light });
 material_pyramid = new Material({ map: tex_pyramid, shader: ue_shader_tex_light });

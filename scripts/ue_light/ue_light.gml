@@ -1,16 +1,14 @@
 function Light(data = {}): Object3D(data) constructor {
+    isLight = true;
     type = "Light";
     lightType = "Light"
     intensity = data[$ "intensity"] ?? 1;
     enabled = data[$ "enabled"] ?? true;
     range = undefined;
+    //render = function() {};
     
     function setColor(_color) {
         color = [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255];
-    }
-    
-    function render() {  
-        
     }
     
     setColor(data[$ "color"] ?? c_dkgray);

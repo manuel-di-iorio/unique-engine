@@ -1,12 +1,24 @@
 function Material(data = {}): Object3D(data) constructor {
+    isMaterial = true;
     color = data[$ "color"] ?? c_white;
     transparent = data[$ "transparent"] ?? false;
     opacity = data[$ "opacity"] ?? 1;
-    side = data[$ "side"] ?? cull_counterclockwise;
+    side = data[$ "side"] ?? cull_noculling// cull_counterclockwise;
     depthTest = data[$ "depthTest"] ?? true;
     depthWrite = data[$ "depthWrite"] ?? true;
-    forceSinglePass = data[$ "forceSinglePass"] ?? false; // @todo: not supported for now
+    depthFunc = data[$ "depthFunc"] ?? cmpfunc_lessequal;
+    forceSinglePass = data[$ "forceSinglePass"] ?? false;
     alphaTest = data[$ "alphaTest"] ?? 0;
+    colorWrite = data[$ "colorWrite"] ?? true;
+    
+    // Blending
+    blending = data[$ "blending"] ?? transparent;
+    blendEquation = data[$ "blendEquation"] ?? bm_eq_add;
+    blendEquationAlpha = data[$ "blendEquationAlpha "] ?? 1;
+    blendSrc = data[$ "blendSrc"] ?? bm_src_alpha;
+    blendDst = data[$ "blendDst"] ?? bm_inv_src_alpha;
+    blendSrcAlpha = data[$ "blendSrcAlpha"] ?? 1;
+    blendDstAlpha = data[$ "blendDstAlpha"] ?? 1;
 
     // Shader
     shader = data[$ "shader"] ?? ue_shader_light;
@@ -69,10 +81,15 @@ function Material(data = {}): Object3D(data) constructor {
     /// Apply material before drawing
     function use(renderState, mesh) {
         gpu_set_cullmode(renderState[$ "side"] ?? side); // Set the backface culling mode
-        gpu_set_ztestenable(true); // Enable depth testing
-        gpu_set_zwriteenable(true); // Enable writing to the depth buffer
+        gpu_set_ztestenable(depthTest); // Enable depth testing
+        gpu_set_zwriteenable(depthWrite); // Enable writing to the depth buffer
+        gpu_set_zfunc(depthFunc);
         gpu_set_alphatestenable(transparent);
         gpu_set_alphatestref(alphaTest);
+        gpu_set_colorwriteenable(colorWrite, colorWrite, colorWrite, colorWrite);
+        gpu_set_blendenable(blending);
+        gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
+        gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha); 
         
         var lightState = renderState.lightState;
         var camera = renderState.camera;
@@ -130,7 +147,10 @@ function Material(data = {}): Object3D(data) constructor {
         // Set the texture samplers
         struct_foreach(textures, function(name, texture) {
             if (texture == undefined) return;
-            texture_set_stage(_sampler_handlers[$ name], texture);
+            var sampler = _sampler_handlers[$ name];
+            gpu_set_texrepeat_ext(sampler, texture.canRepeat);
+            gpu_set_texfilter_ext(sampler, texture.filter);
+            texture_set_stage(sampler, texture.texture);
         });
         
         return self;
