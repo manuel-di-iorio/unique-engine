@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"log",
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"Demo",
+    "path":"folders/Demo.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

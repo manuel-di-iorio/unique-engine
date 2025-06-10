@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"AssimpLoader",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"AssimpLoader",
+  "parent":{
+    "name":"AssimpLoader",
+    "path":"folders/AssimpLoader.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"Demo",
+    "path":"folders/Demo.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

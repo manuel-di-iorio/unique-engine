@@ -4,13 +4,14 @@
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":32,"eventType":9,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
   "name":"o_test",
   "overriddenProperties":[],
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"Demo",
+    "path":"folders/Demo.yy",
   },
   "parentObjectId":null,
   "persistent":false,
