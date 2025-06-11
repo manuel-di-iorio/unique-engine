@@ -36,7 +36,7 @@ function Plane(_normal = new Vec3(0, 1, 0), _d = 0) constructor {
 
     /// Clones the current plane
     function clone() {
-        return new Plane(self.normal, self.d);
+        return variable_clone(self);
     }
 
     /// Copies another plane into this one

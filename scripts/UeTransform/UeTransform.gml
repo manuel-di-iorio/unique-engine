@@ -3,6 +3,7 @@ function Transform(_data = {}) constructor {
     position = _data[$ "position"] ?? new Vec3(_data[$ "x"] ?? 0, _data[$ "y"] ?? 0, _data[$ "z"] ?? 0);
     rotation = _data[$ "rotation"] ?? new Quat(_data[$ "rx"] ?? 0, _data[$ "ry"] ?? 0, _data[$ "rz"] ?? 0);
     scale    = _data[$ "scale"]    ?? new Vec3(_data[$ "sx"] ?? 1, _data[$ "sy"] ?? 1, _data[$ "sz"] ?? 1);
+    up = new Vec3(0, 1, 0);
 
     // Transformation matrices
     matrix = undefined;
@@ -50,20 +51,11 @@ function Transform(_data = {}) constructor {
            
         // Start with local matrix
         if (parent != undefined && parent.matrixWorld != undefined) {
-        matrixWorld = parent.matrixWorld.clone();
-        matrixWorld.multiply(matrix.data);
+            matrixWorld = parent.matrixWorld.clone();
+            matrixWorld.multiply(matrix.data);
         } else {
             matrixWorld = matrix.clone()
         }
-        
-        //matrixWorld = matrix.clone();
-
-        // If there's a parent, combine the matrix world with the parent world matrix
-        //if (parent != undefined && parent.matrixWorld != undefined) {
-            //matrixWorld.multiply(parent.matrixWorld.data);
-        //}
-        //
-        //updateWorldMatrix(false, true);
         
         return self;
     }
@@ -83,6 +75,12 @@ function Transform(_data = {}) constructor {
     }
 
     // --- Translation methods ---
+    function move(x, y, z) {
+        position.set(x, y, z);
+        matrixNeedsUpdate = true;
+        return self;    
+    }
+    
     function translate(x, y, z) {
         position.add(new Vec3(x, y, z));
         matrixNeedsUpdate = true;
@@ -108,6 +106,28 @@ function Transform(_data = {}) constructor {
     }
 
     // --- Rotation methods ---
+    function lookAtVec(target) {
+        var forward = target.sub(position).normalize();
+        var right = self.up.cross(forward).normalize();
+        var up = forward.cross(right);
+
+        var m = new Mat4([
+            right.x, up.x, forward.x, 0,
+            right.y, up.y, forward.y, 0,
+            right.z, up.z, forward.z, 0,
+            0,       0,    0,         1
+        ]);
+    
+        rotation.setFromRotationMatrix(m);
+    
+        matrixNeedsUpdate = true;
+        return self;     
+    }
+    
+    function lookAt(x, y, z) {
+        return lookAtVec(new Vec3(x, y, z));
+    }
+    
     function rotate(x, y, z) {
         rotation.multiply(new Quat(x, y, z));
         matrixNeedsUpdate = true;

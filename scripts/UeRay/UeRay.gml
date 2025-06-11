@@ -40,7 +40,7 @@ function Ray(_origin = new Vec3(), _direction = new Vec3(0, 0, -1)) constructor 
 
     /// Clones the ray
     function clone() {
-        return new Ray(self.origin, self.direction);
+        return variable_clone(self);
     }
 
     /// Copies from another ray

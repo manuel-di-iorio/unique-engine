@@ -1,8 +1,15 @@
 function Quat(_x = 0, _y = 0, _z = 0) constructor {
     
+    function set(x, y, z, w) {
+        self.x = x;
+        self.y = y;
+        self.z = z;
+        self.w = w;
+    }
+    
     /// Clone the quaternion
     function clone() {
-        return new Quat(self.x, self.y, self.z);
+        return variable_clone(self);
     }
 
     /// Copy from another quaternion
@@ -58,11 +65,11 @@ function Quat(_x = 0, _y = 0, _z = 0) constructor {
     /// Set rotation from axis and angle
     function setFromAxisAngle(axis, angle) {
         var half = angle * 0.5;
-        var s = sin(half);
+        var s = dsin(half);
         self.x = axis.x * s;
         self.y = axis.y * s;
         self.z = axis.z * s;
-        self.w = cos(half);
+        self.w = dcos(half);
         return self;
     }
 
@@ -107,7 +114,7 @@ function Quat(_x = 0, _y = 0, _z = 0) constructor {
     /// @param {any*} axis
     /// @param {real} angle in deegres    
     function rotate(axis, angle) {
-        var q = new Quat().setFromAxisAngle(axis, degtorad(angle));
+        var q = new Quat().setFromAxisAngle(axis, angle);
         multiply(q);
         return self;
     }
@@ -147,6 +154,86 @@ function Quat(_x = 0, _y = 0, _z = 0) constructor {
             2 * (xz - wy),      2 * (yz + wx),      1 - 2 * (xx + yy)
         ]);
     }
+    
+    function setFromRotationMatrix(m) {
+        var te = m.data;
+
+        var m11 = te[0], m12 = te[4], m13 = te[8];
+        var m21 = te[1], m22 = te[5], m23 = te[9];
+        var m31 = te[2], m32 = te[6], m33 = te[10];
+    
+        var trace = m11 + m22 + m33;
+        var s;
+    
+        if (trace > 0) {
+            s = 0.5 / sqrt(trace + 1.0);
+            self.w = 0.25 / s;
+            self.x = (m32 - m23) * s;
+            self.y = (m13 - m31) * s;
+            self.z = (m21 - m12) * s;
+        } else if (m11 > m22 && m11 > m33) {
+            s = 2.0 * sqrt(1.0 + m11 - m22 - m33);
+            self.w = (m32 - m23) / s;
+            self.x = 0.25 * s;
+            self.y = (m12 + m21) / s;
+            self.z = (m13 + m31) / s;
+        } else if (m22 > m33) {
+            s = 2.0 * sqrt(1.0 + m22 - m11 - m33);
+            self.w = (m13 - m31) / s;
+            self.x = (m12 + m21) / s;
+            self.y = 0.25 * s;
+            self.z = (m23 + m32) / s;
+        } else {
+            s = 2.0 * sqrt(1.0 + m33 - m11 - m22);
+            self.w = (m21 - m12) / s;
+            self.x = (m13 + m31) / s;
+            self.y = (m23 + m32) / s;
+            self.z = 0.25 * s;
+        }
+    
+        return self;
+    }
+    
+    function setFromUnitVectors(vFrom, vTo) {
+        var EPS = 0.000001;
+        var r = vFrom.dot(vTo) + 1;
+    
+        if (r < EPS) {
+            r = 0;
+            var axis;
+            if (abs(vFrom.x) > abs(vFrom.z)) {
+                axis = new Vec3(-vFrom.y, vFrom.x, 0);
+            } else {
+                axis = new Vec3(0, -vFrom.z, vFrom.y);
+            }
+            axis.normalize();
+    
+            self.x = axis.x;
+            self.y = axis.y;
+            self.z = axis.z;
+            self.w = r;
+        } else {
+            var cross = vFrom.cross(vTo);
+    
+            self.x = cross.x;
+            self.y = cross.y;
+            self.z = cross.z;
+            self.w = r;
+        }
+    
+        // Normalize the quat
+        var len = sqrt(self.x*self.x + self.y*self.y + self.z*self.z + self.w*self.w);
+        if (len > 0) {
+            var invLen = 1 / len;
+            self.x *= invLen;
+            self.y *= invLen;
+            self.z *= invLen;
+            self.w *= invLen;
+        }
+    
+        return self;
+    }
+
     
     setFromEuler(_x, _y, _z);
 }

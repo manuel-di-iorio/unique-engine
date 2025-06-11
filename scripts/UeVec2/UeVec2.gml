@@ -7,9 +7,9 @@ function Vec2(_x = 0, _y = 0) constructor {
         self.y = _y;
         return self;
     }
-
+    
     function clone() {
-        return new Vec2(self.x, self.y);
+        return variable_clone(self);
     }
 
     function copy(vec) {

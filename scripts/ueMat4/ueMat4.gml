@@ -9,7 +9,7 @@ function Mat4(_data = undefined) constructor {
 
     /// Creates a copy of this matrix
     function clone() {
-        return new Mat4(data);
+        return variable_clone(self);
     }
 
     /// Builds a transformation matrix from a Transform object (position, rotation, scale)

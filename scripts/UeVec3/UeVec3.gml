@@ -10,7 +10,7 @@ function Vec3(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     function clone() {
-        return new Vec3(self.x, self.y, self.z);
+        return variable_clone(self);
     }
 
     function copy(vec) {
