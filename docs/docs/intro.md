@@ -2,46 +2,66 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+import CubeDemo from '@site/static/img/cube.png';
 
-Let's discover **Docusaurus in less than 5 minutes**.
+# Getting Started
 
-## Getting Started
+Welcome to **Unique Engine**, a modular 3D engine built for GameMaker and inspired by the power and design of Three.js.  
+This guide will walk you through the first steps to get your 3D scene up and running in minutes.
 
-Get started by **creating a new site**.
+---
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+## 🔧 Requirements
 
-### What you'll need
+- GameMaker Studio 2 (latest LTS or IDE version recommended)
 
-- [Node.js](https://nodejs.org/en/download/) version 18.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+---
 
-## Generate a new site
+## 🧱 Project Structure
 
-Generate a new Docusaurus site using the **classic template**.
+Your 3D scene will usually include:
 
-The classic template will automatically be added to your project after you run the command:
+- A `Scene` object (holds all visible elements)
+- A `PerspectiveCamera` (defines the point of view)
+- A `Renderer` (responsible for drawing)
+- Meshes and materials
+- Lights, etc..
 
-```bash
-npm init docusaurus@latest my-website classic
+
+## 📦 Installation
+
+1. Clone or download the latest version of the Unique Engine from GitHub:  
+   [https://github.com/manuel-di-iorio/unique-engine](https://github.com/manuel-di-iorio/unique-engine)
+
+2. Import the `ue.yymps` file by dragging it into your GameMaker project.
+
+3. Create an object and add it to your room.
+
+4. Turn on the "Enable viewports" in your room view settings
+
+---
+
+## 🚀 Your First Scene
+
+Add this code in the create event of your object
+
+```js
+renderer = new Renderer();
+scene = new Scene();
+camera = new PerspectiveCamera();
+orbitControls = new OrbitControls({ camera });
+mesh = new CubeMesh({ color: c_blue });
+ambientLight = new AmbientLight();
+dirLight = new DirectionalLight({ xt: -100, yt: -50, zt: -70 });
+scene.add(mesh, ambientLight, dirLight);
+```
+and this one in the draw Event, in order to render the scene:
+
+```js
+controls.update();
+renderer.render(scene, camera);
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+Then run the game and you will be able to orbit (mouse/arrow keys) around a cube!
 
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
-```
-
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+<img src={CubeDemo} width="400" />

@@ -6,6 +6,7 @@ function PerspectiveCamera(data = {}): Object3D(data) constructor {
     aspect = data[$ "aspect"] ?? view_wport / view_hport;
     view = data[$ "view"] ?? view_current;
     camera = camera_create();
+    position.set(data[$ "x"] ?? 100, data[$ "y"] ?? 50, data[$ "z"] ?? 50);
     target = new Vec3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
     autoUse = data[$ "autoUse"] ?? true;
     antialias = data[$ "antialias"] ?? 4;
@@ -29,6 +30,7 @@ function PerspectiveCamera(data = {}): Object3D(data) constructor {
     	camera_set_proj_mat(camera, matProj);
         camera_set_update_script(camera, onUpdate);
         
+        view_set_visible(view, true);
         view_set_camera(view, camera);
         
         // Set the antialias and vsync props

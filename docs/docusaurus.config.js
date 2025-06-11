@@ -23,7 +23,7 @@ const config = {
   url: 'https://manuel-di-iorio.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/unique-engine/',
+  baseUrl: '/unique-engine',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.

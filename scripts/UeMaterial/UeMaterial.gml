@@ -102,7 +102,7 @@ function Material(data = {}): Object3D(data) constructor {
         
         // Set the light uniform values
         if (lights) { 
-            shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState.ambient);    
+            shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState.ambient);
             
             var dirLightsNum = array_length(lightState.directional);
             if (dirLightsNum) {

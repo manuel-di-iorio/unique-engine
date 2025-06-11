@@ -75,7 +75,7 @@ function CubeMesh(data = {}): Mesh(data) constructor {
             nz: n[2],
             u: uv[0],
             v: uv[1],
-            color: c_white,
+            color: _color,
             alpha: _alpha
         });
     }

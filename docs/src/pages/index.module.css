@@ -21,3 +21,11 @@
   align-items: center;
   justify-content: center;
 }
+
+.logoText {
+  font-family: "Anta", sans-serif;
+  font-size: 6rem;
+  text-shadow:
+    -3px 0 #ff00ff,   /* ombra sinistra */
+     3px 0 #00ffff;       /* ombra destra */
+}

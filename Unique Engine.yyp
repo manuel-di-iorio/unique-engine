@@ -12,6 +12,7 @@
   "Folders":[
     {"$GMFolder":"","%Name":"AssimpLoader","folderPath":"folders/AssimpLoader.yy","name":"AssimpLoader","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Demo","folderPath":"folders/Demo.yy","name":"Demo","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Textures","folderPath":"folders/Demo/Textures.yy","name":"Textures","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Unique Engine","folderPath":"folders/Unique Engine.yy","name":"Unique Engine","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Controls","folderPath":"folders/Unique Engine/Controls.yy","name":"Controls","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Core","folderPath":"folders/Unique Engine/Core.yy","name":"Core","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -53,6 +54,7 @@
     {"id":{"name":"ueMat4","path":"scripts/ueMat4/ueMat4.yy",},},
     {"id":{"name":"UeMaterial","path":"scripts/UeMaterial/UeMaterial.yy",},},
     {"id":{"name":"UeMesh","path":"scripts/UeMesh/UeMesh.yy",},},
+    {"id":{"name":"UeMeshBasicMaterial","path":"scripts/UeMeshBasicMaterial/UeMeshBasicMaterial.yy",},},
     {"id":{"name":"UeMeshStandardMaterial","path":"scripts/UeMeshStandardMaterial/UeMeshStandardMaterial.yy",},},
     {"id":{"name":"UeObject3D","path":"scripts/UeObject3D/UeObject3D.yy",},},
     {"id":{"name":"UeOrbitControls","path":"scripts/UeOrbitControls/UeOrbitControls.yy",},},
@@ -74,6 +76,7 @@
     {"id":{"name":"UeVec3","path":"scripts/UeVec3/UeVec3.yy",},},
     {"id":{"name":"UeVertexFormat","path":"scripts/UeVertexFormat/UeVertexFormat.yy",},},
     {"id":{"name":"uuid_generate","path":"scripts/uuid_generate/uuid_generate.yy",},},
+    {"id":{"name":"sh_ue_basic","path":"shaders/sh_ue_basic/sh_ue_basic.yy",},},
     {"id":{"name":"sh_ue_light","path":"shaders/sh_ue_light/sh_ue_light.yy",},},
     {"id":{"name":"sh_ue_sprite","path":"shaders/sh_ue_sprite/sh_ue_sprite.yy",},},
     {"id":{"name":"sh_ue_standard","path":"shaders/sh_ue_standard/sh_ue_standard.yy",},},

@@ -5,7 +5,8 @@ import styles from './styles.module.css';
 const FeatureList = [
   {
     title: 'Simple by Design',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    // Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    src: require('@site/static/img/headline_simple.png').default,
     description: (
       <>
         Unique Engine is built to make 3D development in GameMaker intuitive, with clean API and no boilerplate. Just focus on your game.
@@ -14,7 +15,7 @@ const FeatureList = [
   },
   {
     title: 'Modular and Flexible',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    src: require('@site/static/img/headline_puzzle.png').default,
     description: (
       <>
         From rendering to controls, each part of the engine is modular. Customize, extend, or swap components as your game evolves.
@@ -23,7 +24,7 @@ const FeatureList = [
   },
   {
     title: 'Inspired by the Best',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    src: require('@site/static/img/headline_three.png').default,
     description: (
       <>
         Designed with Three.js in mind, Unique Engine brings modern 3D capabilities to GameMaker in a lightweight, developer-friendly package.
@@ -32,11 +33,13 @@ const FeatureList = [
   },
 ];
 
-function Feature({Svg, title, description}) {
+function Feature({ Svg, src, title, description }) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
+        {src ?
+          <img src={src} className={styles.featureSvg} role="img" /> :
+          <Svg className={styles.featureSvg} role="img" />}
       </div>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>

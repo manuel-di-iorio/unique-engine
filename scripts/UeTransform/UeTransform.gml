@@ -83,6 +83,12 @@ function Transform(_data = {}) constructor {
     }
 
     // --- Translation methods ---
+    function translate(x, y, z) {
+        position.add(new Vec3(x, y, z));
+        matrixNeedsUpdate = true;
+        return self;    
+    }
+    
     function translateX(value) {
         position.x += value;
         matrixNeedsUpdate = true;
@@ -102,6 +108,12 @@ function Transform(_data = {}) constructor {
     }
 
     // --- Rotation methods ---
+    function rotate(x, y, z) {
+        rotation.multiply(new Quat(x, y, z));
+        matrixNeedsUpdate = true;
+        return self;
+    }
+    
     function rotateX(value) {
         rotation.rotateX(value);
         matrixNeedsUpdate = true;
@@ -121,6 +133,12 @@ function Transform(_data = {}) constructor {
     }
 
     // --- Scaling methods ---
+    function setScale(x, y, z) {
+        scale.set(x, y, z);
+        matrixNeedsUpdate = true;
+        return self;
+    }
+    
     function scaleX(value) {
         scale.x += value;
         matrixNeedsUpdate = true;

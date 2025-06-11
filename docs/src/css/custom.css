@@ -1,30 +1,33 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+ @import url('https://fonts.googleapis.com/css2?family=Anta&display=swap');
 
-/* You can override the default Infima variables here. */
-:root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+.antaRegular {
+  font-family: "Anta", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+:root {
+  --ifm-color-primary: #000000;
+  --ifm-color-primary-dark: #111111;
+  --ifm-color-primary-darker: #1a1a1a;
+  --ifm-color-primary-darkest: #222222;
+  --ifm-color-primary-light: #333333;
+  --ifm-color-primary-lighter: #4d4d4d;
+  --ifm-color-primary-lightest: #666666;
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.05); /* Soft black highlight */
+}
+
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+   --ifm-color-primary: #777777;
+  --ifm-color-primary-dark: #4d4d4d;
+  --ifm-color-primary-darker: #333333;
+  --ifm-color-primary-darkest: #222222;
+  --ifm-color-primary-light: #1a1a1a;
+  --ifm-color-primary-lighter: #111111;
+  --ifm-color-primary-lightest: #000000;
+
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.05); /* Soft white highlight */
 }
