@@ -75,3 +75,23 @@ pointLight = new PointLight({ x: 40, y: 40, z: 50 });
 
 scene.add(ambientLight, pointLight, terrain, tree);
 ```
+
+---
+
+### Contribuire
+
+Il progetto è open source e aperto a contributi!
+Segnala bug, richieste di funzionalità o apri una pull request su [GitHub](https://github.com/manuel-di-iorio/unique-engine/issues).
+
+### License
+
+[MIT License](LICENSE.md)
+
+Other bundled software, such as Assimp and the [free 3d model](https://free3d.com/it/3d-model/airplane-v2--659376.html), are copyrighted by their respective creators and may come with additional usage restrictions.
+These components are not required to use the engine — if you prefer to avoid any third-party licensing terms, simply remove the AssimpLoader and the included 3d model from the project’s datafiles.
+
+### Link utili
+
+- [Documentazione](https://manuel-diiorio.github.io/unique-engine/docs)
+- [Game Maker Official Website](https://gamemaker.io)
+- [Game Maker Italia Community](https://gamemakeritalia.it)
