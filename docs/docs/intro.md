@@ -21,9 +21,9 @@ This guide will walk you through the first steps to get your 3D scene up and run
 
 Your 3D scene will usually include:
 
-- A `Scene` object (holds all visible elements)
-- A `PerspectiveCamera` (defines the point of view)
-- A `Renderer` (responsible for drawing)
+- A `UeScene` object (holds all visible elements)
+- A `UePerspectiveCamera` (defines the point of view)
+- A `UeRenderer` (responsible for drawing)
 - Meshes and materials
 - Lights, etc..
 
@@ -46,16 +46,15 @@ Your 3D scene will usually include:
 Add this code in the create event of your object
 
 ```js
-ue = new UniqueEngine();
 renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera();
 
-cubeGeometry = new BoxGeometry({ color: c_blue });
+cubeGeometry = new UeBoxGeometry({ color: c_blue });
 cubeMesh = new UeMesh(cubeGeometry);
 
-ambientLight = new AmbientLight();
-dirLight = new DirectionalLight({ xt: -100, yt: -50, zt: -70 });
+ambientLight = new UeAmbientLight();
+dirLight = new UeDirectionalLight({ xt: -100, yt: -50, zt: -70 });
 
 scene.add(cubeMesh, ambientLight, dirLight);
 ```

@@ -10,7 +10,7 @@ Unique Engine is built around a clear and modular architecture. Before diving de
 
 ## 🧩 Object3D
 
-`Object3D` is the base class for all 3D elements in the scene, meshes, lights, and even the camera.  
+`UeObject3D` is the base class for all 3D elements in the scene, meshes, lights, and even the camera.  
 It supports hierarchical parenting, transformation, and visibility.
 
 
@@ -21,10 +21,10 @@ It supports hierarchical parenting, transformation, and visibility.
 
 ## 🖼️ Scene
 
-`Scene` acts as the root container for your 3D world. You add all objects, meshes, lights, etc. to the scene.
+The scene acts as the root container for your 3D world. You add all objects, meshes, lights, etc. to the scene.
 
 ```js
-scene = new Scene();
+scene = new UeScene();
 scene.add(myMesh);
 scene.add(myLight);
 ```
@@ -36,7 +36,7 @@ Unique Engine includes a default perspective camera.
 You place the camera in 3D space like any other object:
 
 ```js
-camera = new PerspectiveCamera();
+camera = new UePerspectiveCamera();
 camera.move(0, 5, 10);
 ```
 You don't need to manually handle GameMaker’s built-in view system, the engine integrates the camera automatically.
@@ -51,7 +51,7 @@ By default, the camera has:
 The camera is a Object3D, so you can move or rotate it like any other object.
 
 ## 🖌️ Renderer
-Renderer is responsible for drawing the scene. It does:
+The renderer is responsible for drawing the scene. It does:
 
 - Recursively traverses the scene graph
 - Sorts opaque and transparent objects independently
@@ -60,7 +60,7 @@ Renderer is responsible for drawing the scene. It does:
 - Calls the render function for each visible mesh
 
 ```js
-renderer = new Renderer();
+renderer = new UeRenderer();
 
 // Per-frame rendering:
 renderer.render(scene, camera);
@@ -78,7 +78,7 @@ Lights bring depth and realism to the scene. Currently supported types:
 Example:
 
 ```js
-light = new DirectionalLight();
+light = new UeDirectionalLight();
 light.move(5, 10, 5);
 scene.add(light);
 ```
