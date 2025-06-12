@@ -1,4 +1,4 @@
-function PerspectiveCamera(data = {}): Object3D(data) constructor { 
+function UePerspectiveCamera(data = {}): UeObject3D(data) constructor { 
     isCamera = true;
     fov  = data[$ "fov"]  ?? 60;
     near = data[$ "near"] ?? 0.1;
@@ -7,7 +7,7 @@ function PerspectiveCamera(data = {}): Object3D(data) constructor {
     view = data[$ "view"] ?? view_current;
     camera = camera_create();
     position.set(data[$ "x"] ?? 100, data[$ "y"] ?? 50, data[$ "z"] ?? 50);
-    target = new Vec3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
+    target = new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
     autoUse = data[$ "autoUse"] ?? true;
     antialias = data[$ "antialias"] ?? 4;
     vsync = data[$ "vsync"] ?? true; 

@@ -1,4 +1,4 @@
-function Plane(_normal = new Vec3(0, 1, 0), _d = 0) constructor {
+function UePlane(_normal = new UeVector3(0, 1, 0), _d = 0) constructor {
     self.normal = _normal;
     self.d = _d;
 

@@ -1,3 +1,3 @@
-function MeshStandardMaterial(data = {}): Material(data) constructor {
-
+function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
+    
 }

@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeMaterial",
+  "%Name":"UeSprite",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeMaterial",
+  "name":"UeSprite",
   "parent":{
     "name":"Core",
     "path":"folders/Unique Engine/Core.yy",

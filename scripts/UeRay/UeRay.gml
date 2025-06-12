@@ -1,4 +1,4 @@
-function Ray(_origin = new Vec3(), _direction = new Vec3(0, 0, -1)) constructor {
+function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) constructor {
     self.origin = _origin;
     self.direction = _direction.normalize();
 

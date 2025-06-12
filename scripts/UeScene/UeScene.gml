@@ -1,4 +1,4 @@
-function Scene(data = {}): Object3D(data) constructor {
+function UeScene(data = {}): UeObject3D(data) constructor {
     isScene = true;
     lights = [];
     

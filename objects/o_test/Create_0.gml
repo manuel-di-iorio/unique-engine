@@ -1,20 +1,28 @@
-//renderer = new Renderer();
-//scene = new Scene();
-//camera = new PerspectiveCamera();
-//orbitControls = new OrbitControls({ camera, radius: 230, elevation: 30 });
-//
-//ambientLight = new AmbientLight({ color: c_dkgray });
-//dirLight = new DirectionalLight({ xt: -150, yt: -50, zt: 50, color: #FFFFC8 });
-//
-//assimpLoader = new AssimpLoader();
-//importedMesh = assimpLoader.load("11804_Airplane_v2_l2.obj");
-//scene.add(ambientLight, dirLight, importedMesh);
+renderer = new UeRenderer();
+scene = new UeScene();
+camera = new UePerspectiveCamera({ x: 150, y: 50, z: 50, xt: 10, yt: 0, zt: 30 });
 
-renderer = new Renderer();
-scene = new Scene();
-camera = new PerspectiveCamera();
-orbitControls = new OrbitControls({ camera });
-mesh = new CubeMesh({ color: c_blue });
-ambientLight = new AmbientLight();
-dirLight = new DirectionalLight({ xt: -100, yt: -50, zt: -70 });
-scene.add(mesh, ambientLight, dirLight);
+// Create the terrain
+terrainGeometry = new UeCircleGeometry(500);
+terrain = new UeMesh(terrainGeometry, { z: -100 });
+
+// Example tree (group of meshes)
+treeGroup = new UeMesh();
+
+treeShadowGeometry = new UeCircleGeometry(25, { color: c_gray });
+treeShadow = new UeMesh(treeShadowGeometry, { z: -24 });
+
+treeTrunkGeometry = new UeParallelepipedGeometry({ color: c_maroon })
+treeTrunk = new UeMesh(treeTrunkGeometry, { rx: 90 });
+
+treeTopGeometry = new UeSphereGeometry(40, { color: #11aa11 });
+treeTop = new UeMesh(treeTopGeometry, { z: 55 });
+
+treeGroup.add(treeShadow, treeTrunk, treeTop);
+
+// Lights
+ambientLight = new UeAmbientLight({ color: #226622 });
+pointLight = new UePointLight(2000, { x: 40, y: 40, z: 50 });
+
+// Add everything to the scene
+scene.add(ambientLight, pointLight, terrain, treeGroup);

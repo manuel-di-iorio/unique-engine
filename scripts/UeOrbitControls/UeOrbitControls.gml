@@ -1,6 +1,6 @@
-function OrbitControls(data = {}): Controls(data) constructor {
+function UeOrbitControls(data = {}): UeControls(data) constructor {
     self.camera = data[$ "camera"];
-    self.target = data[$ "target"] ?? new Vec3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
+    self.target = data[$ "target"] ?? new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
     
     // Set the initial azimuth/elevation from the camera position towards the target
     var dir = camera.position.clone().sub(target);
@@ -106,15 +106,15 @@ function OrbitControls(data = {}): Controls(data) constructor {
             var camDir = camTarget.clone().sub(camPos).normalize();
 
             if (self.screenSpacePanning) {
-                var worldUp = new Vec3(0, 0, -1);
+                var worldUp = new UeVector3(0, 0, -1);
                 var right = camDir.cross(worldUp).normalize();
                 var up = right.cross(camDir).normalize();
 
                 self._deltaPan.add(right.scale(-panX));
                 self._deltaPan.add(up.scale(-panY));
             } else {
-                var forward = new Vec3(camDir.x, camDir.y, 0).normalize();
-                var right = new Vec3(-forward.y, forward.x, 0); // 90° clockwise
+                var forward = new UeVector3(camDir.x, camDir.y, 0).normalize();
+                var right = new UeVector3(-forward.y, forward.x, 0); // 90° clockwise
 
                 self._deltaPan.add(right.scale(-panX));
                 self._deltaPan.add(forward.scale(panY));
@@ -147,7 +147,7 @@ function OrbitControls(data = {}): Controls(data) constructor {
         if (!shiftPressed) {
             if (self.screenSpacePanning) {
                 // Pan aligned to camera screen space
-                var worldUp = new Vec3(0, 0, -1);
+                var worldUp = new UeVector3(0, 0, -1);
                 var right = camDir.cross(worldUp).normalize();
                 var up = right.cross(camDir).normalize();
         
@@ -157,8 +157,8 @@ function OrbitControls(data = {}): Controls(data) constructor {
                 if (keyboard_check(self.keys.BOTTOM))self._deltaPan.add(up.scale(panKeyAmount));
             } else {
                 // Project cam direction onto world XY plane
-                var forward = new Vec3(camDir.x, camDir.y, 0).normalize();
-                var right = new Vec3(-forward.y, forward.x, 0);
+                var forward = new UeVector3(camDir.x, camDir.y, 0).normalize();
+                var right = new UeVector3(-forward.y, forward.x, 0);
                 
                 // World space pan (assumed XY plane)
                 if (keyboard_check(self.keys.LEFT))   self._deltaPan.add(right.scale(panKeyAmount));

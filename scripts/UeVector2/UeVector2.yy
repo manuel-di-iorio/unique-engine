@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeMaterial",
+  "%Name":"UeVector2",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeMaterial",
+  "name":"UeVector2",
   "parent":{
-    "name":"Core",
-    "path":"folders/Unique Engine/Core.yy",
+    "name":"Math",
+    "path":"folders/Unique Engine/Math.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

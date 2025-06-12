@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeMaterial",
+  "%Name":"UeSphereGeometry",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeMaterial",
+  "name":"UeSphereGeometry",
   "parent":{
-    "name":"Core",
-    "path":"folders/Unique Engine/Core.yy",
+    "name":"Geometries",
+    "path":"folders/Unique Engine/Geometries.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -1,4 +1,4 @@
-function Texture(data = {}) constructor {
+function UeTexture(data = {}) constructor {
     isTexture = true;
     image = data[$ "image"];
     subimg = data[$ "subimg"] ?? 0;

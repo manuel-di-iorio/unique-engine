@@ -46,22 +46,25 @@ Your 3D scene will usually include:
 Add this code in the create event of your object
 
 ```js
-renderer = new Renderer();
-scene = new Scene();
-camera = new PerspectiveCamera();
-orbitControls = new OrbitControls({ camera });
-mesh = new CubeMesh({ color: c_blue });
+ue = new UniqueEngine();
+renderer = new UeRenderer();
+scene = new UeScene();
+camera = new UePerspectiveCamera();
+
+cubeGeometry = new BoxGeometry({ color: c_blue });
+cubeMesh = new UeMesh(cubeGeometry);
+
 ambientLight = new AmbientLight();
 dirLight = new DirectionalLight({ xt: -100, yt: -50, zt: -70 });
-scene.add(mesh, ambientLight, dirLight);
+
+scene.add(cubeMesh, ambientLight, dirLight);
 ```
 and this one in the draw Event, in order to render the scene:
 
 ```js
-controls.update();
 renderer.render(scene, camera);
 ```
 
-Then run the game and you will be able to orbit (mouse/arrow keys) around a cube!
+Then run the game and you will see a nice cube!
 
 <img src={CubeDemo} width="400" />

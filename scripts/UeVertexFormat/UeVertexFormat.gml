@@ -1,6 +1,4 @@
-global.UE_DEFAULT_VERTEX_FORMAT = new VertexFormat().position().normal().uv().color().build();
-
-function VertexFormat() constructor {
+function UeVertexFormat() constructor {
     isVertexFormat = true;
     vf = undefined;
     attrs = [];

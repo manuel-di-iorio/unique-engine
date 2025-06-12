@@ -1,9 +1,9 @@
-function Transform(_data = {}) constructor {
+function UeTransform(_data = {}) constructor {
     // Local transform components
-    position = _data[$ "position"] ?? new Vec3(_data[$ "x"] ?? 0, _data[$ "y"] ?? 0, _data[$ "z"] ?? 0);
-    rotation = _data[$ "rotation"] ?? new Quat(_data[$ "rx"] ?? 0, _data[$ "ry"] ?? 0, _data[$ "rz"] ?? 0);
-    scale    = _data[$ "scale"]    ?? new Vec3(_data[$ "sx"] ?? 1, _data[$ "sy"] ?? 1, _data[$ "sz"] ?? 1);
-    up = new Vec3(0, 1, 0);
+    position = _data[$ "position"] ?? new UeVector3(_data[$ "x"] ?? 0, _data[$ "y"] ?? 0, _data[$ "z"] ?? 0);
+    rotation = _data[$ "rotation"] ?? new UeQuaternion(_data[$ "rx"] ?? 0, _data[$ "ry"] ?? 0, _data[$ "rz"] ?? 0);
+    scale    = _data[$ "scale"]    ?? new UeVector3(_data[$ "sx"] ?? 1, _data[$ "sy"] ?? 1, _data[$ "sz"] ?? 1);
+    up       = new UeVector3(0, 1, 0);
 
     // Transformation matrices
     matrix = undefined;
@@ -40,7 +40,7 @@ function Transform(_data = {}) constructor {
     /// Rebuild local matrix from position/rotation/scale
     function updateMatrix() {
         matrixNeedsUpdate = false;
-        matrix = new Mat4().buildByTransform(self);
+        matrix = new UeMatrix4().buildByTransform(self);
         matrixWorldNeedsUpdate = true;
         return self;
     }
@@ -82,7 +82,7 @@ function Transform(_data = {}) constructor {
     }
     
     function translate(x, y, z) {
-        position.add(new Vec3(x, y, z));
+        position.add(new UeVector3(x, y, z));
         matrixNeedsUpdate = true;
         return self;    
     }
@@ -125,11 +125,11 @@ function Transform(_data = {}) constructor {
     }
     
     function lookAt(x, y, z) {
-        return lookAtVec(new Vec3(x, y, z));
+        return lookAtVec(new UeVector3(x, y, z));
     }
     
     function rotate(x, y, z) {
-        rotation.multiply(new Quat(x, y, z));
+        rotation.multiply(new UeQuaternion(x, y, z));
         matrixNeedsUpdate = true;
         return self;
     }

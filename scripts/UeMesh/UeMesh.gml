@@ -1,9 +1,9 @@
-function Mesh(data = {}): Object3D(data) constructor {
-    isMesh = true;
-    geometry = data[$ "geometry"] ?? undefined;
-    material = data[$ "material"] ?? new MeshStandardMaterial();
-    primitive = pr_trianglelist;
-    //boundingBox = { x1: 0, y1: 0, z1: 0, x2: 0, y2: 0, z2: 0, x_size: 0, y_size: 0, z_size: 0 };
+function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
+    self.isMesh = true;
+    self.geometry = geometry;
+    self.material = data[$ "material"] ?? new UeMeshStandardMaterial();
+    self.primitive = data[$ "primitive"] ?? pr_trianglelist;
+    //self.boundingBox = data[$ "boundingBox"] ?? new Box3(); // @todo
     
     function render(renderState) {
         var scene = renderState.scene;
@@ -13,7 +13,7 @@ function Mesh(data = {}): Object3D(data) constructor {
             update();
         }
         
-        if (visible && geometry != undefined) {
+        if (visible && geometry) {
             matrix_set(matrix_world, matrixWorld.data);
             material.use(renderState, self); 
             vertex_submit(geometry.vb, primitive, material.textures.map ?? -1);

@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeMaterial",
+  "%Name":"ueUuid",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeMaterial",
+  "name":"ueUuid",
   "parent":{
-    "name":"Core",
-    "path":"folders/Unique Engine/Core.yy",
+    "name":"Utils",
+    "path":"folders/Unique Engine/Utils.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

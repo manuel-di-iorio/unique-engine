@@ -1,4 +1,4 @@
-function Renderer(data = {}): Object3D(data) constructor {
+function UeRenderer(data = {}): UeObject3D(data) constructor {
     isRenderer = true;
     
     // Recursively collect renderable objects and split them into opaque and transparent queues

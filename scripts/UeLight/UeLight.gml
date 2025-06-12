@@ -1,4 +1,4 @@
-function Light(data = {}): Object3D(data) constructor {
+function UeLight(data = {}): UeObject3D(data) constructor {
     isLight = true;
     type = "Light";
     lightType = "Light"
@@ -13,18 +13,18 @@ function Light(data = {}): Object3D(data) constructor {
     setColor(data[$ "color"] ?? c_dkgray);
 }
 
-function AmbientLight(data = {}): Light(data) constructor {
+function UeAmbientLight(data = {}): UeLight(data) constructor {
     lightType = "AmbientLight"
 }
 
-function DirectionalLight(data = {}): Light(data) constructor {
+function UeDirectionalLight(xt = 0, yt = 0, zt = 0, data = {}): UeLight(data) constructor {
     lightType = "DirectionalLight";
-    target = new Vec3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
+    target = new UeVector3(xt, yt, zt);
 }
 
-function PointLight(data = {}): Light(data) constructor {
+function UePointLight(range = 1000, data = {}): UeLight(data) constructor {
     lightType = "PointLight";
-    range = data[$ "range"] ?? 2000;
+    self.range = range;
 }
 
 /** @todo: unsupported for now */

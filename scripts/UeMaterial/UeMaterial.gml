@@ -1,4 +1,4 @@
-function Material(data = {}): Object3D(data) constructor {
+function UeMaterial(data = {}): UeObject3D(data) constructor {
     isMaterial = true;
     color = data[$ "color"] ?? c_white;
     transparent = data[$ "transparent"] ?? false;

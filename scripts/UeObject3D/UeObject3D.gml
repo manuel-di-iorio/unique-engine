@@ -1,10 +1,11 @@
 global.UNIQUE_ENGINE_OBJECT_ID = 0;
+global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
 
-function Object3D(data = {}): Transform(data) constructor {
+function UeObject3D(data = {}): UeTransform(data) constructor {
     isObject3D = true;
     id = global.UNIQUE_ENGINE_OBJECT_ID++; 
     name = data[$ "name"] ?? undefined;
-    uuid = uuid_generate();
+    uuid = ueUuid();
     visible = data[$ "visible"] ?? true;
     parent = data[$ "parent"] ?? undefined;
     children = [];
@@ -17,7 +18,7 @@ function Object3D(data = {}): Transform(data) constructor {
         for (var i=0; i<argument_count; i++) {
             var child = argument[i];
             child.parent = self;
-            //removeFromParent(child);
+            removeFromParent(child);
             array_push(children, child);
         }
         

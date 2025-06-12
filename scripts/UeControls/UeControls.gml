@@ -1,3 +1,3 @@
-function Controls(data = {}) constructor {
+function UeControls(data = {}) constructor {
     enabled = true;
 }

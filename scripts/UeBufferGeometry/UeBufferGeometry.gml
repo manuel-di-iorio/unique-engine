@@ -1,4 +1,4 @@
-function BufferGeometry(data = {}): Object3D(data) constructor {
+function UeBufferGeometry(data = {}): UeObject3D(data) constructor {
     isBufferGeometry = true;
     vertices = data[$ "vertices"] ?? [];
     index = data[$ "index"] ?? undefined;
@@ -52,6 +52,4 @@ function BufferGeometry(data = {}): Object3D(data) constructor {
         vb = undefined;
         return self;
     }
-    
-    build();
 }
