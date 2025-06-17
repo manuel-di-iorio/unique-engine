@@ -5,13 +5,13 @@ function UePyramidGeometry(data = {}): UeBufferGeometry(data) constructor {
     var _alpha  = data[$ "alpha"]  ?? 1;
 
     var h = _height;
-    var b = _base * 0.5;
+    var base = _base * 0.5;
 
     // Base points
-    var v0 = [-b, -b, 0]; // bottom-left
-    var v1 = [ b, -b, 0]; // bottom-right
-    var v2 = [ b,  b, 0]; // top-right
-    var v3 = [-b,  b, 0]; // top-left
+    var v0 = [-base, -base, 0]; // bottom-left
+    var v1 = [ base, -base, 0]; // bottom-right
+    var v2 = [ base,  base, 0]; // top-right
+    var v3 = [-base,  base, 0]; // top-left
 
     var top = [0, 0, h];
 

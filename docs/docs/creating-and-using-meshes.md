@@ -24,7 +24,46 @@ terrain = new UeMesh(terrainGeometry, { z: 50 });
 - UeParallelepipedGeometry
 - UePyramidGeometry
 
-You can instantiate them with relevant parameters (e.g., radius, width, height), and they automatically generate the vertex/index buffers needed for rendering.
+You can instantiate them with relevant parameters (e.g., radius, width, height), and they automatically generate the vertex buffers needed for rendering.
+
+## 🛠️ Creating Custom Geometry
+
+If you want full control, create a `UeBufferGeometry` with a custom `UeVertexFormat`. In this example, we are going to create a triangle geometry:
+
+**Step 1: Define Vertex Format (optional)**
+```js
+var format = new UeVertexFormat().position().normal().uv().color().build();
+```
+
+**Step 2: Create Geometry**
+```js
+var vertices = [
+    {
+        x: -0.5, y: -0.5, z: 0,
+        nx: 0, ny: 0, nz: 1,
+        u: 0, v: 0,
+        color: c_white,
+        alpha: 1
+    },
+    {
+        x: 0.5, y: -0.5, z: 0,
+        nx: 0, ny: 0, nz: 1,
+        u: 1, v: 0,
+        color: c_white,
+        alpha: 1
+    },
+    {
+        x: 0.0, y: 0.5, z: 0,
+        nx: 0, ny: 0, nz: 1,
+        u: 0.5, v: 1,
+        color: c_white,
+        alpha: 1
+    }
+];
+
+var geometry = new UeBufferGeometry({ vertices, format });
+```
+🧠 The geometries also support custom attributes defined in the format.
 
 ## 🎨 Adding a Material
 
@@ -36,7 +75,7 @@ var material = new UeMaterial({
   transparent: true
 });
 
-var sphere = new UeMesh(new UeSphereGeometry(1), {
+var sphere = new UeMesh(new UeSphereGeometry(), {
   position: new UeVector3(0, 0, 0),
   material: material
 });

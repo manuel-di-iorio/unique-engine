@@ -1,57 +1,57 @@
 # Unique Engine
 
-Unique Engine è una libreria 3D modulare e flessibile, ispirata a Three.js, progettata per facilitare la creazione di giochi 3D e applicazioni interattive.  
-L'obiettivo è offrire un'API semplice, accessibile e potente, mantenendo una struttura chiara e facilmente estendibile.
+Unique Engine is a modular and flexible 3D library, inspired by Three.js, designed to make it easy to create 3D games and interactive applications.
+The goal is to offer a simple, accessible and powerful API, while maintaining a clear and easily extensible structure.
 
 ---
 
-## Caratteristiche attuali ✅
+## Current Features ✅
 
-- **Camera**  
-  Gestisce la proiezione 3D e si collega automaticamente alla view.
+- **Camera**
+Manages 3D projection and automatically connects to the view.
 
-- **Renderer**  
-  Disegna le mesh con ordinamento indipendente di materiali opachi e trasparenti. Gestisce passaggio dati luci agli shader.
+- **Renderer**
+Draws meshes with independent ordering of opaque and transparent materials. Manages passing light data to shaders.
 
-- **Mesh**  
-  Rendering ricorsivo dei figli, aggiornamento matrici solo se necessario. Rotazioni in gradi, con conversione interna a quaternioni.
+- **Mesh**
+Recursive rendering of children, updating matrices only if necessary. Rotations in degrees, with internal conversion to quaternions.
 
-- **Luci**  
-  Supporto base per Ambient, Point e Directional light tramite shader personalizzati.
+- **Lights**
+Basic support for Ambient, Point and Directional lights via custom shaders.
 
-- **Materials & Textures**  
-  Gestione automatica di uniform e sampler, inclusa l’integrazione con le luci.
+- **Materials & Textures**
+Automatic management of uniforms and samplers, including integration with lights.
 
-- **VertexFormat**  
-  Creazione semplice e flessibile dei formati di vertice, es.:  
-  `new VertexFormat().position().normal().uv().color().build()`
+- **VertexFormat**
+Easy and flexible creation of vertex formats, e.g.:
+`new VertexFormat().position().normal().uv().color().build()`
 
-- **Geometria**  
-  Separata dalla mesh, con buffer vertex e indice creati automaticamente in base al formato.
+- **Geometry**
+Separated from the mesh, with vertex buffer and index automatically created based on the format.
 
-- **Math Utilities**  
-  Vettori, matrici, quaternioni, piani e raycasting: `Vec2`, `Vec3`, `Mat3`, `Mat4`, `Quaternion`, `Plane`, `Raycast`.
+- **Math Utilities**
+Vectors, matrices, quaternions, planes and raycasting: `Vec2`, `Vec3`, `Mat3`, `Mat4`, `Quaternion`, `Plane`, `Raycast`.
 
-- **OrbitControls**  
-  Addon per gestione interattiva di drag, pan, rotazione e zoom della camera.
+- **OrbitControls**
+Addon for interactive drag, pan, rotate and zoom of the camera.
 
-- **Import modelli (demo)**  
-  Supporto tramite AssimpDLL di Jak (non incluso nella libreria per motivi di licenza).
-
----
-
-## Funzionalità in sviluppo ⏳
-
-- Import/export scene graph e singoli oggetti via buffer file
-- Primitive mesh aggiuntive e nuovi materiali (già disponibili billboards con rotazione via vertex shader)
-- Bounding box e bounding sphere per collisioni semplici
-- Shader pass multipli per effetti avanzati e post processing
-- Animazioni
-- Ombre, spot lights e altre features ispirate a Three.js
+- **Import models (demo)**
+Support via AssimpDLL by Jak (not included in the library for licensing reasons).
 
 ---
 
-## Esempio base:
+## In development features ⏳
+
+- Import/export scene graph and single objects via buffer file
+- Additional mesh primitives and new materials (billboards with rotation via vertex shader are already available)
+- Bounding box and bounding sphere for simple collisions
+- Multiple shader passes for advanced effects and post processing
+- Animations
+- Shadows, spot lights and other Three.js inspired features
+
+---
+
+## Basic example:
 
 ```gml
 // Setup the scene and the perspective camera
@@ -78,20 +78,20 @@ scene.add(ambientLight, pointLight, terrain, tree);
 
 ---
 
-### Contribuire
+### Contribute
 
-Il progetto è open source e aperto a contributi!
-Segnala bug, richieste di funzionalità o apri una pull request su [GitHub](https://github.com/manuel-di-iorio/unique-engine/issues).
+The project is open source and open to contributions!
+Report bugs, feature requests or open a pull request on [GitHub](https://github.com/manuel-di-iorio/unique-engine/issues).
 
 ### License
 
 [MIT License](LICENSE.md)
 
 Other bundled software, such as Assimp and the [free 3d model](https://free3d.com/it/3d-model/airplane-v2--659376.html), are copyrighted by their respective creators and may come with additional usage restrictions.
-These components are not required to use the engine — if you prefer to avoid any third-party licensing terms, simply remove the AssimpLoader and the included 3d model from the project’s datafiles.
+These components are not required to use the engine — if you prefer to avoid any third-party licensing terms, simply remove the AssimpLoader and the included 3d model from the project's datafiles.
 
-### Link utili
+### Useful Links
 
-- [Documentazione](https://manuel-diiorio.github.io/unique-engine/docs)
+- [Documentation](https://manuel-diiorio.github.io/unique-engine/docs)
 - [Game Maker Official Website](https://gamemaker.io)
 - [Game Maker Italia Community](https://gamemakeritalia.it)

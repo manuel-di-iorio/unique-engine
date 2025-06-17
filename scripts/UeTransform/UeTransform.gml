@@ -64,7 +64,7 @@ function UeTransform(_data = {}) constructor {
     function updateWorldMatrix(updateParents = false, updateChildren = false) {
         // @todo
         if (updateParents) {
-            show_debug_log("updateParents argument not supported yet")
+            show_debug_message("updateParents argument not supported yet")
         }
         
         if (updateChildren) {

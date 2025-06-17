@@ -39,7 +39,7 @@ You place the camera in 3D space like any other object:
 camera = new UePerspectiveCamera();
 camera.move(0, 5, 10);
 ```
-You don't need to manually handle GameMaker’s built-in view system, the engine integrates the camera automatically.
+You don't need to manually handle GameMaker’s view system, the engine integrates the camera automatically.
 
 ### Field of View & Clipping
 By default, the camera has:
@@ -48,7 +48,7 @@ By default, the camera has:
 - Near plane: 0.1
 - Far plane: 32000
 
-The camera is a Object3D, so you can move or rotate it like any other object.
+The camera is a UeObject3D, so you can move or rotate it like any other object.
 
 ## 🖌️ Renderer
 The renderer is responsible for drawing the scene. It does:

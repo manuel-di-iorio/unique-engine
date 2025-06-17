@@ -2,13 +2,13 @@ function UeBufferGeometry(data = {}): UeObject3D(data) constructor {
     isBufferGeometry = true;
     vertices = data[$ "vertices"] ?? [];
     index = data[$ "index"] ?? undefined;
-    vformat = data[$ "vformat"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
+    format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
     vb = undefined;
     
     function build() {
         vb = vertex_create_buffer();
-        vertex_begin(vb, vformat.vf);
-        var attrs = vformat.attrs;
+        vertex_begin(vb, format.vf);
+        var attrs = format.attrs;
         
         var useIndex = is_array(index);
         var ilen = array_length(useIndex ? index : vertices);
