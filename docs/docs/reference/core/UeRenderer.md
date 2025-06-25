@@ -57,7 +57,7 @@ When the internal `render()` method is called, the renderer collects all active 
 ```
 Each light contributes only if enabled == true.
 
-🧠 Notes
+## 🧠 Notes
 
 - The renderer expects all visible meshes to implement a .render(renderState) method.
 - The renderState struct passed to each mesh includes:
