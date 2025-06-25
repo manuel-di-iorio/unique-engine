@@ -75,7 +75,7 @@ function UeTransform(_data = {}) constructor {
     }
 
     // --- Translation methods ---
-    function move(x, y, z) {
+    function setPosition(x, y, z) {
         position.set(x, y, z);
         matrixNeedsUpdate = true;
         return self;    
@@ -126,6 +126,12 @@ function UeTransform(_data = {}) constructor {
     
     function lookAt(x, y, z) {
         return lookAtVec(new UeVector3(x, y, z));
+    }
+    
+    function setRotation(x, y, z) {
+        rotation.setFromEuler(x, y, z);
+        matrixNeedsUpdate = true;
+        return self;
     }
     
     function rotate(x, y, z) {

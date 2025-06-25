@@ -11,11 +11,17 @@ new UeBufferGeometry(data = {})
 
 ### Parameters
 
-| Key        | Type             | Default                    | Description                             |
-| ---------- | ---------------- | -------------------------- | --------------------------------------- |
-| `vertices` | `array`          | `[]`                       | Array of vertex data                    |
-| `index`    | `array` / `null` | `undefined`                | Optional index buffer for reusing verts |
-| `format`   | `UeVertexFormat` | `UE_DEFAULT_VERTEX_FORMAT` | Vertex layout format                    |
+| Key        | Type             | Default                           | Description                             |
+| ---------- | ---------------- | --------------------------        | --------------------------------------- |
+| `vertices` | `array`          | `[]`                              | Array of vertex data                    |
+| `index`    | `array` / `null` | `undefined`                       | Optional index buffer for reusing verts |
+| `format`   | `VertexFormat`   | `global.UE_DEFAULT_VERTEX_FORMAT` | Vertex layout format                    |
+
+### Properties
+
+| Property          | Type         | Default | Description                              |
+| -------------     | ------------ | ------- | ------------------------------           |
+| `isBufferGeometry`| `boolean`    | true    | Indicates that this is a buffer geometry |
 
 ## 🧩 Methods
 

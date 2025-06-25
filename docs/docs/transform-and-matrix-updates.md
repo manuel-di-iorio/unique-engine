@@ -52,7 +52,7 @@ mesh.translate(1, 0, 0);
 ## 🎮 Common Methods
 ```js
 // Move object directly
-object.move(x, y, z);
+object.setPosition(x, y, z);
 
 // Translate (relative)
 object.translate(dx, dy, dz);

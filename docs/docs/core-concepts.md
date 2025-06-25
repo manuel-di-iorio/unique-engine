@@ -37,7 +37,7 @@ You place the camera in 3D space like any other object:
 
 ```js
 camera = new UePerspectiveCamera();
-camera.move(0, 5, 10);
+camera.setPosition(0, 5, 10);
 ```
 You don't need to manually handle GameMaker’s view system, the engine integrates the camera automatically.
 
@@ -79,7 +79,7 @@ Example:
 
 ```js
 light = new UeDirectionalLight();
-light.move(5, 10, 5);
+light.setPosition(5, 10, 5);
 scene.add(light);
 ```
 Lights automatically inject their data into shaders when the material support them, no manual uniform handling needed.

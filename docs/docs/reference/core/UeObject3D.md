@@ -23,15 +23,17 @@ new UeObject3D(data = {})
 
 
 ### Properties
-| Property      | Type         | Description                          |
-| ------------- | ------------ | ------------------------------------ |
-| `id`          | `number`     | Unique numeric ID                    |
-| `uuid`        | `string`     | Randomly generated unique identifier |
-| `name`        | `string`     | Optional human-readable name         |
-| `visible`     | `boolean`    | Visibility flag                      |
-| `parent`      | `UeObject3D` | Parent object in the scene graph     |
-| `children`    | `array`      | Array of child objects               |
-| `renderOrder` | `number`     | Overrides render sort when rendering |
+
+| Property      | Type         | Default   |  Description                         |
+| ------------- | ------------ | --------- | ---------------------------          |
+| `isObject3D`  | `boolean`    | true      | Indicates that this is an Object3D   |
+| `id`          | `number`     |           | Unique numeric ID                    |
+| `uuid`        | `string`     |           | Randomly generated unique identifier |
+| `name`        | `string`     |           | Optional human-readable name         |
+| `visible`     | `boolean`    | true      | Visibility flag                      |
+| `parent`      | `UeObject3D` |           | Parent object in the scene graph     |
+| `children`    | `array`      | []        | Array of child objects               |
+| `renderOrder` | `number`     | 0         | Overrides render sort when rendering |
 
 
 ### 🔁 Inherited from `UeTransform`
@@ -39,7 +41,7 @@ new UeObject3D(data = {})
 This class inherits all transformation logic, including:
 
 - .position, .rotation, .scale
-- .update(), .move(), .rotate(), .lookAt() etc.
+- .update(), .setPosition(), .rotate(), .lookAt() etc.
 - .matrix, .matrixWorld and update flags
 
 ## 🧩 Methods
