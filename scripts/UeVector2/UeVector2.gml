@@ -92,8 +92,8 @@ function UeVector2(_x = 0, _y = 0) constructor {
     }
 
     function rotate(angle) {
-        var cosA = cos(angle);
-        var sinA = sin(angle);
+        var cosA = dcos(angle);
+        var sinA = dsin(angle);
         var nx = self.x * cosA - self.y * sinA;
         var ny = self.x * sinA + self.y * cosA;
         self.x = nx;

@@ -83,7 +83,7 @@ var sphere = new UeMesh(new UeSphereGeometry(), {
 
 ✅ Note: You can still modify the mesh's transform, material, or geometry after creation if needed.
 
-## 💾 Exporting and Importing Meshes (WORK IN PROGRESS)
+## 💾 Exporting and Importing Meshes
 
 Importing a model from a buffer is extremely fast, compared to load it with an OBJLoader or AssimpLoader.
 
@@ -98,7 +98,7 @@ Usually you will import all meshes from buffers that you will place in the "Incl
 
 ```js
 buffer = myMesh.export();   // Serializes data
-new Mesh().import(buffer);  // Loads mesh from buffer
+new UeMesh().import(buffer);  // Loads mesh from buffer
 ```
 📌 Tip: You can use buffer_save() and buffer_load() in combination to persist data between sessions.
 

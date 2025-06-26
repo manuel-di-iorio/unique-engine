@@ -17,10 +17,6 @@ new UeObject3D(data = {})
 | `visible`         | `boolean`                 | `true`      | Visibility flag                 |
 | `parent`          | `UeObject3D`              | `undefined` | Parent object in the hierarchy  |
 | `renderOrder`     | `number`                  | `0`         | Custom sort order for rendering |
-| `position` / `x`  | `UeVector3` / `number`    | `0`         | Initial position                |
-| `rotation` / `rx` | `UeQuaternion` / `number` | `0`         | Initial rotation                |
-| `scale` / `sx`    | `UeVector3` / `number`    | `1`         | Initial scale                   |
-
 
 ### Properties
 

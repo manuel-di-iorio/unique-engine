@@ -93,7 +93,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         if (denom == 0) return 0;
     
         var cos_theta = clamp(dot / denom, -1, 1);
-        return arccos(cos_theta);
+        return darccos(cos_theta);
     }
     
     function distanceTo(vec) {
