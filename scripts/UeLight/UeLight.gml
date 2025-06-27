@@ -21,7 +21,6 @@ function UeAmbientLight(color, data = {}): UeLight(data) constructor {
 function UeDirectionalLight(xt = 0, yt = 0, zt = 0, data = {}): UeLight(data) constructor {
     lightType = "DirectionalLight";
     target = new UeVector3(xt, yt, zt);
-    log(target)
 }
 
 function UePointLight(range = 1000, data = {}): UeLight(data) constructor {

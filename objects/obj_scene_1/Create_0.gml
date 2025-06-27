@@ -31,23 +31,20 @@ pyramid2 = new UeMesh(new UePyramidGeometry({ base: 60, height: 40 }), {
 
 // Palm trees (billboards)
 treePositions = [
-    [  50, -100 ],
-    [  80,  100 ],
-    [  10,  200 ],
-    [ 120,   80 ],
-    [ -150, -170 ],
-    [ -90,   35 ]
+    [  150, -200 ],
+    [  180,  200 ],
+    [  40,  350 ],
+    [ 220,   180 ],
+    [ -180, -320 ],
+    [ -220, 125 ]
 ];
 
 array_foreach(treePositions, function(arr) {
     var sprMesh = new UeSprite(matTree, {
-        x: arr[0], y: arr[1], z: 10,
+        x: arr[0], y: arr[1], z: 19,
         sx: 26, sy: 40,
         isSprite: true
     });
-    //sprMesh.setScale(26,40, 1)
-    //sprMesh.scale.set(26, 40, 1)
-    //sprMesh.matrixNeedsUpdate = true;
     scene.add(sprMesh);
 });
 

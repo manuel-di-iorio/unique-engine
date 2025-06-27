@@ -4,32 +4,32 @@ attribute vec4 in_Colour;                    // (r,g,b,a)
 attribute vec2 in_TextureCoord;              // (u,v)
 
 uniform vec3 u_ueModelPosition;
+uniform vec3 u_ueModelScale;
 
 varying vec2 v_vTexcoord;
 varying vec4 v_vColour;
 
 void main()
 {
-    vec4 object_space_pos = vec4( in_Position.x, in_Position.y, in_Position.z, 1.0);
-    //gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * object_space_pos;
-    //
-    //v_vColour = in_Colour;
-    //v_vTexcoord = in_TextureCoord;
-    //
-    
-    // Estrai le matrici utili
+    mat4 modelMat = gm_Matrices[MATRIX_WORLD];
     mat4 viewMat = gm_Matrices[MATRIX_VIEW];
-    mat4 worldViewProj = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION];
+    mat4 projMat = gm_Matrices[MATRIX_PROJECTION];
+    
+    // Estrai la scala come modulo dei vettori colonna (ignora la rotazione)
+    float scaleX = length(vec3(modelMat[0][0], modelMat[1][0], modelMat[2][0]));
+    float scaleY = length(vec3(modelMat[0][1], modelMat[1][1], modelMat[2][1]));
+    
+    // Usa i vettori della view matrix per orientare il quad verso la camera
+    vec3 right = normalize(vec3(viewMat[0][0], viewMat[1][0], viewMat[2][0]));
+    vec3 up    = normalize(vec3(viewMat[0][1], viewMat[1][1], viewMat[2][1]));
+    
+    // Calcola offset
+    vec3 offset = in_Position.x * scaleX * right + in_Position.y * scaleY * up;
+    
+    // Componi la posizione finale
+    vec4 finalWorld = vec4(u_ueModelPosition  + offset, 1.0);
+    gl_Position = projMat * viewMat * finalWorld;
 
-    vec3 right = vec3(viewMat[0][0], viewMat[1][0], viewMat[2][0]);
-    vec3 up    = vec3(viewMat[0][1], viewMat[1][1], viewMat[2][1]);
-
-    // Costruzione della posizione offset
-    vec3 offset = in_Position.x * right + in_Position.y * up;
-    vec3 worldPos = u_ueModelPosition + offset;
-
-    // Proiezione finale
     v_vColour = in_Colour;
-    gl_Position = worldViewProj * vec4(worldPos, 1.0);
     v_vTexcoord = in_TextureCoord;
 }

@@ -29,6 +29,7 @@ function UeMaterial(data = {}): UeObject3D(data) constructor {
     _sampler_handlers = {};
     
     uniforms[$ "ueModelPosition"] = { type: "array" };
+    uniforms[$ "ueModelScale"] = { type: "array" };
     uniforms[$ "ueCameraPosition"] = { type: "array" };
     
     // Light uniforms
@@ -98,6 +99,7 @@ function UeMaterial(data = {}): UeObject3D(data) constructor {
         shader_set(shader);
         
         shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], [mesh.position.x, mesh.position.y, mesh.position.z]);
+        shader_set_uniform_f_array(_uniform_handlers[$ "ueModelScale"], [mesh.scale.x, mesh.scale.y, mesh.scale.z]);
         shader_set_uniform_f_array(_uniform_handlers[$ "ueCameraPosition"], [camera.position.x, camera.position.y, camera.position.z]);
         
         // Reset the light uniforms (shaders cache their values)
