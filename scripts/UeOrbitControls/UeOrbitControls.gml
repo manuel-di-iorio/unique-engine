@@ -1,5 +1,5 @@
-function UeOrbitControls(data = {}): UeControls(data) constructor {
-    self.camera = data[$ "camera"];
+function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
+    self.camera = camera;
     self.target = data[$ "target"] ?? new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
     
     // Set the initial azimuth/elevation from the camera position towards the target
@@ -7,13 +7,6 @@ function UeOrbitControls(data = {}): UeControls(data) constructor {
     self.radius = camera.position.distanceTo(target);
     self.azimuth = arctan2(dir.y, dir.x);
     self.elevation = arcsin(clamp(dir.z / radius, -1, 1));
-
-    //self.radius = max(0.1, data[$"radius"] ?? 100);
-    //self.azimuth = data[$ "azimuth"] ? degtorad(data.azimuth) : 0;
-    //self.elevation = data[$ "elevation"] ? degtorad(data.elevation) : 0;
-    //self.radius = camera.position.distanceTo(target);
-    //self.azimuth = darctan2(camera.position.y, camera.position.x);
-    //self.elevation = darcsin(clamp(camera.position.z / self.radius, -1, 1));
 
     self.enableZoom = true;
     self.zoomSpeed = data[$"zoomSpeed"] ?? 5;
@@ -30,7 +23,7 @@ function UeOrbitControls(data = {}): UeControls(data) constructor {
     self.dampingFactor = 0.1;
 
     self.autoRotate = data[$"autoRotate"] ?? false;
-    self.autoRotateSpeed = data[$"autoRotateSpeed"] ?? 0.1;
+    self.autoRotateSpeed = data[$"autoRotateSpeed"] ?? 0.5;
 
     self.screenSpacePanning = data[$"screenSpacePanning"] ?? false;
 
@@ -53,7 +46,7 @@ function UeOrbitControls(data = {}): UeControls(data) constructor {
 
     self._deltaAzimuth = 0;
     self._deltaElevation = 0;
-    self._deltaPan = new Vec3(0, 0, 0);
+    self._deltaPan = new UeVector3(0, 0, 0);
 
     self._prevMouseX = display_mouse_get_x();
     self._prevMouseY = display_mouse_get_y();

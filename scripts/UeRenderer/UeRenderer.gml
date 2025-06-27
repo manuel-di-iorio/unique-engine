@@ -84,6 +84,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
     /// Render the scene
     function render(scene, camera) {
+        var currentBlendEnable = gpu_get_blendenable();
+
         var lightState = _buildLightState(scene.lights);
         var renderState = { scene, lightState, camera };
         
@@ -103,6 +105,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         
         // Reset world matrix after rendering
         matrix_set(matrix_world, matrix_build_identity()); 
+        gpu_set_blendenable(currentBlendEnable);
+
         return self;
     }
     

@@ -63,8 +63,8 @@ function UePyramidGeometry(data = {}): UeBufferGeometry(data) constructor {
     for (var i = 0, len = array_length(sideTris); i < len; i++) {
         var tri = sideTris[i];
         var a = tri[0], b = tri[1], c = tri[2];
-        var ab = new Vec3(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
-        var ac = new Vec3(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
+        var ab = new UeVector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+        var ac = new UeVector3(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
         var normal = ac.cross(ab).normalize();
 
         for (var j = 0; j < 3; j++) {

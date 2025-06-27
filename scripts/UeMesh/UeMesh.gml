@@ -1,6 +1,6 @@
 function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
     self.isMesh = true;
-    self.geometry = geometry;
+    self.geometry = geometry ?? data[$ "geometry"];
     self.material = data[$ "material"] ?? new UeMeshStandardMaterial();
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     //self.boundingBox = data[$ "boundingBox"] ?? new Box3(); // @todo
@@ -21,11 +21,11 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         }
     }
     
-    function import(fname) {
+    function import(buffer) {
         
     }
     
-    function export(fname) {
+    function export() {
         
     }
 }

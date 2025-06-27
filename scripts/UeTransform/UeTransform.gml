@@ -1,8 +1,11 @@
-function UeTransform(_data = {}) constructor {
+function UeTransform(data = {}) constructor {
     // Local transform components
-    position = _data[$ "position"] ?? new UeVector3(_data[$ "x"] ?? 0, _data[$ "y"] ?? 0, _data[$ "z"] ?? 0);
-    rotation = _data[$ "rotation"] ?? new UeQuaternion(_data[$ "rx"] ?? 0, _data[$ "ry"] ?? 0, _data[$ "rz"] ?? 0);
-    scale    = _data[$ "scale"]    ?? new UeVector3(_data[$ "sx"] ?? 1, _data[$ "sy"] ?? 1, _data[$ "sz"] ?? 1);
+    if (data[$ "isSprite"]) {
+        log(data)
+    }
+    position = data[$ "position"] ?? new UeVector3(data[$ "x"] ?? 0, data[$ "y"] ?? 0, data[$ "z"] ?? 0);
+    rotation = data[$ "rotation"] ?? new UeQuaternion(data[$ "rx"] ?? 0, data[$ "ry"] ?? 0, data[$ "rz"] ?? 0);
+    scale    = data[$ "scale"]    ?? new UeVector3(data[$ "sx"] ?? 1, data[$ "sy"] ?? 1, data[$ "sz"] ?? 1);
     up       = new UeVector3(0, 1, 0);
 
     // Transformation matrices
@@ -10,7 +13,7 @@ function UeTransform(_data = {}) constructor {
     matrixWorld = undefined;
 
     // Parent (optional)
-    parent = _data[$ "parent"] ?? undefined;
+    parent = data[$ "parent"] ?? undefined;
 
     // Matrix update flags
     matrixAutoUpdate = true;             // Automatically update local matrix

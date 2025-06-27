@@ -32,6 +32,11 @@ setTexture(image, subimg = 0)
 ```
 Changes the source image or sub-image dynamically.
 
+```js
+dispose()
+```
+Cleanup the texture from memory
+
 ## 🧠 Notes
 
 - If using a sprite with multiple frames (like a spritesheet), set subimg accordingly.

@@ -1,17 +1,16 @@
 {
   "$GMObject":"",
-  "%Name":"o_test",
+  "%Name":"obj_scene_1",
   "eventList":[
     {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
-    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":64,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
+    {"$GMEvent":"v1","%Name":"","collisionObjectId":null,"eventNum":0,"eventType":8,"isDnD":false,"name":"","resourceType":"GMEvent","resourceVersion":"2.0",},
   ],
   "managed":true,
-  "name":"o_test",
+  "name":"obj_scene_1",
   "overriddenProperties":[],
   "parent":{
-    "name":"Demo",
-    "path":"folders/Demo.yy",
+    "name":"Scenes",
+    "path":"folders/Demo/Scenes.yy",
   },
   "parentObjectId":null,
   "persistent":false,

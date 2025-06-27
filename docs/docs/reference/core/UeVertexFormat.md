@@ -57,6 +57,11 @@ build()
 ```
 Finalizes the vertex format and returns the current object. Internally calls `vertex_format_begin()` and `vertex_format_end()`.
 
+```js
+dispose()
+```
+Cleanup the vertex format resource
+
 ### Default format in Unique Engine:
 
 ```js

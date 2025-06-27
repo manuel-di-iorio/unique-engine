@@ -46,4 +46,10 @@ function UeVertexFormat() constructor {
         vf = vertex_format_end();
         return self;
     }
+    
+    function dispose() {
+        vertex_format_delete(vf);
+        vf = undefined;
+        return self;
+    }
 }

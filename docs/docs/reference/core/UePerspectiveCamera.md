@@ -35,6 +35,13 @@ new UePerspectiveCamera(data = {})
 | `target`    | `UeVector3` | 0,0,0           | The current look-at target                        |
 | `onUpdate`  | `function`  | Default method  | Function called every frame to update view matrix |
 
+## Methods
+
+```js
+dispose()
+```
+Cleanup the camera resource.
+
 ## Notes
 
 - The default .onUpdate() function uses `matrix_build_lookat()` to orient the camera toward target, with up-vector (0, 0, -1).

@@ -17,7 +17,7 @@ new UeMesh(geometry, data = {})
 | `material`  | `UeMaterial`          | `UeMeshStandardMaterial()` | The material to use                  |
 | `primitive` | `number`              | `pr_trianglelist`          | GPU primitive mode (e.g. triangles)  |
 
-## 🧩 Methods
+## Methods
 
 ```js
 import(buffer)

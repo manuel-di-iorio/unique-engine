@@ -32,7 +32,7 @@ function UeMaterial(data = {}): UeObject3D(data) constructor {
     uniforms[$ "ueCameraPosition"] = { type: "array" };
     
     // Light uniforms
-    lights = data[$ "lights"] ?? 1;
+    lights = data[$ "lights"] ?? 2;
     if (lights) {
         uniforms[$ "ueAmbient"] = { type: "array" };
         
@@ -100,11 +100,24 @@ function UeMaterial(data = {}): UeObject3D(data) constructor {
         shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], [mesh.position.x, mesh.position.y, mesh.position.z]);
         shader_set_uniform_f_array(_uniform_handlers[$ "ueCameraPosition"], [camera.position.x, camera.position.y, camera.position.z]);
         
+        // Reset the light uniforms (shaders cache their values)
+        for (var i=0, n=lights-1; i<n; i++) {
+            shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightDir{i}"], [0, 0, 0]);
+            shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightColor{i}"], [0, 0, 0]);
+            shader_set_uniform_f(_uniform_handlers[$ $"ueDirLightIntensity{i}"], 0);
+            
+            shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightPosition{i}"], [0, 0, 0]);
+            shader_set_uniform_f(_uniform_handlers[$ $"uePointLightRange{i}"], 0);
+            shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightColor{i}"], [0, 0, 0]);
+            shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], 0);
+        }
+
         // Set the light uniform values
         if (lights) { 
             shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState.ambient);
             
             var dirLightsNum = array_length(lightState.directional);
+            
             if (dirLightsNum) {
                 for (var i=0; i<dirLightsNum; i++) {
                     var light = lightState.directional[i];

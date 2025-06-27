@@ -1,6 +1,7 @@
 /// Create a billboard mesh
-function UeSprite(material = new UeSpriteMaterial(), data = {}): UeMesh(data) constructor {
+function UeSprite(material = new UeSpriteMaterial(), data = {}): UeMesh(undefined, data) constructor {
+    log(data)
+    self.geometry = new UePlaneGeometry(1, 1);
     self.isSprite = true;
-    self.geometry = new PlaneGeometry(1, 1);
     self.material = material;
 }

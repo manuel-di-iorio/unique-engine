@@ -1,6 +1,7 @@
 {
   "FolderOrderSettings":[
     {"name":"AssimpLoader","order":9,"path":"folders/AssimpLoader.yy",},
+    {"name":"Scenes","order":7,"path":"folders/Demo/Scenes.yy",},
     {"name":"Unique Engine","order":1,"path":"folders/Unique Engine.yy",},
     {"name":"Controls","order":5,"path":"folders/Unique Engine/Controls.yy",},
     {"name":"Core","order":1,"path":"folders/Unique Engine/Core.yy",},
@@ -12,6 +13,7 @@
   ],
   "ResourceOrderSettings":[
     {"name":"o_test","order":6,"path":"objects/o_test/o_test.yy",},
+    {"name":"obj_scene_1","order":1,"path":"objects/obj_scene_1/obj_scene_1.yy",},
     {"name":"r_test","order":5,"path":"rooms/r_test/r_test.yy",},
     {"name":"__GMassimp_Macros","order":1,"path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},
     {"name":"AssimpLoader","order":2,"path":"scripts/AssimpLoader/AssimpLoader.yy",},

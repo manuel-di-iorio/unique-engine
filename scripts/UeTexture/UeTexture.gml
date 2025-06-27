@@ -19,4 +19,10 @@ function UeTexture(data = {}) constructor {
         gpu_set_tex_mip_enable_ext(sampler, generateMipmaps);
         texture_set_stage(sampler, texture);
     }
+    
+    function dispose() {
+        texture_flush(texture);
+        texture = undefined;
+        return self;
+    }
 }

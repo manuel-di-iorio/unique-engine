@@ -14,7 +14,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             }
              
             if (child[$ "isMesh"] != undefined) {
-                //removeFromParent(child);
+                removeFromParent(child);
                 array_push(children, child);
                 continue;
             }

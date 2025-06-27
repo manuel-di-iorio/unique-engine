@@ -12,6 +12,7 @@
   "Folders":[
     {"$GMFolder":"","%Name":"AssimpLoader","folderPath":"folders/AssimpLoader.yy","name":"AssimpLoader","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Demo","folderPath":"folders/Demo.yy","name":"Demo","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Scenes","folderPath":"folders/Demo/Scenes.yy","name":"Scenes","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Textures","folderPath":"folders/Demo/Textures.yy","name":"Textures","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Unique Engine","folderPath":"folders/Unique Engine.yy","name":"Unique Engine","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Controls","folderPath":"folders/Unique Engine/Controls.yy","name":"Controls","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -41,6 +42,8 @@
   "resources":[
     {"id":{"name":"GMAssimp","path":"extensions/GMAssimp/GMAssimp.yy",},},
     {"id":{"name":"o_test","path":"objects/o_test/o_test.yy",},},
+    {"id":{"name":"obj_scene_0","path":"objects/obj_scene_0/obj_scene_0.yy",},},
+    {"id":{"name":"obj_scene_1","path":"objects/obj_scene_1/obj_scene_1.yy",},},
     {"id":{"name":"r_test","path":"rooms/r_test/r_test.yy",},},
     {"id":{"name":"__GMassimp_Macros","path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},},
     {"id":{"name":"AssimpLoader","path":"scripts/AssimpLoader/AssimpLoader.yy",},},
