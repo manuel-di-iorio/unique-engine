@@ -54,26 +54,17 @@ Support via AssimpDLL by Jak (not included in the library for licensing reasons)
 ## Basic example:
 
 ```gml
-// Setup the scene and the perspective camera
-renderer = new Renderer();
-scene = new Scene();
-camera = new PerspectiveCamera({ x: 150, y: 50, z: 50, xt: 10, yt: 0, zt: 30 });
+renderer = new UeRenderer();
+scene = new UeScene();
+camera = new UePerspectiveCamera();
 
-// Create the terrain
-terrain = new CircleMesh({ z: -100, radius: 500 });
+cubeGeometry = new UeBoxGeometry({ color: c_blue });
+cubeMesh = new UeMesh(cubeGeometry);
 
-// Example tree within a mesh container
-tree = new Mesh();
-treeShadow = new CircleMesh({ z: -24, radius: 25, color: c_gray });
-treeTrunk = new ParallelepipedMesh({ rx: 90, color: c_maroon });
-treeTop = new SphereMesh({ radius: 40, z: 55, color: #11aa11 });
-tree.add(treeShadow, treeTrunk, treeTop);
+ambientLight = new UeAmbientLight();
+dirLight = new UeDirectionalLight({ xt: -100, yt: -50, zt: -70 });
 
-// Basic lights
-ambientLight = new AmbientLight({ color: #226622 });
-pointLight = new PointLight({ x: 40, y: 40, z: 50 });
-
-scene.add(ambientLight, pointLight, terrain, tree);
+scene.add(cubeMesh, ambientLight, dirLight);
 ```
 
 ---
