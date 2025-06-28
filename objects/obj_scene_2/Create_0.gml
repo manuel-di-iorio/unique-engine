@@ -8,7 +8,7 @@ var ambientLight = new UeAmbientLight(c_dkgray);
 var sunLight = new UeDirectionalLight(150, 50, 50, { color: #FFFFC8 });
 
 // Load the model
-assimpLoader = new AssimpLoader();
+assimpLoader = new UeAssimpLoader();
 var importedMesh = assimpLoader.load("11804_Airplane_v2_l2.obj");
 
 // Manually import the texture into the model's material

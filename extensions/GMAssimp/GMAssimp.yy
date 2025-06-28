@@ -677,8 +677,8 @@
   "optionsFile":"options.json",
   "packageId":"",
   "parent":{
-    "name":"AssimpLoader",
-    "path":"folders/Unique Engine/Loaders/AssimpLoader.yy",
+    "name":"UeAssimpLoader",
+    "path":"folders/Unique Engine/Loaders/UeAssimpLoader.yy",
   },
   "productId":"",
   "resourceType":"GMExtension",

@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"__GMassimp_Macros",
+  "%Name":"UeAssimpLoader",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"__GMassimp_Macros",
+  "name":"UeAssimpLoader",
   "parent":{
     "name":"UeAssimpLoader",
     "path":"folders/Unique Engine/Loaders/UeAssimpLoader.yy",

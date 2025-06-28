@@ -1,4 +1,4 @@
-function AssimpLoader(data = {}) constructor {
+function UeAssimpLoader(data = {}) constructor {
     if (!GMA_IsWorking()) {
         throw "[Unique Engine] AssimpLoaderError: Assimp extension is not working";
     }
