@@ -1,6 +1,6 @@
 function AssimpLoader(data = {}) constructor {
     if (!GMA_IsWorking()) {
-        return show_error("Assimp extension is not working", true);
+        throw "[Unique Engine] AssimpLoaderError: Assimp extension is not working";
     }
     
     importer = GMA_CreateImporter();
@@ -44,7 +44,7 @@ function AssimpLoader(data = {}) constructor {
 
 		// Check if the file is correctly loaded
 		if (!check) {	
-			throw "[Assimp Importer] Error: " + GMA_GetImporterErrorString();
+			throw "[Unique Engine] AssimpLoaderError: " + GMA_GetImporterErrorString();
 		}
 
 		GMA_BindScene();
@@ -189,4 +189,9 @@ function AssimpLoader(data = {}) constructor {
         mesh.geometry = new UeBufferGeometry({ vertices });
         return mesh;
     }
-}  
+    
+    function dispose() {
+        GMA_DeleteImporter(importer);
+        return self;
+    }
+}
