@@ -29,7 +29,7 @@ function UeTransform(data = {}) constructor {
             forceUpdateChildren = true;
             updateMatrixWorld();
         }
-        
+
         for (var i = 0, len = array_length(children); i < len; i++) {
             var child = children[i];
             if (forceUpdateChildren) child.matrixWorldNeedsUpdate = true;
@@ -52,27 +52,31 @@ function UeTransform(data = {}) constructor {
         // Start with local matrix
         if (parent != undefined && parent.matrixWorld != undefined) {
             matrixWorld = parent.matrixWorld.clone();
-            matrixWorld.multiply(matrix.data);
+            matrixWorld.multiply(matrix);
         } else {
-            matrixWorld = matrix.clone()
+            matrixWorld = matrix.clone();
         }
         
         return self;
     }
     
     /// Update the matrixWorld of the children
-    function updateWorldMatrix(updateParents = false, updateChildren = false) {
-        // @todo
-        if (updateParents) {
-            show_debug_message("updateParents argument not supported yet")
-        }
-        
-        if (updateChildren) {
-            for (var i = 0, len = array_length(children); i < len; i++) {
-                children[i].updateMatrixWorld();
-            }
-        }
-    }
+    /// @todo
+    //function updateWorldMatrix(updateParents = false, updateChildren = false) {
+        //// @todo
+        //if (updateParents) {
+            //show_debug_message("updateParents argument not supported yet")
+        //}
+        //
+        //if (updateChildren) {
+            //for (var i = 0, len = array_length(children); i < len; i++) {
+                //log(children[i].name)
+                //var child = children[i];
+                //child.matrixWorldNeedsUpdate = true;
+                //child.update();
+            //}
+        //}
+    //}
 
     // --- Translation methods ---
     function setPosition(x, y, z) {
@@ -111,7 +115,7 @@ function UeTransform(data = {}) constructor {
         var right = self.up.cross(forward).normalize();
         var up = forward.cross(right);
 
-        var m = new Mat4([
+        var m = new UeMatrix4([
             right.x, up.x, forward.x, 0,
             right.y, up.y, forward.y, 0,
             right.z, up.z, forward.z, 0,

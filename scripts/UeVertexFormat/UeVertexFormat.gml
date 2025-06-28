@@ -4,27 +4,27 @@ function UeVertexFormat() constructor {
     attrs = [];
 
     function position() {
-        array_push(attrs, { kind: "position" });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.POSITION });
         return self;
     }
     
     function normal() {
-        array_push(attrs, { kind: "normal" });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.NORMAL });
         return self;
     }
 
     function uv() {
-        array_push(attrs, { kind: "uv" });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.UV });
         return self;
     }
     
     function color() {
-        array_push(attrs, { kind: "color" });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.COLOR });
         return self;
     }
     
     function custom(name, type) {
-        array_push(attrs, { kind: "custom", name, type });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name, type });
         return self;
     }
 
@@ -35,11 +35,11 @@ function UeVertexFormat() constructor {
             var attr = attrs[i];
             
             switch (attr.kind) {
-                case "position": vertex_format_add_position_3d(); break;
-                case "normal": vertex_format_add_normal(); break;
-                case "uv": vertex_format_add_texcoord(); break;
-                case "color": vertex_format_add_color(); break; 
-                case "custom": vertex_format_add_custom(attr.type, vertex_usage_texcoord); break;
+                case UE_FORMAT_ATTR.POSITION: vertex_format_add_position_3d(); break;
+                case UE_FORMAT_ATTR.NORMAL: vertex_format_add_normal(); break;
+                case UE_FORMAT_ATTR.UV: vertex_format_add_texcoord(); break;
+                case UE_FORMAT_ATTR.COLOR: vertex_format_add_color(); break; 
+                case UE_FORMAT_ATTR.CUSTOM: vertex_format_add_custom(attr.type, vertex_usage_texcoord); break;
             }
         }
         
@@ -51,5 +51,27 @@ function UeVertexFormat() constructor {
         vertex_format_delete(vf);
         vf = undefined;
         return self;
+    }
+    
+    function export() {
+        var attrsSize = array_length(attrs);
+        var size = 1 + 1 + attrsSize * 2;
+    
+        var buffer = buffer_create(size, buffer_fast, 1);
+        
+        // Write the buffer type
+        buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.FORMAT);
+        
+        // Write the attributes count
+        buffer_write(buffer, buffer_u8, attrsSize);
+        
+        // Write the attributes data
+        for (var i=0; i<attrsSize; i++) {
+            var attr = attrs[i];
+            buffer_write(buffer, buffer_u8, attr.kind);
+            buffer_write(buffer, buffer_u8, attr.type);
+        }
+        
+        return buffer;
     }
 }

@@ -1,5 +1,23 @@
 global.UNIQUE_ENGINE_OBJECT_ID = 0;
+
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
+
+enum UE_BUFFER_TYPE {
+    FORMAT = 0,
+    VBUFF = 1,
+    MATERIAL = 2,
+    MESH = 3,
+    LIGHT = 4
+}
+
+enum UE_FORMAT_ATTR {
+    POSITION = 0,
+    NORMAL = 1,
+    UV = 2,
+    COLOR = 3,
+    CUSTOM = 4
+}
+
 
 function UeObject3D(data = {}): UeTransform(data) constructor {
     isObject3D = true;
@@ -17,8 +35,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     function add() {
         for (var i=0; i<argument_count; i++) {
             var child = argument[i];
-            child.parent = self;
             removeFromParent(child);
+            child.parent = self;
             array_push(children, child);
         }
         

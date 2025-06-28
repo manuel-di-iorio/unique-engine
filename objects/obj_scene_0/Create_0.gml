@@ -12,7 +12,7 @@ treeGroup = new UeMesh();
 treeShadowGeometry = new UeCircleGeometry(25, { color: c_gray });
 treeShadow = new UeMesh(treeShadowGeometry, { z: -24 });
 
-treeTrunkGeometry = new UeParallelepipedGeometry({ color: c_maroon })
+treeTrunkGeometry = new UeParallelepipedGeometry({ color: c_maroon });
 treeTrunk = new UeMesh(treeTrunkGeometry, { rx: 90 });
 
 treeTopGeometry = new UeSphereGeometry(40, { color: #11aa11 });

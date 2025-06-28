@@ -106,6 +106,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         // Reset world matrix after rendering
         matrix_set(matrix_world, matrix_build_identity()); 
         gpu_set_blendenable(currentBlendEnable);
+        gpu_set_cullmode(cull_noculling);
 
         return self;
     }

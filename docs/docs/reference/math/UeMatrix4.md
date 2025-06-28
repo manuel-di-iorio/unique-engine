@@ -23,7 +23,7 @@ new UeMatrix4(data = undefined)
 | Method                  | Returns     | Description                                                               |
 | ----------------------- | ----------- | ------------------------------------------------------------------------- |
 | `clone()`               | `UeMatrix4` | Returns a deep copy of the matrix                                         |
-| `multiply(m)`           | `number[]`  | Multiplies this matrix by another 4×4 matrix and returns the result       |
+| `multiply(m)`           | `self`      | Multiplies this matrix by another UeMatrix                                |
 | `buildByTransform(obj)` | `self`      | Builds a 4×4 matrix from a Transform object (position, quaternion, scale) |
 
 ## Example

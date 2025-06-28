@@ -3,9 +3,10 @@ function UeMatrix4(_data = undefined) constructor {
     // Matrix data, stored as a 4x4 column-major flat array
     data = _data ?? matrix_build_identity();
 
-    /// Multiplies this matrix by another (4x4), returns the result (does not modify self)
+    /// Multiplies this matrix by another (4x4)
     function multiply(m) {
-        return matrix_multiply(self.data, m);
+        data = matrix_multiply(self.data, m.data);
+        return self;
     }
 
     /// Creates a copy of this matrix

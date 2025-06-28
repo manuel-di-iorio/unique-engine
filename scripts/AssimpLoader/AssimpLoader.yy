@@ -6,7 +6,7 @@
   "name":"AssimpLoader",
   "parent":{
     "name":"AssimpLoader",
-    "path":"folders/AssimpLoader.yy",
+    "path":"folders/Unique Engine/Loaders/AssimpLoader.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

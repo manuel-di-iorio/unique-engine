@@ -16,15 +16,3 @@ new UeMesh(geometry, data = {})
 | `geometry`  | `UeBufferGeometry`    | **required**               | The geometry (vertex data)           |
 | `material`  | `UeMaterial`          | `UeMeshStandardMaterial()` | The material to use                  |
 | `primitive` | `number`              | `pr_trianglelist`          | GPU primitive mode (e.g. triangles)  |
-
-## Methods
-
-```js
-import(buffer)
-```
-Import a mesh from a UniqueEngine buffer
-
-```js
-export()
-```
-Export the mesh to a UniqueEngine buffer

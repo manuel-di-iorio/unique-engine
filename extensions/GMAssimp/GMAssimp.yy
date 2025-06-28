@@ -678,7 +678,7 @@
   "packageId":"",
   "parent":{
     "name":"AssimpLoader",
-    "path":"folders/AssimpLoader.yy",
+    "path":"folders/Unique Engine/Loaders/AssimpLoader.yy",
   },
   "productId":"",
   "resourceType":"GMExtension",
