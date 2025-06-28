@@ -15,7 +15,7 @@ function UeLight(data = {}): UeObject3D(data) constructor {
 
 function UeAmbientLight(color, data = {}): UeLight(data) constructor {
     lightType = "AmbientLight";
-    setColor(color ?? data[$ "color"]);
+    setColor(color ?? data[$ "color"] ?? c_dkgray);
 }
 
 function UeDirectionalLight(xt = 0, yt = 0, zt = 0, data = {}): UeLight(data) constructor {

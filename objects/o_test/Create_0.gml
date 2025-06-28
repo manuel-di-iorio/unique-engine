@@ -1,10 +1,10 @@
 bgLayer = layer_background_get_id("Background");
 demo = 0;
-demoMax = 2;
+demoMax = 3;
 scenes = [
     { obj: obj_scene_0, bg: #147FCC }, 
     { obj: obj_scene_1, bg: #D6FFF9 },
-    { obj: obj_scene_2, bg: #147FCC }
+    { obj: obj_scene_2, bg: #147FCC },
 ];
 
 setScene = function(incr = 0) {
