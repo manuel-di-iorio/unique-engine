@@ -12,7 +12,7 @@ var treeGroup = new UeMesh();
 var treeShadowGeometry = new UeCircleGeometry(25, { color: c_gray });
 var treeShadow = new UeMesh(treeShadowGeometry, { z: -24 });
 
-var treeTrunkGeometry = new UeParallelepipedGeometry({ color: c_maroon });
+var treeTrunkGeometry = new UeBoxGeometry(20, 20, 50, { color: c_maroon });
 var treeTrunk = new UeMesh(treeTrunkGeometry, { rx: 90 });
 
 var treeTopGeometry = new UeSphereGeometry(40, { color: #11aa11 });
@@ -22,7 +22,7 @@ treeGroup.add(treeShadow, treeTrunk, treeTop);
 
 // Lights
 var ambientLight = new UeAmbientLight(#226622);
-var pointLight = new UePointLight(2000, { x: 40, y: 40, z: 50 });
+var pointLight = new UePointLight(2000, { x: 50, y: 70, z: 50 });
 
 // Add everything to the scene
 scene.add(ambientLight, pointLight, terrain, treeGroup);

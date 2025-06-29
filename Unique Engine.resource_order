@@ -29,7 +29,6 @@
     {"name":"UeMeshBasicMaterial","order":1,"path":"scripts/UeMeshBasicMaterial/UeMeshBasicMaterial.yy",},
     {"name":"UeMeshStandardMaterial","order":2,"path":"scripts/UeMeshStandardMaterial/UeMeshStandardMaterial.yy",},
     {"name":"UeOrbitControls","order":1,"path":"scripts/UeOrbitControls/UeOrbitControls.yy",},
-    {"name":"UeParallelepipedGeometry","order":4,"path":"scripts/UeParallelepipedGeometry/UeParallelepipedGeometry.yy",},
     {"name":"UePerspectiveCamera","order":6,"path":"scripts/UePerspectiveCamera/UePerspectiveCamera.yy",},
     {"name":"UePlane","order":6,"path":"scripts/UePlane/UePlane.yy",},
     {"name":"UePyramidGeometry","order":5,"path":"scripts/UePyramidGeometry/UePyramidGeometry.yy",},

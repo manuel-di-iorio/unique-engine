@@ -21,7 +21,6 @@ terrain = new UeMesh(terrainGeometry, { z: 50 });
 - UeBoxGeometry
 - UeCircleGeometry
 - UeSphereGeometry
-- UeParallelepipedGeometry
 - UePyramidGeometry
 
 You can instantiate them with relevant parameters (e.g., radius, width, height), and they automatically generate the vertex buffers needed for rendering.

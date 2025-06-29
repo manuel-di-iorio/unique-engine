@@ -59,7 +59,6 @@
     {"id":{"name":"UeMeshStandardMaterial","path":"scripts/UeMeshStandardMaterial/UeMeshStandardMaterial.yy",},},
     {"id":{"name":"UeObject3D","path":"scripts/UeObject3D/UeObject3D.yy",},},
     {"id":{"name":"UeOrbitControls","path":"scripts/UeOrbitControls/UeOrbitControls.yy",},},
-    {"id":{"name":"UeParallelepipedGeometry","path":"scripts/UeParallelepipedGeometry/UeParallelepipedGeometry.yy",},},
     {"id":{"name":"UePerspectiveCamera","path":"scripts/UePerspectiveCamera/UePerspectiveCamera.yy",},},
     {"id":{"name":"UePlane","path":"scripts/UePlane/UePlane.yy",},},
     {"id":{"name":"UePlaneGeometry","path":"scripts/UePlaneGeometry/UePlaneGeometry.yy",},},

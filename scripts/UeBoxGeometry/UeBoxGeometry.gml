@@ -1,82 +1,65 @@
-function UeBoxGeometry(data = {}): UeBufferGeometry(data) constructor {
-    var _width  = data[$ "width"] ?? 50;
-    var _height = data[$ "height"] ?? 50;
-    var _depth  = data[$ "depth"]  ?? 50;
+function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeBufferGeometry(data) constructor {
+    var _width  = width ?? data[$ "width"] ?? 1;
+    var _height = height ?? data[$ "height"] ?? 1;
+    var _depth  = depth ?? data[$ "depth"]  ?? 1;
     var _color  = data[$ "color"]  ?? c_white;
     var _alpha  = data[$ "alpha"]  ?? 1;
 
-    var hw = _width  * 0.5;
+    var hw = _width * 0.5;
     var hh = _height * 0.5;
-    var hd = _depth  * 0.5;
+    var hd = _depth * 0.5;
 
     var faces = [
-        // Front
-        [ [-hw,-hh, hd], [0,0,1], [0,1] ],
-        [ [-hw, hh, hd], [0,0,1], [0,0] ],
-        [ [ hw, hh, hd], [0,0,1], [1,0] ],
-        [ [ hw, hh, hd], [0,0,1], [1,0] ],
-        [ [ hw,-hh, hd], [0,0,1], [1,1] ],
-        [ [-hw,-hh, hd], [0,0,1], [0,1] ],
-
-        // Back
-        [ [-hw,-hh,-hd], [0,0,-1], [1,1] ],
-        [ [ hw,-hh,-hd], [0,0,-1], [0,1] ],
-        [ [ hw, hh,-hd], [0,0,-1], [0,0] ],
-        [ [ hw, hh,-hd], [0,0,-1], [0,0] ],
-        [ [-hw, hh,-hd], [0,0,-1], [1,0] ],
-        [ [-hw,-hh,-hd], [0,0,-1], [1,1] ],
-
-        // Top
-        [ [-hw, hh,-hd], [0,1,0], [0,1] ],
-        [ [ hw, hh,-hd], [0,1,0], [1,1] ],
-        [ [ hw, hh, hd], [0,1,0], [1,0] ],
-        [ [ hw, hh, hd], [0,1,0], [1,0] ],
-        [ [-hw, hh, hd], [0,1,0], [0,0] ],
-        [ [-hw, hh,-hd], [0,1,0], [0,1] ],
-
-        // Bottom
-        [ [-hw,-hh,-hd], [0,-1,0], [0,0] ],
-        [ [-hw,-hh, hd], [0,-1,0], [0,1] ],
-        [ [ hw,-hh, hd], [0,-1,0], [1,1] ],
-        [ [ hw,-hh, hd], [0,-1,0], [1,1] ],
-        [ [ hw,-hh,-hd], [0,-1,0], [1,0] ],
-        [ [-hw,-hh,-hd], [0,-1,0], [0,0] ],
-
-        // Right
-        [ [ hw,-hh,-hd], [1,0,0], [0,1] ],
-        [ [ hw,-hh, hd], [1,0,0], [1,1] ],
-        [ [ hw, hh, hd], [1,0,0], [1,0] ],
-        [ [ hw, hh, hd], [1,0,0], [1,0] ],
-        [ [ hw, hh,-hd], [1,0,0], [0,0] ],
-        [ [ hw,-hh,-hd], [1,0,0], [0,1] ],
-
-        // Left
-        [ [-hw,-hh,-hd], [-1,0,0], [1,1] ],
-        [ [-hw, hh,-hd], [-1,0,0], [1,0] ],
-        [ [-hw, hh, hd], [-1,0,0], [0,0] ],
-        [ [-hw, hh, hd], [-1,0,0], [0,0] ],
-        [ [-hw,-hh, hd], [-1,0,0], [0,1] ],
-        [ [-hw,-hh,-hd], [-1,0,0], [1,1] ]
+        [ 0,  1,  0, [ // Front (Y+)
+            [-hw,-hd, hh, 0,1], [-hw, hd, hh, 0,0], [ hw, hd, hh, 1,0],
+            [ hw, hd, hh, 1,0], [ hw,-hd, hh, 1,1], [-hw,-hd, hh, 0,1]
+        ]],
+        [ 0, -1,  0, [ // Back (Y-)
+            [-hw,-hd,-hh, 1,1], [ hw,-hd,-hh, 0,1], [ hw, hd,-hh, 0,0],
+            [ hw, hd,-hh, 0,0], [-hw, hd,-hh, 1,0], [-hw,-hd,-hh, 1,1]
+        ]],
+        [ 0,  0,  1, [ // Top (Z+)
+            [-hw, hd,-hh, 0,1], [ hw, hd,-hh, 1,1], [ hw, hd, hh, 1,0],
+            [ hw, hd, hh, 1,0], [-hw, hd, hh, 0,0], [-hw, hd,-hh, 0,1]
+        ]],
+        [ 0,  0, -1, [ // Bottom (Z-)
+            [-hw,-hd,-hh, 0,0], [-hw,-hd, hh, 0,1], [ hw,-hd, hh, 1,1],
+            [ hw,-hd, hh, 1,1], [ hw,-hd,-hh, 1,0], [-hw,-hd,-hh, 0,0]
+        ]],
+        [ 1,  0,  0, [ // Right (X+)
+            [ hw,-hd,-hh, 0,1], [ hw,-hd, hh, 1,1], [ hw, hd, hh, 1,0],
+            [ hw, hd, hh, 1,0], [ hw, hd,-hh, 0,0], [ hw,-hd,-hh, 0,1]
+        ]],
+        [-1,  0,  0, [ // Left (X-)
+            [-hw,-hd,-hh, 1,1], [-hw, hd,-hh, 1,0], [-hw, hd, hh, 0,0],
+            [-hw, hd, hh, 0,0], [-hw,-hd, hh, 0,1], [-hw,-hd,-hh, 1,1]
+        ]]
     ];
 
-    for (var i = 0; i < array_length(faces); i++) {
-        var p  = faces[i][0];
-        var n  = faces[i][1];
-        var uv = faces[i][2];
 
-        array_push(vertices, {
-            x: p[0],
-            y: p[1],
-            z: p[2],
-            nx: n[0],
-            ny: n[1],
-            nz: n[2],
-            u: uv[0],
-            v: uv[1],
-            color: _color,
-            alpha: _alpha
-        });
+    for (var f = 0; f < array_length(faces); f++) {
+        var nx = faces[f][0];
+        var ny = -faces[f][1];
+        var nz = faces[f][2];
+        var verts = faces[f][3];
+    
+        for (var i = 0; i < array_length(verts); i++) {
+            var v = verts[i];
+            array_push(vertices, {
+                x: v[0],
+                y: v[1],
+                z: v[2],
+                nx: nx,
+                ny: ny,
+                nz: nz,
+                u: v[3],
+                v: v[4],
+                color: _color,
+                alpha: _alpha
+            });
+        }
     }
+
     
     build();
 }
