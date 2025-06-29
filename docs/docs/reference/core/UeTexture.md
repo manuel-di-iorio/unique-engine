@@ -24,6 +24,7 @@ new UeTexture(data = {})
 | Property          | Type         | Default   | Description                               |
 | -------------     | ------------ | --------- | ------------------------------------      |
 | `isTexture`       | `boolean`    | true      | Indicates that this is a texture          |
+| `uuid`            | `string`     |           | Resource UUID                             |
 
 ## 🧩 Methods
 

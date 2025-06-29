@@ -1,5 +1,6 @@
-function UeMaterial(data = {}): UeObject3D(data) constructor {
+function UeMaterial(data = {}) constructor {
     isMaterial = true;
+    uuid = ueUuid();
     color = data[$ "color"] ?? c_white;
     transparent = data[$ "transparent"] ?? false;
     opacity = data[$ "opacity"] ?? 1;
@@ -28,36 +29,35 @@ function UeMaterial(data = {}): UeObject3D(data) constructor {
     _uniform_handlers = {};
     _sampler_handlers = {};
     
-    uniforms[$ "ueModelPosition"] = { type: "array" };
-    uniforms[$ "ueModelScale"] = { type: "array" };
-    uniforms[$ "ueCameraPosition"] = { type: "array" };
+    uniforms[$ "ueModelPosition"] = { type: UE_UNIFORM_TYPE.ARRAY };
+    uniforms[$ "ueModelScale"] = { type: UE_UNIFORM_TYPE.ARRAY };
+    uniforms[$ "ueCameraPosition"] = { type: UE_UNIFORM_TYPE.ARRAY };
     
     // Light uniforms
     lights = data[$ "lights"] ?? 2;
     if (lights) {
-        uniforms[$ "ueAmbient"] = { type: "array" };
+        uniforms[$ "ueAmbient"] = { type: UE_UNIFORM_TYPE.ARRAY };
         
         for (var i=0; i<lights; i++) {
-            uniforms[$ $"ueDirLightDir{i}"] = { type: "array" };
-            uniforms[$ $"ueDirLightColor{i}"] = { type: "array" };
-            uniforms[$ $"ueDirLightIntensity{i}"] = { type: "float" };
+            uniforms[$ $"ueDirLightDir{i}"] = { type: UE_UNIFORM_TYPE.ARRAY };
+            uniforms[$ $"ueDirLightColor{i}"] = { type: UE_UNIFORM_TYPE.ARRAY };
+            uniforms[$ $"ueDirLightIntensity{i}"] = { type: UE_UNIFORM_TYPE.FLOAT };
             
-            uniforms[$ $"uePointLightPosition{i}"] = { type: "array" };
-            uniforms[$ $"uePointLightRange{i}"] = { type: "float" };
-            uniforms[$ $"uePointLightColor{i}"] = { type: "array" };
-            uniforms[$ $"uePointLightIntensity{i}"] = { type: "float" };
+            uniforms[$ $"uePointLightPosition{i}"] = { type: UE_UNIFORM_TYPE.ARRAY };
+            uniforms[$ $"uePointLightRange{i}"] = { type: UE_UNIFORM_TYPE.FLOAT };
+            uniforms[$ $"uePointLightColor{i}"] = { type: UE_UNIFORM_TYPE.ARRAY };
+            uniforms[$ $"uePointLightIntensity{i}"] = { type: UE_UNIFORM_TYPE.FLOAT };
         }
     }
   
     // Textures
-    textures = {
-        map: data[$ "map"] ?? undefined,
-        normalMap: data[$ "normalMap"] ?? undefined,
-        roughnessMap: data[$ "roughnessMap"] ?? undefined,
-        metalnessMap: data[$ "metalnessMap"] ?? undefined,
-        aoMap: data[$ "aoMap"] ?? undefined,
-        emissiveMap: data[$ "emissiveMap"] ?? undefined,
-    };
+    textures = {};
+    if (data[$ "map"]) textures.map = data[$ "map"];
+    if (data[$ "normalMap"]) textures.normalMap = data[$ "normalMap"];
+    if (data[$ "roughnessMap"]) textures.roughnessMap = data[$ "roughnessMap"];
+    if (data[$ "metalnessMap"]) textures.metalnessMap = data[$ "metalnessMap"];
+    if (data[$ "aoMap"]) textures.aoMap = data[$ "aoMap"];
+    if (data[$ "emissiveMap"]) textures.emissiveMap = data[$ "emissiveMap"];
         
     function build() { 
         if (shader == undefined) return self;
@@ -149,13 +149,13 @@ function UeMaterial(data = {}): UeObject3D(data) constructor {
             if (val == undefined) return;
         
             switch (uniform.type) {
-                case "float": shader_set_uniform_f(loc, val); break;
-                case "vec2": shader_set_uniform_f(loc, val[0], val[1]); break;
-                case "vec3": shader_set_uniform_f(loc, val[0], val[1], val[2]); break;
-                case "vec4": shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]); break;
-                case "mat4": shader_set_uniform_matrix(loc); break;
-                case "array": shader_set_uniform_f_array(loc, val); break;
-                case "buffer": shader_set_uniform_f_buffer(loc, val, uniform.offset, uniform.count); break;
+                case UE_UNIFORM_TYPE.FLOAT: shader_set_uniform_f(loc, val); break;
+                case UE_UNIFORM_TYPE.VEC2: shader_set_uniform_f(loc, val[0], val[1]); break;
+                case UE_UNIFORM_TYPE.VEC3: shader_set_uniform_f(loc, val[0], val[1], val[2]); break;
+                case UE_UNIFORM_TYPE.VEC4: shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]); break;
+                case UE_UNIFORM_TYPE.MAT4: shader_set_uniform_matrix(loc); break;
+                case UE_UNIFORM_TYPE.ARRAY: shader_set_uniform_f_array(loc, val); break;
+                case UE_UNIFORM_TYPE.BUFFER: shader_set_uniform_f_buffer(loc, val, uniform.offset, uniform.count); break;
             }
         });
         
@@ -170,6 +170,87 @@ function UeMaterial(data = {}): UeObject3D(data) constructor {
     
     function clone() {
         return variable_clone(self);
+    }
+    
+    /**
+     * Export the material properties to a buffer
+     * 
+     * Structure:
+     *   1 byte = buffer type
+     *   37 bytes = UUID
+     *   18 bytes = material attributes (1 byte each)
+     *   1 byte = uniforms count
+     *   uniforms = each uniform writes the name and the 1-byte uniform type
+     *   1 byte = textures count
+     *   textures = each texture writes the texture type (map,normalMap,etc..) and texture UUID
+     */
+    function export() {
+        var uniformsNames = struct_get_names(uniforms);
+        var uniformsCount = struct_names_count(uniforms);
+        var texturesNames = struct_get_names(textures); 
+        var texturesCount = struct_names_count(textures);
+        
+        var uniformsBufSize = 0;
+        for (var i=0; i<uniformsCount; i++) {
+            var uniformName = uniformsNames[i];
+            var uniform = uniforms[$ uniformName];
+            uniformsBufSize += string_byte_length(uniformName) + 2;
+        }
+        
+        var texturesBufSize = 0; 
+        for (var i=0; i<texturesCount; i++) {
+            var textureName = texturesNames[i];
+            var texture = textures[$ textureName];
+            uniformsBufSize += string_byte_length(textureName) + 38;
+        }
+        
+        var size = 58 + uniformsBufSize + texturesBufSize;
+        
+        var buffer = buffer_create(size, buffer_fast, 1);
+        
+        // Write the buffer type
+        buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.TEXTURE);
+        
+        // Write the UUID
+        buffer_write(buffer, buffer_string, uuid);
+        
+        // Write the material props
+        buffer_write(buffer, buffer_u8, color);
+        buffer_write(buffer, buffer_u8, transparent);
+        buffer_write(buffer, buffer_u8, opacity);
+        buffer_write(buffer, buffer_u8, side);
+        buffer_write(buffer, buffer_u8, depthTest);
+        buffer_write(buffer, buffer_u8, depthWrite);
+        buffer_write(buffer, buffer_u8, depthFunc);
+        buffer_write(buffer, buffer_u8, forceSinglePass);
+        buffer_write(buffer, buffer_u8, alphaTest);
+        buffer_write(buffer, buffer_u8, colorWrite);
+        buffer_write(buffer, buffer_u8, blending);
+        buffer_write(buffer, buffer_u8, blendEquation);
+        buffer_write(buffer, buffer_u8, blendEquationAlpha);
+        buffer_write(buffer, buffer_u8, blendSrc);
+        buffer_write(buffer, buffer_u8, blendDst);
+        buffer_write(buffer, buffer_u8, blendSrcAlpha);
+        buffer_write(buffer, buffer_u8, blendDstAlpha);
+        buffer_write(buffer, buffer_u8, lights);
+        
+        // Write the uniforms
+        buffer_write(buffer, buffer_u8, uniformsCount);
+        
+        struct_foreach(uniforms, method(buffer, function(name, uniform) {
+            buffer_write(self, buffer_string, name);
+            buffer_write(self, buffer_u8, uniform.type);
+        }));
+        
+        // Write the textures
+        buffer_write(buffer, buffer_u8, texturesCount);
+        
+        struct_foreach(textures, method(buffer, function(name, texture) {
+            buffer_write(self, buffer_string, name);
+            buffer_write(self, buffer_string, texture.uuid);
+        }));
+        
+        return buffer; 
     }
     
     build();

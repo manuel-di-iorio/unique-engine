@@ -1,5 +1,6 @@
 function UeVertexFormat() constructor {
     isVertexFormat = true;
+    uuid = ueUuid();
     vf = undefined;
     attrs = [];
 
@@ -53,14 +54,26 @@ function UeVertexFormat() constructor {
         return self;
     }
     
+    /**
+     * Export the vertex format to a buffer
+     * 
+     * Structure:
+     *   1 byte = buffer type   
+     *   37 bytes = UUID
+     *   1 byte = attributes count
+     *   (attributes count * 2) bytes = List of attributes, with kind (1 byte) and type (1 byte) values
+     */
     function export() {
         var attrsSize = array_length(attrs);
-        var size = 1 + 1 + attrsSize * 2;
+        var size = 39 + attrsSize * 2;
     
         var buffer = buffer_create(size, buffer_fast, 1);
         
         // Write the buffer type
         buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.FORMAT);
+        
+        // Write the UUID
+        buffer_write(buffer, buffer_string, uuid);
         
         // Write the attributes count
         buffer_write(buffer, buffer_u8, attrsSize);

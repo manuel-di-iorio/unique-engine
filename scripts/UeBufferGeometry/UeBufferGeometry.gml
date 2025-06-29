@@ -1,5 +1,6 @@
-function UeBufferGeometry(data = {}): UeObject3D(data) constructor {
+function UeBufferGeometry(data = {}) constructor {
     isBufferGeometry = true;
+    uuid = ueUuid();
     vertices = data[$ "vertices"] ?? [];
     index = data[$ "index"] ?? undefined;
     format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
@@ -54,20 +55,32 @@ function UeBufferGeometry(data = {}): UeObject3D(data) constructor {
         return self;
     }
     
+    /**
+     * Export the buffer geometry to a buffer
+     * 
+     * Structure:
+     *   1 byte = buffer type
+     *   37 bytes = UUID
+     *   4 bytes = vbuffer size
+     *   variable bytes = vbuffer data
+     */
     function export() {
         var vbBuffer = buffer_create_from_vertex_buffer(vb, buffer_fast, 1);
         var vbBufferSize = buffer_get_size(vbBuffer);
-        var size = 1 + 4 + vbBufferSize;
+        var size = 42 + vbBufferSize;
         var buffer = buffer_create(size, buffer_fast, 1);
         
         // Write the buffer type
         buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.VBUFF);
+        
+        // Write the UUID
+        buffer_write(buffer, buffer_string, uuid); 
       
         // Write the vbuffer size
         buffer_write(buffer, buffer_u32, vbBufferSize);
         
         // Write the vbuffer data
-        buffer_copy(vbBuffer, 0, vbBufferSize, buffer, 5);
+        buffer_copy(vbBuffer, 0, vbBufferSize, buffer, 42);
         
         return buffer;
     }

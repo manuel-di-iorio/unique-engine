@@ -16,6 +16,7 @@ new UeMaterial(data = {})
 | Property               | Type      | Default                 | Description                                              |
 | --------------------   | --------- | ----------------------- | -------------------------------------------------------- |
 | `isMaterial`           | `boolean` | `true`                  | Identifies this object as a material                     |
+| `uuid`                 | `string`  |                         | Resource UUID                                            |
 | `color`                | `number`  | `c_white`               | Base color                                               |
 | `transparent`          | `boolean` | `false`                 | Whether to enable transparency                           |
 | `opacity`              | `number`  | `1`                     | Opacity (used in shaders)                                |

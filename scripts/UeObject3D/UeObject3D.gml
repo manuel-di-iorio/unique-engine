@@ -5,9 +5,20 @@ global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().
 enum UE_BUFFER_TYPE {
     FORMAT = 0,
     VBUFF = 1,
-    MATERIAL = 2,
-    MESH = 3,
-    LIGHT = 4
+    TEXTURE = 2,
+    MATERIAL = 3,
+    MESH = 4,
+    LIGHT = 5
+}
+
+enum UE_UNIFORM_TYPE {
+    FLOAT = 0,
+    VEC2 = 1,
+    VEC3 = 2,
+    VEC4 = 3,
+    MAT4 = 4,
+    ARRAY = 5,
+    BUFFER = 6
 }
 
 enum UE_FORMAT_ATTR {

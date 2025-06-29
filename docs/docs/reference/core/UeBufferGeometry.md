@@ -22,6 +22,7 @@ new UeBufferGeometry(data = {})
 | Property          | Type         | Default | Description                              |
 | -------------     | ------------ | ------- | ------------------------------           |
 | `isBufferGeometry`| `boolean`    | true    | Indicates that this is a buffer geometry |
+| `uuid`            | `string`     |         | Resource UUID                            |
 
 ## 🧩 Methods
 
