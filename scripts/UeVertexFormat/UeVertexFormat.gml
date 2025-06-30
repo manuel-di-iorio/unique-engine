@@ -82,7 +82,7 @@ function UeVertexFormat() constructor {
         for (var i=0; i<attrsSize; i++) {
             var attr = attrs[i];
             buffer_write(buffer, buffer_u8, attr.kind);
-            buffer_write(buffer, buffer_u8, attr.type);
+            buffer_write(buffer, buffer_u8, attr[$ "type"] ? attr.type : 0);
         }
         
         return buffer;

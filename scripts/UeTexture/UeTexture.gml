@@ -37,9 +37,17 @@ function UeTexture(data = {}) constructor {
      *   1 byte = texture repeat
      *   1 byte = texture filtering
      *   1 byte = generate mipmaps
+     *   4 bytes = sprite size in bytes
+     *   variable bytes = sprite buffer
      */
     function export() {
-        var buffer = buffer_create(41, buffer_fast, 1);
+        // Get the sprite buffer size
+        var spriteWidth = sprite_get_width(image);
+        var spriteHeight = sprite_get_height(image);
+        var spriteBuffSize = spriteWidth * spriteHeight * 4;
+        
+        // Create the final buffer
+        var buffer = buffer_create(45 + spriteBuffSize, buffer_fast, 1);
         
         // Write the buffer type
         buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.TEXTURE);
@@ -52,6 +60,17 @@ function UeTexture(data = {}) constructor {
         buffer_write(buffer, buffer_u8, filter);
         buffer_write(buffer, buffer_u8, generateMipmaps);
         
-        return buffer; 
+        // Draw the sprite to a temporary surface, in order to extract its buffer
+        var spriteSurf = surface_create(sprite_get_width(image), sprite_get_height(image));
+        surface_set_target(spriteSurf);
+        draw_sprite(image, 0, 0, 0);
+        surface_reset_target();
+        
+        // Write the sprite size and buffer
+        buffer_write(buffer, buffer_u32, spriteBuffSize); 
+        buffer_get_surface(buffer, spriteSurf, 45);
+        surface_free(spriteSurf);
+        
+        return buffer;
     }
 }

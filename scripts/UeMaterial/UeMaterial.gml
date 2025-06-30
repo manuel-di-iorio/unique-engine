@@ -237,17 +237,17 @@ function UeMaterial(data = {}) constructor {
         // Write the uniforms
         buffer_write(buffer, buffer_u8, uniformsCount);
         
-        struct_foreach(uniforms, method(buffer, function(name, uniform) {
-            buffer_write(self, buffer_string, name);
-            buffer_write(self, buffer_u8, uniform.type);
+        struct_foreach(uniforms, method({ buffer }, function(name, uniform) {
+            buffer_write(buffer, buffer_string, name);
+            buffer_write(buffer, buffer_u8, uniform.type);
         }));
         
         // Write the textures
         buffer_write(buffer, buffer_u8, texturesCount);
         
-        struct_foreach(textures, method(buffer, function(name, texture) {
-            buffer_write(self, buffer_string, name);
-            buffer_write(self, buffer_string, texture.uuid);
+        struct_foreach(textures, method({ buffer }, function(name, texture) {
+            buffer_write(buffer, buffer_string, name);
+            buffer_write(buffer, buffer_string, texture.uuid);
         }));
         
         return buffer; 

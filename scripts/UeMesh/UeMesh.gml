@@ -35,7 +35,8 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
      */
     function export() {
         var childrenCount = array_length(children);
-        var size = 38 + 1 + (parent ? 37 : 1) + childrenCount * 37 + 2 + (geometry ? 37 : 1) + (material ? 37 : 1) + 1;
+        var size = 38 + 1 + (parent ? 37 : 1) + childrenCount * 37 + 2 + (geometry ? 37 : 1) + (material ? 37 : 1) +
+          4 * 13;
         var buffer = buffer_create(size, buffer_fast, 1);
         
         // Write the buffer type
@@ -51,8 +52,8 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         buffer_write(buffer, buffer_string, parent ? parent.uuid : "");
         
         // Write the children UUIDs
-        array_foreach(children, method(buffer, function(child) {
-            buffer_write(self, buffer_string, child.uuid);
+        array_foreach(children, method({ buffer }, function(child) {
+            buffer_write(buffer, buffer_string, child.uuid);
         }));
         
         // Write the render order
@@ -63,6 +64,24 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         
         // Write the material UUID
         buffer_write(buffer, buffer_string, material ? material.uuid : "");
+        
+        // Write the transform (position, rotation, scale, up)
+        buffer_write(buffer, buffer_u32, position.x);
+        buffer_write(buffer, buffer_u32, position.y);
+        buffer_write(buffer, buffer_u32, position.z);
+        
+        buffer_write(buffer, buffer_u32, rotation.x);
+        buffer_write(buffer, buffer_u32, rotation.y);
+        buffer_write(buffer, buffer_u32, rotation.z);
+        buffer_write(buffer, buffer_u32, rotation.w);
+        
+        buffer_write(buffer, buffer_u32, scale.x);
+        buffer_write(buffer, buffer_u32, scale.y);
+        buffer_write(buffer, buffer_u32, scale.z);
+        
+        buffer_write(buffer, buffer_u32, up.x);
+        buffer_write(buffer, buffer_u32, up.y);
+        buffer_write(buffer, buffer_u32, up.z);
         
         return buffer;  
     }
