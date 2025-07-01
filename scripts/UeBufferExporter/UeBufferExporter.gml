@@ -1,33 +1,34 @@
-function BufferExporter() constructor {
+function UeBufferExporter() constructor {
     /**
-     * Export the scene to a buffer
-     * 
-     * Structure:
-     *   1 byte = buffer type
-     *   37 bytes = UUID
-     *   4 bytes = vbuffer size
-     *   variable bytes = vbuffer data
+     * Export a scene or a mesh to a buffer, which is a chain of object buffers (textures, geometries, etc)
+     * @param {UeScene|UeMesh} object
+     * @return {Buffer}
      */
-    function parse(scene) {
+    function parse(object) {
+        var obj = object[$ "isScene"] ? object : { children: [object] };
+        
         // Build the child buffers
         var childrenData = {};
-        var size = _buildChildrenBuffers(scene, childrenData);
+        var size = _buildChildrenBuffers(obj, childrenData);
         
         // Write the scene buffer with buffer type and scene uuid
-        var buffer = buffer_create(size, buffer_fast, 1);
+        var buffer = buffer_create(size, buffer_fixed, 1);
         
         // Copy the children buffers into the main buffer
         var offset = 0;
         var childrenDataNames = variable_struct_get_names(childrenData);
         var childrenDataNamesCount = variable_struct_names_count(childrenData);
+        
         for (var i = 0; i < childrenDataNamesCount; i++) {
             var childData = childrenData[$ childrenDataNames[i]];
             buffer_copy(childData.buffer, 0, childData.size, buffer, offset);
             buffer_delete(childData.buffer);
             offset += childData.size;
         }
-        
-        return buffer;
+
+        var compressedBuffer = buffer_compress(buffer, 0, offset);
+        buffer_delete(buffer);
+        return compressedBuffer;
     }
     
     /**
@@ -41,8 +42,11 @@ function BufferExporter() constructor {
             var child = _children[i];
             
             size += _buildObjBuffer(child, childrenData); 
-            if (child[$ "geometry"]) size += _buildObjBuffer(child.geometry, childrenData);
-            if (child[$ "material"]) size += _buildObjBuffer(child.material, childrenData);
+            
+            if (child[$ "isMesh"]) {
+                if (child[$ "geometry"]) size += _buildObjBuffer(child.geometry, childrenData);
+                if (child[$ "material"]) size += _buildObjBuffer(child.material, childrenData);
+            }
             
             size += _buildChildrenBuffers(child, childrenData);
         }

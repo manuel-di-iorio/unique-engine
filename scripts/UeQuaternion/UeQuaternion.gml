@@ -5,6 +5,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         self.y = y;
         self.z = z;
         self.w = w;
+        return self;
     }
     
     /// Clone the quaternion
@@ -233,7 +234,6 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     
         return self;
     }
-
     
     setFromEuler(_x, _y, _z);
 }

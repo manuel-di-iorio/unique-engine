@@ -176,6 +176,7 @@ function UeMaterial(data = {}) constructor {
      * Export the material properties to a buffer
      * 
      * Structure:
+     *   4 bytes = buffer size
      *   1 byte = buffer type
      *   37 bytes = UUID
      *   18 bytes = material attributes (1 byte each)
@@ -206,7 +207,7 @@ function UeMaterial(data = {}) constructor {
         
         var size = 58 + uniformsBufSize + texturesBufSize;
         
-        var buffer = buffer_create(size, buffer_fast, 1);
+        var buffer = buffer_create(size, buffer_fixed, 1);
         
         // Write the buffer type
         buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.TEXTURE);

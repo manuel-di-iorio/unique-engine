@@ -36,7 +36,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     name = data[$ "name"] ?? undefined;
     uuid = ueUuid();
     visible = data[$ "visible"] ?? true;
-    parent = data[$ "parent"] ?? undefined;
     children = [];
     renderOrder = data[$ "renderOrder"] ?? 0;
 

@@ -59,6 +59,7 @@ function UeBufferGeometry(data = {}) constructor {
      * Export the buffer geometry to a buffer
      * 
      * Structure:
+     *   4 bytes = buffer size
      *   1 byte = buffer type
      *   37 bytes = UUID
      *   4 bytes = vbuffer size
@@ -67,8 +68,11 @@ function UeBufferGeometry(data = {}) constructor {
     function export() {
         var vbBuffer = buffer_create_from_vertex_buffer(vb, buffer_fast, 1);
         var vbBufferSize = buffer_get_size(vbBuffer);
-        var size = 42 + vbBufferSize;
-        var buffer = buffer_create(size, buffer_fast, 1);
+        var size = 4 + 42 + vbBufferSize;
+        var buffer = buffer_create(size, buffer_fixed, 1);
+        
+        // Write the buffer size
+        buffer_write(buffer, buffer_u32, size);
         
         // Write the buffer type
         buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.VBUFF);

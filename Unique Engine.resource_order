@@ -21,6 +21,7 @@
     {"name":"UeAssimpLoader","order":2,"path":"scripts/UeAssimpLoader/UeAssimpLoader.yy",},
     {"name":"UeBoxGeometry","order":1,"path":"scripts/UeBoxGeometry/UeBoxGeometry.yy",},
     {"name":"UeBufferGeometry","order":2,"path":"scripts/UeBufferGeometry/UeBufferGeometry.yy",},
+    {"name":"UeBufferLoader","order":1,"path":"scripts/UeBufferLoader/UeBufferLoader.yy",},
     {"name":"UeCircleGeometry","order":2,"path":"scripts/UeCircleGeometry/UeCircleGeometry.yy",},
     {"name":"UeLight","order":9,"path":"scripts/UeLight/UeLight.yy",},
     {"name":"UeMaterial","order":8,"path":"scripts/UeMaterial/UeMaterial.yy",},

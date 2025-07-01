@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"BufferExporter",
+  "%Name":"UeBufferExporter",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"BufferExporter",
+  "name":"UeBufferExporter",
   "parent":{
     "name":"Exporters",
     "path":"folders/Unique Engine/Exporters.yy",

@@ -25,6 +25,7 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
      * Export the mesh properties to a buffer
      * 
      * Structure:
+     *   4 bytes = buffer size
      *   1 byte = buffer type
      *   37 bytes = UUID
      *   1 byte = visible
@@ -35,9 +36,12 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
      */
     function export() {
         var childrenCount = array_length(children);
-        var size = 38 + 1 + (parent ? 37 : 1) + childrenCount * 37 + 2 + (geometry ? 37 : 1) + (material ? 37 : 1) +
+        var size = 38 + 1 + (parent ? 37 : 1) + 2 + childrenCount * 37 + 2 + (geometry ? 37 : 1) + (material ? 37 : 1) +
           4 * 13;
-        var buffer = buffer_create(size, buffer_fast, 1);
+        var buffer = buffer_create(size, buffer_fixed, 1);
+        
+        // Write the buffer size
+        buffer_write(buffer, buffer_u32, size);
         
         // Write the buffer type
         buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.MESH);
@@ -45,16 +49,18 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         // Write the UUID
         buffer_write(buffer, buffer_string, uuid);
         
+        // Write the children UUIDs
+        buffer_write(buffer, buffer_u16, array_length(children));
+        
+        array_foreach(children, method({ buffer }, function(child) {
+            buffer_write(buffer, buffer_string, child.uuid);
+        }));
+        
         // Write the visible property
         buffer_write(buffer, buffer_u8, visible);
         
         // Write the parent property (if set)
         buffer_write(buffer, buffer_string, parent ? parent.uuid : "");
-        
-        // Write the children UUIDs
-        array_foreach(children, method({ buffer }, function(child) {
-            buffer_write(buffer, buffer_string, child.uuid);
-        }));
         
         // Write the render order
         buffer_write(buffer, buffer_u16, renderOrder);

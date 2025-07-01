@@ -58,6 +58,7 @@ function UeVertexFormat() constructor {
      * Export the vertex format to a buffer
      * 
      * Structure:
+     *   4 bytes = buffer size
      *   1 byte = buffer type   
      *   37 bytes = UUID
      *   1 byte = attributes count
@@ -65,9 +66,12 @@ function UeVertexFormat() constructor {
      */
     function export() {
         var attrsSize = array_length(attrs);
-        var size = 39 + attrsSize * 2;
+        var size = 4 + 1 + 37 + 1 + attrsSize * 2;
     
-        var buffer = buffer_create(size, buffer_fast, 1);
+        var buffer = buffer_create(size, buffer_fixed, 1);
+        
+        // Write the buffer size
+        buffer_write(buffer, buffer_u32, size);
         
         // Write the buffer type
         buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.FORMAT);
