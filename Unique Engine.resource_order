@@ -41,6 +41,7 @@
     {"name":"UeSphereGeometry","order":3,"path":"scripts/UeSphereGeometry/UeSphereGeometry.yy",},
     {"name":"UeSprite","order":10,"path":"scripts/UeSprite/UeSprite.yy",},
     {"name":"UeSpriteMaterial","order":3,"path":"scripts/UeSpriteMaterial/UeSpriteMaterial.yy",},
+    {"name":"ueStructMap","order":1,"path":"scripts/ueStructMap/ueStructMap.yy",},
     {"name":"UeTexture","order":3,"path":"scripts/UeTexture/UeTexture.yy",},
     {"name":"UeVector2","order":1,"path":"scripts/UeVector2/UeVector2.yy",},
     {"name":"UeVector3","order":2,"path":"scripts/UeVector3/UeVector3.yy",},

@@ -1,6 +1,7 @@
 function UeVertexFormat() constructor {
     isVertexFormat = true;
     uuid = ueUuid();
+    name = undefined; // @MissingDoc
     vf = undefined;
     attrs = [];
 
@@ -54,41 +55,10 @@ function UeVertexFormat() constructor {
         return self;
     }
     
-    /**
-     * Export the vertex format to a buffer
-     * 
-     * Structure:
-     *   4 bytes = buffer size
-     *   1 byte = buffer type   
-     *   37 bytes = UUID
-     *   1 byte = attributes count
-     *   (attributes count * 2) bytes = List of attributes, with kind (1 byte) and type (1 byte) values
-     */
-    function export() {
-        var attrsSize = array_length(attrs);
-        var size = 4 + 1 + 37 + 1 + attrsSize * 2;
-    
-        var buffer = buffer_create(size, buffer_fixed, 1);
-        
-        // Write the buffer size
-        buffer_write(buffer, buffer_u32, size);
-        
-        // Write the buffer type
-        buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.FORMAT);
-        
-        // Write the UUID
-        buffer_write(buffer, buffer_string, uuid);
-        
-        // Write the attributes count
-        buffer_write(buffer, buffer_u8, attrsSize);
-        
-        // Write the attributes data
-        for (var i=0; i<attrsSize; i++) {
-            var attr = attrs[i];
-            buffer_write(buffer, buffer_u8, attr.kind);
-            buffer_write(buffer, buffer_u8, attr[$ "type"] ? attr.type : 0);
-        }
-        
-        return buffer;
+    /** Internal export methods */
+    function _compileData(data) {
+        var _self = self;
+        var payload = { type: UE_BUFFER_TYPE.FORMAT, uuid, name, attrs };
+        return { obj: _self, payload };
     }
 }

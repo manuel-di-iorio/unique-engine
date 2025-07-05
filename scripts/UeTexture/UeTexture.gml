@@ -29,63 +29,51 @@ function UeTexture(data = {}) constructor {
         return self;
     }
     
-    /**
-     * Export the texture properties to a buffer
-     * The actual sprite may be saved to disk by using the UUID as name
-     * 
-     * Structure:
-     *   4 bytes = buffer size
-     *   1 byte = buffer type
-     *   37 bytes = UUID
-     *   1 byte = texture repeat
-     *   1 byte = texture filtering
-     *   1 byte = generate mipmaps
-     *   4 bytes = sprite width
-     *   4 bytes = sprite height
-     *   4 bytes = sprite buffer size in bytes
-     *   variable bytes = sprite buffer
-     */
-    function export() {
+    /** Internal export methods */
+    function _compileData(data) {
+        var _self = self;
+        
         // Get the sprite buffer size
-        var spriteWidth = sprite_get_width(image);
-        var spriteHeight = sprite_get_height(image);
-        var spriteBuffSize = spriteWidth * spriteHeight * 4;
+        var compileSprites = data.compileSprites && image;
+        var spriteBuffSize = 0;
+        var spriteWidth = undefined;
+        var spriteHeight = undefined;
         
-        // Create the final buffer
-        var size = 4 + 45 + 8 + spriteBuffSize;
-        var buffer = buffer_create(size, buffer_fixed, 1);
+        if (compileSprites) {
+            spriteWidth = sprite_get_width(image);
+            spriteHeight = sprite_get_height(image);
+            spriteBuffSize = spriteWidth * spriteHeight * 4;
+        }
         
-        // Write the buffer size
-        buffer_write(buffer, buffer_u32, size);
+        var payload = {
+            type: UE_BUFFER_TYPE.TEXTURE,
+            uuid,
+            name,
+            filter,
+            generateMipmaps,
+            spriteWidth,
+            spriteHeight,
+            spriteBuffSize
+        };
+        obj[$ "repeat"] = self[$ "repeat"];
         
-        // Write the buffer type
-        buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.TEXTURE);
+        data.size += spriteBuffSize;
         
-        // Write the UUID
-        buffer_write(buffer, buffer_string, uuid);
-        
-        // Write the texture props
-        buffer_write(buffer, buffer_u8, self[$ "repeat"]);
-        buffer_write(buffer, buffer_u8, filter);
-        buffer_write(buffer, buffer_u8, generateMipmaps);
-        
-        // Write the sprite width and height
-        var width = sprite_get_width(image);
-        var height = sprite_get_height(image);
-        buffer_write(buffer, buffer_u32, width); 
-        buffer_write(buffer, buffer_u32, height); 
-        
-        // Draw the sprite to a temporary surface, in order to extract its buffer
-        var spriteSurf = surface_create(width, height);
+        var spriteSurf = surface_create(spriteWidth, spriteHeight);
         surface_set_target(spriteSurf);
         draw_sprite(image, 0, 0, 0);
         surface_reset_target();
         
-        // Write the sprite size and buffer
-        buffer_write(buffer, buffer_u32, spriteBuffSize);
-        buffer_get_surface(buffer, spriteSurf, 45);
-        surface_free(spriteSurf);
-        
-        return buffer;
+        return {
+            obj: _self, 
+            payload,
+            ctx: { spriteSurf, spriteBuffSize }
+        };
+    }
+    
+    function _compileBufferExtra(buffer, ctx) {
+        buffer_get_surface(buffer, ctx.spriteSurf, buffer_tell(buffer));
+        buffer_seek(buffer, buffer_seek_relative, ctx.spriteBuffSize);
+        surface_free(ctx.spriteSurf);
     }
 }

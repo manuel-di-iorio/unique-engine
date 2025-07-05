@@ -23,7 +23,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         if (left >= right) return;
 
         // Use midpoint as pivot
-        var pivot_dist = arr[(left + right) div 2].__ueSortDistanceToCam;
+        var pivot_dist = arr[(left + right) / 2].__ueSortDistanceToCam;
         var i = left;
         var j = right;
         var temp;

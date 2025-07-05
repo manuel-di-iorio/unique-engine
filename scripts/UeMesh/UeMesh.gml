@@ -1,9 +1,9 @@
 function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
     self.isMesh = true;
     self.geometry = geometry ?? data[$ "geometry"];
-    self.material = data[$ "material"] ?? new UeMeshStandardMaterial();
+    self.material = data[$ "material"] ?? global.UE_MESH_STANDARD_MATERIAL;
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
-    //self.boundingBox = data[$ "boundingBox"] ?? new Box3(); // @todo
+    //self.boundingBox = data[$ "boundingBox"] ?? new UeBox3(); // @todo
     
     function render(renderState) {
         var scene = renderState.scene;
@@ -21,74 +21,39 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         }
     }
     
-     /**
-     * Export the mesh properties to a buffer
-     * 
-     * Structure:
-     *   4 bytes = buffer size
-     *   1 byte = buffer type
-     *   37 bytes = UUID
-     *   1 byte = visible
-     *   37 bytes = parent UUID
-     *   2 bytes = render order
-     *   37 bytes = geometry UUID
-     *   37 bytes = material UUID
-     */
-    function export() {
-        var childrenCount = array_length(children);
-        var size = 38 + 1 + (parent ? 37 : 1) + 2 + childrenCount * 37 + 2 + (geometry ? 37 : 1) + (material ? 37 : 1) +
-          4 * 13;
-        var buffer = buffer_create(size, buffer_fixed, 1);
+    /** Internal export methods */
+    function _compileData(data) {
+        var _self = self;
+        var payload = {
+            type: UE_BUFFER_TYPE.MESH, 
+            uuid,
+            name,
+            children: array_map(children, function(child) { return child.uuid }),
+            // Props:
+            visible,
+            parent: parent ? parent.uuid : undefined,
+            renderOrder,
+            geometry: geometry ? geometry.uuid : undefined,
+            material: material ? material.uuid : undefined,
+            
+            px: position.x,
+            py: position.y,
+            pz: position.z,
+            
+            rx: rotation.x,
+            ry: rotation.y,
+            rz: rotation.z, 
+            rw: rotation.w,
+            
+            sx: scale.x,
+            sy: scale.y,
+            sz: scale.z,
+            
+            ux: up.x,
+            uy: up.y,
+            uz: up.z
+        };
         
-        // Write the buffer size
-        buffer_write(buffer, buffer_u32, size);
-        
-        // Write the buffer type
-        buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.MESH);
-        
-        // Write the UUID
-        buffer_write(buffer, buffer_string, uuid);
-        
-        // Write the children UUIDs
-        buffer_write(buffer, buffer_u16, array_length(children));
-        
-        array_foreach(children, method({ buffer }, function(child) {
-            buffer_write(buffer, buffer_string, child.uuid);
-        }));
-        
-        // Write the visible property
-        buffer_write(buffer, buffer_u8, visible);
-        
-        // Write the parent property (if set)
-        buffer_write(buffer, buffer_string, parent ? parent.uuid : "");
-        
-        // Write the render order
-        buffer_write(buffer, buffer_u16, renderOrder);
-        
-        // Write the geometry UUID
-        buffer_write(buffer, buffer_string, geometry ? geometry.uuid : "");
-        
-        // Write the material UUID
-        buffer_write(buffer, buffer_string, material ? material.uuid : "");
-        
-        // Write the transform (position, rotation, scale, up)
-        buffer_write(buffer, buffer_u32, position.x);
-        buffer_write(buffer, buffer_u32, position.y);
-        buffer_write(buffer, buffer_u32, position.z);
-        
-        buffer_write(buffer, buffer_u32, rotation.x);
-        buffer_write(buffer, buffer_u32, rotation.y);
-        buffer_write(buffer, buffer_u32, rotation.z);
-        buffer_write(buffer, buffer_u32, rotation.w);
-        
-        buffer_write(buffer, buffer_u32, scale.x);
-        buffer_write(buffer, buffer_u32, scale.y);
-        buffer_write(buffer, buffer_u32, scale.z);
-        
-        buffer_write(buffer, buffer_u32, up.x);
-        buffer_write(buffer, buffer_u32, up.y);
-        buffer_write(buffer, buffer_u32, up.z);
-        
-        return buffer;  
+        return { obj: _self, payload };
     }
 }

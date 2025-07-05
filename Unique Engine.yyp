@@ -73,6 +73,7 @@
     {"id":{"name":"UeSphereGeometry","path":"scripts/UeSphereGeometry/UeSphereGeometry.yy",},},
     {"id":{"name":"UeSprite","path":"scripts/UeSprite/UeSprite.yy",},},
     {"id":{"name":"UeSpriteMaterial","path":"scripts/UeSpriteMaterial/UeSpriteMaterial.yy",},},
+    {"id":{"name":"ueStructMap","path":"scripts/ueStructMap/ueStructMap.yy",},},
     {"id":{"name":"UeTexture","path":"scripts/UeTexture/UeTexture.yy",},},
     {"id":{"name":"UeTransform","path":"scripts/UeTransform/UeTransform.yy",},},
     {"id":{"name":"ueUuid","path":"scripts/ueUuid/ueUuid.yy",},},

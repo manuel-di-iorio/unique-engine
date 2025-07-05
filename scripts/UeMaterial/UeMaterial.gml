@@ -1,6 +1,7 @@
 function UeMaterial(data = {}) constructor {
     isMaterial = true;
     uuid = ueUuid();
+    name = undefined; // @MissingDoc
     color = data[$ "color"] ?? c_white;
     transparent = data[$ "transparent"] ?? false;
     opacity = data[$ "opacity"] ?? 1;
@@ -172,86 +173,39 @@ function UeMaterial(data = {}) constructor {
         return variable_clone(self);
     }
     
-    /**
-     * Export the material properties to a buffer
-     * 
-     * Structure:
-     *   4 bytes = buffer size
-     *   1 byte = buffer type
-     *   37 bytes = UUID
-     *   18 bytes = material attributes (1 byte each)
-     *   1 byte = uniforms count
-     *   uniforms = each uniform writes the name and the 1-byte uniform type
-     *   1 byte = textures count
-     *   textures = each texture writes the texture type (map,normalMap,etc..) and texture UUID
-     */
-    function export() {
-        var uniformsNames = struct_get_names(uniforms);
-        var uniformsCount = struct_names_count(uniforms);
-        var texturesNames = struct_get_names(textures); 
-        var texturesCount = struct_names_count(textures);
+    /** Internal export methods */
+    function _compileData(data) {
+        var _self = self;
+        var payload = {
+            type: UE_BUFFER_TYPE.MATERIAL,
+            uuid,
+            name,
+            uniforms,
+            textures: ueStructMap(textures, function(name, texture) { return texture.uuid }),
+            shader: shader_get_name(shader),
+            // Props:
+            color,
+            transparent,
+            opacity,
+            depthTest,
+            side,
+            depthTest,
+            depthWrite,
+            depthFunc,
+            forceSinglePass,
+            alphaTest,
+            colorWrite,
+            blending,
+            blendEquation,
+            blendEquationAlpha,
+            blendSrc,
+            blendDst,
+            blendSrcAlpha,
+            blendDstAlpha,
+            lights,
+        };
         
-        var uniformsBufSize = 0;
-        for (var i=0; i<uniformsCount; i++) {
-            var uniformName = uniformsNames[i];
-            var uniform = uniforms[$ uniformName];
-            uniformsBufSize += string_byte_length(uniformName) + 2;
-        }
-        
-        var texturesBufSize = 0; 
-        for (var i=0; i<texturesCount; i++) {
-            var textureName = texturesNames[i];
-            var texture = textures[$ textureName];
-            uniformsBufSize += string_byte_length(textureName) + 38;
-        }
-        
-        var size = 58 + uniformsBufSize + texturesBufSize;
-        
-        var buffer = buffer_create(size, buffer_fixed, 1);
-        
-        // Write the buffer type
-        buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.TEXTURE);
-        
-        // Write the UUID
-        buffer_write(buffer, buffer_string, uuid);
-        
-        // Write the material props
-        buffer_write(buffer, buffer_u8, color);
-        buffer_write(buffer, buffer_u8, transparent);
-        buffer_write(buffer, buffer_u8, opacity);
-        buffer_write(buffer, buffer_u8, side);
-        buffer_write(buffer, buffer_u8, depthTest);
-        buffer_write(buffer, buffer_u8, depthWrite);
-        buffer_write(buffer, buffer_u8, depthFunc);
-        buffer_write(buffer, buffer_u8, forceSinglePass);
-        buffer_write(buffer, buffer_u8, alphaTest);
-        buffer_write(buffer, buffer_u8, colorWrite);
-        buffer_write(buffer, buffer_u8, blending);
-        buffer_write(buffer, buffer_u8, blendEquation);
-        buffer_write(buffer, buffer_u8, blendEquationAlpha);
-        buffer_write(buffer, buffer_u8, blendSrc);
-        buffer_write(buffer, buffer_u8, blendDst);
-        buffer_write(buffer, buffer_u8, blendSrcAlpha);
-        buffer_write(buffer, buffer_u8, blendDstAlpha);
-        buffer_write(buffer, buffer_u8, lights);
-        
-        // Write the uniforms
-        buffer_write(buffer, buffer_u8, uniformsCount);
-        
-        struct_foreach(uniforms, method({ buffer }, function(name, uniform) {
-            buffer_write(buffer, buffer_string, name);
-            buffer_write(buffer, buffer_u8, uniform.type);
-        }));
-        
-        // Write the textures
-        buffer_write(buffer, buffer_u8, texturesCount);
-        
-        struct_foreach(textures, method({ buffer }, function(name, texture) {
-            buffer_write(buffer, buffer_string, name);
-            buffer_write(buffer, buffer_string, texture.uuid);
-        }));
-        
-        return buffer; 
+        return { obj: _self, payload };
     }
     
     build();

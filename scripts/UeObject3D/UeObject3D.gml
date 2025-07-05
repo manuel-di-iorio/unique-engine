@@ -1,6 +1,6 @@
 global.UNIQUE_ENGINE_OBJECT_ID = 0;
-
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
+global.UE_MESH_STANDARD_MATERIAL = new UeMeshStandardMaterial();
 
 enum UE_BUFFER_TYPE {
     FORMAT = 0,

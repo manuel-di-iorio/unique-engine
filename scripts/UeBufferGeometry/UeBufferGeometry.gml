@@ -1,6 +1,7 @@
 function UeBufferGeometry(data = {}) constructor {
     isBufferGeometry = true;
     uuid = ueUuid();
+    name = undefined; // @MissingDoc
     vertices = data[$ "vertices"] ?? [];
     index = data[$ "index"] ?? undefined;
     format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
@@ -27,6 +28,7 @@ function UeBufferGeometry(data = {}) constructor {
                     case UE_FORMAT_ATTR.COLOR: vertex_color(vb, vertex.color, vertex.alpha); break;
                     case UE_FORMAT_ATTR.CUSTOM: 
                         var customValue = vertex.custom[$ attr.name];
+                    
                         switch (attr.type) {
                             case vertex_type_float1: vertex_float1(vb, customValue); break;
                             case vertex_type_float2: vertex_float2(vb, customValue[0], customValue[1]); break;
@@ -55,39 +57,35 @@ function UeBufferGeometry(data = {}) constructor {
         return self;
     }
     
-    /**
-     * Export the buffer geometry to a buffer
-     * 
-     * Structure:
-     *   4 bytes = buffer size
-     *   1 byte = buffer type
-     *   37 bytes = UUID
-     *   4 bytes = vbuffer size
-     *   variable bytes = vbuffer data
-     */
-    function export() {
+    /** Internal export methods */
+    function _compileData(data) {
+        var _self = self;
         var vbBuffer = buffer_create_from_vertex_buffer(vb, buffer_fast, 1);
         var vbBufferSize = buffer_get_size(vbBuffer);
-        var size = 4 + 42 + vbBufferSize;
-        var buffer = buffer_create(size, buffer_fixed, 1);
         
-        // Write the buffer size
-        buffer_write(buffer, buffer_u32, size);
+        var payload = { 
+            type: UE_BUFFER_TYPE.VBUFF,
+            uuid, 
+            name,
+            format: format.uuid,
+            vbBufferSize
+        };
+        data.size += vbBufferSize;
         
-        // Write the buffer type
-        buffer_write(buffer, buffer_u8, UE_BUFFER_TYPE.VBUFF);
-        
-        // Write the UUID
-        buffer_write(buffer, buffer_string, uuid); 
-      
-        // Write the vbuffer size
-        buffer_write(buffer, buffer_u32, vbBufferSize);
-        
-        // Write the vbuffer data
-        buffer_copy(vbBuffer, 0, vbBufferSize, buffer, 42);
-        
-        return buffer;
+        return {
+            obj: _self,
+            payload,
+            ctx: {
+                vbBuffer, 
+                vbBufferSize
+            }
+        };
     }
+    
+    function _compileBufferExtra(buffer, ctx) {
+        buffer_copy(ctx.vbBuffer, 0, ctx.vbBufferSize, buffer, buffer_tell(buffer));
+        buffer_seek(buffer, buffer_seek_relative, ctx.vbBufferSize);
+    } 
     
     // Build the vertex buffer with the initial vertices data
     build();
