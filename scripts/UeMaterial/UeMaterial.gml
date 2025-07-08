@@ -1,5 +1,6 @@
 function UeMaterial(data = {}) constructor {
     isMaterial = true;
+    type = "Material";
     uuid = ueUuid();
     name = undefined; // @MissingDoc
     color = data[$ "color"] ?? c_white;
@@ -162,7 +163,7 @@ function UeMaterial(data = {}) constructor {
         
         // Set the texture samplers
         struct_foreach(textures, function(name, texture) {
-            if (texture == undefined) return;
+            if (texture == undefined || texture.image == undefined) return;
             texture.use(_sampler_handlers[$ name]); 
         });
         
@@ -177,9 +178,6 @@ function UeMaterial(data = {}) constructor {
     function _compileData(data) {
         var _self = self;
         var payload = {
-            type: UE_BUFFER_TYPE.MATERIAL,
-            uuid,
-            name,
             uniforms,
             textures: ueStructMap(textures, function(name, texture) { return texture.uuid }),
             shader: shader_get_name(shader),

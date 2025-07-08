@@ -1,5 +1,6 @@
 function UeVertexFormat() constructor {
     isVertexFormat = true;
+    type = "VertexFormat";
     uuid = ueUuid();
     name = undefined; // @MissingDoc
     vf = undefined;
@@ -58,7 +59,7 @@ function UeVertexFormat() constructor {
     /** Internal export methods */
     function _compileData(data) {
         var _self = self;
-        var payload = { type: UE_BUFFER_TYPE.FORMAT, uuid, name, attrs };
+        var payload = { attrs };
         return { obj: _self, payload };
     }
 }

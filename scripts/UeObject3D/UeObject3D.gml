@@ -2,15 +2,6 @@ global.UNIQUE_ENGINE_OBJECT_ID = 0;
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_MESH_STANDARD_MATERIAL = new UeMeshStandardMaterial();
 
-enum UE_BUFFER_TYPE {
-    FORMAT = 0,
-    VBUFF = 1,
-    TEXTURE = 2,
-    MATERIAL = 3,
-    MESH = 4,
-    LIGHT = 5
-}
-
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,
     VEC2 = 1,
@@ -32,6 +23,7 @@ enum UE_FORMAT_ATTR {
 
 function UeObject3D(data = {}): UeTransform(data) constructor {
     isObject3D = true;
+    type = "Object3D"; // @MissingDoc
     id = global.UNIQUE_ENGINE_OBJECT_ID++; 
     name = data[$ "name"] ?? undefined;
     uuid = ueUuid();
@@ -42,12 +34,18 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     function render() {}
     
     /// @param ...objects
+    /// @MissingDoc array of objects
     function add() {
         for (var i=0; i<argument_count; i++) {
-            var child = argument[i];
-            removeFromParent(child);
-            child.parent = self;
-            array_push(children, child);
+            var objects = argument[i];
+            if (!is_array(objects)) objects = [objects];
+
+            for (var c = 0, cn = array_length(objects); c < cn; c++) {
+                var object = objects[c];
+                removeFromParent(object);
+                object.parent = self;
+                array_push(children, object);
+            }
         }
         
         return self;

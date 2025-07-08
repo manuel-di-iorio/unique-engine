@@ -1,5 +1,6 @@
 function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
     self.isMesh = true;
+    self.type = "Mesh";
     self.geometry = geometry ?? data[$ "geometry"];
     self.material = data[$ "material"] ?? global.UE_MESH_STANDARD_MATERIAL;
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
@@ -15,7 +16,7 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         
         if (visible && geometry) {
             matrix_set(matrix_world, matrixWorld.data);
-            material.use(renderState, self); 
+            material.use(renderState, self);
             vertex_submit(geometry.vb, primitive, material.textures[$ "map"] ?? -1);
             shader_reset();
         }
@@ -25,9 +26,6 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
     function _compileData(data) {
         var _self = self;
         var payload = {
-            type: UE_BUFFER_TYPE.MESH, 
-            uuid,
-            name,
             children: array_map(children, function(child) { return child.uuid }),
             // Props:
             visible,
@@ -51,7 +49,7 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
             
             ux: up.x,
             uy: up.y,
-            uz: up.z
+            uz: up.z,
         };
         
         return { obj: _self, payload };

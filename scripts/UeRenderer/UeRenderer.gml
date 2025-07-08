@@ -1,5 +1,6 @@
 function UeRenderer(data = {}): UeObject3D(data) constructor {
     isRenderer = true;
+    type = "Renderer";
     
     // Recursively collect renderable objects and split them into opaque and transparent queues
     function _collectObjectQueues(objects, cameraPos, opaqueQueue, transparentQueue) {

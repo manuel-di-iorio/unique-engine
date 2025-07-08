@@ -1,12 +1,13 @@
 function UeBufferGeometry(data = {}) constructor {
     isBufferGeometry = true;
+    type = "BufferGeometry";
     uuid = ueUuid();
     name = undefined; // @MissingDoc
     vertices = data[$ "vertices"] ?? [];
     index = data[$ "index"] ?? undefined;
     format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
     vb = undefined;
-    canFreeze = data[$ "canFreeze"] ?? true;
+    canFreeze = data[$ "canFreeze"] ?? false; // true
     
     function build() {
         vb = vertex_create_buffer();
@@ -43,6 +44,10 @@ function UeBufferGeometry(data = {}) constructor {
         }
 
         vertex_end(vb);
+        
+        // Automatically freeze the vertex buffer if specified
+        if (canFreeze) vertex_freeze(vb);
+        
         return self;
     }
     
@@ -64,9 +69,6 @@ function UeBufferGeometry(data = {}) constructor {
         var vbBufferSize = buffer_get_size(vbBuffer);
         
         var payload = { 
-            type: UE_BUFFER_TYPE.VBUFF,
-            uuid, 
-            name,
             format: format.uuid,
             vbBufferSize
         };
@@ -89,7 +91,4 @@ function UeBufferGeometry(data = {}) constructor {
     
     // Build the vertex buffer with the initial vertices data
     build();
-    
-    // Automatically freeze the vertex buffer on init
-    if (canFreeze && array_length(vertices)) vertex_freeze(vb);
 }

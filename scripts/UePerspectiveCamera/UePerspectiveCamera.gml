@@ -1,5 +1,6 @@
 function UePerspectiveCamera(data = {}): UeObject3D(data) constructor { 
     isCamera = true;
+    type = "Camera";
     fov  = data[$ "fov"]  ?? 60;
     near = data[$ "near"] ?? 0.1;
     far  = data[$ "far"]  ?? 32000;

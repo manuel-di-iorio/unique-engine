@@ -21,3 +21,11 @@ importedMesh.traverse(function(mesh) {
 });
 
 scene.add(ambientLight, sunLight, importedMesh);
+
+sceneBuffer = new UeBufferExporter().parse(scene);
+buffer_save(sceneBuffer, "scene2.buff");
+buffer_delete(sceneBuffer);
+scene.children = [];
+scene.lights = [];
+var model = new UeBufferLoader().load("scene2.buff");
+scene.add(model.objects);

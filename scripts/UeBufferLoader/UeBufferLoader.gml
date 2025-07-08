@@ -1,4 +1,5 @@
 function UeBufferLoader() constructor {
+    // @MissingDoc
     // Temporary internal variables
     cache = {
         formats: {},
@@ -6,51 +7,60 @@ function UeBufferLoader() constructor {
         textures: {},
         materials: {},
         meshesFlat: [],
-        meshesFlatMap: {}
+        meshesFlatMap: {},
+        lights: {}
     };
     
     /***
      * Load the scene objects from a buffer file
      **/
-    function load(fname) {
-        var rootMesh = new UeMesh();
+    function load(fname, resetCache = true) {
+        if (resetCache) {
+            cache.formats = {};
+            cache.geometries = {};
+            cache.textures = {};
+            cache.materials = {};
+            cache.meshesFlat = [];
+            cache.meshesFlatMap = {};
+            cache.lights = {};
+        }
         
         var bufferCompressed = buffer_load(fname);
         var buffer = buffer_decompress(bufferCompressed);
         buffer_delete(bufferCompressed);
         var size = buffer_get_size(buffer);
+        var objects = [];
+        
         
         while (buffer_tell(buffer) < size) {
-            _readObject(buffer);
+            _readObject(buffer, objects);
         }
         
         // Resolve the UUID associations
         _resolveGeometriesUUIDs();
         _resolveMaterialUUIDs(); 
-        _resolveMeshesUUIDs(rootMesh); 
+        _resolveMeshesUUIDs(objects); 
         
         buffer_delete(buffer);
-        meshes = [];
-        meshesMap = {};
         
         return {
-            mesh: rootMesh,
+            objects,
             textures: cache.textures,
-            materials: cache.materials,
-            lights: [] // @todo
+            materials: cache.materials
         };
     }
     
-    function _readObject(buffer) {
+    function _readObject(buffer, objects) {
         var str = buffer_read(buffer, buffer_string);
-        var obj = json_parse(str);
+        var obj = json_parse(str); 
       
         switch (obj.type) {
-            case UE_BUFFER_TYPE.FORMAT: _readTypeFormat(obj, buffer); break;
-            case UE_BUFFER_TYPE.VBUFF: _readTypeGeometry(obj, buffer); break;
-            case UE_BUFFER_TYPE.TEXTURE: _readTypeTexture(obj, buffer); break;
-            case UE_BUFFER_TYPE.MATERIAL: _readTypeMaterial(obj, buffer); break;
-            case UE_BUFFER_TYPE.MESH: _readTypeMesh(obj, buffer); break;
+            case "VertexFormat": _readTypeFormat(obj, buffer); break;
+            case "BufferGeometry": _readTypeGeometry(obj, buffer); break;
+            case "Texture": _readTypeTexture(obj, buffer); break;
+            case "Material": _readTypeMaterial(obj, buffer); break;
+            case "Mesh": _readTypeMesh(obj, buffer); break;
+            case "Light": _readTypeLight(obj, buffer, objects); break;
         }
     }
     
@@ -59,7 +69,10 @@ function UeBufferLoader() constructor {
     function _readTypeFormat(obj, buffer) {
         var format = new UeVertexFormat();
         format.uuid = obj.uuid;
-        format.name = obj.name;
+        
+        var name = obj[$ "name"];
+        if (name != undefined) format.name = name;
+            
         format.attrs = obj.attrs;
         format.build(); 
         cache.formats[$ obj.uuid] = format;
@@ -68,14 +81,17 @@ function UeBufferLoader() constructor {
     function _readTypeGeometry(obj, buffer) {
         var geometry = new UeBufferGeometry();
         geometry.uuid = obj.uuid;
-        geometry.name = obj.name;
+        
+        var name = obj[$ "name"];
+        if (name != undefined) geometry.name = name;
+        
         geometry.format = obj.format;
         
         var vbBufferSize = obj.vbBufferSize;
         var vbBuff = buffer_create(vbBufferSize, buffer_fast, 1);
         buffer_copy(buffer, buffer_tell(buffer), vbBufferSize, vbBuff, 0);
         buffer_seek(buffer, buffer_seek_relative, vbBufferSize);
-        geometry.vb = vbBuff; // The actual vbuffer is created on the association step
+        geometry._vbBuffer = vbBuff; // The actual vbuffer is created on the association step
     
         cache.geometries[$ obj.uuid] = geometry;
     }
@@ -84,15 +100,14 @@ function UeBufferLoader() constructor {
         // Create the sprite buffer
         var image = undefined;
         
-        var spriteBuffSize = obj.spriteBuffSize;
+        var spriteBuffSize = obj[$ "spriteBuffSize"];
         if (spriteBuffSize) {
-            var spriteBuff = buffer_create(spriteBuffSize, buffer_fast, 1);
-            buffer_copy(buffer, buffer_tell(buffer), spriteBuffSize, spriteBuff, 0);
-            
             // Draw the sprite buffer onto a temporary surface
+            var spriteWidth = obj.spriteWidth;
+            var spriteHeight = obj.spriteHeight;
             var spriteSurf = surface_create(spriteWidth, spriteHeight);
-            buffer_set_surface(spriteBuff, spriteSurf, 0);
-            buffer_delete(spriteBuff);
+            buffer_set_surface(buffer, spriteSurf, buffer_tell(buffer));
+            buffer_seek(buffer, buffer_seek_relative, spriteBuffSize);
             
             // Create the actual sprite from the surface
             image = sprite_create_from_surface(spriteSurf, 0, 0, spriteWidth, spriteHeight, false, false, 0, 0);
@@ -101,20 +116,22 @@ function UeBufferLoader() constructor {
         
         var texture = new UeTexture({ image });
         texture.uuid = obj.uuid;
-        texture.name = obj.name;
+        
+        var name = obj[$ "name"];
+        if (name != undefined) texture.name = name;
+        
         texture.filter = obj.filter;
         texture.generateMipmaps = obj.generateMipmaps;
-        texture[$ "repeat"] = texrepeat;
-        
+        texture[$ "repeat"] = obj[$ "repeat"];
         cache.textures[$ obj.uuid] = texture;
     }
     
     function _readTypeMaterial(obj, buffer) {
         var material = new UeMaterial();
-
-        // UUID
         material.uuid = obj.uuid;
-        material.name = obj.name;
+        
+        var name = obj[$ "name"];
+        if (name != undefined) material.name = name;
     
         // Material base properties
         material.color = obj.color;
@@ -140,13 +157,22 @@ function UeBufferLoader() constructor {
         material.uniforms = obj.uniforms;
         material.textures = obj.textures; // Actual references are retrieved in the next step
         
+        // Try to set the material from the name
+        var shaderName = obj[$ "shader"];
+        if (shaderName != undefined) {
+            var shader = asset_get_index(shaderName);
+            if (shader != -1) material.shader = shader;
+        }
+        
         cache.materials[$ obj.uuid] = material;
     }
     
     function _readTypeMesh(obj, buffer) {
         var mesh = new UeMesh();
         mesh.uuid = obj.uuid;
-        mesh.name = obj.name;
+        
+        var name = obj[$ "name"];
+        if (name != undefined) mesh.name = name;
         
         // Read the children   
         mesh.children = obj.children;
@@ -170,11 +196,34 @@ function UeBufferLoader() constructor {
         cache.meshesFlatMap[$ obj.uuid] = mesh;
     }
     
+    function _readTypeLight(obj, buffer, objects) {
+        var light = new UeLight();
+        
+        var name = obj[$ "name"];
+        if (name != undefined) light.name = name;
+        
+        light.uuid = obj.uuid;
+        light.lightType = obj.lightType;
+        light.enabled = obj.enabled;
+        light.intensity = obj.intensity;
+        light.range = obj.range;
+        light.color = obj.color;
+        light.position = new UeVector3(obj.px, obj.py, obj.pz);
+        
+        if (obj[$ "targetX"] != undefined) {
+            light.target = new UeVector3(obj.targetX, obj.targetY, obj.targetZ);
+        }
+        
+        array_push(objects, light);
+    }
+    
     /** Resolvers */
     function _resolveGeometriesUUIDs() {
         struct_foreach(cache.geometries, function(geometryUuid, geometry) {
             geometry.format = cache.formats[$ geometry.format];
-            geometry.vb = vertex_create_buffer_from_buffer(geometry.vb, geometry.format.vf);
+            geometry.vb = vertex_create_buffer_from_buffer(geometry._vbBuffer, geometry.format.vf);
+            buffer_delete(geometry._vbBuffer);
+            variable_struct_remove(geometry, "_vbBuffer");
         });
     }
     
@@ -189,27 +238,29 @@ function UeBufferLoader() constructor {
                 var tuuid = materialTextures[$ tname];
                 material.textures[$ tname] = cache.textures[$ tuuid];
             }   
+            
+            material.build();
         });
     }
     
-    function _resolveMeshesUUIDs(rootMesh) {
+    function _resolveMeshesUUIDs(objects) {
         var meshesFlat = cache.meshesFlat;
         
         for (var i = 0, n = array_length(meshesFlat); i < n; i++) {
             var mesh = meshesFlat[i];
-            
-            var parentUuid = mesh._parentUuid;
-            if (parentUuid != undefined) {
-                cache.meshesFlatMap[$ parentUuid].add(mesh);
-            } else {
-                rootMesh.add(mesh);
-            }
             
             mesh.geometry = cache.geometries[$ mesh.geometry];
             mesh.material = cache.materials[$ mesh.material];
             
             for (var c = 0, clen = array_length(mesh.children); c < clen; c++) {
                 mesh.children[c] = cache.meshesFlatMap[$ mesh.children[c]];
+            }
+            
+            var parentUuid = mesh._parentUuid;
+            if (parentUuid != undefined) {
+                cache.meshesFlatMap[$ parentUuid].add(mesh);
+            } else {
+                array_push(objects, mesh);
             }
         }
     }

@@ -28,9 +28,9 @@ var pointLight = new UePointLight(2000, { x: 50, y: 70, z: 50 });
 scene.add(ambientLight, pointLight, terrain, treeGroup);
 
 sceneBuffer = new UeBufferExporter().parse(scene);
-buffer_save(sceneBuffer, "scene.buff");
+buffer_save(sceneBuffer, "scene0.buff");
 buffer_delete(sceneBuffer);
 scene.children = [];
-
-var model = new UeBufferLoader().load("scene.buff");
-scene.add(model.mesh);
+scene.lights = [];
+var model = new UeBufferLoader().load("scene0.buff");
+scene.add(model.objects);

@@ -5,9 +5,33 @@ function UeLight(data = {}): UeObject3D(data) constructor {
     intensity = data[$ "intensity"] ?? 1;
     enabled = data[$ "enabled"] ?? true;
     range = undefined;
+    target = undefined;
     
     function setColor(_color) {
         color = [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255];
+    }
+    
+    function _compileData(data) {
+        var _self = self;
+        var payload = { 
+            lightType, 
+            intensity, 
+            enabled,
+            range,
+            color,
+            px: position.x,
+            py: position.y,
+            pz: position.z,
+        };
+        
+        
+        if (target != undefined) {
+            payload.targetX = target.x;
+            payload.targetY = target.y;
+            payload.targetZ = target.z;
+        }
+        
+        return { obj: _self, payload };
     }
     
     setColor(data[$ "color"] ?? c_dkgray);

@@ -1,17 +1,19 @@
 function UeTexture(data = {}) constructor {
     isTexture = true;
+    type = "Texture";
     uuid = ueUuid();
+    name = undefined; // @MissingDoc
     image = data[$ "image"];
     subimg = data[$ "subimg"] ?? 0;
-    texture = sprite_get_texture(image, subimg);
     self[$ "repeat"] = data[$ "repeat"] ?? true;
     filter = data[$ "filter"] ?? true;
     generateMipmaps = data[$ "generateMipmaps"] ?? true;
+    texture = undefined;
     
     function setTexture(image, subimg = 0) {
         self.image = image;
         self.subimg = subimg;
-        texture = sprite_get_texture(image, subimg);
+        if (image != undefined) texture = sprite_get_texture(image, subimg);
         return self;
     }
     
@@ -34,46 +36,48 @@ function UeTexture(data = {}) constructor {
         var _self = self;
         
         // Get the sprite buffer size
-        var compileSprites = data.compileSprites && image;
-        var spriteBuffSize = 0;
+        log(self)
+        var compileSprites = data.compileSprites && image != undefined;
         var spriteWidth = undefined;
         var spriteHeight = undefined;
+        var spriteBuffSize = 0;
+        
+        var payload = {
+            filter,
+            generateMipmaps,
+        };
+        payload[$ "repeat"] = self[$ "repeat"];
         
         if (compileSprites) {
             spriteWidth = sprite_get_width(image);
             spriteHeight = sprite_get_height(image);
             spriteBuffSize = spriteWidth * spriteHeight * 4;
+            payload.spriteWidth = spriteWidth;
+            payload.spriteHeight = spriteHeight;
+            payload.spriteBuffSize = spriteBuffSize;
         }
         
-        var payload = {
-            type: UE_BUFFER_TYPE.TEXTURE,
-            uuid,
-            name,
-            filter,
-            generateMipmaps,
-            spriteWidth,
-            spriteHeight,
-            spriteBuffSize
-        };
-        obj[$ "repeat"] = self[$ "repeat"];
-        
         data.size += spriteBuffSize;
-        
-        var spriteSurf = surface_create(spriteWidth, spriteHeight);
-        surface_set_target(spriteSurf);
-        draw_sprite(image, 0, 0, 0);
-        surface_reset_target();
         
         return {
             obj: _self, 
             payload,
-            ctx: { spriteSurf, spriteBuffSize }
+            ctx: { spriteWidth, spriteHeight, spriteBuffSize }
         };
     }
     
     function _compileBufferExtra(buffer, ctx) {
-        buffer_get_surface(buffer, ctx.spriteSurf, buffer_tell(buffer));
-        buffer_seek(buffer, buffer_seek_relative, ctx.spriteBuffSize);
-        surface_free(ctx.spriteSurf);
+        if (!ctx.spriteBuffSize) return;
+            
+        var spriteSurf = surface_create(ctx.spriteWidth, ctx.spriteHeight);
+        surface_set_target(spriteSurf);
+        draw_sprite(image, 0, 0, 0);
+        surface_reset_target();
+        
+        buffer_get_surface(buffer, spriteSurf, buffer_tell(buffer));
+        
+        surface_free(spriteSurf);
     }
+    
+    setTexture(image, subimg);
 }

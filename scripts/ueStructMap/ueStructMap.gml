@@ -1,6 +1,6 @@
 function ueStructMap(struct, callback) {
     var finalStruct = {};
-    var names = variable_struct_names_count(struct);
+    var names = variable_struct_get_names(struct);
     var namesCount = variable_struct_names_count(struct);
     
     for (var i = 0; i < namesCount; i++) {
