@@ -14,7 +14,7 @@ function UeBufferLoader() constructor {
     /***
      * Load the scene objects from a buffer file
      **/
-    function load(fname, resetCache = true) {
+    function load(fname, isCompressed = true, resetCache = true) {
         if (resetCache) {
             cache.formats = {};
             cache.geometries = {};
@@ -25,12 +25,17 @@ function UeBufferLoader() constructor {
             cache.lights = {};
         }
         
-        var bufferCompressed = buffer_load(fname);
-        var buffer = buffer_decompress(bufferCompressed);
-        buffer_delete(bufferCompressed);
-        var size = buffer_get_size(buffer);
-        var objects = [];
+        // Load the buffer (decompress it first if specified)
+        var buffer = buffer_load(fname);
         
+        if (isCompressed) {
+            var bufferDecompressed = buffer_decompress(buffer);
+            buffer_delete(buffer);
+            buffer = bufferDecompressed;
+        }
+        
+        var size = buffer_get_size(buffer);
+        var objects = []; 
         
         while (buffer_tell(buffer) < size) {
             _readObject(buffer, objects);
