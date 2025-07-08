@@ -53,13 +53,15 @@ function UeMaterial(data = {}) constructor {
     }
   
     // Textures
-    textures = {};
-    if (data[$ "map"]) textures.map = data[$ "map"];
-    if (data[$ "normalMap"]) textures.normalMap = data[$ "normalMap"];
-    if (data[$ "roughnessMap"]) textures.roughnessMap = data[$ "roughnessMap"];
-    if (data[$ "metalnessMap"]) textures.metalnessMap = data[$ "metalnessMap"];
-    if (data[$ "aoMap"]) textures.aoMap = data[$ "aoMap"];
-    if (data[$ "emissiveMap"]) textures.emissiveMap = data[$ "emissiveMap"];
+    textures = {
+       map: data[$ "map"] ?? global.UE_DEFAULT_TEXTURE
+    };
+    //if (data[$ "map"] != undefined) textures.map = data[$ "map"];
+    if (data[$ "normalMap"] != undefined) textures.normalMap = data[$ "normalMap"];
+    if (data[$ "roughnessMap"] != undefined) textures.roughnessMap = data[$ "roughnessMap"];
+    if (data[$ "metalnessMap"] != undefined) textures.metalnessMap = data[$ "metalnessMap"];
+    if (data[$ "aoMap"] != undefined) textures.aoMap = data[$ "aoMap"];
+    if (data[$ "emissiveMap"] != undefined) textures.emissiveMap = data[$ "emissiveMap"];
         
     function build() { 
         if (shader == undefined) return self;
@@ -97,7 +99,7 @@ function UeMaterial(data = {}) constructor {
         var lightState = renderState.lightState;
         var camera = renderState.camera;
         
-        if (shader == undefined || !shader_is_compiled(shader)) return self;
+        if (shader == undefined) return self;
         shader_set(shader);
         
         shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], [mesh.position.x, mesh.position.y, mesh.position.z]);
@@ -165,7 +167,7 @@ function UeMaterial(data = {}) constructor {
         struct_foreach(textures, function(name, texture) {
             if (texture == undefined || texture.image == undefined) return;
             texture.use(_sampler_handlers[$ name]); 
-        });
+        }); 
         
         return self;
     }
@@ -181,7 +183,6 @@ function UeMaterial(data = {}) constructor {
             uniforms,
             textures: ueStructMap(textures, function(name, texture) { return texture.uuid }),
             shader: shader_get_name(shader),
-            // Props:
             color,
             transparent,
             opacity,

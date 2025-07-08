@@ -161,6 +161,7 @@ function UeBufferLoader() constructor {
         // Uniforms and textures
         material.uniforms = obj.uniforms;
         material.textures = obj.textures; // Actual references are retrieved in the next step
+        log(obj.textures)
         
         // Try to set the material from the name
         var shaderName = obj[$ "shader"];
@@ -203,7 +204,6 @@ function UeBufferLoader() constructor {
     
     function _readTypeLight(obj, buffer, objects) {
         var light = new UeLight();
-        log(obj)
         var name = obj[$ "name"];
         if (name != undefined) light.name = name;
         

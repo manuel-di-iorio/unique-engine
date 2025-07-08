@@ -1,5 +1,6 @@
 global.UNIQUE_ENGINE_OBJECT_ID = 0;
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
+global.UE_DEFAULT_TEXTURE = new UeTexture({ image: spr_ue_default_tex });
 
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,

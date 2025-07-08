@@ -50,11 +50,11 @@ renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera();
 
-cubeGeometry = new UeBoxGeometry({ color: c_blue });
+cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: c_blue });
 cubeMesh = new UeMesh(cubeGeometry);
 
 ambientLight = new UeAmbientLight();
-dirLight = new UeDirectionalLight({ xt: -100, yt: -50, zt: -70 });
+dirLight = new UeDirectionalLight(-100, 50, -70);
 
 scene.add(cubeMesh, ambientLight, dirLight);
 ```

@@ -1,64 +1,35 @@
 renderer = new UeRenderer();
 scene = new UeScene();
-camera = new UePerspectiveCamera({ x: 200, y: 70, z: 100 });
-orbitControls = new UeOrbitControls(camera);
+camera = new UePerspectiveCamera({ x: 150, y: 50, z: 50, xt: 10, yt: 0, zt: 30 });
 
-// Textures
-var texPyramid   = new UeTexture({ image: spr_tex_pyramid });
-var texSand      = new UeTexture({ image: spr_tex_sand });
-var texPalmTree  = new UeTexture({ image: spr_tex_palm_tree });
+// Create the terrain
+var terrainGeometry = new UeCircleGeometry(500);
+var terrain = new UeMesh(terrainGeometry, { z: -100 });
 
-// Materials
-var matSand    = new UeMaterial({ map: texSand, shader: sh_ue_standard });
-var matPyramid0 = new UeMaterial({ map: texPyramid, shader: sh_ue_standard });
-var matPyramid1 = new UeMaterial({ map: texPyramid, shader: sh_ue_standard });
-var matPyramid2 = new UeMaterial({ map: texPyramid, shader: sh_ue_standard });
-matTree    = new UeSpriteMaterial({ map: texPalmTree });
+// Example tree (group of meshes)
+var treeGroup = new UeMesh();
 
-// Terrain
-var desert = new UeMesh(new UePlaneGeometry(1000, 1000), { material: matSand });
+var treeShadowGeometry = new UeCircleGeometry(25, { color: c_gray });
+var treeShadow = new UeMesh(treeShadowGeometry, { z: -24 });
 
-// Pyramids
-var pyramid0 = new UeMesh(new UePyramidGeometry({ base: 160, height: 100 }), { material: matPyramid0 });
+var treeTrunkGeometry = new UeBoxGeometry(20, 20, 50, { color: c_maroon });
+var treeTrunk = new UeMesh(treeTrunkGeometry, { rx: 90 });
 
-var pyramid1 = new UeMesh(new UePyramidGeometry({ base: 75, height: 60 }), {
-    x: -150, y: -150, z: 0,
-    material: matPyramid1
-});
+var treeTopGeometry = new UeSphereGeometry(40, { color: #11aa11 });
+var treeTop = new UeMesh(treeTopGeometry, { z: 55 });
 
-var pyramid2 = new UeMesh(new UePyramidGeometry({ base: 60, height: 40 }), {
-    x: -150, y: 150, z: 0,
-    material: matPyramid2
-});
+treeGroup.add(treeShadow, treeTrunk, treeTop);
 
-// Palm trees (billboards)
-var treePositions = [
-    [  150, -200 ],
-    [  180,  200 ],
-    [  40,  350 ],
-    [ 220,   180 ],
-    [ -180, -320 ],
-    [ -220, 125 ]
-];
+// Lights
+var ambientLight = new UeAmbientLight(#226622);
+var pointLight = new UePointLight(2000, { x: 50, y: 70, z: 50 });
 
-array_foreach(treePositions, function(arr) {
-    var sprMesh = new UeSprite(matTree, {
-        x: arr[0], y: arr[1], z: 19,
-        sx: 26, sy: 40,
-        isSprite: true
-    });
-    scene.add(sprMesh);
-});
-
-// Lighting
-var ambientLight = new UeAmbientLight(#5A4628);
-var sunLight = new UeDirectionalLight(-200, -100, -150, { color: #FFFFC8, intensity: .8 });
-
-scene.add(ambientLight, sunLight, desert, pyramid0, pyramid1, pyramid2);
+// Add everything to the scene
+scene.add(ambientLight, pointLight, terrain, treeGroup);
 
 sceneBuffer = new UeBufferExporter().parse(scene);
-buffer_save(sceneBuffer, "scene1.buff");
+buffer_save(sceneBuffer, "scene0.buff");
 buffer_delete(sceneBuffer);
 scene.clear();
-var model = new UeBufferLoader().load("scene1.buff");
+var model = new UeBufferLoader().load("scene0.buff");
 scene.add(model.objects);

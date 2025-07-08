@@ -15,6 +15,7 @@
     {"name":"o_test","order":6,"path":"objects/o_test/o_test.yy",},
     {"name":"obj_scene_1","order":1,"path":"objects/obj_scene_1/obj_scene_1.yy",},
     {"name":"obj_scene_2","order":2,"path":"objects/obj_scene_2/obj_scene_2.yy",},
+    {"name":"obj_scene_3","order":3,"path":"objects/obj_scene_3/obj_scene_3.yy",},
     {"name":"r_test","order":5,"path":"rooms/r_test/r_test.yy",},
     {"name":"__GMassimp_Macros","order":1,"path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},
     {"name":"log","order":4,"path":"scripts/log/log.yy",},
@@ -51,5 +52,6 @@
     {"name":"sh_ue_standard","order":2,"path":"shaders/sh_ue_standard/sh_ue_standard.yy",},
     {"name":"spr_tex_palm_tree","order":2,"path":"sprites/spr_tex_palm_tree/spr_tex_palm_tree.yy",},
     {"name":"spr_tex_pyramid","order":1,"path":"sprites/spr_tex_pyramid/spr_tex_pyramid.yy",},
+    {"name":"spr_ue_default_tex","order":2,"path":"sprites/spr_ue_default_tex/spr_ue_default_tex.yy",},
   ],
 }
