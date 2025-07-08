@@ -3,10 +3,15 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     type = "Renderer";
     
     // Recursively collect renderable objects and split them into opaque and transparent queues
-    function _collectObjectQueues(objects, cameraPos, opaqueQueue, transparentQueue) {
+    function _collectObjectQueues(objects, lights, cameraPos, opaqueQueue, transparentQueue) {
         for (var i = 0, len = array_length(objects); i < len; i++) {
             var object = objects[i];
             
+            if (object[$ "isLight"]) {
+                array_push(lights, object);
+                continue;
+            }
+             
             // Precompute distance from camera for sorting
             object.__ueSortDistanceToCam = object.position.distanceSquaredTo(cameraPos);
 
@@ -14,7 +19,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             array_push(object.material != undefined && object.material.transparent ? transparentQueue : opaqueQueue, object); 
             
             // Traverse child objects
-            _collectObjectQueues(object.children, cameraPos, opaqueQueue, transparentQueue);
+            _collectObjectQueues(object.children, lights, cameraPos, opaqueQueue, transparentQueue);
         } 
     }
     
@@ -86,19 +91,22 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     /// Render the scene
     function render(scene, camera) {
         var currentBlendEnable = gpu_get_blendenable();
-
-        var lightState = _buildLightState(scene.lights);
-        var renderState = { scene, lightState, camera };
+        var currentCullMode = gpu_get_cullmode();
         
         // Collect and classify all renderable objects
         var opaqueQueue = [];
         var transparentQueue = [];
+        var lights = [];
         var cameraPos = camera.position;
-        _collectObjectQueues(scene.children, cameraPos, opaqueQueue, transparentQueue);
+        _collectObjectQueues(scene.children, lights, cameraPos, opaqueQueue, transparentQueue);
 
         // Sort both queues before rendering
         _sortObjectsByCamDistance(opaqueQueue, 0, array_length(opaqueQueue) - 1, false); // Front-to-back
         _sortObjectsByCamDistance(transparentQueue, 0, array_length(transparentQueue) - 1, true); // Back-to-front
+        
+        // Build the light and render state
+        var lightState = _buildLightState(lights);
+        var renderState = { scene, lightState, camera };
         
         // Render the objects opaque objects first
         _renderOpaqueObjects(opaqueQueue, renderState);
@@ -107,7 +115,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         // Reset world matrix after rendering
         matrix_set(matrix_world, matrix_build_identity()); 
         gpu_set_blendenable(currentBlendEnable);
-        gpu_set_cullmode(cull_noculling);
+        gpu_set_cullmode(currentCullMode);
 
         return self;
     }

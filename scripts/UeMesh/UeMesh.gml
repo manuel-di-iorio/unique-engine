@@ -2,7 +2,7 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
     self.isMesh = true;
     self.type = "Mesh";
     self.geometry = geometry ?? data[$ "geometry"];
-    self.material = data[$ "material"] ?? global.UE_MESH_STANDARD_MATERIAL;
+    self.material = data[$ "material"] ?? new UeMeshStandardMaterial();
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     //self.boundingBox = data[$ "boundingBox"] ?? new UeBox3(); // @todo
     
@@ -29,7 +29,7 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
             children: array_map(children, function(child) { return child.uuid }),
             // Props:
             visible,
-            parent: parent ? parent.uuid : undefined,
+            parent: parent && !parent[$ "isScene"] ? parent.uuid : undefined,
             renderOrder,
             geometry: geometry ? geometry.uuid : undefined,
             material: material ? material.uuid : undefined,

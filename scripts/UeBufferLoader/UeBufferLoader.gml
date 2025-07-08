@@ -198,7 +198,7 @@ function UeBufferLoader() constructor {
     
     function _readTypeLight(obj, buffer, objects) {
         var light = new UeLight();
-        
+        log(obj)
         var name = obj[$ "name"];
         if (name != undefined) light.name = name;
         

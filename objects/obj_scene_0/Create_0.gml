@@ -30,7 +30,6 @@ scene.add(ambientLight, pointLight, terrain, treeGroup);
 sceneBuffer = new UeBufferExporter().parse(scene);
 buffer_save(sceneBuffer, "scene0.buff");
 buffer_delete(sceneBuffer);
-scene.children = [];
-scene.lights = [];
+scene.clear();
 var model = new UeBufferLoader().load("scene0.buff");
 scene.add(model.objects);

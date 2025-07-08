@@ -1,6 +1,5 @@
 global.UNIQUE_ENGINE_OBJECT_ID = 0;
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
-global.UE_MESH_STANDARD_MATERIAL = new UeMeshStandardMaterial();
 
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,
@@ -20,7 +19,9 @@ enum UE_FORMAT_ATTR {
     CUSTOM = 4
 }
 
-
+/**
+ * Object3D
+ */
 function UeObject3D(data = {}): UeTransform(data) constructor {
     isObject3D = true;
     type = "Object3D"; // @MissingDoc
@@ -33,8 +34,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
 
     function render() {}
     
-    /// @param ...objects
     /// @MissingDoc array of objects
+    /// @param ...objects
     function add() {
         for (var i=0; i<argument_count; i++) {
             var objects = argument[i];

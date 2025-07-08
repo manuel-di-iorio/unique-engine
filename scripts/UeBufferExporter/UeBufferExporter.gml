@@ -13,10 +13,6 @@ function UeBufferExporter() constructor {
          
         _compileObject(obj, compilation);
         
-        if (obj[$ "isScene"]) {
-            _compileChildren(obj, "lights", compilation);
-        }
-        
         var buffer = buffer_create(compilation.size, buffer_fixed, 1);
         _buildObjects(buffer, compilation);
    
@@ -59,18 +55,14 @@ function UeBufferExporter() constructor {
                 break; 
         }
         
-        _compileChildren(obj, "children", compilation);
-    }
-        
-    function _compileChildren(obj, listField, compilation) {
-        var children = obj[$ listField];
+        var children = obj[$ "children"];
         if (children != undefined) {
             for (var i = 0, n = array_length(children); i < n; i++) {
                _compileObject(children[i], compilation);
             }
         }
     }
-    
+        
     function _buildObjects(buffer, compilation) {
         var elems = compilation.elems;
         

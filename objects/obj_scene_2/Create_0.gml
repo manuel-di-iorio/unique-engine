@@ -14,6 +14,7 @@ var importedMesh = assimpLoader.load("11804_Airplane_v2_l2.obj");
 // Manually import the texture into the model's material
 sprAirplane = sprite_add("11804_Airplane_diff.jpg", 1, false, false, 0, 0);
 texAirplane = new UeTexture({ image: sprAirplane });
+
 importedMesh.traverse(function(mesh) {
     var material = mesh.material;
     material.textures.map = texAirplane;
@@ -25,7 +26,6 @@ scene.add(ambientLight, sunLight, importedMesh);
 sceneBuffer = new UeBufferExporter().parse(scene);
 buffer_save(sceneBuffer, "scene2.buff");
 buffer_delete(sceneBuffer);
-scene.children = [];
-scene.lights = [];
+scene.clear();
 var model = new UeBufferLoader().load("scene2.buff");
 scene.add(model.objects);

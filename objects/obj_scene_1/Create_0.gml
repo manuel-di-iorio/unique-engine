@@ -59,7 +59,6 @@ scene.add(ambientLight, sunLight, desert, pyramid0, pyramid1, pyramid2);
 sceneBuffer = new UeBufferExporter().parse(scene);
 buffer_save(sceneBuffer, "scene1.buff");
 buffer_delete(sceneBuffer);
-scene.children = [];
-scene.lights = [];
+scene.clear();
 var model = new UeBufferLoader().load("scene1.buff");
 scene.add(model.objects);

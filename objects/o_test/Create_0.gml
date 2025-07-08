@@ -1,5 +1,5 @@
 bgLayer = layer_background_get_id("Background");
-demo = 1;
+demo = 0;
 demoMax = 2;
 scenes = [
     { obj: obj_scene_0, bg: #147FCC }, 

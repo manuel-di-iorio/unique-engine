@@ -36,7 +36,6 @@ function UeTexture(data = {}) constructor {
         var _self = self;
         
         // Get the sprite buffer size
-        log(self)
         var compileSprites = data.compileSprites && image != undefined;
         var spriteWidth = undefined;
         var spriteHeight = undefined;
