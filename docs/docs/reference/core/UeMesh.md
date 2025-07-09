@@ -16,3 +16,11 @@ new UeMesh(geometry, data = {})
 | `geometry`  | `UeBufferGeometry`    | **required**               | The geometry (vertex data)           |
 | `material`  | `UeMaterial`          | `UeMeshStandardMaterial()` | The material to use                  |
 | `primitive` | `number`              | `pr_trianglelist`          | GPU primitive mode (e.g. triangles)  |
+
+### Properties
+
+| Property    | Type      | Default | Description                         |
+| ----------- | --------- | ------- | ----------------------------------- |
+| `isMesh`    | `boolean` | `true`  | Identifies this object as a mesh    |
+| `type`      | `string`  | `Mesh`  | Object type                         |
+| `name`      | `string`  | undefined | Object name (optional)            |

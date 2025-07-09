@@ -21,6 +21,8 @@ const format = new UeVertexFormat().position().normal().uv().color().build();
 | Property          | Type         | Default | Description                            |
 | -------------     | ------------ | ------- | ----------------------------           |
 | `isVertexFormat`  | `boolean`    | true    | Indicates that this is a vertex format |
+| `type`            | `string`     | `VertexFormat` | Object type                     |
+| `name`            | `string`     | undefined | Object name (optional)               |
 | `uuid`            | `string`     |         | Resource UUID                          |
 
 ## 🧩 Methods

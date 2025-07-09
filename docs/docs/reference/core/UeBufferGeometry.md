@@ -19,10 +19,12 @@ new UeBufferGeometry(data = {})
 
 ### Properties
 
-| Property          | Type         | Default | Description                              |
-| -------------     | ------------ | ------- | ------------------------------           |
-| `isBufferGeometry`| `boolean`    | true    | Indicates that this is a buffer geometry |
-| `uuid`            | `string`     |         | Resource UUID                            |
+| Property          | Type         | Default   | Description                              |
+| -------------     | ------------ | -------   | ------------------------------           |
+| `isBufferGeometry`| `boolean`    | true      | Indicates that this is a buffer geometry |
+| `type`            | `string`     | `"BufferGeometry"` | Object type                               |
+| `name`            | `string`     | undefined | Object name (optional)                   |
+| `uuid`            | `string`     |            Resource UUID                            |
 
 ## 🧩 Methods
 

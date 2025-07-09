@@ -31,6 +31,8 @@ new UePerspectiveCamera(data = {})
 | Property    | Type        | Default         | Description                                       |
 | ----------  | ----------- | -------         | ------------------------------------------        |
 | `isCamera`  | boolean     | true            |  Indicates that this is a camera                  |
+| `type`      | `string`    | `PerspectiveCamera` | Object type                                   |
+| `name`      | `string`    | undefined       | Object name (optional)                           |
 | `camera`    | Camera      | camera_create() | The underlying GameMaker camera object            |
 | `target`    | `UeVector3` | 0,0,0           | The current look-at target                        |
 | `onUpdate`  | `function`  | Default method  | Function called every frame to update view matrix |

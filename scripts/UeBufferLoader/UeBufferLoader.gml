@@ -111,14 +111,17 @@ function UeBufferLoader() constructor {
             var spriteWidth = obj.spriteWidth;
             var spriteHeight = obj.spriteHeight;
             var spriteSurf = surface_create(spriteWidth, spriteHeight);
+            
             buffer_set_surface(buffer, spriteSurf, buffer_tell(buffer));
             buffer_seek(buffer, buffer_seek_relative, spriteBuffSize);
             
             // Create the actual sprite from the surface
             image = sprite_create_from_surface(spriteSurf, 0, 0, spriteWidth, spriteHeight, false, false, 0, 0);
+            sprite_prefetch(image);
+            sprite_save(image, 0, obj.uuid + ".png")
             surface_free(spriteSurf);
         }
-        
+
         var texture = new UeTexture({ image });
         texture.uuid = obj.uuid;
         
@@ -161,7 +164,6 @@ function UeBufferLoader() constructor {
         // Uniforms and textures
         material.uniforms = obj.uniforms;
         material.textures = obj.textures; // Actual references are retrieved in the next step
-        log(obj.textures)
         
         // Try to set the material from the name
         var shaderName = obj[$ "shader"];
@@ -255,6 +257,7 @@ function UeBufferLoader() constructor {
             var mesh = meshesFlat[i];
             
             mesh.geometry = cache.geometries[$ mesh.geometry];
+            log(mesh.material, cache.materials)
             mesh.material = cache.materials[$ mesh.material];
             
             for (var c = 0, clen = array_length(mesh.children); c < clen; c++) {

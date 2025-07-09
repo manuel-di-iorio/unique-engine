@@ -25,7 +25,7 @@ enum UE_FORMAT_ATTR {
  */
 function UeObject3D(data = {}): UeTransform(data) constructor {
     isObject3D = true;
-    type = "Object3D"; // @MissingDoc
+    type = "Object3D";
     id = global.UNIQUE_ENGINE_OBJECT_ID++; 
     name = data[$ "name"] ?? undefined;
     uuid = ueUuid();
@@ -35,7 +35,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
 
     function render() {}
     
-    /// @MissingDoc array of objects
     /// @param ...objects
     function add() {
         for (var i=0; i<argument_count; i++) {

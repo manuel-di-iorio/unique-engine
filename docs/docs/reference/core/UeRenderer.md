@@ -16,6 +16,8 @@ new UeRenderer(data = {})
 | Property     | Type      | Default | Description                         |
 | ------------ | --------- | ------- | ----------------------------------- |
 | `isRenderer` | `boolean` | `true`  | Identifies the object as a renderer |
+| `type`       | `string`  | `Renderer` | Object type                      |
+| `name`       | `string`  | undefined | Object name (optional)            |
 
 ## 🔧 Internal Logic
 

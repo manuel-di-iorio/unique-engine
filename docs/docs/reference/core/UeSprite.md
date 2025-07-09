@@ -27,6 +27,8 @@ new UeSprite(material = new UeSpriteMaterial(), data = {})
 | Property   | Type               | Default                  | Description                            |
 | ---------- | ------------------ | ------------------------ | -------------------------------------- |
 | `isSprite` | `boolean`          | `true`                   | Identifies this object as a sprite     |
+| `type`     | `string`           | `Sprite`                 | Object type                            |
+| `name`     | `string`           | undefined                | Object name (optional)                 |
 | `geometry` | `PlaneGeometry`    | `PlaneGeometry(1, 1)`    | A flat quad geometry                   |
 | `material` | `UeSpriteMaterial` | `new UeSpriteMaterial()` | Material used for rendering the sprite |
 

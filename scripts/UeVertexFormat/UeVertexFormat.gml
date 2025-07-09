@@ -2,7 +2,7 @@ function UeVertexFormat() constructor {
     isVertexFormat = true;
     type = "VertexFormat";
     uuid = ueUuid();
-    name = undefined; // @MissingDoc
+    name = data[$ "name"] ?? undefined;
     vf = undefined;
     attrs = [];
 

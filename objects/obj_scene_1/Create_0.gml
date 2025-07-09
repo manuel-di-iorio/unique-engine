@@ -27,6 +27,7 @@ var pointLight = new UePointLight(2000, { x: 50, y: 70, z: 50 });
 // Add everything to the scene
 scene.add(ambientLight, pointLight, terrain, treeGroup);
 
+// test:
 sceneBuffer = new UeBufferExporter().parse(scene);
 buffer_save(sceneBuffer, "scene0.buff");
 buffer_delete(sceneBuffer);

@@ -23,6 +23,7 @@ new UeObject3D(data = {})
 | Property      | Type         | Default   |  Description                         |
 | ------------- | ------------ | --------- | ---------------------------          |
 | `isObject3D`  | `boolean`    | true      | Indicates that this is an Object3D   |
+| `type`        | `string`     | `Object3D` | Object type                         |
 | `id`          | `number`     |           | Unique numeric ID                    |
 | `uuid`        | `string`     |           | Randomly generated unique identifier |
 | `name`        | `string`     |           | Optional human-readable name         |
@@ -44,7 +45,7 @@ This class inherits all transformation logic, including:
 ```js
 add(...objects)
 ```
-Adds one or more child objects.
+Adds one or more child objects. Accepts individual objects as arguments or an array of objects.
 
 ```js
 remove(child)

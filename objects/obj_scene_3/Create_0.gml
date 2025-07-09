@@ -23,7 +23,7 @@ importedMesh.traverse(function(mesh) {
 
 scene.add(ambientLight, sunLight, importedMesh);
 
-
+// test:
 sceneBuffer = new UeBufferExporter().parse(scene);
 buffer_save(sceneBuffer, "scene2.buff");
 buffer_delete(sceneBuffer);

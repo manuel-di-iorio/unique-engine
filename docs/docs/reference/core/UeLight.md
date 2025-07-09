@@ -17,7 +17,8 @@ new UeLight(data = {})
 | Property    | Type      | Default     | Description                                    |
 | ----------- | --------- | ----------- | ---------------------------------------------- |
 | `isLight`   | `boolean` | `true`      | Identifies this object as a light              |
-| `type`      | `string`  | `"Light"`   | Base type string                               |
+| `type`      | `string`  | `Light`     | Object type                                    |
+| `name`      | `string`  | undefined   | Object name (optional)                         |
 | `lightType` | `string`  | `"Light"`   | Specific light type (`"AmbientLight"`, etc.)   |
 | `intensity` | `number`  | `1`         | Brightness multiplier for this light           |
 | `enabled`   | `boolean` | `true`      | Whether the light is currently active          |

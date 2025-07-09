@@ -56,6 +56,7 @@ var sunLight = new UeDirectionalLight(-200, -100, -150, { color: #FFFFC8, intens
 
 scene.add(ambientLight, sunLight, desert, pyramid0, pyramid1, pyramid2);
 
+// test:
 sceneBuffer = new UeBufferExporter().parse(scene);
 buffer_save(sceneBuffer, "scene1.buff");
 buffer_delete(sceneBuffer);
