@@ -16,17 +16,11 @@ sprAirplane = sprite_add("11804_Airplane_diff.jpg", 1, false, false, 0, 0);
 texAirplane = new UeTexture({ image: sprAirplane });
 
 importedMesh.traverse(function(mesh) {
+    if (mesh[$ "geometry"] != undefined) mesh.geometry.freeze();
+    
     var material = mesh.material;
     material.textures.map = texAirplane;
     material.build();
 });
 
 scene.add(ambientLight, sunLight, importedMesh);
-
-// test:
-sceneBuffer = new UeBufferExporter().parse(scene);
-buffer_save(sceneBuffer, "scene2.buff");
-buffer_delete(sceneBuffer);
-scene.clear();
-var model = new UeBufferLoader().load("scene2.buff");
-scene.add(model.objects);

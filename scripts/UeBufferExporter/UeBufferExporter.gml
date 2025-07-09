@@ -2,7 +2,6 @@ function UeBufferExporter() constructor {
     /**
      * Export a scene or a mesh to a buffer
      */
-    // @MissingDoc
     function parse(obj, compress = true, compileSprites = true) {
         var compilation = {
             size: 0,

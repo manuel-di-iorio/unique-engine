@@ -7,7 +7,7 @@ function UeBufferGeometry(data = {}) constructor {
     index = data[$ "index"] ?? undefined;
     format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
     vb = undefined;
-    canFreeze = data[$ "canFreeze"] ?? false; // true // @todo
+    canFreeze = data[$ "canFreeze"] ?? true;
     
     function build() {
         vb = vertex_create_buffer();
@@ -90,5 +90,5 @@ function UeBufferGeometry(data = {}) constructor {
     } 
     
     // Build the vertex buffer with the initial vertices data
-    build();
+    if (array_length(vertices)) build();
 }

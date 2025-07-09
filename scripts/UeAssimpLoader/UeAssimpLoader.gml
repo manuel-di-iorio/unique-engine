@@ -186,7 +186,7 @@ function UeAssimpLoader(data = {}) constructor {
 		//mesh.boundingBox = { x1, y1, z1, x2, y2, z2, x_size: x2 - x1, y_size: y2 - y1, z_size: z2 - z1 };
 		//mesh.boundingBoxRelative = { x1, y1, z1, x2, y2, z2, x_size: x2 - x1, y_size: y2 - y1, z_size: z2 - z1 };
 		
-        mesh.geometry = new UeBufferGeometry({ vertices });
+        mesh.geometry = new UeBufferGeometry({ vertices, canFreeze: false });
         return mesh;
     }
     

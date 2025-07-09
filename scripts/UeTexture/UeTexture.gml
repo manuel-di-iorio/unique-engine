@@ -68,19 +68,12 @@ function UeTexture(data = {}) constructor {
     function _compileBufferExtra(buffer, ctx) {
         if (!ctx.spriteBuffSize) return;
             
-        log("compiling image:", image)
-        sprite_variable=sprite_duplicate(image);
-        sprite_save(sprite_variable, 0, "prova.png")
         var spriteSurf = surface_create(ctx.spriteWidth, ctx.spriteHeight);
         surface_set_target(spriteSurf);
-        draw_sprite(sprite_variable, 0, 0, 0);
+        draw_clear_alpha(c_black, 0);
+        draw_sprite(image, 0, 0, 0);
         surface_reset_target();
-        
-        var c = sprite_create_from_surface(spriteSurf, 0, 0, ctx.spriteWidth, ctx.spriteHeight, 0, 0, 0, 0);
-        sprite_save(c, 0, "c.png")
-        
         buffer_get_surface(buffer, spriteSurf, buffer_tell(buffer));
-        
         surface_free(spriteSurf);
     }
     

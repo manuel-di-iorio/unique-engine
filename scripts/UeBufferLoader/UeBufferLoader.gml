@@ -1,5 +1,4 @@
 function UeBufferLoader() constructor {
-    // @MissingDoc
     // Temporary internal variables
     cache = {
         formats: {},
@@ -117,8 +116,6 @@ function UeBufferLoader() constructor {
             
             // Create the actual sprite from the surface
             image = sprite_create_from_surface(spriteSurf, 0, 0, spriteWidth, spriteHeight, false, false, 0, 0);
-            sprite_prefetch(image);
-            sprite_save(image, 0, obj.uuid + ".png")
             surface_free(spriteSurf);
         }
 

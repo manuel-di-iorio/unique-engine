@@ -55,11 +55,3 @@ var ambientLight = new UeAmbientLight(#5A4628);
 var sunLight = new UeDirectionalLight(-200, -100, -150, { color: #FFFFC8, intensity: .8 });
 
 scene.add(ambientLight, sunLight, desert, pyramid0, pyramid1, pyramid2);
-
-// test:
-sceneBuffer = new UeBufferExporter().parse(scene);
-buffer_save(sceneBuffer, "scene1.buff");
-buffer_delete(sceneBuffer);
-scene.clear();
-var model = new UeBufferLoader().load("scene1.buff");
-scene.add(model.objects);

@@ -16,6 +16,7 @@ new UeBufferGeometry(data = {})
 | `vertices` | `array`          | `[]`                              | Array of vertex data                    |
 | `index`    | `array` / `null` | `undefined`                       | Optional index buffer for reusing verts |
 | `format`   | `VertexFormat`   | `global.UE_DEFAULT_VERTEX_FORMAT` | Vertex layout format                    |
+| `canFreeze`| `boolean`        | `true`                            | Whether to freeze the vertex buffer after the build |
 
 ### Properties
 
