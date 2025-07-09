@@ -1,4 +1,4 @@
-function UeVertexFormat() constructor {
+function UeVertexFormat(data = {}) constructor {
     isVertexFormat = true;
     type = "VertexFormat";
     uuid = ueUuid();
