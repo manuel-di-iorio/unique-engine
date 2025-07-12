@@ -61,22 +61,36 @@ function UeTransform(data = {}) constructor {
     }
     
     /// Update the matrixWorld of the children
-    /// @todo
-    //function updateWorldMatrix(updateParents = false, updateChildren = false) {
-        //// @todo
-        //if (updateParents) {
-            //show_debug_message("updateParents argument not supported yet")
-        //}
-        //
-        //if (updateChildren) {
-            //for (var i = 0, len = array_length(children); i < len; i++) {
-                //log(children[i].name)
-                //var child = children[i];
-                //child.matrixWorldNeedsUpdate = true;
-                //child.update();
-            //}
-        //}
-    //}
+    /// @MissingDoc
+    function updateWorldMatrix(updateParents = false, updateChildren = false) {
+        if (updateParents && parent != undefined) {
+            parent.updateWorldMatrix(true, false);
+        }
+    
+        if (matrixNeedsUpdate) {
+            updateMatrix();
+        }
+    
+        if (parent != undefined && parent.matrixWorld != undefined) {
+            matrixWorld = parent.matrixWorld.clone();
+            matrixWorld.multiply(matrix);
+        } else {
+            matrixWorld = matrix.clone();
+        }
+    
+        matrixWorldNeedsUpdate = false;
+    
+        if (updateChildren) {
+            for (var i = 0, len = array_length(children); i < len; i++) {
+                var child = children[i];
+                child.matrixWorldNeedsUpdate = true;
+                child.updateWorldMatrix(false, true);
+            }
+        }
+    
+        return self;
+    }
+
 
     // --- Translation methods ---
     function setPosition(x, y, z) {

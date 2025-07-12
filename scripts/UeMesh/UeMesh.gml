@@ -53,4 +53,25 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         
         return { obj: _self, payload };
     }
+    
+    // @todo This is a very simplified version of the actual implementation
+    // @MissingDoc
+    function raycast(raycaster, intersects) {
+        var object = self;
+        var _ray = raycaster.ray;
+        
+        if (geometry.boundingBox != undefined) {
+			if (!_ray.intersectsBox(geometry.boundingBox)) return;
+                
+            array_push(intersects, {
+                object
+            });
+		} else if (geometry.boundingSphere != undefined) {
+			if (!_ray.intersectsSphere(geometry.boundingSphere)) return;
+                
+            array_push(intersects, {
+                object
+            });
+		}
+    }
 }

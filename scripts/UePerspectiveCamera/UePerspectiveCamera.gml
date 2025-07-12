@@ -1,5 +1,6 @@
 function UePerspectiveCamera(data = {}): UeObject3D(data) constructor { 
-    isCamera = true;
+    isCamera = true; // @todo May create a new UeCamera class?
+    isPerspectiveCamera = true; // @MissingDoc
     type = "Camera";
     fov  = data[$ "fov"]  ?? 60;
     near = data[$ "near"] ?? 0.1;
