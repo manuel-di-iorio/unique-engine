@@ -13,7 +13,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             }
              
             // Precompute distance from camera for sorting
-            object.__ueSortDistanceToCam = object.position.distanceSquaredTo(cameraPos);
+            object.__ueSortDistanceToCam = object.position.distanceToSquared(cameraPos);
 
             // Push to transparent or opaque queue based on material property
             array_push(object.material != undefined && object.material.transparent ? transparentQueue : opaqueQueue, object); 

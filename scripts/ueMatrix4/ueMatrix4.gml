@@ -1,24 +1,34 @@
+// @MissingDoc
 function UeMatrix4(_data = undefined) constructor {
-    
-    // Matrix data, stored as a 4x4 column-major flat array
+    // dati in colonna-major
     data = _data ?? matrix_build_identity();
 
-    /// Multiplies this matrix by another (4x4)
+    /// Moltiplica questa matrice per un'altra
     function multiply(m) {
         data = matrix_multiply(self.data, m.data);
         return self;
     }
 
-    /// Creates a copy of this matrix
-    function clone() {
-        return variable_clone(self);
+    /// Moltiplica: risultato = a * b
+    function multiplyMatrices(a, b) {
+        data = matrix_multiply(a.data, b.data);
+        return self;
     }
 
-    /// Builds a transformation matrix from a Transform object (position, rotation, scale)
-    function buildByTransform(transform) {
-        var pos = transform.position;
-        var rot = transform.rotation;
-        var scl = transform.scale;
+    /// Pre-moltiplica: risultato = m * questa
+    function premultiply(m) {
+        data = matrix_multiply(m.data, self.data);
+        return self;
+    }
+
+    /// Moltiplica ogni componente per uno scalare
+    function multiplyScalar(s) {
+        for (var i = 0; i < 16; i++) data[i] *= s;
+        return self;
+    }
+
+    /// Costruita da transform (pos, quat, scale)
+    function compose(pos, rot, scl) {
     
         // Normalize quaternion to prevent rotation-scaling artifacts
         rot.normalize();
@@ -49,6 +59,331 @@ function UeMatrix4(_data = undefined) constructor {
             pos.x, pos.y, pos.z, 1
         ];
 
+        return self;
+    }
+
+    /// Estrae pos, rot e scala da matrix
+    function decompose(position, quaternion, scale) {
+        var te = data;
+        position.set(te[12], te[13], te[14]);
+
+        var sx = new UeVector3(te[0], te[1], te[2]).length();
+        var sy = new UeVector3(te[4], te[5], te[6]).length();
+        var sz = new UeVector3(te[8], te[9], te[10]).length();
+
+        scale.set(sx, sy, sz);
+
+        var m = self.clone();
+        var invScale = new UeVector3(1/sx, 1/sy, 1/sz);
+        m.scale(invScale);
+
+        quaternion.setFromRotationMatrix(m);
+        return self;
+    }
+
+    /// Copia un'altra matrice
+    function copy(m) {
+        for (var i = 0; i < 16; i++) data[i] = m.data[i];
+        return self;
+    }
+
+    /// Copia solo la parte traslazione da un'altra matrice
+    function copyPosition(m) {
+        data[12] = m.data[12];
+        data[13] = m.data[13];
+        data[14] = m.data[14];
+        return self;
+    }
+
+    /// Determinante della matrice
+    function determinant() {
+        var a00 = data[ 0], a01 = data[ 4], a02 = data[ 8],  a03 = data[12];
+        var a10 = data[ 1], a11 = data[ 5], a12 = data[ 9],  a13 = data[13];
+        var a20 = data[ 2], a21 = data[ 6], a22 = data[10],  a23 = data[14];
+        var a30 = data[ 3], a31 = data[ 7], a32 = data[11],  a33 = data[15];
+    
+        var det00 = a00 * (a11 * (a22 * a33 - a23 * a32) - a12 * (a21 * a33 - a23 * a31) + a13 * (a21 * a32 - a22 * a31));
+        var det01 = a01 * (a10 * (a22 * a33 - a23 * a32) - a12 * (a20 * a33 - a23 * a30) + a13 * (a20 * a32 - a22 * a30));
+        var det02 = a02 * (a10 * (a21 * a33 - a23 * a31) - a11 * (a20 * a33 - a23 * a30) + a13 * (a20 * a31 - a21 * a30));
+        var det03 = a03 * (a10 * (a21 * a32 - a22 * a31) - a11 * (a20 * a32 - a22 * a30) + a12 * (a20 * a31 - a21 * a30));
+    
+        return det00 - det01 + det02 - det03;
+    }
+
+    /// Inversione della matrice
+    function invert() {
+        data = matrix_inverse(self.data);
+        return self;
+    }
+
+    /// Confronto tra matrici
+    function equals(m) {
+        for (var i = 0; i < 16; i++)
+            if (data[i] != m.data[i]) return false;
+        return true;
+    }
+
+    /// Estrae le tre axis basis
+    function extractBasis(xAxis, yAxis, zAxis) {
+        xAxis.set(data[0], data[1], data[2]);
+        yAxis.set(data[4], data[5], data[6]);
+        zAxis.set(data[8], data[9], data[10]);
+        return self;
+    }
+
+    /// Estrae solo la rotazione
+    function extractRotation(m) {
+        self.copy(m);
+        var scale = new UeVector3();
+        self.decompose(new UeVector3(), new UeQuaternion(), scale);
+        return self;
+    }
+
+    /// Reset a identità
+    function identity() {
+        data = matrix_build_identity();
+        return self;
+    }
+
+    /// Costruisce una matrice lookAt da occhio, target, up
+    function lookAt(eye, target, up) {
+        var m = matrix_build_lookat(eye.x, eye.y, eye.z, target.x, target.y, target.z, up.x, up.y, up.z);
+        data = m;
+        return self;
+    }
+
+    /// Rotazione attorno ad un asse
+    function makeRotationAxis(axis, theta) {
+        var q = new UeQuaternion().setFromAxisAngle(axis, theta);
+        return self.makeRotationFromQuaternion(q);
+    }
+
+    /// Rotazione da quaternion
+    function makeRotationFromQuaternion(q) {
+        self.compose(new UeVector3(), q, new UeVector3(1,1,1));
+        return self;
+    }
+
+    /// Costruzione matrice di scala
+    function makeScale(x, y, z) {
+        data = [
+            x, 0, 0, 0,
+            0, y, 0, 0,
+            0, 0, z, 0,
+            0, 0, 0, 1
+        ];
+        return self;
+    }
+
+    /// Costruzione matrice di traslazione
+    function makeTranslation(x, y, z) {
+        data = [
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            x, y, z, 1
+        ];
+        return self;
+    }
+
+    /// Costruzione matrice prospettica
+    function makePerspective(left, right, top, bottom, near, far) {
+        var width  = right - left;
+        var height = top - bottom;
+        var aspect = width / height;
+        var fov_y_deg = radtodeg(2 * arctan(height * 0.5 / near));
+    
+        data = matrix_build_projection_perspective(fov_y_deg, aspect, near, far);
+        return self;
+    }
+
+    /// Costruzione matrice ortografica
+    function makeOrthographic(left, right, top, bottom, near, far) {
+        var width  = right - left;
+        var height = top - bottom;
+    
+        data = matrix_build_projection_ortho(width, height, near, far);
+        return self;
+    }
+
+    /// Legge da array column-major
+    function fromArray(arr, offset = 0) {
+        for (var i = 0; i < 16; i++) data[i] = arr[i + offset];
+        return self;
+    }
+
+    /// Scrive in array column-major
+    function toArray(arr = undefined, offset = 0) {
+        arr ??= [];
+        for (var i = 0; i < 16; i++) arr[offset + i] = data[i];
+        return arr;
+    }
+
+    /// Trasposta la matrice (row ↔ column)
+    function transpose() {
+        data = [
+            data[0], data[4], data[8],  data[12],
+            data[1], data[5], data[9],  data[13],
+            data[2], data[6], data[10], data[14],
+            data[3], data[7], data[11], data[15]
+        ];
+        return self;
+    }
+
+    /// Trova la scala massima lungo gli assi (usato in UeSphere)
+    function getMaxScaleOnAxis() {
+        var sx = new UeVector3(data[0], data[1], data[2]).length();
+        var sy = new UeVector3(data[4], data[5], data[6]).length();
+        var sz = new UeVector3(data[8], data[9], data[10]).length();
+        return max(sx, sy, sz);
+    }
+
+    /// Applica la matrice ad un punto Vector3 (w=1)
+    function applyToVector3(vec) {
+        var e = data;
+        var xx = vec.x, yy = vec.y, zz = vec.z;
+        var tx = e[0]*xx + e[4]*yy + e[8]*zz + e[12];
+        var ty = e[1]*xx + e[5]*yy + e[9]*zz + e[13];
+        var tz = e[2]*xx + e[6]*yy + e[10]*zz + e[14];
+        var tw = e[3]*xx + e[7]*yy + e[11]*zz + e[15];
+        if (tw != 1 && tw != 0) {
+            tx /= tw; ty /= tw; tz /= tw;
+        }
+        return new UeVector3(tx, ty, tz);
+    }
+
+    /// Copia la matrice
+    function clone() {
+        return variable_clone(self);
+    }
+    
+    /// Scala la matrice moltiplicando le colonne per un vettore
+    function scale(v) {
+        data[0] *= v.x; data[1] *= v.x; data[2] *= v.x; data[3] *= v.x;
+        data[4] *= v.y; data[5] *= v.y; data[6] *= v.y; data[7] *= v.y;
+        data[8] *= v.z; data[9] *= v.z; data[10] *= v.z; data[11] *= v.z;
+        return self;
+    }
+
+    /// Imposta gli elementi della matrice con valori in row-major
+    function set(n11, n12, n13, n14,
+                 n21, n22, n23, n24,
+                 n31, n32, n33, n34,
+                 n41, n42, n43, n44) {
+        // Ricorda: interna è column-major, quindi trasponiamo
+        data[0]  = n11; data[4]  = n12; data[8]  = n13; data[12] = n14;
+        data[1]  = n21; data[5]  = n22; data[9]  = n23; data[13] = n24;
+        data[2]  = n31; data[6]  = n32; data[10] = n33; data[14] = n34;
+        data[3]  = n41; data[7]  = n42; data[11] = n43; data[15] = n44;
+        return self;
+    }
+
+    /// Imposta la posizione senza alterare rotazione e scala
+    function setPosition(v) {
+        data[12] = v.x;
+        data[13] = v.y;
+        data[14] = v.z;
+        return self;
+    }
+    
+    function setPositionXYZ(x, y, z) {
+        data[12] = x;
+        data[13] = y;
+        data[14] = z;
+        return self;
+    }
+
+    /// Costruisce una matrice a partire da tre vettori base (basis vectors)
+    function makeBasis(xAxis, yAxis, zAxis) {
+        data = [
+            xAxis.x, yAxis.x, zAxis.x, 0,
+            xAxis.y, yAxis.y, zAxis.y, 0,
+            xAxis.z, yAxis.z, zAxis.z, 0,
+            0,       0,       0,       1
+        ];
+        return self;
+    }
+
+    /// Costruisce matrice di rotazione da un Euler (angoli in degrees)
+    function makeRotationFromEuler(x_deg, y_deg, z_deg) {
+        var c1 = dcos(x_deg);
+        var c2 = dcos(y_deg);
+        var c3 = dcos(z_deg);
+        var s1 = dsin(x_deg);
+        var s2 = dsin(y_deg);
+        var s3 = dsin(z_deg);
+    
+        // Ordine XYZ:
+        var m00 = c2 * c3;
+        var m01 = -c2 * s3;
+        var m02 = s2;
+    
+        var m10 = c1 * s3 + s1 * s2 * c3;
+        var m11 = c1 * c3 - s1 * s2 * s3;
+        var m12 = -s1 * c2;
+    
+        var m20 = s1 * s3 - c1 * s2 * c3;
+        var m21 = s1 * c3 + c1 * s2 * s3;
+        var m22 = c1 * c2;
+    
+        data = [
+            m00, m01, m02, 0,
+            m10, m11, m12, 0,
+            m20, m21, m22, 0,
+            0,   0,   0,   1
+        ];
+    
+        return self;
+    }
+
+
+    /// Costruisce matrice di rotazione X
+    function makeRotationX(theta) {
+        var c = cos(theta);
+        var s = sin(theta);
+        data = [
+            1, 0, 0, 0,
+            0, c, s, 0,
+            0,-s, c, 0,
+            0, 0, 0, 1
+        ];
+        return self;
+    }
+
+    /// Costruisce matrice di rotazione Y
+    function makeRotationY(theta) {
+        var c = cos(theta);
+        var s = sin(theta);
+        data = [
+            c, 0,-s, 0,
+            0, 1, 0, 0,
+            s, 0, c, 0,
+            0, 0, 0, 1
+        ];
+        return self;
+    }
+
+    /// Costruisce matrice di rotazione Z
+    function makeRotationZ(theta) {
+        var c = cos(theta);
+        var s = sin(theta);
+        data = [
+            c, s, 0, 0,
+           -s, c, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ];
+        return self;
+    }
+
+    /// Costruisce matrice di shear (shearing)
+    function makeShear(xy, xz, yx, yz, zx, zy) {
+        data = [
+            1,  yx, zx, 0,
+            xy, 1,  zy, 0,
+            xz, yz, 1,  0,
+            0,  0,  0,  1
+        ];
         return self;
     }
 }

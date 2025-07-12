@@ -8,7 +8,11 @@ function UeBufferGeometry(data = {}) constructor {
     format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
     vb = undefined;
     canFreeze = data[$ "canFreeze"] ?? true;
-    
+    // @MissingDoc
+    boundingBox = data[$ "boundingBox"] ?? new UeBox3();
+    // @MissingDoc
+    //boundingSphere = data[$ "boundingSphere"] ?? new UeSphere();
+
     function build() {
         vb = vertex_create_buffer();
         vertex_begin(vb, format.vf);
@@ -59,6 +63,18 @@ function UeBufferGeometry(data = {}) constructor {
     function dispose() {
         vertex_delete_buffer(vb);
         vb = undefined;
+        return self;
+    }
+    
+    // @MissingDoc
+    function computeBoundingBox() {
+        boundingBox.setFromPoints(vertices);
+        return self;
+    }
+    
+    // @MissingDoc
+    function computeBoundingSphere() {
+        //boundingSphere.setFromPoints(vertices);
         return self;
     }
     

@@ -11,20 +11,32 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     target = new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
     autoUse = data[$ "autoUse"] ?? true;
     antialias = data[$ "antialias"] ?? 4;
-    vsync = data[$ "vsync"] ?? true; 
+    vsync = data[$ "vsync"] ?? true;
+    // @MissingDoc
+    matrixWorld = undefined;
+    // @MissingDoc
+    matrixWorldInverse = undefined;
+    // @MissingDoc
+    projectionMatrix = undefined;
+    // @MissingDoc
+    projectionMatrixInverse = undefined;
     
     onUpdate = data[$ "onUpdate"] ?? function() {
-        camera_set_view_mat(camera, matrix_build_lookat(
+        matrixWorldInverse  = matrix_build_lookat(
             position.x, position.y, position.z,  // From
             target.x, target.y, target.z, // To
             0, 0, -1 // Up
-        ));
+        );
+        matrixWorld = matrix_inverse(matrixWorldInverse);
+        
+        camera_set_view_mat(camera, matrixWorldInverse);
     };
     
     // Build the perspective projection
     function use() {
-        matProj = matrix_build_projection_perspective_fov(fov, aspect, near, far);
-    	camera_set_proj_mat(camera, matProj);
+        projectionMatrix = matrix_build_projection_perspective_fov(fov, aspect, near, far);
+        projectionMatrixInverse = matrix_inverse(projectionMatrix);
+    	camera_set_proj_mat(camera, projectionMatrix);
         camera_set_update_script(camera, onUpdate);
         
         view_set_visible(view, true);

@@ -4,7 +4,6 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
     self.geometry = geometry ?? data[$ "geometry"];
     self.material = data[$ "material"] ?? new UeMeshStandardMaterial();
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
-    //self.boundingBox = data[$ "boundingBox"] ?? new UeBox3(); // @todo
     
     function render(renderState) {
         var scene = renderState.scene;

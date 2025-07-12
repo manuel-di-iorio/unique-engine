@@ -6,8 +6,8 @@ function UeTransform(data = {}) constructor {
     up       = new UeVector3(0, 1, 0);
 
     // Transformation matrices
-    matrix = undefined;
-    matrixWorld = undefined;
+    matrix = new UeMatrix4();
+    matrixWorld = new UeMatrix4();
 
     // Parent (optional)
     parent = data[$ "parent"] ?? undefined;
@@ -40,7 +40,7 @@ function UeTransform(data = {}) constructor {
     /// Rebuild local matrix from position/rotation/scale
     function updateMatrix() {
         matrixNeedsUpdate = false;
-        matrix = new UeMatrix4().buildByTransform(self);
+        matrix.compose(position, rotation, scale);
         matrixWorldNeedsUpdate = true;
         return self;
     }
@@ -111,19 +111,9 @@ function UeTransform(data = {}) constructor {
 
     // --- Rotation methods ---
     function lookAtVec(target) {
-        var forward = target.sub(position).normalize();
-        var right = self.up.cross(forward).normalize();
-        var up = forward.cross(right);
-
-        var m = new UeMatrix4([
-            right.x, up.x, forward.x, 0,
-            right.y, up.y, forward.y, 0,
-            right.z, up.z, forward.z, 0,
-            0,       0,    0,         1
-        ]);
-    
+        var m = new UeMatrix4();
+        m.lookAt(position, target, up);
         rotation.setFromRotationMatrix(m);
-    
         matrixNeedsUpdate = true;
         return self;     
     }
