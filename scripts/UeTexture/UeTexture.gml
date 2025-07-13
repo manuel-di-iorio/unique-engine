@@ -17,11 +17,12 @@ function UeTexture(data = {}) constructor {
         return self;
     }
     
-    function use(sampler) {
+    // @MissingDoc wireframe arg
+    function use(sampler, wireframe = false) {
         gpu_set_texrepeat_ext(sampler, self[$ "repeat"]);
         gpu_set_texfilter_ext(sampler, filter);
         gpu_set_tex_mip_enable_ext(sampler, generateMipmaps);
-        texture_set_stage(sampler, texture);
+        texture_set_stage(sampler, wireframe ? global.UE_DEFAULT_TEXTURE.texture : texture);
         return self;
     }
     

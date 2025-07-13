@@ -13,6 +13,7 @@ function UeMaterial(data = {}) constructor {
     forceSinglePass = data[$ "forceSinglePass"] ?? false;
     alphaTest = data[$ "alphaTest"] ?? 0;
     colorWrite = data[$ "colorWrite"] ?? true;
+    wireframe = data[$ "wireframe"] ?? false; // @MissingDoc
     
     // Blending
     blending = data[$ "blending"] ?? transparent;
@@ -117,9 +118,14 @@ function UeMaterial(data = {}) constructor {
             shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightColor{i}"], [0, 0, 0]);
             shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], 0);
         }
+        
+        // Vertex white color in wireframe mode
+        if (wireframe) {
+            shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], [1, 1, 1]);
+        }
 
         // Set the light uniform values
-        if (lights) { 
+        if (lights && !wireframe) { 
             shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState.ambient);
             
             var dirLightsNum = array_length(lightState.directional);
@@ -166,7 +172,7 @@ function UeMaterial(data = {}) constructor {
         // Set the texture samplers
         struct_foreach(textures, function(name, texture) {
             if (texture == undefined || texture.image == undefined) return;
-            texture.use(_sampler_handlers[$ name]); 
+            texture.use(_sampler_handlers[$ name], wireframe); 
         }); 
         
         return self;

@@ -16,7 +16,7 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         if (visible && geometry) {
             matrix_set(matrix_world, matrixWorld.data);
             material.use(renderState, self);
-            vertex_submit(geometry.vb, primitive, material.textures[$ "map"] ?? -1);
+            vertex_submit(geometry.vb, material.wireframe ? pr_linelist : primitive, -1);
             shader_reset();
         }
     }

@@ -254,7 +254,6 @@ function UeBufferLoader() constructor {
             var mesh = meshesFlat[i];
             
             mesh.geometry = cache.geometries[$ mesh.geometry];
-            log(mesh.material, cache.materials)
             mesh.material = cache.materials[$ mesh.material];
             
             for (var c = 0, clen = array_length(mesh.children); c < clen; c++) {
