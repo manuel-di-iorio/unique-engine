@@ -100,6 +100,8 @@ function UeMaterial(data = {}) constructor {
         var lightState = renderState.lightState;
         var camera = renderState.camera;
         
+        if (wireframe) return self;
+        
         if (shader == undefined) return self;
         shader_set(shader);
         
@@ -119,13 +121,8 @@ function UeMaterial(data = {}) constructor {
             shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], 0);
         }
         
-        // Vertex white color in wireframe mode
-        if (wireframe) {
-            shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], [1, 1, 1]);
-        }
-
         // Set the light uniform values
-        if (lights && !wireframe) { 
+        if (lights) { 
             shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState.ambient);
             
             var dirLightsNum = array_length(lightState.directional);

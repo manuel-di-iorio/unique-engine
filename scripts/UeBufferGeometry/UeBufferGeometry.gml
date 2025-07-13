@@ -74,7 +74,7 @@ function UeBufferGeometry(data = {}) constructor {
     
     // @MissingDoc
     function computeBoundingSphere() {
-        //boundingSphere.setFromPoints(vertices);
+        boundingSphere.setFromPoints(vertices);
         return self;
     }
     

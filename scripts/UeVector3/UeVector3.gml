@@ -1,3 +1,4 @@
+// @MissingDoc
 function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     self.x = _x;
     self.y = _y;
