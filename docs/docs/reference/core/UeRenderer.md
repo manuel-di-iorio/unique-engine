@@ -48,7 +48,7 @@ Objects are sorted by distance to the camera using quicksort:
 
 **Lighting Aggregation**
 
-When the internal `render()` method is called, the renderer collects all active lights from scene.lights, and builds a lightState object:
+When the internal `render()` method is called, the renderer collects all active lights, and builds a lightState object:
 
 ```js
 {
@@ -64,7 +64,7 @@ Each light contributes only if enabled == true.
 - The renderer expects all visible meshes to implement a .render(renderState) method.
 - The renderState struct passed to each mesh includes:
 
-  - scene, lightState, camera, and optionally side (for double-pass).
+  - scene, lightState, camera.
 
 - World matrix is reset to identity after rendering to avoid side effects.
 

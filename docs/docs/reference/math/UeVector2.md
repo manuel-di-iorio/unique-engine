@@ -12,7 +12,7 @@ A 2D vector class with common vector operations. Useful for positions, direction
 new UeVector2(x = 0, y = 0)
 ```
 
-### Parameters
+### Data parameters
 
 | Name | Type     | Default | Description  |
 | ---- | -------- | ------- | ------------ |

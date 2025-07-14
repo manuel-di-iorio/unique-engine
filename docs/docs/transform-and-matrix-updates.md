@@ -36,7 +36,7 @@ Unique Engine minimizes redundant matrix computations using a dirty flag system.
 
 Whenever you call a transform method like .rotateY() or .setScale(), it sets `matrixNeedsUpdate = true`, ensuring the matrix is rebuilt only once during rendering.
 
-This is not automatic if you mutate .position or .rotation manually:
+This is not automatic if you mutate .position, .rotation or .scale manually:
 
 ```js
 // ❌ This won't trigger matrix update

@@ -12,7 +12,7 @@ Represents a ray in 3D space defined by an origin and a normalized direction vec
 new UeRay(origin = new UeVector3(), direction = new UeVector3(0, 0, -1))
 ```
 
-### Parameters
+### Data parameters
 
 | Name        | Type        | Default                   | Description                                |
 | ----------- | ----------- | ------------------------- | ------------------------------------------ |

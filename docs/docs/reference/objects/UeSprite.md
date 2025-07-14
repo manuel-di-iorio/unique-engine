@@ -1,5 +1,5 @@
 ---
-sidebar_position: 10
+sidebar_position: 4
 ---
 
 A `UeSprite` is a lightweight 2D object rendered as a billboard that always faces the camera.  
@@ -9,13 +9,15 @@ Inherits from `UeMesh` and uses a flat plane geometry (`PlaneGeometry`) and typi
 
 ---
 
-## 🖼️ `UeSprite`
+### Constructor
 
 ```js
 new UeSprite(material = new UeSpriteMaterial(), data = {})
 ```
 
-### Parameters
+> Inherits from [UeMesh](/docs/reference/objects/UeMesh)
+
+### Data parameters
 
 | Name       | Type               | Default                  | Description                            |
 | ---------- | ------------------ | ------------------------ | -------------------------------------- |

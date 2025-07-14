@@ -12,6 +12,8 @@ Lights affect materials that have lighting enabled (e.g. `UeMeshStandardMaterial
 new UeLight(data = {})
 ```
 
+> Inherits from [UeObject3D](/docs/reference/core/UeObject3D)
+
 ### Properties
 
 | Property    | Type      | Default     | Description                                    |

@@ -40,17 +40,6 @@ Support via AssimpDLL by Jak (not included in the library for licensing reasons)
 
 ---
 
-## In development features ⏳
-
-- Import/export scene graph and single objects via buffer file
-- Additional mesh primitives and new materials (billboards with rotation via vertex shader are already available)
-- Bounding box and bounding sphere for simple collisions
-- Multiple shader passes for advanced effects and post processing
-- Animations
-- Shadows, spot lights and other Three.js inspired features
-
----
-
 ## Basic example:
 
 ```gml
@@ -66,6 +55,12 @@ dirLight = new UeDirectionalLight({ xt: -100, yt: -50, zt: -70 });
 
 scene.add(cubeMesh, ambientLight, dirLight);
 ```
+
+---
+
+## Trello board:
+
+https://trello.com/b/NYfgFbd8/unique-engine
 
 ---
 

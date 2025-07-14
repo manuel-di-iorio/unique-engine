@@ -27,7 +27,7 @@ load(fname, isCompressed = true, resetCache = true)
 ```
 Loads and reconstructs scene objects from a binary buffer file.
 
-### Parameters
+### Data parameters
 
 | Parameter      | Type      | Default | Description                                      |
 | -------------- | --------- | ------- | ------------------------------------------------ |

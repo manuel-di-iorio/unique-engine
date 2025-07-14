@@ -26,7 +26,7 @@ parse(obj, compress = true, compileSprites = true)
 ```
 Exports a scene or mesh object to a binary buffer.
 
-### Parameters
+### Data parameters
 
 | Parameter       | Type      | Default | Description                                    |
 | --------------- | --------- | ------- | ---------------------------------------------- |

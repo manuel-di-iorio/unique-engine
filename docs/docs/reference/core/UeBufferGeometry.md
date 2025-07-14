@@ -9,7 +9,7 @@ The `UeBufferGeometry` class represents a 3D geometry made of vertices and optio
 new UeBufferGeometry(data = {})
 ```
 
-### Parameters
+### Data parameters
 
 | Key        | Type             | Default                           | Description                             |
 | ---------- | ---------------- | --------------------------        | --------------------------------------- |

@@ -12,7 +12,7 @@ Represents a mathematical plane in 3D space defined by a normal vector and a dis
 new UePlane(normal = new UeVector3(0, 1, 0), d = 0)
 ```
 
-### Parameters
+### Data parameters
 
 | Name     | Type        | Default                  | Description                                      |
 | -------- | ----------- | ------------------------ | ------------------------------------------------ |

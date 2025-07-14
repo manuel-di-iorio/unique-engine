@@ -1,4 +1,4 @@
-/// @class UeRaycaster
+/// @MissingDoc UeRaycaster
 function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1), _near = 0, _far = infinity) constructor {
     self.ray = new UeRay(_origin, _direction);
     self.near = _near;
@@ -26,10 +26,10 @@ function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0,
         if (camera.isPerspectiveCamera) {
             origin.copy(camera.position);
             dir.set(coords.x, coords.y, 0.5).unproject(camera).sub(camera.position).normalize();
-        } /*else if (camera.isOrthographicCamera) {
+        } else if (camera.isOrthographicCamera) {
             origin.set(coords.x, coords.y, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
             dir.set(0, 0, -1).transformDirection(camera.matrixWorld);
-        }*/
+        }
 
         self.ray.set(origin, direction);
     }

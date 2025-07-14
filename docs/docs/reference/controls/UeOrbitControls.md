@@ -10,7 +10,7 @@ It supports mouse drag, scroll wheel zoom, keyboard pan/rotation, and inertia da
 new UeOrbitControls(data = {})
 ```
 
-### Parameters
+### Data parameters
 
 | Key                  | Type        | Default      | Description                         |
 | -------------------- | ----------- | ------------ | ----------------------------------- |

@@ -12,7 +12,7 @@ Represents a 3×3 matrix, mainly used for 2D/3D transformations like normal matr
 new UeMatrix3(data = undefined)
 ```
 
-### Parameters
+### Data parameters
 
 | Name   | Type       | Default         | Description                                        |
 | ------ | ---------- | --------------- | -------------------------------------------------- |

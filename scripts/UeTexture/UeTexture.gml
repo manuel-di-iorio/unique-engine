@@ -2,7 +2,7 @@ function UeTexture(data = {}) constructor {
     isTexture = true;
     type = "Texture";
     uuid = ueUuid();
-    name = data[$ "name"] ?? undefined;
+    name = data[$ "name"] ?? "";
     image = data[$ "image"];
     subimg = data[$ "subimg"] ?? 0;
     self[$ "repeat"] = data[$ "repeat"] ?? true;
@@ -17,12 +17,11 @@ function UeTexture(data = {}) constructor {
         return self;
     }
     
-    // @MissingDoc wireframe arg
-    function use(sampler, wireframe = false) {
+    function use(sampler) {
         gpu_set_texrepeat_ext(sampler, self[$ "repeat"]);
         gpu_set_texfilter_ext(sampler, filter);
         gpu_set_tex_mip_enable_ext(sampler, generateMipmaps);
-        texture_set_stage(sampler, wireframe ? global.UE_DEFAULT_TEXTURE.texture : texture);
+        texture_set_stage(sampler, texture);
         return self;
     }
     

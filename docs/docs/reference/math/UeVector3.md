@@ -12,7 +12,7 @@ A 3D vector class that supports common vector math operations. Used for position
 new UeVector3(x = 0, y = 0, z = 0)
 ```
 
-### Parameters
+### Data parameters
 
 | Name | Type     | Default | Description |
 | ---- | -------- | ------- | ----------- |

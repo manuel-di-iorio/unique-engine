@@ -12,7 +12,7 @@ Represents a quaternion used to encode 3D rotations in a compact and stable way.
 new UeQuaternion(x = 0, y = 0, z = 0)
 ```
 
-### Parameters
+### Data parameters
 
 | Name | Type   | Default | Description                                  |
 | ---- | ------ | ------- | -------------------------------------------- |

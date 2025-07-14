@@ -9,24 +9,24 @@ The `UeTexture` class wraps a 2D image or sub-image (frame) into a GPU texture, 
 new UeTexture(data = {})
 ```
 
-### Parameters
+### Data parameters
 
 | Key               | Type      | Default      | Description                                    |
 | ----------------- | --------- | ------------ | ---------------------------------------------- |
 | `image`           | `sprite`  | **required** | A sprite resource or image                     |
 | `subimg`          | `number`  | `0`          | Sub-image index (frame of the sprite)          |
-| `repeat`          | `boolean` | `true`       | Whether the texture repeats outside \[0,1] UVs |
+| `repeat`          | `boolean` | `true`       | Whether the texture repeats                    |
 | `filter`          | `boolean` | `true`       | Enables texture smoothing                      |
 | `generateMipmaps` | `boolean` | `true`       | Whether to enable mipmaps for minification     |
 
 ### Properties
 
-| Property          | Type         | Default   | Description                               |
-| -------------     | ------------ | --------- | ------------------------------------      |
-| `isTexture`       | `boolean`    | true      | Indicates that this is a texture          |
-| `type`            | `string`     | `Texture` | Object type                               |
-| `name`            | `string`     | undefined | Object name (optional)                    |
-| `uuid`            | `string`     |           | Resource UUID                             |
+| Property          | Type         | Default     | Description                                    |
+| -------------     | ------------ | ---------   | ------------------------------------           |
+| `isTexture`       | `boolean`    | true        | Indicates that this is a texture               |
+| `type`            | `string`     | `"Texture"` | Object type                                    |
+| `name`            | `string`     | ""          | Object name                                    |
+| `uuid`            | `string`     |             | Resource UUID                                  |
 
 ## 🧩 Methods
 

@@ -1,9 +1,7 @@
-// @MissingDoc: move to objects category
-// @MissingDoc: material as second argument
 function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject3D(data) constructor {
     self.isMesh = true;
     self.type = "Mesh";
-    self.geometry = geometry; // @MissingDoc. Not retrieved from data as fallback anymore
+    self.geometry = geometry;
     self.material = material ?? new UeMeshStandardMaterial();
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
@@ -28,7 +26,6 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         var _self = self;
         var payload = {
             children: array_map(children, function(child) { return child.uuid }),
-            // Props:
             visible,
             parent: parent && !parent[$ "isScene"] ? parent.uuid : undefined,
             renderOrder,

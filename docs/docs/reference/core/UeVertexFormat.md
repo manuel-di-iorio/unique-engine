@@ -18,12 +18,12 @@ const format = new UeVertexFormat().position().normal().uv().color().build();
 
 ### Properties
 
-| Property          | Type         | Default | Description                            |
-| -------------     | ------------ | ------- | ----------------------------           |
-| `isVertexFormat`  | `boolean`    | true    | Indicates that this is a vertex format |
-| `type`            | `string`     | `VertexFormat` | Object type                     |
-| `name`            | `string`     | undefined | Object name (optional)               |
-| `uuid`            | `string`     |         | Resource UUID                          |
+| Property          | Type         | Default          | Description                            |
+| -------------     | ------------ | -------          | ----------------------------           |
+| `isVertexFormat`  | `boolean`    | true             | Indicates that this is a vertex format |
+| `type`            | `string`     | `"VertexFormat"` | Object type                            |
+| `name`            | `string`     | ""               | Object name (optional)                 |
+| `uuid`            | `string`     |                  | Resource UUID                          |
 
 ## 🧩 Methods
 ```js

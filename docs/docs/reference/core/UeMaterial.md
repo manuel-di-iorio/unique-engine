@@ -17,9 +17,8 @@ new UeMaterial(data = {})
 | --------------------   | --------- | ----------------------- | -------------------------------------------------------- |
 | `isMaterial`           | `boolean` | `true`                  | Identifies this object as a material                     |
 | `uuid`                 | `string`  | (auto-generated)        | Resource UUID                                            |
-| `type`                 | `string`  | `Material`              | Object type                                              |
-| `name`                 | `string`  | undefined               | Object name (optional)                                   |
-| `color`                | `number`  | `c_white`               | Base color                                               |
+| `type`                 | `string`  | `"Material"`            | Object type                                              |
+| `name`                 | `string`  | ""                      | Object name (empty string by default)                    |
 | `transparent`          | `boolean` | `false`                 | Whether to enable transparency                           |
 | `opacity`              | `number`  | `1`                     | Opacity (used in shaders)                                |
 | `side`                 | `number`  | `cull_counterclockwise` | Which side to render (`cull_*`)                          |
@@ -40,12 +39,13 @@ new UeMaterial(data = {})
 | `uniforms`             | `object`  | `{}`                    | Custom uniforms to pass to the shader                    |
 | `lights`               | `number`  | `2`                     | Number of supported lights (0 to disable lighting)       |
 | `textures`             | `object`  | `{map, normalMap, ...}` | Maps for base color, normal, roughness, etc.             |
+| `wireframe`            | `boolean` | `false`                 | Whether to render the mesh as wireframe (pr_linelist)    |
 
 ## Textures
 
 Textures are assigned via the textures object:
 
-- **map**: Base diffuse texture
+- **map**: Base diffuse texture (by default it is `global.UE_DEFAULT_TEXTURE`, a white-colored 1x1 texture)
 - **normalMap**: Normal mapping
 - **roughnessMap**: For roughness (PBR)
 - **metalnessMap**: For metallic (PBR)
@@ -113,4 +113,4 @@ const mat = new UeMaterial({
 
 - Uniforms and textures must be named in the shader as u_ + name and s_ + name. This is an opinionated standard in Unique Engine's shaders, but you may want to change it if you prefer.
 
-- If `forceSinglePass` is `false`, transparent objects may be rendered twice to help with depth artifacts.
+- If `forceSinglePass` is `false`, transparent objects will be rendered twice to help with depth artifacts.

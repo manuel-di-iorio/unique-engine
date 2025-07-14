@@ -2,7 +2,7 @@ function UeVertexFormat(data = {}) constructor {
     isVertexFormat = true;
     type = "VertexFormat";
     uuid = ueUuid();
-    name = data[$ "name"] ?? undefined;
+    name = data[$ "name"] ?? "";
     vf = undefined;
     attrs = [];
 

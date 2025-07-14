@@ -12,7 +12,7 @@ Represents a 4×4 transformation matrix. Useful for 3D object transformations in
 new UeMatrix4(data = undefined)
 ```
 
-### Parameters
+### Data parameters
 
 | Name   | Type       | Default                   | Description                                      |
 | ------ | ---------- | ------------------------- | ------------------------------------------------ |

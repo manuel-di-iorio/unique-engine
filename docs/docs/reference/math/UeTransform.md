@@ -12,7 +12,7 @@ A `UeTransform` represents an object's position, rotation, and scale in 3D space
 new UeTransform(data = {})
 ```
 
-### Parameters
+### Data parameters
 
 | Name       | Type           | Default        | Description                  |
 | ---------- | -------------- | -------------- | ---------------------------- |

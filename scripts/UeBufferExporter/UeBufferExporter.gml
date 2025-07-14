@@ -31,7 +31,7 @@ function UeBufferExporter() constructor {
             var payload = compiledData.payload;
             payload.type = obj.type;
             payload.uuid = obj.uuid;
-            if (obj[$ "name"] != undefined) payload.name = obj.name;
+            payload.name = obj.name;
             var payloadStr = json_stringify(payload);
             compiledData.payloadStr = payloadStr;
             

@@ -2,8 +2,7 @@ function UeMaterial(data = {}) constructor {
     isMaterial = true;
     type = "Material";
     uuid = ueUuid();
-    name = data[$ "name"] ?? undefined;
-    color = data[$ "color"] ?? c_white; // @MissingDoc @Deprecated
+    name = data[$ "name"] ?? "";
     transparent = data[$ "transparent"] ?? false;
     opacity = data[$ "opacity"] ?? 1;
     side = data[$ "side"] ?? cull_counterclockwise;
@@ -13,7 +12,6 @@ function UeMaterial(data = {}) constructor {
     forceSinglePass = data[$ "forceSinglePass"] ?? false;
     alphaTest = data[$ "alphaTest"] ?? 0;
     colorWrite = data[$ "colorWrite"] ?? true;
-    wireframe = data[$ "wireframe"] ?? false; // @MissingDoc
     
     // Blending
     blending = data[$ "blending"] ?? transparent;
@@ -57,7 +55,6 @@ function UeMaterial(data = {}) constructor {
     textures = {
        map: data[$ "map"] ?? global.UE_DEFAULT_TEXTURE
     };
-    //if (data[$ "map"] != undefined) textures.map = data[$ "map"];
     if (data[$ "normalMap"] != undefined) textures.normalMap = data[$ "normalMap"];
     if (data[$ "roughnessMap"] != undefined) textures.roughnessMap = data[$ "roughnessMap"];
     if (data[$ "metalnessMap"] != undefined) textures.metalnessMap = data[$ "metalnessMap"];
