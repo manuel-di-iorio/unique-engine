@@ -3,7 +3,7 @@ function UeMaterial(data = {}) constructor {
     type = "Material";
     uuid = ueUuid();
     name = data[$ "name"] ?? undefined;
-    color = data[$ "color"] ?? c_white;
+    color = data[$ "color"] ?? c_white; // @MissingDoc @Deprecated
     transparent = data[$ "transparent"] ?? false;
     opacity = data[$ "opacity"] ?? 1;
     side = data[$ "side"] ?? cull_counterclockwise;
@@ -97,10 +97,10 @@ function UeMaterial(data = {}) constructor {
         gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
         gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha); 
         
-        var lightState = renderState.lightState;
-        var camera = renderState.camera;
-        
         if (wireframe) return self;
+        
+        var lightState = renderState.lightState;
+        var camera = renderState.camera; 
         
         if (shader == undefined) return self;
         shader_set(shader);

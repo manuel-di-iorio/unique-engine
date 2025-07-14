@@ -6,8 +6,8 @@ function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeBufferGeo
     var _alpha  = data[$ "alpha"]  ?? 1;
 
     var hw = _width * 0.5;
-    var hh = _height * 0.5;
-    var hd = _depth * 0.5;
+    var hh = _depth * 0.5;
+    var hd = _height * 0.5;
 
     var faces = [
         [ 0,  1,  0, [ // Front (Y+)

@@ -1,11 +1,10 @@
-/// Rappresenta un box 3D allineato agli assi (AABB), con limiti min e max in 3D.
 function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new UeVector3(-infinity, -infinity, -infinity)) constructor {
-    self.min_ = _min;
-    self.max_ = _max;
+    self.sizeMin = _min;
+    self.sizeMax = _max;
 
     function set(_min, _max) {
-        self.min_.copy(_min);
-        self.max_.copy(_max);
+        self.sizeMin.copy(_min);
+        self.sizeMax.copy(_max);
         return self;
     }
 
@@ -22,8 +21,8 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
 
     function setFromCenterAndSize(center, size) {
         var halfSize = size.clone().scale(0.5);
-        self.min_.copy(center).sub(halfSize);
-        self.max_.copy(center).add(halfSize);
+        self.sizeMin.copy(center).sub(halfSize);
+        self.sizeMax.copy(center).add(halfSize);
         return self;
     }
 
@@ -46,48 +45,52 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
     }
 
     function copy(box) {
-        self.min_.copy(box.min_);
-        self.max_.copy(box.max_);
+        self.sizeMin.copy(box.sizeMin);
+        self.sizeMax.copy(box.sizeMax);
         return self;
     }
 
     function makeEmpty() {
-        self.min_.set(+infinity, +infinity, +infinity);
-        self.max_.set(-infinity, -infinity, -infinity);
+        self.sizeMin.set(infinity, infinity, infinity);
+        self.sizeMax.set(-infinity, -infinity, -infinity);
         return self;
     }
 
     function isEmpty() {
-        return (self.max_.x < self.min_.x) || (self.max_.y < self.min_.y) || (self.max_.z < self.min_.z);
+        return (
+            self.sizeMax.x < self.sizeMin.x ||
+            self.sizeMax.y < self.sizeMin.y ||
+            self.sizeMax.z < self.sizeMin.z
+        );
     }
 
     function expandByPoint(point) {
-        self.min_.x = min(self.min_.x, point.x);
-        self.min_.y = min(self.min_.y, point.y);
-        self.min_.z = min(self.min_.z, point.z);
+        self.sizeMin.x = min(self.sizeMin.x, point.x);
+        self.sizeMin.y = min(self.sizeMin.y, point.y);
+        self.sizeMin.z = min(self.sizeMin.z, point.z);
 
-        self.max_.x = max(self.max_.x, point.x);
-        self.max_.y = max(self.max_.y, point.y);
-        self.max_.z = max(self.max_.z, point.z);
+        self.sizeMax.x = max(self.sizeMax.x, point.x);
+        self.sizeMax.y = max(self.sizeMax.y, point.y);
+        self.sizeMax.z = max(self.sizeMax.z, point.z);
 
         return self;
     }
 
     function expandByScalar(scalar) {
-        self.min_.x -= scalar;
-        self.min_.y -= scalar;
-        self.min_.z -= scalar;
+        self.sizeMin.x -= scalar;
+        self.sizeMin.y -= scalar;
+        self.sizeMin.z -= scalar;
 
-        self.max_.x += scalar;
-        self.max_.y += scalar;
-        self.max_.z += scalar;
+        self.sizeMax.x += scalar;
+        self.sizeMax.y += scalar;
+        self.sizeMax.z += scalar;
 
         return self;
     }
 
     function expandByVector(vec) {
-        self.min_.sub(vec);
-        self.max_.add(vec);
+        self.sizeMin.sub(vec);
+        self.sizeMax.add(vec);
         return self;
     }
 
@@ -115,28 +118,28 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
 
     function containsPoint(point) {
         return (
-            point.x >= self.min_.x && point.x <= self.max_.x &&
-            point.y >= self.min_.y && point.y <= self.max_.y &&
-            point.z >= self.min_.z && point.z <= self.max_.z
+            point.x >= self.sizeMin.x && point.x <= self.sizeMax.x &&
+            point.y >= self.sizeMin.y && point.y <= self.sizeMax.y &&
+            point.z >= self.sizeMin.z && point.z <= self.sizeMax.z
         );
     }
 
     function containsBox(box) {
         return (
-            self.min_.x <= box.min_.x && box.max_.x <= self.max_.x &&
-            self.min_.y <= box.min_.y && box.max_.y <= self.max_.y &&
-            self.min_.z <= box.min_.z && box.max_.z <= self.max_.z
+            self.sizeMin.x <= box.sizeMin.x && box.sizeMax.x <= self.sizeMax.x &&
+            self.sizeMin.y <= box.sizeMin.y && box.sizeMax.y <= self.sizeMax.y &&
+            self.sizeMin.z <= box.sizeMin.z && box.sizeMax.z <= self.sizeMax.z
         );
     }
 
     function intersect(box) {
-        self.min_.x = max(self.min_.x, box.min_.x);
-        self.min_.y = max(self.min_.y, box.min_.y);
-        self.min_.z = max(self.min_.z, box.min_.z);
+        self.sizeMin.x = max(self.sizeMin.x, box.sizeMin.x);
+        self.sizeMin.y = max(self.sizeMin.y, box.sizeMin.y);
+        self.sizeMin.z = max(self.sizeMin.z, box.sizeMin.z);
 
-        self.max_.x = min(self.max_.x, box.max_.x);
-        self.max_.y = min(self.max_.y, box.max_.y);
-        self.max_.z = min(self.max_.z, box.max_.z);
+        self.sizeMax.x = min(self.sizeMax.x, box.sizeMax.x);
+        self.sizeMax.y = min(self.sizeMax.y, box.sizeMax.y);
+        self.sizeMax.z = min(self.sizeMax.z, box.sizeMax.z);
 
         if (isEmpty()) makeEmpty();
         return self;
@@ -144,27 +147,27 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
 
     function intersectsBox(box) {
         return !(
-            box.max_.x < self.min_.x || box.min_.x > self.max_.x ||
-            box.max_.y < self.min_.y || box.min_.y > self.max_.y ||
-            box.max_.z < self.min_.z || box.min_.z > self.max_.z
+            box.sizeMax.x < self.sizeMin.x || box.sizeMin.x > self.sizeMax.x ||
+            box.sizeMax.y < self.sizeMin.y || box.sizeMin.y > self.sizeMax.y ||
+            box.sizeMax.z < self.sizeMin.z || box.sizeMin.z > self.sizeMax.z
         );
     }
 
     function intersectsPlane(plane) {
-        var min_ = self.min_;
-        var max_ = self.max_;
+        var _min = self.sizeMin;
+        var _max = self.sizeMax;
         var normal = plane.normal;
 
         var p_near = new UeVector3(
-            normal.x >= 0 ? min_.x : max_.x,
-            normal.y >= 0 ? min_.y : max_.y,
-            normal.z >= 0 ? min_.z : max_.z
+            normal.x >= 0 ? _min.x : _max.x,
+            normal.y >= 0 ? _min.y : _max.y,
+            normal.z >= 0 ? _min.z : _max.z
         );
 
         var p_far = new UeVector3(
-            normal.x >= 0 ? max_.x : min_.x,
-            normal.y >= 0 ? max_.y : min_.y,
-            normal.z >= 0 ? max_.z : min_.z
+            normal.x >= 0 ? _max.x : _min.x,
+            normal.y >= 0 ? _max.y : _min.y,
+            normal.z >= 0 ? _max.z : _min.z
         );
 
         var dist_near = plane.distanceToPoint(p_near);
@@ -174,30 +177,30 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
     }
 
     function getCenter(target = new UeVector3()) {
-        return target.copy(self.min_).add(self.max_).scale(0.5);
+        return target.copy(self.sizeMin).add(self.sizeMax).scale(0.5);
     }
 
     function getSize(target = new UeVector3()) {
-        return target.copy(self.max_).sub(self.min_);
+        return target.copy(self.sizeMax).sub(self.sizeMin);
     }
 
     function getParameter(point, target = new UeVector3()) {
-        target.x = (point.x - self.min_.x) / (self.max_.x - self.min_.x);
-        target.y = (point.y - self.min_.y) / (self.max_.y - self.min_.y);
-        target.z = (point.z - self.min_.z) / (self.max_.z - self.min_.z);
+        target.x = (point.x - self.sizeMin.x) / (self.sizeMax.x - self.sizeMin.x);
+        target.y = (point.y - self.sizeMin.y) / (self.sizeMax.y - self.sizeMin.y);
+        target.z = (point.z - self.sizeMin.z) / (self.sizeMax.z - self.sizeMin.z);
         return target;
     }
 
     function applyMatrix4(matrix) {
         var points = [
-            new UeVector3(self.min_.x, self.min_.y, self.min_.z),
-            new UeVector3(self.min_.x, self.min_.y, self.max_.z),
-            new UeVector3(self.min_.x, self.max_.y, self.min_.z),
-            new UeVector3(self.min_.x, self.max_.y, self.max_.z),
-            new UeVector3(self.max_.x, self.min_.y, self.min_.z),
-            new UeVector3(self.max_.x, self.min_.y, self.max_.z),
-            new UeVector3(self.max_.x, self.max_.y, self.min_.z),
-            new UeVector3(self.max_.x, self.max_.y, self.max_.z)
+            new UeVector3(self.sizeMin.x, self.sizeMin.y, self.sizeMin.z),
+            new UeVector3(self.sizeMin.x, self.sizeMin.y, self.sizeMax.z),
+            new UeVector3(self.sizeMin.x, self.sizeMax.y, self.sizeMin.z),
+            new UeVector3(self.sizeMin.x, self.sizeMax.y, self.sizeMax.z),
+            new UeVector3(self.sizeMax.x, self.sizeMin.y, self.sizeMin.z),
+            new UeVector3(self.sizeMax.x, self.sizeMin.y, self.sizeMax.z),
+            new UeVector3(self.sizeMax.x, self.sizeMax.y, self.sizeMin.z),
+            new UeVector3(self.sizeMax.x, self.sizeMax.y, self.sizeMax.z)
         ];
 
         makeEmpty();
@@ -210,19 +213,19 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
     }
 
     function translate(offset) {
-        self.min_.add(offset);
-        self.max_.add(offset);
+        self.sizeMin.add(offset);
+        self.sizeMax.add(offset);
         return self;
     }
 
     function equals(box) {
-        return self.min_.equals(box.min_) && self.max_.equals(box.max_);
+        return self.sizeMin.equals(box.sizeMin) && self.sizeMax.equals(box.sizeMax);
     }
 
     function clampPoint(point, target = new UeVector3()) {
-        target.x = clamp(point.x, self.min_.x, self.max_.x);
-        target.y = clamp(point.y, self.min_.y, self.max_.y);
-        target.z = clamp(point.z, self.min_.z, self.max_.z);
+        target.x = clamp(point.x, self.sizeMin.x, self.sizeMax.x);
+        target.y = clamp(point.y, self.sizeMin.y, self.sizeMax.y);
+        target.z = clamp(point.z, self.sizeMin.z, self.sizeMax.z);
         return target;
     }
 
@@ -233,20 +236,20 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
 
     function getBoundingSphere(target) {
         var center = getCenter();
-        var radius = center.distanceTo(self.max_);
+        var radius = center.distanceTo(self.sizeMax);
         target.center.copy(center);
         target.radius = radius;
         return target;
     }
 
     function union(box) {
-        self.min_.x = min(self.min_.x, box.min_.x);
-        self.min_.y = min(self.min_.y, box.min_.y);
-        self.min_.z = min(self.min_.z, box.min_.z);
+        self.sizeMin.x = min(self.sizeMin.x, box.sizeMin.x);
+        self.sizeMin.y = min(self.sizeMin.y, box.sizeMin.y);
+        self.sizeMin.z = min(self.sizeMin.z, box.sizeMin.z);
 
-        self.max_.x = max(self.max_.x, box.max_.x);
-        self.max_.y = max(self.max_.y, box.max_.y);
-        self.max_.z = max(self.max_.z, box.max_.z);
+        self.sizeMax.x = max(self.sizeMax.x, box.sizeMax.x);
+        self.sizeMax.y = max(self.sizeMax.y, box.sizeMax.y);
+        self.sizeMax.z = max(self.sizeMax.z, box.sizeMax.z);
 
         return self;
     }

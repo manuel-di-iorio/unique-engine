@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeMesh",
+  "%Name":"UeBoxHelper",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeMesh",
+  "name":"UeBoxHelper",
   "parent":{
-    "name":"Objects",
-    "path":"folders/Unique Engine/Objects.yy",
+    "name":"Helpers",
+    "path":"folders/Unique Engine/Helpers.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

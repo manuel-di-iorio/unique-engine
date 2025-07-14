@@ -1,1 +1,1 @@
-showBbox = !showBbox;
+airplaneBox.visible = !airplaneBox.visible;

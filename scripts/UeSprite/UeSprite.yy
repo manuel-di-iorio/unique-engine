@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UeSprite",
   "parent":{
-    "name":"Core",
-    "path":"folders/Unique Engine/Core.yy",
+    "name":"Objects",
+    "path":"folders/Unique Engine/Objects.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

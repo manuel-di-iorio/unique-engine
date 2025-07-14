@@ -78,8 +78,12 @@ Report bugs, feature requests or open a pull request on [GitHub](https://github.
 
 [MIT License](LICENSE.md)
 
-Other bundled software, such as Assimp and the [free 3d model](https://free3d.com/it/3d-model/airplane-v2--659376.html), are copyrighted by their respective creators and may come with additional usage restrictions. The included extension "GMAssimp.dll", which the engine uses internally to import external models, has been created by Giacomo "Jak" Marton and it is MIT-licensed.
-These components are not required to use the engine — if you prefer to avoid any third-party licensing terms, simply remove the AssimpLoader and the included 3d model from the project's datafiles.
+Other bundled software, such as Assimp or the included 3d models, are copyrighted by their respective creators and may come with additional usage restrictions. The included extension "GMAssimp.dll", which the engine uses internally to import external models, has been created by Giacomo "Jak" Marton and it is MIT-licensed.
+These components are not required to use the engine — if you prefer to avoid any third-party licensing terms, simply remove the AssimpLoader and the included 3d models from the project's datafiles.
+
+Links to the free 3D models used in the examples:
+- https://free3d.com/3d-model/airplane-v2--659376.html
+- https://free3d.com/3d-model/cat-v1--522281.html
 
 ### Useful Links
 

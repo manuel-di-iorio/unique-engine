@@ -16,20 +16,12 @@ var matPyramid2 = new UeMaterial({ map: texPyramid, shader: sh_ue_standard });
 matTree         = new UeSpriteMaterial({ map: texPalmTree });
 
 // Terrain
-var desert = new UeMesh(new UePlaneGeometry(1000, 1000), { material: matSand });
+var desert = new UeMesh(new UePlaneGeometry(1000, 1000), matSand);
 
 // Pyramids
-var pyramid0 = new UeMesh(new UePyramidGeometry({ base: 160, height: 100 }), { material: matPyramid0 });
-
-var pyramid1 = new UeMesh(new UePyramidGeometry({ base: 75, height: 60 }), {
-    x: -150, y: -150, z: 0,
-    material: matPyramid1
-});
-
-var pyramid2 = new UeMesh(new UePyramidGeometry({ base: 60, height: 40 }), {
-    x: -150, y: 150, z: 0,
-    material: matPyramid2
-});
+var pyramid0 = new UeMesh(new UePyramidGeometry({ base: 160, height: 100 }), matPyramid0);
+var pyramid1 = new UeMesh(new UePyramidGeometry({ base: 75, height: 60 }), matPyramid1, { x: -150, y: -150, z: 0 });
+var pyramid2 = new UeMesh(new UePyramidGeometry({ base: 60, height: 40 }), matPyramid2, { x: -150, y: 150, z: 0 });
 
 // Palm trees (billboards)
 var treePositions = [

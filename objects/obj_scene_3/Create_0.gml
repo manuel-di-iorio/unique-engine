@@ -16,14 +16,20 @@ sprAirplane = sprite_add("11804_Airplane_diff.jpg", 1, false, false, 0, 0);
 texAirplane = new UeTexture({ image: sprAirplane });
 
 airplaneMesh.traverse(function(mesh) {
-    if (mesh[$ "geometry"] != undefined) mesh.geometry.freeze();
+    var geometry = mesh[$ "geometry"];
+    if (geometry != undefined) {
+        geometry.computeBoundingBox();
+        geometry.freeze();
+    }
     
     var material = mesh.material;
     material.textures.map = texAirplane;
     material.build();
 });
 
-scene.add(ambientLight, sunLight, airplaneMesh);
+airplaneBox = new UeBoxHelper(airplaneMesh);
+airplaneBox.visible = false;
 
-showBbox = false;
+scene.add(ambientLight, sunLight, airplaneMesh, airplaneBox);
+
 showWireframe = false;

@@ -1,8 +1,10 @@
-function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
+// @MissingDoc: move to objects category
+// @MissingDoc: material as second argument
+function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject3D(data) constructor {
     self.isMesh = true;
     self.type = "Mesh";
-    self.geometry = geometry ?? data[$ "geometry"];
-    self.material = data[$ "material"] ?? new UeMeshStandardMaterial();
+    self.geometry = geometry; // @MissingDoc. Not retrieved from data as fallback anymore
+    self.material = material ?? new UeMeshStandardMaterial();
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
     function render(renderState) {
@@ -55,7 +57,7 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
     }
     
     // @todo This is a very simplified version of the actual implementation
-    // @MissingDoc
+    // @MissingDoc @Todo @Untested
     function raycast(raycaster, intersects) {
         var object = self;
         var _ray = raycaster.ray;
@@ -63,8 +65,8 @@ function UeMesh(geometry = undefined, data = {}): UeObject3D(data) constructor {
         if (geometry.boundingBox != undefined) {
 			if (!_ray.intersectsBox(geometry.boundingBox)) return;
                 
-            array_push(intersects, {
-                object
+            array_push(intersects, { 
+                object 
             });
 		} else if (geometry.boundingSphere != undefined) {
 			if (!_ray.intersectsSphere(geometry.boundingSphere)) return;

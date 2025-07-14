@@ -11,7 +11,7 @@ function UeBufferGeometry(data = {}) constructor {
     // @MissingDoc
     boundingBox = data[$ "boundingBox"] ?? new UeBox3();
     // @MissingDoc
-    //boundingSphere = data[$ "boundingSphere"] ?? new UeSphere();
+    boundingSphere = data[$ "boundingSphere"] ?? new UeSphere();
 
     function build() {
         vb = vertex_create_buffer();
@@ -56,13 +56,15 @@ function UeBufferGeometry(data = {}) constructor {
     }
     
     function freeze() {
-        vertex_freeze(vb);
+        if (vb) vertex_freeze(vb);
         return self;
     }
     
     function dispose() {
-        vertex_delete_buffer(vb);
-        vb = undefined;
+        if (vb) {
+            vertex_delete_buffer(vb);
+            vb = undefined;
+        }
         return self;
     }
     

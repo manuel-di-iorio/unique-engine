@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeMesh",
+  "%Name":"UeLineSegments",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeMesh",
+  "name":"UeLineSegments",
   "parent":{
     "name":"Objects",
     "path":"folders/Unique Engine/Objects.yy",

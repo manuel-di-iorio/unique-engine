@@ -13,8 +13,9 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     autoUse = data[$ "autoUse"] ?? true;
     antialias = data[$ "antialias"] ?? 4;
     vsync = data[$ "vsync"] ?? true;
+    
     // @MissingDoc
-    matrixWorld = undefined;
+    camMatrixWorld = undefined;
     // @MissingDoc
     matrixWorldInverse = undefined;
     // @MissingDoc
@@ -28,7 +29,7 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
             target.x, target.y, target.z, // To
             0, 0, -1 // Up
         );
-        matrixWorld = matrix_inverse(matrixWorldInverse);
+        camMatrixWorld = matrix_inverse(matrixWorldInverse);
         
         camera_set_view_mat(camera, matrixWorldInverse);
     };
