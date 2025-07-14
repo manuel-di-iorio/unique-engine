@@ -188,6 +188,7 @@ function UeBufferLoader() constructor {
         mesh.renderOrder = obj.renderOrder;
         mesh.geometry = obj[$ "geometry"];
         mesh.material = obj[$ "material"];
+        mesh.layers.mask = obj.layers;
         
         // Read the transform
         mesh.position = new UeVector3(obj.px, obj.py, obj.pz);

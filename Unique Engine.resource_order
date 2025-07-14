@@ -28,6 +28,7 @@
     {"name":"UeBufferGeometry","order":2,"path":"scripts/UeBufferGeometry/UeBufferGeometry.yy",},
     {"name":"UeBufferLoader","order":1,"path":"scripts/UeBufferLoader/UeBufferLoader.yy",},
     {"name":"UeCircleGeometry","order":2,"path":"scripts/UeCircleGeometry/UeCircleGeometry.yy",},
+    {"name":"UeLayers","order":12,"path":"scripts/UeLayers/UeLayers.yy",},
     {"name":"UeLight","order":9,"path":"scripts/UeLight/UeLight.yy",},
     {"name":"UeLine","order":1,"path":"scripts/UeLine/UeLine.yy",},
     {"name":"UeLineSegments","order":2,"path":"scripts/UeLineSegments/UeLineSegments.yy",},

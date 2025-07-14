@@ -3,9 +3,14 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     type = "Renderer";
     
     // Recursively collect renderable objects and split them into opaque and transparent queues
-    function _collectObjectQueues(objects, lights, cameraPos, opaqueQueue, transparentQueue) {
+    function _collectObjectQueues(objects, lights, camera, opaqueQueue, transparentQueue) {
+        var cameraPos = camera.position;
+        var cameraLayers = camera.layers;
+        
         for (var i = 0, len = array_length(objects); i < len; i++) {
             var object = objects[i];
+            
+            if (!object.layers.test(cameraLayers)) continue;
             
             if (object[$ "isLight"]) {
                 array_push(lights, object);
@@ -19,7 +24,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             array_push(object.material != undefined && object.material.transparent ? transparentQueue : opaqueQueue, object); 
             
             // Traverse child objects
-            _collectObjectQueues(object.children, lights, cameraPos, opaqueQueue, transparentQueue);
+            _collectObjectQueues(object.children, lights, camera, opaqueQueue, transparentQueue);
         } 
     }
     
@@ -97,8 +102,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         var opaqueQueue = [];
         var transparentQueue = [];
         var lights = [];
-        var cameraPos = camera.position;
-        _collectObjectQueues(scene.children, lights, cameraPos, opaqueQueue, transparentQueue);
+        _collectObjectQueues(scene.children, lights, camera, opaqueQueue, transparentQueue);
 
         // Sort both queues before rendering
         _sortObjectsByCamDistance(opaqueQueue, 0, array_length(opaqueQueue) - 1, false); // Front-to-back

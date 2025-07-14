@@ -31,6 +31,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
             renderOrder,
             geometry: geometry ? geometry.uuid : undefined,
             material: material ? material.uuid : undefined,
+            layers: layers.mask,
             
             px: position.x,
             py: position.y,

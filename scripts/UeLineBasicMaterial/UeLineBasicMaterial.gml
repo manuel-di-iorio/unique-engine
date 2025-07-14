@@ -5,6 +5,7 @@ function UeLineBasicMaterial(data = {}): UeMaterial(data = {}) constructor {
     
     function setColor(color) {
         uniforms.ueColor.value = [color_get_red(color), color_get_green(color), color_get_blue(color)];
+        return self;
     };
     
     setColor(data[$ "color"] ?? c_white);

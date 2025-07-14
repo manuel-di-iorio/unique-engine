@@ -63,6 +63,7 @@
     {"id":{"name":"UeBufferLoader","path":"scripts/UeBufferLoader/UeBufferLoader.yy",},},
     {"id":{"name":"UeCircleGeometry","path":"scripts/UeCircleGeometry/UeCircleGeometry.yy",},},
     {"id":{"name":"UeControls","path":"scripts/UeControls/UeControls.yy",},},
+    {"id":{"name":"UeLayers","path":"scripts/UeLayers/UeLayers.yy",},},
     {"id":{"name":"UeLight","path":"scripts/UeLight/UeLight.yy",},},
     {"id":{"name":"UeLine","path":"scripts/UeLine/UeLine.yy",},},
     {"id":{"name":"UeLineBasicMaterial","path":"scripts/UeLineBasicMaterial/UeLineBasicMaterial.yy",},},

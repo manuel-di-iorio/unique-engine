@@ -33,6 +33,7 @@ new UeObject3D(data = {})
 | `parent`      | `UeObject3D` | undefined        | Parent object in the scene graph     |
 | `children`    | `array`      | []               | Array of child objects               |
 | `renderOrder` | `number`     | 0                | Overrides render sort when rendering |
+| `layers`      | `UeLayers`   | 0                | Overrides render sort when rendering |
 
 
 ### 🔁 Inherited from `UeTransform`

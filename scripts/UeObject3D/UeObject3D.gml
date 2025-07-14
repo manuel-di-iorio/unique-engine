@@ -32,6 +32,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     visible = data[$ "visible"] ?? true;
     children = [];
     renderOrder = data[$ "renderOrder"] ?? 0;
+    layers = new UeLayers();
 
     function render() {}
     
