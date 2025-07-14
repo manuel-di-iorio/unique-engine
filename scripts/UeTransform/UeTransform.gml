@@ -60,8 +60,8 @@ function UeTransform(data = {}) constructor {
         return self;
     }
     
-    /// Update the matrixWorld of the children
-    /// @MissingDoc @Todo @Untested
+    /// Update the matrixWorld of parents/children
+    /// @todo Needs tests
     function updateWorldMatrix(updateParents = false, updateChildren = false) {
         if (updateParents && parent != undefined) {
             parent.updateWorldMatrix(true, false);

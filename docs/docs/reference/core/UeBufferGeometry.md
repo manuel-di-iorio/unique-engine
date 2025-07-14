@@ -2,7 +2,9 @@
 sidebar_position: 3
 ---
 
-The `UeBufferGeometry` class represents a 3D geometry made of vertices and optional indices. It inherits from `UeObject3D`, and is meant to be rendered by `UeMesh`.
+A geometry class representing a buffer geometry, optimized for GPU rendering.  
+Manages vertex data, index buffers, and provides methods to build, freeze, and dispose the vertex buffer.  
+Includes support for bounding volumes (bounding box and bounding sphere).
 
 ### Constructor
 ```js
@@ -11,42 +13,45 @@ new UeBufferGeometry(data = {})
 
 ### Data parameters
 
-| Key        | Type             | Default                           | Description                             |
-| ---------- | ---------------- | --------------------------        | --------------------------------------- |
-| `vertices` | `array`          | `[]`                              | Array of vertex data                    |
-| `index`    | `array` / `null` | `undefined`                       | Optional index buffer for reusing verts |
-| `format`   | `VertexFormat`   | `global.UE_DEFAULT_VERTEX_FORMAT` | Vertex layout format                    |
+| Key        | Type             | Default                           | Description                                         |
+| ---------- | ---------------- | --------------------------        | ---------------------------------------             |
+| `vertices` | `array`          | `[]`                              | Array of vertex data                                |
+| `index`    | `array` / `null` | `undefined`                       | Optional index buffer for reusing verts             |
+| `format`   | `VertexFormat`   | `global.UE_DEFAULT_VERTEX_FORMAT` | Vertex layout format                                |
 | `canFreeze`| `boolean`        | `true`                            | Whether to freeze the vertex buffer after the build |
+| `boundingBox`                 | `UeBox3`                          | Axis-aligned bounding box                           |
+| `boundingSphere`              | `UeSphere`                        | Bounding sphere                                     |
 
 ### Properties
 
-| Property          | Type         | Default   | Description                              |
-| -------------     | ------------ | -------   | ------------------------------           |
-| `isBufferGeometry`| `boolean`    | true      | Indicates that this is a buffer geometry |
-| `type`            | `string`     | `"BufferGeometry"` | Object type                               |
-| `name`            | `string`     | undefined | Object name (optional)                   |
-| `uuid`            | `string`     |            Resource UUID                            |
+| Property           | Type                   | Description                                                 |
+| ------------------ | ---------------------- | ----------------------------------------------------------- |
+| `isBufferGeometry` | `boolean`              | Flag indicating this is a buffer geometry                   |
+| `type`             | `string`               | Type identifier `"BufferGeometry"`                          |
+| `uuid`             | `string`               | Unique identifier                                           |
+| `name`             | `string`               | Optional name                                               |
+| `vertices`         | `Array`                | Vertex data array                                           |
+| `index`            | `Array` or `undefined` | Optional index array                                        |
+| `format`           | `Object`               | Vertex format descriptor                                    |
+| `vb`               | `object`               | Vertex buffer handle                                        |
+| `canFreeze`        | `boolean`              | If true, allows freezing the vertex buffer for optimization |
+| `boundingBox`      | `UeBox3`               | Axis-aligned bounding box                                   |
+| `boundingSphere`   | `UeSphere`             | Bounding sphere                                             |
 
-## 🧩 Methods
 
-```js
-build()
-```
-Compiles the vertex buffer using the current vertices, index, and format. You must call this before rendering.
+## Methods
+
+| Method                             | Returns  | Description                                                                 |
+| ---------------------------------- | -------- | --------------------------------------------------------------------------- |
+| `build()`                          | `self`   | Builds the vertex buffer from the current vertices and vertex format        |
+| `freeze()`                         | `self`   | Freezes the vertex buffer to optimize usage                                 |
+| `dispose()`                        | `self`   | Deletes the vertex buffer and releases GPU resources                        |
+| `computeBoundingBox()`             | `self`   | Computes the bounding box from the current vertex positions                 |
+| `computeBoundingSphere()`          | `self`   | Computes the bounding sphere from the current vertex positions              |
 
 
-```js
-freeze()
-```
-Freeze the vertex buffer. Call after .build() when you completed building the geometry.
-Because it resides in VRAM, a frozen vertex buffer can be submitted to the shader faster than a normal, dynamic buffer.
+## Notes
 
-```js
-dispose()
-```
-Destroys the internal vertex buffer. Call this when the geometry is no longer needed.
-
-## 🧠 Notes
 `vertices` is an array of vertex structs. Their properties must match the format set in .format.
 
 If `index` is provided, it must be an array of indices pointing into vertices.

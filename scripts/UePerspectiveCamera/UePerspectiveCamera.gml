@@ -1,6 +1,6 @@
 function UePerspectiveCamera(data = {}): UeObject3D(data) constructor { 
     isCamera = true; // @todo May create a new UeCamera class?
-    isPerspectiveCamera = true; // @MissingDoc
+    isPerspectiveCamera = true;
     type = "Camera";
     fov  = data[$ "fov"]  ?? 60;
     near = data[$ "near"] ?? 0.1;
@@ -14,24 +14,24 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     antialias = data[$ "antialias"] ?? 4;
     vsync = data[$ "vsync"] ?? true;
     
-    // @MissingDoc
-    camMatrixWorld = undefined;
-    // @MissingDoc
+    // Matrixes
+    matrixWorld = undefined;
     matrixWorldInverse = undefined;
-    // @MissingDoc
     projectionMatrix = undefined;
-    // @MissingDoc
     projectionMatrixInverse = undefined;
     
     onUpdate = data[$ "onUpdate"] ?? function() {
-        matrixWorldInverse  = matrix_build_lookat(
-            position.x, position.y, position.z,  // From
-            target.x, target.y, target.z, // To
-            0, 0, -1 // Up
-        );
-        camMatrixWorld = matrix_inverse(matrixWorldInverse);
-        
-        camera_set_view_mat(camera, matrixWorldInverse);
+        if (matrixAutoUpdate && matrixNeedsUpdate) {
+            matrixWorldInverse = matrix_build_lookat(
+                position.x, position.y, position.z,  // From
+                target.x, target.y, target.z, // To
+                0, 0, -1 // Up
+            );
+            matrixWorld = matrix_inverse(matrixWorldInverse);
+            
+            camera_set_view_mat(camera, matrixWorldInverse);
+            matrixNeedsUpdate = false;
+        }
     };
     
     // Build the perspective projection

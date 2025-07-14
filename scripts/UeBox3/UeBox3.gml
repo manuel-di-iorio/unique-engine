@@ -1,13 +1,16 @@
+/// Represents an axis-aligned 3D bounding box (AABB) defined by min and max corners.
 function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new UeVector3(-infinity, -infinity, -infinity)) constructor {
     self.sizeMin = _min;
     self.sizeMax = _max;
 
+    /// Sets the min and max corners of the box.
     function set(_min, _max) {
         self.sizeMin.copy(_min);
         self.sizeMax.copy(_max);
         return self;
     }
 
+    /// Sets the box bounds from a flat array of coordinates [x0, y0, z0, x1, y1, z1, ...].
     function setFromArray(arr) {
         makeEmpty();
         for (var i = 0, n = array_length(arr); i < n; i += 3) {
@@ -19,6 +22,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
+    /// Sets the box from a center point and size vector.
     function setFromCenterAndSize(center, size) {
         var halfSize = size.clone().scale(0.5);
         self.sizeMin.copy(center).sub(halfSize);
@@ -26,6 +30,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
+    /// Sets the box to enclose an array of points (UeVector3).
     function setFromPoints(points) {
         makeEmpty();
         for (var i = 0, n = array_length(points); i < n; i++) {
@@ -34,28 +39,33 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
+    /// Sets the box to enclose an object and its children, optionally with precise geometry.
     function setFromObject(object, precise = false) {
         makeEmpty(); 
         expandByObject(object, precise);
         return self;
     }
 
+    /// Creates and returns a clone of this box.
     function clone() {
         return variable_clone(self);
     }
 
+    /// Copies the min and max corners from another box.
     function copy(box) {
         self.sizeMin.copy(box.sizeMin);
         self.sizeMax.copy(box.sizeMax);
         return self;
     }
 
+    /// Empties the box (min at +inf, max at -inf).
     function makeEmpty() {
         self.sizeMin.set(infinity, infinity, infinity);
         self.sizeMax.set(-infinity, -infinity, -infinity);
         return self;
     }
 
+    /// Returns true if the box is empty (no volume).
     function isEmpty() {
         return (
             self.sizeMax.x < self.sizeMin.x ||
@@ -64,6 +74,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         );
     }
 
+    /// Expands the box to include a given point.
     function expandByPoint(point) {
         self.sizeMin.x = min(self.sizeMin.x, point.x);
         self.sizeMin.y = min(self.sizeMin.y, point.y);
@@ -76,6 +87,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
+    /// Expands the box by a scalar amount in all directions.
     function expandByScalar(scalar) {
         self.sizeMin.x -= scalar;
         self.sizeMin.y -= scalar;
@@ -88,12 +100,15 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
+    /// Expands the box by a vector in all directions.
     function expandByVector(vec) {
         self.sizeMin.sub(vec);
         self.sizeMax.add(vec);
         return self;
     }
 
+    /// Expands the box to include the bounding box of an object and its children.
+    /// If `precise` is true, uses geometry vertices; otherwise uses cached bounding box.
     function expandByObject(object, precise = false) {
         var box = undefined;
         var geometry = object[$ "geometry"];
@@ -116,6 +131,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
+    /// Returns true if the box contains the given point.
     function containsPoint(point) {
         return (
             point.x >= self.sizeMin.x && point.x <= self.sizeMax.x &&
@@ -124,6 +140,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         );
     }
 
+    /// Returns true if the given box is fully contained within this box.
     function containsBox(box) {
         return (
             self.sizeMin.x <= box.sizeMin.x && box.sizeMax.x <= self.sizeMax.x &&
@@ -132,6 +149,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         );
     }
 
+    /// Updates this box to the intersection of itself and another box.
     function intersect(box) {
         self.sizeMin.x = max(self.sizeMin.x, box.sizeMin.x);
         self.sizeMin.y = max(self.sizeMin.y, box.sizeMin.y);
@@ -145,6 +163,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
+    /// Returns true if this box intersects another box.
     function intersectsBox(box) {
         return !(
             box.sizeMax.x < self.sizeMin.x || box.sizeMin.x > self.sizeMax.x ||
@@ -153,6 +172,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         );
     }
 
+    /// Returns true if this box intersects a plane.
     function intersectsPlane(plane) {
         var _min = self.sizeMin;
         var _max = self.sizeMax;
@@ -176,14 +196,17 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return dist_near <= 0 && dist_far >= 0;
     }
 
+    /// Returns the center point of the box.
     function getCenter(target = new UeVector3()) {
         return target.copy(self.sizeMin).add(self.sizeMax).scale(0.5);
     }
 
+    /// Returns the size (width, height, depth) of the box.
     function getSize(target = new UeVector3()) {
         return target.copy(self.sizeMax).sub(self.sizeMin);
     }
 
+    /// Returns normalized coordinates (0..1) of a point relative to the box bounds.
     function getParameter(point, target = new UeVector3()) {
         target.x = (point.x - self.sizeMin.x) / (self.sizeMax.x - self.sizeMin.x);
         target.y = (point.y - self.sizeMin.y) / (self.sizeMax.y - self.sizeMin.y);
@@ -191,6 +214,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return target;
     }
 
+    /// Applies a 4x4 transformation matrix to the box and updates its bounds.
     function applyMatrix4(matrix) {
         var points = [
             new UeVector3(self.sizeMin.x, self.sizeMin.y, self.sizeMin.z),
@@ -212,16 +236,19 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
+    /// Moves (translates) the box by a given offset vector.
     function translate(offset) {
         self.sizeMin.add(offset);
         self.sizeMax.add(offset);
         return self;
     }
 
+    /// Returns true if this box equals another box.
     function equals(box) {
         return self.sizeMin.equals(box.sizeMin) && self.sizeMax.equals(box.sizeMax);
     }
 
+    /// Clamps a point to stay within the bounds of the box.
     function clampPoint(point, target = new UeVector3()) {
         target.x = clamp(point.x, self.sizeMin.x, self.sizeMax.x);
         target.y = clamp(point.y, self.sizeMin.y, self.sizeMax.y);
@@ -229,11 +256,14 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return target;
     }
 
+    /// Returns the distance from a point to the box (0 if the point is inside).
     function distanceToPoint(point) {
         var clamped = clampPoint(point);
         return clamped.distanceTo(point);
     }
 
+    /// Calculates the bounding sphere that encloses the box.
+    /// The `target` must have `.center` (UeVector3) and `.radius` (number) properties.
     function getBoundingSphere(target) {
         var center = getCenter();
         var radius = center.distanceTo(self.sizeMax);
@@ -242,6 +272,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return target;
     }
 
+    /// Expands this box to include another box.
     function union(box) {
         self.sizeMin.x = min(self.sizeMin.x, box.sizeMin.x);
         self.sizeMin.y = min(self.sizeMin.y, box.sizeMin.y);

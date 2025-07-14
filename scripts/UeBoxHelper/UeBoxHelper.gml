@@ -1,4 +1,3 @@
-// @MissingDoc
 function UeBoxHelper(object, color = #FFFF00, data = {}): UeLineSegments(undefined, undefined, data) constructor {
     self.object = object;
     self.color = color;

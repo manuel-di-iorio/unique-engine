@@ -1,25 +1,33 @@
+/// A 3D ray defined by an origin point and a normalized direction vector.
+/// Used for raycasting, intersection tests, and spatial queries.
 function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) constructor {
+    /// The origin point of the ray
     self.origin = _origin.clone();
+    /// The normalized direction vector of the ray
     self.direction = _direction.clone().normalize();
 
+    /// Sets the ray's origin and direction based on two points: from -> to
     function setFromPoints(from, to) {
         self.origin.copy(from);
         self.direction.copy(to).sub(from).normalize();
         return self;
     }
 
+    /// Returns the point at distance t along the ray
     function getPoint(t) {
         return self.origin.clone().add(self.direction.clone().scale(t));
     }
 
+    /// Returns intersection point with a plane or undefined if no intersection
     function intersectPlane(plane) {
         var denom = plane.normal.dot(self.direction);
-        if (abs(denom) < 0.00001) return undefined; // Parallel
+        if (abs(denom) < 0.00001) return undefined; // Parallel, no intersection
         var t = -(plane.normal.dot(self.origin) + plane.d) / denom;
-        if (t < 0) return undefined;
+        if (t < 0) return undefined; // Intersection behind origin
         return getPoint(t);
     }
 
+    /// Returns the shortest distance from the ray to a given point
     function distanceToPoint(point) {
         var v = point.clone().sub(self.origin);
         var t = self.direction.dot(v);
@@ -27,37 +35,39 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return v.sub(proj).length();
     }
 
+    /// Returns true if a point is within maxDist from the ray
     function isPointClose(point, maxDist) {
         return distanceToPoint(point) <= maxDist;
     }
 
+    /// Returns a clone (deep copy) of this ray
     function clone() {
         return variable_clone(self);
     }
 
+    /// Copies origin and direction from another ray
     function copy(ray) {
         self.origin.copy(ray.origin);
         self.direction.copy(ray.direction);
         return self;
     }
 
-    /// Apply Matrix4 transformation to the ray (origin and direction)
+    /// Applies a 4x4 transformation matrix to the ray's origin and direction
     function applyMatrix4(matrix4) {
         self.origin = matrix4.applyToVector3(self.origin);
-        // Direzione trasformata come vettore (senza traslazione)
         var endPoint = self.origin.clone().add(self.direction);
         endPoint = matrix4.applyToVector3(endPoint);
         self.direction.copy(endPoint.sub(self.origin).normalize());
         return self;
     }
 
-    /// Get point at distance t along the ray, writing result into target Vector3
+    /// Gets the point at distance t along the ray, writes into target Vector3
     function at(t, target) {
         target.copy(self.direction).scale(t).add(self.origin);
         return target;
     }
 
-    /// Get closest point on the ray to a given point, result in target
+    /// Gets the closest point on the ray to a given point, stores result in target
     function closestPointToPoint(point, target) {
         var v = point.clone().sub(self.origin);
         var t = self.direction.dot(v);
@@ -65,7 +75,7 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return self.at(t, target);
     }
 
-    /// Squared distance from ray to point
+    /// Returns squared distance from the ray to a point
     function distanceSqToPoint(point) {
         var v = point.clone().sub(self.origin);
         var t = self.direction.dot(v);
@@ -74,7 +84,8 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return point.clone().sub(projected).lengthSquared();
     }
 
-    /// Squared distance between ray and segment v0-v1
+    /// Returns squared distance between ray and segment defined by v0 and v1.
+    /// Optionally outputs closest points on ray and segment.
     function distanceSqToSegment(v0, v1, optionalPointOnRay = undefined, optionalPointOnSegment = undefined) {
         var segCenter = v0.clone().add(v1).scale(0.5);
         var segDir = v1.clone().sub(v0).normalize();
@@ -86,7 +97,7 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         var b1 = -diff.dot(segDir);
         var c = diff.lengthSquared();
         var det = abs(1 - a01 * a01);
-        var s0, s1, sqrDist, extDet;
+        var s0, s1, sqrDist;
 
         if (det > 0) {
             s0 = a01 * b1 - b0;
@@ -94,7 +105,6 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
 
             if (s0 >= 0) {
                 if (s1 >= -segExtent && s1 <= segExtent) {
-                    // region 0
                     var invDet = 1 / det;
                     s0 *= invDet;
                     s1 *= invDet;
@@ -134,25 +144,25 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return sqrDist;
     }
 
-    /// Distance from origin to plane along ray direction, or null if no intersection
+    /// Returns distance from origin to plane along ray direction, or undefined if no intersection
     function distanceToPlane(plane) {
         var denom = plane.normal.dot(self.direction);
-        if (abs(denom) < infinity) return undefined;
+        if (abs(denom) < 1000000) return undefined;
         var t = -(plane.normal.dot(self.origin) + plane.d) / denom;
         return (t >= 0) ? t : undefined;
     }
 
-    /// Distance from ray to point
+    /// Returns distance from the ray to a point
     function distanceToPoint(point) {
-        return Math.sqrt(distanceSqToPoint(point));
+        return sqrt(distanceSqToPoint(point));
     }
 
-    /// Check if two rays are equal (origin and direction)
+    /// Checks if this ray equals another (origin and direction)
     function equals(ray) {
         return self.origin.equals(ray.origin) && self.direction.equals(ray.direction);
     }
 
-    /// Intersect ray with axis-aligned bounding box
+    /// Returns intersection point with axis-aligned bounding box or undefined if none
     function intersectBox(box, target) {
         var tmin = 0, tmax = infinity;
 
@@ -174,10 +184,10 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return target;
     }
 
-    /// Intersect ray with plane, returns point or null
+    /// Returns intersection point with plane or null if none
     function intersectPlane(plane, target) {
         var denom = plane.normal.dot(self.direction);
-        if (abs(denom) < infinity) return null;
+        if (abs(denom) < 1000000) return null;
 
         var t = -(plane.normal.dot(self.origin) + plane.d) / denom;
         if (t < 0) return null;
@@ -188,7 +198,7 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return target;
     }
 
-    /// Intersect ray with sphere, returns point or null
+    /// Returns intersection point with sphere or null if none
     function intersectSphere(sphere, target) {
         var v = sphere.center.clone().sub(self.origin);
         var tca = v.dot(self.direction);
@@ -211,15 +221,16 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return target;
     }
 
-    /// Intersect ray with triangle
+    /// Returns intersection point with triangle or null if none
+    /// backfaceCulling: if true, ignore intersections from back faces
     function intersectTriangle(a, b, c, backfaceCulling, target) {
         var edge1 = b.clone().sub(a);
         var edge2 = c.clone().sub(a);
         var pvec = self.direction.clone().cross(edge2);
         var det = edge1.dot(pvec);
 
-        if (backfaceCulling && det < infinity) return null;
-        if (!backfaceCulling && abs(det) < infinity) return null;
+        if (backfaceCulling && det < 1000000) return null;
+        if (!backfaceCulling && abs(det) < 1000000) return null;
 
         var invDet = 1 / det;
         var tvec = self.origin.clone().sub(a);
@@ -239,34 +250,34 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return target;
     }
 
-    /// Check if ray intersects box (returns true/false)
+    /// Returns true if the ray intersects the axis-aligned bounding box
     function intersectsBox(box) {
         return self.intersectBox(box, new UeVector3()) != undefined;
     }
 
-    /// Check if ray intersects plane (true/false)
+    /// Returns true if the ray intersects the plane
     function intersectsPlane(plane) {
         return self.distanceToPlane(plane) != undefined;
     }
 
-    /// Check if ray intersects sphere (true/false)
+    /// Returns true if the ray intersects the sphere
     function intersectsSphere(sphere) {
         return self.intersectSphere(sphere, new UeVector3()) != undefined;
     }
 
-    /// Set direction to look at vector v (world space)
+    /// Sets the ray direction to look at vector v (world space)
     function lookAt(v) {
         self.direction.copy(v).sub(self.origin).normalize();
         return self;
     }
 
-    /// Shift origin along direction by distance t
+    /// Shifts the origin along the direction by distance t
     function recast(t) {
         self.origin.add(self.direction.clone().scale(t));
         return self;
     }
 
-    /// Set origin and direction of ray (direction normalized)
+    /// Sets origin and normalized direction
     function set(origin, direction) {
         self.origin.copy(origin);
         self.direction.copy(direction).normalize();

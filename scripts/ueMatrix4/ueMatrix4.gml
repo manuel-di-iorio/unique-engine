@@ -1,57 +1,55 @@
-// @MissingDoc
 function UeMatrix4(_data = undefined) constructor {
-    // dati in colonna-major
+    // Internal data in column-major order
     data = _data ?? matrix_build_identity();
 
-    /// Moltiplica questa matrice per un'altra
+    /// Creates a deep copy of this matrix
+    function clone() {
+        return variable_clone(self);
+    }
+    
+    /// Multiplies this matrix by another
     function multiply(m) {
         data = matrix_multiply(self.data, m.data);
         return self;
     }
 
-    /// Moltiplica: risultato = a * b
+    /// Multiplies two matrices: result = a * b
     function multiplyMatrices(a, b) {
         data = matrix_multiply(a.data, b.data);
         return self;
     }
 
-    /// Pre-moltiplica: risultato = m * questa
+    /// Pre-multiplies this matrix: result = m * this
     function premultiply(m) {
         data = matrix_multiply(m.data, self.data);
         return self;
     }
 
-    /// Moltiplica ogni componente per uno scalare
+    /// Multiplies every component by a scalar
     function multiplyScalar(s) {
         for (var i = 0; i < 16; i++) data[i] *= s;
         return self;
     }
 
-    /// Costruita da transform (pos, quat, scale)
+    /// Builds a matrix from position, quaternion rotation, and scale
     function compose(pos, rot, scl) {
-    
-        // Normalize quaternion to prevent rotation-scaling artifacts
         rot.normalize();
-    
+
         var x0 = rot.x, y0 = rot.y, z0 = rot.z, w0 = rot.w;
         var x2 = x0 + x0, y2 = y0 + y0, z2 = z0 + z0;
-    
-        // Precompute quaternion products
+
         var xx = x0 * x2, xy = x0 * y2, xz = x0 * z2;
         var yy = y0 * y2, yz = y0 * z2, zz = z0 * z2;
         var wx = w0 * x2, wy = w0 * y2, wz = w0 * z2;
-    
-        // Rotation matrix without scale (column-major)
+
         var m00 = 1 - (yy + zz), m01 = xy + wz,     m02 = xz - wy;
         var m10 = xy - wz,       m11 = 1 - (xx + zz), m12 = yz + wx;
         var m20 = xz + wy,       m21 = yz - wx,     m22 = 1 - (xx + yy);
-    
-        // Apply scale per column
+
         m00 *= scl.x; m10 *= scl.x; m20 *= scl.x;
         m01 *= scl.y; m11 *= scl.y; m21 *= scl.y;
         m02 *= scl.z; m12 *= scl.z; m22 *= scl.z;
-    
-        // Compose final matrix
+
         data = [
             m00, m01, m02, 0,
             m10, m11, m12, 0,
@@ -62,7 +60,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Estrae pos, rot e scala da matrix
+    /// Decomposes matrix into position, quaternion, and scale
     function decompose(position, quaternion, scale) {
         var te = data;
         position.set(te[12], te[13], te[14]);
@@ -81,13 +79,13 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Copia un'altra matrice
+    /// Copies all values from another matrix
     function copy(m) {
         for (var i = 0; i < 16; i++) data[i] = m.data[i];
         return self;
     }
 
-    /// Copia solo la parte traslazione da un'altra matrice
+    /// Copies only the translation component from another matrix
     function copyPosition(m) {
         data[12] = m.data[12];
         data[13] = m.data[13];
@@ -95,35 +93,35 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Determinante della matrice
+    /// Returns the determinant of the matrix
     function determinant() {
         var a00 = data[ 0], a01 = data[ 4], a02 = data[ 8],  a03 = data[12];
         var a10 = data[ 1], a11 = data[ 5], a12 = data[ 9],  a13 = data[13];
         var a20 = data[ 2], a21 = data[ 6], a22 = data[10],  a23 = data[14];
         var a30 = data[ 3], a31 = data[ 7], a32 = data[11],  a33 = data[15];
-    
+
         var det00 = a00 * (a11 * (a22 * a33 - a23 * a32) - a12 * (a21 * a33 - a23 * a31) + a13 * (a21 * a32 - a22 * a31));
         var det01 = a01 * (a10 * (a22 * a33 - a23 * a32) - a12 * (a20 * a33 - a23 * a30) + a13 * (a20 * a32 - a22 * a30));
         var det02 = a02 * (a10 * (a21 * a33 - a23 * a31) - a11 * (a20 * a33 - a23 * a30) + a13 * (a20 * a31 - a21 * a30));
         var det03 = a03 * (a10 * (a21 * a32 - a22 * a31) - a11 * (a20 * a32 - a22 * a30) + a12 * (a20 * a31 - a21 * a30));
-    
+
         return det00 - det01 + det02 - det03;
     }
 
-    /// Inversione della matrice
+    /// Inverts the matrix
     function invert() {
         data = matrix_inverse(self.data);
         return self;
     }
 
-    /// Confronto tra matrici
+    /// Checks if this matrix equals another
     function equals(m) {
         for (var i = 0; i < 16; i++)
             if (data[i] != m.data[i]) return false;
         return true;
     }
 
-    /// Estrae le tre axis basis
+    /// Extracts the three basis axes (X, Y, Z) from matrix
     function extractBasis(xAxis, yAxis, zAxis) {
         xAxis.set(data[0], data[1], data[2]);
         yAxis.set(data[4], data[5], data[6]);
@@ -131,7 +129,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Estrae solo la rotazione
+    /// Removes scaling and isolates rotation from a matrix
     function extractRotation(m) {
         self.copy(m);
         var scale = new UeVector3();
@@ -139,32 +137,32 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Reset a identità
+    /// Resets the matrix to identity
     function identity() {
         data = matrix_build_identity();
         return self;
     }
 
-    /// Costruisce una matrice lookAt da occhio, target, up
+    /// Builds a lookAt matrix from eye, target and up vectors
     function lookAt(eye, target, up) {
         var m = matrix_build_lookat(eye.x, eye.y, eye.z, target.x, target.y, target.z, up.x, up.y, up.z);
         data = m;
         return self;
     }
 
-    /// Rotazione attorno ad un asse
+    /// Builds a rotation matrix from axis and angle
     function makeRotationAxis(axis, theta) {
         var q = new UeQuaternion().setFromAxisAngle(axis, theta);
         return self.makeRotationFromQuaternion(q);
     }
 
-    /// Rotazione da quaternion
+    /// Builds a rotation matrix from quaternion
     function makeRotationFromQuaternion(q) {
         self.compose(new UeVector3(), q, new UeVector3(1,1,1));
         return self;
     }
 
-    /// Costruzione matrice di scala
+    /// Builds a scaling matrix
     function makeScale(x, y, z) {
         data = [
             x, 0, 0, 0,
@@ -175,7 +173,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Costruzione matrice di traslazione
+    /// Builds a translation matrix
     function makeTranslation(x, y, z) {
         data = [
             1, 0, 0, 0,
@@ -186,40 +184,38 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Costruzione matrice prospettica
+    /// Builds a perspective projection matrix
     function makePerspective(left, right, top, bottom, near, far) {
         var width  = right - left;
         var height = top - bottom;
         var aspect = width / height;
         var fov_y_deg = radtodeg(2 * arctan(height * 0.5 / near));
-    
         data = matrix_build_projection_perspective(fov_y_deg, aspect, near, far);
         return self;
     }
 
-    /// Costruzione matrice ortografica
+    /// Builds an orthographic projection matrix
     function makeOrthographic(left, right, top, bottom, near, far) {
         var width  = right - left;
         var height = top - bottom;
-    
         data = matrix_build_projection_ortho(width, height, near, far);
         return self;
     }
 
-    /// Legge da array column-major
+    /// Sets values from a column-major array
     function fromArray(arr, offset = 0) {
         for (var i = 0; i < 16; i++) data[i] = arr[i + offset];
         return self;
     }
 
-    /// Scrive in array column-major
+    /// Writes values into a column-major array
     function toArray(arr = undefined, offset = 0) {
         arr ??= [];
         for (var i = 0; i < 16; i++) arr[offset + i] = data[i];
         return arr;
     }
 
-    /// Trasposta la matrice (row ↔ column)
+    /// Transposes the matrix
     function transpose() {
         data = [
             data[0], data[4], data[8],  data[12],
@@ -230,7 +226,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Trova la scala massima lungo gli assi (usato in UeSphere)
+    /// Returns the maximum scale along any axis
     function getMaxScaleOnAxis() {
         var sx = new UeVector3(data[0], data[1], data[2]).length();
         var sy = new UeVector3(data[4], data[5], data[6]).length();
@@ -238,7 +234,7 @@ function UeMatrix4(_data = undefined) constructor {
         return max(sx, sy, sz);
     }
 
-    /// Applica la matrice ad un punto Vector3 (w=1)
+    /// Applies matrix transform to a Vector3 (as a position, w = 1)
     function applyToVector3(vec) {
         var e = data;
         var xx = vec.x, yy = vec.y, zz = vec.z;
@@ -252,12 +248,7 @@ function UeMatrix4(_data = undefined) constructor {
         return new UeVector3(tx, ty, tz);
     }
 
-    /// Copia la matrice
-    function clone() {
-        return variable_clone(self);
-    }
-    
-    /// Scala la matrice moltiplicando le colonne per un vettore
+    /// Scales this matrix by a vector (column-wise)
     function scale(v) {
         data[0] *= v.x; data[1] *= v.x; data[2] *= v.x; data[3] *= v.x;
         data[4] *= v.y; data[5] *= v.y; data[6] *= v.y; data[7] *= v.y;
@@ -265,12 +256,11 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Imposta gli elementi della matrice con valori in row-major
+    /// Sets matrix values using row-major arguments (converted to column-major)
     function set(n11, n12, n13, n14,
                  n21, n22, n23, n24,
                  n31, n32, n33, n34,
                  n41, n42, n43, n44) {
-        // Ricorda: interna è column-major, quindi trasponiamo
         data[0]  = n11; data[4]  = n12; data[8]  = n13; data[12] = n14;
         data[1]  = n21; data[5]  = n22; data[9]  = n23; data[13] = n24;
         data[2]  = n31; data[6]  = n32; data[10] = n33; data[14] = n34;
@@ -278,14 +268,15 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Imposta la posizione senza alterare rotazione e scala
+    /// Sets only the translation component of the matrix
     function setPosition(v) {
         data[12] = v.x;
         data[13] = v.y;
         data[14] = v.z;
         return self;
     }
-    
+
+    /// Sets translation from X, Y, Z values
     function setPositionXYZ(x, y, z) {
         data[12] = x;
         data[13] = y;
@@ -293,7 +284,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Costruisce una matrice a partire da tre vettori base (basis vectors)
+    /// Builds a matrix from 3 orthogonal basis vectors
     function makeBasis(xAxis, yAxis, zAxis) {
         data = [
             xAxis.x, yAxis.x, zAxis.x, 0,
@@ -304,7 +295,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Costruisce matrice di rotazione da un Euler (angoli in degrees)
+    /// Builds a rotation matrix from Euler angles in degrees (XYZ order)
     function makeRotationFromEuler(x_deg, y_deg, z_deg) {
         var c1 = dcos(x_deg);
         var c2 = dcos(y_deg);
@@ -312,32 +303,30 @@ function UeMatrix4(_data = undefined) constructor {
         var s1 = dsin(x_deg);
         var s2 = dsin(y_deg);
         var s3 = dsin(z_deg);
-    
-        // Ordine XYZ:
+
         var m00 = c2 * c3;
         var m01 = -c2 * s3;
         var m02 = s2;
-    
+
         var m10 = c1 * s3 + s1 * s2 * c3;
         var m11 = c1 * c3 - s1 * s2 * s3;
         var m12 = -s1 * c2;
-    
+
         var m20 = s1 * s3 - c1 * s2 * c3;
         var m21 = s1 * c3 + c1 * s2 * s3;
         var m22 = c1 * c2;
-    
+
         data = [
             m00, m01, m02, 0,
             m10, m11, m12, 0,
             m20, m21, m22, 0,
             0,   0,   0,   1
         ];
-    
+
         return self;
     }
 
-
-    /// Costruisce matrice di rotazione X
+    /// Builds a rotation matrix around X axis
     function makeRotationX(theta) {
         var c = cos(theta);
         var s = sin(theta);
@@ -350,7 +339,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Costruisce matrice di rotazione Y
+    /// Builds a rotation matrix around Y axis
     function makeRotationY(theta) {
         var c = cos(theta);
         var s = sin(theta);
@@ -363,7 +352,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Costruisce matrice di rotazione Z
+    /// Builds a rotation matrix around Z axis
     function makeRotationZ(theta) {
         var c = cos(theta);
         var s = sin(theta);
@@ -376,7 +365,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Costruisce matrice di shear (shearing)
+    /// Builds a shear (skew) matrix
     function makeShear(xy, xz, yx, yz, zx, zy) {
         data = [
             1,  yx, zx, 0,

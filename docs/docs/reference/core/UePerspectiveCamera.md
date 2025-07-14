@@ -28,14 +28,19 @@ new UePerspectiveCamera(data = {})
 
 ### Properties
 
-| Property              | Type        | Default               | Description                                       |
-| ----------            | ----------- | -------               | ------------------------------------------        |
-| `isCamera`            | boolean     | true                  | Indicates that this is a camera                   |
-| `isPerspectiveCamera` | boolean     | true                  | Indicates that this is a perspective camera       |
-| `type`                | `string`    | `"PerspectiveCamera"` | Object type                                       |
-| `camera`              | Camera      | camera_create()       | The underlying GameMaker camera object            |
-| `target`              | `UeVector3` | 0,0,0                 | The current look-at target                        |
-| `onUpdate`            | `function`  | Default method        | Function called every frame to update view matrix |
+| Property                 | Type          | Default                | Description                                                       |
+|--------------------------|-------------  |------------------------|------------------------------------------------------------------|
+| `isCamera`               | `boolean`     | `true`                 | Indicates that this is a camera                                  |
+| `isPerspectiveCamera`    | `boolean`     | `true`                 | Indicates that this is a perspective camera                      |
+| `type`                   | `string`      | `"PerspectiveCamera"`  | Object type                                                      |
+| `camera`                 | `Camera`      | `camera_create()`      | The underlying GameMaker camera object                           |
+| `target`                 | `UeVector3`   | `0,0,0`                | The current look-at target                                       |
+| `onUpdate`               | `function`    | Default method         | Function called every frame to update the view matrix            |
+| `matrixWorld`            | `UeMatrix4`   | `undefined`            | World transformation matrix of the camera                        |
+| `matrixWorldInverse`     | `UeMatrix4`   | `undefined`            | Inverse of `matrixWorld`, used in `camera_set_view_mat()`        |
+| `projectionMatrix`       | `UeMatrix4`   | `undefined`            | Projection matrix, used in `camera_set_proj_mat()`               |
+| `projectionMatrixInverse`| `UeMatrix4`   | `undefined`            | Inverse of the projection matrix                                 |
+
 
 ## Methods
 
@@ -47,6 +52,7 @@ Cleanup the camera resource.
 ## Notes
 
 - The default .onUpdate() function uses `matrix_build_lookat()` to orient the camera toward target, with up-vector (0, 0, -1).
+- The update script update the camera matrixes only if needed.
 - use() must be called to activate the camera, unless autoUse is set to true (which is the default).
 - Antialias and vsync are applied through `display_reset()`.
 

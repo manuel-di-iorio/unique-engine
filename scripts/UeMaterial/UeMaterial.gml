@@ -12,6 +12,7 @@ function UeMaterial(data = {}) constructor {
     forceSinglePass = data[$ "forceSinglePass"] ?? false;
     alphaTest = data[$ "alphaTest"] ?? 0;
     colorWrite = data[$ "colorWrite"] ?? true;
+    wireframe = data[$ "wireframe"] ?? false;
     
     // Blending
     blending = data[$ "blending"] ?? transparent;

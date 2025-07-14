@@ -4,20 +4,20 @@ sidebar_position: 1
 
 The `UeMesh` class is the renderable object in Unique Engine. It combines a geometry (vertex buffer) with a material and is placed in the scene graph via its transformation.
 
-### Constructor
+## Constructor
 ```js
 new UeMesh(geometry, material = UeMeshStandardMaterial(), data = {})
 ```
 
 > Inherits from [UeObject3D](/docs/reference/core/UeObject3D)
 
-### Data parameters
+## Data parameters
 
 | Key         | Type                  | Default                    | Description                          |
 | ----------- | --------------------- | -------------------------- | -----------------------------------  |
 | `primitive` | `number`              | `pr_trianglelist`          | GPU primitive mode                   |
 
-### Properties
+## Properties
 
 | Property    | Type               | Default                    | Description                           |
 | ----------- | ---------          | -------                    | -----------------------------------   |
@@ -27,3 +27,9 @@ new UeMesh(geometry, material = UeMeshStandardMaterial(), data = {})
 | `material`  | `UeMaterial`       | `UeMeshStandardMaterial()` | The material to use                   |
 | `primitive` | `number`           | `pr_trianglelist`          | GPU primitive mode                    |
 | `name`      | `string`           | ""                         | Object name (empty string by default) |
+
+## Methods
+
+| Method                           | Returns | Description                                                                                            |
+| -------------------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
+| `raycast(raycaster, intersects)` | `this`  | Tests the ray from `raycaster` against this object's bounding volume and appends hits to `intersects`. |

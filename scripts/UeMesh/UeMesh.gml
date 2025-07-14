@@ -53,8 +53,8 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         return { obj: _self, payload };
     }
     
-    // @todo This is a very simplified version of the actual implementation
-    // @MissingDoc @Todo @Untested
+    // This is a very simplified version of the actual implementation
+    // @Todo @Untested
     function raycast(raycaster, intersects) {
         var object = self;
         var _ray = raycaster.ray;
@@ -72,5 +72,6 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
                 object
             });
 		}
+        return self;
     }
 }

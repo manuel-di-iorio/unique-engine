@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 A ready-to-use material with built-in lighting support (ambient, point, directional) and texture handling.
