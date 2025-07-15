@@ -54,25 +54,26 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         return { obj: _self, payload };
     }
     
-    // This is a very simplified version of the actual implementation
-    // @Todo @Untested
-    function raycast(raycaster, intersects) {
+    // This is a very simplified version of the actual ThreeJS implementation
+    function raycast(raycaster, hits) {
         var object = self;
         var _ray = raycaster.ray;
         
-        if (geometry.boundingBox != undefined) {
-			if (!_ray.intersectsBox(geometry.boundingBox)) return;
-                
-            array_push(intersects, { 
-                object 
-            });
-		} else if (geometry.boundingSphere != undefined) {
+        if (geometry.boundingBox != undefined && !geometry.boundingBox.isEmpty()) {
+			if (!_ray.intersectsBox(geometry.boundingBox)) {
+                log("No hit")
+                return self;
+            }
+                log("HIT!")
+		} else if (geometry.boundingSphere != undefined && !geometry.boundingSphere.isEmpty()) {
 			if (!_ray.intersectsSphere(geometry.boundingSphere)) return;
-                
-            array_push(intersects, {
-                object
-            });
 		}
+        
+        array_push(hits, {
+            object,
+            distance: _ray.distanceToPoint(position)
+        });
+        
         return self;
     }
 }

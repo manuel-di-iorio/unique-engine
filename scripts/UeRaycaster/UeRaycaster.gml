@@ -30,11 +30,17 @@ function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0,
     /**
      * Sets the ray from normalized device coordinates (NDC) and camera
      * Converts screen coordinates into a world-space ray
-     * @param {UeVector3} coords - Coordinates in NDC space (-1 to 1)
-     * @param {Object} camera - Camera object used for unprojection
+     * @param {Real} mx - device_mouse_get_x() or device_mouse_x_to_gui(0)
+     * @param {Real} my - device_mouse_get_y() or device_mouse_y_to_gui(0)
+     * @param {Struct} camera - Camera object used for unprojection
      */
-    function setFromCamera(coords, camera) {
+    function setFromCamera(mx, my, camera) {
         self.camera = camera;
+        
+        // Normalize the mouse coordinates
+        // @todo May use a more generalized way to obtain the screen size
+        var ndc_x = (mx / window_get_width()) * 2 - 1;
+        var ndc_y = -((my / window_get_width()) * 2 - 1);
 
         // Initialize origin and direction vectors
         var origin = new UeVector3();
@@ -44,14 +50,14 @@ function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0,
             // For perspective camera, origin is camera position
             origin.copy(camera.position);
             // Direction is computed by unprojecting NDC point and normalizing
-            dir.set(coords.x, coords.y, 0.5).unproject(camera).sub(camera.position).normalize();
+            dir.set(ndc_x, ndc_y, 0.5).unproject(camera).sub(camera.position).normalize();
         } else if (camera.isOrthographicCamera) {
             // For orthographic camera, origin is unprojected NDC with depth, direction is fixed
-            origin.set(coords.x, coords.y, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
+            origin.set(ndc_x, ndc_y, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
             dir.set(0, 0, -1).transformDirection(camera.matrixWorld);
         }
 
-        self.ray.set(origin, direction);
+        self.ray.set(origin, dir);
         return self;
     }
 
@@ -59,15 +65,13 @@ function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0,
      * Intersects the ray with an object and optionally its descendants recursively
      * @param {Struct} object - The object to test for intersections
      * @param {bool} recursive - Whether to check children recursively (default: true)
-     * @param {Array} optionalTarget - Optional array to store intersection results
+     * @param {Array} hits - Optional array to store intersection results
      * @returns {Array} Sorted array of intersection hits, closest first
      */
-    function intersectObject(object, recursive = true, optionalTarget = []) {
-        var hits = optionalTarget ?? [];
-
+    function intersectObject(object, recursive = true, hits = []) {
         // If the object has a raycast method, invoke it
         var objectRaycast = object[$ "raycast"];
-        if (objectRaycast != undefined) {
+        if (objectRaycast != undefined) { 
             objectRaycast(self, hits);
         }
 
@@ -88,12 +92,10 @@ function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0,
      * Intersects the ray with multiple objects
      * @param {Array} objects - Array of objects to test intersections
      * @param {bool} recursive - Whether to check children recursively (default: true)
-     * @param {Array} optionalTarget - Optional array to store intersection results
+     * @param {Array} hits - Optional array to store intersection results
      * @returns {Array} Sorted array of intersection hits, closest first
      */
-    function intersectObjects(objects, recursive = true, optionalTarget = []) {
-        var hits = optionalTarget ?? [];
-
+    function intersectObjects(objects, recursive = true, hits = []) {
         for (var i = 0, n = array_length(objects); i < n; i++) {
             intersectObject(objects[i], recursive, hits);
         }

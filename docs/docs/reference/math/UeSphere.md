@@ -24,21 +24,21 @@ new UeSphere(center = new UeVector3(0, 0, 0), radius = -1)
 
 | Method                                   | Returns     | Description                                                       |
 | ---------------------------------------- | ----------- | ----------------------------------------------------------------- |
-| `set(center, radius)`                    | `this`      | Sets the center and radius of the sphere                          |
-| `copy(sphere)`                           | `this`      | Copies values from another sphere                                 |
+| `set(center, radius)`                    | `self`      | Sets the center and radius of the sphere                          |
+| `copy(sphere)`                           | `self`      | Copies values from another sphere                                 |
 | `clone()`                                | `UeSphere`  | Returns a new copy of this sphere                                 |
 | `isEmpty()`                              | `boolean`   | Returns `true` if radius is less than 0 (sphere is empty)         |
-| `makeEmpty()`                            | `this`      | Makes the sphere empty                                            |
+| `makeEmpty()`                            | `self`      | Makes the sphere empty                                            |
 | `containsPoint(point)`                   | `boolean`   | Returns `true` if the point is inside or on the surface           |
 | `distanceToPoint(point)`                 | `number`    | Returns distance from the surface to a point (negative if inside) |
 | `clampPoint(point, target?)`             | `UeVector3` | Clamps a point inside the sphere boundary                         |
-| `applyMatrix4(matrix)`                   | `this`      | Applies a 4x4 transformation matrix to the sphere                 |
-| `expandByPoint(point)`                   | `this`      | Expands the sphere to include the given point                     |
-| `setFromPoints(points, optionalCenter?)` | `this`      | Sets the sphere from an array of points, optionally with a center |
-| `translate(offset)`                      | `this`      | Moves the sphere by an offset vector                              |
+| `applyMatrix4(matrix)`                   | `self`      | Applies a 4x4 transformation matrix to the sphere                 |
+| `expandByPoint(point)`                   | `self`      | Expands the sphere to include the given point                     |
+| `setFromPoints(points, optionalCenter?)` | `self`      | Sets the sphere from an array of points, optionally with a center |
+| `translate(offset)`                      | `self`      | Moves the sphere by an offset vector                              |
 | `equals(sphere)`                         | `boolean`   | Checks if this sphere equals another (same center and radius)     |
 | `getBoundingBox(target?)`                | `UeBox3`    | Returns the minimal bounding box enclosing this sphere            |
 | `intersectsBox(box)`                     | `boolean`   | Returns `true` if the sphere intersects a given box               |
 | `intersectsPlane(plane)`                 | `boolean`   | Returns `true` if the sphere intersects a given plane             |
 | `intersectsSphere(sphere)`               | `boolean`   | Returns `true` if this sphere intersects another sphere           |
-| `union(sphere)`                          | `this`      | Expands this sphere to include another sphere                     |
+| `union(sphere)`                          | `self`      | Expands this sphere to include another sphere                     |

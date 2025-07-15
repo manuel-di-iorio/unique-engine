@@ -17,6 +17,7 @@ function UeBufferGeometry(data = {}) constructor {
 
     // Build the vertex buffer from vertices and format
     function build() {
+        dispose();
         vb = vertex_create_buffer();               // Create a new vertex buffer
         vertex_begin(vb, format.vf);               // Begin vertex buffer with format flags
         var attrs = format.attrs;                   // Attributes defined by the format

@@ -8,19 +8,19 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self.azimuth = arctan2(dir.y, dir.x);
     self.elevation = arcsin(clamp(dir.z / radius, -1, 1));
 
-    self.enableZoom = true;
+    self.enableZoom = data[$"enableZoom"] ?? true;
     self.zoomSpeed = data[$"zoomSpeed"] ?? 5;
     self.minTargetRadius = data[$"minTargetRadius"] ?? 5;
     self.maxTargetRadius = data[$"maxTargetRadius"] ?? infinity;
 
-    self.enablePan = true;
+    self.enablePan = data[$"enablePan"] ?? true;
     self.panSpeed = data[$"panSpeed"] ?? 1.0;
 
-    self.enableRotate = true;
+    self.enableRotate = data[$"enableRotate"] ?? true;
     self.rotateSpeed = data[$"rotateSpeed"] ?? 1.0;
 
-    self.enableDamping = true;
-    self.dampingFactor = 0.1;
+    self.enableDamping = data[$"enableDamping"] ?? true;
+    self.dampingFactor = data[$"dampingFactor"] ?? 0.1;
 
     self.autoRotate = data[$"autoRotate"] ?? false;
     self.autoRotateSpeed = data[$"autoRotateSpeed"] ?? 0.5;
@@ -55,8 +55,8 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var mx = display_mouse_get_x();
         var my = display_mouse_get_y();
 
-        var isRotatingNow = mouse_check_button(self.mouseButtonRotate);
-        var isPanningNow = mouse_check_button(self.mouseButtonPan);
+        var isRotatingNow = mouse_check_button(self.mouseButtonRotate) && self.enableRotate;
+        var isPanningNow = mouse_check_button(self.mouseButtonPan) && self.enablePan;
 
         if (isRotatingNow && !self._dragging) {
             self._prevMouseX = mx;

@@ -22,18 +22,18 @@ new UeObject3D(data = {})
 
 ### Properties
 
-| Property      | Type         | Default          |  Description                         |
-| ------------- | ------------ | ---------        | ---------------------------          |
-| `isObject3D`  | `boolean`    | true             | Indicates that this is an Object3D   |
-| `type`        | `string`     | `"Object3D"`     | Object type                          |
-| `id`          | `number`     | (auto-generated) | Unique numeric ID                    |
-| `uuid`        | `string`     | (auto-generated) | Randomly generated unique identifier |
-| `name`        | `string`     | ""               | Optional object name                 |
-| `visible`     | `boolean`    | true             | Visibility flag                      |
-| `parent`      | `UeObject3D` | undefined        | Parent object in the scene graph     |
-| `children`    | `array`      | []               | Array of child objects               |
-| `renderOrder` | `number`     | 0                | Overrides render sort when rendering |
-| `layers`      | `UeLayers`   | 0                | Overrides render sort when rendering |
+| Property      | Type         | Default          |  Description                                     |
+| ------------- | ------------ | ---------        | ---------------------------                      |
+| `isObject3D`  | `boolean`    | true             | Indicates that this is an Object3D               |
+| `type`        | `string`     | `"Object3D"`     | Object type                                      |
+| `id`          | `number`     | (auto-generated) | Incremental object ID                            |
+| `uuid`        | `string`     | (auto-generated) | Randomly generated unique identifier             |
+| `name`        | `string`     | ""               | Optional object name                             |
+| `visible`     | `boolean`    | true             | Visibility flag                                  |
+| `parent`      | `UeObject3D` | undefined        | Parent object in the scene graph                 |
+| `children`    | `array`      | []               | Array of child objects                           |
+| `renderOrder` | `number`     | 0                | Overrides render sort when rendering             |
+| `layers`      | `UeLayers`   |                  | Layers with membership set to layer 0 by default |
 
 
 ### 🔁 Inherited from `UeTransform`

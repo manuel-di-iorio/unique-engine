@@ -23,19 +23,19 @@ new UeVector2(x = 0, y = 0)
 
 | Method            | Returns     | Description                                        |
 | ----------------- | ----------- | -------------------------------------------------- |
-| `set(x, y)`       | `this`      | Sets the X and Y components                        |
+| `set(x, y)`       | `self`      | Sets the X and Y components                        |
 | `clone()`         | `UeVector2` | Returns a copy of this vector                      |
-| `copy(vec)`       | `this`      | Copies values from another vector                  |
-| `add(vec)`        | `this`      | Adds another vector                                |
-| `sub(vec)`        | `this`      | Subtracts another vector                           |
-| `multiply(vec)`   | `this`      | Multiplies each component by another vector        |
-| `scale(s)`        | `this`      | Scales both components by scalar `s`               |
+| `copy(vec)`       | `self`      | Copies values from another vector                  |
+| `add(vec)`        | `self`      | Adds another vector                                |
+| `sub(vec)`        | `self`      | Subtracts another vector                           |
+| `multiply(vec)`   | `self`      | Multiplies each component by another vector        |
+| `scale(s)`        | `self`      | Scales both components by scalar `s`               |
 | `dot(vec)`        | `number`    | Dot product with another vector                    |
 | `length()`        | `number`    | Magnitude (Euclidean norm)                         |
-| `normalize()`     | `this`      | Converts to a unit vector                          |
+| `normalize()`     | `self`      | Converts to a unit vector                          |
 | `equals(vec)`     | `boolean`   | Checks if two vectors are identical                |
-| `lerp(vec, t)`    | `this`      | Linear interpolation toward `vec` by factor `t`    |
+| `lerp(vec, t)`    | `self`      | Linear interpolation toward `vec` by factor `t`    |
 | `angleTo(vec)`    | `number`    | Returns angle in radians between the vectors       |
 | `distanceTo(vec)` | `number`    | Euclidean distance to another vector               |
 | `perp()`          | `UeVector2` | Returns a perpendicular vector (`-y, x`)           |
-| `rotate(angle)`   | `this`      | Rotates the vector counterclockwise by angle       |
+| `rotate(angle)`   | `self`      | Rotates the vector counterclockwise by angle       |

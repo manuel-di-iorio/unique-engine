@@ -8,6 +8,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         self.x = _x;
         self.y = _y;
         self.z = _z;
+        return self;
     }
 
     /// Returns a deep clone of this vector.
@@ -306,15 +307,17 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     /// Projects this vector into NDC space using camera matrices.
     /// @param {UeCamera} camera
     function project(camera) {
-        return applyMatrix4(camera.matrixWorldInverse)
-                .applyMatrix4(camera.projectionMatrix);
+        applyMatrix4(camera.matrixWorldInverse)
+        applyMatrix4(camera.projectionMatrix);
+        return self;
     }
 
     /// Unprojects this vector from NDC space back to world space.
     /// @param {UeCamera} camera
     function unproject(camera) {
-        return applyMatrix4(camera.projectionMatrixInverse)
-                .applyMatrix4(camera.matrixWorld);
+        applyMatrix4(camera.projectionMatrixInverse)
+        applyMatrix4(camera.matrixWorld);
+        return self;
     }
 
     /// Transforms the direction only (ignores translation), then normalizes.

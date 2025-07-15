@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-The `UeMesh` class is the renderable object in Unique Engine. It combines a geometry (vertex buffer) with a material and is placed in the scene graph via its transformation.
+The `UeMesh` class is a renderable object in Unique Engine. It combines a geometry (vertex buffer) with a material and is placed in the scene graph via its transformation.
 
 ## Constructor
 ```js
@@ -30,6 +30,6 @@ new UeMesh(geometry, material = UeMeshStandardMaterial(), data = {})
 
 ## Methods
 
-| Method                           | Returns | Description                                                                                            |
-| -------------------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
-| `raycast(raycaster, intersects)` | `this`  | Tests the ray from `raycaster` against this object's bounding volume and appends hits to `intersects`. |
+| Method                           | Returns | Description                                                                                                |
+| -------------------------------- | ------- | ------------------------------------------------------------------------------------------------------     |
+| `raycast(raycaster, intersects)` | `self`  | Tests the ray from `raycaster` against this object's bounding box/sphere and appends hits to `intersects`. |

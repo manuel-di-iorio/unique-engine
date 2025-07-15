@@ -22,7 +22,7 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
         return self;
     }
 
-    /// Sets the box from a center point and size vector.
+    /// Sets the box from a center point (UeVector3) and size (UeVector3).
     function setFromCenterAndSize(center, size) {
         var halfSize = size.clone().scale(0.5);
         self.sizeMin.copy(center).sub(halfSize);

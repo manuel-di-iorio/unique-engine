@@ -1,7 +1,7 @@
 function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeBufferGeometry(data) constructor {
-    var _width  = width ?? data[$ "width"] ?? 1;
-    var _height = height ?? data[$ "height"] ?? 1;
-    var _depth  = depth ?? data[$ "depth"]  ?? 1;
+    var _width  = width ?? 1;
+    var _height = height ?? 1;
+    var _depth  = depth ?? 1;
     var _color  = data[$ "color"]  ?? c_white;
     var _alpha  = data[$ "alpha"]  ?? 1;
 

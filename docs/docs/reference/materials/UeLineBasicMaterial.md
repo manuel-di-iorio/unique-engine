@@ -18,4 +18,4 @@ Provides a simple colored line shader.
 
 | Method                               | Returns     | Description                                                          |
 | ------------------------------------ | ----------- | -------------------------------------------------------------        |
-| `setColor(color)`                    | `this`      | Sets the flat color of the line material, White is the default color |
+| `setColor(color)`                    | `self`      | Sets the flat color of the line material, White is the default color |

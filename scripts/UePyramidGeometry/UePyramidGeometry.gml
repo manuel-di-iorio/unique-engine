@@ -80,8 +80,7 @@ function UePyramidGeometry(data = {}): UeBufferGeometry(data) constructor {
                 u: uv[0],
                 v: uv[1],
                 color: _color,
-                alpha: _alpha,
-                custom: {}
+                alpha: _alpha
             });
         }
     }

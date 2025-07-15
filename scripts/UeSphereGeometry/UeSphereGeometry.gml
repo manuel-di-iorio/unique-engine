@@ -51,8 +51,7 @@ function UeSphereGeometry(_radius = 40, data = {}): UeBufferGeometry(data) const
                     u: u,
                     v: v,
                     color: _color,
-                    alpha: _alpha,
-                    custom: {}
+                    alpha: _alpha
                 });
             }
         }

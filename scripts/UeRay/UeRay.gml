@@ -75,13 +75,13 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         return self.at(t, target);
     }
 
-    /// Returns squared distance from the ray to a point
+    /// Returns squared distance from the ray to a point (UeVector3)
     function distanceSqToPoint(point) {
         var v = point.clone().sub(self.origin);
         var t = self.direction.dot(v);
         if (t < 0) t = 0;
         var projected = self.direction.clone().scale(t).add(self.origin);
-        return point.clone().sub(projected).lengthSquared();
+        return point.clone().sub(projected).lengthSq();
     }
 
     /// Returns squared distance between ray and segment defined by v0 and v1.
@@ -95,7 +95,7 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         var a01 = -self.direction.dot(segDir);
         var b0 = diff.dot(self.direction);
         var b1 = -diff.dot(segDir);
-        var c = diff.lengthSquared();
+        var c = diff.lengthSq();
         var det = abs(1 - a01 * a01);
         var s0, s1, sqrDist;
 
@@ -165,11 +165,11 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
     /// Returns intersection point with axis-aligned bounding box or undefined if none
     function intersectBox(box, target) {
         var tmin = 0, tmax = infinity;
-
+        
         for (var i = 0; i < 3; i++) {
             var invD = 1 / self.direction.getComponent(i);
-            var t0 = (box.min.getComponent(i) - self.origin.getComponent(i)) * invD;
-            var t1 = (box.max.getComponent(i) - self.origin.getComponent(i)) * invD;
+            var t0 = (box.sizeMin.getComponent(i) - self.origin.getComponent(i)) * invD;
+            var t1 = (box.sizeMax.getComponent(i) - self.origin.getComponent(i)) * invD;
             if (invD < 0) {
                 var tmp = t0; t0 = t1; t1 = tmp;
             }
@@ -202,7 +202,7 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
     function intersectSphere(sphere, target) {
         var v = sphere.center.clone().sub(self.origin);
         var tca = v.dot(self.direction);
-        var d2 = v.lengthSquared() - tca * tca;
+        var d2 = v.lengthSq() - tca * tca;
         var r2 = sphere.radius * sphere.radius;
 
         if (d2 > r2) return null;

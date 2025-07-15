@@ -67,8 +67,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // Render a list of opaque objects
     function _renderOpaqueObjects(objects, renderState) {
         for (var i = 0, len = array_length(objects); i < len; i++) {
-            var child = objects[i];
-            child.render(renderState);
+            objects[i].render(renderState);
         }
     }
     
@@ -114,7 +113,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         
         // Render the objects opaque objects first
         _renderOpaqueObjects(opaqueQueue, renderState);
-        _renderTransparentObjects(transparentQueue, renderState); 
+        _renderTransparentObjects(transparentQueue, renderState);
         
         // Reset world matrix after rendering
         matrix_set(matrix_world, matrix_build_identity()); 

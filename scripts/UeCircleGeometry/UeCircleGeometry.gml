@@ -24,8 +24,7 @@ function UeCircleGeometry(radius = 1, data = {}): UeBufferGeometry(data) constru
             u: 0.5,
             v: 0.5,
             color: _color,
-            alpha: _alpha,
-            custom: {}
+            alpha: _alpha
         });
         
         // Vertex: edge 2
@@ -39,8 +38,7 @@ function UeCircleGeometry(radius = 1, data = {}): UeBufferGeometry(data) constru
             u: (x1 / (radius * 2)) + 0.5,
             v: (z1 / (radius * 2)) + 0.5,
             color: _color,
-            alpha: _alpha,
-            custom: {}
+            alpha: _alpha
         });
 
         // Vertex: edge 1
@@ -54,8 +52,7 @@ function UeCircleGeometry(radius = 1, data = {}): UeBufferGeometry(data) constru
             u: (x0 / (radius * 2)) + 0.5,
             v: (z0 / (radius * 2)) + 0.5,
             color: _color,
-            alpha: _alpha,
-            custom: {}
+            alpha: _alpha
         });
     }
 

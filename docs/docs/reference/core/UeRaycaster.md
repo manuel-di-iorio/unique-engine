@@ -26,18 +26,18 @@ UeRaycaster(origin = new UeVector3(), direction = new UeVector3(0, 0, -1), near 
 
 | Method                                                             | Returns | Description                                                                                     |
 | ------------------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------- |
-| `set(origin, direction)`                                           | `this`  | Sets the ray origin and direction                                                               |
-| `setFromCamera(coords, camera)`                                    | `this`  | Sets the ray based on normalized device coordinates and camera type                             |
-| `intersectObject(object, recursive = true, optionalTarget = [])`   | `Array` | Intersects ray with an object and optionally its descendants recursively, returning sorted hits |
-| `intersectObjects(objects, recursive = true, optionalTarget = [])` | `Array` | Intersects ray with multiple objects, optionally recursive, returning sorted hits               |
+| `set(origin, direction)`                                           | `self`  | Sets the ray origin and direction                                                            |
+| `setFromCamera(mouse_x, mouse_y, camera)`                          | `self`  | Sets the ray based on device mouse coordinates and camera                             |
+| `intersectObject(object, recursive = true, hits = [])`   | `Array` | Intersects ray with an object and optionally its descendants recursively, returning sorted hits by distance |
+| `intersectObjects(objects, recursive = true, hits = [])` | `Array` | Intersects ray with multiple objects, optionally recursive, returning sorted hits by distance              |
 
 ## Usage example
 
 ```js
 const raycaster = new UeRaycaster();
 raycaster.setFromCamera(new UeVector3(0, 0), camera);
-const intersects = raycaster.intersectObjects(scene.children);
-if (array_length(intersects) > 0) {
-  show_debug_message("Hit object:", intersects[0].object);
+const hits = raycaster.intersectObjects(scene.children);
+if (array_length(hits) > 0) {
+  show_debug_message("Hit object:", hits[0].object);
 }
 ```

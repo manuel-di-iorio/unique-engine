@@ -81,7 +81,7 @@ function UeMatrix4(_data = undefined) constructor {
 
     /// Copies all values from another matrix
     function copy(m) {
-        for (var i = 0; i < 16; i++) data[i] = m.data[i];
+        array_copy(data, 0, m.data, 0, 16);
         return self;
     }
 
@@ -145,8 +145,7 @@ function UeMatrix4(_data = undefined) constructor {
 
     /// Builds a lookAt matrix from eye, target and up vectors
     function lookAt(eye, target, up) {
-        var m = matrix_build_lookat(eye.x, eye.y, eye.z, target.x, target.y, target.z, up.x, up.y, up.z);
-        data = m;
+        data = matrix_build_lookat(eye.x, eye.y, eye.z, target.x, target.y, target.z, up.x, up.y, up.z);
         return self;
     }
 
@@ -204,14 +203,13 @@ function UeMatrix4(_data = undefined) constructor {
 
     /// Sets values from a column-major array
     function fromArray(arr, offset = 0) {
-        for (var i = 0; i < 16; i++) data[i] = arr[i + offset];
+        array_copy(data, 0, arr, offset, 16-offset);
         return self;
     }
 
     /// Writes values into a column-major array
     function toArray(arr = undefined, offset = 0) {
-        arr ??= [];
-        for (var i = 0; i < 16; i++) arr[offset + i] = data[i];
+        array_copy(arr ?? [], offset, data, 0, 16-offset);
         return arr;
     }
 

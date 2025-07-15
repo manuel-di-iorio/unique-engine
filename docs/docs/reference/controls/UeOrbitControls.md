@@ -20,6 +20,11 @@ new UeOrbitControls(data = {})
 | `panSpeed`           | `number`    | `1.0`        | Mouse pan speed                     |
 | `rotateSpeed`        | `number`    | `1.0`        | Mouse rotation speed                |
 | `autoRotate`         | `boolean`   | `false`      | Enables idle rotation               |
+| `enableZoom`         | `boolean`   | `true`       | Enables zooming                     |
+| `enablePan`          | `boolean`   | `true`       | Enables panning                     |
+| `enableRotate`       | `boolean`   | `true`       | Enables orbit rotation              |
+| `enableDamping`      | `boolean`   | `true`       | Enables inertia smoothing           |
+| `dampingFactor`      | `number`    | `0.1`        | Lerp factor for smooth motion       |
 | `autoRotateSpeed`    | `number`    | `0.1`        | Speed of automatic rotation         |
 | `minTargetRadius`    | `number`    | `5`          | Minimum zoom radius                 |
 | `maxTargetRadius`    | `number`    | `Infinity`   | Maximum zoom radius                 |
