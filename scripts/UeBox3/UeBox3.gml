@@ -89,14 +89,8 @@ function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new U
 
     /// Expands the box by a scalar amount in all directions.
     function expandByScalar(scalar) {
-        self.sizeMin.x -= scalar;
-        self.sizeMin.y -= scalar;
-        self.sizeMin.z -= scalar;
-
-        self.sizeMax.x += scalar;
-        self.sizeMax.y += scalar;
-        self.sizeMax.z += scalar;
-
+        self.sizeMin.subScalar(scalar);
+        self.sizeMax.addScalar(scalar);
         return self;
     }
 

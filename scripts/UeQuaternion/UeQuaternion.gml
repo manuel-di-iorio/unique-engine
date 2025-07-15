@@ -196,7 +196,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     function setFromUnitVectors(vFrom, vTo) {
-        var EPS = 0.000001;
+        var EPS = math_get_epsilon();
         var r = vFrom.dot(vTo) + 1;
     
         if (r < EPS) {

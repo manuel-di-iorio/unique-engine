@@ -1,4 +1,4 @@
-function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1), _near = 0, _far = infinity) constructor {
+function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _far = infinity) constructor {
     // Ray used for intersection tests
     self.ray = new UeRay(_origin, _direction);
     // Near and far clipping distances for raycasting
@@ -6,16 +6,8 @@ function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0,
     self.far = _far;
     // Camera associated with this raycaster (used for coordinate conversions)
     self.camera = undefined;
-
-    // Parameters for intersection tests per object type
-    // @todo unused for now
-    self.params = {
-        Mesh: {},
-        Line: { threshold: 1 },
-        LOD: {},
-        Points: { threshold: 1 },
-        Sprite: {}
-    };
+    // Raycaster layers. Objects being tested must share at least one layer with the raycaster
+    self.layers = new UeLayers();
    
     /**
      * Sets the ray's origin and direction
@@ -40,7 +32,7 @@ function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0,
         // Normalize the mouse coordinates
         // @todo May use a more generalized way to obtain the screen size
         var ndc_x = (mx / window_get_width()) * 2 - 1;
-        var ndc_y = -((my / window_get_width()) * 2 - 1);
+        var ndc_y = ((my / window_get_width()) * 2 - 1);
 
         // Initialize origin and direction vectors
         var origin = new UeVector3();
@@ -70,9 +62,11 @@ function UeRaycaster(_origin = new UeVector3(), _direction = new UeVector3(0, 0,
      */
     function intersectObject(object, recursive = true, hits = []) {
         // If the object has a raycast method, invoke it
-        var objectRaycast = object[$ "raycast"];
-        if (objectRaycast != undefined) { 
-            objectRaycast(self, hits);
+        if (object.visible && object[$ "geometry"] && layers.test(object.layers)) {
+            var objectRaycast = object[$ "raycast"];
+            if (objectRaycast != undefined) { 
+                objectRaycast(self, hits);
+            }
         }
 
         // Recursively test child objects if requested

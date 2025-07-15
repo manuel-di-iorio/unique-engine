@@ -54,6 +54,7 @@
     {"id":{"name":"r_test","path":"rooms/r_test/r_test.yy",},},
     {"id":{"name":"__GMassimp_Macros","path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},},
     {"id":{"name":"log","path":"scripts/log/log.yy",},},
+    {"id":{"name":"UeArrowHelper","path":"scripts/UeArrowHelper/UeArrowHelper.yy",},},
     {"id":{"name":"UeAssimpLoader","path":"scripts/UeAssimpLoader/UeAssimpLoader.yy",},},
     {"id":{"name":"UeBox2","path":"scripts/UeBox2/UeBox2.yy",},},
     {"id":{"name":"UeBox3","path":"scripts/UeBox3/UeBox3.yy",},},

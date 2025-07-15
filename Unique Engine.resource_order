@@ -22,6 +22,7 @@
     {"name":"r_test","order":5,"path":"rooms/r_test/r_test.yy",},
     {"name":"__GMassimp_Macros","order":1,"path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},
     {"name":"log","order":4,"path":"scripts/log/log.yy",},
+    {"name":"UeArrowHelper","order":1,"path":"scripts/UeArrowHelper/UeArrowHelper.yy",},
     {"name":"UeAssimpLoader","order":2,"path":"scripts/UeAssimpLoader/UeAssimpLoader.yy",},
     {"name":"UeBox2","order":8,"path":"scripts/UeBox2/UeBox2.yy",},
     {"name":"UeBox3","order":9,"path":"scripts/UeBox3/UeBox3.yy",},

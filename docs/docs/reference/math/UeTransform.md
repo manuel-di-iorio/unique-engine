@@ -28,7 +28,7 @@ new UeTransform(data = {})
 | `position`               | `UeVector3`    | `(0, 0, 0)` | Local position vector                        |
 | `rotation`               | `UeQuaternion` | `(0, 0, 0)` | Local rotation as quaternion                 |
 | `scale`                  | `UeVector3`    | `(1, 1, 1)` | Local scale vector                           |
-| `up`                     | `UeVector3`    | `(0, 1, 0)` | World up direction used in `lookAt()`        |
+| `up`                     | `UeVector3`    | `(0, 0, -1)` | World up direction used in `lookAt()`        |
 | `matrix`                 | `UeMatrix4`    | —           | Local transformation matrix                  |
 | `matrixWorld`            | `UeMatrix4`    | —           | World transformation matrix                  |
 | `parent`                 | `UeObject3D`   | `undefined` | Parent in transform hierarchy                |

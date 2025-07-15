@@ -110,7 +110,7 @@ function UeMatrix4(_data = undefined) constructor {
 
     /// Inverts the matrix
     function invert() {
-        data = matrix_inverse(self.data);
+        self.data = matrix_inverse(self.data);
         return self;
     }
 

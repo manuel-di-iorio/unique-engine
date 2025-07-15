@@ -9,14 +9,14 @@ Represents a mathematical plane in 3D space defined by a normal vector and a dis
 ## Constructor
 
 ```js
-new UePlane(normal = new UeVector3(0, 1, 0), d = 0)
+new UePlane(normal = new UeVector3(0, 0, -1), d = 0)
 ```
 
 ### Data parameters
 
 | Name     | Type        | Default                  | Description                                      |
 | -------- | ----------- | ------------------------ | ------------------------------------------------ |
-| `normal` | `UeVector3` | `new UeVector3(0, 1, 0)` | The normal vector of the plane                   |
+| `normal` | `UeVector3` | `new UeVector3(0, 0, -1)` | The normal vector of the plane                   |
 | `d`      | `number`    | `0`                      | The signed distance from the origin along normal |
 
 ## Methods

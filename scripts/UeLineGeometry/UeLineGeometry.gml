@@ -5,7 +5,7 @@ function UeLineGeometry(data = {}): UeBufferGeometry(data) constructor {
     /// Populates the geometry with 3D positions. Array must be multiple of 3 (x,y,z)
     function setPositions(array) {
         vertices = [];
-        for (var i = 0; i < array_length(array); i += 3) {
+        for (var i = 0, num = array_length(array); i < num; i += 3) {
             array_push(vertices, {
                 x: array[i],
                 y: array[i + 1],
@@ -59,7 +59,7 @@ function UeLineGeometry(data = {}): UeBufferGeometry(data) constructor {
         var srcVerts = line.geometry.vertices;
         vertices = [];
 
-        for (var i = 0; i < array_length(srcVerts); i++) {
+        for (var i = 0, num = array_length(srcVerts); i < num; i++) {
             var v = srcVerts[i];
             array_push(vertices, {
                 x: v.x,
