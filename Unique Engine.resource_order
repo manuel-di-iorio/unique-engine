@@ -21,6 +21,7 @@
     {"name":"obj_scene_4","order":4,"path":"objects/obj_scene_4/obj_scene_4.yy",},
     {"name":"r_test","order":5,"path":"rooms/r_test/r_test.yy",},
     {"name":"__GMassimp_Macros","order":1,"path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},
+    {"name":"AxesHelper","order":2,"path":"scripts/AxesHelper/AxesHelper.yy",},
     {"name":"log","order":4,"path":"scripts/log/log.yy",},
     {"name":"UeArrowHelper","order":1,"path":"scripts/UeArrowHelper/UeArrowHelper.yy",},
     {"name":"UeAssimpLoader","order":2,"path":"scripts/UeAssimpLoader/UeAssimpLoader.yy",},

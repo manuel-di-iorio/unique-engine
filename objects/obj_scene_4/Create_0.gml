@@ -31,8 +31,12 @@ for (var i = 0; i < 1; i++) {
     scene.add(mesh);
     
     // Choose a position far from the camera XY
-    var xx = 50//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
-    var yy = 50//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
+    //var xx = 50//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
+    //var yy = 50//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
+    //var zz = 0//(irandom(1) == 0) ? random_range(-maxDist, 0) : random_range(0, maxDist); 
+
+    var xx = 0//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
+    var yy = 0//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
     var zz = 0//(irandom(1) == 0) ? random_range(-maxDist, 0) : random_range(0, maxDist); 
     mesh.setPosition(xx, yy, zz);
     
@@ -55,6 +59,7 @@ raycasterRay = raycaster.ray;
 rayArrowHelper = new UeArrowHelper(raycasterRay.direction, raycasterRay.origin, 250);
 scene.add(rayArrowHelper);
 
-scene.add(new UeLine(new UeLineGeometry({ color: c_red }).setPositions([0,0,-size/2, 0, 0, size/2])));
-scene.add(new UeLine(new UeLineGeometry({ color: c_green }).setPositions([0,-size/2, 0, 0, size/2, 0])));
-scene.add(new UeLine(new UeLineGeometry({ color: c_blue }).setPositions([-size/2, 0, 0, size/2, 0, 0])));
+//scene.add(new UeLine(new UeLineGeometry({ color: c_red }).setPositions([0,0,-size, 0, 0, size])));
+//scene.add(new UeLine(new UeLineGeometry({ color: c_green }).setPositions([0,-size, 0, 0, size, 0])));
+//scene.add(new UeLine(new UeLineGeometry({ color: c_blue }).setPositions([-size, 0, 0, size, 0, 0])));
+scene.add(new UeAxesHelper(50));

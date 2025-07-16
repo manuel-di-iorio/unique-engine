@@ -59,7 +59,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         var object = self;
         
         var inverseMatrix = matrixWorld.clone().invert();
-        var localRay = raycaster.ray.clone()//.applyMatrix4(inverseMatrix);
+        var localRay = raycaster.ray.clone().applyMatrix4(inverseMatrix);
         
         var boundingBox = geometry[$ "boundingBox"];
         var boundingSphere = geometry[$ "boundingSphere"];
