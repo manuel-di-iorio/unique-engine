@@ -31,8 +31,12 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         
         // Normalize the mouse coordinates
         // @todo May use a more generalized way to obtain the screen size
-        var ndc_x = (mx / window_get_width()) * 2 - 1;
-        var ndc_y = ((my / window_get_width()) * 2 - 1);
+        var screenW = window_get_width();
+        var screenH = window_get_height();
+        if (!screenW || !screenH) return self;
+            
+        var ndcX = (mx / window_get_width()) * 2 - 1;
+        var ndcY = ((my / window_get_width()) * 2 - 1); 
 
         // Initialize origin and direction vectors
         var origin = new UeVector3();
@@ -42,10 +46,10 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
             // For perspective camera, origin is camera position
             origin.copy(camera.position);
             // Direction is computed by unprojecting NDC point and normalizing
-            dir.set(ndc_x, ndc_y, 0.5).unproject(camera).sub(camera.position).normalize();
+            dir.set(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
         } else if (camera.isOrthographicCamera) {
             // For orthographic camera, origin is unprojected NDC with depth, direction is fixed
-            origin.set(ndc_x, ndc_y, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
+            origin.set(ndcX, ndcY, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
             dir.set(0, 0, -1).transformDirection(camera.matrixWorld);
         }
 

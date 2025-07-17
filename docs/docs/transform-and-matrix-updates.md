@@ -78,13 +78,13 @@ Unique Engine uses a right-handed coordinate system, where the Z axis is up, to 
 
 
 ```markdown
-        ↑ +Z (up)
-        |
-        |
-        └───→ +X (right)
-       /
-      /
-    +Y (forward)
++Z (up)
+↑
+|   
+|  / +Y (forward)
+| /
+|/
+└───→ +X (right)
 ```
 
 ### 🧱 Common Conventions

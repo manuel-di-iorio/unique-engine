@@ -149,7 +149,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         var wy = self.w * self.y;
         var wz = self.w * self.z;
     
-        return new Mat3([
+        return new UeMatrix3([
             1 - 2 * (yy + zz),  2 * (xy - wz),      2 * (xz + wy),
             2 * (xy + wz),      1 - 2 * (xx + zz),  2 * (yz - wx),
             2 * (xz - wy),      2 * (yz + wx),      1 - 2 * (xx + yy)

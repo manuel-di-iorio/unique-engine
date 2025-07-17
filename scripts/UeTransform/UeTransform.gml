@@ -5,6 +5,7 @@ function UeTransform(data = {}) constructor {
     scale    = data[$ "scale"]    ?? new UeVector3(data[$ "sx"] ?? 1, data[$ "sy"] ?? 1, data[$ "sz"] ?? 1);
     //up       = new UeVector3(0, 1, 0);
     up       = new UeVector3(0, 0, -1);
+    //up       = new UeVector3(0, 0, 1);
 
     // Transformation matrices
     matrix = new UeMatrix4();

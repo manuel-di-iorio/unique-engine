@@ -9,19 +9,22 @@ Meshes are built from geometry classes (primitives), which define their vertex d
 🔹 Example: Creating a circular terrain
 ```js
 terrainGeometry = new UeCircleGeometry(500);
-terrain = new UeMesh(terrainGeometry, { z: 50 });
-// The second argument is an optional struct of properties to apply to the mesh (such as position, rotation, material, etc.).
+terrain = new UeMesh(terrainGeometry, new UeMeshStandardMaterial(), { z: 50 });
+// The third argument is an optional struct of properties to apply to the mesh (such as position, rotation, etc.).
 ```
 
 ## 🧱 Available Geometry Primitives
 
 **These are the built-in geometry types available:**
 
-- UePlaneGeometry
 - UeBoxGeometry
+- UeLineGeometry
+- UeLineSegmentsGeometry
+- UePlaneGeometry
 - UeCircleGeometry
 - UeSphereGeometry
 - UePyramidGeometry
+- UeConeGeometry
 
 You can instantiate them with relevant parameters (e.g., radius, width, height), and they automatically generate the vertex buffers needed for rendering.
 
@@ -74,9 +77,8 @@ var material = new UeMaterial({
   transparent: true
 });
 
-var sphere = new UeMesh(new UeSphereGeometry(), {
-  position: new UeVector3(0, 0, 0),
-  material: material
+var sphere = new UeMesh(new UeSphereGeometry(), material, { 
+  position: new UeVector3(0, 0, 0) 
 });
 ```
 

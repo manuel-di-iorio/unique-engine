@@ -2,21 +2,23 @@ function UeAxesHelper(size = 1): UeLineSegments() constructor {
     var colorX = c_red;
     var colorY = c_lime;
     var colorZ = c_blue;
-
-    var s = size;
+    
+    material.transparent = true;
+    material.depthTest = false;
+    material.forceSinglePass = true;
 
     // Line segment positions for axes: [x1, y1, z1, x2, y2, z2]
     var positions = [
-        0, 0, 0, -s, 0, 0,   // X axis
-        0, 0, 0, 0, -s, 0,   // Y axis
-        0, 0, 0, 0, 0, s    // Z axis
+        0, 0, 0, -size, 0, 0,   // X axis
+        0, 0, 0, 0, -size, 0,   // Y axis
+        0, 0, 0, 0, 0, size    // Z axis
     ];
 
     // Colors: RGB triplets for each point (2 points per axis)
     var colors = [
-        1, 0, 0,  1, 0, 0,   // X: red
-        0, 1, 0,  0, 1, 0,   // Y: green
-        0, 0, 1,  0, 0, 1    // Z: blue
+        255, 0, 0,  255, 0, 0,   // X: red
+        0, 0, 255,  0, 0, 255,   // Y: blue
+        0, 255, 0,  0, 255, 0    // Z: green
     ];
 
     var geom = new UeLineSegmentsGeometry();

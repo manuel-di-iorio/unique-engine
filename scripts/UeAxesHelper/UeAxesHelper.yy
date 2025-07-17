@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"AxesHelper",
+  "%Name":"UeAxesHelper",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"AxesHelper",
+  "name":"UeAxesHelper",
   "parent":{
     "name":"Helpers",
     "path":"folders/Unique Engine/Helpers.yy",

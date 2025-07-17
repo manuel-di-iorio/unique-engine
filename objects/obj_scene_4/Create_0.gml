@@ -28,7 +28,7 @@ for (var i = 0; i < 1; i++) {
     var size = random_range(30, 40);
     var geometry = new UeBoxGeometry(size, size, size, { color });
     var mesh = new UeMesh(geometry);
-    scene.add(mesh);
+    //scene.add(mesh);
     
     // Choose a position far from the camera XY
     //var xx = 50//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
@@ -49,17 +49,15 @@ for (var i = 0; i < 1; i++) {
     geometry.boundingBox.setFromCenterAndSize(vecZero, new UeVector3(size, size, size));
     
     mesh.bbox = new UeBoxHelper(mesh, c_yellow, { visible: false });
-    scene.add(mesh.bbox);
+    //scene.add(mesh.bbox);
 }
 
 // Create the ray arrow helper
 raycaster.setFromCamera(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), camera);
-
 raycasterRay = raycaster.ray;
 rayArrowHelper = new UeArrowHelper(raycasterRay.direction, raycasterRay.origin, 250);
-scene.add(rayArrowHelper);
+//scene.add(rayArrowHelper);
 
-//scene.add(new UeLine(new UeLineGeometry({ color: c_red }).setPositions([0,0,-size, 0, 0, size])));
-//scene.add(new UeLine(new UeLineGeometry({ color: c_green }).setPositions([0,-size, 0, 0, size, 0])));
-//scene.add(new UeLine(new UeLineGeometry({ color: c_blue }).setPositions([-size, 0, 0, size, 0, 0])));
-scene.add(new UeAxesHelper(50));
+//scene.add(new UeGridHelper(1000))
+scene.add(new UeAxesHelper(30))
+scene.add(new UeArrowHelper(new UeVector3(0, 0, -1), new UeVector3(30, 30, 0), 30));

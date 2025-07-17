@@ -10,7 +10,7 @@ uniform sampler2D s_map;
 
 void main()
 {
-    vec3 finalColor = v_vColour.rgb * u_ueColor.rgb;
+    vec3 finalColor = v_vColour.rgb * u_ueColor;
     
     // Diffuse texture
     finalColor *= texture2D(s_map, v_vTexcoord).rgb;
