@@ -58,24 +58,24 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     function raycast(raycaster, hits) {
         var object = self;
         
-        var inverseMatrix = matrixWorld.clone().invert();
-        var localRay = raycaster.ray.clone().applyMatrix4(inverseMatrix);
+        var matrixWorldInverse = matrixWorld.clone().invert(); // @todo cache it?
+        var localRay = raycaster.ray.clone();
+        var localOrigin = localRay.origin.applyMatrix4(matrixWorldInverse);
+        var localDirection = localRay.direction.transformDirection(matrixWorldInverse);
         
         var boundingBox = geometry[$ "boundingBox"];
         var boundingSphere = geometry[$ "boundingSphere"];
         
         if (boundingBox != undefined && !boundingBox.isEmpty()) {
-			if (!localRay.intersectsBox(boundingBox)) {
-                return self;
-            }
-        }
-		//} else if (boundingSphere != undefined && !boundingSphere.isEmpty()) {
-			//if (!localRay.intersectsSphere(boundingSphere)) return;
-		//}
+			if (!localRay.intersectsBox(boundingBox)) return self;
+		} else if (boundingSphere != undefined && !boundingSphere.isEmpty()) {
+			if (!localRay.intersectsSphere(boundingSphere)) return self;
+		}
+        
         
         array_push(hits, {
             object,
-            distance: localRay.distanceToPoint(position)
+            distance: raycaster.ray.distanceToPoint(position)
         });
         
         return self;

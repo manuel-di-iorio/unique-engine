@@ -10,7 +10,7 @@ Useful for visual debugging or highlighting the bounding volume of an object.
 ## Constructor
 
 ```js
-new UeBoxHelper(object, color = #FFFF00, data = {})
+new UeBoxHelper(object = undefined, color = #FFFF00, data = {})
 ```
 
 > Inherits from [UeLineSegments](/docs/reference/objects/UeLineSegments)

@@ -24,7 +24,7 @@ new UeArrowHelper(dir, origin, length, color, headLength, headWidth)
 | `origin`     | `Vector3` |                    | Starting point of the arrow.                                 |
 | `length`     | `number`  | `1`                | Total length of the arrow.                                   |
 | `color`      | `Color`   | `c_yellow`         | Color of both the shaft and the head of the arrow.           |
-| `headLength` | `number`  | `0.2 * length`     | Length of the arrowhead (cone).                              |
+| `headLength` | `number`  | `0.1 * length`     | Length of the arrowhead (cone).                              |
 | `headWidth`  | `number`  | `0.2 * headLength` | Width of the arrowhead (cone).                               |
 
 ## Properties

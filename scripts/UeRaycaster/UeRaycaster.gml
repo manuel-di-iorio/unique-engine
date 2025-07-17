@@ -30,13 +30,13 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         self.camera = camera;
         
         // Normalize the mouse coordinates
-        // @todo May use a more generalized way to obtain the screen size
+        // @todo May use a better way to obtain the screen size
         var screenW = window_get_width();
         var screenH = window_get_height();
         if (!screenW || !screenH) return self;
             
-        var ndcX = (mx / window_get_width()) * 2 - 1;
-        var ndcY = ((my / window_get_width()) * 2 - 1); 
+        var ndcX = (mx / screenW) * 2 - 1;
+        var ndcY = ((my / screenH) * 2 - 1);
 
         // Initialize origin and direction vectors
         var origin = new UeVector3();

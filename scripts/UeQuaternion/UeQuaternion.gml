@@ -195,45 +195,37 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
+    /// Set quaternion that rotates from vFrom to vTo (both must be unit vectors)
     function setFromUnitVectors(vFrom, vTo) {
         var EPS = math_get_epsilon();
-        var r = vFrom.dot(vTo) + 1;
     
-        if (r < EPS) {
-            r = 0;
-            var axis;
-            if (abs(vFrom.x) > abs(vFrom.z)) {
-                axis = new Vec3(-vFrom.y, vFrom.x, 0);
-            } else {
-                axis = new Vec3(0, -vFrom.z, vFrom.y);
+        var r = vFrom.dot(vTo);
+    
+        // Vectors are the same → identity quaternion
+        if (r >= 1.0 - EPS) {
+            return self.set(0, 0, 0, 1);
+        }
+    
+        // Vectors are opposite → rotate 180° around any orthogonal axis
+        if (r <= -1.0 + EPS) {
+            var axis = new UeVector3(0, 0, 1).cross(vFrom);
+            if (axis.lengthSq() < EPS) {
+                axis = new UeVector3(0, 1, 0).cross(vFrom);
             }
             axis.normalize();
-    
-            self.x = axis.x;
-            self.y = axis.y;
-            self.z = axis.z;
-            self.w = r;
-        } else {
-            var cross = vFrom.cross(vTo);
-    
-            self.x = cross.x;
-            self.y = cross.y;
-            self.z = cross.z;
-            self.w = r;
+            return self.setFromAxisAngle(axis, 180);
         }
     
-        // Normalize the quat
-        var len = sqrt(self.x*self.x + self.y*self.y + self.z*self.z + self.w*self.w);
-        if (len > 0) {
-            var invLen = 1 / len;
-            self.x *= invLen;
-            self.y *= invLen;
-            self.z *= invLen;
-            self.w *= invLen;
-        }
+        // General case
+        var cross = vFrom.cross(vTo);
+        self.x = cross.x;
+        self.y = cross.y;
+        self.z = cross.z;
+        self.w = 1 + r;
     
-        return self;
+        return self.normalize();
     }
+
     
     setFromEuler(_x, _y, _z);
 }

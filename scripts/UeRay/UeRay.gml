@@ -164,25 +164,39 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
 
     /// Returns intersection point with axis-aligned bounding box or undefined if none
     function intersectBox(box, target) {
-        var tmin = 0, tmax = infinity;
-        
-        for (var i = 0; i < 3; i++) {
-            var invD = 1 / self.direction.getComponent(i);
-            var t0 = (box.sizeMin.getComponent(i) - self.origin.getComponent(i)) * invD;
-            var t1 = (box.sizeMax.getComponent(i) - self.origin.getComponent(i)) * invD;
-            if (invD < 0) {
-                var tmp = t0; t0 = t1; t1 = tmp;
+    var tmin = 0, tmax = infinity;
+
+    for (var i = 0; i < 3; i++) {
+        var originComp = self.origin.getComponent(i);
+        var dirComp = self.direction.getComponent(i);
+
+        if (abs(dirComp) < math_get_epsilon()) {
+            // Ray is parallel to slab
+            if (originComp < box.sizeMin.getComponent(i) || originComp > box.sizeMax.getComponent(i)) {
+                return undefined;
             }
-            tmin = max(tmin, t0);
-            tmax = min(tmax, t1);
-            if (tmax < tmin) return undefined;
+            continue;
         }
 
-        if (target) self.at(tmin, target);
-        else target = self.at(tmin, new UeVector3());
+        var invD = 1 / dirComp;
+        var t0 = (box.sizeMin.getComponent(i) - originComp) * invD;
+        var t1 = (box.sizeMax.getComponent(i) - originComp) * invD;
 
-        return target;
+        if (invD < 0) {
+            var tmp = t0; t0 = t1; t1 = tmp;
+        }
+
+        tmin = max(tmin, t0);
+        tmax = min(tmax, t1);
+
+        if (tmax < tmin) return undefined;
     }
+
+    var hitPoint = target ?? new UeVector3();
+    self.at(tmin, hitPoint);
+    return hitPoint;
+}
+
 
     /// Returns intersection point with plane or null if none
     function intersectPlane(plane, target) {

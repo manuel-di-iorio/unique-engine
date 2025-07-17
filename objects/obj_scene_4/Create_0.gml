@@ -1,13 +1,14 @@
 renderer = new UeRenderer();
 scene = new UeScene();
-camera = new UePerspectiveCamera()//{ z: 100 });
+camera = new UePerspectiveCamera();
 
 orbitControls = new UeOrbitControls(camera, {
-    //autoRotate: true, 
-    //autoRotateSpeed: .1,
+    autoRotate: true, 
+    autoRotateSpeed: .1,
     //enablePan: false,
     //enableRotate: false,
     //enableZoom: false,
+    enableDamping: false
 });
 
 // Lightning
@@ -17,47 +18,36 @@ scene.add(ambientLight, dirLight);
 
 // Create the raycaster
 raycaster = new UeRaycaster();
+raycaster.layers.set(1);
+raycaster.setFromCamera(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), camera);
+intersectedBox = undefined;
 
 // Create the random boxes
-var maxDist = 0//350;
+var maxDist = 350;
 var gap = 50;
-var vecZero = new UeVector3(0, 0, 0);
+var vecZero = new UeVector3(0, 0, 0); // @todo creare una macro
 
-for (var i = 0; i < 1; i++) {
+for (var i = 0; i < 100; i++) {
     var color = make_color_rgb(irandom_range(60, 255), irandom_range(60, 255), irandom_range(60, 255));
     var size = random_range(30, 40);
     var geometry = new UeBoxGeometry(size, size, size, { color });
     var mesh = new UeMesh(geometry);
-    //scene.add(mesh);
-    
-    // Choose a position far from the camera XY
-    //var xx = 50//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
-    //var yy = 50//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
-    //var zz = 0//(irandom(1) == 0) ? random_range(-maxDist, 0) : random_range(0, maxDist); 
-
-    var xx = 0//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
-    var yy = 0//(irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
-    var zz = 0//(irandom(1) == 0) ? random_range(-maxDist, 0) : random_range(0, maxDist); 
-    mesh.setPosition(xx, yy, zz);
+    mesh.layers.enable(1); // Only objects having layer 1 will be intersected
+    scene.add(mesh);
     
     // Set the rotation
-    //mesh.setRotation(random_range(0, 360), random_range(0, 360), random_range(0, 360));
+    mesh.setRotation(random_range(0, 360), random_range(0, 360), random_range(0, 360));
+    
+    // Choose a position far from the camera XY
+    var xx = (irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
+    var yy = (irandom(1) == 0) ? random_range(-maxDist, -gap) : random_range(gap, maxDist);
+    var zz = (irandom(1) == 0) ? random_range(-maxDist, 0) : random_range(0, maxDist); 
+
+    mesh.setPosition(xx, yy, zz);
     
     // Set the bounding box size matching the mesh scale
-    //geometry.boundingBox.sizeMin = new UeVector3(-size/2, -size/2, -size/2)
-    //geometry.boundingBox.sizeMax = new UeVector3(size/2, size/2, size/2)
-    geometry.boundingBox.setFromCenterAndSize(vecZero, new UeVector3(size, size, size));
+    geometry.boundingBox.setFromCenterAndSize(vecZero, new UeVector3(size, size, size));  
     
     mesh.bbox = new UeBoxHelper(mesh, c_yellow, { visible: false });
-    //scene.add(mesh.bbox);
+    scene.add(mesh.bbox);
 }
-
-// Create the ray arrow helper
-raycaster.setFromCamera(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), camera);
-raycasterRay = raycaster.ray;
-rayArrowHelper = new UeArrowHelper(raycasterRay.direction, raycasterRay.origin, 250);
-//scene.add(rayArrowHelper);
-
-//scene.add(new UeGridHelper(1000))
-scene.add(new UeAxesHelper(30))
-scene.add(new UeArrowHelper(new UeVector3(0, 0, -1), new UeVector3(30, 30, 0), 30));

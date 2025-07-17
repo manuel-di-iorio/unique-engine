@@ -3,9 +3,7 @@ function UeTransform(data = {}) constructor {
     position = data[$ "position"] ?? new UeVector3(data[$ "x"] ?? 0, data[$ "y"] ?? 0, data[$ "z"] ?? 0);
     rotation = data[$ "rotation"] ?? new UeQuaternion(data[$ "rx"] ?? 0, data[$ "ry"] ?? 0, data[$ "rz"] ?? 0);
     scale    = data[$ "scale"]    ?? new UeVector3(data[$ "sx"] ?? 1, data[$ "sy"] ?? 1, data[$ "sz"] ?? 1);
-    //up       = new UeVector3(0, 1, 0);
     up       = new UeVector3(0, 0, -1);
-    //up       = new UeVector3(0, 0, 1);
 
     // Transformation matrices
     matrix = new UeMatrix4();

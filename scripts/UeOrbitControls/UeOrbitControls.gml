@@ -1,3 +1,4 @@
+// @todo check input configuration in variables (mouse/keyboard). Use vec3_zero macro. Use cached mouse position
 function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self.camera = camera;
     self.target = data[$ "target"] ?? new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
@@ -206,7 +207,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         if (!self.camera.target.equals(self.target)) {
             self.camera.target.copy(self.target);
         }
-
+        
         self._prevMouseX = mx;
         self._prevMouseY = my;
     }

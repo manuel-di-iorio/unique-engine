@@ -1,4 +1,4 @@
-//randomize();
+randomize();
 bgLayer = layer_background_get_id("Background");
 demo = 4;
 demoMax = 4;

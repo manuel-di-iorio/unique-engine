@@ -1,7 +1,7 @@
-function UeBoxHelper(object, color = #FFFF00, data = {}): UeLineSegments(undefined, undefined, data) constructor {
+function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSegments(undefined, undefined, data) constructor {
     self.object = object;
     self.color = color;
-    self.material = new UeLineBasicMaterial({ color: c_yellow });
+    self.material = new UeLineBasicMaterial({ color });
     
     updateBox = function() {
         var box = new UeBox3().setFromObject(self.object);
@@ -60,18 +60,17 @@ function UeBoxHelper(object, color = #FFFF00, data = {}): UeLineSegments(undefin
 
         geometry.build();
         
-        // Copy the object transform into the bounding box
-        position.copy(object.position);
+        // Copy the object transform into the bounding box        
         rotation.copy(object.rotation);
         scale.copy(object.scale);
-        updateMatrix();
-        updateMatrixWorld();
+        position.copy(object.position);
+        matrixNeedsUpdate = true;
     }
     
     function setFromObject(object) {
         self.object = object;
-        update();
+        updateBox();
     }
     
-    updateBox();
+    if (object != undefined) updateBox();
 }
