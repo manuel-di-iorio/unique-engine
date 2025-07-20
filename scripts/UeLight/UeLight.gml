@@ -11,8 +11,8 @@ function UeLight(data = {}): UeObject3D(data) constructor {
         color = [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255];
     }
     
-    function _compileData(data) {
-        var _self = self;
+    // @MissingDoc
+    function toJSON() {
         var payload = { 
             lightType, 
             intensity, 
@@ -24,14 +24,17 @@ function UeLight(data = {}): UeObject3D(data) constructor {
             pz: position.z,
         };
         
-        
         if (target != undefined) {
             payload.targetX = target.x;
             payload.targetY = target.y;
             payload.targetZ = target.z;
         }
         
-        return { obj: _self, payload };
+        return payload;
+    }
+    
+    function _compileData(data) {
+        return { payload: toJSON() };
     }
     
     setColor(data[$ "color"] ?? c_dkgray);

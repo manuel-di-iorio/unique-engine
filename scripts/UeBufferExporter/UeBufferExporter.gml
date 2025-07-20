@@ -28,6 +28,7 @@ function UeBufferExporter() constructor {
         if (!obj[$ "isScene"] && !compilation.cache[$ obj.uuid]) {
             // Stringify the object's payload, by also enhancing it with other props
             var compiledData = obj._compileData(compilation);
+            compiledData.obj = obj;
             var payload = compiledData.payload;
             payload.type = obj.type;
             payload.uuid = obj.uuid;

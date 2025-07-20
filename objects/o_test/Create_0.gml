@@ -1,6 +1,7 @@
-randomize();
+show_debug_overlay(true);
+//randomize();
 bgLayer = layer_background_get_id("Background");
-demo = 0;
+demo = 4;
 demoMax = 4;
 scenes = [
     { obj: obj_scene_0, bg: c_black }, 

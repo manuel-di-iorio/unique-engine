@@ -31,21 +31,25 @@ function UeTexture(data = {}) constructor {
         return self;
     }
     
+    // @MissingDoc
+    function toJSON() {
+        var payload = {
+            filter,
+            generateMipmaps,
+        };
+        payload[$ "repeat"] = self[$ "repeat"];
+        return payload;
+    }
+    
     /** Internal export methods */
     function _compileData(data) {
-        var _self = self;
+        var payload = toJSON();
         
         // Get the sprite buffer size
         var compileSprites = data.compileSprites && image != undefined;
         var spriteWidth = undefined;
         var spriteHeight = undefined;
         var spriteBuffSize = 0;
-        
-        var payload = {
-            filter,
-            generateMipmaps,
-        };
-        payload[$ "repeat"] = self[$ "repeat"];
         
         if (compileSprites) {
             spriteWidth = sprite_get_width(image);
@@ -59,7 +63,6 @@ function UeTexture(data = {}) constructor {
         data.size += spriteBuffSize;
         
         return {
-            obj: _self, 
             payload,
             ctx: { spriteWidth, spriteHeight, spriteBuffSize }
         };

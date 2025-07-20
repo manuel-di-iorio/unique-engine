@@ -10,7 +10,6 @@ function UeAssimpLoader(data = {}) constructor {
 		var check = GMA_ReadFile(fname,
 			GMA_PP.GEN_BOUNDING_BOXES |
 			
-			//GMA_PP.MAKE_LEFT_HANDED |
 			GMA_PP.FLIP_UVS |
 			GMA_PP.FLIP_WINDING_ORDER |
 			
@@ -27,8 +26,6 @@ function UeAssimpLoader(data = {}) constructor {
 			GMA_PP.JOIN_IDENTICAL_VERTICES |
 			GMA_PP.IMPROVE_CACHE_LOCALITY | 
 			//GMA_PP.LIMIT_BONE_WEIGHTS | // @todo: test
-			//GMA_PP.REMOVE_REDUNDANT_MATERIALS | // Let the user handle all materials
-			//GMA_PP.SPLIT_LARGE_MESHES | // @todo: test, is it needed?
 			GMA_PP.TRIANGULATE |
 			GMA_PP.GEN_UV_COORDS |
 			GMA_PP.SORT_BY_PTYPE |

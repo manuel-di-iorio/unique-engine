@@ -15,13 +15,20 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     vsync = data[$ "vsync"] ?? true;
     
     // Matrixes
-    matrixWorld = new UeMatrix4();
     matrixWorldInverse = new UeMatrix4();
     projectionMatrix = new UeMatrix4();
     projectionMatrixInverse = new UeMatrix4();
     
-    onUpdate = data[$ "onUpdate"] ?? function() {
-        if (matrixAutoUpdate && matrixNeedsUpdate) {
+    // @MissingDoc
+    function updateProjectionMatrix() {
+        projectionMatrix.fromArray(matrix_build_projection_perspective_fov(fov, aspect, near, far));
+        projectionMatrixInverse.copy(projectionMatrix).invert();
+    	camera_set_proj_mat(camera, projectionMatrix.data);
+    }
+    
+    // @MissingDoc
+    function updateMatrixWorld() {
+        if (matrixNeedsUpdate) {
             matrixWorldInverse.fromArray(matrix_build_lookat(
                 position.x, position.y, position.z,  // From
                 target.x, target.y, target.z, // To
@@ -32,15 +39,11 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
             camera_set_view_mat(camera, matrixWorldInverse.data);
             matrixNeedsUpdate = false;
         }
-    };
+    }
     
     // Build the perspective projection
     function use() {
-        projectionMatrix.fromArray(matrix_build_projection_perspective_fov(fov, aspect, near, far));
-        projectionMatrixInverse.copy(projectionMatrix).invert();
-    	camera_set_proj_mat(camera, projectionMatrix.data);
-        camera_set_update_script(camera, onUpdate);
-        
+        updateProjectionMatrix();
         view_set_visible(view, true);
         view_set_camera(view, camera);
         

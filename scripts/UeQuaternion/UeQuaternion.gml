@@ -197,8 +197,6 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Set quaternion that rotates from vFrom to vTo (both must be unit vectors)
     function setFromUnitVectors(vFrom, vTo) {
-        var EPS = math_get_epsilon();
-    
         var r = vFrom.dot(vTo);
     
         // Vectors are the same → identity quaternion
@@ -207,9 +205,9 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         }
     
         // Vectors are opposite → rotate 180° around any orthogonal axis
-        if (r <= -1.0 + EPS) {
+        if (r <= -1.0 + global.UE_EPSILON) {
             var axis = new UeVector3(0, 0, 1).cross(vFrom);
-            if (axis.lengthSq() < EPS) {
+            if (axis.lengthSq() < global.UE_EPSILON) {
                 axis = new UeVector3(0, 1, 0).cross(vFrom);
             }
             axis.normalize();

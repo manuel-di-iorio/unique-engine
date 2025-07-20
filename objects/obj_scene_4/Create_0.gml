@@ -3,12 +3,12 @@ scene = new UeScene();
 camera = new UePerspectiveCamera();
 
 orbitControls = new UeOrbitControls(camera, {
-    autoRotate: true, 
-    autoRotateSpeed: .1,
+    //autoRotate: true, 
+    //autoRotateSpeed: .1,
     //enablePan: false,
     //enableRotate: false,
     //enableZoom: false,
-    enableDamping: false
+    //enableDamping: false
 });
 
 // Lightning
@@ -25,9 +25,8 @@ intersectedBox = undefined;
 // Create the random boxes
 var maxDist = 350;
 var gap = 50;
-var vecZero = new UeVector3(0, 0, 0); // @todo creare una macro
 
-for (var i = 0; i < 100; i++) {
+for (var i = 0; i < 500; i++) {
     var color = make_color_rgb(irandom_range(60, 255), irandom_range(60, 255), irandom_range(60, 255));
     var size = random_range(30, 40);
     var geometry = new UeBoxGeometry(size, size, size, { color });
@@ -46,7 +45,11 @@ for (var i = 0; i < 100; i++) {
     mesh.setPosition(xx, yy, zz);
     
     // Set the bounding box size matching the mesh scale
-    geometry.boundingBox.setFromCenterAndSize(vecZero, new UeVector3(size, size, size));  
+    geometry.boundingBox = new UeBox3();
+    geometry.boundingBox.setFromCenterAndSize(global.UE_VECTOR3_ZERO, new UeVector3(size, size, size));
+    
+    // Set the bounding sphere for frustum testing
+    geometry.boundingSphere = new UeSphere(global.UE_VECTOR3_ZERO, size);
     
     mesh.bbox = new UeBoxHelper(mesh, c_yellow, { visible: false });
     scene.add(mesh.bbox);

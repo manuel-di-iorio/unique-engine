@@ -56,10 +56,12 @@ function UeVertexFormat(data = {}) constructor {
         return self;
     }
     
+    function toJSON() {
+        return { attrs };
+    }
+    
     /** Internal export methods */
     function _compileData(data) {
-        var _self = self;
-        var payload = { attrs };
-        return { obj: _self, payload };
+        return { payload: toJSON() };
     }
 }

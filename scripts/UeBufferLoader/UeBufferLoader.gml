@@ -139,7 +139,6 @@ function UeBufferLoader() constructor {
         if (name != undefined) material.name = name;
     
         // Material base properties
-        material.color = obj.color;
         material.transparent = obj.transparent;
         material.opacity = obj.opacity;
         material.side = obj.side;

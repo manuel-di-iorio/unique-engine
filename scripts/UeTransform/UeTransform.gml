@@ -3,7 +3,7 @@ function UeTransform(data = {}) constructor {
     position = data[$ "position"] ?? new UeVector3(data[$ "x"] ?? 0, data[$ "y"] ?? 0, data[$ "z"] ?? 0);
     rotation = data[$ "rotation"] ?? new UeQuaternion(data[$ "rx"] ?? 0, data[$ "ry"] ?? 0, data[$ "rz"] ?? 0);
     scale    = data[$ "scale"]    ?? new UeVector3(data[$ "sx"] ?? 1, data[$ "sy"] ?? 1, data[$ "sz"] ?? 1);
-    up       = new UeVector3(0, 0, -1);
+    up       = global.UE_OBJECT3D_DEFAULT_UP.clone(); // @MissingDoc
 
     // Transformation matrices
     matrix = new UeMatrix4();
@@ -13,77 +13,86 @@ function UeTransform(data = {}) constructor {
     parent = data[$ "parent"] ?? undefined;
 
     // Matrix update flags
-    matrixAutoUpdate = true;             // Automatically update local matrix
-    matrixWorldAutoUpdate = true;        // Automatically update world matrix
+    matrixAutoUpdate = global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE; // Automatically update local matrix @MissingDoc
+    matrixWorldAutoUpdate = global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE; // Automatically update world matrix @MissingDoc
     matrixNeedsUpdate = false;           // Force update the local matrix for this frame
     matrixWorldNeedsUpdate = false;      // Force update the world matrix for this frame
-
-    function update() {
-        var forceUpdateChildren = false;
-        if (matrixAutoUpdate && matrixNeedsUpdate) {
-            forceUpdateChildren = true;
-            updateMatrix();
-        }
-        
-        if (matrixWorldAutoUpdate && matrixWorldNeedsUpdate) {
-            forceUpdateChildren = true;
-            updateMatrixWorld();
-        }
-
-        for (var i = 0, len = array_length(children); i < len; i++) {
-            var child = children[i];
-            if (forceUpdateChildren) child.matrixWorldNeedsUpdate = true;
-            child.update();
-        }
-    };
+    
+    // Internals
+    __frustumSphere = undefined;
     
     /// Rebuild local matrix from position/rotation/scale
     function updateMatrix() {
-        matrixNeedsUpdate = false;
         matrix.compose(position, rotation, scale);
+        matrixNeedsUpdate = false;
         matrixWorldNeedsUpdate = true;
         return self;
     }
 
-    /// Update world matrix
-    function updateMatrixWorld() {
-        matrixWorldNeedsUpdate = false;
-           
-        // Start with local matrix
-        if (parent != undefined && parent.matrixWorld != undefined) {
-            matrixWorld = parent.matrixWorld.clone();
-            matrixWorld.multiply(matrix);
-        } else {
-            matrixWorld = matrix.clone();
+    /// Update local matrix and matrix world, also on children
+    /// @MissingDoc
+    function updateMatrixWorld(frustum, force = false) {
+        if (matrixAutoUpdate && matrixNeedsUpdate) {
+            updateMatrix();
+        }
+        
+        if (matrixWorldNeedsUpdate || force) {
+            if (parent == undefined) {
+                matrixWorld.copy(matrix);
+            } else {
+                matrixWorld.multiplyMatrices(parent.matrixWorld, matrix);
+            }
+            
+            matrixWorldNeedsUpdate = false;
+			force = true;
+        }
+        
+        
+        if (force) {
+            var boundingSphere = geometry != undefined ? geometry[$ "boundingSphere"] : undefined
+            if (boundingSphere != undefined) {
+                __frustumSphere = new UeSphere();
+                __frustumSphere.copy(boundingSphere).applyMatrix4(matrixWorld); 
+            }
+        }
+        
+        for (var i = 0, len = array_length(children); i < len; i++) {
+            children[i].updateMatrixWorld(frustum, force);
         }
         
         return self;
     }
     
-    /// Update the matrixWorld of parents/children
-    /// @todo Needs tests
+    /**
+     * Update the matrixWorld of parents/children
+     * 
+     * This method computes the `matrixWorld` property, which represents the object's transform 
+     * in world space, by combining its local `matrix` with the parent's `matrixWorld`.
+     * 
+     * Notes:
+     *  - If `matrixNeedsUpdate` is true, `updateMatrix()` will be called before computing `matrixWorld`.
+     *  - `matrixWorldNeedsUpdate` is reset to false after the update.
+     *  - This method should be called if the object or its hierarchy has changed (e.g., after transformations or re-parenting).
+     */
+    /// @untested
     function updateWorldMatrix(updateParents = false, updateChildren = false) {
         if (updateParents && parent != undefined) {
             parent.updateWorldMatrix(true, false);
         }
+        
+        if (matrixAutoUpdate && matrixNeedsUpdate) updateMatrix();
     
-        if (matrixNeedsUpdate) {
-            updateMatrix();
+        if (matrixWorldAutoUpdate) {
+            if (parent == undefined) {
+                matrixWorld.copy(matrix);
+            } else {
+                matrixWorld.multiplyMatrices(parent.matrixWorld, matrix);
+            } 
         }
-    
-        if (parent != undefined && parent.matrixWorld != undefined) {
-            matrixWorld = parent.matrixWorld.clone();
-            matrixWorld.multiply(matrix);
-        } else {
-            matrixWorld = matrix.clone();
-        }
-    
-        matrixWorldNeedsUpdate = false;
-    
+
         if (updateChildren) {
             for (var i = 0, len = array_length(children); i < len; i++) {
                 var child = children[i];
-                child.matrixWorldNeedsUpdate = true;
                 child.updateWorldMatrix(false, true);
             }
         }
@@ -91,12 +100,21 @@ function UeTransform(data = {}) constructor {
         return self;
     }
 
-
     // --- Translation methods ---
+    
     function setPosition(x, y, z) {
         position.set(x, y, z);
         matrixNeedsUpdate = true;
         return self;    
+    }
+    
+    // Translate an object by distance along an axis in object space. The axis is assumed to be normalized.
+    // @untested @MissingDoc
+    function translateOnAxis(axis, distance) {
+        var v = axis.clone().applyQuaternion(rotation);
+        position.add(v.multiplyScalar(distance));
+        matrixNeedsUpdate = true;
+        return self;
     }
     
     function translate(x, y, z) {
@@ -142,26 +160,67 @@ function UeTransform(data = {}) constructor {
         return self;
     }
     
+    // Calls setFromRotationMatrix(m) on the rotation's quaternion
+    // Assumes the upper 3x3 of m is a pure rotation matrix (i.e. unscaled).
+    // @untested @MissingDoc
+    function setRotationFromMatrix(mat) {
+        rotation.setFromRotationMatrix(mat);
+        matrixNeedsUpdate = true;
+        return self;
+    }
+    
+    // Copy the given quaternion into the rotation.
+    // @untested @MissingDoc
+    function setRotationFromQuaternion(quat) {
+        rotation.copy(quat);
+        matrixNeedsUpdate = true;
+        return self;
+    }
+    
     function rotate(x, y, z) {
         rotation.multiply(new UeQuaternion(x, y, z));
         matrixNeedsUpdate = true;
         return self;
     }
     
+    // Rotates the object around x axis in local space. value in degrees
     function rotateX(value) {
         rotation.rotateX(value);
         matrixNeedsUpdate = true;
         return self;
     }
 
+    // Rotates the object around y axis in local space. value in degrees
     function rotateY(value) {
         rotation.rotateY(value);
         matrixWorldNeedsUpdate = true;
         return self;
     }
 
+    // Rotates the object around z axis in local space. value in degrees
     function rotateZ(value) {
         rotation.rotateZ(value);
+        matrixNeedsUpdate = true;
+        return self;
+    }
+    
+    // Rotate an object along an axis in object space. The axis is assumed to be normalized
+    // @untested @MissingDoc
+    function rotateOnAxis(axis, angle) {
+        var q = new UeQuaternion();
+        q.setFromAxisAngle(axis, angle);
+        rotation.multiply(q);
+        matrixNeedsUpdate = true;
+        return self;
+    }
+    
+    // Rotate an object along an axis in world space. The axis is assumed to be normalized.
+    // Assumes no rotated parent.
+    // @untested @MissingDoc
+    function rotateOnWorldAxis(axis, angle) {
+        var q = new UeQuaternion();
+        q.setFromAxisAngle(axis, angle);
+        rotation.premultiply(q);
         matrixNeedsUpdate = true;
         return self;
     }
@@ -189,6 +248,64 @@ function UeTransform(data = {}) constructor {
         scale.z += value;
         matrixNeedsUpdate = true;
         return self;
+    }
+    
+    // Applies the matrix transform to the object and updates the object's position, rotation and scale.
+    // @untested @MissingDoc
+    function applyMatrix4(mat4) {
+        matrix.multiply(mat4);
+        matrix.decompose(position, rotation, scale);
+        matrixNeedsUpdate = true;
+        return self;
+    }
+    
+    // Applies the rotation represented by the quaternion to the object.
+    // @untested @MissingDoc
+    function applyQuaternion(quat) {
+        rotation.multiply(quat);
+        matrixNeedsUpdate = true;
+        return self;
+    }
+    
+    // Returns a vector representing the position of the object in world space.
+    // @untested @MissingDoc
+    function getWorldPosition(target) {
+        return target.setFromMatrixPosition(matrixWorld);
+    }
+    
+    // Returns a quaternion representing the rotation of the object in world space.
+    // @untested @MissingDoc
+    function getWorldQuaternion(target) {
+        matrixWorld.decompose(global.UE_DUMMY_VECTOR3, target, global.UE_DUMMY_VECTOR3);
+        return target;
+    }
+    
+    // Returns a vector of the scaling factors applied to the object for each axis in world space.
+    // @untested @MissingDoc
+    function getWorldScale(target) {
+        matrixWorld.decompose(global.UE_DUMMY_VECTOR3, global.UE_DUMMY_QUATERNION, target);
+        return target;
+    }
+    
+    // Returns a vector representing the direction of object's positive z(Z or Y?)-axis in world space.
+    // @untested @MissingDoc
+    // 0,0,1 (forward?) è corretto o sarebbe meglio 0,1,0 in base alla proiezione 0,0,-1? da testare.
+    function getWorldDirection(target) {
+        var v = new UeVector3(0, 0, 1);
+        v.transformDirection(matrixWorld);
+        return target.copy(v);
+    }
+    
+    // @todo
+    // Converts the vector from this object's local space to world space.
+    function localToWorld(vec) {
+        return vec.applyMatrix4(matrixWorld);
+    }
+    
+    // @todo
+    // Converts the vector from world space to this object's local space.
+    function worldToLocal(vec) {
+        return vec.applyMatrix4(matrixWorld.clone().invert());
     }
 
     // Initial matrix build

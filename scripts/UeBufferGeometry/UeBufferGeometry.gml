@@ -10,10 +10,10 @@ function UeBufferGeometry(data = {}) constructor {
     canFreeze = data[$ "canFreeze"] ?? true;      // Flag whether vertex buffer can be frozen (optimized)
 
     // Axis-aligned bounding box for the geometry (auto-calculated or provided)
-    boundingBox = data[$ "boundingBox"] ?? new UeBox3();
+    boundingBox = data[$ "boundingBox"] ?? undefined;
     
     // Bounding sphere for the geometry (auto-calculated or provided)
-    boundingSphere = data[$ "boundingSphere"] ?? new UeSphere();
+    boundingSphere = data[$ "boundingSphere"] ?? undefined;
 
     // Build the vertex buffer from vertices and format
     function build() {
@@ -95,30 +95,35 @@ function UeBufferGeometry(data = {}) constructor {
     
     // Compute bounding box based on current vertices
     function computeBoundingBox() {
+        if (boundingBox == undefined) boundingBox = new UeBox3();
         boundingBox.setFromPoints(vertices);
         return self;
     }
     
     // Compute bounding sphere based on current vertices
     function computeBoundingSphere() {
+        if (boundingSphere == undefined) boundingBox = new UeSphere();
         boundingSphere.setFromPoints(vertices);
         return self;
     }
     
+    // @MissingDoc
+    function toJSON() {
+        var payload = { 
+            format: format.uuid,
+        };
+    }
+    
     /** Internal method: prepare data for export or serialization */
     function _compileData(data) {
-        var _self = self;
         var vbBuffer = buffer_create_from_vertex_buffer(vb, buffer_fast, 1);
         var vbBufferSize = buffer_get_size(vbBuffer);
         
-        var payload = { 
-            format: format.uuid,
-            vbBufferSize
-        };
+        var payload = toJSON();
+        payload.vbBufferSize = vbBufferSize;
         data.size += vbBufferSize;
         
         return {
-            obj: _self,
             payload,
             ctx: {
                 vbBuffer, 

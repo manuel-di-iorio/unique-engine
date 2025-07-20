@@ -6,25 +6,15 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
     function render(renderState) {
-        var scene = renderState.scene;
-        var lightState = renderState.lightState;
-        
-        if (scene.matrixAutoUpdate && matrixAutoUpdate) {
-            update();
-        }
-        
-        if (visible && geometry) {
-            matrix_set(matrix_world, matrixWorld.data);
-            material.use(renderState, self);
-            vertex_submit(geometry.vb, material.wireframe ? pr_linelist : primitive, -1);
-            shader_reset();
-        }
+        matrix_set(matrix_world, matrixWorld.data);
+        material.use(renderState, self);
+        vertex_submit(geometry.vb, material.wireframe ? pr_linelist : primitive, -1);
+        shader_reset();
     }
     
-    /** Internal export methods */
-    function _compileData(data) {
-        var _self = self;
-        var payload = {
+    // @MissingDoc
+    function toJSON() {
+        return {
             children: array_map(children, function(child) { return child.uuid }),
             visible,
             parent: parent && !parent[$ "isScene"] ? parent.uuid : undefined,
@@ -50,15 +40,13 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
             uy: up.y,
             uz: up.z,
         };
-        
-        return { obj: _self, payload };
     }
     
     // This is a very simplified version of the actual ThreeJS implementation
     function raycast(raycaster, hits) {
         var object = self;
         
-        var matrixWorldInverse = matrixWorld.clone().invert(); // @todo cache it?
+        var matrixWorldInverse = matrixWorld.clone().invert();
         var localRay = raycaster.ray.clone();
         var localOrigin = localRay.origin.applyMatrix4(matrixWorldInverse);
         var localDirection = localRay.direction.transformDirection(matrixWorldInverse);
@@ -66,18 +54,23 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         var boundingBox = geometry[$ "boundingBox"];
         var boundingSphere = geometry[$ "boundingSphere"];
         
-        if (boundingBox != undefined && !boundingBox.isEmpty()) {
+        if (boundingBox != undefined) {
 			if (!localRay.intersectsBox(boundingBox)) return self;
-		} else if (boundingSphere != undefined && !boundingSphere.isEmpty()) {
+		} else if (boundingSphere != undefined) {
 			if (!localRay.intersectsSphere(boundingSphere)) return self;
 		}
         
-        
         array_push(hits, {
             object,
-            distance: raycaster.ray.distanceToPoint(position)
+            distance: position.distanceToSquared(raycaster.ray.origin)
         });
         
         return self;
+    }
+    
+    /** Internal export methods */
+    function _compileData(data) {
+        var _self = self;
+        return { obj: _self, payload: toJSON() };
     }
 }

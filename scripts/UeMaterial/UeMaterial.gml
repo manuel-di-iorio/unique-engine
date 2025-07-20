@@ -83,6 +83,11 @@ function UeMaterial(data = {}) constructor {
     }
      
     /// Apply material before drawing
+    ///
+    /// @todo very slow, need to avoid to set/bind things again if they have not changed. 
+    /// Also avoid struct_foreach
+    /// Add checks on cached global gpu_set_ before use to avoid a GPU call.
+    
     function use(renderState, mesh) {
         gpu_set_cullmode(renderState[$ "side"] ?? side); // Set the backface culling mode
         gpu_set_ztestenable(depthTest); // Enable depth testing
@@ -100,7 +105,7 @@ function UeMaterial(data = {}) constructor {
         var lightState = renderState.lightState;
         var camera = renderState.camera; 
         
-        if (shader == undefined) return self;
+        if (shader == undefined || !shader_is_compiled(shader)) return self;
         shader_set(shader);
         
         shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], [mesh.position.x, mesh.position.y, mesh.position.z]);
@@ -177,14 +182,12 @@ function UeMaterial(data = {}) constructor {
         return variable_clone(self);
     }
     
-    /** Internal export methods */
-    function _compileData(data) {
-        var _self = self;
-        var payload = {
+    // @MissingDoc
+    function toJSON() {
+        return {
             uniforms,
             textures: ueStructMap(textures, function(name, texture) { return texture.uuid }),
             shader: shader_get_name(shader),
-            color,
             transparent,
             opacity,
             depthTest,
@@ -204,8 +207,11 @@ function UeMaterial(data = {}) constructor {
             blendDstAlpha,
             lights,
         };
-        
-        return { obj: _self, payload };
+    }
+    
+    /** Internal export methods */
+    function _compileData(data) {
+        return { payload: toJSON() };
     }
     
     build();

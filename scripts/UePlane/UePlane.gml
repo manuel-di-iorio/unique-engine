@@ -1,14 +1,17 @@
-function UePlane(_normal = new UeVector3(0, 0, -1), _d = 0) constructor {
+function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
     self.normal = _normal;
     self.d = _d;
-
+    
+    /// @MissingDoc Read-only flag to check if a given object is of type Plane
+    self.isPlane = true;
+    
     /// Sets plane from normal and a point on the plane
     function setFromNormalAndPoint(_normal, point) {
         self.normal.copy(_normal).normalize();
         self.d = -self.normal.dot(point);
         return self;
     }
-
+    
     /// Sets plane from three non-collinear points (counter-clockwise winding)
     function setFromPoints(p1, p2, p3) {
         var u = p2.clone().sub(p1);
@@ -17,39 +20,178 @@ function UePlane(_normal = new UeVector3(0, 0, -1), _d = 0) constructor {
         self.d = -self.normal.dot(p1);
         return self;
     }
-
+    
     /// Returns signed distance from point to the plane
     function distanceToPoint(point) {
         return self.normal.dot(point) + self.d;
     }
-
+    
     /// Projects a point onto the plane
     function projectPoint(point) {
         var dist = distanceToPoint(point);
         return point.clone().sub(self.normal.clone().scale(dist));
     }
-
+    
     /// Returns true if a point lies on the plane (within a small epsilon)
     function isPointOnPlane(point, epsilon = 0.0001) {
         return abs(distanceToPoint(point)) < epsilon;
     }
-
+    
     /// Clones the current plane
     function clone() {
         return variable_clone(self);
     }
-
+    
     /// Copies another plane into this one
     function copy(plane) {
         self.normal.copy(plane.normal);
         self.d = plane.d;
         return self;
     }
-
+    
     /// Flips the normal and distance (i.e. inverts the plane)
     function flip() {
         self.normal.scale(-1);
         self.d = -self.d;
+        return self;
+    }
+    
+    /// @MissingDoc Apply a Matrix4 to the plane. The matrix must be an affine, homogeneous transform
+    function applyMatrix4(matrix, optionalNormalMatrix = undefined) {
+        var normalMatrix = optionalNormalMatrix ?? new UeMatrix3().getNormalMatrix(matrix);
+        
+        var referencePoint = coplanarPoint();
+        referencePoint.applyMatrix4(matrix);
+        
+        var normal = self.normal.clone().applyMatrix3(normalMatrix || matrix);
+        setFromNormalAndPoint(normal, referencePoint);
+        
+        return self;
+    }
+    
+    /// @MissingDoc Returns a Vector3 coplanar to the plane, by calculating the projection of the normal vector at the origin onto the plane
+    function coplanarPoint() {
+        return self.normal.clone().scale(-self.d);
+    }
+    
+    /// @MissingDoc Returns the signed distance from the sphere to the plane
+    function distanceToSphere(sphere) {
+        return distanceToPoint(sphere.center) - sphere.radius;
+    }
+    
+    /// @MissingDoc Checks to see if two planes are equal (their normal and constant properties match)
+    function equals(plane) {
+        return plane.normal.equals(self.normal) && (abs(plane.d - self.d) < 0.0001);
+    }
+    
+    /// @MissingDoc Returns the intersection point of the passed line and the plane. Returns undefined if the line does not intersect
+    function intersectLine(line) {
+        var dir = line.delta();
+        var denominator = self.normal.dot(dir);
+        
+        if (abs(denominator) < global.UE_EPSILON) {
+            // Line is parallel to plane
+            if (distanceToPoint(line.start) == 0) {
+                // Line is coplanar with plane, return start point
+                return line.start.clone();
+            } else {
+                // Line is parallel but not coplanar
+                return undefined;
+            }
+        }
+        
+        var t = -(self.normal.dot(line.start) + self.d) / denominator;
+        
+        if (t < 0 || t > 1) {
+            // Intersection point is outside the line segment
+            return undefined;
+        }
+        
+        return line.start.clone().add(dir.scale(t));
+    }
+    
+    /// @MissingDoc Determines whether or not this plane intersects box
+    function intersectsBox(box) {
+        // Get the positive and negative vertices of the box relative to the plane normal
+        var _min = box.min;
+        var _max = box.max;
+        
+        var positive = new UeVector3(
+            self.normal.x > 0 ? max_maxx : _min.x,
+            self.normal.y > 0 ? _max.y : _min.y,
+            self.normal.z > 0 ? _max.z : _min.z
+        );
+        
+        var negative = new UeVector3(
+            self.normal.x > 0 ? _min.x : _max.x,
+            self.normal.y > 0 ? _min.y : _max.y,
+            self.normal.z > 0 ? _min.z : _max.z
+        );
+        
+        var distPositive = distanceToPoint(positive);
+        var distNegative = distanceToPoint(negative);
+        
+        // If signs are different, box intersects plane
+        return (distPositive * distNegative) <= 0;
+    }
+    
+    /// @MissingDoc Tests whether a line segment intersects with (passes through) the plane
+    /// @todo Needs to implement the Line3 math class first.
+    //function intersectsLine(line) {
+        //var startDistance = distanceToPoint(line._start);
+        //var endDistance = distanceToPoint(line._end);
+        //
+        //// If start and end are on opposite sides, line intersects plane
+        //return (startDistance * endDistance) <= 0;
+    //}
+    
+    /// @MissingDoc Determines whether or not this plane intersects sphere
+    function intersectsSphere(sphere) {
+        return abs(distanceToPoint(sphere.center)) <= sphere.radius;
+    }
+    
+    /// @MissingDoc Negates both the normal vector and the constant
+    function negate() {
+        self.normal.scale(-1);
+        self.d = -self.d;
+        return self;
+    }
+    
+    /// @MissingDoc Normalizes the normal vector, and adjusts the constant value accordingly
+    function normalize() {
+        var normalLength = self.normal.length();
+        self.normal.normalize();
+        self.d = self.d / normalLength;
+        return self;
+    }
+    
+    /// @MissingDoc Sets this plane's normal and constant properties by copying the values from the given normal
+    function set(_normal, constant) {
+        self.normal.copy(_normal);
+        self.d = constant;
+        return self;
+    }
+    
+    /// @MissingDoc Set the individual components that define the plane
+    function setComponents(x, y, z, w) {
+        self.normal.set(x, y, z);
+        self.d = w;
+        return self;
+    }
+    
+    /// @MissingDoc Sets the plane's properties as defined by a normal and an arbitrary coplanar point
+    function setFromNormalAndCoplanarPoint(_normal, point) {
+        return setFromNormalAndPoint(_normal, point);
+    }
+    
+    /// @MissingDoc Alias for setFromPoints - Defines the plane based on the 3 provided points
+    function setFromCoplanarPoints(a, b, c) {
+        return setFromPoints(a, b, c);
+    }
+    
+    /// @MissingDoc Translates the plane by the distance defined by the offset vector
+    function translate(offset) {
+        self.d = self.d - offset.dot(self.normal);
         return self;
     }
 }

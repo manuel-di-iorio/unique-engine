@@ -32,6 +32,7 @@
     {"name":"UeBufferLoader","order":1,"path":"scripts/UeBufferLoader/UeBufferLoader.yy",},
     {"name":"UeCircleGeometry","order":2,"path":"scripts/UeCircleGeometry/UeCircleGeometry.yy",},
     {"name":"UeConeGeometry","order":7,"path":"scripts/UeConeGeometry/UeConeGeometry.yy",},
+    {"name":"UeFrustum","order":11,"path":"scripts/UeFrustum/UeFrustum.yy",},
     {"name":"UeGridHelper","order":3,"path":"scripts/UeGridHelper/UeGridHelper.yy",},
     {"name":"UeLayers","order":12,"path":"scripts/UeLayers/UeLayers.yy",},
     {"name":"UeLight","order":9,"path":"scripts/UeLight/UeLight.yy",},

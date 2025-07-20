@@ -10,7 +10,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         self.z = _z;
         return self;
     }
-
+    
     /// Returns a deep clone of this vector.
     function clone() {
         return variable_clone(self);
@@ -315,7 +315,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     /// Unprojects this vector from NDC space back to world space.
     /// @param {UeCamera} camera
     function unproject(camera) {
-        applyMatrix4(camera.projectionMatrixInverse)
+        applyMatrix4(camera.projectionMatrixInverse);
         applyMatrix4(camera.matrixWorld);
         return self;
     }
@@ -411,6 +411,95 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         self.x = sinPhi * cos(theta);
         self.y = sinPhi * sin(theta);
         self.z = cos(phi);
+        return self;
+    }
+    
+    /// @MissingDoc
+    /// Sets components from the column at index in a 4x4 matrix.
+    function setFromMatrixColumn(matrix, index) {
+        var e = matrix.data;
+        self.x = e[index * 4 + 0];
+        self.y = e[index * 4 + 1];
+        self.z = e[index * 4 + 2];
+        return self;
+    }
+    
+    /// @MissingDoc
+    /// Sets components from the column at index in a 3x3 matrix.
+    function setFromMatrix3Column(matrix, index) {
+        var e = matrix.data;
+        self.x = e[index * 3 + 0];
+        self.y = e[index * 3 + 1];
+        self.z = e[index * 3 + 2];
+        return self;
+    }
+    
+    // @MissingDoc
+    function setFromMatrixPosition(mat) {
+        var e = mat.data;
+    
+        // Elements 12, 13, 14 contain the translation component (column 4)
+        self.x = e[12];
+        self.y = e[13];
+        self.z = e[14];
+    
+        return self;
+    }
+    
+    // @MissingDoc
+    function setFromMatrixScale(mat) {
+        var te = mat.data;
+
+        // Extract basis vectors (columns of the upper-left 3x3)
+        self.x = global.UE_DUMMY_VECTOR3.set(te[0], te[1], te[2]).length();
+        self.y = global.UE_DUMMY_VECTOR3.set(te[4], te[5], te[6]).length();
+        self.z = global.UE_DUMMY_VECTOR3.set(te[8], te[9], te[10]).length();
+
+        return self;
+    }
+    
+    /// @MissingDoc
+    /// Sets a single component by index (0 = x, 1 = y, 2 = z).
+    function setComponent(index, value) {
+        if (index == 0) self.x = value;
+        else if (index == 1) self.y = value;
+        else if (index == 2) self.z = value;
+        return self;
+    }
+    
+    /// @MissingDoc
+    /// Replaces each component with the min between self and vec.
+    function min(vec) {
+        self.x = min(self.x, vec.x);
+        self.y = min(self.y, vec.y);
+        self.z = min(self.z, vec.z);
+        return self;
+    }
+        
+        /// @MissingDoc
+    /// Replaces each component with the max between self and vec.
+    function max(vec) {
+        self.x = max(self.x, vec.x);
+        self.y = max(self.y, vec.y);
+        self.z = max(self.z, vec.z);
+        return self;
+    }
+    
+    /// @MissingDoc
+    /// Sets components using spherical coordinates.
+    function setFromSphericalCoords(radius, phi, theta) {
+        self.x = radius * sin(phi) * cos(theta);
+        self.y = radius * cos(phi);
+        self.z = radius * sin(phi) * sin(theta);
+        return self;
+    }
+    
+    /// @MissingDoc
+    /// Sets components using cylindrical coordinates.
+    function setFromCylindricalCoords(radius, theta, y) {
+        self.x = radius * cos(theta);
+        self.z = radius * sin(theta);
+        self.y = y;
         return self;
     }
 }

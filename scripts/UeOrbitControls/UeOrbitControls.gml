@@ -100,7 +100,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             var camDir = camTarget.clone().sub(camPos).normalize();
 
             if (self.screenSpacePanning) {
-                var worldUp = new UeVector3(0, 0, -1);
+                var worldUp = global.UE_OBJECT3D_DEFAULT_UP;
                 var right = camDir.cross(worldUp).normalize();
                 var up = right.cross(camDir).normalize();
 
@@ -141,7 +141,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         if (!shiftPressed) {
             if (self.screenSpacePanning) {
                 // Pan aligned to camera screen space
-                var worldUp = new UeVector3(0, 0, -1);
+                var worldUp = global.UE_OBJECT3D_DEFAULT_UP;
                 var right = camDir.cross(worldUp).normalize();
                 var up = right.cross(camDir).normalize();
         

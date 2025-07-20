@@ -43,10 +43,9 @@ new UeTransform(data = {})
 
 | Method                                 | Description                                       |
 | -------------------------------------- | ------------------------------------------------- |
-| `update()`                             | Updates both local and world matrices recursively |
 | `updateMatrix()`                       | Rebuilds the local transform matrix               |
-| `updateMatrixWorld()`                  | Computes world matrix from parent                 |
-| `updateWorldMatrix(parents, children)` | Updates matrices optionally recursively           |
+| `updateMatrixWorld()`                  | Updates local matrix and world matrix if necessary, also on children |
+| `updateWorldMatrix(parents, children)` | Updates matrices optionally and recursively       |
 
 **Translation**
 

@@ -41,7 +41,7 @@ new UeObject3D(data = {})
 This class inherits all transformation logic, including:
 
 - .position, .rotation, .scale
-- .update(), .setPosition(), .rotate(), .lookAt() etc.
+- .setPosition(), .rotate(), .lookAt() etc.
 - .matrix, .matrixWorld and update flags
 
 ## 🧩 Methods

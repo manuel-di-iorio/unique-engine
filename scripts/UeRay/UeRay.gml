@@ -1,6 +1,6 @@
 /// A 3D ray defined by an origin point and a normalized direction vector.
 /// Used for raycasting, intersection tests, and spatial queries.
-function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) constructor {
+function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAULT_UP) constructor {
     /// The origin point of the ray
     self.origin = _origin.clone();
     /// The normalized direction vector of the ray
@@ -170,7 +170,7 @@ function UeRay(_origin = new UeVector3(), _direction = new UeVector3(0, 0, -1)) 
         var originComp = self.origin.getComponent(i);
         var dirComp = self.direction.getComponent(i);
 
-        if (abs(dirComp) < math_get_epsilon()) {
+        if (abs(dirComp) < global.UE_DEFAULT_TEXTURE) {
             // Ray is parallel to slab
             if (originComp < box.sizeMin.getComponent(i) || originComp > box.sizeMax.getComponent(i)) {
                 return undefined;
