@@ -8,8 +8,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     function render(renderState) {
         matrix_set(matrix_world, matrixWorld.data);
         material.use(renderState, self);
-        vertex_submit(geometry.vb, material.wireframe ? pr_linelist : primitive, -1);
-        shader_reset();
+        vertex_submit(geometry.vb, material.wireframe ? pr_linelist : primitive, -1); 
     }
     
     // @MissingDoc

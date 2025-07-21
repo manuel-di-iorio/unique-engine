@@ -140,31 +140,106 @@ function UeFrustum(_p0, _p1, _p2, _p3, _p4, _p5) constructor {
     /// @param {Struct} _matrix Projection Matrix4 used to set the planes
     /// @return {Struct}
     function setFromProjectionMatrix(_matrix) {
-        var m = _matrix.data;
-        
-        var m11 = m[0], m12 = m[4], m13 = m[8], m14 = m[12];
-        var m21 = m[1], m22 = m[5], m23 = m[9], m24 = m[13];
-        var m31 = m[2], m32 = m[6], m33 = m[10], m34 = m[14];
-        var m41 = m[3], m42 = m[7], m43 = m[11], m44 = m[15];
+        //var m = _matrix.data;
+        //
+        //var m11 = m[0], m12 = m[4], m13 = m[8], m14 = m[12];
+        //var m21 = m[1], m22 = m[5], m23 = m[9], m24 = m[13];
+        //var m31 = m[2], m32 = m[6], m33 = m[10], m34 = m[14];
+        //var m41 = m[3], m42 = m[7], m43 = m[11], m44 = m[15];
         
         // Right plane
-        planes[0].setComponents(m41 - m11, m42 - m12, m43 - m13, m44 - m14).normalize();
+        //planes[0].setComponents(m41 - m11, m42 - m12, m43 - m13, m44 - m14).normalize();
+        //
+        //// Left plane
+        //planes[1].setComponents(m41 + m11, m42 + m12, m43 + m13, m44 + m14).normalize();
+        //
+        //// Bottom plane
+        //planes[2].setComponents(m41 + m21, m42 + m22, m43 + m23, m44 + m24).normalize();
+        //
+        //// Top plane
+        //planes[3].setComponents(m41 - m21, m42 - m22, m43 - m23, m44 - m24).normalize();
+        //
+        //// Near plane
+        //planes[4].setComponents(m41 + m31, m42 + m32, m43 + m33, m44 + m34).normalize();
+        //
+        //// Far plane
+        //planes[5].setComponents(m41 - m31, m42 - m32, m43 - m33, m44 - m34).normalize();
         
-        // Left plane
-        planes[1].setComponents(m41 + m11, m42 + m12, m43 + m13, m44 + m14).normalize();
+        //__setPlaneAndNormalize(planes[0], m41 - m11, m42 - m12, m43 - m13, m44 - m14); // right
+        //__setPlaneAndNormalize(planes[1], m41 + m11, m42 + m12, m43 + m13, m44 + m14); // left
+        //__setPlaneAndNormalize(planes[2], m41 + m21, m42 + m22, m43 + m23, m44 + m24); // bottom
+        //__setPlaneAndNormalize(planes[3], m41 - m21, m42 - m22, m43 - m23, m44 - m24); // top
+        //__setPlaneAndNormalize(planes[4], m41 + m31, m42 + m32, m43 + m33, m44 + m34); // near
+        //__setPlaneAndNormalize(planes[5], m41 - m31, m42 - m32, m43 - m33, m44 - m34); // far
         
-        // Bottom plane
-        planes[2].setComponents(m41 + m21, m42 + m22, m43 + m23, m44 + m24).normalize();
-        
-        // Top plane
-        planes[3].setComponents(m41 - m21, m42 - m22, m43 - m23, m44 - m24).normalize();
-        
-        // Near plane
-        planes[4].setComponents(m41 + m31, m42 + m32, m43 + m33, m44 + m34).normalize();
-        
-        // Far plane
-        planes[5].setComponents(m41 - m31, m42 - m32, m43 - m33, m44 - m34).normalize();
+    var m = _matrix.data;
+
+    var m11 = m[0],  m12 = m[4],  m13 = m[8],  m14 = m[12];
+    var m21 = m[1],  m22 = m[5],  m23 = m[9],  m24 = m[13];
+    var m31 = m[2],  m32 = m[6],  m33 = m[10], m34 = m[14];
+    var m41 = m[3],  m42 = m[7],  m43 = m[11], m44 = m[15];
+
+    var px, py, pz, pw, invLen;
+
+    // RIGHT
+    px = m41 - m11; py = m42 - m12; pz = m43 - m13; pw = m44 - m14;
+    invLen = 1 / sqrt(px * px + py * py + pz * pz);
+    planes[0].normal.x = px * invLen;
+    planes[0].normal.y = py * invLen;
+    planes[0].normal.z = pz * invLen;
+    planes[0].d = pw * invLen;
+
+    // LEFT
+    px = m41 + m11; py = m42 + m12; pz = m43 + m13; pw = m44 + m14;
+    invLen = 1 / sqrt(px * px + py * py + pz * pz);
+    planes[1].normal.x = px * invLen;
+    planes[1].normal.y = py * invLen;
+    planes[1].normal.z = pz * invLen;
+    planes[1].d = pw * invLen;
+
+    // BOTTOM
+    px = m41 + m21; py = m42 + m22; pz = m43 + m23; pw = m44 + m24;
+    invLen = 1 / sqrt(px * px + py * py + pz * pz);
+    planes[2].normal.x = px * invLen;
+    planes[2].normal.y = py * invLen;
+    planes[2].normal.z = pz * invLen;
+    planes[2].d = pw * invLen;
+
+    // TOP
+    px = m41 - m21; py = m42 - m22; pz = m43 - m23; pw = m44 - m24;
+    invLen = 1 / sqrt(px * px + py * py + pz * pz);
+    planes[3].normal.x = px * invLen;
+    planes[3].normal.y = py * invLen;
+    planes[3].normal.z = pz * invLen;
+    planes[3].d = pw * invLen;
+
+    // NEAR
+    px = m41 + m31; py = m42 + m32; pz = m43 + m33; pw = m44 + m34;
+    invLen = 1 / sqrt(px * px + py * py + pz * pz);
+    planes[4].normal.x = px * invLen;
+    planes[4].normal.y = py * invLen;
+    planes[4].normal.z = pz * invLen;
+    planes[4].d = pw * invLen;
+
+    // FAR
+    px = m41 - m31; py = m42 - m32; pz = m43 - m33; pw = m44 - m34;
+    invLen = 1 / sqrt(px * px + py * py + pz * pz);
+    planes[5].normal.x = px * invLen;
+    planes[5].normal.y = py * invLen;
+    planes[5].normal.z = pz * invLen;
+    planes[5].d = pw * invLen;
+
         
         return self;
+    }
+    
+    function __setPlaneAndNormalize(plane, x, y, z, w) {
+        var len = sqrt(x * x + y * y + z * z);
+        var invLen = 1 / len;
+    
+        plane.normal.x = x * invLen;
+        plane.normal.y = y * invLen;
+        plane.normal.z = z * invLen;
+        plane.d = w * invLen;
     }
 }

@@ -43,18 +43,17 @@ function UeTransform(data = {}) constructor {
                 matrixWorld.multiplyMatrices(parent.matrixWorld, matrix);
             }
             
-            matrixWorldNeedsUpdate = false;
+            matrixWorldNeedsUpdate = false; 
 			force = true;
-        }
-        
-        
-        if (force) {
+            
+            // Update the object's frustum bounding sphere
             var boundingSphere = geometry != undefined ? geometry[$ "boundingSphere"] : undefined
             if (boundingSphere != undefined) {
                 __frustumSphere = new UeSphere();
                 __frustumSphere.copy(boundingSphere).applyMatrix4(matrixWorld); 
             }
         }
+        
         
         for (var i = 0, len = array_length(children); i < len; i++) {
             children[i].updateMatrixWorld(frustum, force);

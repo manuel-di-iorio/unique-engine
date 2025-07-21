@@ -38,22 +38,18 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         var ndcX = (mx / screenW) * 2 - 1;
         var ndcY = ((my / screenH) * 2 - 1);
 
-        // Initialize origin and direction vectors
-        var origin = new UeVector3();
-        var dir = new UeVector3();
-
         if (camera.isPerspectiveCamera) {
             // For perspective camera, origin is camera position
-            origin.copy(camera.position);
+            global.UE_DUMMY_VECTOR3.copy(camera.position);
             // Direction is computed by unprojecting NDC point and normalizing
-            dir.set(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
+            global.UE_DUMMY_VECTOR3_B.set(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
         } else if (camera.isOrthographicCamera) {
             // For orthographic camera, origin is unprojected NDC with depth, direction is fixed
-            origin.set(ndcX, ndcY, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
-            dir.set(0, 0, -1).transformDirection(camera.matrixWorld);
+            global.UE_DUMMY_VECTOR3.set(ndcX, ndcY, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
+            global.UE_DUMMY_VECTOR3_B.set(0, 0, -1).transformDirection(camera.matrixWorld);
         }
 
-        self.ray.set(origin, dir);
+        self.ray.set(global.UE_DUMMY_VECTOR3, global.UE_DUMMY_VECTOR3_B);
         return self;
     }
 

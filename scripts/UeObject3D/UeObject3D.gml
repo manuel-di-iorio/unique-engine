@@ -1,36 +1,5 @@
-global.UE_OBJECT_ID = 0;
-global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
-global.UE_DEFAULT_TEXTURE = new UeTexture({ image: spr_ue_default_tex });
-global.UE_OBJECT3D_DEFAULT_UP = new UeVector3(0, 0, -1); // @MissingDoc
-global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE = true; // @MissingDoc
-global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE = true; // @MissingDoc
-#macro UE_MACRO_VECTOR3_ZERO new UeVector3(0, 0, 0)
-global.UE_VECTOR3_ZERO = UE_MACRO_VECTOR3_ZERO; // @MissingDoc
 
-// Internal globals
-global.UE_EPSILON = math_get_epsilon();
-global.UE_DUMMY_VECTOR3 = new UeVector3();
-global.UE_DUMMY_QUATERNION = new UeQuaternion();
-global.UE_DUMMY_SPHERE = new UeSphere();
-global.UE_DUMMY_DEFAULT_SPRITE_CENTER = new UeVector2(0.5, 0.5);
 
-enum UE_UNIFORM_TYPE {
-    FLOAT = 0,
-    VEC2 = 1,
-    VEC3 = 2,
-    VEC4 = 3,
-    MAT4 = 4,
-    ARRAY = 5,
-    BUFFER = 6
-}
-
-enum UE_FORMAT_ATTR {
-    POSITION = 0,
-    NORMAL = 1,
-    UV = 2,
-    COLOR = 3,
-    CUSTOM = 4
-}
 
 /**
  * Object3D

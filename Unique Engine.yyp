@@ -53,6 +53,7 @@
     {"id":{"name":"obj_scene_4","path":"objects/obj_scene_4/obj_scene_4.yy",},},
     {"id":{"name":"r_test","path":"rooms/r_test/r_test.yy",},},
     {"id":{"name":"__GMassimp_Macros","path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},},
+    {"id":{"name":"__ueGlobals","path":"scripts/__ueGlobals/__ueGlobals.yy",},},
     {"id":{"name":"log","path":"scripts/log/log.yy",},},
     {"id":{"name":"UeArrowHelper","path":"scripts/UeArrowHelper/UeArrowHelper.yy",},},
     {"id":{"name":"UeAssimpLoader","path":"scripts/UeAssimpLoader/UeAssimpLoader.yy",},},

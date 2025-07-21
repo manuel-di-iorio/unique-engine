@@ -5,6 +5,7 @@ function UeMaterial(data = {}) constructor {
     name = data[$ "name"] ?? "";
     transparent = data[$ "transparent"] ?? false;
     opacity = data[$ "opacity"] ?? 1;
+    visible = data[$ "visible"] ?? true; // @MissingDoc
     side = data[$ "side"] ?? cull_counterclockwise;
     depthTest = data[$ "depthTest"] ?? true;
     depthWrite = data[$ "depthWrite"] ?? true;
@@ -13,6 +14,7 @@ function UeMaterial(data = {}) constructor {
     alphaTest = data[$ "alphaTest"] ?? 0;
     colorWrite = data[$ "colorWrite"] ?? true;
     wireframe = data[$ "wireframe"] ?? false;
+    userData = {}; // @MissingDoc
     
     // Blending
     blending = data[$ "blending"] ?? transparent;
@@ -21,7 +23,7 @@ function UeMaterial(data = {}) constructor {
     blendSrc = data[$ "blendSrc"] ?? bm_src_alpha;
     blendDst = data[$ "blendDst"] ?? bm_inv_src_alpha;
     blendSrcAlpha = data[$ "blendSrcAlpha"] ?? 1;
-    blendDstAlpha = data[$ "blendDstAlpha"] ?? 1;
+    blendDstAlpha = data[$ "blendDstAlpha"] ?? 1; 
 
     // Shader
     shader = data[$ "shader"] ?? sh_ue_standard;
@@ -62,6 +64,7 @@ function UeMaterial(data = {}) constructor {
     if (data[$ "aoMap"] != undefined) textures.aoMap = data[$ "aoMap"];
     if (data[$ "emissiveMap"] != undefined) textures.emissiveMap = data[$ "emissiveMap"];
         
+    
     function build() { 
         if (shader == undefined) return self;
             
@@ -81,82 +84,168 @@ function UeMaterial(data = {}) constructor {
         
         return self;
     }
-     
-    /// Apply material before drawing
-    ///
-    /// @todo very slow, need to avoid to set/bind things again if they have not changed. 
-    /// Also avoid struct_foreach
-    /// Add checks on cached global gpu_set_ before use to avoid a GPU call.
     
-    function use(renderState, mesh) {
-        gpu_set_cullmode(renderState[$ "side"] ?? side); // Set the backface culling mode
-        gpu_set_ztestenable(depthTest); // Enable depth testing
-        gpu_set_zwriteenable(depthWrite); // Enable writing to the depth buffer
-        gpu_set_zfunc(depthFunc);
-        gpu_set_alphatestenable(transparent);
-        gpu_set_alphatestref(alphaTest);
-        gpu_set_colorwriteenable(colorWrite, colorWrite, colorWrite, colorWrite);
-        gpu_set_blendenable(blending);
-        gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
-        gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha); 
+    function __setGpuState(renderState) {
+        var gpuState = global.UE_MATERIAL_GPU_STATE;
         
-        if (wireframe) return self;
-        
-        var lightState = renderState.lightState;
-        var camera = renderState.camera; 
-        
-        if (shader == undefined || !shader_is_compiled(shader)) return self;
-        shader_set(shader);
-        
-        shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], [mesh.position.x, mesh.position.y, mesh.position.z]);
-        shader_set_uniform_f_array(_uniform_handlers[$ "ueModelScale"], [mesh.scale.x, mesh.scale.y, mesh.scale.z]);
-        shader_set_uniform_f_array(_uniform_handlers[$ "ueCameraPosition"], [camera.position.x, camera.position.y, camera.position.z]);
-        
-        // Reset the light uniforms (shaders cache their values)
-        for (var i=0, n=lights-1; i<n; i++) {
-            shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightDir{i}"], [0, 0, 0]);
-            shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightColor{i}"], [0, 0, 0]);
-            shader_set_uniform_f(_uniform_handlers[$ $"ueDirLightIntensity{i}"], 0);
-            
-            shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightPosition{i}"], [0, 0, 0]);
-            shader_set_uniform_f(_uniform_handlers[$ $"uePointLightRange{i}"], 0);
-            shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightColor{i}"], [0, 0, 0]);
-            shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], 0);
+        var _side = renderState[$ "side"] ?? side;
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.SIDE] != _side) {
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.SIDE] = _side;
+            gpu_set_cullmode(_side);
         }
         
-        // Set the light uniform values
-        if (lights) { 
-            shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState.ambient);
-            
-            var dirLightsNum = array_length(lightState.directional);
-            
-            if (dirLightsNum) {
-                for (var i=0; i<dirLightsNum; i++) {
-                    var light = lightState.directional[i];
-                    var lightTarget = light.target;
-                    shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightDir{i}"], [lightTarget.x, lightTarget.y, lightTarget.z]);
-                    shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightColor{i}"], light.color);
-                    shader_set_uniform_f(_uniform_handlers[$ $"ueDirLightIntensity{i}"], light.intensity);
-                }
-            }
-            
-            var pointLightsNum = array_length(lightState.point);
-            if (pointLightsNum) {
-                for (var i=0; i<pointLightsNum; i++) {
-                    var light = lightState.point[i];
-                    shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightPosition{i}"], [light.position.x, light.position.y, light.position.z]);
-                    shader_set_uniform_f(_uniform_handlers[$ $"uePointLightRange{i}"], light.range);
-                    shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightColor{i}"], light.color);
-                    shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], light.intensity);
-                }
-            }
-        } 
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_TEST] != depthTest) { 
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_TEST] = depthTest;
+            gpu_set_ztestenable(depthTest);
+        }
         
+        if (global.UE_MATERIAL_GPU_STATE[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_WRITE] != depthWrite) {
+            global.UE_MATERIAL_GPU_STATE[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_WRITE] = depthWrite;
+            gpu_set_zwriteenable(depthWrite);
+        }
+        
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_FUNC] != depthFunc) {
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_FUNC] = depthFunc;
+            gpu_set_zfunc(depthFunc);
+        }
+        
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.TRANSPARENT] != transparent) {
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.TRANSPARENT] = transparent;
+            gpu_set_alphatestenable(transparent);
+        }
+        
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.ALPHA_TEST] != alphaTest) {
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.ALPHA_TEST] = alphaTest;
+            gpu_set_alphatestref(alphaTest);
+        }
+        
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.COLOR_WRITE] != colorWrite) {
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.COLOR_WRITE] = colorWrite;
+            gpu_set_colorwriteenable(colorWrite, colorWrite, colorWrite, colorWrite);
+        }
+        
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLENDING] != blending) {
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLENDING] = blending;
+            gpu_set_blendenable(blending);
+        }
+
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_EQUATION] != blendEquation || 
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_EQUATION_ALPHA] != blendEquationAlpha) {
+                
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_EQUATION] = blendEquation;
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_EQUATION_ALPHA] = blendEquationAlpha;
+            gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
+        }
+
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_SRC] != blendSrc ||
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_DST] != blendDst ||
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_SRC_ALPHA] != blendSrcAlpha ||
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_DST_ALPHA] != blendDstAlpha ) {
+            
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_SRC] = blendSrc;
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_DST] = blendDst;
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_SRC_ALPHA] = blendSrcAlpha;
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_DST_ALPHA] = blendDstAlpha;
+            gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha);
+        }
+    }
+    
+    function __setMainUniforms(renderState, mesh) {
+        var camera = renderState.camera; 
+        var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
+        
+        uniformsCache[0] = mesh.position.x;
+        uniformsCache[1] = mesh.position.y;
+        uniformsCache[2] = mesh.position.z;
+        shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], uniformsCache);
+        
+        uniformsCache[0] = mesh.scale.x;
+        uniformsCache[1] = mesh.scale.y;
+        uniformsCache[2] = mesh.scale.z;
+        shader_set_uniform_f_array(_uniform_handlers[$ "ueModelScale"], uniformsCache);
+        
+        uniformsCache[0] = camera.position.x;
+        uniformsCache[1] = camera.position.y;
+        uniformsCache[2] = camera.position.z;
+        shader_set_uniform_f_array(_uniform_handlers[$ "ueCameraPosition"], uniformsCache);
+    }
+    
+    function __setLightsUniforms() {
+        if (!lights) return;
+            
+        var lightState = global.UE_RENDERER_LIGHT_STATE;
+        var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
+        
+        var directionalState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL];
+        var directionalCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT];
+        var pointLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT];
+        var pointLightCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT];
+
+        shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT]);
+        
+        // Set directional lights
+        for (var i = 0; i < lights; i++) {
+            if (i < directionalCount) {
+                var light = directionalState[i];
+                var lightTarget = light.target;
+                
+                uniformsCache[0] = lightTarget.x;
+                uniformsCache[1] = lightTarget.y;
+                uniformsCache[2] = lightTarget.z;
+                shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightDir{i}"], uniformsCache);
+                
+                shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightColor{i}"], light.color);
+                shader_set_uniform_f(_uniform_handlers[$ $"ueDirLightIntensity{i}"], light.intensity);
+            } else {
+                // Reset unused light slots
+                shader_set_uniform_f(_uniform_handlers[$ $"ueDirLightIntensity{i}"], 0);
+            }
+        }
+        
+        // Set point lights
+        var lightColor;
+        for (var i = 0; i < lights; i++) {
+            if (i < pointLightCount) {
+                var light = pointLightState[i];
+                
+                uniformsCache[0] = light.position.x;
+                uniformsCache[1] = light.position.y;
+                uniformsCache[2] = light.position.z;
+                shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightPosition{i}"], uniformsCache);
+                
+                shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightColor{i}"], light.color);
+                shader_set_uniform_f(_uniform_handlers[$ $"uePointLightRange{i}"], light.range);
+                shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], light.intensity);
+            } else {
+                // Reset unused light slots
+                shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], 0);
+            }
+        }
+    }
+     
+    /// Apply material before drawing
+    function use(renderState, mesh) {
+        if (!visible) return self;
+            
+        __setGpuState(renderState);
+        
+        if (wireframe || shader == undefined || !shader_is_compiled(shader)) { 
+            shader_reset();
+            return self;
+        } 
+
+        shader_set(shader); 
+        __setMainUniforms(renderState, mesh); 
+        __setLightsUniforms();
+   
         // Set the custom uniforms
-        struct_foreach(uniforms, function(name, uniform) {
-            var loc = _uniform_handlers[$ name];
+        var uniformNames = variable_struct_get_names(uniforms);
+        for (var u=0, ul = array_length(uniformNames); u<ul; u++) {
+            var uniformName = uniformNames[u];
+            var uniform = uniforms[$ uniformName];
+            var loc = _uniform_handlers[$ uniformName];
             var val = uniform[$ "value"];
-            if (val == undefined) return;
+            if (val == undefined) continue;
         
             switch (uniform.type) {
                 case UE_UNIFORM_TYPE.FLOAT: shader_set_uniform_f(loc, val); break;
@@ -167,13 +256,16 @@ function UeMaterial(data = {}) constructor {
                 case UE_UNIFORM_TYPE.ARRAY: shader_set_uniform_f_array(loc, val); break;
                 case UE_UNIFORM_TYPE.BUFFER: shader_set_uniform_f_buffer(loc, val, uniform.offset, uniform.count); break;
             }
-        });
+        }
         
         // Set the texture samplers
-        struct_foreach(textures, function(name, texture) {
-            if (texture == undefined || texture.image == undefined) return;
-            texture.use(_sampler_handlers[$ name], wireframe); 
-        }); 
+        var texturesNames = variable_struct_get_names(textures);
+        for (var t=0, tl = array_length(texturesNames); t<tl; t++) {
+            var textureName = texturesNames[t];
+            var texture = textures[$ textureName];
+            if (texture == undefined || texture.image == undefined) continue;
+            texture.use(_sampler_handlers[$ textureName]); 
+        }
         
         return self;
     }

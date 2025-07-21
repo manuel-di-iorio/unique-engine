@@ -1,16 +1,20 @@
-// @todo This entire class is slow! Need to avoid to do things if they have not changed and cache as much as possible
-// @todo implement frustum culling check on objects
 function UeRenderer(data = {}): UeObject3D(data) constructor {
     isRenderer = true;
     type = "Renderer";
     
     __projScreenMatrix = new UeMatrix4();
     __frustum = new UeFrustum(); 
+    __opaqueIdx = 0;
+    __transparentIdx = 0;
+    __lightIdx = 0;
     
     // Recursively collect renderable objects and split them into opaque and transparent queues
-    function __collectObjectQueues(objects, lights, camera, opaqueQueue, transparentQueue) {
+    function __collectObjectQueues(objects, camera) {
         var cameraPos = camera.position;
         var cameraLayers = camera.layers;
+        var opaqueQueue = global.UE_RENDERER_OPAQUE_QUEUE;
+        var transparentQueue = global.UE_RENDERER_TRANSPARENT_QUEUE;
+        var lights = global.UE_RENDERER_LIGHTS;
         
         for (var i = 0, len = array_length(objects); i < len; i++) {
             var object = objects[i];
@@ -24,8 +28,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 
             object.updateMatrixWorld(__frustum);
             
-            if (object[$ "geometry"] && object.visible) {
+            if (object[$ "geometry"] != undefined && object.visible) {
                 // Test the frustum intersection
+                // @todo not working correctly
                 //if (object.frustumCulled && !__frustum.intersectsObject(object)) continue;
                  
                 // Precompute distance from camera for sorting
@@ -41,16 +46,17 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             }
             
             // Traverse child objects
-            __collectObjectQueues(object.children, lights, camera, opaqueQueue, transparentQueue);
+            __collectObjectQueues(object.children, camera);
         } 
     }
     
     /**
      * [Complexity] average case: O(n log n), worst case: O(n^2)
      */
-    function __quickSortOpaqueObjects(array, left, right) {
+    function __quickSortOpaqueObjects(left, right) {
         if (left >= right) return;
         
+        var array = global.UE_RENDERER_OPAQUE_QUEUE; 
         var pivot = array[right];
         var i = left - 1;
         
@@ -75,13 +81,14 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         
         var pivotIndex = i + 1;
         
-        __quickSortOpaqueObjects(array, left, pivotIndex - 1);
-        __quickSortOpaqueObjects(array, pivotIndex + 1, right);
+        __quickSortOpaqueObjects(left, pivotIndex - 1);
+        __quickSortOpaqueObjects(pivotIndex + 1, right);
     }
 
-    function __quickSortTransparentObjects(array, left, right) {
+    function __quickSortTransparentObjects(left, right) {
         if (left >= right) return;
         
+        var array = global.UE_RENDERER_TRANSPARENT_QUEUE;
         var pivot = array[right];
         var i = left - 1;
         
@@ -105,12 +112,14 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         
         var pivotIndex = i + 1;
         
-        __quickSortTransparentObjects(array, left, pivotIndex - 1);
-        __quickSortTransparentObjects(array, pivotIndex + 1, right);
+        __quickSortTransparentObjects(left, pivotIndex - 1);
+        __quickSortTransparentObjects(pivotIndex + 1, right);
     }
     
     // Render a list of opaque objects
-    function __renderOpaqueObjects(objects, renderState) {
+    function __renderOpaqueObjects(renderState) {
+        var objects = global.UE_RENDERER_OPAQUE_QUEUE;
+        
         for (var i = 0; i < __opaqueIdx; i++) {
             var object = objects[i];
             var onBeforeRender = object[$ "onBeforeRender"];
@@ -120,13 +129,15 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             object.render(renderState);
             if (onAfterRender != undefined) onAfterRender(renderState);
         }
+        shader_reset();
     }
     
     // Render a list of transparent objects with zwrite disabled
     // Also make a double draw call (if allowed) to mitigate transparency artifacts
-    function __renderTransparentObjects(objects, renderState) {
+    function __renderTransparentObjects(renderState) {
         var currentZWriteEnable = gpu_get_zwriteenable();
         gpu_set_zwriteenable(false);
+        var objects = global.UE_RENDERER_TRANSPARENT_QUEUE;
         
         for (var i = 0; i < __transparentIdx; i++) {
             var object = objects[i];
@@ -144,19 +155,26 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 delete renderState.side;
             }
             
-            if (onAfterRender != undefined) onAfterRender(renderState);
+            if (onAfterRender != undefined) onAfterRender(renderState); 
         }
+        shader_reset();  
         
         gpu_set_zwriteenable(currentZWriteEnable);
     }
     
     // Aggregate light data from scene lights
-    function __buildLightState(lights) {
-        var state = {
-            ambient: [0, 0, 0],
-            directional: [],
-            point: []
-        };
+    function __buildLightState() {
+        var lights = global.UE_RENDERER_LIGHTS;
+        var ambientState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT];
+        ambientState[0] = 0;
+        ambientState[1] = 0;
+        ambientState[2] = 0;
+        
+        var directionalState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL];
+        var pointLightState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT];
+        
+        var dIdx = 0;
+        var pIdx = 0;
         
         for (var i = 0; i < __lightIdx; i++) {
             var l = lights[i];
@@ -165,27 +183,28 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             switch (l.lightType) {
                 case "AmbientLight":
                     // Accumulate ambient light contributions
-                    state.ambient[0] += l.color[0] * l.intensity;
-                    state.ambient[1] += l.color[1] * l.intensity;
-                    state.ambient[2] += l.color[2] * l.intensity;
+                    ambientState[0] += l.color[0] * l.intensity;
+                    ambientState[1] += l.color[1] * l.intensity;
+                    ambientState[2] += l.color[2] * l.intensity;
                     break;
 
                 case "DirectionalLight":
-                    array_push(state.directional, l);
+                    directionalState[dIdx++] = l;
                     break;
 
                 case "PointLight":
-                    array_push(state.point, l);
+                    pointLightState[pIdx++] = l;
                     break;
             }
         }
         
-        // Clamp ambient light to prevent over-exposure
-        state.ambient[0] = clamp(state.ambient[0], 0, 1);
-        state.ambient[1] = clamp(state.ambient[1], 0, 1);
-        state.ambient[2] = clamp(state.ambient[2], 0, 1);
+        global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = dIdx;
+        global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = pIdx;
         
-        return state;
+        // Clamp ambient light to prevent over-exposure
+        ambientState[0] = clamp(ambientState[0], 0, 1);
+        ambientState[1] = clamp(ambientState[1], 0, 1);
+        ambientState[2] = clamp(ambientState[2], 0, 1);
     }
     
     /// Render the scene
@@ -204,22 +223,20 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         __lightIdx = 0;
         __opaqueIdx = 0;
         __transparentIdx = 0;
-        var opaqueQueue = array_create(512);
-        var transparentQueue = array_create(512);
-        var lights = array_create(8);
-        __collectObjectQueues(scene.children, lights, camera, opaqueQueue, transparentQueue);
+        
+        __collectObjectQueues(scene.children, camera);
 
         // Sort both queues before rendering
-        __quickSortOpaqueObjects(opaqueQueue, 0, __opaqueIdx-1); // Front-to-back
-        __quickSortTransparentObjects(transparentQueue, 0, __transparentIdx-1); // Back-to-front
+        __quickSortOpaqueObjects(0, __opaqueIdx-1); // Front-to-back
+        __quickSortTransparentObjects(0, __transparentIdx-1); // Back-to-front
         
         // Build the light and render state
-        var lightState = __buildLightState(lights);
-        var renderState = { renderer: self, scene, lightState, camera };
+        __buildLightState();
+        var renderState = { renderer: self, scene, camera };
         
         // Render the objects opaque objects first
-        __renderOpaqueObjects(opaqueQueue, renderState);
-        __renderTransparentObjects(transparentQueue, renderState);
+        __renderOpaqueObjects(renderState);
+        __renderTransparentObjects(renderState);
         
         // Reset world matrix after rendering
         matrix_set(matrix_world, matrix_build_identity()); 
