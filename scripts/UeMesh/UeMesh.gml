@@ -5,10 +5,16 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     self.material = material ?? new UeMeshStandardMaterial();
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
-    function render(renderState) {
+    function render(renderSide = undefined) {
         matrix_set(matrix_world, matrixWorld.data);
-        material.use(renderState, self);
-        vertex_submit(geometry.vb, material.wireframe ? pr_linelist : primitive, -1); 
+        
+        // Apply the material
+        if (material != undefined) {
+            material.use();
+            material.useByMesh(self, renderSide);
+        }
+        
+        vertex_submit(geometry.vb, material != undefined && material.wireframe ? pr_linelist : primitive, -1); 
     }
     
     // @MissingDoc
@@ -53,10 +59,10 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         var boundingBox = geometry[$ "boundingBox"];
         var boundingSphere = geometry[$ "boundingSphere"];
         
-        if (boundingBox != undefined) {
-			if (!localRay.intersectsBox(boundingBox)) return self;
-		} else if (boundingSphere != undefined) {
+        if (boundingSphere != undefined) {
 			if (!localRay.intersectsSphere(boundingSphere)) return self;
+		} else if (boundingBox != undefined) {
+			if (!localRay.intersectsBox(boundingBox)) return self;
 		}
         
         array_push(hits, {

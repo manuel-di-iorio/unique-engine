@@ -53,6 +53,11 @@ enum UE_MATERIAL_GPU_STATE_ENUM {
 global.UE_MATERIAL_GPU_STATE = array_create(14);
 global.UE_MATERIAL_UNIFORMS_SET_CACHE = array_create(3);
 
+global.UE_RENDERER_STATE = array_create(1);
+enum UE_RENDERER_STATE_ENUM {
+    CAMERA,
+}
+
 global.UE_RENDERER_LIGHT_STATE = array_create(5);
 enum UE_RENDERER_LIGHT_STATE_ENUM {
     AMBIENT,

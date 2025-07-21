@@ -1,6 +1,3 @@
-
-
-
 /**
  * Object3D
  */
@@ -12,7 +9,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     uuid = ueUuid();
     visible = data[$ "visible"] ?? true;
     children = [];
-    renderOrder = data[$ "renderOrder"] ?? 0; // @todo unused
+    renderOrder = data[$ "renderOrder"] ?? 0;
     layers = new UeLayers();
     userData = {}; // @MissingDoc
     frustumCulled = true; // @MissingDoc

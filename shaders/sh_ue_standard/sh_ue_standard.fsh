@@ -4,9 +4,6 @@ varying vec2 v_vTexcoord;
 varying vec4 v_vColour;
 varying vec3 v_vNormal;
 
-uniform vec3 u_ueModelPosition;
-uniform vec3 u_ueCameraPosition;
-
 /* Ambient light */
 uniform vec3 u_ueAmbient;
 

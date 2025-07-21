@@ -1,6 +1,7 @@
 function UeRenderer(data = {}): UeObject3D(data) constructor {
     isRenderer = true;
     type = "Renderer";
+    sortObjects = data[$ "sortObjects"] ?? true; // @MissingDoc
     
     __projScreenMatrix = new UeMatrix4();
     __frustum = new UeFrustum(); 
@@ -9,7 +10,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     __lightIdx = 0;
     
     // Recursively collect renderable objects and split them into opaque and transparent queues
-    function __collectObjectQueues(objects, camera) {
+    function __collectObjectQueues(objects, camera, materials) {
         var cameraPos = camera.position;
         var cameraLayers = camera.layers;
         var opaqueQueue = global.UE_RENDERER_OPAQUE_QUEUE;
@@ -38,15 +39,21 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
                 // Push to transparent or opaque queue based on material property
                 var material = object.material;
-                if (material != undefined && material.transparent) {
+                if (material != undefined                     && material.transparent) {
                     transparentQueue[__transparentIdx++] = object;
                 } else {
                     opaqueQueue[__opaqueIdx++] = object;
                 }
+                
+                // Add the material to the global list if not set yet
+                if (material != undefined) {
+                    var materialId = material.id;
+                    if (materials[$ materialId] == undefined) materials[$ materialId] = material;
+                }
             }
             
             // Traverse child objects
-            __collectObjectQueues(object.children, camera);
+            __collectObjectQueues(object.children, camera, materials);
         } 
     }
     
@@ -117,7 +124,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     }
     
     // Render a list of opaque objects
-    function __renderOpaqueObjects(renderState) {
+    function __renderOpaqueObjects() {
         var objects = global.UE_RENDERER_OPAQUE_QUEUE;
         
         for (var i = 0; i < __opaqueIdx; i++) {
@@ -125,16 +132,15 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             var onBeforeRender = object[$ "onBeforeRender"];
             var onAfterRender = object[$ "onAfterRender"];
             
-            if (onBeforeRender != undefined) onBeforeRender(renderState);
-            object.render(renderState);
-            if (onAfterRender != undefined) onAfterRender(renderState);
-        }
-        shader_reset();
+            if (onBeforeRender != undefined) onBeforeRender();
+            object.render();
+            if (onAfterRender != undefined) onAfterRender();
+        } 
     }
     
     // Render a list of transparent objects with zwrite disabled
     // Also make a double draw call (if allowed) to mitigate transparency artifacts
-    function __renderTransparentObjects(renderState) {
+    function __renderTransparentObjects() {
         var currentZWriteEnable = gpu_get_zwriteenable();
         gpu_set_zwriteenable(false);
         var objects = global.UE_RENDERER_TRANSPARENT_QUEUE;
@@ -145,19 +151,16 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             var onAfterRender = object[$ "onAfterRender"];
             var material = object.material;
             
-            if (onBeforeRender != undefined) onBeforeRender(renderState);
+            if (onBeforeRender != undefined) onBeforeRender();
             
             if (material != undefined && material.forceSinglePass) {
-                object.render(renderState);
+                object.render();
             } else {
-                renderState.side = cull_noculling;
-                object.render(renderState);
-                delete renderState.side;
+                object.render(cull_noculling);
             }
             
-            if (onAfterRender != undefined) onAfterRender(renderState); 
+            if (onAfterRender != undefined) onAfterRender(); 
         }
-        shader_reset();  
         
         gpu_set_zwriteenable(currentZWriteEnable);
     }
@@ -224,21 +227,33 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         __opaqueIdx = 0;
         __transparentIdx = 0;
         
-        __collectObjectQueues(scene.children, camera);
+        var materials = {};
+        __collectObjectQueues(scene.children, camera, materials);
 
         // Sort both queues before rendering
-        __quickSortOpaqueObjects(0, __opaqueIdx-1); // Front-to-back
-        __quickSortTransparentObjects(0, __transparentIdx-1); // Back-to-front
+        if (sortObjects) {
+            __quickSortOpaqueObjects(0, __opaqueIdx-1); // Front-to-back
+            __quickSortTransparentObjects(0, __transparentIdx-1); // Back-to-front
+        }
         
         // Build the light and render state
         __buildLightState();
-        var renderState = { renderer: self, scene, camera };
+        
+        global.UE_RENDERER_STATE[UE_RENDERER_STATE_ENUM.CAMERA] = camera;
+        
+        // Apply the materials uniforms
+        var materialNames = variable_struct_get_names(materials);
+        for (var m = 0, mn = array_length(materialNames); m < mn; m++) {
+            //materials[$ materialNames[m]].use(camera);
+        }
+        shader_reset();
         
         // Render the objects opaque objects first
-        __renderOpaqueObjects(renderState);
-        __renderTransparentObjects(renderState);
+        __renderOpaqueObjects();
+        __renderTransparentObjects();
         
-        // Reset world matrix after rendering
+        // Reset the world after rendering
+        shader_reset();  
         matrix_set(matrix_world, matrix_build_identity()); 
         gpu_set_blendenable(currentBlendEnable);
         gpu_set_cullmode(currentCullMode);

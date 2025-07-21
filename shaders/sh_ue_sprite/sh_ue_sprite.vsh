@@ -4,7 +4,6 @@ attribute vec4 in_Colour;                    // (r,g,b,a)
 attribute vec2 in_TextureCoord;              // (u,v)
 
 uniform vec3 u_ueModelPosition;
-uniform vec3 u_ueModelScale;
 
 varying vec2 v_vTexcoord;
 varying vec4 v_vColour;

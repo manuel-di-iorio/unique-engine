@@ -3,9 +3,6 @@ attribute vec3 in_Normal;                    // (x,y,z)
 attribute vec4 in_Colour;                    // (r,g,b,a)
 attribute vec2 in_TextureCoord;              // (u,v)
 
-uniform vec3 u_ueModelPosition;
-uniform vec3 u_ueModelScale;
-
 varying vec3 v_vWorldPosition;
 varying vec3 v_vWorldNormal;
 varying vec2 v_vTexcoord;

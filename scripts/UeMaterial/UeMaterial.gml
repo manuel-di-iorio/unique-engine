@@ -1,5 +1,6 @@
 function UeMaterial(data = {}) constructor {
     isMaterial = true;
+    id = global.UE_OBJECT_ID++; // @MissingDoc
     type = "Material";
     uuid = ueUuid();
     name = data[$ "name"] ?? "";
@@ -85,13 +86,14 @@ function UeMaterial(data = {}) constructor {
         return self;
     }
     
-    function __setGpuState(renderState) {
+    function __setGpuState(renderSide = undefined) {
         var gpuState = global.UE_MATERIAL_GPU_STATE;
         
-        var _side = renderState[$ "side"] ?? side;
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.SIDE] != _side) {
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.SIDE] = _side;
-            gpu_set_cullmode(_side);
+        renderSide ??= side;
+        var gpuState = global.UE_MATERIAL_GPU_STATE;
+        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.SIDE] != renderSide) {
+            gpuState[UE_MATERIAL_GPU_STATE_ENUM.SIDE] = renderSide;
+            gpu_set_cullmode(renderSide);
         }
         
         if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_TEST] != depthTest) { 
@@ -150,26 +152,6 @@ function UeMaterial(data = {}) constructor {
         }
     }
     
-    function __setMainUniforms(renderState, mesh) {
-        var camera = renderState.camera; 
-        var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
-        
-        uniformsCache[0] = mesh.position.x;
-        uniformsCache[1] = mesh.position.y;
-        uniformsCache[2] = mesh.position.z;
-        shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], uniformsCache);
-        
-        uniformsCache[0] = mesh.scale.x;
-        uniformsCache[1] = mesh.scale.y;
-        uniformsCache[2] = mesh.scale.z;
-        shader_set_uniform_f_array(_uniform_handlers[$ "ueModelScale"], uniformsCache);
-        
-        uniformsCache[0] = camera.position.x;
-        uniformsCache[1] = camera.position.y;
-        uniformsCache[2] = camera.position.z;
-        shader_set_uniform_f_array(_uniform_handlers[$ "ueCameraPosition"], uniformsCache);
-    }
-    
     function __setLightsUniforms() {
         if (!lights) return;
             
@@ -224,18 +206,19 @@ function UeMaterial(data = {}) constructor {
     }
      
     /// Apply material before drawing
-    function use(renderState, mesh) {
-        if (!visible) return self;
-            
-        __setGpuState(renderState);
-        
-        if (wireframe || shader == undefined || !shader_is_compiled(shader)) { 
-            shader_reset();
-            return self;
-        } 
+    function use() {
+        if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) return self;
 
-        shader_set(shader); 
-        __setMainUniforms(renderState, mesh); 
+        shader_set(shader);
+        
+        var camera = global.UE_RENDERER_STATE[UE_RENDERER_STATE_ENUM.CAMERA];
+        var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
+        var cameraPosition = camera.position;
+        uniformsCache[0] = cameraPosition.x;
+        uniformsCache[1] = cameraPosition.y;
+        uniformsCache[2] = cameraPosition.z;
+        shader_set_uniform_f_array(_uniform_handlers[$ "ueCameraPosition"], uniformsCache);
+        
         __setLightsUniforms();
    
         // Set the custom uniforms
@@ -258,6 +241,15 @@ function UeMaterial(data = {}) constructor {
             }
         }
         
+        return self;
+    }
+    
+    function useByMesh(mesh, renderSide = undefined) {
+        if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) return self;
+            
+        shader_set(shader); 
+        __setGpuState(renderSide);
+        
         // Set the texture samplers
         var texturesNames = variable_struct_get_names(textures);
         for (var t=0, tl = array_length(texturesNames); t<tl; t++) {
@@ -266,8 +258,16 @@ function UeMaterial(data = {}) constructor {
             if (texture == undefined || texture.image == undefined) continue;
             texture.use(_sampler_handlers[$ textureName]); 
         }
-        
-        return self;
+            
+        // Update the shader's model position uniform (for billboard sprites)
+        if (mesh[$ "isSprite"] != undefined) {
+            var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
+            var meshPosition = mesh.position;
+            uniformsCache[0] = meshPosition.x;
+            uniformsCache[1] = meshPosition.y;
+            uniformsCache[2] = meshPosition.z;
+            shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], uniformsCache);
+        }
     }
     
     function clone() {

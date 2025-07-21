@@ -78,7 +78,6 @@ uniforms: {
 **Automatically included uniforms:**
 
 - ueModelPosition
-- ueModelScale
 - ueCameraPosition
 - ueAmbient
 - ueDirLight* / uePointLight* (if lights > 0)
