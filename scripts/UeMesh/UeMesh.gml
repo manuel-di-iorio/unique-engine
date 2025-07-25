@@ -16,7 +16,6 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         vertex_submit(geometry.vb, material != undefined && material.wireframe ? pr_linelist : primitive, -1); 
     }
     
-    // @MissingDoc
     function toJSON() {
         return {
             children: array_map(children, function(child) { return child.uuid }),

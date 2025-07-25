@@ -11,20 +11,19 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     children = [];
     renderOrder = data[$ "renderOrder"] ?? 0;
     layers = new UeLayers();
-    userData = {}; // @MissingDoc
-    frustumCulled = true; // @MissingDoc
+    userData = {};
+    frustumCulled = true;
     //animations = []; // @todo
     //castShadow = false; // @todo
     //receiveShadow = false; // @todo
 
     // Abstract methods
     function render() {}
-    function onBeforeRender() {} // @MissingDoc
-    function onAfterRender() {} // @MissingDoc
+    function onBeforeRender() {}
+    function onAfterRender() {}
     //function onBeforeShadow() {} // @todo
     //function onAfterShadow() {} // @todo
     
-    // @untested // @MissingDoc
     /**
      * Returns a clone of this object and optionally all descendants.
      * @param {bool} recursive If true, descendants of the object are also cloned. Default is true
@@ -53,7 +52,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     
     // Adds object as a child of this, while maintaining the object's world transform.
     // Note: This method does not support parents with non-uniform scaling.
-    // @MissingDoc @untested
     function attach(child) {
         removeFromParent(child);
         add(child);
@@ -133,7 +131,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         return self;
     }
     
-    // @MissingDoc @Untested
     // Executes the callback on all ancestors.
     // Note: Modifying the scene graph inside the callback is discouraged
     function traverseAncestors(callback) {
@@ -145,7 +142,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         return self;
     }
     
-    // @MissingDoc @Untested
     /**
      * Copies the given object variables into this object. Note: Event listeners and user-defined callbacks (eg. .onAfterRender and .onBeforeRender) are not copied
      * @param {Struct} source object to copy into this one
@@ -172,7 +168,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         return self;
     }
     
-    // @MissingDoc @Untested
     /**
      * Searches through an object and its children, starting with the object itself, and returns the first with a matching id.
      * Note that ids are assigned in chronological order: 1, 2, 3, ..., incrementing by one for each new object.     
@@ -188,7 +183,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         return undefined;
     }
     
-    // @MissingDoc @Untested
     /**
      * Searches through an object and its children, starting with the object itself, and returns the first with a matching name.
      * Note that for most objects the name is an empty string by default. You will have to set it manually to make use of this method.
@@ -204,7 +198,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         return undefined;
     }
     
-    // @MissingDoc @Untested
     /**
      * Searches through an object and its children, starting with the object itself, and returns the first with a property that matches the value given.
      */
@@ -219,7 +212,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         return undefined;
     }
     
-    // @MissingDoc @Untested
     /**
      * Searches through an object and its children, starting with the object itself, and returns all the objects with a property that matches the value given.
      * @param {string} name the property name to search for

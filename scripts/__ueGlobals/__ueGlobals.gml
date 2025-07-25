@@ -1,10 +1,8 @@
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_DEFAULT_TEXTURE = new UeTexture({ image: spr_ue_default_tex });
-global.UE_OBJECT3D_DEFAULT_UP = new UeVector3(0, 0, -1); // @MissingDoc
-global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE = true; // @MissingDoc
-global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE = true; // @MissingDoc
-#macro UE_MACRO_VECTOR3_ZERO new UeVector3(0, 0, 0)
-global.UE_VECTOR3_ZERO = UE_MACRO_VECTOR3_ZERO; // @MissingDoc
+global.UE_OBJECT3D_DEFAULT_UP = new UeVector3(0, 0, -1);
+global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE = true;
+global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE = true;
 
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,
@@ -55,11 +53,3 @@ global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL] = array
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = 0;
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT] = array_create(2);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = 0;
-
-var opaqueQueue = array_create(512);
-        var transparentQueue = array_create(512);
-        var lights = array_create(8);
-
-global.UE_RENDERER_OPAQUE_QUEUE = array_create(512);
-global.UE_RENDERER_TRANSPARENT_QUEUE = array_create(256);
-global.UE_RENDERER_LIGHTS = array_create(2);

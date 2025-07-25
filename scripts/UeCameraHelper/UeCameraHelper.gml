@@ -1,4 +1,3 @@
-// @MissingDoc
 function UeCameraHelper(camera, color = c_yellow): UeLineSegments() constructor {
     self.camera = camera;
     self.color = color;

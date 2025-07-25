@@ -22,9 +22,6 @@ new UePerspectiveCamera(data = {})
 | `x`, `y`, `z`    | `number`   | `0`, `-100`, `0`          | Initial camera position              |
 | `xt`, `yt`, `zt` | `number`   | `0`                       | Look-at target coordinates           |
 | `autoUse`        | `boolean`  | `true`                    | Automatically activates the camera   |
-| `antialias`      | `number`   | `4`                       | Antialiasing samples (0 to disable)  |
-| `vsync`          | `boolean`  | `true`                    | Enable vertical sync                 |
-| `onUpdate`       | `function` | Look-at script            | Custom update script for camera view |
 
 ### Properties
 
@@ -35,7 +32,6 @@ new UePerspectiveCamera(data = {})
 | `type`                   | `string`      | `"PerspectiveCamera"`  | Object type                                                      |
 | `camera`                 | `Camera`      | `camera_create()`      | The underlying GameMaker camera object                           |
 | `target`                 | `UeVector3`   | `0,0,0`                | The current look-at target position                              |
-| `onUpdate`               | `function`    | Default method         | Function called every frame to update the view matrix            |
 | `matrixWorld`            | `UeMatrix4`   | `new UeMatrix4()`      | World transformation matrix of the camera                        |
 | `matrixWorldInverse`     | `UeMatrix4`   | `new UeMatrix4()`      | Inverse of `matrixWorld`, used in `camera_set_view_mat()`        |
 | `projectionMatrix`       | `UeMatrix4`   | `new UeMatrix4()`      | Projection matrix, used in `camera_set_proj_mat()`               |
@@ -51,10 +47,10 @@ Cleanup the camera resource.
 
 ## Notes
 
-- The default .onUpdate() function uses `matrix_build_lookat()` to orient the camera toward target, with up-vector (0, 0, -1).
+- The camera projection is built using `matrix_build_projection_perspective_fov()`.
+- The default .updateMatrixWorld() function uses `matrix_build_lookat()` to orient the camera toward target, with up-vector (0, 0, -1), which means that the camera is rotated 90° degrees downwards.
 - The update script update the camera matrixes only if needed.
 - use() must be called to activate the camera, unless autoUse is set to true (which is the default).
-- Antialias and vsync are applied through `display_reset()`.
 
 ## Example
 ```js

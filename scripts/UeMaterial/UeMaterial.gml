@@ -1,12 +1,12 @@
 function UeMaterial(data = {}) constructor {
     isMaterial = true;
-    id = global.UE_OBJECT_ID++; // @MissingDoc
+    id = global.UE_OBJECT_ID++;
     type = "Material";
     uuid = ueUuid();
     name = data[$ "name"] ?? "";
     transparent = data[$ "transparent"] ?? false;
     opacity = data[$ "opacity"] ?? 1;
-    visible = data[$ "visible"] ?? true; // @MissingDoc
+    visible = data[$ "visible"] ?? true;
     side = data[$ "side"] ?? cull_counterclockwise;
     depthTest = data[$ "depthTest"] ?? true;
     depthWrite = data[$ "depthWrite"] ?? true;
@@ -15,7 +15,7 @@ function UeMaterial(data = {}) constructor {
     alphaTest = data[$ "alphaTest"] ?? 0;
     colorWrite = data[$ "colorWrite"] ?? true;
     wireframe = data[$ "wireframe"] ?? false;
-    userData = {}; // @MissingDoc
+    userData = {};
     
     // Blending
     blending = data[$ "blending"] ?? transparent;
@@ -176,7 +176,10 @@ function UeMaterial(data = {}) constructor {
      
     /// Apply material before drawing
     function use(mesh, renderSide = undefined) {
-        if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) return self;
+        if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) {
+            shader_reset();   
+            return self;
+        }
 
         shader_set(shader);
         __setLightsUniforms();
@@ -208,7 +211,6 @@ function UeMaterial(data = {}) constructor {
         }
             
         // Update the shader's model position uniform (for billboard sprites)
-        // @MissingDoc
         if (mesh[$ "isSprite"] != undefined) {
             var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
             var meshPosition = mesh.position;
@@ -237,7 +239,6 @@ function UeMaterial(data = {}) constructor {
         return variable_clone(self);
     }
     
-    // @MissingDoc
     function toJSON() {
         return {
             uniforms,

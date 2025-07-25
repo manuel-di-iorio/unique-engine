@@ -414,7 +414,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    /// @MissingDoc
     /// Sets components from the column at index in a 4x4 matrix.
     function setFromMatrixColumn(matrix, index) {
         var e = matrix.data;
@@ -424,7 +423,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    /// @MissingDoc
     /// Sets components from the column at index in a 3x3 matrix.
     function setFromMatrix3Column(matrix, index) {
         var e = matrix.data;
@@ -434,7 +432,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    // @MissingDoc
     function setFromMatrixPosition(mat) {
         var e = mat.data;
     
@@ -446,7 +443,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    // @MissingDoc
     function setFromMatrixScale(mat) {
         var te = mat.data;
 
@@ -458,7 +454,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    /// @MissingDoc
     /// Sets a single component by index (0 = x, 1 = y, 2 = z).
     function setComponent(index, value) {
         if (index == 0) self.x = value;
@@ -467,7 +462,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    /// @MissingDoc
     /// Replaces each component with the min between self and vec.
     function min(vec) {
         self.x = min(self.x, vec.x);
@@ -476,7 +470,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
         
-        /// @MissingDoc
     /// Replaces each component with the max between self and vec.
     function max(vec) {
         self.x = max(self.x, vec.x);
@@ -485,7 +478,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    /// @MissingDoc
     /// Sets components using spherical coordinates.
     function setFromSphericalCoords(radius, phi, theta) {
         self.x = radius * sin(phi) * cos(theta);
@@ -494,7 +486,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    /// @MissingDoc
     /// Sets components using cylindrical coordinates.
     function setFromCylindricalCoords(radius, theta, y) {
         self.x = radius * cos(theta);
@@ -503,7 +494,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    /// @MissingDoc
     function applyQuaternion(q) {
         var xx = self.x, yy = self.y, zz = self.z;
         var qx = q.x, qy = q.y, qz = q.z, qw = q.w;
@@ -520,7 +510,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    // @MissingDoc
     function applyAxisAngle(axis, angle) {
         var xx = self.x, yy = self.y, zz = self.z;
         var ax = axis.x, ay = axis.y, az = axis.z;

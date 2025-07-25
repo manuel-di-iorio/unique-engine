@@ -34,12 +34,18 @@ setColor(color)
 ```
 Sets the RGB color of the light. Accepts a GM color constant like c_red.
 
+```js
+toJSON()
+```
+
+Returns an object representing this entity's properties. Not all props may be included.
+
 🌌 **UeAmbientLight**
 
 ```js
 new UeAmbientLight(data = {})
 ```
-Ambient lights apply uniform color to all visible fragments. They are not directional and don’t cast shadows.
+Ambient lights apply uniform color to all visible fragments. They are not directional and don't cast shadows.
 
 🌞 **UeDirectionalLight**
 ```js

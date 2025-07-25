@@ -11,7 +11,6 @@ function UeLight(data = {}): UeObject3D(data) constructor {
         color = [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255];
     }
     
-    // @MissingDoc
     function toJSON() {
         var payload = { 
             lightType, 

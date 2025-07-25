@@ -32,7 +32,6 @@ function UeTexture(data = {}) constructor {
         return self;
     }
     
-    // @MissingDoc
     function toJSON() {
         var payload = {
             filter,

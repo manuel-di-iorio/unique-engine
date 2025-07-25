@@ -39,7 +39,7 @@ updateBox()
 ```
 - Updates the bounding box geometry based on the current state of the target object.
 
-- Computes the bounding box from the object’s geometry.
+- Computes the bounding box from the object's geometry.
 
 - Rebuilds the line vertices representing the box edges.
 

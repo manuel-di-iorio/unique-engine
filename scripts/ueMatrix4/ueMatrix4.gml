@@ -1,4 +1,3 @@
-// @MissingDoc check all methods
 function UeMatrix4(_data = undefined) constructor {
     // Internal data in column-major order
     data = _data ?? matrix_build_identity();

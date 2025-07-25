@@ -65,6 +65,12 @@ dispose()
 ```
 Cleanup the vertex format resource
 
+```js
+toJSON()
+```
+
+Returns an object representing this entity's properties. Not all props may be included.
+
 ### Default format in Unique Engine:
 
 ```js

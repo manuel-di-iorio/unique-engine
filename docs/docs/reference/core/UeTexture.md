@@ -40,6 +40,12 @@ dispose()
 ```
 Cleanup the texture from memory
 
+```js
+toJSON()
+```
+
+Returns an object representing this entity's properties. Not all props may be included.
+
 ## 🧠 Notes
 
 - If using a sprite with multiple frames (like a spritesheet), set subimg accordingly.

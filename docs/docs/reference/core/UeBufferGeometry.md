@@ -48,6 +48,7 @@ new UeBufferGeometry(data = {})
 | `dispose()`                        | `self`   | Deletes the vertex buffer and releases GPU resources                        |
 | `computeBoundingBox()`             | `self`   | Computes the bounding box from the current vertex positions                 |
 | `computeBoundingSphere()`          | `self`   | Computes the bounding sphere from the current vertex positions              |
+| `toJSON()`                         | `struct` | Returns an object representing this entity's properties. Not all props may be included |
 
 
 ## Notes

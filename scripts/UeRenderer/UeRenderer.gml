@@ -1,7 +1,7 @@
 function UeRenderer(data = {}): UeObject3D(data) constructor {
     isRenderer = true;
     type = "Renderer";
-    sortObjects = data[$ "sortObjects"] ?? true; // @MissingDoc
+    sortObjects = data[$ "sortObjects"] ?? true;
     
     __frustum = new UeFrustum(); 
     __opaqueIdx = 0;
@@ -26,7 +26,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 continue;
             }
                 
-            object.updateMatrixWorld(false, __frustum);
+            if (object.matrixWorldAutoUpdate) object.updateMatrixWorld(false, __frustum);
             
             if (object[$ "geometry"] != undefined && object.visible) {
                 // Test the frustum intersection
@@ -124,7 +124,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             var object = objects[i];
             var onBeforeRender = object[$ "onBeforeRender"];
             var onAfterRender = object[$ "onAfterRender"];
-            
+
             if (onBeforeRender != undefined) onBeforeRender();
             object.render();
             if (onAfterRender != undefined) onAfterRender();

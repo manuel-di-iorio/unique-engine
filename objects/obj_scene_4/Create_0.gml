@@ -54,10 +54,10 @@ for (var i = 0; i < 2; i++) {
      
     // Set the bounding box size matching the mesh scale
     geometry.boundingBox = new UeBox3();
-    geometry.boundingBox.setFromCenterAndSize(global.UE_VECTOR3_ZERO, new UeVector3(size, size, size));
+    geometry.boundingBox.setFromCenterAndSize(new UeVector3(0, 0, 0), new UeVector3(size, size, size));
     
     // Set the bounding sphere for frustum testing
-    geometry.boundingSphere = new UeSphere(global.UE_VECTOR3_ZERO, size);
+    geometry.boundingSphere = new UeSphere(new UeVector3(0, 0, 0), size);
     
     mesh.forceUpdate();
     

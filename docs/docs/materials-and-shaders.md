@@ -88,5 +88,3 @@ Uniform locations are cached on material creation using build().
 ```js
 myMaterial.uniforms.time.value = current_time / 1000;
 ```
-
-🔧 Internal use: the engine also injects default uniforms like ueModelPosition and ueCameraPosition, and light-related uniforms when lighting is enabled.

@@ -95,19 +95,18 @@ function UeBufferGeometry(data = {}) constructor {
     
     // Compute bounding box based on current vertices
     function computeBoundingBox() {
-        if (boundingBox == undefined) boundingBox = new UeBox3();
+        boundingBox ??= new UeBox3();
         boundingBox.setFromPoints(vertices);
         return self;
     }
     
     // Compute bounding sphere based on current vertices
     function computeBoundingSphere() {
-        if (boundingSphere == undefined) boundingBox = new UeSphere();
+        boundingBox ??= new UeSphere();
         boundingSphere.setFromPoints(vertices);
         return self;
     }
     
-    // @MissingDoc
     function toJSON() {
         var payload = { 
             format: format.uuid,

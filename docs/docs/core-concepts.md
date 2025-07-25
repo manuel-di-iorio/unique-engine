@@ -39,7 +39,7 @@ You place the camera in 3D space like any other object:
 camera = new UePerspectiveCamera();
 camera.setPosition(0, 5, 10);
 ```
-You don't need to manually handle GameMaker’s view system, the engine integrates the camera automatically.
+You don't need to manually handle GameMaker's view system, the engine integrates the camera automatically.
 
 ### Field of View & Clipping
 By default, the camera has:
@@ -56,7 +56,7 @@ The renderer is responsible for drawing the scene. It does:
 - Recursively traverses the scene graph
 - Sorts opaque and transparent objects independently
 - Passing light data to shaders
-- Updates world matrices only when necessary
+- Updates world matrices only where necessary
 - Calls the render function for each visible mesh
 
 ```js

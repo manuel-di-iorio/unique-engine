@@ -16,9 +16,11 @@ new UeMaterial(data = {})
 | Property               | Type      | Default                 | Description                                              |
 | --------------------   | --------- | ----------------------- | -------------------------------------------------------- |
 | `isMaterial`           | `boolean` | `true`                  | Identifies this object as a material                     |
+| `id`                   | `number`  | (auto-generated)        | Incremental object ID (shared counter with objects)      |
 | `uuid`                 | `string`  | (auto-generated)        | Resource UUID                                            |
 | `type`                 | `string`  | `"Material"`            | Object type                                              |
 | `name`                 | `string`  | ""                      | Object name (empty string by default)                    |
+| `visible`              | `boolean` | `true`                  | Whether to use this material (set the shader)            |
 | `transparent`          | `boolean` | `false`                 | Whether to enable transparency                           |
 | `opacity`              | `number`  | `1`                     | Opacity (used in shaders)                                |
 | `side`                 | `number`  | `cull_counterclockwise` | Which side to render (`cull_*`)                          |
@@ -40,6 +42,7 @@ new UeMaterial(data = {})
 | `lights`               | `number`  | `2`                     | Number of supported lights (0 to disable lighting)       |
 | `textures`             | `object`  | `{map, normalMap, ...}` | Maps for base color, normal, roughness, etc.             |
 | `wireframe`            | `boolean` | `false`                 | Whether to render the mesh as wireframe (pr_linelist)    |
+| `userData`             | `struct`  | {}                      | A struct where to safely place custom related data for this entity |
 
 ## Textures
 
@@ -77,8 +80,7 @@ uniforms: {
 
 **Automatically included uniforms:**
 
-- ueModelPosition
-- ueCameraPosition
+- ueModelPosition (only for sprite objects)
 - ueAmbient
 - ueDirLight* / uePointLight* (if lights > 0)
 
@@ -92,6 +94,12 @@ Prepares internal caches of uniforms and samplers for GPU use.
 clone()
 ```
 Returns a deep copy of the material.
+
+```js
+toJSON()
+```
+
+Returns an object representing this entity's properties. Not all props may be included.
 
 ### Example
 ```js

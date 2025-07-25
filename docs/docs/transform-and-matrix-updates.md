@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Transform & Matrix Updates
 
-Every `UeObject3D` in Unique Engine has its own local `UeTransform`, and these combine recursively to form the final world transform. The engine handles matrix updates in an efficient way, recalculating only when necessary.
+Every `UeObject3D` in Unique Engine has its own local `UeTransform`, and these combine recursively to form the final world transform. The engine handles matrix updates in an efficient way, recalculating them only one time per frame. 
 
 ---
 
@@ -31,21 +31,11 @@ The `matrixWorld` is what the renderer uses for drawing and lighting.
 
 ---
 
-## ⚡ Matrix Optimization
-Unique Engine minimizes redundant matrix computations using a dirty flag system.
+## ⚡ Static Objects
 
-Whenever you call a transform method like .rotateY() or .setScale(), it sets `matrixNeedsUpdate = true`, ensuring the matrix is rebuilt only once during rendering.
-
-This is not automatic if you mutate .position, .rotation or .scale manually:
-
-```js
-// ❌ This won't trigger matrix update
-mesh.position.x += 1;
-
-// ✅ This will
-mesh.translate(1, 0, 0);
-```
-✅ Best Practice: Always prefer using transform methods to ensure consistent and optimized matrix updates.
+Unique Engine will skip matrix updates whenever they have the `matrixAutoUpdate` flag set to `false`. 
+This is useful to avoid doing calculations for objects that don't move. 
+You may still update their matrix calling `forceUpdate()` after modifying their properties
 
 ---
 
@@ -74,14 +64,13 @@ object.scaleZ(0.5);
 
 ## 🧭 Coordinate System
 
-Unique Engine uses a right-handed coordinate system, where the Z axis is up, to stay consistent with the GameMaker experience.
-
+Unique Engine uses a right-handed coordinate system, where the Y+ is the forward/depth axis (where the camera looks at), and the Z+ is the up axis (sky).
 
 ```markdown
 +Z (up)
 ↑
 |   
-|  / +Y (forward)
+|  / +Y (forward or depth)
 | /
 |/
 └───→ +X (right)

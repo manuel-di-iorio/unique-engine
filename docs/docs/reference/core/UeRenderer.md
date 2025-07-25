@@ -13,11 +13,12 @@ new UeRenderer(data = {})
 
 ### Properties
 
-| Property     | Type      | Default | Description                         |
-| ------------ | --------- | ------- | ----------------------------------- |
-| `isRenderer` | `boolean` | `true`  | Identifies the object as a renderer |
-| `type`       | `string`  | `Renderer` | Object type                      |
-| `name`       | `string`  | undefined | Object name (optional)            |
+| Property     | Type      | Default    | Description                                 |
+| ------------ | --------- | -------    | -----------------------------------         |
+| `isRenderer` | `boolean` | `true`     | Identifies the object as a renderer         |
+| `type`       | `string`  | `Renderer` | Object type                                 |
+| `name`       | `string`  | `undefined`| Object name (optional)                      |
+| `sortObjects`| `boolean` | `true`     | Whether to sort the objects on render phase |
 
 ## 🔧 Internal Logic
 

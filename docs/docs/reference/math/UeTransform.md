@@ -34,40 +34,51 @@ new UeTransform(data = {})
 | `parent`                 | `UeObject3D`   | `undefined` | Parent in transform hierarchy                |
 | `matrixAutoUpdate`       | `boolean`      | `true`      | Whether to automatically update local matrix |
 | `matrixWorldAutoUpdate`  | `boolean`      | `true`      | Whether to auto-update world matrix          |
-| `matrixNeedsUpdate`      | `boolean`      | `false`     | Forces local matrix update                   |
 | `matrixWorldNeedsUpdate` | `boolean`      | `false`     | Forces world matrix update                   |
 
 ## Methods
 
 **Matrix Updates**
 
-| Method                                 | Description                                       |
-| -------------------------------------- | ------------------------------------------------- |
-| `updateMatrix()`                       | Rebuilds the local transform matrix               |
-| `updateMatrixWorld()`                  | Updates local matrix and world matrix if necessary, also on children |
-| `updateWorldMatrix(parents, children)` | Updates matrices optionally and recursively       |
+| Method                                 | Description                                                                       |
+| -------------------------------------- | -------------------------------------------------                                 |
+| `updateMatrix()`                       | Rebuilds the local transform matrix                                               |
+| `updateMatrixWorld()`                  | Updates local matrix and world matrix where necessary, also on children           | 
+| `updateWorldMatrix(parents, children)` | Updates matrices optionally and recursively                                       |
+| `forceUpdate()`                        | Immediately updates the matrixes (useful for static objects)                      |
+| `applyMatrix4(mat4)`                   | Applies a transform directly from a matrix and updates position, rotation, scale. |
+| `applyQuaternion(quat)`                | Applies a quaternion rotation to the object.                                      |
+| `localToWorld(vec)`                    | Converts a local-space vector to world-space.                                     |
+| `worldToLocal(vec)`                    | Converts a world-space vector to local-space.                                     |
+
 
 **Translation**
 
-| Method                 | Description                       |
-| ---------------------- | --------------------------------- |
-| `setPosition(x, y, z)` | Set absolute position             |
-| `translate(x, y, z)`   | Translate relative to current pos |
-| `translateX(v)`        | Translate along X axis            |
-| `translateY(v)`        | Translate along Y axis            |
-| `translateZ(v)`        | Translate along Z axis            |
+| Method                            | Description                                 |
+| ----------------------            | ---------------------------------           |
+| `setPosition(x, y, z)`            | Set absolute position                       |
+| `translate(x, y, z)`              | Translate relative to current pos           |
+| `translateX(v)`                   | Translate along X axis                      |
+| `translateY(v)`                   | Translate along Y axis                      |
+| `translateZ(v)`                   | Translate along Z axis                      |
+| `translateOnAxis(axis, distance)` | Translates along a local axis (normalized). |
+
 
 **Rotation**
 
-| Method                 | Description                                |
-| ---------------------- | ------------------------------------------ |
-| `setRotation(x, y, z)` | Sets rotation using Euler angles           |
-| `rotate(x, y, z)`      | Rotates using a delta quaternion           |
-| `rotateX(v)`           | Rotates around local X axis                |
-| `rotateY(v)`           | Rotates around local Y axis                |
-| `rotateZ(v)`           | Rotates around local Z axis                |
-| `lookAt(x, y, z)`      | Rotates to face a world position           |
-| `lookAtVec(vec3)`      | Same as `lookAt()` but takes a `UeVector3` |
+| Method                            | Description                                                          |
+| ----------------------            | ------------------------------------------                           |
+| `setRotation(x, y, z)`            | Sets rotation using Euler angles                                     |
+| `rotate(x, y, z)`                 | Rotates using a delta quaternion                                     |
+| `rotateX(v)`                      | Rotates around local X axis                                          |
+| `rotateY(v)`                      | Rotates around local Y axis                                          |
+| `rotateZ(v)`                      | Rotates around local Z axis                                          |
+| `lookAt(x, y, z)`                 | Rotates to face a world position                                     |
+| `lookAtVec(vec3)`                 | Same as `lookAt()` but takes a `UeVector3`                           |
+| `setRotationFromMatrix(mat)`      | Sets rotation from a rotation matrix (3×3 upper part of 4×4 matrix). |
+| `setRotationFromQuaternion(quat)`	| Copies a quaternion into the rotation.                               |
+| `rotateOnAxis(axis, angle)`       | Rotates around an axis in local space (assumes normalized axis).     |
+| `rotateOnWorldAxis(axis, angle)`  | Rotates around an axis in world space (assumes normalized axis).     |
 
 
 **Scaling**
@@ -78,6 +89,15 @@ new UeTransform(data = {})
 | `scaleX(v)`         | Modify scale along X axis |
 | `scaleY(v)`         | Modify scale along Y axis |
 | `scaleZ(v)`         | Modify scale along Z axis |
+
+**World Space Extraction**
+| Method                       | Description                                    |
+| ---------------------------- | ---------------------------------------------- |
+| `getWorldPosition(target)`   | Gets world position as a vector.               |
+| `getWorldQuaternion(target)` | Gets world rotation as a quaternion.           |
+| `getWorldScale(target)`      | Gets world scale vector.                       |
+| `getWorldDirection(target)`  | Gets world direction vector (positive Y axis). |
+
 
 ## 💡 Example
 ```js
