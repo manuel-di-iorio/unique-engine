@@ -1,4 +1,3 @@
-// @MissingDoc @untested
 /// @description Frustum constructor - Creates a view frustum for culling calculations
 function UeFrustum() constructor {
     

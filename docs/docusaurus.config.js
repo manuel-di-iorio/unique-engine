@@ -49,10 +49,17 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/manuel-di-iorio/unique-engine/tree/main/docs',
+          lastVersion: 'current',
+          versions: {
+            current: {
+              label: '0.0.1 (latest)',
+            },
+            '0.0.1': {
+              label: '0.0.1',
+            },
+          },
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -73,6 +80,11 @@ const config = {
           src: 'img/logo.png',
         },
         items: [
+          {
+            to: '/download',
+            label: 'Download',
+            position: 'left',
+          },
           {
             type: 'docSidebar',
             sidebarId: 'documentationSidebar',
