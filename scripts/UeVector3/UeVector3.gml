@@ -502,4 +502,39 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         self.y = y;
         return self;
     }
+    
+    /// @MissingDoc
+    function applyQuaternion(q) {
+        var xx = self.x, yy = self.y, zz = self.z;
+        var qx = q.x, qy = q.y, qz = q.z, qw = q.w;
+    
+        var ix =  qw * xx + qy * zz - qz * yy;
+        var iy =  qw * yy + qz * xx - qx * zz;
+        var iz =  qw * zz + qx * yy - qy * xx;
+        var iw = -qx * xx - qy * yy - qz * zz;
+    
+        self.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
+        self.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
+        self.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+    
+        return self;
+    }
+    
+    // @MissingDoc
+    function applyAxisAngle(axis, angle) {
+        var xx = self.x, yy = self.y, zz = self.z;
+        var ax = axis.x, ay = axis.y, az = axis.z;
+    
+        var cosA = dcos(angle);
+        var sinA = dsin(angle);
+        var t = 1 - cosA;
+    
+        // Rodrigues' rotation formula
+        self.x = (t * ax * ax + cosA) * xx + (t * ax * ay - sinA * az) * yy + (t * ax * az + sinA * ay) * zz;
+        self.y = (t * ax * ay + sinA * az) * xx + (t * ay * ay + cosA) * yy + (t * ay * az - sinA * ax) * zz;
+        self.z = (t * ax * az - sinA * ay) * xx + (t * ay * az + sinA * ax) * yy + (t * az * az + cosA) * zz;
+    
+        return self;
+    }
 }
+

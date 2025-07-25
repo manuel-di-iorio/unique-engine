@@ -65,6 +65,7 @@
     {"id":{"name":"UeBufferExporter","path":"scripts/UeBufferExporter/UeBufferExporter.yy",},},
     {"id":{"name":"UeBufferGeometry","path":"scripts/UeBufferGeometry/UeBufferGeometry.yy",},},
     {"id":{"name":"UeBufferLoader","path":"scripts/UeBufferLoader/UeBufferLoader.yy",},},
+    {"id":{"name":"UeCameraHelper","path":"scripts/UeCameraHelper/UeCameraHelper.yy",},},
     {"id":{"name":"UeCircleGeometry","path":"scripts/UeCircleGeometry/UeCircleGeometry.yy",},},
     {"id":{"name":"UeConeGeometry","path":"scripts/UeConeGeometry/UeConeGeometry.yy",},},
     {"id":{"name":"UeControls","path":"scripts/UeControls/UeControls.yy",},},

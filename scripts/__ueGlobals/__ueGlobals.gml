@@ -24,7 +24,6 @@ enum UE_FORMAT_ATTR {
     CUSTOM = 4
 }
 
-
 // Internal globals
 global.UE_OBJECT_ID = 0;
 global.UE_EPSILON = math_get_epsilon();

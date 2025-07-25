@@ -7,7 +7,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     var dir = camera.position.clone().sub(target);
     self.radius = camera.position.distanceTo(target);
     self.azimuth = arctan2(dir.y, dir.x);
-    self.elevation = arcsin(clamp(dir.z / radius, -1, 1));
+    self.elevation = radius == 0 ? 0 : arcsin(clamp(dir.z / radius, -1, 1));
 
     self.enableZoom = data[$"enableZoom"] ?? true;
     self.zoomSpeed = data[$"zoomSpeed"] ?? 5;

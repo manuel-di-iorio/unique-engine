@@ -123,6 +123,8 @@ function UeAssimpLoader(data = {}) constructor {
         
         // Rotate the model to match the engine camera directions
         model.rotateZ(180);
+        model.updateMatrix();
+        model.updateMatrixWorld(true);
         
         return model;
     }

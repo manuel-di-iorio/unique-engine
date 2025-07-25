@@ -67,7 +67,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         child.scale.setFromMatrixScale(localMatrix);
         
         // Immediately update the child matrixes to reflect the new transform
-        child.matrixNeedsUpdate = true;
         child.updateWorldMatrix(false, true);
     
         return self;
@@ -169,7 +168,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
                 add(source.children[i].clone(true));
             }
         }
-    
+        
         return self;
     }
     
@@ -238,4 +237,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     
         return optionalTarget;
     }
+
+    // Initial matrix build
+    forceUpdate();
 }

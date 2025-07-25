@@ -16,6 +16,8 @@ sprAirplane = sprite_add("11804_Airplane_diff.jpg", 1, false, false, 0, 0);
 texAirplane = new UeTexture({ image: sprAirplane });
 
 airplaneMesh.traverse(function(mesh) {
+    mesh.matrixAutoUpdate = false;
+    
     var geometry = mesh[$ "geometry"];
     if (geometry != undefined) {
         geometry.computeBoundingBox();
@@ -29,6 +31,8 @@ airplaneMesh.traverse(function(mesh) {
 
 airplaneBox = new UeBoxHelper(airplaneMesh);
 airplaneBox.visible = false;
+airplaneBox.matrixAutoUpdate = false;
+
 
 scene.add(ambientLight, sunLight, airplaneMesh, airplaneBox);
 

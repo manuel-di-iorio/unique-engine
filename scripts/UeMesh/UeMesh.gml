@@ -10,8 +10,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         
         // Apply the material
         if (material != undefined) {
-            //material.use();
-            material.useByMesh(self, renderSide);
+            material.use(self, renderSide);
         }
         
         vertex_submit(geometry.vb, material != undefined && material.wireframe ? pr_linelist : primitive, -1); 
@@ -59,16 +58,11 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         var boundingBox = geometry[$ "boundingBox"];
         var boundingSphere = geometry[$ "boundingSphere"];
         
-        if (boundingBox != undefined) {
-			if (!localRay.intersectsBox(boundingBox)) return self;
-		}
-        
-        //if (localRay.distanceSqToPoint(position) > 5) {
-            //return self;
-            ////if (boundingBox != undefined) {
-    			////if (!localRay.intersectsBox(boundingBox)) return self;
-    		////}
-        //}
+         if (boundingSphere != undefined) {
+            if (!localRay.intersectSphere(boundingSphere, global.UE_DUMMY_VECTOR3)) return self; 
+        } else if (boundingBox != undefined) {
+			if (!localRay.intersectBox(boundingBox, global.UE_DUMMY_VECTOR3)) return self;
+		} 
         
         array_push(hits, {
             object,

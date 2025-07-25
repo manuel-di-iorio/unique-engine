@@ -39,5 +39,10 @@ function UeGridHelper(
     geometry = new UeLineSegmentsGeometry();
     geometry.setPositions(positions);
     geometry.setColors(colors);
+    
+    material.side = cull_noculling;
+    
+    matrixAutoUpdate = false;
+    frustumCulled = false;
 
 }

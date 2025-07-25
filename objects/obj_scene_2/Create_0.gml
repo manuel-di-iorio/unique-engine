@@ -17,11 +17,17 @@ matTree         = new UeSpriteMaterial({ map: texPalmTree });
 
 // Terrain
 var desert = new UeMesh(new UePlaneGeometry(1000, 1000), matSand);
+desert.matrixAutoUpdate = false;
 
 // Pyramids
 var pyramid0 = new UeMesh(new UePyramidGeometry({ base: 160, height: 100 }), matPyramid0);
+pyramid0.matrixAutoUpdate = false;
+
 var pyramid1 = new UeMesh(new UePyramidGeometry({ base: 75, height: 60 }), matPyramid1, { x: -150, y: -150, z: 0 });
+pyramid1.matrixAutoUpdate = false;
+
 var pyramid2 = new UeMesh(new UePyramidGeometry({ base: 60, height: 40 }), matPyramid2, { x: -150, y: 150, z: 0 });
+pyramid2.matrixAutoUpdate = false;
 
 // Palm trees (billboards)
 var treePositions = [
@@ -39,6 +45,7 @@ array_foreach(treePositions, function(arr) {
         sx: 26, sy: 40,
         isSprite: true
     });
+    sprMesh.matrixAutoUpdate = false;
     scene.add(sprMesh);
 });
 

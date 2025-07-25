@@ -64,7 +64,6 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
         rotation.copy(object.rotation);
         scale.copy(object.scale);
         position.copy(object.position);
-        matrixNeedsUpdate = true;
     }
     
     function setFromObject(object) {

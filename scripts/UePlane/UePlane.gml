@@ -1,6 +1,7 @@
-function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
+// @MissingDoc d -> constant
+function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP.clone(), _constant = 0) constructor {
     self.normal = _normal;
-    self.d = _d;
+    self.constant = _constant;
     
     /// @MissingDoc Read-only flag to check if a given object is of type Plane
     self.isPlane = true;
@@ -8,7 +9,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
     /// Sets plane from normal and a point on the plane
     function setFromNormalAndPoint(_normal, point) {
         self.normal.copy(_normal).normalize();
-        self.d = -self.normal.dot(point);
+        self.constant = -self.normal.dot(point);
         return self;
     }
     
@@ -17,13 +18,13 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
         var u = p2.clone().sub(p1);
         var v = p3.clone().sub(p1);
         self.normal = u.cross(v).normalize();
-        self.d = -self.normal.dot(p1);
+        self.constant = -self.normal.dot(p1);
         return self;
     }
     
     /// Returns signed distance from point to the plane
     function distanceToPoint(point) {
-        return self.normal.dot(point) + self.d;
+        return self.normal.dot(point) + self.constant;
     }
     
     /// Projects a point onto the plane
@@ -45,14 +46,14 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
     /// Copies another plane into this one
     function copy(plane) {
         self.normal.copy(plane.normal);
-        self.d = plane.d;
+        self.constant = plane.constant;
         return self;
     }
     
     /// Flips the normal and distance (i.e. inverts the plane)
     function flip() {
         self.normal.scale(-1);
-        self.d = -self.d;
+        self.constant = -self.constant;
         return self;
     }
     
@@ -63,7 +64,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
         var referencePoint = coplanarPoint();
         referencePoint.applyMatrix4(matrix);
         
-        var normal = self.normal.clone().applyMatrix3(normalMatrix || matrix);
+        var normal = self.normal.clone().applyMatrix3(normalMatrix);
         setFromNormalAndPoint(normal, referencePoint);
         
         return self;
@@ -71,7 +72,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
     
     /// @MissingDoc Returns a Vector3 coplanar to the plane, by calculating the projection of the normal vector at the origin onto the plane
     function coplanarPoint() {
-        return self.normal.clone().scale(-self.d);
+        return self.normal.clone().scale(-self.constant);
     }
     
     /// @MissingDoc Returns the signed distance from the sphere to the plane
@@ -81,7 +82,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
     
     /// @MissingDoc Checks to see if two planes are equal (their normal and constant properties match)
     function equals(plane) {
-        return plane.normal.equals(self.normal) && (abs(plane.d - self.d) < 0.0001);
+        return plane.normal.equals(self.normal) && (abs(plane.constant - self.constant) < 0.0001);
     }
     
     /// @MissingDoc Returns the intersection point of the passed line and the plane. Returns undefined if the line does not intersect
@@ -100,7 +101,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
             }
         }
         
-        var t = -(self.normal.dot(line.start) + self.d) / denominator;
+        var t = -(self.normal.dot(line.start) + self.constant) / denominator;
         
         if (t < 0 || t > 1) {
             // Intersection point is outside the line segment
@@ -117,7 +118,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
         var _max = box.max;
         
         var positive = new UeVector3(
-            self.normal.x > 0 ? max_maxx : _min.x,
+            self.normal.x > 0 ? _max.x : _min.x,
             self.normal.y > 0 ? _max.y : _min.y,
             self.normal.z > 0 ? _max.z : _min.z
         );
@@ -153,7 +154,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
     /// @MissingDoc Negates both the normal vector and the constant
     function negate() {
         self.normal.scale(-1);
-        self.d = -self.d;
+        self.constant = -self.constant;
         return self;
     }
     
@@ -161,21 +162,21 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
     function normalize() {
         var normalLength = self.normal.length();
         self.normal.normalize();
-        self.d = self.d / normalLength;
+        self.constant = self.constant / normalLength;
         return self;
     }
     
     /// @MissingDoc Sets this plane's normal and constant properties by copying the values from the given normal
     function set(_normal, constant) {
         self.normal.copy(_normal);
-        self.d = constant;
+        self.constant = constant;
         return self;
     }
     
     /// @MissingDoc Set the individual components that define the plane
     function setComponents(x, y, z, w) {
         self.normal.set(x, y, z);
-        self.d = w;
+        self.constant = w;
         return self;
     }
     
@@ -191,7 +192,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP, _d = 0) constructor {
     
     /// @MissingDoc Translates the plane by the distance defined by the offset vector
     function translate(offset) {
-        self.d = self.d - offset.dot(self.normal);
+        self.constant = self.constant - offset.dot(self.normal);
         return self;
     }
 }

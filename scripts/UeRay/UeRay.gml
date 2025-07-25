@@ -1,6 +1,6 @@
 /// A 3D ray defined by an origin point and a normalized direction vector.
 /// Used for raycasting, intersection tests, and spatial queries.
-function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAULT_UP) constructor {
+function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAULT_UP.clone()) constructor {
     /// The origin point of the ray
     self.origin = _origin.clone();
     /// The normalized direction vector of the ray
@@ -22,7 +22,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
     function intersectPlane(plane) {
         var denom = plane.normal.dot(self.direction);
         if (abs(denom) < 0.00001) return undefined; // Parallel, no intersection
-        var t = -(plane.normal.dot(self.origin) + plane.d) / denom;
+        var t = -(plane.normal.dot(self.origin) + plane.constant) / denom;
         if (t < 0) return undefined; // Intersection behind origin
         return getPoint(t);
     }
@@ -77,11 +77,32 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns squared distance from the ray to a point (UeVector3)
     function distanceSqToPoint(point) {
-        var v = point.clone().sub(self.origin);
-        var t = self.direction.dot(v);
+        //var v = point.clone().sub(self.origin);
+        //var t = self.direction.dot(v);
+        //if (t < 0) t = 0;
+        //var projected = self.direction.clone().scale(t).add(self.origin);
+        //return point.clone().sub(projected).lengthSq();
+        
+        // Compute the vector from the origin towards the point
+        var vx = point.x - self.origin.x;
+        var vy = point.y - self.origin.y;
+        var vz = point.z - self.origin.z;
+        
+        // Dot product
+        var t = self.direction.x * vx + self.direction.y * vy + self.direction.z * vz;
         if (t < 0) t = 0;
-        var projected = self.direction.clone().scale(t).add(self.origin);
-        return point.clone().sub(projected).lengthSq();
+        
+        // Compute the projected point
+        var projectedX = self.origin.x + self.direction.x * t;
+        var projectedY = self.origin.y + self.direction.y * t;
+        var projectedZ = self.origin.z + self.direction.z * t;
+        
+        // Compute the quadratic distance
+        var dx = point.x - projectedX;
+        var dy = point.y - projectedY;
+        var dz = point.z - projectedZ;
+        
+        return dx * dx + dy * dy + dz * dz;
     }
 
     /// Returns squared distance between ray and segment defined by v0 and v1.
@@ -148,7 +169,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
     function distanceToPlane(plane) {
         var denom = plane.normal.dot(self.direction);
         if (abs(denom) < 1000000) return undefined;
-        var t = -(plane.normal.dot(self.origin) + plane.d) / denom;
+        var t = -(plane.normal.dot(self.origin) + plane.constant) / denom;
         return (t >= 0) ? t : undefined;
     }
 
@@ -164,46 +185,44 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns intersection point with axis-aligned bounding box or undefined if none
     function intersectBox(box, target) {
-    var tmin = 0, tmax = infinity;
-
-    for (var i = 0; i < 3; i++) {
-        var originComp = self.origin.getComponent(i);
-        var dirComp = self.direction.getComponent(i);
-
-        if (abs(dirComp) < global.UE_DEFAULT_TEXTURE) {
-            // Ray is parallel to slab
-            if (originComp < box.sizeMin.getComponent(i) || originComp > box.sizeMax.getComponent(i)) {
-                return undefined;
+        var tmin = 0, tmax = infinity;
+    
+        for (var i = 0; i < 3; i++) {
+            var originComp = self.origin.getComponent(i);
+            var dirComp = self.direction.getComponent(i);
+    
+            if (abs(dirComp) < global.UE_DEFAULT_TEXTURE) {
+                // Ray is parallel to slab
+                if (originComp < box.sizeMin.getComponent(i) || originComp > box.sizeMax.getComponent(i)) {
+                    return undefined;
+                }
+                continue;
             }
-            continue;
+    
+            var invD = 1 / dirComp;
+            var t0 = (box.sizeMin.getComponent(i) - originComp) * invD;
+            var t1 = (box.sizeMax.getComponent(i) - originComp) * invD;
+    
+            if (invD < 0) {
+                var tmp = t0; t0 = t1; t1 = tmp;
+            }
+    
+            tmin = max(tmin, t0);
+            tmax = min(tmax, t1);
+    
+            if (tmax < tmin) return undefined;
         }
-
-        var invD = 1 / dirComp;
-        var t0 = (box.sizeMin.getComponent(i) - originComp) * invD;
-        var t1 = (box.sizeMax.getComponent(i) - originComp) * invD;
-
-        if (invD < 0) {
-            var tmp = t0; t0 = t1; t1 = tmp;
-        }
-
-        tmin = max(tmin, t0);
-        tmax = min(tmax, t1);
-
-        if (tmax < tmin) return undefined;
+    
+        self.at(tmin, target);
+        return target;
     }
-
-    var hitPoint = target ?? new UeVector3();
-    self.at(tmin, hitPoint);
-    return hitPoint;
-}
-
 
     /// Returns intersection point with plane or undefined if none
     function intersectPlane(plane, target) {
         var denom = plane.normal.dot(self.direction);
         if (abs(denom) < 1000000) return undefined;
 
-        var t = -(plane.normal.dot(self.origin) + plane.d) / denom;
+        var t = -(plane.normal.dot(self.origin) + plane.constant) / denom;
         if (t < 0) return undefined;
 
         if (target) self.at(t, target);
@@ -214,25 +233,46 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns intersection point with sphere or undefined if none
     function intersectSphere(sphere, target) {
-        var v = sphere.center.clone().sub(self.origin);
-        var tca = v.dot(self.direction);
-        var d2 = v.lengthSq() - tca * tca;
+        //var v = sphere.center.clone().sub(self.origin);
+        //var tca = v.dot(self.direction);
+        //var d2 = v.lengthSq() - tca * tca;
+        //var r2 = sphere.radius * sphere.radius;
+//
+        //if (d2 > r2) return undefined;
+//
+        //var thc = sqrt(r2 - d2);
+        //var t0 = tca - thc;
+        //var t1 = tca + thc;
+//
+        //if (t0 < 0 && t1 < 0) return undefined;
+//
+        //var t = (t0 < 0) ? t1 : t0;
+//
+        //return self.at(t, target);
+        
+        var vx = sphere.center.x - self.origin.x;
+        var vy = sphere.center.y - self.origin.y;
+        var vz = sphere.center.z - self.origin.z;
+        
+        var tca = vx * self.direction.x + vy * self.direction.y + vz * self.direction.z;
+        var vLenSq = vx * vx + vy * vy + vz * vz;
+        var d2 = vLenSq - tca * tca;
+        
         var r2 = sphere.radius * sphere.radius;
-
-        if (d2 > r2) return undefined;
-
+        if (d2 > r2) return undefined; // Early exit se non c'è intersezione
+        
         var thc = sqrt(r2 - d2);
         var t0 = tca - thc;
+        
+        // Ottimizzazione: controlla prima t0, poi t1 solo se necessario
+        if (t0 >= 0) {
+            return self.at(t0, target);
+        }
+        
         var t1 = tca + thc;
-
-        if (t0 < 0 && t1 < 0) return undefined;
-
-        var t = (t0 < 0) ? t1 : t0;
-
-        if (target) self.at(t, target);
-        else target = self.at(t, new UeVector3());
-
-        return target;
+        if (t1 < 0) return undefined;
+        
+        return self.at(t1, target);
     }
 
     /// Returns intersection point with triangle or undefined if none

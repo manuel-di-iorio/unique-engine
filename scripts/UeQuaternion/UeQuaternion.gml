@@ -162,6 +162,10 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         var m11 = te[0], m12 = te[4], m13 = te[8];
         var m21 = te[1], m22 = te[5], m23 = te[9];
         var m31 = te[2], m32 = te[6], m33 = te[10];
+        
+        if (is_nan(m11) || is_nan(m22) || is_nan(m33)) {
+            return self;
+        }
     
         var trace = m11 + m22 + m33;
         var s;
@@ -200,7 +204,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         var r = vFrom.dot(vTo);
     
         // Vectors are the same → identity quaternion
-        if (r >= 1.0 - EPS) {
+        if (r >= 1.0 - global.UE_EPSILON) {
             return self.set(0, 0, 0, 1);
         }
     

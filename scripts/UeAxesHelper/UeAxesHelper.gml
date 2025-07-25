@@ -6,6 +6,8 @@ function UeAxesHelper(size = 1): UeLineSegments() constructor {
     material.transparent = true;
     material.depthTest = false;
     material.forceSinglePass = true;
+    material.side = cull_noculling;
+    matrixAutoUpdate = false;
 
     // Line segment positions for axes: [x1, y1, z1, x2, y2, z2]
     var positions = [
@@ -32,7 +34,7 @@ function UeAxesHelper(size = 1): UeLineSegments() constructor {
         var yr = color_get_red(yAxisColor), yg = color_get_green(yAxisColor), yb = color_get_blue(yAxisColor);
         var zr = color_get_red(zAxisColor), zg = color_get_green(zAxisColor), zb = color_get_blue(zAxisColor);
         
-        geom.setColors([
+        self.geometry.setColors([
             xr, xg, xb,
             xr, xg, xb, 
             yr,yg,yb,
@@ -45,7 +47,7 @@ function UeAxesHelper(size = 1): UeLineSegments() constructor {
 
     /// Disposes the geometry
     function dispose() {
-        geom.dispose();
+        self.geometry.dispose();
         return self;
     }
 }

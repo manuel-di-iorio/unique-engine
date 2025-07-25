@@ -4,7 +4,7 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     type = "Camera";
     fov  = data[$ "fov"]  ?? 60;
     near = data[$ "near"] ?? 0.1;
-    far  = data[$ "far"]  ?? 32000;
+    far  = data[$ "far"]  ?? 3200;
     aspect = data[$ "aspect"] ?? view_wport / view_hport;
     view = data[$ "view"] ?? view_current;
     camera = camera_create();
@@ -13,6 +13,9 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     autoUse = data[$ "autoUse"] ?? true;
     antialias = data[$ "antialias"] ?? 4;
     vsync = data[$ "vsync"] ?? true;
+    upX = global.UE_OBJECT3D_DEFAULT_UP.x;
+    upY = global.UE_OBJECT3D_DEFAULT_UP.y;
+    upZ = global.UE_OBJECT3D_DEFAULT_UP.z;
     
     // Matrixes
     matrixWorldInverse = new UeMatrix4();
@@ -28,22 +31,20 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     
     // @MissingDoc
     function updateMatrixWorld() {
-        if (matrixNeedsUpdate) {
-            matrixWorldInverse.fromArray(matrix_build_lookat(
-                position.x, position.y, position.z,  // From
-                target.x, target.y, target.z, // To
-                0, 0, -1 // Up
-            ));
-            matrixWorld.copy(matrixWorldInverse).invert();
-            
-            camera_set_view_mat(camera, matrixWorldInverse.data);
-            matrixNeedsUpdate = false;
-        }
+        var lookAt = matrix_build_lookat(
+            position.x, position.y, position.z,  // From
+            target.x, target.y, target.z, // To
+            upX, upY, upZ // Up
+        )
+        matrixWorldInverse.fromArray(lookAt);
+        matrixWorld.copy(matrixWorldInverse).invert();
+        camera_set_view_mat(camera, lookAt);
     }
     
     // Build the perspective projection
     function use() {
         updateProjectionMatrix();
+        updateMatrixWorld();
         view_set_visible(view, true);
         view_set_camera(view, camera);
         

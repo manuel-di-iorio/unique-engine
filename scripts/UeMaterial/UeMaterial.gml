@@ -175,7 +175,7 @@ function UeMaterial(data = {}) constructor {
     }
      
     /// Apply material before drawing
-    function use() {
+    function use(mesh, renderSide = undefined) {
         if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) return self;
 
         shader_set(shader);
@@ -201,14 +201,24 @@ function UeMaterial(data = {}) constructor {
             }
         }
         
-        return self;
-    }
-    
-    function useByMesh(mesh, renderSide = undefined) {
-        if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) return self;
+        // Set the texture samplers
+        for (var t=0; t<__texturesCachedCount; t++) {
+            var textureCached = __texturesCached[t];
+            textureCached[0].use(textureCached[1]);
+        }
             
-        shader_set(shader); 
+        // Update the shader's model position uniform (for billboard sprites)
+        // @MissingDoc
+        if (mesh[$ "isSprite"] != undefined) {
+            var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
+            var meshPosition = mesh.position;
+            uniformsCache[0] = meshPosition.x;
+            uniformsCache[1] = meshPosition.y;
+            uniformsCache[2] = meshPosition.z;
+            shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
+        }
         
+        // Set the GPU state
         renderSide ??= side;
         gpu_set_cullmode(renderSide);
     
@@ -221,22 +231,6 @@ function UeMaterial(data = {}) constructor {
         gpu_set_blendenable(blending);
         gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
         gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha);
-    
-        // Set the texture samplers
-        for (var t=0; t<__texturesCachedCount; t++) {
-            var textureCached = __texturesCached[t];
-            textureCached[0].use(textureCached[1]);
-        }
-            
-        // Update the shader's model position uniform (for billboard sprites)
-        if (mesh[$ "isSprite"] != undefined) {
-            var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
-            var meshPosition = mesh.position;
-            uniformsCache[0] = meshPosition.x;
-            uniformsCache[1] = meshPosition.y;
-            uniformsCache[2] = meshPosition.z;
-            shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
-        }
     }
     
     function clone() {

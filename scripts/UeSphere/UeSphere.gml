@@ -20,7 +20,7 @@ function UeSphere(center = new UeVector3(0, 0, 0), radius = -1) constructor {
 
     /// Returns a clone of this sphere.
     function clone() {
-        return new UeSphere(self.center.clone(), self.radius);
+        return variable_clone(self);
     }
 
     /// Checks if the sphere is empty (radius < 0).

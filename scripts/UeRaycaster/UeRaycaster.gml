@@ -46,7 +46,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         } else if (camera.isOrthographicCamera) {
             // For orthographic camera, origin is unprojected NDC with depth, direction is fixed
             global.UE_DUMMY_VECTOR3.set(ndcX, ndcY, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
-            global.UE_DUMMY_VECTOR3_B.set(0, 0, -1).transformDirection(camera.matrixWorld);
+            global.UE_DUMMY_VECTOR3_B.copy(global.UE_OBJECT3D_DEFAULT_UP).transformDirection(camera.matrixWorld);
         }
 
         self.ray.set(global.UE_DUMMY_VECTOR3, global.UE_DUMMY_VECTOR3_B);

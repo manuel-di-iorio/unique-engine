@@ -26,13 +26,13 @@ function UeArrowHelper(
     ]);
     // Create the line mesh from geometry
     self.line = new UeLine(lineGeom);
+    self.line.matrixAutoUpdate = false;
 
     // --- Create the cone geometry for the arrowhead ---
     var coneGeom = new UeConeGeometry(self.headWidth * 0.5, self.headLength, 32, { color });
     // Create the mesh for the cone with basic material
     self.cone = new UeMesh(coneGeom, new UeMeshBasicMaterial());
     self.cone.setPosition(lineLen, 0, 0);
-    self.cone.matrixNeedsUpdate = true;
 
     // Add line and cone as children of this arrow mesh
     self.add(self.line, self.cone);
@@ -44,12 +44,13 @@ function UeArrowHelper(
         
         // Compute quaternion rotation from default direction (X+) to new direction
         self.rotation.copy(new UeQuaternion().setFromUnitVectors(new UeVector3(1, 0, 0), _dir));
-        // Mark the matrix to be updated to apply rotation
+        forceUpdate();
         
         // Calculate new position for the cone along the rotated direction
         var pos = _dir.scale(self._length - self.headLength);
         // Update the cone’s position to stay at the tip of the arrow
         self.cone.setPosition(pos.x, pos.y, pos.z);
+        self.cone.forceUpdate();
     }
 
     // --- Method to update the length and dimensions of the arrow (untested) ---
@@ -77,6 +78,7 @@ function UeArrowHelper(
     
         // Position the cone at the new tip of the line along X axis
         self.cone.setPosition(lineLen, 0, 0);
+        self.cone.forceUpdate();
     }
 
     // --- Method to update the color of the arrow (untested) ---

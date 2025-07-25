@@ -30,6 +30,7 @@
     {"name":"UeBoxGeometry","order":1,"path":"scripts/UeBoxGeometry/UeBoxGeometry.yy",},
     {"name":"UeBufferGeometry","order":2,"path":"scripts/UeBufferGeometry/UeBufferGeometry.yy",},
     {"name":"UeBufferLoader","order":1,"path":"scripts/UeBufferLoader/UeBufferLoader.yy",},
+    {"name":"UeCameraHelper","order":4,"path":"scripts/UeCameraHelper/UeCameraHelper.yy",},
     {"name":"UeCircleGeometry","order":2,"path":"scripts/UeCircleGeometry/UeCircleGeometry.yy",},
     {"name":"UeConeGeometry","order":7,"path":"scripts/UeConeGeometry/UeConeGeometry.yy",},
     {"name":"UeFrustum","order":11,"path":"scripts/UeFrustum/UeFrustum.yy",},

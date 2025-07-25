@@ -21,21 +21,26 @@ raycaster.layers.set(1);
 raycaster.setFromCamera(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), camera);
 intersectedBox = undefined;
 
+meshGroup = new UeMesh(undefined, undefined);
+meshGroup.matrixAutoUpdate = false;
+scene.add(meshGroup);
+
 // Create the random boxes
 var maxDist = 500;
 var gap = 300;
 
-for (var i = 0; i < 300; i++) {
+for (var i = 0; i < 2; i++) {
     var color = make_color_rgb(irandom_range(60, 255), irandom_range(60, 255), irandom_range(60, 255));
     var size = random_range(30, 40);
     
     var geometry = new UeBoxGeometry(size, size, size, { color });
     var mesh = new UeMesh(geometry);
+    mesh.matrixAutoUpdate = false;
     mesh.layers.enable(1); // Only objects having layer 1 will be intersected
-    scene.add(mesh);
+    meshGroup.add(mesh);
     
     // Set the rotation
-    mesh.setRotation(random_range(0, 360), random_range(0, 360), random_range(0, 360));
+    //mesh.setRotation(random_range(0, 360), random_range(0, 360), random_range(0, 360));
     
     // Choose a position far from the center
     var xx = 0, yy = 0, zz = 0;
@@ -45,8 +50,8 @@ for (var i = 0; i < 300; i++) {
         zz = random_range(-maxDist, maxDist);
     } until (xx * xx + yy * yy + zz * zz >= gap * gap);
     
-    mesh.setPosition(xx, yy, zz);
-    
+    mesh.setPosition(xx, yy, zz); 
+     
     // Set the bounding box size matching the mesh scale
     geometry.boundingBox = new UeBox3();
     geometry.boundingBox.setFromCenterAndSize(global.UE_VECTOR3_ZERO, new UeVector3(size, size, size));
@@ -54,6 +59,24 @@ for (var i = 0; i < 300; i++) {
     // Set the bounding sphere for frustum testing
     geometry.boundingSphere = new UeSphere(global.UE_VECTOR3_ZERO, size);
     
-    mesh.bbox = new UeBoxHelper(mesh, c_yellow, { visible: false });
-    scene.add(mesh.bbox);
+    mesh.forceUpdate();
+    
+    // Bounding box
+    //mesh.bbox = new UeBoxHelper(mesh, c_yellow, { visible: false });
+    //mesh.bbox.matrixAutoUpdate = false;
+    //scene.add(mesh.bbox);
+    
+    
+    sg = new UeSphereGeometry(mesh.__frustumSphere.radius/1.5); 
+    sm = new UeMesh(sg, undefined);
+    sm.matrixAutoUpdate = false;
+    sm.position.copy(mesh.__frustumSphere.center);
+    sm.frustumCulled = false;
+    sm.forceUpdate();
+    scene.add(sm);
 }
+
+scene.add(new UeGridHelper(1000))
+
+cameraHelper = new UeCameraHelper(camera);
+//scene.add(cameraHelper);

@@ -1,3 +1,4 @@
+// @MissingDoc check all methods
 function UeMatrix4(_data = undefined) constructor {
     // Internal data in column-major order
     data = _data ?? matrix_build_identity();
@@ -19,7 +20,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Pre-multiplies this matrix: result = m * this
+    /// Pre-multiplies this matrix: result = m * self
     function premultiply(m) {
         data = matrix_multiply(m.data, self.data);
         return self;
@@ -326,8 +327,8 @@ function UeMatrix4(_data = undefined) constructor {
 
     /// Builds a rotation matrix around X axis
     function makeRotationX(theta) {
-        var c = cos(theta);
-        var s = sin(theta);
+        var c = dcos(theta);
+        var s = dsin(theta);
         data = [
             1, 0, 0, 0,
             0, c, s, 0,
@@ -339,8 +340,8 @@ function UeMatrix4(_data = undefined) constructor {
 
     /// Builds a rotation matrix around Y axis
     function makeRotationY(theta) {
-        var c = cos(theta);
-        var s = sin(theta);
+        var c = dcos(theta);
+        var s = dsin(theta);
         data = [
             c, 0,-s, 0,
             0, 1, 0, 0,
@@ -352,8 +353,8 @@ function UeMatrix4(_data = undefined) constructor {
 
     /// Builds a rotation matrix around Z axis
     function makeRotationZ(theta) {
-        var c = cos(theta);
-        var s = sin(theta);
+        var c = dcos(theta);
+        var s = dsin(theta);
         data = [
             c, s, 0, 0,
            -s, c, 0, 0,
