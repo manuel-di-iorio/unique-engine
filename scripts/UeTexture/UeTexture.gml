@@ -9,7 +9,6 @@ function UeTexture(data = {}) constructor {
     filter = data[$ "filter"] ?? true;
     generateMipmaps = data[$ "generateMipmaps"] ?? true;
     texture = undefined;
-    __gpu_state = {};
     
     function setTexture(image, subimg = 0) {
         self.image = image;
@@ -20,23 +19,10 @@ function UeTexture(data = {}) constructor {
     
     function use(sampler) {
         var _texRepeat = self[$ "repeat"];
-        if (__gpu_state[$ "repeat"] != _texRepeat) {
-            __gpu_state[$ "repeat"] = _texRepeat;
-            gpu_set_texrepeat_ext(sampler, _texRepeat);
-        }
-        
-        if (__gpu_state[$ "filter"] != filter) {
-            __gpu_state[$ "filter"] = filter;
-            gpu_set_texfilter_ext(sampler, filter);
-        }
-        
-        if (__gpu_state[$ "mipmap"] != generateMipmaps) {
-            __gpu_state[$ "mipmap"] = generateMipmaps;
-            gpu_set_tex_mip_enable_ext(sampler, generateMipmaps);
-        }
-        
+        gpu_set_texrepeat_ext(sampler, _texRepeat);
+        gpu_set_texfilter_ext(sampler, filter);
+        gpu_set_tex_mip_enable_ext(sampler, generateMipmaps);
         texture_set_stage(sampler, texture);
-        
         return self;
     }
     

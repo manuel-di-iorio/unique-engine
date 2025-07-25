@@ -33,24 +33,9 @@ global.UE_DUMMY_VECTOR3_B = new UeVector3();
 global.UE_DUMMY_QUATERNION = new UeQuaternion();
 global.UE_DUMMY_SPHERE = new UeSphere();
 global.UE_DUMMY_DEFAULT_SPRITE_CENTER = new UeVector2(0.5, 0.5);
+global.UE_DUMMY_RAY = new UeRay();
+global.UE_DUMMY_MATRIX4 = new UeMatrix4();
 
-enum UE_MATERIAL_GPU_STATE_ENUM {
-    SIDE,
-    DEPTH_TEST,
-    DEPTH_WRITE,
-    DEPTH_FUNC,
-    TRANSPARENT,
-    ALPHA_TEST,
-    COLOR_WRITE,
-    BLENDING,
-    BLEND_EQUATION,
-    BLEND_EQUATION_ALPHA,
-    BLEND_SRC,
-    BLEND_DST,
-    BLEND_SRC_ALPHA,
-    BLEND_DST_ALPHA
-}
-global.UE_MATERIAL_GPU_STATE = array_create(14);
 global.UE_MATERIAL_UNIFORMS_SET_CACHE = array_create(3);
 
 global.UE_RENDERER_STATE = array_create(1);

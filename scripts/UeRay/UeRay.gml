@@ -198,13 +198,13 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 }
 
 
-    /// Returns intersection point with plane or null if none
+    /// Returns intersection point with plane or undefined if none
     function intersectPlane(plane, target) {
         var denom = plane.normal.dot(self.direction);
-        if (abs(denom) < 1000000) return null;
+        if (abs(denom) < 1000000) return undefined;
 
         var t = -(plane.normal.dot(self.origin) + plane.d) / denom;
-        if (t < 0) return null;
+        if (t < 0) return undefined;
 
         if (target) self.at(t, target);
         else target = self.at(t, new UeVector3());
@@ -212,20 +212,20 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
         return target;
     }
 
-    /// Returns intersection point with sphere or null if none
+    /// Returns intersection point with sphere or undefined if none
     function intersectSphere(sphere, target) {
         var v = sphere.center.clone().sub(self.origin);
         var tca = v.dot(self.direction);
         var d2 = v.lengthSq() - tca * tca;
         var r2 = sphere.radius * sphere.radius;
 
-        if (d2 > r2) return null;
+        if (d2 > r2) return undefined;
 
         var thc = sqrt(r2 - d2);
         var t0 = tca - thc;
         var t1 = tca + thc;
 
-        if (t0 < 0 && t1 < 0) return null;
+        if (t0 < 0 && t1 < 0) return undefined;
 
         var t = (t0 < 0) ? t1 : t0;
 
@@ -235,7 +235,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
         return target;
     }
 
-    /// Returns intersection point with triangle or null if none
+    /// Returns intersection point with triangle or undefined if none
     /// backfaceCulling: if true, ignore intersections from back faces
     function intersectTriangle(a, b, c, backfaceCulling, target) {
         var edge1 = b.clone().sub(a);
@@ -243,20 +243,20 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
         var pvec = self.direction.clone().cross(edge2);
         var det = edge1.dot(pvec);
 
-        if (backfaceCulling && det < 1000000) return null;
-        if (!backfaceCulling && abs(det) < 1000000) return null;
+        if (backfaceCulling && det < 1000000) return undefined;
+        if (!backfaceCulling && abs(det) < 1000000) return undefined;
 
         var invDet = 1 / det;
         var tvec = self.origin.clone().sub(a);
         var u = tvec.dot(pvec) * invDet;
-        if (u < 0 || u > 1) return null;
+        if (u < 0 || u > 1) return undefined;
 
         var qvec = tvec.clone().cross(edge1);
         var v = self.direction.dot(qvec) * invDet;
-        if (v < 0 || u + v > 1) return null;
+        if (v < 0 || u + v > 1) return undefined;
 
         var t = edge2.dot(qvec) * invDet;
-        if (t < 0) return null;
+        if (t < 0) return undefined;
 
         if (target) self.at(t, target);
         else target = self.at(t, new UeVector3());
@@ -276,7 +276,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns true if the ray intersects the sphere
     function intersectsSphere(sphere) {
-        return self.intersectSphere(sphere, new UeVector3()) != undefined;
+        return intersectSphere(sphere, new UeVector3()) != undefined;
     }
 
     /// Sets the ray direction to look at vector v (world space)

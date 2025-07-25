@@ -24,8 +24,6 @@ intersectedBox = undefined;
 // Create the random boxes
 var maxDist = 500;
 var gap = 300;
-//meshBatch = new UeMesh();
-//scene.add(meshBatch);
 
 for (var i = 0; i < 300; i++) {
     var color = make_color_rgb(irandom_range(60, 255), irandom_range(60, 255), irandom_range(60, 255));
@@ -33,7 +31,6 @@ for (var i = 0; i < 300; i++) {
     
     var geometry = new UeBoxGeometry(size, size, size, { color });
     var mesh = new UeMesh(geometry);
-    //mesh.material = undefined;
     mesh.layers.enable(1); // Only objects having layer 1 will be intersected
     scene.add(mesh);
     

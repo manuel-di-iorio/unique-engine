@@ -244,7 +244,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         // Apply the materials uniforms
         var materialNames = variable_struct_get_names(materials);
         for (var m = 0, mn = array_length(materialNames); m < mn; m++) {
-            //materials[$ materialNames[m]].use(camera);
+            materials[$ materialNames[m]].use(camera);
         }
         shader_reset();
         

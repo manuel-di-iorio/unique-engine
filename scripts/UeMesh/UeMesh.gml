@@ -10,7 +10,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         
         // Apply the material
         if (material != undefined) {
-            material.use();
+            //material.use();
             material.useByMesh(self, renderSide);
         }
         
@@ -51,19 +51,24 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     function raycast(raycaster, hits) {
         var object = self;
         
-        var matrixWorldInverse = matrixWorld.clone().invert();
-        var localRay = raycaster.ray.clone();
+        var matrixWorldInverse = global.UE_DUMMY_MATRIX4.copy(matrixWorld).invert();
+        var localRay = global.UE_DUMMY_RAY.copy(raycaster.ray);
         var localOrigin = localRay.origin.applyMatrix4(matrixWorldInverse);
         var localDirection = localRay.direction.transformDirection(matrixWorldInverse);
         
         var boundingBox = geometry[$ "boundingBox"];
         var boundingSphere = geometry[$ "boundingSphere"];
         
-        if (boundingSphere != undefined) {
-			if (!localRay.intersectsSphere(boundingSphere)) return self;
-		} else if (boundingBox != undefined) {
+        if (boundingBox != undefined) {
 			if (!localRay.intersectsBox(boundingBox)) return self;
 		}
+        
+        //if (localRay.distanceSqToPoint(position) > 5) {
+            //return self;
+            ////if (boundingBox != undefined) {
+    			////if (!localRay.intersectsBox(boundingBox)) return self;
+    		////}
+        //}
         
         array_push(hits, {
             object,

@@ -31,30 +31,19 @@ function UeMaterial(data = {}) constructor {
     
     // Uniforms
     uniforms = data[$ "uniforms"] ?? {};
-    _uniform_handlers = {};
-    _sampler_handlers = {};
-    
-    uniforms[$ "ueModelPosition"] = { type: UE_UNIFORM_TYPE.ARRAY };
-    uniforms[$ "ueModelScale"] = { type: UE_UNIFORM_TYPE.ARRAY };
-    uniforms[$ "ueCameraPosition"] = { type: UE_UNIFORM_TYPE.ARRAY };
+    __uniformsCached = [];
+    __uniformsCachedCount = 0;
+    __texturesCached = []; 
+    __texturesCachedCount = 0;
+     
+    __uniformModelPositionLoc = undefined;
     
     // Light uniforms
     lights = data[$ "lights"] ?? 2;
-    if (lights) {
-        uniforms[$ "ueAmbient"] = { type: UE_UNIFORM_TYPE.ARRAY };
-        
-        for (var i=0; i<lights; i++) {
-            uniforms[$ $"ueDirLightDir{i}"] = { type: UE_UNIFORM_TYPE.ARRAY };
-            uniforms[$ $"ueDirLightColor{i}"] = { type: UE_UNIFORM_TYPE.ARRAY };
-            uniforms[$ $"ueDirLightIntensity{i}"] = { type: UE_UNIFORM_TYPE.FLOAT };
-            
-            uniforms[$ $"uePointLightPosition{i}"] = { type: UE_UNIFORM_TYPE.ARRAY };
-            uniforms[$ $"uePointLightRange{i}"] = { type: UE_UNIFORM_TYPE.FLOAT };
-            uniforms[$ $"uePointLightColor{i}"] = { type: UE_UNIFORM_TYPE.ARRAY };
-            uniforms[$ $"uePointLightIntensity{i}"] = { type: UE_UNIFORM_TYPE.FLOAT };
-        }
-    }
-  
+    __uniformLightsAmbientLoc = undefined;
+    __uniformLightsDir = [];
+    __uniformLightsPos = [];
+    
     // Textures
     textures = {
        map: data[$ "map"] ?? global.UE_DEFAULT_TEXTURE
@@ -65,91 +54,66 @@ function UeMaterial(data = {}) constructor {
     if (data[$ "aoMap"] != undefined) textures.aoMap = data[$ "aoMap"];
     if (data[$ "emissiveMap"] != undefined) textures.emissiveMap = data[$ "emissiveMap"];
         
-    
+    // Cache uniform/sampler locations
     function build() { 
         if (shader == undefined) return self;
             
-        _uniform_handlers = {};
-        _sampler_handlers = {};
+        // Cache the engine uniforms
+        __uniformModelPositionLoc = shader_get_uniform(shader, "u_ueModelPosition");
+        __uniformLightsAmbientLoc = shader_get_uniform(shader, "u_ueAmbient");
         
-        // Cache uniform locations
-        struct_foreach(uniforms, function(name, uniform) {
-            _uniform_handlers[$ name] = shader_get_uniform(shader, $"u_{name}"); 
-        });
+        __uniformLightsDir = array_create(lights);
+        __uniformLightsPos = array_create(lights);
+        
+        for (var l=0; l<lights; l++) { 
+            __uniformLightsDir[l] = [
+                shader_get_uniform(shader, $"u_ueDirLightDir{l}"),
+                shader_get_uniform(shader, $"u_ueDirLightColor{l}"),
+                shader_get_uniform(shader, $"u_ueDirLightIntensity{l}"),
+            ];
+            
+            __uniformLightsPos[l] = [
+                shader_get_uniform(shader, $"u_uePointLightPosition{l}"),
+                shader_get_uniform(shader, $"u_uePointLightColor{l}"),
+                shader_get_uniform(shader, $"u_uePointLightRange{l}"),
+                shader_get_uniform(shader, $"u_uePointLightIntensity{l}"),
+            ];
+        }
+            
+        // Cache the uniforms
+        var uniformNames = variable_struct_get_names(uniforms);
+        __uniformsCachedCount = array_length(uniformNames);
+        __uniformCached = array_create(__uniformsCachedCount);
+        
+        for (var u=0; u<__uniformsCachedCount; u++) {
+            var uniformName = uniformNames[u];
+            var uniformLoc = shader_get_uniform(shader, $"u_{uniformName}");
+            
+            __uniformCached[u] = [
+                uniforms[$ uniformName],
+                shader_get_uniform(shader, $"u_{uniformName}")
+            ];
+        }
+        
+        // Cache the textures        
+        var textureNames = variable_struct_get_names(textures);
+        var textureNamesCount = array_length(textureNames);
     
-        // Cache sampler texture stages
-        struct_foreach(textures, function(name, texture) {
-            if (texture == undefined) return;
-            _sampler_handlers[$ name] = shader_get_sampler_index(shader, $"s_{name}");
-        });
+        __texturesCached = array_create(textureNamesCount);
+        __texturesCachedCount = 0;
+        
+        for (var t=0; t<textureNamesCount; t++) {
+            var textureName = textureNames[t];
+            var texture = textures[$ textureName];
+            if (texture == undefined || texture.image == undefined) continue;
+            __texturesCached[t] = [
+                texture,
+                shader_get_sampler_index(shader, $"s_{textureName}")
+            ];
+            __texturesCachedCount++;
+        }
         
         return self;
-    }
-    
-    function __setGpuState(renderSide = undefined) {
-        var gpuState = global.UE_MATERIAL_GPU_STATE;
-        
-        renderSide ??= side;
-        var gpuState = global.UE_MATERIAL_GPU_STATE;
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.SIDE] != renderSide) {
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.SIDE] = renderSide;
-            gpu_set_cullmode(renderSide);
-        }
-        
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_TEST] != depthTest) { 
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_TEST] = depthTest;
-            gpu_set_ztestenable(depthTest);
-        }
-        
-        if (global.UE_MATERIAL_GPU_STATE[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_WRITE] != depthWrite) {
-            global.UE_MATERIAL_GPU_STATE[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_WRITE] = depthWrite;
-            gpu_set_zwriteenable(depthWrite);
-        }
-        
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_FUNC] != depthFunc) {
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.DEPTH_FUNC] = depthFunc;
-            gpu_set_zfunc(depthFunc);
-        }
-        
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.TRANSPARENT] != transparent) {
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.TRANSPARENT] = transparent;
-            gpu_set_alphatestenable(transparent);
-        }
-        
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.ALPHA_TEST] != alphaTest) {
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.ALPHA_TEST] = alphaTest;
-            gpu_set_alphatestref(alphaTest);
-        }
-        
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.COLOR_WRITE] != colorWrite) {
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.COLOR_WRITE] = colorWrite;
-            gpu_set_colorwriteenable(colorWrite, colorWrite, colorWrite, colorWrite);
-        }
-        
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLENDING] != blending) {
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLENDING] = blending;
-            gpu_set_blendenable(blending);
-        }
-
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_EQUATION] != blendEquation || 
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_EQUATION_ALPHA] != blendEquationAlpha) {
-                
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_EQUATION] = blendEquation;
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_EQUATION_ALPHA] = blendEquationAlpha;
-            gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
-        }
-
-        if (gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_SRC] != blendSrc ||
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_DST] != blendDst ||
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_SRC_ALPHA] != blendSrcAlpha ||
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_DST_ALPHA] != blendDstAlpha ) {
-            
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_SRC] = blendSrc;
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_DST] = blendDst;
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_SRC_ALPHA] = blendSrcAlpha;
-            gpuState[UE_MATERIAL_GPU_STATE_ENUM.BLEND_DST_ALPHA] = blendDstAlpha;
-            gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha);
-        }
     }
     
     function __setLightsUniforms() {
@@ -163,10 +127,12 @@ function UeMaterial(data = {}) constructor {
         var pointLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT];
         var pointLightCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT];
 
-        shader_set_uniform_f_array(_uniform_handlers[$ "ueAmbient"], lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT]);
+        shader_set_uniform_f_array(__uniformLightsAmbientLoc, lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT]);
         
         // Set directional lights
         for (var i = 0; i < lights; i++) {
+            var lightLoc = __uniformLightsDir[i];
+            
             if (i < directionalCount) {
                 var light = directionalState[i];
                 var lightTarget = light.target;
@@ -174,33 +140,36 @@ function UeMaterial(data = {}) constructor {
                 uniformsCache[0] = lightTarget.x;
                 uniformsCache[1] = lightTarget.y;
                 uniformsCache[2] = lightTarget.z;
-                shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightDir{i}"], uniformsCache);
+                shader_set_uniform_f_array(lightLoc[0], uniformsCache);
                 
-                shader_set_uniform_f_array(_uniform_handlers[$ $"ueDirLightColor{i}"], light.color);
-                shader_set_uniform_f(_uniform_handlers[$ $"ueDirLightIntensity{i}"], light.intensity);
+                shader_set_uniform_f_array(lightLoc[1], light.color);
+                shader_set_uniform_f(lightLoc[2], light.intensity);
+                
             } else {
                 // Reset unused light slots
-                shader_set_uniform_f(_uniform_handlers[$ $"ueDirLightIntensity{i}"], 0);
+                shader_set_uniform_f(lightLoc[2], 0);
             }
         }
         
         // Set point lights
         var lightColor;
         for (var i = 0; i < lights; i++) {
+            var lightLoc = __uniformLightsPos[i];
+            
             if (i < pointLightCount) {
                 var light = pointLightState[i];
                 
                 uniformsCache[0] = light.position.x;
                 uniformsCache[1] = light.position.y;
                 uniformsCache[2] = light.position.z;
-                shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightPosition{i}"], uniformsCache);
+                shader_set_uniform_f_array(lightLoc[0], uniformsCache);
                 
-                shader_set_uniform_f_array(_uniform_handlers[$ $"uePointLightColor{i}"], light.color);
-                shader_set_uniform_f(_uniform_handlers[$ $"uePointLightRange{i}"], light.range);
-                shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], light.intensity);
+                shader_set_uniform_f_array(lightLoc[1], light.color);
+                shader_set_uniform_f(lightLoc[2], light.range);
+                shader_set_uniform_f(lightLoc[3], light.intensity);
             } else {
                 // Reset unused light slots
-                shader_set_uniform_f(_uniform_handlers[$ $"uePointLightIntensity{i}"], 0);
+                shader_set_uniform_f(lightLoc[3], 0);
             }
         }
     }
@@ -210,26 +179,17 @@ function UeMaterial(data = {}) constructor {
         if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) return self;
 
         shader_set(shader);
-        
-        var camera = global.UE_RENDERER_STATE[UE_RENDERER_STATE_ENUM.CAMERA];
-        var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
-        var cameraPosition = camera.position;
-        uniformsCache[0] = cameraPosition.x;
-        uniformsCache[1] = cameraPosition.y;
-        uniformsCache[2] = cameraPosition.z;
-        shader_set_uniform_f_array(_uniform_handlers[$ "ueCameraPosition"], uniformsCache);
-        
         __setLightsUniforms();
    
-        // Set the custom uniforms
-        var uniformNames = variable_struct_get_names(uniforms);
-        for (var u=0, ul = array_length(uniformNames); u<ul; u++) {
-            var uniformName = uniformNames[u];
-            var uniform = uniforms[$ uniformName];
-            var loc = _uniform_handlers[$ uniformName];
+        // Apply the uniforms on the shader
+        for (var u=0; u<__uniformsCachedCount; u++) {
+            var uniformCached = __uniformCached[u];
+            var uniform = uniformCached[0];
+            
             var val = uniform[$ "value"];
             if (val == undefined) continue;
         
+            var loc = uniformCached[1];
             switch (uniform.type) {
                 case UE_UNIFORM_TYPE.FLOAT: shader_set_uniform_f(loc, val); break;
                 case UE_UNIFORM_TYPE.VEC2: shader_set_uniform_f(loc, val[0], val[1]); break;
@@ -248,15 +208,24 @@ function UeMaterial(data = {}) constructor {
         if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) return self;
             
         shader_set(shader); 
-        __setGpuState(renderSide);
         
+        renderSide ??= side;
+        gpu_set_cullmode(renderSide);
+    
+        gpu_set_ztestenable(depthTest);
+        gpu_set_zwriteenable(depthWrite);
+        gpu_set_zfunc(depthFunc);
+        gpu_set_alphatestenable(transparent);
+        gpu_set_alphatestref(alphaTest);
+        gpu_set_colorwriteenable(colorWrite, colorWrite, colorWrite, colorWrite);
+        gpu_set_blendenable(blending);
+        gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
+        gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha);
+    
         // Set the texture samplers
-        var texturesNames = variable_struct_get_names(textures);
-        for (var t=0, tl = array_length(texturesNames); t<tl; t++) {
-            var textureName = texturesNames[t];
-            var texture = textures[$ textureName];
-            if (texture == undefined || texture.image == undefined) continue;
-            texture.use(_sampler_handlers[$ textureName]); 
+        for (var t=0; t<__texturesCachedCount; t++) {
+            var textureCached = __texturesCached[t];
+            textureCached[0].use(textureCached[1]);
         }
             
         // Update the shader's model position uniform (for billboard sprites)
@@ -266,7 +235,7 @@ function UeMaterial(data = {}) constructor {
             uniformsCache[0] = meshPosition.x;
             uniformsCache[1] = meshPosition.y;
             uniformsCache[2] = meshPosition.z;
-            shader_set_uniform_f_array(_uniform_handlers[$ "ueModelPosition"], uniformsCache);
+            shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
         }
     }
     

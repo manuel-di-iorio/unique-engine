@@ -29,8 +29,8 @@ function UeTransform(data = {}) constructor {
         return self;
     }
 
-    /// Update local matrix and matrix world, also on children
-    /// @MissingDoc
+    // Update local matrix and matrix world, also on children
+    // @MissingDoc
     function updateMatrixWorld(frustum, force = false) {
         if (matrixAutoUpdate && matrixNeedsUpdate) {
             updateMatrix();
@@ -47,11 +47,11 @@ function UeTransform(data = {}) constructor {
 			force = true;
             
             // Update the object's frustum bounding sphere
-            var boundingSphere = geometry != undefined ? geometry[$ "boundingSphere"] : undefined
-            if (boundingSphere != undefined) {
-                __frustumSphere = new UeSphere();
-                __frustumSphere.copy(boundingSphere).applyMatrix4(matrixWorld); 
-            }
+            //var boundingSphere = geometry != undefined ? geometry[$ "boundingSphere"] : undefined
+            //if (boundingSphere != undefined) {
+                //__frustumSphere = new UeSphere();
+                //__frustumSphere.copy(boundingSphere).applyMatrix4(matrixWorld); 
+            //}
         }
         
         
@@ -61,6 +61,123 @@ function UeTransform(data = {}) constructor {
         
         return self;
     }
+    
+    // Optimized in VM:
+    //function updateMatrixWorld(frustum, force = false) {
+        //if (matrixAutoUpdate && matrixNeedsUpdate) {
+            //// matrix.compose(position, quaternion, scale)
+            //var x0 = position.x, y0 = position.y, z = position.z;
+            //var qx = rotation.x, qy = rotation.y, qz = rotation.z, qw = rotation.w;
+            //var sx = scale.x, sy = scale.y, sz = scale.z;
+            //
+            //var x2 = qx + qx, y2 = qy + qy, z2 = qz + qz;
+            //var xx = qx * x2, xy = qx * y2, xz = qx * z2;
+            //var yy = qy * y2, yz = qy * z2, zz = qz * z2;
+            //var wx = qw * x2, wy = qw * y2, wz = qw * z2;
+            //
+            //var te = matrix.data;
+            //
+            //te[0] = (1 - (yy + zz)) * sx;
+            //te[1] = (xy + wz) * sx;
+            //te[2] = (xz - wy) * sx;
+            //te[3] = 0;
+            //
+            //te[4] = (xy - wz) * sy;
+            //te[5] = (1 - (xx + zz)) * sy;
+            //te[6] = (yz + wx) * sy;
+            //te[7] = 0;
+            //
+            //te[8] = (xz + wy) * sz;
+            //te[9] = (yz - wx) * sz;
+            //te[10] = (1 - (xx + yy)) * sz;
+            //te[11] = 0;
+            //
+            //te[12] = x0;
+            //te[13] = y0;
+            //te[14] = z;
+            //te[15] = 1;
+            //
+            //matrixNeedsUpdate = false;
+        //}
+        //
+        //if (matrixWorldNeedsUpdate || force) {
+            //// Calcolo inline della matrixWorld
+            //if (parent == undefined) {
+                //// Matrix copy
+                //var m = matrix.data;
+                //var mw = matrixWorld.data;
+                //mw[0] = m[0]; mw[1] = m[1]; mw[2] = m[2]; mw[3] = m[3];
+                //mw[4] = m[4]; mw[5] = m[5]; mw[6] = m[6]; mw[7] = m[7];
+                //mw[8] = m[8]; mw[9] = m[9]; mw[10] = m[10]; mw[11] = m[11];
+                //mw[12] = m[12]; mw[13] = m[13]; mw[14] = m[14]; mw[15] = m[15];
+            //} else {
+                //// multiplyMatrices()
+                //var pm = parent.matrixWorld.data;
+                //var m = matrix.data;
+                //var mw = matrixWorld.data;
+                //
+                //// Unroll della moltiplicazione 4x4
+                //mw[0] = pm[0]*m[0] + pm[4]*m[1] + pm[8]*m[2] + pm[12]*m[3];
+                //mw[1] = pm[1]*m[0] + pm[5]*m[1] + pm[9]*m[2] + pm[13]*m[3];
+                //mw[2] = pm[2]*m[0] + pm[6]*m[1] + pm[10]*m[2] + pm[14]*m[3];
+                //mw[3] = pm[3]*m[0] + pm[7]*m[1] + pm[11]*m[2] + pm[15]*m[3];
+                //
+                //mw[4] = pm[0]*m[4] + pm[4]*m[5] + pm[8]*m[6] + pm[12]*m[7];
+                //mw[5] = pm[1]*m[4] + pm[5]*m[5] + pm[9]*m[6] + pm[13]*m[7];
+                //mw[6] = pm[2]*m[4] + pm[6]*m[5] + pm[10]*m[6] + pm[14]*m[7];
+                //mw[7] = pm[3]*m[4] + pm[7]*m[5] + pm[11]*m[6] + pm[15]*m[7];
+                //
+                //mw[8] = pm[0]*m[8] + pm[4]*m[9] + pm[8]*m[10] + pm[12]*m[11];
+                //mw[9] = pm[1]*m[8] + pm[5]*m[9] + pm[9]*m[10] + pm[13]*m[11];
+                //mw[10] = pm[2]*m[8] + pm[6]*m[9] + pm[10]*m[10] + pm[14]*m[11];
+                //mw[11] = pm[3]*m[8] + pm[7]*m[9] + pm[11]*m[10] + pm[15]*m[11];
+                //
+                //mw[12] = pm[0]*m[12] + pm[4]*m[13] + pm[8]*m[14] + pm[12]*m[15];
+                //mw[13] = pm[1]*m[12] + pm[5]*m[13] + pm[9]*m[14] + pm[13]*m[15];
+                //mw[14] = pm[2]*m[12] + pm[6]*m[13] + pm[10]*m[14] + pm[14]*m[15];
+                //mw[15] = pm[3]*m[12] + pm[7]*m[13] + pm[11]*m[14] + pm[15]*m[15];
+            //}
+            //
+            //matrixWorldNeedsUpdate = false;
+            //force = true;
+            //
+            //// Calcolo bounding sphere inline se presente
+            //if (geometry != undefined) {
+                //var boundingSphere = geometry[$ "boundingSphere"];
+                //if (boundingSphere != undefined) {
+                    //// Inline sphere transformation invece di copy + applyMatrix4
+                    //var bs = boundingSphere;
+                    //var mw = matrixWorld.data;
+                    //
+                    //// Trasforma il centro della sfera
+                    //var cx = bs.center.x;
+                    //var cy = bs.center.y; 
+                    //var cz = bs.center.z;
+                    //
+                    //__frustumSphere = global.UE_DUMMY_SPHERE;
+                    //__frustumSphere.center.x = mw[0]*cx + mw[4]*cy + mw[8]*cz + mw[12];
+                    //__frustumSphere.center.y = mw[1]*cx + mw[5]*cy + mw[9]*cz + mw[13];
+                    //__frustumSphere.center.z = mw[2]*cx + mw[6]*cy + mw[10]*cz + mw[14];
+                    //
+                    //// Calcola il nuovo raggio considerando lo scale
+                    //var sx = sqrt(mw[0]*mw[0] + mw[1]*mw[1] + mw[2]*mw[2]);
+                    //var sy = sqrt(mw[4]*mw[4] + mw[5]*mw[5] + mw[6]*mw[6]);
+                    //var sz = sqrt(mw[8]*mw[8] + mw[9]*mw[9] + mw[10]*mw[10]);
+                    //var maxScale = max(sx, max(sy, sz));
+                    //
+                    //__frustumSphere.radius = bs.radius * maxScale;
+                //}
+            //}
+        //}
+        //
+        //// Ricorsione sui children (questa rimane uguale)
+        //var len = array_length(children);
+        //for (var i = 0; i < len; i++) {
+            //children[i].updateMatrixWorld(frustum, force);
+        //}
+        //
+        //return self;
+    //}
     
     /**
      * Update the matrixWorld of parents/children
