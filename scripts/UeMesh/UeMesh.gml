@@ -11,6 +11,8 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         // Apply the material
         if (material != undefined) {
             material.use(self, renderSide);
+        } else {
+            shader_reset();
         }
         
         vertex_submit(geometry.vb, material != undefined && material.wireframe ? pr_linelist : primitive, -1); 

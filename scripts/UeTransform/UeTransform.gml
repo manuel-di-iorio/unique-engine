@@ -73,11 +73,6 @@ function UeTransform(data = {}) constructor {
         if (boundingSphere != undefined) {
             if (__frustumSphere == undefined) __frustumSphere = new UeSphere();
             __frustumSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
-            
-                
-                var rotMatrix = matrixWorld.clone().setPositionXYZ(0, 0, 0);
-                rotation.setFromRotationMatrix(rotMatrix);
-                rotation.rotateX(90); 
         }
         
         for (var i = 0, len = array_length(children); i < len; i++) {

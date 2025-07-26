@@ -200,13 +200,8 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var cy = self.target.y + self.radius * cos(self.elevation) * sin(self.azimuth);
         var cz = self.target.z + self.radius * sin(self.elevation);
       
-        if (!self.camera.position.equals(new UeVector3(cx, cy, cz))) {
-            self.camera.setPosition(cx, cy, cz);
-        }
-        
-        if (!self.camera.target.equals(self.target)) {
-            self.camera.target.copy(self.target);
-        }
+        self.camera.setPosition(cx, cy, cz);
+        self.camera.target.copy(self.target);
         
         self._prevMouseX = mx;
         self._prevMouseY = my;

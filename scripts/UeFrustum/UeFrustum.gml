@@ -73,6 +73,8 @@ function UeFrustum() constructor {
         var sphereCenter = sphere.center;
         
         for (var i = 0; i < 6; i++) { 
+            var dist = planes[i].distanceToPoint(sphere.center);
+    //show_debug_message("Piano " + string(i) + " distanza dal centro sfera: " + string(dist));
             if (planes[i].distanceToPoint(sphereCenter) < negRadius) {
                 return false;
             }
@@ -114,24 +116,55 @@ function UeFrustum() constructor {
     /// @return {Struct}
     function setFromProjectionMatrix(matrix) {
         var m = matrix.data;
-
-        // Left, Right, Bottom, Top, Near, Far
-        planes[0] = buildPlane(m, +1, +0, +0, +0); // Left
-        planes[1] = buildPlane(m, -1, +0, +0, -0); // Right
-        planes[2] = buildPlane(m, +0, +1, +0, +0); // Bottom
-        planes[3] = buildPlane(m, +0, -1, +0, -0); // Top
-        planes[4] = buildPlane(m, +0, +0, +1, +0); // Near
-        planes[5] = buildPlane(m, +0, +0, -1, -0); // Far
-
+    
+        // righe della matrice
+        var r0 = [m[0], m[4], m[8],  m[12]];
+        var r1 = [m[1], m[5], m[9],  m[13]];
+        var r2 = [m[2], m[6], m[10], m[14]];
+        var r3 = [m[3], m[7], m[11], m[15]];
+    
+        planes[0] = new UePlane().setComponents(
+            r3[0] + r0[0],
+            r3[1] + r0[1],
+            r3[2] + r0[2],
+            r3[3] + r0[3]
+        ).normalize(); // Left
+    
+        planes[1] = new UePlane().setComponents(
+            r3[0] - r0[0],
+            r3[1] - r0[1],
+            r3[2] - r0[2],
+            r3[3] - r0[3]
+        ).normalize(); // Right
+    
+        planes[2] = new UePlane().setComponents(
+            r3[0] + r1[0],
+            r3[1] + r1[1],
+            r3[2] + r1[2],
+            r3[3] + r1[3]
+        ).normalize(); // Bottom
+    
+        planes[3] = new UePlane().setComponents(
+            r3[0] - r1[0],
+            r3[1] - r1[1],
+            r3[2] - r1[2],
+            r3[3] - r1[3]
+        ).normalize(); // Top
+    
+        planes[4] = new UePlane().setComponents(
+            r3[0] + r2[0],
+            r3[1] + r2[1],
+            r3[2] + r2[2],
+            r3[3] + r2[3]
+        ).normalize(); // Near
+    
+        planes[5] = new UePlane().setComponents(
+            r3[0] - r2[0],
+            r3[1] - r2[1],
+            r3[2] - r2[2],
+            r3[3] - r2[3]
+        ).normalize(); // Far
+        
         return self;
     }
-
-    // @todo will be removed 
-    function buildPlane(m, ix, iy, iz, iw) {
-            var nx = m[3] + ix * m[0];
-            var ny = m[7] + iy * m[4];
-            var nz = m[11] + iz * m[8];
-            var nw = m[15] + iw * m[12];
-            return new UePlane().setComponents(nx, ny, nz, nw).normalize();
-        }
 }

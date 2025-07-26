@@ -208,8 +208,8 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Writes values into a column-major array
-    function toArray(arr = undefined, offset = 0) {
-        array_copy(arr ?? [], offset, data, 0, 16-offset);
+    function toArray(arr = [], offset = 0) {
+        array_copy(arr, offset, data, 0, 16-offset);
         return arr;
     }
 

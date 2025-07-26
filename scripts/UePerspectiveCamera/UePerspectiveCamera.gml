@@ -3,14 +3,13 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     isPerspectiveCamera = true;
     type = "Camera";
     fov  = data[$ "fov"]  ?? 60;
-    near = data[$ "near"] ?? 0.1;
+    near = data[$ "near"] ?? .1;
     far  = data[$ "far"]  ?? 32000;
-    aspect = data[$ "aspect"] ?? view_wport / view_hport;
-    view = data[$ "view"] ?? view_current;
+    view = data[$ "view"] ?? 0;
+    aspect = data[$ "aspect"] ?? view_wport[view] / view_hport[view];
     camera = camera_create();
     setPosition(data[$ "x"] ?? 0, data[$ "y"] ?? -100, data[$ "z"] ?? 0);
-    target = new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
-    autoUse = data[$ "autoUse"] ?? true;
+    target = new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 1, data[$ "zt"] ?? 0);
     upX = global.UE_OBJECT3D_DEFAULT_UP.x;
     upY = global.UE_OBJECT3D_DEFAULT_UP.y;
     upZ = global.UE_OBJECT3D_DEFAULT_UP.z;
@@ -38,18 +37,14 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     }
     
     // Build the perspective projection
-    function use() {
-        updateProjectionMatrix();
-        updateMatrixWorld();
-        view_set_visible(view, true);
-        view_set_camera(view, camera);
-    }
-    
     function dispose() {
         camera_destroy(camera);
         camera = undefined;
         return self;
     }
     
-    if (autoUse) use();
+    updateProjectionMatrix();
+    updateMatrixWorld();
+    view_set_camera(view, camera);
+    view_set_visible(view, true); 
 }

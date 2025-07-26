@@ -41,6 +41,7 @@ Objects are sorted by distance to the camera using quicksort:
 - Transparent → back-to-front (to ensure correct alpha blending)
 
 **Transparency Rendering**
+
 - Transparent objects are rendered with:
 
 - Depth write disabled (`gpu_set_zwriteenable(false)`)

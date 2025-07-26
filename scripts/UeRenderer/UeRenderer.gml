@@ -31,7 +31,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             if (object[$ "geometry"] != undefined && object.visible) {
                 // Test the frustum intersection
                 // @todo not working correctly
-                //if (object.frustumCulled && !__frustum.intersectsObject(object)) continue;
+                if (object.frustumCulled && !__frustum.intersectsObject(object)) continue;
                  
                 // Precompute distance from camera for sorting
                 object.__ueSortDistanceToCam = object.position.distanceToSquared(cameraPos);
@@ -127,7 +127,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
             if (onBeforeRender != undefined) onBeforeRender();
             object.render();
-            if (onAfterRender != undefined) onAfterRender();
+            if (onAfterRender != undefined) onAfterRender(); 
         } 
     }
     
@@ -213,13 +213,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
         // Frustum updated from camera. 
         // It needs to test using world coords, so we multiply the matrixes from camera space to world space 
-        // @todo not working correctly
-        //var projScreenMat = global.UE_DUMMY_MATRIX4;
-        //projScreenMat.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
-        //projScreenMat.makeRotationFromEuler(90, 0, 0);
-        //__frustum.setFromProjectionMatrix(projScreenMat);
-        //log("camera.projectionMatrix", camera.projectionMatrix.data)
-        //log("camera.matrixWorldInverse", camera.matrixWorldInverse.data)
+        var projViewMatrix = global.UE_DUMMY_MATRIX4.copy(camera.matrixWorldInverse).multiply(camera.projectionMatrix);
+        __frustum.setFromProjectionMatrix(projViewMatrix); 
         
         __lightIdx = 0;
         __opaqueIdx = 0;

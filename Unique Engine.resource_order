@@ -1,6 +1,6 @@
 {
   "FolderOrderSettings":[
-    {"name":"Scenes","order":7,"path":"folders/Demo/Scenes.yy",},
+    {"name":"Scenes","order":4,"path":"folders/Demo/Scenes.yy",},
     {"name":"Unique Engine","order":1,"path":"folders/Unique Engine.yy",},
     {"name":"Controls","order":6,"path":"folders/Unique Engine/Controls.yy",},
     {"name":"Exporters","order":9,"path":"folders/Unique Engine/Exporters.yy",},
@@ -14,14 +14,14 @@
     {"name":"Utils","order":10,"path":"folders/Unique Engine/Utils.yy",},
   ],
   "ResourceOrderSettings":[
-    {"name":"o_test","order":6,"path":"objects/o_test/o_test.yy",},
+    {"name":"o_test","order":2,"path":"objects/o_test/o_test.yy",},
     {"name":"obj_scene_1","order":1,"path":"objects/obj_scene_1/obj_scene_1.yy",},
     {"name":"obj_scene_2","order":2,"path":"objects/obj_scene_2/obj_scene_2.yy",},
     {"name":"obj_scene_3","order":3,"path":"objects/obj_scene_3/obj_scene_3.yy",},
     {"name":"obj_scene_4","order":4,"path":"objects/obj_scene_4/obj_scene_4.yy",},
-    {"name":"r_test","order":5,"path":"rooms/r_test/r_test.yy",},
+    {"name":"r_test","order":3,"path":"rooms/r_test/r_test.yy",},
     {"name":"__GMassimp_Macros","order":1,"path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},
-    {"name":"log","order":4,"path":"scripts/log/log.yy",},
+    {"name":"log","order":1,"path":"scripts/log/log.yy",},
     {"name":"UeArrowHelper","order":1,"path":"scripts/UeArrowHelper/UeArrowHelper.yy",},
     {"name":"UeAssimpLoader","order":2,"path":"scripts/UeAssimpLoader/UeAssimpLoader.yy",},
     {"name":"UeAxesHelper","order":2,"path":"scripts/UeAxesHelper/UeAxesHelper.yy",},

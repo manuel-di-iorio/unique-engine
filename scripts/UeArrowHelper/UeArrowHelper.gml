@@ -43,7 +43,7 @@ function UeArrowHelper(
         var _dir = dir.clone().normalize();
         
         // Compute quaternion rotation from default direction (X+) to new direction
-        self.rotation.copy(new UeQuaternion().setFromUnitVectors(new UeVector3(1, 0, 0), _dir));
+        self.rotation.copy(global.UE_DUMMY_QUATERNION.setFromUnitVectors(new UeVector3(1, 0, 0), _dir));
         forceUpdate();
         
         // Calculate new position for the cone along the rotated direction

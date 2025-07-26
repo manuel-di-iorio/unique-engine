@@ -26,5 +26,5 @@ new UeCameraHelper(camera, color = c_yellow)
 | Method                               | Returns | Description                                                        |
 | ------------------------------------ | ------- | --------------------------------------------------------           |
 | `.update()`         | `self`  | Updates the helper's position and rotation to align with the camera's world matrix. |
-| `.setColor(newCol)` | `self`  | Sets a new line color and rebuilds the geometry.                                    |
+| `.setColors(newCol)` | `self`  | Sets a new line color and rebuilds the geometry.                                    |
 | `.dispose()`        | `self`  | Frees GPU resources used by the helper.                                             |

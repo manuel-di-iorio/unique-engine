@@ -12,16 +12,15 @@ new UePerspectiveCamera(data = {})
 
 ### Data parameters
 
-| Key              | Type       | Default                   | Description                          |
-| ---------------- | ---------- | ------------------------- | ------------------------------------ |
-| `fov`            | `number`   | `60`                      | Field of view in degrees             |
-| `near`           | `number`   | `0.1`                     | Near clipping plane                  |
-| `far`            | `number`   | `32000`                   | Far clipping plane                   |
-| `aspect`         | `number`   | `view_wport / view_hport` | Aspect ratio (width/height)          |
-| `view`           | `number`   | `view_current`            | Viewport to assign this camera to    |
-| `x`, `y`, `z`    | `number`   | `0`, `-100`, `0`          | Initial camera position              |
-| `xt`, `yt`, `zt` | `number`   | `0`                       | Look-at target coordinates           |
-| `autoUse`        | `boolean`  | `true`                    | Automatically activates the camera   |
+| Key              | Type       | Default                               | Description                          |
+| ---------------- | ---------- | -------------------------             | ------------------------------------ |
+| `fov`            | `number`   | `60`                                  | Field of view in degrees             |
+| `near`           | `number`   | `0.1`                                 | Near clipping plane                  |
+| `far`            | `number`   | `32000`                               | Far clipping plane                   |
+| `view`           | `number`   | `0`                                   | Viewport to assign this camera to    |
+| `aspect`         | `number`   | `view_wport[view] / view_hport[view]` | Aspect ratio (width/height)          |
+| `x`, `y`, `z`    | `number`   | `0`, `-100`, `0`                      | Initial camera position              |
+| `xt`, `yt`, `zt` | `number`   | `0`                                   | Look-at target coordinates           |
 
 ### Properties
 
@@ -49,8 +48,6 @@ Cleanup the camera resource.
 
 - The camera projection is built using `matrix_build_projection_perspective_fov()`.
 - The default .updateMatrixWorld() function uses `matrix_build_lookat()` to orient the camera toward target, with up-vector (0, 0, -1), which means that the camera is rotated 90° degrees downwards.
-- The update script update the camera matrixes only if needed.
-- use() must be called to activate the camera, unless autoUse is set to true (which is the default).
 
 ## Example
 ```js

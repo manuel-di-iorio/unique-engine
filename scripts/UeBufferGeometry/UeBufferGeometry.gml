@@ -70,10 +70,10 @@ function UeBufferGeometry(data = {}) constructor {
             }
         }
 
-        vertex_end(vb);                           // Finalize vertex buffer
+        vertex_end(vb); // Finalize vertex buffer
         
         // Automatically freeze the vertex buffer if allowed
-        if (canFreeze) vertex_freeze(vb);
+        if (canFreeze) freeze();
         
         return self;
     }
