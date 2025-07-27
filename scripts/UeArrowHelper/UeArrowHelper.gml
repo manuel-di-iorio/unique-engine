@@ -44,13 +44,13 @@ function UeArrowHelper(
         
         // Compute quaternion rotation from default direction (X+) to new direction
         self.rotation.copy(global.UE_DUMMY_QUATERNION.setFromUnitVectors(new UeVector3(1, 0, 0), _dir));
-        forceUpdate();
+        updateMatrix();
         
         // Calculate new position for the cone along the rotated direction
         var pos = _dir.scale(self._length - self.headLength);
         // Update the cone’s position to stay at the tip of the arrow
         self.cone.setPosition(pos.x, pos.y, pos.z);
-        self.cone.forceUpdate();
+        self.cone.updateMatrix();
     }
 
     // --- Method to update the length and dimensions of the arrow (untested) ---

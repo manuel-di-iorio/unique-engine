@@ -26,7 +26,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 continue;
             }
                 
-            if (object.matrixWorldAutoUpdate) object.updateMatrixWorld(false, __frustum);
+            if (object.matrixWorldAutoUpdate) object.updateMatrixWorld();
             
             if (object[$ "geometry"] != undefined && object.visible) {
                 // Test the frustum intersection

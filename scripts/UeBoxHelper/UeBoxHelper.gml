@@ -3,7 +3,7 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
     self.color = color;
     self.material = new UeLineBasicMaterial({ color });
     
-    updateBox = function() {
+    update = function() {
         var box = new UeBox3().setFromObject(self.object);
         var _min = box.sizeMin;
         var _max = box.sizeMax;
@@ -60,16 +60,17 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
 
         geometry.build();
         
-        // Copy the object transform into the bounding box        
+        // Copy the object transform into the bounding box    
         rotation.copy(object.rotation);
         scale.copy(object.scale);
         position.copy(object.position);
+        
     }
     
     function setFromObject(object) {
         self.object = object;
-        updateBox();
+        update();
     }
     
-    if (object != undefined) updateBox();
+    if (object != undefined) update();
 }

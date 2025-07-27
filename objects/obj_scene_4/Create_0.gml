@@ -30,7 +30,7 @@ scene.add(meshGroup);
 var maxDist = 500;
 var gap = 300;
 
-for (var i = 0; i < 500; i++) {
+for (var i = 0; i < 200; i++) {
     var color = make_color_rgb(irandom_range(60, 255), irandom_range(60, 255), irandom_range(60, 255));
     var size = random_range(30, 40);
     
@@ -55,15 +55,17 @@ for (var i = 0; i < 500; i++) {
      
     // Set the bounding box size matching the mesh scale
     geometry.boundingBox = new UeBox3();
-    geometry.boundingBox.setFromCenterAndSize(new UeVector3(0, 0, 0), new UeVector3(size, size, size));
+    geometry.boundingBox.setFromCenterAndSize(UE_VECTOR3_ZERO, new UeVector3(size, size, size));
     
     // Set the bounding sphere for frustum testing
     geometry.boundingSphere = new UeSphere(UE_VECTOR3_ZERO, size);
     
-    mesh.forceUpdate();
+    mesh.updateMatrix();
     
     // Bounding box
-    mesh.bbox = new UeBoxHelper(mesh, c_yellow, { visible: false });
-    mesh.bbox.matrixAutoUpdate = false;
-    scene.add(mesh.bbox);
+    var bbox =  new UeBoxHelper(mesh, c_yellow, { visible: false });
+    bbox.matrixAutoUpdate = false;
+    bbox.updateMatrix();
+    scene.add(bbox);
+    mesh.bbox = bbox;
 }

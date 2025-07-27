@@ -231,5 +231,5 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     }
 
     // Initial matrix build
-    forceUpdate();
+    updateMatrix();
 }

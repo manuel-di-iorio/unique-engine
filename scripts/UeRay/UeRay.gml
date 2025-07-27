@@ -233,23 +233,6 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns intersection point with sphere or undefined if none
     function intersectSphere(sphere, target) {
-        //var v = sphere.center.clone().sub(self.origin);
-        //var tca = v.dot(self.direction);
-        //var d2 = v.lengthSq() - tca * tca;
-        //var r2 = sphere.radius * sphere.radius;
-//
-        //if (d2 > r2) return undefined;
-//
-        //var thc = sqrt(r2 - d2);
-        //var t0 = tca - thc;
-        //var t1 = tca + thc;
-//
-        //if (t0 < 0 && t1 < 0) return undefined;
-//
-        //var t = (t0 < 0) ? t1 : t0;
-//
-        //return self.at(t, target);
-        
         var vx = sphere.center.x - self.origin.x;
         var vy = sphere.center.y - self.origin.y;
         var vz = sphere.center.z - self.origin.z;

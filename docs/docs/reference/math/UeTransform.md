@@ -45,7 +45,6 @@ new UeTransform(data = {})
 | `updateMatrix()`                       | Rebuilds the local transform matrix                                               |
 | `updateMatrixWorld()`                  | Updates local matrix and world matrix where necessary, also on children           | 
 | `updateWorldMatrix(parents, children)` | Updates matrices optionally and recursively                                       |
-| `forceUpdate()`                        | Immediately updates the matrixes (useful for static objects)                      |
 | `applyMatrix4(mat4)`                   | Applies a transform directly from a matrix and updates position, rotation, scale. |
 | `applyQuaternion(quat)`                | Applies a quaternion rotation to the object.                                      |
 | `localToWorld(vec)`                    | Converts a local-space vector to world-space.                                     |

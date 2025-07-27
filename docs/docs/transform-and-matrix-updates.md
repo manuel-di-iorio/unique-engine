@@ -35,7 +35,7 @@ The `matrixWorld` is what the renderer uses for drawing and lighting.
 
 Unique Engine will skip matrix updates whenever they have the `matrixAutoUpdate` flag set to `false`. 
 This is useful to avoid doing calculations for objects that don't move. 
-You may still update their matrix calling `forceUpdate()` after modifying their properties
+You may still update their matrix calling `updateMatrix()` after modifying their properties
 
 ---
 

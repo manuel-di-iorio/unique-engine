@@ -28,7 +28,7 @@ function UeTransform(data = {}) constructor {
     }
 
     // Update local matrix and matrix world, also on children
-    function updateMatrixWorld(force = false, frustum = undefined) {
+    function updateMatrixWorld(force = false) {
         if (matrixAutoUpdate) {
             updateMatrix();
         }
@@ -52,7 +52,7 @@ function UeTransform(data = {}) constructor {
         } 
         
         for (var i = 0, len = array_length(children); i < len; i++) {
-            children[i].updateMatrixWorld(force, frustum);
+            children[i].updateMatrixWorld(force);
         }
         
         return self;
@@ -69,14 +69,16 @@ function UeTransform(data = {}) constructor {
         
         
         // Update the object's frustum bounding sphere
-        var boundingSphere = self[$ "geometry"] != undefined ? geometry.boundingSphere : undefined;
-        if (boundingSphere != undefined) {
-            if (__frustumSphere == undefined) __frustumSphere = new UeSphere();
-            __frustumSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
+        if (frustumCulled) {
+            var boundingSphere = self[$ "geometry"] != undefined ? geometry.boundingSphere : undefined;
+            if (boundingSphere != undefined) {
+                if (__frustumSphere == undefined) __frustumSphere = new UeSphere();
+                __frustumSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
+            }
         }
         
         for (var i = 0, len = array_length(children); i < len; i++) {
-            children[i].updateMatrixWorld(force, frustum);
+            children[i].forceUpdate();
         }
     }
     
