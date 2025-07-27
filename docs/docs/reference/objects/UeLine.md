@@ -29,3 +29,10 @@ new UeLine(geometry = undefined, material = undefined, data = {})
 | `primitive` | `string`              | Primitive type, here `"pr_linestrip"` for continuous lines |
 | `geometry`  | `UeBufferGeometry`    | Geometry data for line vertices                            |
 | `material`  | `UeLineBasicMaterial` | Material used for rendering the line                       |
+
+## Methods
+
+| Method                           | Returns | Description                                                                                                |
+| -------------------------------- | ------- | ------------------------------------------------------------------------------------------------------     |
+| `raycast(raycaster, intersects)` | `self`  | Tests the ray from `raycaster` against this line segments and appends hits to `intersects`. The bounding sphere is checked first for optimization purposes |
+| `toJSON()`                       | `struct`| Returns an object representing this entity's properties. Not all props may be included                     |

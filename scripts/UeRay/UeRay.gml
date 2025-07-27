@@ -77,12 +77,6 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns squared distance from the ray to a point (UeVector3)
     function distanceSqToPoint(point) {
-        //var v = point.clone().sub(self.origin);
-        //var t = self.direction.dot(v);
-        //if (t < 0) t = 0;
-        //var projected = self.direction.clone().scale(t).add(self.origin);
-        //return point.clone().sub(projected).lengthSq();
-        
         // Compute the vector from the origin towards the point
         var vx = point.x - self.origin.x;
         var vy = point.y - self.origin.y;
@@ -107,63 +101,59 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns squared distance between ray and segment defined by v0 and v1.
     /// Optionally outputs closest points on ray and segment.
-    function distanceSqToSegment(v0, v1, optionalPointOnRay = undefined, optionalPointOnSegment = undefined) {
-        var segCenter = v0.clone().add(v1).scale(0.5);
-        var segDir = v1.clone().sub(v0).normalize();
-        var segExtent = v1.clone().sub(v0).length() * 0.5;
-
-        var diff = self.origin.clone().sub(segCenter);
-        var a01 = -self.direction.dot(segDir);
-        var b0 = diff.dot(self.direction);
+    function distanceSqToSegment(v0, v1, optionalPointOnRay, optionalPointOnSegment) {
+        var origin = self.origin;
+        var dir = self.direction;
+    
+        // Prepara dummy vectors
+        var segCenter = global.UE_DUMMY_VECTOR3_E.copy(v0).add(v1).multiplyScalar(0.5);
+        var segDir = global.UE_DUMMY_VECTOR3_F.copy(v1).sub(v0);
+        var segLength = segDir.length();
+        segDir.multiplyScalar(1 / segLength);
+        var segExtent = 0.5 * segLength;
+    
+        var diff = global.UE_DUMMY_VECTOR3_G.copy(origin).sub(segCenter);
+    
+        var a01 = -dir.dot(segDir);
+        var b0 = diff.dot(dir);
         var b1 = -diff.dot(segDir);
         var c = diff.lengthSq();
-        var det = abs(1 - a01 * a01);
-        var s0, s1, sqrDist;
-
-        if (det > 0) {
-            s0 = a01 * b1 - b0;
-            s1 = a01 * b0 - b1;
-
-            if (s0 >= 0) {
-                if (s1 >= -segExtent && s1 <= segExtent) {
-                    var invDet = 1 / det;
-                    s0 *= invDet;
-                    s1 *= invDet;
-                    sqrDist = s0 * (s0 + a01 * s1 + 2 * b0) + s1 * (a01 * s0 + s1 + 2 * b1) + c;
-                } else if (s1 < -segExtent) {
-                    s1 = -segExtent;
-                    s0 = max(0, -(a01 * s1 + b0));
-                    sqrDist = -s0 * s0 + s1 * (s1 + 2 * b1) + c;
-                } else {
-                    s1 = segExtent;
-                    s0 = max(0, -(a01 * s1 + b0));
-                    sqrDist = -s0 * s0 + s1 * (s1 + 2 * b1) + c;
-                }
-            } else {
-                if (s1 <= -segExtent) {
-                    s0 = max(0, -b0);
-                    s1 = -segExtent;
-                    sqrDist = -s0 * s0 + s1 * (s1 + 2 * b1) + c;
-                } else if (s1 <= segExtent) {
-                    s0 = 0;
-                    sqrDist = s1 * (s1 + 2 * b1) + c;
-                } else {
-                    s0 = max(0, - (a01 * segExtent + b0));
-                    s1 = segExtent;
-                    sqrDist = -s0 * s0 + s1 * (s1 + 2 * b1) + c;
-                }
+    
+        var det = 1 - a01 * a01;
+        var s0, s1;
+    
+        if (abs(det) > UE_EPSILON) {
+            var invDet = 1 / det;
+            s0 = (a01 * b1 - b0) * invDet;
+            s1 = (a01 * b0 - b1) * invDet;
+    
+            // Clamp s1 to segment
+            if (s1 < -segExtent) {
+                s1 = -segExtent;
+            } else if (s1 > segExtent) {
+                s1 = segExtent;
             }
+    
+            // Clamp s0 to ray
+            if (s0 < 0) s0 = 0;
+    
         } else {
-            s0 = max(0, -b0);
-            s1 = (s1 < -segExtent) ? -segExtent : segExtent;
-            sqrDist = s0 * (s0 + 2 * b0) + s1 * (s1 + 2 * b1) + c;
+            // Parallel case
+            s0 = 0;
+            s1 = clamp(-b1, -segExtent, segExtent);
         }
-
-        if (optionalPointOnRay) optionalPointOnRay.copy(self.at(s0, new UeVector3()));
-        if (optionalPointOnSegment) optionalPointOnSegment.copy(segDir.clone().scale(s1).add(segCenter));
-
-        return sqrDist;
+    
+        // Closest points
+        var closestRayPoint = global.UE_DUMMY_VECTOR3_H.copy(dir).multiplyScalar(s0).add(origin);
+        var closestSegPoint = global.UE_DUMMY_VECTOR3_J.copy(segDir).multiplyScalar(s1).add(segCenter);
+    
+        // Optional output
+        if (optionalPointOnRay) optionalPointOnRay.copy(closestRayPoint);
+        if (optionalPointOnSegment) optionalPointOnSegment.copy(closestSegPoint);
+    
+        return closestRayPoint.distanceToSquared(closestSegPoint);
     }
+
 
     /// Returns distance from origin to plane along ray direction, or undefined if no intersection
     function distanceToPlane(plane) {

@@ -1,5 +1,5 @@
 /// A bounding sphere defined by a center and a radius.
-function UeSphere(center = new UeVector3(0, 0, 0), radius = -1) constructor {
+function UeSphere(center = UE_VECTOR3_ZERO, radius = -1) constructor {
     self.isSphere = true;
     self.center = center;
     self.radius = radius;

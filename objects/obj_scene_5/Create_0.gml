@@ -1,0 +1,17 @@
+renderer = new UeRenderer();
+scene = new UeScene();
+camera = new UePerspectiveCamera({ x: -10, z: 50 });
+
+// Create the raycaster
+raycaster = new UeRaycaster();
+
+// Create the debug hit sphere
+hitSphere = new UeMesh(new UeSphereGeometry(2, { color: c_yellow }), new UeMeshBasicMaterial(), { visible: false });
+hitSphere.matrixAutoUpdate = false;
+scene.add(hitSphere);
+
+scene.add(new UeGridHelper(500));
+
+axesHelper = new UeAxesHelper(50);
+axesHelper.geometry.boundingSphere = new UeSphere(UE_VECTOR3_ZERO, 100);
+scene.add(axesHelper);

@@ -9,10 +9,10 @@ function UeBufferGeometry(data = {}) constructor {
     vb = undefined;                               // Vertex buffer handle (created on build)
     canFreeze = data[$ "canFreeze"] ?? true;      // Flag whether vertex buffer can be frozen (optimized)
 
-    // Axis-aligned bounding box for the geometry (auto-calculated or provided)
+    // Axis-aligned bounding box for the geometry
     boundingBox = data[$ "boundingBox"] ?? undefined;
     
-    // Bounding sphere for the geometry (auto-calculated or provided)
+    // Bounding sphere for the geometry
     boundingSphere = data[$ "boundingSphere"] ?? undefined;
 
     // Build the vertex buffer from vertices and format
@@ -102,7 +102,7 @@ function UeBufferGeometry(data = {}) constructor {
     
     // Compute bounding sphere based on current vertices
     function computeBoundingSphere() {
-        boundingBox ??= new UeSphere();
+        boundingSphere ??= new UeSphere();
         boundingSphere.setFromPoints(vertices);
         return self;
     }

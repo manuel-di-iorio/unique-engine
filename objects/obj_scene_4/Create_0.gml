@@ -1,6 +1,6 @@
 renderer = new UeRenderer();
 scene = new UeScene();
-camera = new UePerspectiveCamera({ view: 0 });
+camera = new UePerspectiveCamera();
 
 orbitControls = new UeOrbitControls(camera, {
     autoRotate: true, 

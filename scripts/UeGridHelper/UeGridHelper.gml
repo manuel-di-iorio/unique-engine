@@ -43,6 +43,4 @@ function UeGridHelper(
     material.side = cull_noculling;
     
     matrixAutoUpdate = false;
-    frustumCulled = false;
-
 }

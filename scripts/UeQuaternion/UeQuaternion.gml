@@ -204,14 +204,14 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         var r = vFrom.dot(vTo);
     
         // Vectors are the same → identity quaternion
-        if (r >= 1.0 - global.UE_EPSILON) {
+        if (r >= 1.0 - UE_EPSILON) {
             return self.set(0, 0, 0, 1);
         }
     
         // Vectors are opposite → rotate 180° around any orthogonal axis
-        if (r <= -1.0 + global.UE_EPSILON) {
+        if (r <= -1.0 + UE_EPSILON) {
             var axis = new UeVector3(0, 0, 1).cross(vFrom);
-            if (axis.lengthSq() < global.UE_EPSILON) {
+            if (axis.lengthSq() < UE_EPSILON) {
                 axis = new UeVector3(0, 1, 0).cross(vFrom);
             }
             axis.normalize();

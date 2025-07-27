@@ -8,6 +8,13 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
     self.camera = undefined;
     // Raycaster layers. Objects being tested must share at least one layer with the raycaster
     self.layers = new UeLayers();
+    
+    // @MissingDoc
+    self.params = {
+        Mesh: {},
+        Line: { threshold: 4 },
+        Points: { threshold: 1 },
+    };
    
     /**
      * Sets the ray's origin and direction

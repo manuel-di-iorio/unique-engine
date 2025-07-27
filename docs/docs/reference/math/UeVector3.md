@@ -84,8 +84,8 @@ new UeVector3(x = 0, y = 0, z = 0)
 | `setFromMatrixPosition(matrix)`     | `self`      | Sets components from the position (translation) column of a 4×4 matrix.                |
 | `setFromMatrixScale(matrix)`        | `self`      | Extracts scale components from the 3×3 part of a matrix and sets them.                 |
 | `setComponent(index, value)`        | `self`      | Sets a single component by index (`0`: x, `1`: y, `2`: z).                             |
-| `min(vec)`                          | `self`      | Sets each component to the minimum of itself and the corresponding component in `vec`. |
-| `max(vec)`                          | `self`      | Sets each component to the maximum of itself and the corresponding component in `vec`. |
+| `minVec(vec)`                          | `self`      | Sets each component to the minimum of itself and the corresponding component in `vec`. |
+| `maxVec(vec)`                          | `self`      | Sets each component to the maximum of itself and the corresponding component in `vec`. |
 | `setFromSphericalCoords(r, φ, θ)`   | `self`      | Sets vector components from spherical coordinates (`radius`, `phi`, `theta`).          |
 | `setFromCylindricalCoords(r, θ, y)` | `self`      | Sets vector components from cylindrical coordinates (`radius`, `theta`, `y`).          |
 | `applyQuaternion(q)`                | `self`      | Rotates this vector by a quaternion.                                                   |

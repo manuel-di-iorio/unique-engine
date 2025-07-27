@@ -18,7 +18,7 @@ function UeTransform(data = {}) constructor {
     matrixWorldNeedsUpdate = false;      // Tells to update the world matrix for this frame
     
     // Internals
-    __frustumSphere = undefined;
+    __intersectionSphere = undefined;
     
     /// Rebuild local matrix from position/rotation/scale
     function updateMatrix() {
@@ -46,8 +46,8 @@ function UeTransform(data = {}) constructor {
             // Update the object's frustum bounding sphere
             var boundingSphere = self[$ "geometry"] != undefined ? geometry.boundingSphere : undefined;
             if (boundingSphere != undefined) {
-                if (__frustumSphere == undefined) __frustumSphere = new UeSphere();
-                __frustumSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
+                if (__intersectionSphere == undefined) __intersectionSphere = new UeSphere();
+                __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
             }
         } 
         

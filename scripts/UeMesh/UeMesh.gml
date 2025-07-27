@@ -59,9 +59,11 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         var boundingBox = geometry[$ "boundingBox"];
         var boundingSphere = geometry[$ "boundingSphere"];
         
-         if (boundingSphere != undefined) {
+        if (boundingSphere != undefined) {
             if (!localRay.intersectSphere(boundingSphere, global.UE_DUMMY_VECTOR3)) return self; 
-        } else if (boundingBox != undefined) {
+        }
+        
+        if (boundingBox != undefined) {
 			if (!localRay.intersectBox(boundingBox, global.UE_DUMMY_VECTOR3)) return self;
 		} 
         

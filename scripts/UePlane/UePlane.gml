@@ -89,7 +89,7 @@ function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP.clone(), _constant = 0)
         var dir = line.delta();
         var denominator = self.normal.dot(dir);
         
-        if (abs(denominator) < global.UE_EPSILON) {
+        if (abs(denominator) < UE_EPSILON) {
             // Line is parallel to plane
             if (distanceToPoint(line.start) == 0) {
                 // Line is coplanar with plane, return start point

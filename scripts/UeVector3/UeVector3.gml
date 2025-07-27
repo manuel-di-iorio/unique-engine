@@ -463,7 +463,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     /// Replaces each component with the min between self and vec.
-    function min(vec) {
+    function minVec(vec) {
         self.x = min(self.x, vec.x);
         self.y = min(self.y, vec.y);
         self.z = min(self.z, vec.z);
@@ -471,7 +471,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     }
         
     /// Replaces each component with the max between self and vec.
-    function max(vec) {
+    function maxVec(vec) {
         self.x = max(self.x, vec.x);
         self.y = max(self.y, vec.y);
         self.z = max(self.z, vec.z);

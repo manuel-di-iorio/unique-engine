@@ -1,9 +1,9 @@
 /// @description Frustum constructor - Creates a view frustum for culling calculations
 function UeFrustum() constructor {
     
-    // Array of 6 planes
-    planes = array_create(5);
-    for (var i=0; i<5; i++) {
+    // Array of 4 planes
+    planes = array_create(4);
+    for (var i=0; i<4; i++) {
         planes[i] = new UePlane();
     }
     
@@ -17,7 +17,7 @@ function UeFrustum() constructor {
     /// @param {Struct} _point Vector3 to test
     /// @return {bool}
     function containsPoint(_point) {
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 4; i++) {
             if (planes[i].distanceToPoint(_point) < 0) {
                 return false;
             }
@@ -29,7 +29,7 @@ function UeFrustum() constructor {
     /// @param {Struct} _frustum The frustum to copy
     /// @return {Struct}
     function copy(_frustum) {
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 4; i++) {
             planes[i].copy(_frustum.planes[i]);
         }
         return self;
@@ -39,7 +39,7 @@ function UeFrustum() constructor {
     /// @param {Struct} _box Box3 to check for intersection
     /// @return {bool}
     function intersectsBox(_box) {
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 4; i++) {
             var plane = planes[i];
             
             // Get positive vertex (farthest in direction of plane normal)
@@ -60,9 +60,9 @@ function UeFrustum() constructor {
     /// @param {Struct} object Object with geometry for bounding sphere calculation
     /// @return {bool}
     function intersectsObject(object) {
-        var frustumSphere = object.__frustumSphere;
-        if (frustumSphere == undefined) return true;
-        return intersectsSphere(frustumSphere);
+        var intersectionSphere = object.__intersectionSphere;
+        if (intersectionSphere == undefined) return true;
+        return intersectsSphere(intersectionSphere);
     }
     
     /// @description Return true if sphere intersects with this frustum
@@ -72,7 +72,7 @@ function UeFrustum() constructor {
         var negRadius = -sphere.radius; 
         var sphereCenter = sphere.center;
         
-        for (var i = 0; i < 5; i++) { 
+        for (var i = 0; i < 4; i++) { 
             var dist = planes[i].distanceToPoint(sphere.center);
             if (planes[i].distanceToPoint(sphereCenter) < negRadius) {
                 return false;
@@ -146,16 +146,16 @@ function UeFrustum() constructor {
         p.constant = d * invLen;
     
         // Far
-        nx = m3 - m2;
-        ny = m7 - m6;
-        nz = m11 - m10;
-        d  = m15 - m14;
-        invLen = 1 / sqrt(nx * nx + ny * ny + nz * nz);
-        p = planes[2];
-        p.normal.x = nx * invLen;
-        p.normal.y = ny * invLen;
-        p.normal.z = nz * invLen;
-        p.constant = d * invLen;
+        //nx = m3 - m2;
+        //ny = m7 - m6;
+        //nz = m11 - m10;
+        //d  = m15 - m14;
+        //invLen = 1 / sqrt(nx * nx + ny * ny + nz * nz);
+        //p = planes[2];
+        //p.normal.x = nx * invLen;
+        //p.normal.y = ny * invLen;
+        //p.normal.z = nz * invLen;
+        //p.constant = d * invLen;
     
         // Bottom
         nx = m3 + m1;
@@ -163,7 +163,7 @@ function UeFrustum() constructor {
         nz = m11 + m9;
         d  = m15 + m13;
         invLen = 1 / sqrt(nx * nx + ny * ny + nz * nz);
-        p = planes[3];
+        p = planes[2];
         p.normal.x = nx * invLen;
         p.normal.y = ny * invLen;
         p.normal.z = nz * invLen;
@@ -175,7 +175,7 @@ function UeFrustum() constructor {
         nz = m11 - m9;
         d  = m15 - m13;
         invLen = 1 / sqrt(nx * nx + ny * ny + nz * nz);
-        p = planes[4];
+        p = planes[3];
         p.normal.x = nx * invLen;
         p.normal.y = ny * invLen;
         p.normal.z = nz * invLen;
