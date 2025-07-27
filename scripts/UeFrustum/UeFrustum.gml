@@ -111,11 +111,9 @@ function UeFrustum() constructor {
     }
     
     /// @description Sets the frustum planes from the projection matrix
-    /// @param {Struct} matrix Projection Matrix4 used to set the planes
+    /// @param {Struct} m Projection Matrix 16x16 Array used to set the planes
     /// @return {Struct}
-    function setFromProjectionMatrix(matrix) {
-        var m = matrix.data;
-    
+    function setFromProjectionMatrix(m) {
         var m3  = m[3],  m7  = m[7],  m11 = m[11], m15 = m[15];
         var m0  = m[0],  m4  = m[4],  m8  = m[8],  m12 = m[12];
         var m1  = m[1],  m5  = m[5],  m9  = m[9],  m13 = m[13];

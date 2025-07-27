@@ -33,7 +33,7 @@ new UeFrustum()
 | `intersectsSphere(sphere)`        | `boolean`   | Returns `true` if the sphere intersects the frustum                         |
 | `intersectsSprite(sprite)`        | `boolean`   | Returns `true` if the sprite intersects the frustum (using bounding sphere) |
 | `set(p0, p1, p2, p3, p4, p5)`     | `self`      | Sets the frustum planes directly                                            |
-| `setFromProjectionMatrix(matrix)` | `self`      | Extracts frustum planes from a projection matrix                            |
+| `setFromProjectionMatrix(matrixArray)` | `self`      | Extracts frustum planes from a projection matrix (4x4 array)           |
 
 ## Notes
 

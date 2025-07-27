@@ -213,8 +213,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
         // Frustum updated from camera. 
         // It needs to test using world coords, so we multiply the matrixes from camera space to world space 
-        var projViewMatrix = global.UE_DUMMY_MATRIX4.multiplyMatrices(camera.matrixWorldInverse, camera.projectionMatrix);
-        __frustum.setFromProjectionMatrix(projViewMatrix); 
+        __frustum.setFromProjectionMatrix(
+            matrix_multiply(camera.matrixWorldInverse.data, camera.projectionMatrix.data)
+        ); 
         
         __lightIdx = 0;
         __opaqueIdx = 0;
