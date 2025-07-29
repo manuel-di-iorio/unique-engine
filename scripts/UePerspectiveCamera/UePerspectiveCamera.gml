@@ -20,12 +20,14 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     projectionMatrixInverse = new UeMatrix4();
     
     function updateProjectionMatrix() {
+        gml_pragma("forceinline");
         projectionMatrix.fromArray(matrix_build_projection_perspective_fov(fov, aspect, near, far));
         projectionMatrixInverse.copy(projectionMatrix).invert();
     	camera_set_proj_mat(camera, projectionMatrix.data);
     }
     
     function updateMatrixWorld() {
+        gml_pragma("forceinline");
         var lookAt = matrix_build_lookat(
             position.x, position.y, position.z,  // From
             target.x, target.y, target.z, // To
@@ -38,6 +40,7 @@ function UePerspectiveCamera(data = {}): UeObject3D(data) constructor {
     
     // Build the perspective projection
     function dispose() {
+        gml_pragma("forceinline");
         camera_destroy(camera);
         camera = undefined;
         return self;

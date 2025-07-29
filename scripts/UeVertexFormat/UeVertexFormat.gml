@@ -7,31 +7,37 @@ function UeVertexFormat(data = {}) constructor {
     attrs = [];
 
     function position() {
+        gml_pragma("forceinline");
         array_push(attrs, { kind: UE_FORMAT_ATTR.POSITION });
         return self;
     }
     
     function normal() {
+        gml_pragma("forceinline");
         array_push(attrs, { kind: UE_FORMAT_ATTR.NORMAL });
         return self;
     }
 
     function uv() {
+        gml_pragma("forceinline");
         array_push(attrs, { kind: UE_FORMAT_ATTR.UV });
         return self;
     }
     
     function color() {
+        gml_pragma("forceinline");
         array_push(attrs, { kind: UE_FORMAT_ATTR.COLOR });
         return self;
     }
     
     function custom(name, type) {
+        gml_pragma("forceinline");
         array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name, type });
         return self;
     }
 
     function build() {
+        gml_pragma("forceinline");
         vertex_format_begin();
 
         for (var i = 0, len = array_length(attrs); i < len; i++) {
@@ -51,17 +57,20 @@ function UeVertexFormat(data = {}) constructor {
     }
     
     function dispose() {
+        gml_pragma("forceinline");
         vertex_format_delete(vf);
         vf = undefined;
         return self;
     }
     
     function toJSON() {
+        gml_pragma("forceinline");
         return { attrs };
     }
     
     /** Internal export methods */
     function _compileData(data) {
+        gml_pragma("forceinline");
         return { payload: toJSON() };
     }
 }

@@ -13,6 +13,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
     // Recursively collect renderable objects and split them into opaque and transparent queues
     function __collectObjectQueues(objects, camera) {
+        gml_pragma("forceinline");
         var cameraPos = camera.position;
         var cameraLayers = camera.layers;
         
@@ -54,6 +55,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
      * [Complexity] average case: O(n log n), worst case: O(n^2)
      */
     function __quickSortOpaqueObjects(left, right) {
+        gml_pragma("forceinline");
         if (left >= right) return;
         
         var array = __opaqueQueue;
@@ -86,6 +88,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     }
 
     function __quickSortTransparentObjects(left, right) {
+        gml_pragma("forceinline");
         if (left >= right) return;
         
         var array = __transparentQueue;
@@ -118,6 +121,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
     // Render a list of opaque objects
     function __renderOpaqueObjects() {
+        gml_pragma("forceinline");
         var objects = __opaqueQueue;
         
         for (var i = 0; i < __opaqueIdx; i++) {
@@ -134,6 +138,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // Render a list of transparent objects with zwrite disabled
     // Also make a double draw call (if allowed) to mitigate transparency artifacts
     function __renderTransparentObjects() {
+        gml_pragma("forceinline");
         var currentZWriteEnable = gpu_get_zwriteenable();
         gpu_set_zwriteenable(false);
         var objects = __transparentQueue;
@@ -160,6 +165,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
     // Aggregate light data from scene lights
     function __buildLightState() {
+        gml_pragma("forceinline");
         var lights = __lights;
         var ambientState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT];
         ambientState[0] = 0;
@@ -205,6 +211,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
     /// Render the scene
     function render(scene, camera) {
+        gml_pragma("forceinline");
         var currentBlendEnable = gpu_get_blendenable();
         var currentCullMode = gpu_get_cullmode();
         

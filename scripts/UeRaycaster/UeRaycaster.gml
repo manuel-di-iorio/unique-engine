@@ -22,6 +22,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * @param {Struct} direction - The normalized direction vector of the ray
      */
     function set(origin, direction) {
+        gml_pragma("forceinline");
         self.ray.set(origin, direction);
         return self;
     }
@@ -34,6 +35,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * @param {Struct} camera - Camera object used for unprojection
      */
     function setFromCamera(mx, my, camera) {
+        gml_pragma("forceinline");
         self.camera = camera;
         
         // Normalize the mouse coordinates
@@ -68,6 +70,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * @returns {Array} Sorted array of intersection hits, closest first
      */
     function intersectObject(object, recursive = true, hits = []) {
+        gml_pragma("forceinline");
         // If the object has a raycast method, invoke it
         if (object.visible && object[$ "geometry"] && layers.test(object.layers)) {
             var objectRaycast = object[$ "raycast"];
@@ -97,6 +100,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * @returns {Array} Sorted array of intersection hits, closest first
      */
     function intersectObjects(objects, recursive = true, hits = []) {
+        gml_pragma("forceinline");
         for (var i = 0, n = array_length(objects); i < n; i++) {
             intersectObject(objects[i], recursive, hits);
         }

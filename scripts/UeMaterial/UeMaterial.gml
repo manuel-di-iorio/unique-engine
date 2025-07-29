@@ -56,6 +56,7 @@ function UeMaterial(data = {}) constructor {
         
     // Cache uniform/sampler locations
     function build() { 
+        gml_pragma("forceinline");
         if (shader == undefined) return self;
             
         // Cache the engine uniforms
@@ -117,6 +118,7 @@ function UeMaterial(data = {}) constructor {
     }
     
     function __setLightsUniforms() {
+        gml_pragma("forceinline");
         if (!lights) return;
             
         var lightState = global.UE_RENDERER_LIGHT_STATE;
@@ -176,6 +178,7 @@ function UeMaterial(data = {}) constructor {
      
     /// Apply material before drawing
     function use(mesh, renderSide = undefined) {
+        gml_pragma("forceinline");
         if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) {
             shader_reset();   
             return self;
@@ -207,7 +210,7 @@ function UeMaterial(data = {}) constructor {
         // Set the texture samplers
         for (var t=0; t<__texturesCachedCount; t++) {
             var textureCached = __texturesCached[t];
-            textureCached[0].use(textureCached[1]);
+            textureCached[0].__use(textureCached[1]);
         }
             
         // Update the shader's model position uniform (for billboard sprites)
@@ -236,10 +239,12 @@ function UeMaterial(data = {}) constructor {
     }
     
     function clone() {
+        gml_pragma("forceinline");
         return variable_clone(self);
     }
     
     function toJSON() {
+        gml_pragma("forceinline");
         return {
             uniforms,
             textures: ueStructMap(textures, function(name, texture) { return texture.uuid }),
@@ -267,6 +272,7 @@ function UeMaterial(data = {}) constructor {
     
     /** Internal export methods */
     function _compileData(data) {
+        gml_pragma("forceinline");
         return { payload: toJSON() };
     }
     

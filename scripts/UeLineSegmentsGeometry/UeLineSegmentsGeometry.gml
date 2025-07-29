@@ -5,6 +5,7 @@ function UeLineSegmentsGeometry(data = {}): UeBufferGeometry(data) constructor {
 
     /// Populates this geometry using any mesh (will extract every pair of vertices)
     function fromMesh(mesh) {
+        gml_pragma("forceinline");
         var sourceVerts = mesh.geometry.vertices;
         vertices = [];
 
@@ -22,6 +23,7 @@ function UeLineSegmentsGeometry(data = {}): UeBufferGeometry(data) constructor {
     
     // Set a list of segment positions (flat array: [x1,y1,z1,x2,y2,z2,...])
     function setPositions(arr) {
+        gml_pragma("forceinline");
         vertices = [];
 
         var len = array_length(arr);

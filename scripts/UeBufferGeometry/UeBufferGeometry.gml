@@ -17,6 +17,7 @@ function UeBufferGeometry(data = {}) constructor {
 
     // Build the vertex buffer from vertices and format
     function build() {
+        gml_pragma("forceinline");
         dispose();
         vb = vertex_create_buffer();               // Create a new vertex buffer
         vertex_begin(vb, format.vf);               // Begin vertex buffer with format flags
@@ -80,12 +81,14 @@ function UeBufferGeometry(data = {}) constructor {
     
     // Freeze the vertex buffer to optimize usage
     function freeze() {
+        gml_pragma("forceinline");
         if (vb) vertex_freeze(vb);
         return self;
     }
     
     // Dispose the vertex buffer, releasing GPU resources
     function dispose() {
+        gml_pragma("forceinline");
         if (vb) {
             vertex_delete_buffer(vb);
             vb = undefined;
@@ -95,6 +98,7 @@ function UeBufferGeometry(data = {}) constructor {
     
     // Compute bounding box based on current vertices
     function computeBoundingBox() {
+        gml_pragma("forceinline");
         boundingBox ??= new UeBox3();
         boundingBox.setFromPoints(vertices);
         return self;
@@ -102,12 +106,14 @@ function UeBufferGeometry(data = {}) constructor {
     
     // Compute bounding sphere based on current vertices
     function computeBoundingSphere() {
+        gml_pragma("forceinline");
         boundingSphere ??= new UeSphere();
         boundingSphere.setFromPoints(vertices);
         return self;
     }
     
     function toJSON() {
+        gml_pragma("forceinline");
         var payload = { 
             format: format.uuid,
         };
@@ -115,6 +121,7 @@ function UeBufferGeometry(data = {}) constructor {
     
     /** Internal method: prepare data for export or serialization */
     function _compileData(data) {
+        gml_pragma("forceinline");
         var vbBuffer = buffer_create_from_vertex_buffer(vb, buffer_fast, 1);
         var vbBufferSize = buffer_get_size(vbBuffer);
         
@@ -133,6 +140,7 @@ function UeBufferGeometry(data = {}) constructor {
     
     /** Internal method: copy vertex buffer data into export buffer */
     function _compileBufferExtra(buffer, ctx) {
+        gml_pragma("forceinline");
         buffer_copy(ctx.vbBuffer, 0, ctx.vbBufferSize, buffer, buffer_tell(buffer));
         buffer_seek(buffer, buffer_seek_relative, ctx.vbBufferSize);
     } 

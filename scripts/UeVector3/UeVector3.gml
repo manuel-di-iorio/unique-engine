@@ -5,6 +5,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Sets the components of this vector.
     function set(_x, _y, _z) {
+        gml_pragma("forceinline");
         self.x = _x;
         self.y = _y;
         self.z = _z;
@@ -13,11 +14,13 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Returns a deep clone of this vector.
     function clone() {
+        gml_pragma("forceinline");
         return variable_clone(self);
     }
 
     /// Copies the values from another vector into this one.
     function copy(vec) {
+        gml_pragma("forceinline");
         self.x = vec.x;
         self.y = vec.y;
         self.z = vec.z;
@@ -26,6 +29,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Adds another vector to this one.
     function add(vec) {
+        gml_pragma("forceinline");
         self.x += vec.x;
         self.y += vec.y;
         self.z += vec.z;
@@ -34,6 +38,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Subtracts another vector from this one.
     function sub(vec) {
+        gml_pragma("forceinline");
         self.x -= vec.x;
         self.y -= vec.y;
         self.z -= vec.z;
@@ -42,6 +47,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Multiplies each component by the corresponding component of another vector.
     function multiply(vec) {
+        gml_pragma("forceinline");
         self.x *= vec.x;
         self.y *= vec.y;
         self.z *= vec.z;
@@ -50,6 +56,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Scales this vector uniformly by a scalar.
     function scale(s) {
+        gml_pragma("forceinline");
         self.x *= s;
         self.y *= s;
         self.z *= s;
@@ -58,11 +65,13 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Returns the dot product with another vector.
     function dot(vec) {
+        gml_pragma("forceinline");
         return self.x * vec.x + self.y * vec.y + self.z * vec.z;
     }
 
     /// Returns the cross product with another vector.
     function cross(vec) {
+        gml_pragma("forceinline");
         var cx = self.y * vec.z - self.z * vec.y;
         var cy = self.z * vec.x - self.x * vec.z;
         var cz = self.x * vec.y - self.y * vec.x;
@@ -71,11 +80,13 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Returns the Euclidean length (magnitude) of this vector.
     function length() {
+        gml_pragma("forceinline");
         return sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
     }
 
     /// Normalizes the vector to unit length.
     function normalize() {
+        gml_pragma("forceinline");
         var len = length();
         if (len > 0) {
             var inv = 1 / len;
@@ -88,11 +99,13 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Returns true if all components match the given vector.
     function equals(vec) {
+        gml_pragma("forceinline");
         return self.x == vec.x && self.y == vec.y && self.z == vec.z;
     }
 
     /// Linearly interpolates towards another vector by a factor t (0..1).
     function lerp(vec, t) {
+        gml_pragma("forceinline");
         self.x += (vec.x - self.x) * t;
         self.y += (vec.y - self.y) * t;
         self.z += (vec.z - self.z) * t;
@@ -101,6 +114,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Returns the angle to another vector in radians.
     function angleTo(vec) {
+        gml_pragma("forceinline");
         var dot = dot(vec);
         var len1 = length();
         var len2 = vec.length();
@@ -113,6 +127,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Returns the Euclidean distance to another vector.
     function distanceTo(vec) {
+        gml_pragma("forceinline");
         var dx = self.x - vec.x;
         var dy = self.y - vec.y;
         var dz = self.z - vec.z;
@@ -121,6 +136,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Returns squared distance to another vector (faster than distance).
     function distanceToSquared(vec) {
+        gml_pragma("forceinline");
         var dx = self.x - vec.x;
         var dy = self.y - vec.y;
         var dz = self.z - vec.z;
@@ -129,6 +145,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Adds a scalar to each component.
     function addScalar(s) {
+        gml_pragma("forceinline");
         self.x += s;
         self.y += s;
         self.z += s;
@@ -137,6 +154,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Adds a scaled version of another vector.
     function addScaledVector(vec, scale) {
+        gml_pragma("forceinline");
         self.x += vec.x * scale;
         self.y += vec.y * scale;
         self.z += vec.z * scale;
@@ -145,6 +163,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Sets this vector as the sum of two other vectors.
     function addVectors(a, b) {
+        gml_pragma("forceinline");
         self.x = a.x + b.x;
         self.y = a.y + b.y;
         self.z = a.z + b.z;
@@ -153,6 +172,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Clamps each component between corresponding min and max vector components.
     function clamp(minVec, maxVec) {
+        gml_pragma("forceinline");
         self.x = clamp(self.x, minVec.x, maxVec.x);
         self.y = clamp(self.y, minVec.y, maxVec.y);
         self.z = clamp(self.z, minVec.z, maxVec.z);
@@ -161,6 +181,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Clamps each component between two scalar values.
     function clampScalar(minVal, maxVal) {
+        gml_pragma("forceinline");
         self.x = clamp(self.x, minVal, maxVal);
         self.y = clamp(self.y, minVal, maxVal);
         self.z = clamp(self.z, minVal, maxVal);
@@ -169,12 +190,14 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Clamps the vector’s length between two values.
     function clampLength(minLen, maxLen) {
+        gml_pragma("forceinline");
         var len = length();
         return setLength(clamp(len, minLen, maxLen));
     }
 
     /// Divides this vector by another vector component-wise.
     function divide(vec) {
+        gml_pragma("forceinline");
         self.x /= vec.x;
         self.y /= vec.y;
         self.z /= vec.z;
@@ -183,11 +206,13 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Divides this vector by a scalar.
     function divideScalar(scalar) {
+        gml_pragma("forceinline");
         return self.scale(1 / scalar);
     }
 
     /// Applies floor() to each component.
     function floor() {
+        gml_pragma("forceinline");
         self.x = floor(self.x);
         self.y = floor(self.y);
         self.z = floor(self.z);
@@ -196,6 +221,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Applies ceil() to each component.
     function ceil() {
+        gml_pragma("forceinline");
         self.x = ceil(self.x);
         self.y = ceil(self.y);
         self.z = ceil(self.z);
@@ -204,6 +230,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Rounds each component to the nearest integer.
     function round() {
+        gml_pragma("forceinline");
         self.x = round(self.x);
         self.y = round(self.y);
         self.z = round(self.z);
@@ -212,6 +239,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Rounds each component toward zero.
     function roundToZero() {
+        gml_pragma("forceinline");
         self.x = (self.x < 0) ? ceil(self.x) : floor(self.x);
         self.y = (self.y < 0) ? ceil(self.y) : floor(self.y);
         self.z = (self.z < 0) ? ceil(self.z) : floor(self.z);
@@ -220,26 +248,31 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Returns the squared length of this vector.
     function lengthSq() {
+        gml_pragma("forceinline");
         return self.x * self.x + self.y * self.y + self.z * self.z;
     }
 
     /// Returns the Manhattan length (sum of absolute components).
     function manhattanLength() {
+        gml_pragma("forceinline");
         return abs(self.x) + abs(self.y) + abs(self.z);
     }
 
     /// Returns the Manhattan distance to another vector.
     function manhattanDistanceTo(vec) {
+        gml_pragma("forceinline");
         return abs(self.x - vec.x) + abs(self.y - vec.y) + abs(self.z - vec.z);
     }
 
     /// Multiplies this vector by a scalar.
     function multiplyScalar(s) {
+        gml_pragma("forceinline");
         return scale(s);
     }
 
     /// Sets this vector as the component-wise multiplication of two other vectors.
     function multiplyVectors(a, b) {
+        gml_pragma("forceinline");
         self.x = a.x * b.x;
         self.y = a.y * b.y;
         self.z = a.z * b.z;
@@ -248,6 +281,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Negates each component.
     function negate() {
+        gml_pragma("forceinline");
         self.x = -self.x;
         self.y = -self.y;
         self.z = -self.z;
@@ -256,30 +290,35 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Sets all components to the given scalar.
     function setScalar(scalar) {
+        gml_pragma("forceinline");
         self.x = self.y = self.z = scalar;
         return self;
     }
 
     /// Sets only the X component.
     function setX(x) {
+        gml_pragma("forceinline");
         self.x = x;
         return self;
     }
 
     /// Sets only the Y component.
     function setY(y) {
+        gml_pragma("forceinline");
         self.y = y;
         return self;
     }
 
     /// Sets only the Z component.
     function setZ(z) {
+        gml_pragma("forceinline");
         self.z = z;
         return self;
     }
 
     /// Subtracts a scalar from all components.
     function subScalar(s) {
+        gml_pragma("forceinline");
         self.x -= s;
         self.y -= s;
         self.z -= s;
@@ -288,6 +327,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Sets this vector as the difference of two vectors.
     function subVectors(a, b) {
+        gml_pragma("forceinline");
         self.x = a.x - b.x;
         self.y = a.y - b.y;
         self.z = a.z - b.z;
@@ -296,6 +336,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Transforms this vector by a 3x3 matrix.
     function applyMatrix3(m) {
+        gml_pragma("forceinline");
         var xx = self.x, yy = self.y, zz = self.z;
         var e = m.data;
         self.x = e[0]*xx + e[3]*yy + e[6]*zz;
@@ -307,6 +348,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     /// Projects this vector into NDC space using camera matrices.
     /// @param {UeCamera} camera
     function project(camera) {
+        gml_pragma("forceinline");
         applyMatrix4(camera.matrixWorldInverse)
         applyMatrix4(camera.projectionMatrix);
         return self;
@@ -315,6 +357,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     /// Unprojects this vector from NDC space back to world space.
     /// @param {UeCamera} camera
     function unproject(camera) {
+        gml_pragma("forceinline");
         applyMatrix4(camera.projectionMatrixInverse);
         applyMatrix4(camera.matrixWorld);
         return self;
@@ -322,6 +365,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Transforms the direction only (ignores translation), then normalizes.
     function transformDirection(m) {
+        gml_pragma("forceinline");
         var xx = self.x, yy = self.y, zz = self.z;
         var e = m.data;
         self.x = e[0]*xx + e[4]*yy + e[8]*zz;
@@ -332,6 +376,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Transforms this vector by a 4x4 matrix (full 3D point transform).
     function applyMatrix4(m) {
+        gml_pragma("forceinline");
         var xx = self.x, yy = self.y, zz = self.z;
         var e = m.data;
         var w = e[3]*xx + e[7]*yy + e[11]*zz + e[15];
@@ -344,35 +389,41 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Applies a normal matrix (3x3) and normalizes the result.
     function applyNormalMatrix(m) {
+        gml_pragma("forceinline");
         applyMatrix3(m);
         return self.normalize();
     }
 
     /// Projects this vector onto a plane defined by a normal.
     function projectOnPlane(normal) {
+        gml_pragma("forceinline");
         var v = normal.clone().scale(self.dot(normal));
         return self.sub(v);
     }
 
     /// Projects this vector onto a direction vector.
     function projectOnVector(v) {
+        gml_pragma("forceinline");
         var scalar = self.dot(v) / v.dot(v);
         return self.copy(v).scale(scalar);
     }
 
     /// Reflects this vector over a given normal.
     function reflect(normal) {
+        gml_pragma("forceinline");
         return self.sub(normal.clone().scale(2 * self.dot(normal)));
     }
 
     /// Sets the vector length to a given value.
     function setLength(l) {
+        gml_pragma("forceinline");
         var old = length();
         return old != 0 ? self.scale(l / old) : self.scale(0);
     }
 
     /// Sets components from a simple array.
     function fromArray(arr, offset = 0) {
+        gml_pragma("forceinline");
         self.x = arr[offset];
         self.y = arr[offset + 1];
         self.z = arr[offset + 2];
@@ -381,6 +432,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Gets a specific component by index (0 = x, 1 = y, 2 = z).
     function getComponent(index) {
+        gml_pragma("forceinline");
         if (index == 0) return self.x;
         if (index == 1) return self.y;
         if (index == 2) return self.z;
@@ -388,6 +440,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Copies components into an array (or creates one).
     function toArray(arr = undefined, offset = 0) {
+        gml_pragma("forceinline");
         arr ??= [];
         arr[offset]     = self.x;
         arr[offset + 1] = self.y;
@@ -397,6 +450,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Sets random values in the [0, 1) range.
     function random() {
+        gml_pragma("forceinline");
         self.x = random_range(0, 1);
         self.y = random_range(0, 1);
         self.z = random_range(0, 1);
@@ -405,6 +459,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Sets this vector to a random direction on the unit sphere.
     function randomDirection() {
+        gml_pragma("forceinline");
         var theta = random_range(0, 2 * pi);
         var phi = arccos(random_range(-1, 1));
         var sinPhi = sin(phi);
@@ -416,6 +471,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Sets components from the column at index in a 4x4 matrix.
     function setFromMatrixColumn(matrix, index) {
+        gml_pragma("forceinline");
         var e = matrix.data;
         self.x = e[index * 4 + 0];
         self.y = e[index * 4 + 1];
@@ -425,6 +481,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Sets components from the column at index in a 3x3 matrix.
     function setFromMatrix3Column(matrix, index) {
+        gml_pragma("forceinline");
         var e = matrix.data;
         self.x = e[index * 3 + 0];
         self.y = e[index * 3 + 1];
@@ -433,6 +490,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     function setFromMatrixPosition(mat) {
+        gml_pragma("forceinline");
         var e = mat.data;
     
         // Elements 12, 13, 14 contain the translation component (column 4)
@@ -444,6 +502,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     function setFromMatrixScale(mat) {
+        gml_pragma("forceinline");
         var te = mat.data;
 
         // Extract basis vectors (columns of the upper-left 3x3)
@@ -456,6 +515,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Sets a single component by index (0 = x, 1 = y, 2 = z).
     function setComponent(index, value) {
+        gml_pragma("forceinline");
         if (index == 0) self.x = value;
         else if (index == 1) self.y = value;
         else if (index == 2) self.z = value;
@@ -464,6 +524,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Replaces each component with the min between self and vec.
     function minVec(vec) {
+        gml_pragma("forceinline");
         self.x = min(self.x, vec.x);
         self.y = min(self.y, vec.y);
         self.z = min(self.z, vec.z);
@@ -472,6 +533,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         
     /// Replaces each component with the max between self and vec.
     function maxVec(vec) {
+        gml_pragma("forceinline");
         self.x = max(self.x, vec.x);
         self.y = max(self.y, vec.y);
         self.z = max(self.z, vec.z);
@@ -480,6 +542,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Sets components using spherical coordinates.
     function setFromSphericalCoords(radius, phi, theta) {
+        gml_pragma("forceinline");
         self.x = radius * sin(phi) * cos(theta);
         self.y = radius * cos(phi);
         self.z = radius * sin(phi) * sin(theta);
@@ -488,6 +551,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Sets components using cylindrical coordinates.
     function setFromCylindricalCoords(radius, theta, y) {
+        gml_pragma("forceinline");
         self.x = radius * cos(theta);
         self.z = radius * sin(theta);
         self.y = y;
@@ -495,6 +559,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     function applyQuaternion(q) {
+        gml_pragma("forceinline");
         var xx = self.x, yy = self.y, zz = self.z;
         var qx = q.x, qy = q.y, qz = q.z, qw = q.w;
     
@@ -511,6 +576,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     function applyAxisAngle(axis, angle) {
+        gml_pragma("forceinline");
         var xx = self.x, yy = self.y, zz = self.z;
         var ax = axis.x, ay = axis.y, az = axis.z;
     

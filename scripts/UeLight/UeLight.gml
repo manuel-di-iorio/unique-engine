@@ -8,10 +8,12 @@ function UeLight(data = {}): UeObject3D(data) constructor {
     target = undefined;
     
     function setColor(_color) {
+        gml_pragma("forceinline");
         color = [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255];
     }
     
     function toJSON() {
+        gml_pragma("forceinline");
         var payload = { 
             lightType, 
             intensity, 

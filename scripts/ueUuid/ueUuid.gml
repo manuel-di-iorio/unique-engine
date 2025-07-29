@@ -1,4 +1,5 @@
 function ueUuid() {
+    gml_pragma("forceinline");
     var hex = "0123456789abcdef";
     var uuid = "";
     var r;

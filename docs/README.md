@@ -45,7 +45,7 @@ To publish a new version of Unique Engine and update its documentation:
      ```
    - This command creates a copy of the documentation in the `versioned_docs` folder and updates the version selector.
 
-65. **Commit, push and deploy**
+65. **Commit and push**
    - Commit all changes from the root folder of Unique Engine (including the new versioned docs and changelog).
    - Push to GitHub:
      ```bash
@@ -53,12 +53,14 @@ To publish a new version of Unique Engine and update its documentation:
      git commit -m "Release 0.0.2"
      git push
      ```
-   - Deploy the updated documentation:
-     ```bash
-     cd docs
-     npm run deploy
-     ```
 
 6. **Tag a new version on GitHub**
    - Go to the [GitHub Releases page](https://github.com/manuel-di-iorio/unique-engine/releases) and create a new release.
    - Enter the new tag name (e.g. `0.0.2`) and fill in the release notes, if necessary.
+
+7. **Deploy the documentation**
+
+```bash
+cd docs
+npm run deploy
+```

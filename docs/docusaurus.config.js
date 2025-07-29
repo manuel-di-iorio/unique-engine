@@ -5,6 +5,7 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import {themes as prismThemes} from 'prism-react-renderer';
+import versions from "./versions.json"
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -54,7 +55,10 @@ const config = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '0.1.0 (latest)',
+              label: '0.2.0 (latest)',
+            },
+            '0.2.0': {
+              label: '0.2.0',
             },
             '0.1.0': {
               label: '0.1.0',
@@ -94,6 +98,11 @@ const config = {
             position: 'left',
             label: 'Documentation',
           },
+          {
+          type: 'docsVersionDropdown',
+          versions: ['current', ...versions.slice(1)],
+            position: 'right',
+        },
           {
             href: 'https://github.com/manuel-di-iorio/unique-engine',
             label: 'GitHub',

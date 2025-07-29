@@ -1,4 +1,5 @@
 function ueStructMap(struct, callback) {
+    gml_pragma("forceinline");
     var finalStruct = {};
     var names = variable_struct_get_names(struct);
     var namesCount = variable_struct_names_count(struct);

@@ -23,23 +23,24 @@ new UeQuaternion(x = 0, y = 0, z = 0)
 
 ## Methods
 
-| Method                      | Returns        | Description                                                   |
-| --------------------------- | -------------- | ------------------------------------------------------------- |
-| `set(x, y, z, w)`           | `self`         | Sets all four quaternion components                           |
-| `clone()`                   | `UeQuaternion` | Returns a deep copy of the quaternion                         |
-| `copy(q)`                   | `self`         | Copies values from another quaternion                         |
-| `normalize()`               | `self`         | Normalizes the quaternion (unit length)                       |
-| `multiply(q)`               | `self`         | Multiplies (combines) this quaternion with another            |
-| `setFromEuler(rx, ry, rz)`  | `self`         | Sets rotation using Euler angles (degrees)                    |
-| `setFromAxisAngle(axis, a)` | `self`         | Sets rotation from an axis and angle in degrees               |
-| `rotate(axis, angle)`       | `self`         | Rotates around a specified axis (angle in degrees)            |
-| `rotateX(angle)`            | `self`         | Rotates around the X axis                                     |
-| `rotateY(angle)`            | `self`         | Rotates around the Y axis                                     |
-| `rotateZ(angle)`            | `self`         | Rotates around the Z axis                                     |
-| `slerp(q, t)`               | `self`         | Performs spherical linear interpolation toward quaternion `q` |
-| `toMat3()`                  | `UeMatrix3`    | Converts this quaternion into a 3×3 rotation matrix           |
-| `setFromRotationMatrix(m)`  | `self`         | Sets rotation based on a 4×4 matrix rotation component        |
-| `setFromUnitVectors(a, b)`  | `self`         | Sets rotation from one normalized vector to another           |
+| Method                      | Returns        | Description                                                      |
+| --------------------------- | -------------- | -------------------------------------------------------------    |
+| `set(x, y, z, w)`           | `self`         | Sets all four quaternion components                              |
+| `clone()`                   | `UeQuaternion` | Returns a deep copy of the quaternion                            |
+| `copy(q)`                   | `self`         | Copies values from another quaternion                            |
+| `normalize()`               | `self`         | Normalizes the quaternion (unit length)                          |
+| `multiply(q)`               | `self`         | Multiplies (combines) this quaternion with another               |
+| `setFromEuler(rx, ry, rz)`  | `self`         | Sets rotation using Euler angles (degrees)                       |
+| `setFromAxisAngle(axis, a)` | `self`         | Sets rotation from an axis and angle in degrees                  |
+| `rotate(axis, angle)`       | `self`         | Rotates around a specified axis (angle in degrees)               |
+| `rotateX(angle)`            | `self`         | Rotates around the X axis                                        |
+| `rotateY(angle)`            | `self`         | Rotates around the Y axis                                        |
+| `rotateZ(angle)`            | `self`         | Rotates around the Z axis                                        |
+| `slerp(q, t)`               | `self`         | Performs spherical linear interpolation toward quaternion `q`    |
+| `toMat3()`                  | `UeMatrix3`    | Converts this quaternion into a 3×3 rotation matrix              |
+| `setFromRotationMatrix(m)`  | `self`         | Sets rotation based on a 4×4 matrix rotation component           |
+| `setFromUnitVectors(a, b)`  | `self`         | Sets rotation from one normalized vector to another              |
+| `identity()`                | `self`         | Reset the quaternion to the default values 0,0,0,1 (no rotation) |
 
 
 ## Example

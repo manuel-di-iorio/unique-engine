@@ -29,12 +29,14 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      * @param {bool} recursive If true, descendants of the object are also cloned. Default is true
      */
     function clone(recursive = true) {
+        gml_pragma("forceinline");
         // @todo need to test the children array
         return variable_clone(self, recursive ? 128 : 0);
     }
     
     /// @param ...objects
     function add() {
+        gml_pragma("forceinline");
         for (var i=0; i<argument_count; i++) {
             var objects = argument[i];
             if (!is_array(objects)) objects = [objects];
@@ -53,6 +55,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     // Adds object as a child of this, while maintaining the object's world transform.
     // Note: This method does not support parents with non-uniform scaling.
     function attach(child) {
+        gml_pragma("forceinline");
         removeFromParent(child);
         add(child);
         
@@ -72,12 +75,14 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
 
     /// Remove a child
     function remove(child) {
+        gml_pragma("forceinline");
         removeFromParent(child);
         return self;
     }
     
     /// Remove this object from its parent
     function removeFromParent(_object = undefined) {
+        gml_pragma("forceinline");
         _object = _object ?? self;
         if (_object.parent == undefined) return;
         var parentChildren = _object.parent.children;
@@ -95,6 +100,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     
     /// Remove all children
     function clear() {
+        gml_pragma("forceinline");
         for (var i=0, len=array_length(children); i<len; i++) {
             var child = children[i];
             child.clear();
@@ -108,6 +114,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     /// Execute a callback on this object and its children
     /// Note: Modifying the scene graph inside the callback is discouraged.
     function traverse(callback) {
+        gml_pragma("forceinline");
         callback(self);
         
         for (var i=0, len=array_length(children); i<len; i++) {
@@ -121,6 +128,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     /// Descendants of invisible objects are not traversed.
     /// Note: Modifying the scene graph inside the callback is discouraged.
     function traverseVisible(callback) {
+        gml_pragma("forceinline");
         if (visible) callback(self);
         
         for (var i=0, len=array_length(children); i<len; i++) {
@@ -134,6 +142,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     // Executes the callback on all ancestors.
     // Note: Modifying the scene graph inside the callback is discouraged
     function traverseAncestors(callback) {
+        gml_pragma("forceinline");
         var current = parent;
         while (current != undefined) {
             callback(current);
@@ -148,6 +157,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      * @param {bool} recursive If set to true, descendants of the object are copied next to the existing ones. If set to false, descendants are left unchanged. Default is true.
      */
     function copy(source, recursive = true) {
+        gml_pragma("forceinline");
         name = source.name;
         visible = source.visible;
         renderOrder = source.renderOrder;
@@ -173,6 +183,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      * Note that ids are assigned in chronological order: 1, 2, 3, ..., incrementing by one for each new object.     
      */
     function getObjectById(targetId) {
+        gml_pragma("forceinline");
         if (self.id == targetId) return self;
 
         for (var i = 0, n = array_length(children); i < n; i++) {
@@ -188,6 +199,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      * Note that for most objects the name is an empty string by default. You will have to set it manually to make use of this method.
      */
     function getObjectByName(name) {
+        gml_pragma("forceinline");
         if (self.name == name) return self;
 
         for (var i = 0, n = array_length(children); i < n; i++) {
@@ -202,6 +214,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      * Searches through an object and its children, starting with the object itself, and returns the first with a property that matches the value given.
      */
     function getObjectByProperty(name, value) {
+        gml_pragma("forceinline");
         if (self[$ name] == value) return self;
             
         for (var i = 0, n = array_length(children); i < n; i++) {
@@ -219,6 +232,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      * @param {array} optionalTarget (optional) target to set the result. Otherwise a new Array is instantiated.
      */
     function getObjectsByProperty(name, value, optionalTarget = []) {
+        gml_pragma("forceinline");
         if (self[$ name] == value) {
             array_push(optionalTarget, self);
         }

@@ -10,6 +10,7 @@ function UeFrustum() constructor {
     /// @description Return a new Frustum with the same parameters as this one
     /// @return {Struct}
     function clone() {
+        gml_pragma("forceinline");
         return variable_clone(self);
     }
     
@@ -17,6 +18,7 @@ function UeFrustum() constructor {
     /// @param {Struct} _point Vector3 to test
     /// @return {bool}
     function containsPoint(_point) {
+        gml_pragma("forceinline");
         for (var i = 0; i < 4; i++) {
             if (planes[i].distanceToPoint(_point) < 0) {
                 return false;
@@ -29,6 +31,7 @@ function UeFrustum() constructor {
     /// @param {Struct} _frustum The frustum to copy
     /// @return {Struct}
     function copy(_frustum) {
+        gml_pragma("forceinline");
         for (var i = 0; i < 4; i++) {
             planes[i].copy(_frustum.planes[i]);
         }
@@ -39,6 +42,7 @@ function UeFrustum() constructor {
     /// @param {Struct} _box Box3 to check for intersection
     /// @return {bool}
     function intersectsBox(_box) {
+        gml_pragma("forceinline");
         for (var i = 0; i < 4; i++) {
             var plane = planes[i];
             
@@ -60,6 +64,7 @@ function UeFrustum() constructor {
     /// @param {Struct} object Object with geometry for bounding sphere calculation
     /// @return {bool}
     function intersectsObject(object) {
+        gml_pragma("forceinline");
         var intersectionSphere = object.__intersectionSphere;
         if (intersectionSphere == undefined) return true;
         return intersectsSphere(intersectionSphere);
@@ -69,6 +74,7 @@ function UeFrustum() constructor {
     /// @param {Struct} sphere Sphere to check for intersection
     /// @return {bool}
     function intersectsSphere(sphere) {
+        gml_pragma("forceinline");
         var negRadius = -sphere.radius; 
         var sphereCenter = sphere.center;
         
@@ -85,6 +91,7 @@ function UeFrustum() constructor {
     /// @param {Struct} _sprite Sprite to check for intersection
     /// @return {bool}
     function intersectsSprite(_sprite) {
+        gml_pragma("forceinline");
         global.UE_DUMMY_SPHERE.center.set(0, 0, 0);
         var offset = global.UE_DUMMY_DEFAULT_SPRITE_CENTER.distanceTo(sprite.center);
         _sphere.radius = 0.7071067811865476 + offset; // 0.707etc.. is the approx result of sqrt(0.5)
@@ -101,6 +108,7 @@ function UeFrustum() constructor {
     /// @param {Struct} _p5 
     /// @return {Struct}
     function set(_p0, _p1, _p2, _p3, _p4, _p5) {
+        gml_pragma("forceinline");
         planes[0].copy(_p0);
         planes[1].copy(_p1);
         planes[2].copy(_p2);
@@ -114,6 +122,7 @@ function UeFrustum() constructor {
     /// @param {Struct} m Projection Matrix 16x16 Array used to set the planes
     /// @return {Struct}
     function setFromProjectionMatrix(m) {
+        gml_pragma("forceinline");
         var m3  = m[3],  m7  = m[7],  m11 = m[11], m15 = m[15];
         var m0  = m[0],  m4  = m[4],  m8  = m[8],  m12 = m[12];
         var m1  = m[1],  m5  = m[5],  m9  = m[9],  m13 = m[13];

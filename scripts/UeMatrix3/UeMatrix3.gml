@@ -8,17 +8,20 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Creates a new clone of this matrix.
     function clone() {
+        gml_pragma("forceinline");
         return variable_clone(self);
     }
 
     /// Copies the values from another UeMatrix3 into this matrix.
     function copy(m) {
+        gml_pragma("forceinline");
         for (var i = 0; i < 9; i++) data[i] = m.data[i];
         return self;
     }
 
     /// Computes and returns the determinant of the matrix.
     function determinant() {
+        gml_pragma("forceinline");
         var a = data[0], d = data[3], g = data[6];
         var b = data[1], e = data[4], h = data[7];
         var c = data[2], f = data[5], i = data[8];
@@ -28,6 +31,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Checks if this matrix is equal to another (element-wise).
     function equals(m) {
+        gml_pragma("forceinline");
         for (var i = 0; i < 9; i++)
             if (data[i] != m.data[i]) return false;
         return true;
@@ -35,6 +39,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Extracts the basis vectors (columns) of the matrix into xAxis, yAxis, zAxis vectors.
     function extractBasis(xAxis, yAxis, zAxis) {
+        gml_pragma("forceinline");
         // Extract columns because data is column-major
         xAxis.set(data[0], data[1], data[2]);
         yAxis.set(data[3], data[4], data[5]);
@@ -44,12 +49,14 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets the matrix elements from an array starting at the given offset.
     function fromArray(arr, offset = 0) {
+        gml_pragma("forceinline");
         for (var i = 0; i < 9; i++) data[i] = arr[offset + i];
         return self;
     }
 
     /// Inverts the matrix. If determinant is zero, sets matrix to zero matrix.
     function invert() {
+        gml_pragma("forceinline");
         var det = self.determinant();
         if (det == 0) {
             // Non-invertible matrix, zero it out
@@ -81,6 +88,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets this matrix to the normal matrix derived from a 4x4 matrix (used in shading).
     function getNormalMatrix(m4) {
+        gml_pragma("forceinline");
         // Extract 3x3 part, invert and transpose
         self.setFromMatrix4(m4);
         self.invert();
@@ -90,6 +98,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Resets the matrix to the identity matrix.
     function identity() {
+        gml_pragma("forceinline");
         data = [
             1,0,0,
             0,1,0,
@@ -100,6 +109,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets the matrix to a 2D rotation matrix for the given angle in radians.
     function makeRotation(theta_rad) {
+        gml_pragma("forceinline");
         var c = cos(theta_rad);
         var s = sin(theta_rad);
         data = [
@@ -112,6 +122,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets the matrix to a 2D scale matrix with x and y scaling factors.
     function makeScale(x, y) {
+        gml_pragma("forceinline");
         data = [
             x, 0, 0,
             0, y, 0,
@@ -122,6 +133,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets the matrix to a 2D translation matrix by (x, y).
     function makeTranslation(x, y) {
+        gml_pragma("forceinline");
         data = [
             1, 0, 0,
             0, 1, 0,
@@ -132,6 +144,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Multiplies this matrix by another UeMatrix3 from the right.
     function multiply(m) {
+        gml_pragma("forceinline");
         var a = data;
         var b = m.data;
         var r = [];
@@ -151,24 +164,28 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets this matrix as the product of matrices a and b.
     function multiplyMatrices(a, b) {
+        gml_pragma("forceinline");
         data = a.clone().multiply(b).data;
         return self;
     }
 
     /// Multiplies every element of the matrix by scalar s.
     function multiplyScalar(s) {
+        gml_pragma("forceinline");
         for (var i = 0; i < 9; i++) data[i] *= s;
         return self;
     }
 
     /// Applies a 2D rotation by theta radians by multiplying on the right.
     function rotate(theta_rad) {
+        gml_pragma("forceinline");
         var rot = new UeMatrix3().makeRotation(theta_rad);
         return self.multiply(rot);
     }
 
     /// Applies scaling factors sx, sy to the matrix (affects the first two columns).
     function scale(sx, sy) {
+        gml_pragma("forceinline");
         data[0] *= sx; data[3] *= sx; data[6] *= sx;
         data[1] *= sy; data[4] *= sy; data[7] *= sy;
         // last row (2D affine transform) remains unchanged
@@ -177,6 +194,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets matrix elements explicitly.
     function set(n11, n12, n13, n21, n22, n23, n31, n32, n33) {
+        gml_pragma("forceinline");
         data = [
             n11, n12, n13,
             n21, n22, n23,
@@ -187,6 +205,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Premultiplies this matrix by another matrix m (i.e. m * this).
     function premultiply(m) {
+        gml_pragma("forceinline");
         var result = m.clone().multiply(self);
         self.copy(result);
         return self;
@@ -194,6 +213,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets this matrix from the upper-left 3x3 part of a UeMatrix4.
     function setFromMatrix4(m4) {
+        gml_pragma("forceinline");
         var me = m4.data;
         data = [
             me[0], me[1], me[2],
@@ -205,6 +225,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Sets a UV transform matrix for texture transformations.
     function setUvTransform(tx, ty, sx, sy, rotation, cx, cy) {
+        gml_pragma("forceinline");
         var c = cos(rotation);
         var s = sin(rotation);
 
@@ -220,6 +241,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Copies the matrix elements into an array, optionally starting at offset.
     function toArray(arr = undefined, offset = 0) {
+        gml_pragma("forceinline");
         arr ??= [];
         for (var i = 0; i < 9; i++) arr[offset + i] = data[i];
         return arr;
@@ -227,6 +249,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Translates the matrix by adding (tx, ty) to the last row (affine transform).
     function translate(tx, ty) {
+        gml_pragma("forceinline");
         data[6] += tx;
         data[7] += ty;
         return self;
@@ -234,6 +257,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Transposes the matrix (rows become columns).
     function transpose() {
+        gml_pragma("forceinline");
         var d = data;
         data = [
             d[0], d[3], d[6],
@@ -245,6 +269,7 @@ function UeMatrix3(_data = undefined) constructor {
 
     /// Writes the transposed matrix into the given array.
     function transposeIntoArray(arr) {
+        gml_pragma("forceinline");
         arr[0] = data[0];
         arr[1] = data[3];
         arr[2] = data[6];

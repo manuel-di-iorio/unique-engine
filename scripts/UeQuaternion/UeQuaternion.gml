@@ -1,6 +1,7 @@
 function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     
     function set(x, y, z, w) {
+        gml_pragma("forceinline");
         self.x = x;
         self.y = y;
         self.z = z;
@@ -10,11 +11,13 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Clone the quaternion
     function clone() {
+        gml_pragma("forceinline");
         return variable_clone(self);
     }
 
     /// Copy from another quaternion
     function copy(q) {
+        gml_pragma("forceinline");
         self.x = q.x;
         self.y = q.y;
         self.z = q.z;
@@ -24,6 +27,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Set quaternion from Euler angles (in degrees)
     function setFromEuler(rx, ry, rz) {
+        gml_pragma("forceinline");
         var cx = dcos(rx * 0.5);
         var sx = dsin(rx * 0.5);
         var cy = dcos(ry * 0.5);
@@ -40,6 +44,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Normalize quaternion
     function normalize() {
+        gml_pragma("forceinline");
         var len = sqrt(self.x*self.x + self.y*self.y + self.z*self.z + self.w*self.w);
         if (len > 0) {
             var inv = 1 / len;
@@ -53,6 +58,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Multiply (combine) with another quaternion
     function multiply(q) {
+        gml_pragma("forceinline");
         var _x = self.x, _y = self.y, _z = self.z, _w = self.w;
 
         self.x = _w * q.x + _x * q.w + _y * q.z - _z * q.y;
@@ -65,6 +71,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
 
     /// Set rotation from axis and angle
     function setFromAxisAngle(axis, angle) {
+        gml_pragma("forceinline");
         var half = angle * 0.5;
         var s = dsin(half);
         self.x = axis.x * s;
@@ -75,7 +82,9 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     /// Spherical linear interpolation
+    /// @todo quat()? Needs to be fixed
     function slerp(q, t) {
+        gml_pragma("forceinline");
         var _x = self.x, _y = self.y, _z = self.z, _w = self.w;
 
         var cosHalfTheta = _x * q.x + _y * q.y + _z * q.z + _w * q.w;
@@ -115,6 +124,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     /// @param {any*} axis
     /// @param {real} angle in deegres    
     function rotate(axis, angle) {
+        gml_pragma("forceinline");
         var q = new UeQuaternion().setFromAxisAngle(axis, angle);
         multiply(q);
         return self;
@@ -122,23 +132,27 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
 
     // Rotate around X axis
     function rotateX(angle) {
+        gml_pragma("forceinline");
         rotate(new UeVector3(1, 0, 0), angle);
         return self;
     };
 
     // Rotate around Y axis
     function rotateY(angle) {
+        gml_pragma("forceinline");
         rotate(new UeVector3(0, 1, 0), angle);
         return self;
     };
 
     // Rotate around Z axis
     function rotateZ(angle) {
+        gml_pragma("forceinline");
         rotate(new UeVector3(0, 0, 1), angle);
         return self;
     };
     
     function toMat3() {
+        gml_pragma("forceinline");
         var xx = self.x * self.x;
         var yy = self.y * self.y;
         var zz = self.z * self.z;
@@ -157,6 +171,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     function setFromRotationMatrix(m) {
+        gml_pragma("forceinline");
         var te = m.data;
 
         var m11 = te[0], m12 = te[4], m13 = te[8];
@@ -201,6 +216,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     
     /// Set quaternion that rotates from vFrom to vTo (both must be unit vectors)
     function setFromUnitVectors(vFrom, vTo) {
+        gml_pragma("forceinline");
         var r = vFrom.dot(vTo);
     
         // Vectors are the same → identity quaternion
@@ -227,7 +243,14 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     
         return self.normalize();
     }
-
     
+    function identity() {
+        self.x = 0;
+        self.y = 0;
+        self.z = 0;
+        self.w = 1;
+        return self;
+    }
+
     setFromEuler(_x, _y, _z);
 }

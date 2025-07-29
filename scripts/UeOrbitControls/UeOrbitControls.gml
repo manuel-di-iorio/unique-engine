@@ -53,6 +53,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self._prevMouseY = display_mouse_get_y();
 
     function update() {
+        gml_pragma("forceinline");
         var mx = display_mouse_get_x();
         var my = display_mouse_get_y();
 

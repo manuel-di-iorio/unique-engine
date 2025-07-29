@@ -4,6 +4,7 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
     self.material = new UeLineBasicMaterial({ color });
     
     update = function() {
+        gml_pragma("forceinline");
         var box = new UeBox3().setFromObject(self.object);
         var _min = box.sizeMin;
         var _max = box.sizeMax;
@@ -68,6 +69,7 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
     }
     
     function setFromObject(object) {
+        gml_pragma("forceinline");
         self.object = object;
         update();
     }

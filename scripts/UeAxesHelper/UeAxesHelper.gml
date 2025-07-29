@@ -30,6 +30,7 @@ function UeAxesHelper(size = 1): UeLineSegments() constructor {
 
     /// Sets custom axis colors
     function setColors(xAxisColor, yAxisColor, zAxisColor) {
+        gml_pragma("forceinline");
         var xr = color_get_red(xAxisColor), xg = color_get_green(xAxisColor), xb = color_get_blue(xAxisColor);
         var yr = color_get_red(yAxisColor), yg = color_get_green(yAxisColor), yb = color_get_blue(yAxisColor);
         var zr = color_get_red(zAxisColor), zg = color_get_green(zAxisColor), zb = color_get_blue(zAxisColor);
@@ -47,6 +48,7 @@ function UeAxesHelper(size = 1): UeLineSegments() constructor {
 
     /// Disposes the geometry
     function dispose() {
+        gml_pragma("forceinline");
         self.geometry.dispose();
         return self;
     }

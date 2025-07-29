@@ -8,6 +8,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Sets the ray's origin and direction based on two points: from -> to
     function setFromPoints(from, to) {
+        gml_pragma("forceinline");
         self.origin.copy(from);
         self.direction.copy(to).sub(from).normalize();
         return self;
@@ -15,11 +16,13 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns the point at distance t along the ray
     function getPoint(t) {
+        gml_pragma("forceinline");
         return self.origin.clone().add(self.direction.clone().scale(t));
     }
 
     /// Returns intersection point with a plane or undefined if no intersection
     function intersectPlane(plane) {
+        gml_pragma("forceinline");
         var denom = plane.normal.dot(self.direction);
         if (abs(denom) < 0.00001) return undefined; // Parallel, no intersection
         var t = -(plane.normal.dot(self.origin) + plane.constant) / denom;
@@ -29,6 +32,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns the shortest distance from the ray to a given point
     function distanceToPoint(point) {
+        gml_pragma("forceinline");
         var v = point.clone().sub(self.origin);
         var t = self.direction.dot(v);
         var proj = self.direction.clone().scale(t);
@@ -37,16 +41,19 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns true if a point is within maxDist from the ray
     function isPointClose(point, maxDist) {
+        gml_pragma("forceinline");
         return distanceToPoint(point) <= maxDist;
     }
 
     /// Returns a clone (deep copy) of this ray
     function clone() {
+        gml_pragma("forceinline");
         return variable_clone(self);
     }
 
     /// Copies origin and direction from another ray
     function copy(ray) {
+        gml_pragma("forceinline");
         self.origin.copy(ray.origin);
         self.direction.copy(ray.direction);
         return self;
@@ -54,6 +61,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Applies a 4x4 transformation matrix to the ray's origin and direction
     function applyMatrix4(matrix4) {
+        gml_pragma("forceinline");
         self.origin = matrix4.applyToVector3(self.origin);
         var endPoint = self.origin.clone().add(self.direction);
         endPoint = matrix4.applyToVector3(endPoint);
@@ -63,12 +71,14 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Gets the point at distance t along the ray, writes into target Vector3
     function at(t, target) {
+        gml_pragma("forceinline");
         target.copy(self.direction).scale(t).add(self.origin);
         return target;
     }
 
     /// Gets the closest point on the ray to a given point, stores result in target
     function closestPointToPoint(point, target) {
+        gml_pragma("forceinline");
         var v = point.clone().sub(self.origin);
         var t = self.direction.dot(v);
         if (t < 0) t = 0;
@@ -77,6 +87,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns squared distance from the ray to a point (UeVector3)
     function distanceSqToPoint(point) {
+        gml_pragma("forceinline");
         // Compute the vector from the origin towards the point
         var vx = point.x - self.origin.x;
         var vy = point.y - self.origin.y;
@@ -102,6 +113,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
     /// Returns squared distance between ray and segment defined by v0 and v1.
     /// Optionally outputs closest points on ray and segment.
     function distanceSqToSegment(v0, v1, optionalPointOnRay, optionalPointOnSegment) {
+        gml_pragma("forceinline");
         var origin = self.origin;
         var dir = self.direction;
     
@@ -157,6 +169,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns distance from origin to plane along ray direction, or undefined if no intersection
     function distanceToPlane(plane) {
+        gml_pragma("forceinline");
         var denom = plane.normal.dot(self.direction);
         if (abs(denom) < 1000000) return undefined;
         var t = -(plane.normal.dot(self.origin) + plane.constant) / denom;
@@ -165,23 +178,26 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns distance from the ray to a point
     function distanceToPoint(point) {
+        gml_pragma("forceinline");
         return sqrt(distanceSqToPoint(point));
     }
 
     /// Checks if this ray equals another (origin and direction)
     function equals(ray) {
+        gml_pragma("forceinline");
         return self.origin.equals(ray.origin) && self.direction.equals(ray.direction);
     }
 
     /// Returns intersection point with axis-aligned bounding box or undefined if none
     function intersectBox(box, target) {
+        gml_pragma("forceinline");
         var tmin = 0, tmax = infinity;
     
         for (var i = 0; i < 3; i++) {
             var originComp = self.origin.getComponent(i);
             var dirComp = self.direction.getComponent(i);
     
-            if (abs(dirComp) < global.UE_DEFAULT_TEXTURE) {
+            if (abs(dirComp) < UE_EPSILON) {
                 // Ray is parallel to slab
                 if (originComp < box.sizeMin.getComponent(i) || originComp > box.sizeMax.getComponent(i)) {
                     return undefined;
@@ -209,6 +225,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns intersection point with plane or undefined if none
     function intersectPlane(plane, target) {
+        gml_pragma("forceinline");
         var denom = plane.normal.dot(self.direction);
         if (abs(denom) < 1000000) return undefined;
 
@@ -223,6 +240,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns intersection point with sphere or undefined if none
     function intersectSphere(sphere, target) {
+        gml_pragma("forceinline");
         var vx = sphere.center.x - self.origin.x;
         var vy = sphere.center.y - self.origin.y;
         var vz = sphere.center.z - self.origin.z;
@@ -251,6 +269,7 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
     /// Returns intersection point with triangle or undefined if none
     /// backfaceCulling: if true, ignore intersections from back faces
     function intersectTriangle(a, b, c, backfaceCulling, target) {
+        gml_pragma("forceinline");
         var edge1 = b.clone().sub(a);
         var edge2 = c.clone().sub(a);
         var pvec = self.direction.clone().cross(edge2);
@@ -279,33 +298,39 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
 
     /// Returns true if the ray intersects the axis-aligned bounding box
     function intersectsBox(box) {
+        gml_pragma("forceinline");
         return self.intersectBox(box, new UeVector3()) != undefined;
     }
 
     /// Returns true if the ray intersects the plane
     function intersectsPlane(plane) {
+        gml_pragma("forceinline");
         return self.distanceToPlane(plane) != undefined;
     }
 
     /// Returns true if the ray intersects the sphere
     function intersectsSphere(sphere) {
+        gml_pragma("forceinline");
         return intersectSphere(sphere, new UeVector3()) != undefined;
     }
 
     /// Sets the ray direction to look at vector v (world space)
     function lookAt(v) {
+        gml_pragma("forceinline");
         self.direction.copy(v).sub(self.origin).normalize();
         return self;
     }
 
     /// Shifts the origin along the direction by distance t
     function recast(t) {
+        gml_pragma("forceinline");
         self.origin.add(self.direction.clone().scale(t));
         return self;
     }
 
     /// Sets origin and normalized direction
     function set(origin, direction) {
+        gml_pragma("forceinline");
         self.origin.copy(origin);
         self.direction.copy(direction).normalize();
         return self;

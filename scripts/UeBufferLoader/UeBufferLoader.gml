@@ -14,6 +14,7 @@ function UeBufferLoader() constructor {
      * Load the scene objects from a buffer file
      **/
     function load(fname, isCompressed = true, resetCache = true) {
+        gml_pragma("forceinline");
         if (resetCache) {
             cache.formats = {};
             cache.geometries = {};
@@ -55,6 +56,7 @@ function UeBufferLoader() constructor {
     }
     
     function _readObject(buffer, objects) {
+        gml_pragma("forceinline");
         var str = buffer_read(buffer, buffer_string);
         var obj = json_parse(str); 
       
@@ -71,6 +73,7 @@ function UeBufferLoader() constructor {
     
     /** Types */
     function _readTypeFormat(obj, buffer) {
+        gml_pragma("forceinline");
         var format = new UeVertexFormat();
         format.uuid = obj.uuid;
         
@@ -83,6 +86,7 @@ function UeBufferLoader() constructor {
     }
     
     function _readTypeGeometry(obj, buffer) {
+        gml_pragma("forceinline");
         var geometry = new UeBufferGeometry();
         geometry.uuid = obj.uuid;
         
@@ -101,6 +105,7 @@ function UeBufferLoader() constructor {
     }
     
     function _readTypeTexture(obj, buffer) {
+        gml_pragma("forceinline");
         // Create the sprite buffer
         var image = undefined;
         
@@ -132,6 +137,7 @@ function UeBufferLoader() constructor {
     }
     
     function _readTypeMaterial(obj, buffer) {
+        gml_pragma("forceinline");
         var material = new UeMaterial();
         material.uuid = obj.uuid;
         
@@ -172,6 +178,7 @@ function UeBufferLoader() constructor {
     }
     
     function _readTypeMesh(obj, buffer) {
+        gml_pragma("forceinline");
         var mesh = new UeMesh();
         mesh.uuid = obj.uuid;
         
@@ -202,6 +209,7 @@ function UeBufferLoader() constructor {
     }
     
     function _readTypeLight(obj, buffer, objects) {
+        gml_pragma("forceinline");
         var light = new UeLight();
         var name = obj[$ "name"];
         if (name != undefined) light.name = name;
@@ -223,6 +231,7 @@ function UeBufferLoader() constructor {
     
     /** Resolvers */
     function _resolveGeometriesUUIDs() {
+        gml_pragma("forceinline");
         struct_foreach(cache.geometries, function(geometryUuid, geometry) {
             geometry.format = cache.formats[$ geometry.format];
             geometry.vb = vertex_create_buffer_from_buffer(geometry._vbBuffer, geometry.format.vf);
@@ -232,6 +241,7 @@ function UeBufferLoader() constructor {
     }
     
     function _resolveMaterialUUIDs() {
+        gml_pragma("forceinline");
         struct_foreach(cache.materials, function(materialUuid, material) {
             var materialTextures = material.textures; 
             var texNames = struct_get_names(materialTextures);
@@ -248,6 +258,7 @@ function UeBufferLoader() constructor {
     }
     
     function _resolveMeshesUUIDs(objects) {
+        gml_pragma("forceinline");
         var meshesFlat = cache.meshesFlat;
         
         for (var i = 0, n = array_length(meshesFlat); i < n; i++) {

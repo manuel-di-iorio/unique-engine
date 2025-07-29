@@ -39,6 +39,7 @@ function UeArrowHelper(
 
     // --- Method to set the direction of the arrow ---
     function setDirection(dir) {
+        gml_pragma("forceinline");
         // Normalize the new direction vector
         var _dir = dir.clone().normalize();
         
@@ -55,6 +56,7 @@ function UeArrowHelper(
 
     // --- Method to update the length and dimensions of the arrow (untested) ---
     function setLength(_length, _headLength = undefined, _headWidth = undefined) {
+        gml_pragma("forceinline");
         self._length = _length;
         
         // Update head length and width based on parameters or defaults
@@ -83,6 +85,7 @@ function UeArrowHelper(
 
     // --- Method to update the color of the arrow (untested) ---
     function setColor(_color) {
+        gml_pragma("forceinline");
         // Update line vertex colors
         self.line.geometry.setColors([
             color_get_red(_color), color_get_green(_color), color_get_blue(_color),

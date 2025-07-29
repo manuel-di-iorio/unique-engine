@@ -23,6 +23,12 @@ enum UE_FORMAT_ATTR {
     CUSTOM = 4
 }
 
+enum UE_TEXTURE_WRAP {
+    REPEAT,
+    CLAMP_TO_EDGE,
+    MIRRORED_REPEAT
+}
+
 // Internal globals
 #macro UE_EPSILON 0.00001
 global.UE_OBJECT_ID = 0;

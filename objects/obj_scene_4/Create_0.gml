@@ -30,7 +30,7 @@ scene.add(meshGroup);
 var maxDist = 500;
 var gap = 300;
 
-for (var i = 0; i < 200; i++) {
+for (var i = 0; i < 150; i++) {
     var color = make_color_rgb(irandom_range(60, 255), irandom_range(60, 255), irandom_range(60, 255));
     var size = random_range(30, 40);
     

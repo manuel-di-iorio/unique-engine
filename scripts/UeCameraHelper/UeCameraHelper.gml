@@ -54,11 +54,13 @@ function UeCameraHelper(camera, color = c_yellow): UeLineSegments() constructor 
 
     // -- Methods --
     function update() {
+        gml_pragma("forceinline");
         matrixWorld.copy(self.camera.matrixWorld);
         return self;
     }
     
     function setColors(color = c_yellow) {
+        gml_pragma("forceinline");
         geometry.setColors(color);
         return self;
     }

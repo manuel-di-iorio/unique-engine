@@ -4,6 +4,7 @@ function UeLineGeometry(data = {}): UeBufferGeometry(data) constructor {
 
     /// Populates the geometry with 3D positions. Array must be multiple of 3 (x,y,z)
     function setPositions(array) {
+        gml_pragma("forceinline");
         vertices = [];
         for (var i = 0, num = array_length(array); i < num; i += 3) {
             array_push(vertices, {
@@ -22,6 +23,7 @@ function UeLineGeometry(data = {}): UeBufferGeometry(data) constructor {
 
     /// Populates the geometry with RGB colors. One color per vertex (r,g,b)
     function setColors(colors) {
+        gml_pragma("forceinline");
         var count = min(array_length(vertices), array_length(colors) / 3);
         for (var i = 0; i < count; i++) {
             var r = colors[i * 3];
@@ -35,6 +37,7 @@ function UeLineGeometry(data = {}): UeBufferGeometry(data) constructor {
 
     /// Populates the geometry from a list of UeVector3 or UeVector2 points
     function setFromPoints(points) {
+        gml_pragma("forceinline");
         vertices = [];
         for (var i = 0; i < array_length(points); i++) {
             var p = points[i];
@@ -54,6 +57,7 @@ function UeLineGeometry(data = {}): UeBufferGeometry(data) constructor {
 
     /// Extracts vertices from a UeLine instance (assumes no index buffer)
     function fromLine(line) {
+        gml_pragma("forceinline");
         if (!line.isLine) return self;
 
         var srcVerts = line.geometry.vertices;

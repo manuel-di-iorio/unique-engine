@@ -7,6 +7,7 @@ function UeAssimpLoader(data = {}) constructor {
     GMA_BindImporter(importer);
     
     function load(fname) {
+        gml_pragma("forceinline");
 		var check = GMA_ReadFile(fname,
 			GMA_PP.GEN_BOUNDING_BOXES |
 			
@@ -51,6 +52,7 @@ function UeAssimpLoader(data = {}) constructor {
     }
     
     function _addMaterials(fname) {
+        gml_pragma("forceinline");
         var modelPath = filename_path(fname);
 		
 		// Get the materials
@@ -66,6 +68,7 @@ function UeAssimpLoader(data = {}) constructor {
     }
     
     function _addTextures(modelPath) {
+        gml_pragma("forceinline");
         var textures = {};
         
         var materialTypes = [
@@ -95,6 +98,7 @@ function UeAssimpLoader(data = {}) constructor {
     }
     
     function _addTexture(modelPath, fname) {
+        gml_pragma("forceinline");
         var fullPath = modelPath + "/" + fname;
 			
         if (!file_exists(fullPath)) {
@@ -112,6 +116,7 @@ function UeAssimpLoader(data = {}) constructor {
     }
     
     function _addMeshes(materials) {
+        gml_pragma("forceinline");
         var model = new UeMesh();
         
         for (var i = 0, n = GMA_GetMeshNum(); i < n; i++) {
@@ -130,6 +135,7 @@ function UeAssimpLoader(data = {}) constructor {
     }
     
     function _buildMesh() {
+        gml_pragma("forceinline");
         var mesh = new UeMesh();
         mesh.name = GMA_GetMeshName();
         var meshFacenum = GMA_GetMeshFacesNum();
@@ -190,6 +196,7 @@ function UeAssimpLoader(data = {}) constructor {
     }
     
     function dispose() {
+        gml_pragma("forceinline");
         GMA_DeleteImporter(importer);
         return self;
     }

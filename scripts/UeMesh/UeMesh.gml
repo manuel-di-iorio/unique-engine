@@ -6,7 +6,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
     function render(renderSide = undefined) {
-        matrix_set(matrix_world, matrixWorld.data);
+        gml_pragma("forceinline");
         
         // Apply the material
         if (material != undefined) {
@@ -15,10 +15,12 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
             shader_reset();
         }
         
+        matrix_set(matrix_world, matrixWorld.data);
         vertex_submit(geometry.vb, material != undefined && material.wireframe ? pr_linelist : primitive, -1); 
     }
     
     function toJSON() {
+        gml_pragma("forceinline");
         return {
             children: array_map(children, function(child) { return child.uuid }),
             visible,
@@ -47,8 +49,8 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         };
     }
     
-    // This is a very simplified version of the actual ThreeJS implementation
     function raycast(raycaster, hits) {
+        gml_pragma("forceinline");
         var object = self;
         
         var matrixWorldInverse = global.UE_DUMMY_MATRIX4.copy(matrixWorld).invert();
@@ -77,6 +79,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     
     /** Internal export methods */
     function _compileData(data) {
+        gml_pragma("forceinline");
         var _self = self;
         return { obj: _self, payload: toJSON() };
     }
