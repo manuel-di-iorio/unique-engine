@@ -13,7 +13,7 @@ new UeTexture(data = {})
 
 | Key               | Type      | Default      | Description                                    |
 | ----------------- | --------- | ------------ | ---------------------------------------------- |
-| `image`           | `sprite`  | **required** | A sprite resource or image                     |
+| `image`           | `sprite`  |              | A sprite resource or image                     |
 | `repeat`          | `boolean` | `true`       | Whether the texture repeats                    |
 | `filter`          | `boolean` | `true`       | Enables texture smoothing                      |
 | `generateMipmaps` | `boolean` | `true`       | Whether to enable mipmaps for minification     |
@@ -31,15 +31,15 @@ new UeTexture(data = {})
 | `repeat`           | `UeVector2` | UV repeat count.                                                    |
 | `center`           | `UeVector2` | Pivot point for transforms.                                         |
 | `rotation`         | `float`     | Rotation in radians (Z-axis).                                       |
-| `flipX`            | `bool`      | Flips horizontally.                                                 |
-| `flipY`            | `bool`      | Flips vertically.                                                   |
-| `wrapS`            | `enum`      | Horizontal wrapping (`REPEAT`, `CLAMP_TO_EDGE`, `MIRRORED_REPEAT`). |
-| `wrapT`            | `enum`      | Vertical wrapping.                                                  |
-| `filter`           | `bool`      | Texture filtering mode.                                             |
-| `generateMipmaps`  | `bool`      | Enables mipmap generation.                                          |
+| `flipX`            | `boolean`      | Flips horizontally.                                                 |
+| `flipY`            | `boolean`      | Flips vertically.                                                   |
+| `wrapS`            | `boolean`      | Horizontal wrapping (`UE_TEXTURE_WRAP.REPEAT`, `UE_TEXTURE_WRAP.CLAMP_TO_EDGE`, `UE_TEXTURE_WRAP.MIRRORED_REPEAT`). |
+| `wrapT`            | `boolean`      | Vertical wrapping                                                   |
+| `filter`           | `boolean`      | Texture filtering mode.                                             |
+| `generateMipmaps`  | `boolean`      | Enables mipmap generation.                                          |
 | `matrix`           | `UeMatrix4` | UV transformation matrix.                                           |
-| `matrixAutoUpdate` | `bool`      | Auto-updates matrix when needed.                                    |
-| `needsUpdate`      | `bool`      | Marks texture as needing rebake.                                    |
+| `matrixAutoUpdate` | `boolean`      | Auto-updates matrix when needed.                                    |
+| `needsUpdate`      | `boolean`      | Marks texture as needing rebake.                                    |
 
 
 
@@ -57,4 +57,4 @@ new UeTexture(data = {})
 
 ## Notes
 
-You don't need to call `updateMatrix()` manually unless `matrixAutoUpdate` is false. Just set `needsUpdate = true` to tells the engine to rebake the texture.
+You don't need to call `updateMatrix()` manually unless `matrixAutoUpdate` is set to false. Just set `needsUpdate = true` to tells the engine to rebake the texture.
