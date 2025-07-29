@@ -54,7 +54,7 @@ function UeTexture(data = {}) constructor {
     needsUpdate = false;
 
     // Cached sprite created from baked surface with applied transforms
-    __cachedSprite = undefined;
+    __cachedSprite = image;
 
     // Cached texture handle from the cached sprite
     __cachedTexture = image != undefined ? sprite_get_texture(image, 0) : undefined;
@@ -217,14 +217,14 @@ function UeTexture(data = {}) constructor {
 
         var payload = toJSON();
 
-        var compileSprites = data.compileSprites && image != undefined;
+        var compileSprites = data.compileSprites && __cachedSprite != undefined;
         var spriteWidth = undefined;
         var spriteHeight = undefined;
         var spriteBuffSize = 0;
 
         if (compileSprites) {
-            spriteWidth = sprite_get_width(image);
-            spriteHeight = sprite_get_height(image);
+            spriteWidth = sprite_get_width(__cachedSprite);
+            spriteHeight = sprite_get_height(__cachedSprite);
             spriteBuffSize = spriteWidth * spriteHeight * 4;
             payload.spriteWidth = spriteWidth;
             payload.spriteHeight = spriteHeight;
@@ -250,7 +250,7 @@ function UeTexture(data = {}) constructor {
         var spriteSurf = surface_create(ctx.spriteWidth, ctx.spriteHeight);
         surface_set_target(spriteSurf);
         draw_clear_alpha(c_black, 0);
-        draw_sprite(image, 0, 0, 0);
+        draw_sprite(__cachedSprite, 0, 0, 0);
         surface_reset_target();
         buffer_get_surface(buffer, spriteSurf, buffer_tell(buffer));
         surface_free(spriteSurf);
@@ -264,6 +264,7 @@ function UeTexture(data = {}) constructor {
      * Object-fit: contain (fit inside surface preserving aspect ratio)
      */
     function contain(aspect) {
+        gml_pragma("forceinline");
         var imageW = sprite_get_width(image);
         var imageH = sprite_get_height(image);
         var imageAspect = imageW / imageH;
@@ -292,6 +293,7 @@ function UeTexture(data = {}) constructor {
      * Object-fit: cover (cover entire surface preserving aspect ratio)
      */
     function cover(aspect) {
+        gml_pragma("forceinline");
         var imageW = sprite_get_width(image);
         var imageH = sprite_get_height(image);
         var imageAspect = imageW / imageH;
@@ -320,6 +322,7 @@ function UeTexture(data = {}) constructor {
      * Object-fit: fill (stretch to fill, ignore aspect ratio)
      */
     function fill() {
+        gml_pragma("forceinline");
         self[$ "repeat"].x = 1;
         self[$ "repeat"].y = 1;
         offset.x = 0;

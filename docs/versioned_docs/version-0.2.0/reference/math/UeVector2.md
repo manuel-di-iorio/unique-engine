@@ -35,7 +35,7 @@ new UeVector2(x = 0, y = 0)
 | `normalize()`     | `self`      | Converts to a unit vector                          |
 | `equals(vec)`     | `boolean`   | Checks if two vectors are identical                |
 | `lerp(vec, t)`    | `self`      | Linear interpolation toward `vec` by factor `t`    |
-| `angleTo(vec)`    | `number`    | Returns angle in degrees between the vectors       |
+| `angleTo(vec)`    | `number`    | Returns angle in radians between the vectors       |
 | `distanceTo(vec)` | `number`    | Euclidean distance to another vector               |
 | `perp()`          | `UeVector2` | Returns a perpendicular vector (`-y, x`)           |
 | `rotate(angle)`   | `self`      | Rotates the vector counterclockwise by angle       |

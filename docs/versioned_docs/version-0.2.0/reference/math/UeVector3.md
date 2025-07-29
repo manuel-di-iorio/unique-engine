@@ -37,7 +37,7 @@ new UeVector3(x = 0, y = 0, z = 0)
 | `normalize()`                       | `self`      | Normalizes the vector                                |
 | `equals(vec)`                       | `boolean`   | Checks if the vectors are equal in all components    |
 | `lerp(vec, t)`                      | `self`      | Linearly interpolates toward another vector          |
-| `angleTo(vec)`                      | `number`    | Angle between vectors (degrees)                      |
+| `angleTo(vec)`                      | `number`    | Angle between vectors (radians)                      |
 | `distanceTo(vec)`                   | `number`    | Euclidean distance to another vector                 |
 | `distanceToSquared(vec)`            | `number`    | Squared distance (faster)                            |
 | `addScalar(s)`                      | `self`      | Adds a scalar to all components                      |

@@ -132,7 +132,18 @@ function UeBufferLoader() constructor {
         
         texture.filter = obj.filter;
         texture.generateMipmaps = obj.generateMipmaps;
-        texture[$ "repeat"] = obj[$ "repeat"];
+        var repeatVec = obj[$ "repeat"];
+        var offset = obj.offset;
+        var center = obj.center;
+        texture[$ "repeat"] = new UeVector2(repeatVec.x, repeatVec.y);
+        texture.offset = new UeVector2(offset.x, offset.y);
+        texture.center = new UeVector2(center.x, center.y);
+        texture.rotation = obj.rotation;
+        texture.flipX = obj.flipX;
+        texture.flipY = obj.flipY;
+        texture.wrapS = obj.wrapS;
+        texture.wrapT = obj.wrapT;
+        
         cache.textures[$ obj.uuid] = texture;
     }
     
