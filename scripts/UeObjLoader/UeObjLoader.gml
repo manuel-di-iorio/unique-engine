@@ -1,21 +1,21 @@
 function UeObjLoader() constructor {
     // Optional settings
     flipUV = true;
-    reverseWinding = false;
+    reverseWinding = true;
     materials = {}; // Loaded with the UeMtlLoader
     
-    root = undefined;
-    positions = [];
-    normals = [];
-    uvs = [];
-    colors = [];
-    meshes = [];
-    currentMesh = undefined;
-    currentMaterial = undefined;
-    materialLibs = [];
-
     function load(fname) {
+        gml_pragma("forceinline");
+        positions = [];
+        normals = [];
+        uvs = [];
+        colors = [];
+        meshes = [];
+        currentMesh = undefined;
+        currentMaterial = undefined;
+        materialLibs = [];
         root = new UeMesh();
+        
         var buffer = buffer_load(fname);
         var size = buffer_get_size(buffer);
         var line = "";
@@ -45,6 +45,7 @@ function UeObjLoader() constructor {
     }
 
      function _startNewMesh(name) {
+        gml_pragma("forceinline");
         if (currentMesh != undefined) {
             currentMesh.geometry.vertices = currentVertices;
             currentMesh.geometry.index = currentIndices;
@@ -63,6 +64,7 @@ function UeObjLoader() constructor {
     }
 
     function _parseLine(line) {
+        gml_pragma("forceinline");
         var tokens = string_split_ext(string_trim(line), [" "], true);
         if (!array_length(tokens)) return;
         var type = tokens[0];
@@ -112,6 +114,7 @@ function UeObjLoader() constructor {
     }
 
     function _parseFace(tokens) {
+        gml_pragma("forceinline");
         var count = array_length(tokens) - 1;
         var baseIndex = array_length(currentVertices);
         var faceIndices = [];
@@ -165,6 +168,7 @@ function UeObjLoader() constructor {
     }
 
     function _buildGeometries() {
+        gml_pragma("forceinline");
         if (currentMesh != undefined) {
             currentMesh.geometry.vertices = currentVertices;
             currentMesh.geometry.index = currentIndices;
@@ -177,6 +181,7 @@ function UeObjLoader() constructor {
     }
     
     function setMaterials(materials) {
+        gml_pragma("forceinline");
         self.materials = materials;
     }
 }

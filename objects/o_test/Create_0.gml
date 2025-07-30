@@ -2,7 +2,7 @@ display_reset(4, false);
 show_debug_overlay(true);
 
 bgLayer = layer_background_get_id("Background");
-demo = 7;
+demo = 0;
 demoMax = 7;
 scenes = [
     { obj: obj_scene_0, bg: c_black }, 

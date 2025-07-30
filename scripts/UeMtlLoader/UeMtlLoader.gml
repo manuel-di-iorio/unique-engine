@@ -1,8 +1,8 @@
 function UeMtlLoader() constructor {
-    // Main output: map from material name to UeMaterial
     materials = {};
 
     function load(path) {
+        gml_pragma("forceinline");
         materials = {};
         baseDir = filename_path(path);
 
@@ -40,6 +40,7 @@ function UeMtlLoader() constructor {
     }
 
     function _parseLine(line) {
+        gml_pragma("forceinline");
         var tokens = string_split_ext(string_trim(line), [" "], true);
 
         if (!array_length(tokens)) return;
@@ -130,6 +131,7 @@ function UeMtlLoader() constructor {
     }
 
     function _createTexture(fname) {
+        gml_pragma("forceinline");
         var image = sprite_add(baseDir + fname, 1, false, false, 0, 0);
         if (image < 0) return undefined;
    

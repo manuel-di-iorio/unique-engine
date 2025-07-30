@@ -11,15 +11,6 @@ Parses standard MTL directives and builds `UeMeshStandardMaterial` instances, lo
 new UeMtlLoader()
 ```
 
-### Properties
-
-| Property          | Type      | Default | Description                             |
-| ----------------- | --------- | ------- | --------------------------------------- |
-| `isBufferLoader`  | `boolean` | `true`  | Identifies this object as a buffer loader |
-| `type`            | `string`  | `BufferLoader` | Object type                        |
-| `name`            | `string`  | undefined | Object name (optional)                |
-| `cache`           | `object`  | Internal cache | Temporary storage for object resolution |
-
 ## Methods
 
 | Method Signature | Description                                                                |

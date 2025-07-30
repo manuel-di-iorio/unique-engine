@@ -7,12 +7,23 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import versions from "./versions.json"
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+// Get the versions from the versions.json file
+const versionsMap = {
+  current: {
+    label: versions[0] + ' (latest)',
+  }
+};
+for (let i = 1; i < versions.length; i++) {
+  versionsMap[versions[i]] = {
+    label: versions[i]
+  };
+}
+
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Unique Engine',
-  tagline: 'A lightweight 3D engine for GameMaker',
+  tagline: 'A 3D engine for GameMaker',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -53,20 +64,7 @@ const config = {
           editUrl:
             'https://github.com/manuel-di-iorio/unique-engine/tree/main/docs',
           lastVersion: 'current',
-          versions: {
-            current: {
-              label: '0.2.0 (latest)',
-            },
-            '0.2.0': {
-              label: '0.2.0',
-            },
-            '0.1.0': {
-              label: '0.1.0',
-            },
-            '0.0.1': {
-              label: '0.0.1',
-            },
-          },
+          versions: versionsMap,
         },
         theme: {
           customCss: './src/css/custom.css',
