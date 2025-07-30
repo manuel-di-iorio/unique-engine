@@ -5,7 +5,7 @@ function ueUuid() {
     var r;
 
     for (var i = 0; i < 36; i++) {
-        // Inserisci trattini alle posizioni fisse
+        // Inserisci dash alle posizioni fisse
         if (i == 8 || i == 13 || i == 18 || i == 23) {
             uuid += "-";
             continue;

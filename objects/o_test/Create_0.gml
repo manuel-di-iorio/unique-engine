@@ -2,8 +2,8 @@ display_reset(4, false);
 show_debug_overlay(true);
 
 bgLayer = layer_background_get_id("Background");
-demo = 0;
-demoMax = 6;
+demo = 7;
+demoMax = 7;
 scenes = [
     { obj: obj_scene_0, bg: c_black }, 
     { obj: obj_scene_1, bg: #D6FFF9 },
@@ -12,6 +12,7 @@ scenes = [
     { obj: obj_scene_4, bg: #333333 },
     { obj: obj_scene_5, bg: #333333 },
     { obj: obj_scene_6, bg: #333333 },
+    { obj: obj_scene_7, bg: #147FCC },
 ];
 
 setScene = function(incr = 0) {

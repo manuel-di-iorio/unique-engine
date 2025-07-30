@@ -9,10 +9,10 @@ var sunLight = new UeDirectionalLight(150, 50, 50, { color: #FFFFC8 });
 
 // Load the model
 assimpLoader = new UeAssimpLoader();
-airplaneMesh = assimpLoader.load("11804_Airplane_v2_l2.obj");
+airplaneMesh = assimpLoader.load("airplane/11804_Airplane_v2_l2.obj");
 
 // Manually import the texture into the model's material
-sprAirplane = sprite_add("11804_Airplane_diff.jpg", 1, false, false, 0, 0);
+sprAirplane = sprite_add("airplane/11804_Airplane_diff.jpg", 1, false, false, 0, 0);
 texAirplane = new UeTexture({ image: sprAirplane });
 
 airplaneMesh.traverse(function(mesh) {
