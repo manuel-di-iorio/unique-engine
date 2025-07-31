@@ -8,4 +8,5 @@ var ambientLight = new UeAmbientLight(c_dkgray);
 var sunLight = new UeDirectionalLight(150, 50, 50, { color: #FFFFC8 });
 
 modelLoaded = false;
+modelLoading = false;
 scene.add(ambientLight, sunLight);

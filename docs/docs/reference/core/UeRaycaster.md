@@ -27,7 +27,7 @@ UeRaycaster(origin = new UeVector3(), direction = new UeVector3(0, 0, -1), near 
 | Method                                                             | Returns | Description                                                                                     |
 | ------------------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------- |
 | `set(origin, direction)`                                           | `self`  | Sets the ray origin and direction                                                            |
-| `setFromCamera(mouse_x, mouse_y, camera)`                          | `self`  | Sets the ray based on device mouse coordinates and camera                             |
+| `setFromCamera(camera)`                                  | `self`  | Sets the ray based on mouse coordinates and camera                             |
 | `intersectObject(object, recursive = true, hits = [])`   | `Array` | Intersects ray with an object and optionally its descendants recursively, returning sorted hits by distance |
 | `intersectObjects(objects, recursive = true, hits = [])` | `Array` | Intersects ray with multiple objects, optionally recursive, returning sorted hits by distance              |
 

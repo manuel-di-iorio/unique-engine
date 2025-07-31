@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"ueUuid",
+  "%Name":"scrDemoDrawSelector",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"ueUuid",
+  "name":"scrDemoDrawSelector",
   "parent":{
-    "name":"__internals",
-    "path":"folders/Unique Engine/__internals.yy",
+    "name":"Demo",
+    "path":"folders/Demo.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

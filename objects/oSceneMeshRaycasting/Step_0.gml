@@ -1,5 +1,5 @@
 // Project the raycaster from the camera origin towards the mouse coords
-raycaster.setFromCamera(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), camera);
+raycaster.setFromCamera(camera);
 var intersects = raycaster.intersectObjects(meshGroup.children, false);
 
 // Hide the previously selected bbox

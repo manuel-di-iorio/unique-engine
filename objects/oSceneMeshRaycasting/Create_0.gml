@@ -18,7 +18,7 @@ scene.add(ambientLight, dirLight);
 // Create the raycaster
 raycaster = new UeRaycaster();
 raycaster.layers.set(1);
-raycaster.setFromCamera(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), camera);
+raycaster.setFromCamera(camera);
 intersectedBox = undefined;
 
 meshGroup = new UeMesh(undefined);

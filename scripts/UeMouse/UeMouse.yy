@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"ueUuid",
+  "%Name":"UeMouse",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"ueUuid",
+  "name":"UeMouse",
   "parent":{
-    "name":"__internals",
-    "path":"folders/Unique Engine/__internals.yy",
+    "name":"Utils",
+    "path":"folders/Unique Engine/Utils.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

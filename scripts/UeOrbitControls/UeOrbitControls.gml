@@ -39,7 +39,8 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         LEFT: vk_left,
         UP: vk_up,
         RIGHT: vk_right,
-        BOTTOM: vk_down
+        BOTTOM: vk_down,
+        SHIFT: vk_shift
     };
 
     self._dragging = false;
@@ -47,16 +48,17 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     self._deltaAzimuth = 0;
     self._deltaElevation = 0;
-    self._deltaPan = new UeVector3(0, 0, 0);
-
-    self._prevMouseX = display_mouse_get_x();
-    self._prevMouseY = display_mouse_get_y();
+    self._deltaPan = new UeVector3(0, 0, 0);  
 
     function update() {
         gml_pragma("forceinline");
-        var mx = display_mouse_get_x();
-        var my = display_mouse_get_y();
-
+        var mouse = global.UE_MOUSE.get(); 
+        var mx = mouse.x;
+        var my = mouse.y;
+        var displayWidth = display_get_width();
+        var displayHeight = display_get_height();
+        var worldUp = global.UE_OBJECT3D_DEFAULT_UP;
+        
         var isRotatingNow = mouse_check_button(self.mouseButtonRotate) && self.enableRotate;
         var isPanningNow = mouse_check_button(self.mouseButtonPan) && self.enablePan;
 
@@ -75,23 +77,24 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var dx = 0;
         var dy = 0;
         if (self._dragging || self._panning) {
+            log(mx, self._prevMouseX)
             dx = mx - self._prevMouseX;
             dy = my - self._prevMouseY;
         }
 
         // Mouse rotate
         if (self._dragging && self.enableRotate) {
-            var norm_dx = dx / display_get_width();
-            var norm_dy = dy / display_get_height();
+            var norm_dx = dx / displayWidth;
+            var norm_dy = dy / displayHeight;
 
-            self._deltaAzimuth -= norm_dx * self.rotateSpeed * 2 * pi;
+            self._deltaAzimuth -= norm_dx * self.rotateSpeed * pi;
             self._deltaElevation += norm_dy * self.rotateSpeed * pi;
         }
 
         // Mouse pan
         if (self._panning && self.enablePan) {
-            var norm_dx = dx / display_get_width();
-            var norm_dy = dy / display_get_height();
+            var norm_dx = dx / displayWidth;
+            var norm_dy = dy / displayHeight;
 
             var panX = -norm_dx * self.panSpeed * self.radius * 3;
             var panY = norm_dy * self.panSpeed * self.radius * 3;
@@ -101,7 +104,6 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             var camDir = camTarget.clone().sub(camPos).normalize();
 
             if (self.screenSpacePanning) {
-                var worldUp = global.UE_OBJECT3D_DEFAULT_UP;
                 var right = camDir.cross(worldUp).normalize();
                 var up = right.cross(camDir).normalize();
 
@@ -122,7 +124,6 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             if (mouse_wheel_down()) self.radius += self.zoomSpeed * 5;
                 
             if (mouse_check_button(self.mouseButtonZoom)) {
-                my = display_mouse_get_y();
                 dy = my - self._prevMouseY;
         
                 // Zoom in base al movimento verticale del mouse (drag)
@@ -131,7 +132,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         }
 
         // Keyboard input
-        var shiftPressed = keyboard_check(vk_shift);
+        var shiftPressed = keyboard_check(self.keys.SHIFT);
         var panKeyAmount = self.keyPanSpeed * self.radius * 0.01;
         var rotateKeyAmount = self.keyRotateSpeed * pi * 0.01;
 
@@ -142,14 +143,13 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         if (!shiftPressed) {
             if (self.screenSpacePanning) {
                 // Pan aligned to camera screen space
-                var worldUp = global.UE_OBJECT3D_DEFAULT_UP;
                 var right = camDir.cross(worldUp).normalize();
                 var up = right.cross(camDir).normalize();
         
-                if (keyboard_check(self.keys.LEFT))  self._deltaPan.add(right.scale(panKeyAmount));
-                if (keyboard_check(self.keys.RIGHT)) self._deltaPan.add(right.scale(-panKeyAmount));
-                if (keyboard_check(self.keys.UP))    self._deltaPan.add(up.scale(-panKeyAmount));
-                if (keyboard_check(self.keys.BOTTOM))self._deltaPan.add(up.scale(panKeyAmount));
+                if (keyboard_check(self.keys.LEFT))   self._deltaPan.add(right.scale(panKeyAmount));
+                if (keyboard_check(self.keys.RIGHT))  self._deltaPan.add(right.scale(-panKeyAmount));
+                if (keyboard_check(self.keys.UP))     self._deltaPan.add(up.scale(-panKeyAmount));
+                if (keyboard_check(self.keys.BOTTOM)) self._deltaPan.add(up.scale(panKeyAmount));
             } else {
                 // Project cam direction onto world XY plane
                 var forward = new UeVector3(camDir.x, camDir.y, 0).normalize();
@@ -207,4 +207,8 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         self._prevMouseX = mx;
         self._prevMouseY = my;
     }
+    
+    var mouse = global.UE_MOUSE.get(); 
+    self._prevMouseX = mouse.x;
+    self._prevMouseY = mouse.y;
 }

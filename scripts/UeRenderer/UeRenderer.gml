@@ -212,6 +212,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     /// Render the scene
     function render(scene, camera) {
         gml_pragma("forceinline");
+        if (view_current != camera.view) return;
         var currentBlendEnable = gpu_get_blendenable();
         var currentCullMode = gpu_get_cullmode();
         

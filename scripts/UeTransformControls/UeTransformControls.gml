@@ -152,7 +152,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         if (!self.object || self.dragging || (pointer != undefined && pointer.button != 0)) return;
 
         // Setup raycaster from current mouse position
-        self._raycaster.setFromCamera(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), self.camera);
+        self._raycaster.setFromCamera(self.camera);
         updateInteraction();  // Update which axis is hovered
 
         if (self.axis != undefined) {
@@ -198,7 +198,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         if (!self.dragging) return;
 
         // Update raycaster for current mouse position
-        self._raycaster.setFromCamera(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), self.camera);
+        self._raycaster.setFromCamera( self.camera);
 
         // Calculate intersection with drag plane
         var intersectionPoint = new UeVector3();

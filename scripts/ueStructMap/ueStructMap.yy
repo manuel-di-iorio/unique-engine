@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"ueStructMap",
   "parent":{
-    "name":"Utils",
-    "path":"folders/Unique Engine/Utils.yy",
+    "name":"__internals",
+    "path":"folders/Unique Engine/__internals.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

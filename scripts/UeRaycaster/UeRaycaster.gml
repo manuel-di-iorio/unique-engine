@@ -7,9 +7,9 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
     // Camera associated with this raycaster (used for coordinate conversions)
     self.camera = undefined;
     // Raycaster layers. Objects being tested must share at least one layer with the raycaster
-    self.layers = new UeLayers();
+    self.layers = new UeLayers(); 
     
-    // @MissingDoc
+    // @undocumented
     self.params = {
         Mesh: {},
         Line: { threshold: 4 },
@@ -29,32 +29,27 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
 
     /**
      * Sets the ray from normalized device coordinates (NDC) and camera
-     * Converts screen coordinates into a world-space ray
-     * @param {Real} mx - device_mouse_get_x() or device_mouse_x_to_gui(0)
-     * @param {Real} my - device_mouse_get_y() or device_mouse_y_to_gui(0)
+     * Converts mouse coordinates into a world-space ray
      * @param {Struct} camera - Camera object used for unprojection
      */
-    function setFromCamera(mx, my, camera) {
+    function setFromCamera(camera) {
         gml_pragma("forceinline");
         self.camera = camera;
         
-        // Normalize the mouse coordinates
-        // @todo May use a better way to obtain the screen size
-        var screenW = window_get_width();
-        var screenH = window_get_height();
-        if (!screenW || !screenH) return self;
-            
-        var ndcX = (mx / screenW) * 2 - 1;
-        var ndcY = ((my / screenH) * 2 - 1);
+        var mouse = global.UE_MOUSE.get();
 
         if (camera.isPerspectiveCamera) {
             // For perspective camera, origin is camera position
             global.UE_DUMMY_VECTOR3.copy(camera.position);
             // Direction is computed by unprojecting NDC point and normalizing
-            global.UE_DUMMY_VECTOR3_B.set(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
+            global.UE_DUMMY_VECTOR3_B.set(mouse.ndcX, mouse.ndcY, 0.5)
+                .unproject(camera)
+                .sub(camera.position)
+                .normalize();
         } else if (camera.isOrthographicCamera) {
             // For orthographic camera, origin is unprojected NDC with depth, direction is fixed
-            global.UE_DUMMY_VECTOR3.set(ndcX, ndcY, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
+            global.UE_DUMMY_VECTOR3.set(mouse.ndcX, mouse.ndcY, (camera.near + camera.far) / (camera.near - camera.far))
+                .unproject(camera);
             global.UE_DUMMY_VECTOR3_B.copy(global.UE_OBJECT3D_DEFAULT_UP).transformDirection(camera.matrixWorld);
         }
 
