@@ -2,6 +2,7 @@ display_reset(4, false);
 currentDemo = undefined;
 bgLayer = layer_background_get_id("Background");
 selectorW = 300;
+show_debug_overlay(true)
 
 scenes = [
     { name: "Cube", obj: oSceneCube, bg: c_black }, 

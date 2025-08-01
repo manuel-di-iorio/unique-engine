@@ -77,8 +77,6 @@ function UeTexture(data = {}) constructor {
         var ox = offset.x + center.x;
         var oy = offset.y + center.y;
         
-        log(tx, ty, sx, sy, ox, oy)
-
         matrix.identity()
             .multiply(matrix.makeTranslation(tx, ty, 0))
             .multiply(matrix.makeRotationFromEuler(0, rotation, 0))
@@ -152,6 +150,7 @@ function UeTexture(data = {}) constructor {
      */
     function __use(sampler) {
         gml_pragma("forceinline");
+        if (__cachedTexture == undefined) return;
 
         if (matrixAutoUpdate && needsUpdate) __update();
 
@@ -166,12 +165,15 @@ function UeTexture(data = {}) constructor {
     }
 
     /**
-     * Dispose cached sprite and free GPU resources.
+     * Dispose cached sprite (if modified) to free memory resources.
      */
     function dispose() {
         gml_pragma("forceinline");
 
-        if (sprite_exists(__cachedSprite)) sprite_delete(__cachedSprite);
+        if (image != __cachedSprite && sprite_exists(__cachedSprite)) {
+            sprite_delete(__cachedSprite);
+        }
+        
         __cachedSprite = undefined;
         __cachedTexture = undefined;
 

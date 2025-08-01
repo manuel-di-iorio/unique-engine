@@ -77,7 +77,6 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var dx = 0;
         var dy = 0;
         if (self._dragging || self._panning) {
-            log(mx, self._prevMouseX)
             dx = mx - self._prevMouseX;
             dy = my - self._prevMouseY;
         }

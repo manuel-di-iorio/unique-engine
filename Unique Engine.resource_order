@@ -66,7 +66,8 @@
     {"name":"UeSphereGeometry","order":3,"path":"scripts/UeSphereGeometry/UeSphereGeometry.yy",},
     {"name":"UeSprite","order":3,"path":"scripts/UeSprite/UeSprite.yy",},
     {"name":"UeSpriteMaterial","order":3,"path":"scripts/UeSpriteMaterial/UeSpriteMaterial.yy",},
-    {"name":"ueStructMap","order":2,"path":"scripts/ueStructMap/ueStructMap.yy",},
+    {"name":"ueStructEach","order":2,"path":"scripts/ueStructEach/ueStructEach.yy",},
+    {"name":"ueStructMap","order":3,"path":"scripts/ueStructMap/ueStructMap.yy",},
     {"name":"UeTexture","order":7,"path":"scripts/UeTexture/UeTexture.yy",},
     {"name":"UeTransformControls","order":2,"path":"scripts/UeTransformControls/UeTransformControls.yy",},
     {"name":"ueUuid","order":1,"path":"scripts/ueUuid/ueUuid.yy",},
@@ -79,7 +80,7 @@
     {"name":"spr_tex_box","order":3,"path":"sprites/spr_tex_box/spr_tex_box.yy",},
     {"name":"spr_tex_palm_tree","order":2,"path":"sprites/spr_tex_palm_tree/spr_tex_palm_tree.yy",},
     {"name":"spr_tex_pyramid","order":1,"path":"sprites/spr_tex_pyramid/spr_tex_pyramid.yy",},
-    {"name":"spr_ue_default_tex","order":3,"path":"sprites/spr_ue_default_tex/spr_ue_default_tex.yy",},
+    {"name":"spr_ue_default_tex","order":4,"path":"sprites/spr_ue_default_tex/spr_ue_default_tex.yy",},
     {"name":"sprLogo","order":6,"path":"sprites/sprLogo/sprLogo.yy",},
   ],
 }

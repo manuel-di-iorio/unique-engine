@@ -6,11 +6,15 @@ function UeObjLoader() constructor {
     
     function load(fname) {
         gml_pragma("forceinline");
-        positions = [];
-        normals = [];
-        uvs = [];
-        colors = [];
-        meshes = [];
+        positions = array_create(99999);
+        normals = array_create(99999);
+        uvs = array_create(99999);
+        colors = array_create(99999);
+        positionsIdx = 0;
+        normalsIdx = 0;
+        uvsIdx = 0;
+        colorsIdx = 0;
+        
         currentMesh = undefined;
         currentMaterial = undefined;
         materialLibs = [];
@@ -37,65 +41,74 @@ function UeObjLoader() constructor {
             }
         }
         if (line != "") _parseLine(line); // last line
-
         buffer_delete(buffer);
-        _buildGeometries();
+        if (currentMesh != undefined) _endMesh(); 
+        positions = undefined;
+        normals = undefined;
+        uvs = undefined;
+        colors = undefined;
         
         return root;
     }
 
      function _startNewMesh(name) {
         gml_pragma("forceinline");
-        if (currentMesh != undefined) {
-            currentMesh.geometry.vertices = currentVertices;
-            currentMesh.geometry.index = currentIndices;
-            currentMesh.geometry.build();
-            if (currentMaterial != undefined) currentMesh.material = currentMaterial;
-            array_push(meshes, currentMesh);
-        }
+        
+        if (currentMesh != undefined) _endMesh();
     
         // Prepara la nuova mesh
         currentMesh = new UeMesh();
         currentMesh.geometry = new UeBufferGeometry({ canFreeze: false });
+        currentVb = vertex_create_buffer();
+        currentMesh.geometry.vb = currentVb;
+        vertex_begin(currentVb, currentMesh.geometry.format.vf); 
         currentMesh.name = name;
     
         currentVertices = [];
         currentIndices = [];
     }
+    
+    function _endMesh() {
+        gml_pragma("forceinline");
+        //currentMesh.geometry.vertices = currentVertices;
+        //currentMesh.geometry.index = currentIndices;
+        //currentMesh.geometry.build();
+        vertex_end(currentVb);
+        root.add(currentMesh);
+    }
 
     function _parseLine(line) {
         gml_pragma("forceinline");
         var tokens = string_split_ext(string_trim(line), [" "], true);
-        if (!array_length(tokens)) return;
+        var tokensLength = array_length(tokens);
+        if (!tokensLength) return;
         var type = tokens[0];
 
         switch (type) {
             case "v":
                 var xx = real(tokens[1]), yy = real(tokens[2]), zz = real(tokens[3]);
-                array_push(positions, [xx, yy, zz]);
-                if (array_length(tokens) >= 7) {
-                    var r = real(tokens[4]) * 255;
-                    var g = real(tokens[5]) * 255;
-                    var b = real(tokens[6]) * 255;
-                    array_push(colors, make_color_rgb(r, g, b));
+                positions[positionsIdx++] = [xx, yy, zz];
+                
+                if (tokensLength >= 7) {
+                    colors[colorsIdx++] = make_color_rgb(real(tokens[4]) * 255, real(tokens[5]) * 255, real(tokens[6]) * 255);
                 } else {
-                    array_push(colors, c_white);
+                    colors[colorsIdx++] = c_white;
                 }
                 break;
 
             case "vt":
                 var u = real(tokens[1]), v = real(tokens[2]);
                 if (flipUV) v = 1.0 - v;
-                array_push(uvs, [u, v]);
+                uvs[uvsIdx++] = [u, v];
                 break;
 
             case "vn":
-                array_push(normals, [real(tokens[1]), real(tokens[2]), real(tokens[3])]);
+                normals[normalsIdx++] = [real(tokens[1]), real(tokens[2]), real(tokens[3])];
                 break;
 
             case "f":
                 if (currentMesh == undefined) _startNewMesh("default");
-                _parseFace(tokens);
+                _parseFace(tokens, tokensLength);
                 break;
 
             case "o":
@@ -104,7 +117,7 @@ function UeObjLoader() constructor {
                 break;
 
             case "usemtl":
-                currentMaterial = materials[$ tokens[1]];
+                currentMesh.material = materials[$ tokens[1]];
                 break;
 
             case "mtllib":
@@ -113,70 +126,197 @@ function UeObjLoader() constructor {
         }
     }
 
-    function _parseFace(tokens) {
-        gml_pragma("forceinline");
-        var count = array_length(tokens) - 1;
-        var baseIndex = array_length(currentVertices);
-        var faceIndices = [];
+    // @note: slower version but theoricatically safer
+    //function _parseFace(tokens, tokensLength) {
+        //gml_pragma("forceinline");
+        //var baseIndex = array_length(currentVertices);
+        //var faceIndices = array_create(4);
+        //var faceIndicesIdx = 0;
+        //var count = tokensLength - 1;
+    //
+        //for (var i = 1; i <= count; i++) {
+            //var parts = string_split(tokens[i], "/");
+            //var partsCount = array_length(parts);
+            //var vi = real(parts[0]) - 1;
+            //var ti = (partsCount >= 2 && parts[1] != "") ? real(parts[1]) - 1 : -1;
+            //var ni = (partsCount >= 3 && parts[2] != "") ? real(parts[2]) - 1 : -1;
+    //
+            //var pos = positions[vi];
+            //var uv  = (ti >= 0) ? uvs[ti] : [0, 0];
+            //var nor = (ni >= 0) ? normals[ni] : [0, 0, 1];
+            //var col = (vi < colorsIdx) ? colors[vi] : c_white;
+    //
+            //var vert = {
+                //x: pos[0], y: pos[1], z: pos[2],
+                //nx: nor[0], ny: nor[1], nz: nor[2],
+                //u: uv[0], v: uv[1],
+                //color: col,
+                //alpha: 1
+            //};
+    //
+            //array_push(currentVertices, vert);
+            //faceIndices[faceIndicesIdx++] = baseIndex + i - 1;
+        //}
+    //
+        //if (count > 3) {
+            //for (var i = 1; i < count - 1; i++) {
+                //if (reverseWinding) {
+                    //array_push(currentIndices, faceIndices[i + 1]);
+                    //array_push(currentIndices, faceIndices[i]);
+                    //array_push(currentIndices, faceIndices[0]);
+                //} else {
+                    //array_push(currentIndices, faceIndices[0]);
+                    //array_push(currentIndices, faceIndices[i]);
+                    //array_push(currentIndices, faceIndices[i + 1]);
+                //}
+            //}
+        //} else {
+            //if (reverseWinding) {
+                //array_push(currentIndices, faceIndices[2]);
+                //array_push(currentIndices, faceIndices[1]);
+                //array_push(currentIndices, faceIndices[0]);
+            //} else {
+                //for (var j = 0, jl = array_length(faceIndices); j < jl; j++) {
+                    //array_push(currentIndices, faceIndices[j]);
+                //}
+            //}
+        //}
+        //
+        //faceIndices = undefined;
+    //}
     
+    function _parseFace(tokens, tokensLength) {
+        gml_pragma("forceinline");
+        var vb = currentVb;
+        var count = tokensLength - 1;
+        
+        // Cache per i dati dei vertici della faccia (massimo 4 per quad)
+        var faceVertices = array_create(count);
+        
+        // Prima pass: raccogli e prepara i dati dei vertici
         for (var i = 1; i <= count; i++) {
             var parts = string_split(tokens[i], "/");
+            var partsCount = array_length(parts);
             var vi = real(parts[0]) - 1;
-            var ti = (array_length(parts) >= 2 && parts[1] != "") ? real(parts[1]) - 1 : -1;
-            var ni = (array_length(parts) >= 3 && parts[2] != "") ? real(parts[2]) - 1 : -1;
+            var ti = (partsCount >= 2 && parts[1] != "") ? real(parts[1]) - 1 : -1;
+            var ni = (partsCount >= 3 && parts[2] != "") ? real(parts[2]) - 1 : -1;
     
             var pos = positions[vi];
-            var uv  = (ti >= 0) ? uvs[ti] : [0, 0];
+            var uv = (ti >= 0) ? uvs[ti] : [0, 0];
             var nor = (ni >= 0) ? normals[ni] : [0, 0, 1];
-            var col = (vi < array_length(colors)) ? colors[vi] : c_white;
+            var col = (vi < colorsIdx) ? colors[vi] : c_white;
     
-            var vert = {
+            faceVertices[i - 1] = {
                 x: pos[0], y: pos[1], z: pos[2],
                 nx: nor[0], ny: nor[1], nz: nor[2],
                 u: uv[0], v: uv[1],
-                color: col,
-                alpha: 1
+                color: col
             };
-    
-            array_push(currentVertices, vert);
-            array_push(faceIndices, baseIndex + i - 1);
         }
-    
-        if (count > 3) {
-            for (var i = 1; i < count - 1; i++) {
-                if (reverseWinding) {
-                    array_push(currentIndices, faceIndices[i + 1]);
-                    array_push(currentIndices, faceIndices[i]);
-                    array_push(currentIndices, faceIndices[0]);
-                } else {
-                    array_push(currentIndices, faceIndices[0]);
-                    array_push(currentIndices, faceIndices[i]);
-                    array_push(currentIndices, faceIndices[i + 1]);
-                }
+        
+        // Seconda pass: scrivi direttamente nel vertex buffer
+        if (count == 3) {
+            // Triangolo semplice
+            var indices = reverseWinding ? [2, 1, 0] : [0, 1, 2];
+            for (var i = 0; i < 3; i++) {
+                var v = faceVertices[indices[i]];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
             }
-        } else if (count == 3) {
+        } else if (count == 4) {
+            // Quad - triangola in 2 triangoli
             if (reverseWinding) {
-                array_push(currentIndices, faceIndices[2]);
-                array_push(currentIndices, faceIndices[1]);
-                array_push(currentIndices, faceIndices[0]);
+                // Primo triangolo: 0,3,1
+                var v = faceVertices[0];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                v = faceVertices[3];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                v = faceVertices[1];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                // Secondo triangolo: 1,3,2
+                v = faceVertices[1];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                v = faceVertices[3];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                v = faceVertices[2];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
             } else {
-                for (var j = 0; j < array_length(faceIndices); j++) {
-                    array_push(currentIndices, faceIndices[j]);
+                // Primo triangolo: 0,1,3
+                var v = faceVertices[0];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                v = faceVertices[1];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                v = faceVertices[3];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                // Secondo triangolo: 1,2,3
+                v = faceVertices[1];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                v = faceVertices[2];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+                
+                v = faceVertices[3];
+                vertex_position_3d(vb, v.x, v.y, v.z);
+                vertex_normal(vb, v.nx, v.ny, v.nz);
+                vertex_texcoord(vb, v.u, v.v);
+                vertex_color(vb, v.color, 1.0);
+            }
+        } else {
+            // N-gon (fan triangulation)
+            for (var i = 1; i < count - 1; i++) {
+                var indices = reverseWinding ? [i + 1, i, 0] : [0, i, i + 1];
+                
+                for (var j = 0; j < 3; j++) {
+                    var v = faceVertices[indices[j]];
+                    vertex_position_3d(vb, v.x, v.y, v.z);
+                    vertex_normal(vb, v.nx, v.ny, v.nz);
+                    vertex_texcoord(vb, v.u, v.v);
+                    vertex_color(vb, v.color, 1.0);
                 }
             }
-        }
-    }
-
-    function _buildGeometries() {
-        gml_pragma("forceinline");
-        if (currentMesh != undefined) {
-            currentMesh.geometry.vertices = currentVertices;
-            currentMesh.geometry.index = currentIndices;
-            currentMesh.geometry.build();
-            if (currentMaterial != undefined) currentMesh.material = currentMaterial;
-            
-            array_push(meshes, currentMesh);
-            root.add(currentMesh);
         }
     }
     

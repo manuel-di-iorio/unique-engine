@@ -55,8 +55,7 @@ function UeMtlLoader() constructor {
                 break;
 
             case "Ka": case "Kd": case "Ks": case "Ke": case "Tf":
-                var r = real(tokens[1]), g = real(tokens[2]), b = real(tokens[3]);
-                var color = make_color_rgb(r * 255, g * 255, b * 255);
+                var color = make_color_rgb(real(tokens[1]) * 255, real(tokens[2]) * 255, real(tokens[3]) * 255);
                 if (current != undefined) current[$ type] = color;
                 break;
 

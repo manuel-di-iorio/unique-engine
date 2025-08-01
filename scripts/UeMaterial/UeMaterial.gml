@@ -122,7 +122,7 @@ function UeMaterial(data = {}) constructor {
         if (!lights) return;
             
         var lightState = global.UE_RENDERER_LIGHT_STATE;
-        var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
+        var uniformsCache = global.UE_DUMMY_ARRAY3;
         
         var directionalState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL];
         var directionalCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT];
@@ -215,7 +215,7 @@ function UeMaterial(data = {}) constructor {
             
         // Update the shader's model position uniform (for billboard sprites)
         if (mesh[$ "isSprite"] != undefined) {
-            var uniformsCache = global.UE_MATERIAL_UNIFORMS_SET_CACHE;
+            var uniformsCache = global.UE_DUMMY_ARRAY3;
             var meshPosition = mesh.position;
             uniformsCache[0] = meshPosition.x;
             uniformsCache[1] = meshPosition.y;

@@ -50,8 +50,7 @@ global.UE_DUMMY_RAY = new UeRay();
 global.UE_DUMMY_MATRIX4 = new UeMatrix4();
 global.UE_DUMMY_MATRIX4_B = new UeMatrix4();
 global.UE_DUMMY_BOX = new UeBox3();
-
-global.UE_MATERIAL_UNIFORMS_SET_CACHE = array_create(3);
+global.UE_DUMMY_ARRAY3 = array_create(3);
 
 global.UE_RENDERER_STATE = array_create(1);
 enum UE_RENDERER_STATE_ENUM {
