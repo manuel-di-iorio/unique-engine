@@ -136,14 +136,16 @@ function UeAssimpLoader(data = {}) constructor {
     
     function _buildMesh() {
         gml_pragma("forceinline");
-        var mesh = new UeMesh();
+        var mesh = new UeMesh(new UeBufferGeometry());
         mesh.name = GMA_GetMeshName();
+        var geometry = mesh.geometry;
+        var vb = vertex_create_buffer();
+        geometry.vb = vb;
+        vertex_begin(vb, geometry.format.vf);
+        
         var meshFacenum = GMA_GetMeshFacesNum();
         var meshChannelNumColor = GMA_GetMeshColorChannelsNum();
         var meshChannelNumTexcoord = GMA_GetMeshUVChannelsNum();
-        var totalVertsEstimate = meshFacenum * 3;
-        var vertices = array_create(totalVertsEstimate);
-        var verticesCount = 0;
         
         for (var f = 0; f < meshFacenum; f++) {
             var fn = GMA_GetMeshFaceVerticesNum(f);
@@ -151,47 +153,37 @@ function UeAssimpLoader(data = {}) constructor {
             for (var fi = 0; fi < fn; fi++) {
                 var v = GMA_GetMeshFaceVertexIndex(f, fi);
         
-                var vx = GMA_GetMeshVertexX(v);
-                var vy = GMA_GetMeshVertexY(v);
-                var vz = GMA_GetMeshVertexZ(v);
-        
-                var nx = GMA_GetMeshNormalX(v);
-                var ny = GMA_GetMeshNormalY(v);
-                var nz = GMA_GetMeshNormalZ(v);
-        
-                var uu = (meshChannelNumTexcoord > 0) ? GMA_GetMeshTexCoordU(v, 0) : 0;
-                var vv = (meshChannelNumTexcoord > 0) ? GMA_GetMeshTexCoordV(v, 0) : 0;
-        
-                var col = c_white;
-                var alpha = 1;
-                if (meshChannelNumColor > 0) {
-                    col = make_color_rgb(GMA_GetMeshVertexColorGM(v, 0), GMA_GetMeshVertexColorGM(v, 1), GMA_GetMeshVertexColorGM(v, 2));
-                    alpha = GMA_GetMeshVertexAlpha(v, 0);
-                }
-        
-                vertices[verticesCount++] = {
-                    x: vx, y: vy, z: vz,
-                    nx: nx, ny: ny, nz: nz,
-                    u: uu, v: vv,
-                    color: col,
-                    alpha: alpha
-                };
+                vertex_position_3d(vb, GMA_GetMeshVertexX(v), GMA_GetMeshVertexY(v), GMA_GetMeshVertexZ(v));
+                
+                vertex_normal(vb, GMA_GetMeshNormalX(v), GMA_GetMeshNormalY(v), GMA_GetMeshNormalZ(v));
+                
+                vertex_texcoord(vb, 
+                    meshChannelNumTexcoord > 0 ? GMA_GetMeshTexCoordU(v, 0) : 0,
+                    meshChannelNumTexcoord > 0 ? GMA_GetMeshTexCoordV(v, 0) : 0
+                );
+                
+                vertex_color(vb, 
+                    meshChannelNumColor > 0 ? make_color_rgb(GMA_GetMeshVertexColorGM(v, 0), GMA_GetMeshVertexColorGM(v, 1), GMA_GetMeshVertexColorGM(v, 2)) : c_white, 
+                    meshChannelNumColor > 0 ? GMA_GetMeshVertexAlpha(v, 0) : 1);
             }
         }
+        vertex_end(vb);
         
-        array_resize(vertices, verticesCount);
-
 		// Store the bounding box
-		//var x1 = GMA_GetMeshAABBMinX();
-		//var y1 = GMA_GetMeshAABBMinY();
-		//var z1 = GMA_GetMeshAABBMinZ();
-		//var x2 = GMA_GetMeshAABBMaxX();
-		//var y2 = GMA_GetMeshAABBMaxY();
-		//var z2 = GMA_GetMeshAABBMaxZ();
-		//mesh.boundingBox = { x1, y1, z1, x2, y2, z2, x_size: x2 - x1, y_size: y2 - y1, z_size: z2 - z1 };
-		//mesh.boundingBoxRelative = { x1, y1, z1, x2, y2, z2, x_size: x2 - x1, y_size: y2 - y1, z_size: z2 - z1 };
-		
-        mesh.geometry = new UeBufferGeometry({ vertices, canFreeze: false });
+		var x1 = GMA_GetMeshAABBMinX();
+		var y1 = GMA_GetMeshAABBMinY();
+		var z1 = GMA_GetMeshAABBMinZ();
+		var x2 = GMA_GetMeshAABBMaxX();
+		var y2 = GMA_GetMeshAABBMaxY();
+		var z2 = GMA_GetMeshAABBMaxZ();
+        var minV = new UeVector3(x1, y1, z1);
+        var maxV = new UeVector3(x2, y2, z2);
+        
+        geometry.boundingBox = new UeBox3(minV, maxV);
+        
+        var center = minV.clone().add(maxV).multiplyScalar(0.5);
+        geometry.boundingSphere = new UeSphere(center, center.distanceTo(maxV));
+        
         return mesh;
     }
     

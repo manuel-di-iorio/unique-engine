@@ -9,7 +9,9 @@ var sunLight = new UeDirectionalLight(150, 50, 50, { color: #FFFFC8 });
 
 // Load the model
 assimpLoader = new UeAssimpLoader();
+loadTime = get_timer();
 airplaneMesh = assimpLoader.load("airplane/11804_Airplane_v2_l2.obj");
+loadTime = (get_timer() - loadTime) / 1000;
 
 // Manually import the texture into the model's material
 sprAirplane = sprite_add("airplane/11804_Airplane_diff.jpg", 1, false, false, 0, 0);
@@ -19,10 +21,7 @@ airplaneMesh.traverse(function(mesh) {
     mesh.matrixAutoUpdate = false;
     
     var geometry = mesh[$ "geometry"];
-    if (geometry != undefined) {
-        geometry.computeBoundingBox();
-        geometry.freeze();
-    }
+    if (geometry != undefined) geometry.freeze();
     
     var material = mesh.material;
     material.textures.map = texAirplane;
