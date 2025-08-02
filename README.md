@@ -3,61 +3,6 @@
 Unique Engine is a modular and flexible 3D library, inspired by Three.js, designed to make it easy to create 3D games and interactive applications.
 The goal is to offer a simple, accessible and powerful API, while maintaining a clear and easily extensible structure.
 
----
-
-## Current Features ✅
-
-- **Camera**
-Manages 3D projection and automatically connects to the view.
-
-- **Renderer**
-Draws meshes with independent ordering of opaque and transparent materials. Manages passing light data to shaders.
-
-- **Mesh**
-Recursive rendering of children, updating matrices only if necessary. Rotations in degrees, with internal conversion to quaternions.
-
-- **Lights**
-Basic support for Ambient, Point and Directional lights via custom shaders.
-
-- **Materials & Textures**
-Automatic management of uniforms and samplers, including integration with lights.
-
-- **VertexFormat**
-Easy and flexible creation of vertex formats, e.g.:
-`new VertexFormat().position().normal().uv().color().build()`
-
-- **Geometry**
-Separated from the mesh, with vertex buffer and index automatically created based on the format.
-
-- **Math Utilities**
-Vectors, matrices, quaternions, planes and raycasting: `Vec2`, `Vec3`, `Mat3`, `Mat4`, `Quaternion`, `Plane`, `Raycast`.
-
-- **OrbitControls**
-Addon for interactive drag, pan, rotate and zoom of the camera.
-
-- **Import models (demo)**
-Support via AssimpDLL by Jak (not included in the library for licensing reasons).
-
----
-
-## Basic example:
-
-```gml
-renderer = new UeRenderer();
-scene = new UeScene();
-camera = new UePerspectiveCamera();
-
-cubeGeometry = new UeBoxGeometry({ color: c_blue });
-cubeMesh = new UeMesh(cubeGeometry);
-
-ambientLight = new UeAmbientLight();
-dirLight = new UeDirectionalLight({ xt: -100, yt: -50, zt: -70 });
-
-scene.add(cubeMesh, ambientLight, dirLight);
-```
-
----
-
 ## Trello board:
 
 https://trello.com/b/NYfgFbd8/unique-engine

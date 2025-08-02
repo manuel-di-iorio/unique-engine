@@ -82,7 +82,6 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     /// Spherical linear interpolation
-    /// @todo quat()? Needs to be fixed
     function slerp(q, t) {
         gml_pragma("forceinline");
         var _x = self.x, _y = self.y, _z = self.z, _w = self.w;
@@ -90,7 +89,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         var cosHalfTheta = _x * q.x + _y * q.y + _z * q.z + _w * q.w;
 
         if (cosHalfTheta < 0) {
-            q = quat(-q.x, -q.y, -q.z, -q.w);
+            q = new UeQuaternion().set(-q.x, -q.y, -q.z, -q.w);
             cosHalfTheta = -cosHalfTheta;
         }
 
@@ -250,6 +249,111 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         self.z = 0;
         self.w = 1;
         return self;
+    }
+        
+    /// Rotates this quaternion toward q by a maximum of `step` radians
+    function rotateTowards(q, step) {
+        gml_pragma("forceinline");
+    
+        if (step <= 0) return self;
+    
+        // Clamp il dot product tra -1 e 1
+        var cosHalfTheta = clamp(self.dot(q), -1, 1);
+    
+        // Se già molto vicini (quasi uguali)
+        if (cosHalfTheta >= 1.0) return self;
+    
+        // Calcola l'angolo attuale
+        var halfTheta = arccos(cosHalfTheta);
+    
+        // Se l'angolo è piccolo, o minore dello step, fai direttamente il slerp completo
+        if (halfTheta < step) {
+            return self.copy(q);
+        }
+    
+        // Calcola il rapporto t di interpolazione da usare
+        var t = step / halfTheta;
+    
+        return self.slerp(q, t);
+    }
+    
+    /// Rotational conjugate of this quaternion
+    function conjugate() {
+        gml_pragma("forceinline");
+        self.x = -self.x;
+        self.y = -self.y;
+        self.z = -self.z;
+        // self.w remains unchanged
+        return self;
+    }
+    
+    /// Invert (conjugate) the quaternion
+    function invert() {
+        gml_pragma("forceinline");
+        var norm = self.lengthSq();
+        if (norm > 0) {
+            var invNorm = 1 / norm;
+            self.x *= -invNorm;
+            self.y *= -invNorm;
+            self.z *= -invNorm;
+            self.w *= invNorm;
+        }
+        return self;
+    }
+    
+    /// Returns the squared length of the quaternion (avoids sqrt for performance)
+    function lengthSq() {
+        gml_pragma("forceinline");
+        return self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w;
+    }
+
+    
+    /// Return the quaternion length (magnitude)
+    function length() {
+        gml_pragma("forceinline");
+        return sqrt(self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w);
+    }
+    
+    function dot(q) {
+        gml_pragma("forceinline");
+        return self.x * q.x + self.y * q.y + self.z * q.z + self.w * q.w;
+    }
+    
+    // Returns the angle in degrees between this quaternion and q. Clamped for stability. Always returns a value in [0, 180°].
+    function angleTo(q) {
+        gml_pragma("forceinline");
+        var d = clamp(self.dot(q), -1, 1);
+        return radtodeg(2 * arccos(abs(d)));
+    }
+
+    
+    function multiplyQuaternions(a, b) {
+        gml_pragma("forceinline");
+    
+        var ax = a.x, ay = a.y, az = a.z, aw = a.w;
+        var bx = b.x, by = b.y, bz = b.z, bw = b.w;
+    
+        self.x = ax * bw + aw * bx + ay * bz - az * by;
+        self.y = ay * bw + aw * by + az * bx - ax * bz;
+        self.z = az * bw + aw * bz + ax * by - ay * bx;
+        self.w = aw * bw - ax * bx - ay * by - az * bz;
+    
+        return self;
+    }
+    
+    function equals(q) {
+        gml_pragma("forceinline");
+        return (
+            abs(self.x - q.x) < UE_EPSILON &&
+            abs(self.y - q.y) < UE_EPSILON &&
+            abs(self.z - q.z) < UE_EPSILON &&
+            abs(self.w - q.w) < UE_EPSILON
+        );
+    }
+    
+    function toArray() {
+        gml_pragma("forceinline");
+        return [self.x, self.y, self.z, self.w];
     }
 
     setFromEuler(_x, _y, _z);

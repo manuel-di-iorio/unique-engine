@@ -1,4 +1,4 @@
-// @todo check input configuration in variables (mouse/keyboard). Use cached mouse position
+// @todo check input configuration in variables (mouse/keyboard)
 function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self.camera = camera;
     self.target = data[$ "target"] ?? new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);

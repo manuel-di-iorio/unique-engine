@@ -1,5 +1,6 @@
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
-global.UE_DEFAULT_TEXTURE = new UeTexture({ image: spr_ue_default_tex });
+global.UE_TEXTURE_MAP = new UeTexture({ image: sprUeMapTex });
+global.UE_TEXTURE_EMISSIVE = new UeTexture({ image: sprUeEmissiveTex });
 global.UE_OBJECT3D_DEFAULT_UP = new UeVector3(0, 0, -1);
 global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE = true;
 global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE = true;

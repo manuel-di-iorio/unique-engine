@@ -3,7 +3,7 @@ scene = new UeScene();
 camera = new UePerspectiveCamera({ x: -10, z: 50 });
 orbit = new UeOrbitControls(camera);
 
-var ambientLight = new UeAmbientLight(#FFFFFF);
+var ambientLight = new UeAmbientLight();
 scene.add(ambientLight);
 
 scene.add(new UeGridHelper(500));
@@ -15,6 +15,6 @@ box.material.textures.map = new UeTexture({ image: spr_tex_box });
 box.material.build();
 scene.add(box);
 
-//control = new UeTransformControls(camera);
-//control.attach(box);
-//scene.add(control.getHelper());
+control = new UeTransformControls(camera);
+control.attach(box);
+scene.add(control.getHelper());

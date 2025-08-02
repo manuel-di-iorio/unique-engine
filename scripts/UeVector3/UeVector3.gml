@@ -575,6 +575,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
+    // Rotate around the specified axis by the angle (degrees)
     function applyAxisAngle(axis, angle) {
         gml_pragma("forceinline");
         var xx = self.x, yy = self.y, zz = self.z;
@@ -590,6 +591,10 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         self.z = (t * ax * az - sinA * ay) * xx + (t * ay * az + sinA * ax) * yy + (t * az * az + cosA) * zz;
     
         return self;
+    }
+    
+    function applyEuler(x, y, z) {
+        
     }
 }
 

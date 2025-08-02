@@ -46,7 +46,7 @@ function UeMaterial(data = {}) constructor {
     
     // Textures
     textures = {
-       map: data[$ "map"] ?? global.UE_DEFAULT_TEXTURE
+       map: data[$ "map"] ?? global.UE_TEXTURE_MAP,
     };
     if (data[$ "normalMap"] != undefined) textures.normalMap = data[$ "normalMap"];
     if (data[$ "roughnessMap"] != undefined) textures.roughnessMap = data[$ "roughnessMap"];
@@ -62,6 +62,7 @@ function UeMaterial(data = {}) constructor {
         // Cache the engine uniforms
         __uniformModelPositionLoc = shader_get_uniform(shader, "u_ueModelPosition");
         __uniformLightsAmbientLoc = shader_get_uniform(shader, "u_ueAmbient");
+        __uniformEmissiveIntensityLoc = shader_get_uniform(shader, "u_ueEmissiveIntensity");
         
         __uniformLightsDir = array_create(lights);
         __uniformLightsPos = array_create(lights);
@@ -186,6 +187,9 @@ function UeMaterial(data = {}) constructor {
 
         shader_set(shader);
         __setLightsUniforms();
+        
+        // Reset emissive uniforms
+        shader_set_uniform_f(__uniformEmissiveIntensityLoc, 0);
    
         // Apply the uniforms on the shader
         for (var u=0; u<__uniformsCachedCount; u++) {

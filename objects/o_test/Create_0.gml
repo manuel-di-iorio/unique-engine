@@ -2,17 +2,17 @@ display_reset(4, false);
 currentDemo = undefined;
 bgLayer = layer_background_get_id("Background");
 selectorW = 300;
-show_debug_overlay(true)
+showDebug = false;
 
 scenes = [
-    { name: "Cube", obj: oSceneCube, bg: c_black }, 
-    { name: "Tree with basic geometries", obj: oSceneTree, bg: #D6FFF9 },
-    { name: "Pyramids, sprites and orbit", obj: oScenePyramids, bg: #147FCC },
-    { name: "Lines raycasting", obj: oSceneLinesRaycasting, bg: #333333 },
-    { name: "Mesh raycasting", obj: oSceneMeshRaycasting, bg: #333333 },
-    { name: "Assimp Loader", obj: oSceneAssimpLoader, bg: #147FCC },
-    { name: "OBJ Loader", obj: oSceneObjLoader, bg: #147FCC },
-    { name: "TransformControls", obj: oSceneTransformControls, bg: #333333 },
+    { name: "Cube", obj: oSceneCube, bg: c_black }, // 0
+    { name: "Tree with basic geometries", obj: oSceneTree, bg: #D6FFF9 }, // 1
+    { name: "Pyramids, sprites and orbit", obj: oScenePyramids, bg: #147FCC }, // 2
+    { name: "Lines raycasting", obj: oSceneLinesRaycasting, bg: #333333 }, // 3
+    { name: "Mesh raycasting", obj: oSceneMeshRaycasting, bg: #333333 }, // 4
+    { name: "Assimp Loader", obj: oSceneAssimpLoader, bg: #147FCC }, // 5
+    { name: "OBJ Loader", obj: oSceneObjLoader, bg: #147FCC }, // 6
+    { name: "TransformControls", obj: oSceneTransformControls, bg: #333333 }, // 7
 ];
 
 setScene = function(idx) {
@@ -28,4 +28,4 @@ setScene = function(idx) {
     layer_background_blend(bgLayer, currentDemo.bg);
 }
 
-setScene(5);
+setScene(0);

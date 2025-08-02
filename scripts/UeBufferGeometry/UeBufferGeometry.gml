@@ -145,6 +145,21 @@ function UeBufferGeometry(data = {}) constructor {
         buffer_seek(buffer, buffer_seek_relative, ctx.vbBufferSize);
     } 
     
+    
+    function export(fname) {
+        var buf = buffer_create_from_vertex_buffer(vb, buffer_fast, 1);
+        buffer_save(buf, fname);
+        buffer_delete(buf);
+        return self;
+    }
+    
+    function import(fname) {
+        var buf = buffer_load(fname);
+        vb = vertex_create_buffer_from_buffer(buf, format.vf);
+        buffer_delete(buff);
+        return self;
+    }
+    
     // Auto-build vertex buffer if vertices are provided
     if (array_length(vertices)) build();
 }

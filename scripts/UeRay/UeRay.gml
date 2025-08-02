@@ -20,16 +20,6 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
         return self.origin.clone().add(self.direction.clone().scale(t));
     }
 
-    /// Returns intersection point with a plane or undefined if no intersection
-    function intersectPlane(plane) {
-        gml_pragma("forceinline");
-        var denom = plane.normal.dot(self.direction);
-        if (abs(denom) < 0.00001) return undefined; // Parallel, no intersection
-        var t = -(plane.normal.dot(self.origin) + plane.constant) / denom;
-        if (t < 0) return undefined; // Intersection behind origin
-        return getPoint(t);
-    }
-
     /// Returns the shortest distance from the ray to a given point
     function distanceToPoint(point) {
         gml_pragma("forceinline");
@@ -224,18 +214,15 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
     }
 
     /// Returns intersection point with plane or undefined if none
-    function intersectPlane(plane, target) {
+    function intersectPlane(plane, target = new UeVector3()) {
         gml_pragma("forceinline");
         var denom = plane.normal.dot(self.direction);
-        if (abs(denom) < 1000000) return undefined;
+        if (abs(denom) < UE_EPSILON) return undefined;
 
         var t = -(plane.normal.dot(self.origin) + plane.constant) / denom;
         if (t < 0) return undefined;
 
-        if (target) self.at(t, target);
-        else target = self.at(t, new UeVector3());
-
-        return target;
+        return self.at(t, target);
     }
 
     /// Returns intersection point with sphere or undefined if none

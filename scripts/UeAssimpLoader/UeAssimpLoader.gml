@@ -1,7 +1,5 @@
 function UeAssimpLoader(data = {}) constructor {
-    if (!GMA_IsWorking()) {
-        throw "[Unique Engine] AssimpLoaderError: Assimp extension is not working";
-    }
+    if (!GMA_IsWorking()) ueError("Assimp extension is not working");
     
     importer = GMA_CreateImporter();
     GMA_BindImporter(importer);
@@ -42,7 +40,7 @@ function UeAssimpLoader(data = {}) constructor {
 
 		// Check if the file is correctly loaded
 		if (!check) {	
-			throw "[Unique Engine] AssimpLoaderError: " + GMA_GetImporterErrorString();
+			ueError($"{GMA_GetImporterErrorString()}");
 		}
 
 		GMA_BindScene();
@@ -117,7 +115,7 @@ function UeAssimpLoader(data = {}) constructor {
     
     function _addMeshes(materials) {
         gml_pragma("forceinline");
-        var model = new UeMesh();
+        var model = new UeObject3D();
         
         for (var i = 0, n = GMA_GetMeshNum(); i < n; i++) {
 		    GMA_BindMesh(i);

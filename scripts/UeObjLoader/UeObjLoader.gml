@@ -18,7 +18,7 @@ function UeObjLoader() constructor {
         currentMesh = undefined;
         currentMaterial = undefined;
         materialLibs = [];
-        root = new UeMesh();
+        root = new UeObject3D();
         
         var buffer = buffer_load(fname);
         var size = buffer_get_size(buffer);

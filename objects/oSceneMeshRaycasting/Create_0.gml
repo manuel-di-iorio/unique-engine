@@ -12,7 +12,7 @@ orbitControls = new UeOrbitControls(camera, {
 
 // Lightning
 ambientLight = new UeAmbientLight(#888888);
-dirLight = new UeDirectionalLight(-100, 50, 70);
+dirLight = new UeDirectionalLight(90, 45, { color: #FFFFC8, intensity: .8 });
 scene.add(ambientLight, dirLight);
 
 // Create the raycaster
@@ -21,9 +21,8 @@ raycaster.layers.set(1);
 raycaster.setFromCamera(camera);
 intersectedBox = undefined;
 
-meshGroup = new UeMesh(undefined);
+meshGroup = new UeStaticMesh(undefined);
 meshGroup.material = undefined;
-meshGroup.matrixAutoUpdate = false;
 scene.add(meshGroup);
 
 // Create the random boxes
@@ -35,8 +34,9 @@ for (var i = 0; i < 150; i++) {
     var size = random_range(30, 40);
     
     var geometry = new UeBoxGeometry(size, size, size, { color });
-    var mesh = new UeMesh(geometry);
-    mesh.matrixAutoUpdate = false;
+    var mesh = new UeStaticMesh(geometry);
+    mesh.material.uniforms.ueEmissive.value = [0.8, 0.8, 0];
+    mesh.material.uniforms.ueEmissiveIntensity.value = 0;
     mesh.layers.enable(1); // Only objects having layer 1 will be intersected
     meshGroup.add(mesh);
 
@@ -61,11 +61,4 @@ for (var i = 0; i < 150; i++) {
     geometry.boundingSphere = new UeSphere(UE_VECTOR3_ZERO, size);
     
     mesh.updateMatrix();
-    
-    // Bounding box
-    var bbox =  new UeBoxHelper(mesh, c_yellow, { visible: false });
-    bbox.matrixAutoUpdate = false;
-    bbox.updateMatrix();
-    scene.add(bbox);
-    mesh.bbox = bbox;
 }

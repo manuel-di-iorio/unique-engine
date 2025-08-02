@@ -276,11 +276,9 @@ function UeTransform(data = {}) constructor {
     }
     
     // Returns a vector representing the direction of object's positive Y axis in world space.
-    function getWorldDirection(target) {
+    function getWorldDirection(target = new UeVector3()) {
         gml_pragma("forceinline");
-        var v = new UeVector3(0, 1, 0);
-        v.transformDirection(matrixWorld);
-        return target.copy(v);
+        return target.copy(up.clone().transformDirection(matrixWorld));
     }
     
     // Converts the vector from this object's local space to world space.

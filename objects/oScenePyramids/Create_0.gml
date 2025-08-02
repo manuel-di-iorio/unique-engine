@@ -16,18 +16,14 @@ var matPyramid2 = new UeMaterial({ map: texPyramid, shader: sh_ue_standard });
 matTree         = new UeSpriteMaterial({ map: texPalmTree });
 
 // Terrain
-var desert = new UeMesh(new UePlaneGeometry(1000, 1000), matSand);
-desert.matrixAutoUpdate = false;
+var desert = new UeStaticMesh(new UePlaneGeometry(1000, 1000), matSand);
 
 // Pyramids
-var pyramid0 = new UeMesh(new UePyramidGeometry({ base: 160, height: 100 }), matPyramid0);
-pyramid0.matrixAutoUpdate = false;
+var pyramid0 = new UeStaticMesh(new UePyramidGeometry({ base: 160, height: 100 }), matPyramid0);
 
-var pyramid1 = new UeMesh(new UePyramidGeometry({ base: 75, height: 60 }), matPyramid1, { x: -150, y: -150, z: 0 });
-pyramid1.matrixAutoUpdate = false;
+var pyramid1 = new UeStaticMesh(new UePyramidGeometry({ base: 75, height: 60 }), matPyramid1, { x: -150, y: -150, z: 0 });
 
-var pyramid2 = new UeMesh(new UePyramidGeometry({ base: 60, height: 40 }), matPyramid2, { x: -150, y: 150, z: 0 });
-pyramid2.matrixAutoUpdate = false;
+var pyramid2 = new UeStaticMesh(new UePyramidGeometry({ base: 60, height: 40 }), matPyramid2, { x: -150, y: 150, z: 0 });
 
 // Palm trees (billboards)
 var treePositions = [
@@ -51,6 +47,6 @@ array_foreach(treePositions, function(arr) {
 
 // Lighting
 var ambientLight = new UeAmbientLight(#5A4628);
-var sunLight = new UeDirectionalLight(-200, -100, -150, { color: #FFFFC8, intensity: .8 });
+var sunLight = new UeDirectionalLight(90, 45, { color: #FFFFC8, intensity: .7 });
 
 scene.add(ambientLight, sunLight, desert, pyramid0, pyramid1, pyramid2);

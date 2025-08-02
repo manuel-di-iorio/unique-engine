@@ -1,3 +1,14 @@
 function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
+    var emissive = data[$ "emissive"];
+    if (emissive != undefined) {
+        emissive = [ color_get_red(emissive)/255, color_get_green(emissive)/255, color_get_blue(emissive)/255 ];
+    } else {
+        emissive = [0, 0, 0];
+    }
+    uniforms.ueEmissive = { type: UE_UNIFORM_TYPE.ARRAY, value: emissive };
+    uniforms.ueEmissiveIntensity = { type: UE_UNIFORM_TYPE.FLOAT, value: data[$ "emissiveIntensity"] ?? 1 };
     
+    textures.emissiveMap = global.UE_TEXTURE_EMISSIVE;
+    
+    build();
 }

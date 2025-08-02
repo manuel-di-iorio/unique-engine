@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"ueError",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"ueError",
+  "parent":{
+    "name":"__internals",
+    "path":"folders/Unique Engine/__internals.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

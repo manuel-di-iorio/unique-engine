@@ -5,7 +5,7 @@ orbitControls = new UeOrbitControls(camera, { autoRotate: true });
 
 // Lighting
 var ambientLight = new UeAmbientLight(c_dkgray);
-var sunLight = new UeDirectionalLight(150, 50, 50, { color: #FFFFC8 });
+var sunLight = new UeDirectionalLight(90, 45, { color: #FFFFC8, intensity: .8 });
 
 // Load the model
 assimpLoader = new UeAssimpLoader();
@@ -23,9 +23,11 @@ airplaneMesh.traverse(function(mesh) {
     var geometry = mesh[$ "geometry"];
     if (geometry != undefined) geometry.freeze();
     
-    var material = mesh.material;
-    material.textures.map = texAirplane;
-    material.build();
+    var material = mesh[$ "material"];
+    if (material != undefined) {
+        material.textures.map = texAirplane;
+        material.build();
+    }
 });
 
 airplaneBox = new UeBoxHelper(airplaneMesh);
