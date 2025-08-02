@@ -52,6 +52,9 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     function update() {
         gml_pragma("forceinline");
+        
+        if (!enabled) return;
+        
         var mouse = global.UE_MOUSE.get(); 
         var mx = mouse.x;
         var my = mouse.y;

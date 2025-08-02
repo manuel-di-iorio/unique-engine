@@ -39,7 +39,7 @@ new UeArrowHelper(dir, origin, length, color, headLength, headWidth)
 | Method                                       | Returns | Description                                                                        |
 | -------------------------------------------- | ------- | ---------------------------------------------------------------------------------- |
 | `setDirection(dir)`                          | `self`  | Updates the arrow's orientation to point in the new direction. Will be normalized  |
-| `setLength(length, headLength?, headWidth?)` | `self`  | Changes the overall size of the arrow.                                             |
+| `setLength(length, headLength, headWidth)` | `self`  | Changes the overall size of the arrow.                                             |
 | `setColor(color)`                            | `self`  | Changes the color of both the line and cone parts.                                 |
 
 

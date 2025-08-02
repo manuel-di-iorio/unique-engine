@@ -36,7 +36,6 @@ new UePlane(normal = new UeVector3(0, 0, -1), d = 0)
 | `coplanarPoint()`                     | `UeVector3`  | Returns a point coplanar to the plane                               |
 | `distanceToSphere(sphere)`            | `number`     | Returns signed distance from the sphere to the plane                |
 | `equals(plane)`                       | `boolean`    | Returns `true` if two planes are equal (same normal and constant)   |
-<!-- | `intersectLine(line)`                 | `UeVector3`  | Returns the intersection point between a line and the plane, if any | -->
 | `intersectsBox(box)`                  | `boolean`    | Returns `true` if the plane intersects the AABB box                 |
 | `intersectsSphere(sphere)`            | `boolean`    | Returns `true` if the plane intersects the sphere                   |
 | `negate()`                            | `self`       | Inverts the normal and constant                                     |
@@ -46,6 +45,7 @@ new UePlane(normal = new UeVector3(0, 0, -1), d = 0)
 | `setFromNormalAndCoplanarPoint(n,pt)` | `self`       | Alias of `setFromNormalAndPoint`                                    |
 | `setFromCoplanarPoints(a, b, c)`      | `self`       | Alias of `setFromPoints`                                            |
 | `translate(offset)`                   | `self`       | Translates the plane by the given offset vector                     |
+<!-- | `intersectLine(line)`                 | `UeVector3`  | Returns the intersection point between a line and the plane, if any | -->
 
 ## Example
 

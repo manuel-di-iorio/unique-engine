@@ -9,7 +9,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     self.camera = camera;             // Camera for raycasting calculations
     self.axis = undefined;            // Currently selected axis: "X", "Y", "Z" or undefined
     self.dragging = false;            // Flag to indicate if dragging is in progress
-    self.size = 50;                   // Gizmo visual size multiplier
+    self.size = 1;                    // Gizmo visual size multiplier
     self.mode = "translate";          // Current transform mode: "translate", "rotate", or "scale"
     self.space = "world";             // Transform space: "world" or "local"
 
@@ -43,51 +43,107 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     self._scaleStart = new UeVector3();
 
     /**
+     * Attaches the transform controls to a 3D object, enabling manipulation.
+     * @param {UeObject3D} object - The target object to control.
+     * @returns {self}
+     */
+    function attach(object) {
+        gml_pragma("forceinline");
+        self.object = object;
+        
+        var objectBox = object.geometry[$ "boundingBox"];
+        if (objectBox != undefined) self.size = objectBox.getSize().x;
+            
+        build();
+        updateGizmo();                    // Sync gizmo transform with object
+        return self;
+    }
+
+    /**
+     * Detaches the transform controls from the current object and hides the gizmo.
+     * @returns {self}
+     */
+    function detach() {
+        gml_pragma("forceinline");
+        self._root.visible = false;  // Hide gizmo
+        self.axis = undefined;
+        self.object = undefined;
+        return self;
+    }
+    
+    /**
      * Builds the gizmo visual lines for the axes according to current size and visibility.
      */
-    function buildGizmo() {
+    function build() {
         gml_pragma("forceinline");
         clearGizmo();  // Remove previous gizmo geometry to avoid memory leaks
         
-        var axisLength = self.size * 1.5;
-
+        var axisLength = self.size * 1.2;
+        var axisLengthHalf = axisLength * .5;
+        var axisLineWidth = 1;
+        var axisOffset = 1;
+        var axisMaterial = new UeMeshBasicMaterial();
+        
         // Create X axis line if visible
         if (self.showX) {
-            var geoX = new UeLineGeometry({ color: c_red });
-            geoX.setPositions([0,0,0, -axisLength,0,0]);
-            geoX.build();
-            var meshX = new UeLine(geoX);
-            meshX.name = "X";                       // Name used for raycast identification
+            var geoX = new UeArrowGeometry(axisLineWidth, axisLength, 10, undefined, { color: c_red });
+            geoX.boundingBox = new UeBox3(
+                new UeVector3(-axisLength, -axisLength, -axisLength),
+                new UeVector3(axisLength, axisLength, axisLength)
+            );
+            var meshX = new UeMesh(geoX, axisMaterial);
+            meshX.name = "X";
+            meshX.rotation.setFromAxisAngle(new UeVector3(0, 0, 1), 180);
+            meshX.position.x = -axisLengthHalf - axisOffset;
+            meshX.material.depthTest = false;
+            meshX.material.transparent = true;
+            
             self._root.add(meshX);
         }
         
         // Create Y axis line if visible
         if (self.showY) {
-            var geoY = new UeLineGeometry({ color: c_blue });
-            geoY.setPositions([0,0,0, 0,-axisLength,0]);
-            geoY.build();
-            var meshY = new UeLine(geoY);
+            var geoY = new UeArrowGeometry(axisLineWidth, axisLength, 10, undefined, { color: #2277B3 });
+            geoY.boundingBox = new UeBox3(
+                new UeVector3(-axisLength, -axisLength, -axisLength),
+                new UeVector3(axisLength, axisLength, axisLength)
+            );
+            var meshY = new UeMesh(geoY, axisMaterial);
             meshY.name = "Y";
+            meshY.rotation.setFromAxisAngle(new UeVector3(0, 0, 1), 270);
+            meshY.position.y = -axisLengthHalf - axisOffset;
+            meshY.material.depthTest = false;
             self._root.add(meshY);
         }
         
         // Create Z axis line if visible
         if (self.showZ) {
-            var geoZ = new UeLineGeometry({ color: c_green });
-            geoZ.setPositions([0,0,0, 0,0,axisLength]); // Line along Z axis
-            geoZ.build();
-            var meshZ = new UeLine(geoZ);
+            var geoZ = new UeArrowGeometry(axisLineWidth, axisLength, 10, undefined, { color: c_lime });
+            geoZ.boundingBox = new UeBox3(
+                new UeVector3(-axisLength, -axisLength, -axisLength),
+                new UeVector3(axisLength, axisLength, axisLength)
+            );
+            var meshZ = new UeMesh(geoZ, axisMaterial);
             meshZ.name = "Z";
+            meshZ.rotation.setFromAxisAngle(new UeVector3(0, 1, 0), 270);
+            meshZ.position.z = axisLengthHalf + axisOffset;
+            meshZ.material.depthTest = false;
             self._root.add(meshZ);
         }
-
-        self._root.visible = false; // Gizmo starts hidden until attached to an object
+        
+        // Add the center cube
+        var geoBox = new UeBoxGeometry(axisOffset*2, axisOffset*2, axisOffset*2, { color: c_ltgray });
+        var meshBox = new UeMesh(geoBox, axisMaterial);
+        meshBox.material.depthTest = false;
+        meshBox.renderOrder = -1;
+        //meshBox.material.transparent = true;
+        self._root.add(meshBox);
     }
 
     /**
      * Updates the gizmo's position and orientation to match the attached object's transform.
      */
-    function update() {
+    function updateGizmo() {
         gml_pragma("forceinline");
         if (!self.object) return;
 
@@ -108,39 +164,27 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
      */
     function updateInteraction() {
         gml_pragma("forceinline");
+        
+        // Reset scala e emissive di tutti gli assi
+        for (var i = 0, l = array_length(self._root.children); i < l; i++) {
+            var child = self._root.children[i];
+            child.scale.set(1, 1, 1);
+            child.material.emissive = undefined;
+        }
+        
+        
         var intersects = self._raycaster.intersectObjects(self._root.children);
      
         if (array_length(intersects) > 0) {
-            self.axis = intersects[0].object.name;  // Set axis to hit object's name (X, Y, Z)
+            var hovered = intersects[0].object;
+            //hovered.scale.set(1.5, 1.5, 1.5);
+            self.axis = hovered.name;
+            self.hovered = hovered;
         } else {
+            self.hovered = undefined;
             self.axis = undefined;                  // No axis hovered
         }
-    }
-
-    /**
-     * Attaches the transform controls to a 3D object, enabling manipulation.
-     * @param {UeObject3D} object - The target object to control.
-     * @returns {self}
-     */
-    function attach(object) {
-        gml_pragma("forceinline");
-        self.object = object;
-        self._root.visible = true;   // Show gizmo
-        update();                    // Sync gizmo transform with object
-        return self;
-    }
-
-    /**
-     * Detaches the transform controls from the current object and hides the gizmo.
-     * @returns {self}
-     */
-    function detach() {
-        gml_pragma("forceinline");
-        self._root.visible = false;  // Hide gizmo
-        self.axis = undefined;
-        self.object = undefined;
-        return self;
-    }
+    } 
 
     /**
      * Handles pointer down event to start dragging the selected axis if possible.
@@ -160,7 +204,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             var axisVec = new UeVector3();
             switch (self.axis) {
                 case "X": 
-                    axisVec.set(1,0,0); 
+                    axisVec.set(1,0,0);
                     break;
                 case "Y": 
                     axisVec.set(0,1,0); 
@@ -169,6 +213,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
                     axisVec.set(0,0,1); 
                     break;
             }
+            log(self.hovered.material)
+            self.hovered.material.uniforms.ueEmissive.value = [1, 1, 0];
 
             // Rotate plane normal by object's rotation if in local space
             if (self.space == "local") {
@@ -216,7 +262,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self.delta.copy(self.pointEnd).sub(self.pointStart);
 
         applyTransform();  // Apply transform change to object based on delta
-        update();          // Update gizmo transform to match object
+        updateGizmo();          // Update gizmo transform to match object
     }
 
     /**
@@ -226,6 +272,19 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         self.dragging = false;
         self.axis = undefined;
+    }
+    
+    // Listen for mouse events and call the respective methods
+    function update() {
+        if (mouse_check_button_pressed(mb_left)) {
+            onPointerDown();
+        }
+        if (mouse_check_button(mb_left)) {
+            onPointerMove();
+        }
+        if (mouse_check_button_released(mb_left)) {
+            onPointerUp();
+        }
     }
 
     /**
@@ -404,7 +463,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function setSize(value) {
         gml_pragma("forceinline");
         self.size = value;
-        buildGizmo();  // Rebuild gizmo geometry with new size
+        build();  // Rebuild gizmo geometry with new size
         return self;
     }
     
@@ -416,7 +475,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function setSpace(value) {
         gml_pragma("forceinline");
         self.space = value;
-        update(); // Update gizmo to match new space setting
+        updateGizmo(); // Update gizmo to match new space setting
         return self;
     }
     
@@ -433,7 +492,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self.object.rotation.copy(self._rotationStart);
         self.object.scale.copy(self._scaleStart);
         self.pointStart.copy(self.pointEnd);
-        update();
+        updateGizmo();
         return self;
     }
     
@@ -452,10 +511,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             }
         }
         self._root.clear();  // Remove all children from gizmo root
-    } 
-
-    // Build initial gizmo on creation
-    buildGizmo();
+    }
     
     return self;
 }

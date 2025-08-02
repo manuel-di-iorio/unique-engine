@@ -34,14 +34,14 @@ new UeRay(origin = new UeVector3(), direction = new UeVector3(0, 0, -1))
 | `at(t, target)`                                                             | `UeVector3`              | Writes point at distance `t` along the ray into `target` and returns it                       |
 | `closestPointToPoint(point, target)`                                        | `UeVector3`              | Returns closest point on the ray to a given point, stored in `target`                         |
 | `distanceSqToPoint(point)`                                                  | `number`                 | Returns squared distance from ray to a point                                                  |
-| `distanceSqToSegment(v0, v1, optionalPointOnRay?, optionalPointOnSegment?)` | `number`                 | Returns squared distance between ray and segment `v0`-`v1`; optionally outputs closest points |
+| `distanceSqToSegment(v0, v1, optionalPointOnRay, optionalPointOnSegment)` | `number`                 | Returns squared distance between ray and segment `v0`-`v1`; optionally outputs closest points |
 | `distanceToPlane(plane)`                                                    | `number \| undefined`    | Returns distance from origin to intersection with plane along the ray, or `undefined` if none |
 | `distanceToPoint(point)`                                                    | `number`                 | Returns distance from ray to point                                                            |
 | `equals(ray)`                                                               | `boolean`                | Returns true if origin and direction equal another ray                                        |
-| `intersectBox(box, target?)`                                                | `UeVector3 \| undefined` | Returns intersection point with axis-aligned bounding box or `undefined` if none              |
-| `intersectPlane(plane, target?)`                                            | `UeVector3 \| null`      | Returns intersection point with plane or `null` if none                                       |
-| `intersectSphere(sphere, target?)`                                          | `UeVector3 \| null`      | Returns intersection point with sphere or `null` if none                                      |
-| `intersectTriangle(a, b, c, backfaceCulling, target?)`                      | `UeVector3 \| null`      | Returns intersection point with triangle or `null` if none                                    |
+| `intersectBox(box, target)`                                                | `UeVector3 \| undefined` | Returns intersection point with axis-aligned bounding box or `undefined` if none              |
+| `intersectPlane(plane, target)`                                            | `UeVector3 \| null`      | Returns intersection point with plane or `null` if none                                       |
+| `intersectSphere(sphere, target)`                                          | `UeVector3 \| null`      | Returns intersection point with sphere or `null` if none                                      |
+| `intersectTriangle(a, b, c, backfaceCulling, target)`                      | `UeVector3 \| null`      | Returns intersection point with triangle or `null` if none                                    |
 | `intersectsBox(box)`                                                        | `boolean`                | Returns true if ray intersects an axis-aligned bounding box                                   |
 | `intersectsPlane(plane)`                                                    | `boolean`                | Returns true if ray intersects a plane                                                        |
 | `intersectsSphere(sphere)`                                                  | `boolean`                | Returns true if ray intersects a sphere                                                       |

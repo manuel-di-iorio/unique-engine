@@ -139,8 +139,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // Also make a double draw call (if allowed) to mitigate transparency artifacts
     function __renderTransparentObjects() {
         gml_pragma("forceinline");
-        var currentZWriteEnable = gpu_get_zwriteenable();
-        gpu_set_zwriteenable(false);
         var objects = __transparentQueue;
         
         for (var i = 0; i < __transparentIdx; i++) {
@@ -159,8 +157,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             
             if (onAfterRender != undefined) onAfterRender(); 
         }
-        
-        gpu_set_zwriteenable(currentZWriteEnable);
     }
     
     // Aggregate light data from scene lights

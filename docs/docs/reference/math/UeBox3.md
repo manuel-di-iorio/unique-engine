@@ -42,13 +42,13 @@ new UeBox3(min = new UeVector3(infinity, infinity, infinity), max = new UeVector
 | `intersect(box)`                     | `self`      | Updates this box to be the intersection of itself and another        |
 | `intersectsBox(box)`                 | `boolean`   | Returns `true` if the two boxes intersect                            |
 | `intersectsPlane(plane)`             | `boolean`   | Returns `true` if the box intersects a given plane                   |
-| `getCenter(target?)`                 | `UeVector3` | Returns the center point of the box                                  |
-| `getSize(target?)`                   | `UeVector3` | Returns the size (width, height, depth) of the box                   |
-| `getParameter(point, target?)`       | `UeVector3` | Returns normalized coordinates of a point relative to the box (0..1) |
+| `getCenter(target)`                 | `UeVector3` | Returns the center point of the box                                  |
+| `getSize(target)`                   | `UeVector3` | Returns the size (width, height, depth) of the box                   |
+| `getParameter(point, target)`       | `UeVector3` | Returns normalized coordinates of a point relative to the box (0..1) |
 | `applyMatrix4(matrix)`               | `self`      | Applies a 4x4 transformation matrix to the box                       |
 | `translate(offset)`                  | `self`      | Moves the box by an offset                                           |
 | `equals(box)`                        | `boolean`   | Checks whether this box is equal to another (min and max match)      |
-| `clampPoint(point, target?)`         | `UeVector3` | Clamps a point to stay within the box limits                         |
+| `clampPoint(point, target)`         | `UeVector3` | Clamps a point to stay within the box limits                         |
 | `distanceToPoint(point)`             | `number`    | Returns distance from point to the box (0 if point is inside)        |
 | `getBoundingSphere(target)`          | `Object`    | Calculates the bounding sphere that encloses the box                 |
 | `union(box)`                         | `self`      | Merges this box with another, expanding the bounds                   |

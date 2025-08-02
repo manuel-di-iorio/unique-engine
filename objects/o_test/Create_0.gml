@@ -1,7 +1,7 @@
 display_reset(4, false);
 currentDemo = undefined;
 bgLayer = layer_background_get_id("Background");
-selectorW = 300;
+selectorW = view_xport;
 showDebug = false;
 
 scenes = [
@@ -28,4 +28,4 @@ setScene = function(idx) {
     layer_background_blend(bgLayer, currentDemo.bg);
 }
 
-setScene(0);
+setScene(7);

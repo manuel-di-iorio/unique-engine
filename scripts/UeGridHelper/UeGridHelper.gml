@@ -28,7 +28,7 @@ function UeGridHelper(
             colR, colG, colB
         );
     
-        // Orizzontale (asse X)
+        // Horizontal (asse X)
         array_push(positions, -halfSize, k, 0, halfSize, k, 0);
         array_push(colors,
             colR, colG, colB,
@@ -39,8 +39,6 @@ function UeGridHelper(
     geometry = new UeLineSegmentsGeometry();
     geometry.setPositions(positions);
     geometry.setColors(colors);
-    
-    material.side = cull_noculling;
     
     matrixAutoUpdate = false;
 }

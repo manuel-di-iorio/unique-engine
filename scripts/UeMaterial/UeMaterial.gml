@@ -232,7 +232,7 @@ function UeMaterial(data = {}) constructor {
         gpu_set_cullmode(renderSide);
     
         gpu_set_ztestenable(depthTest);
-        gpu_set_zwriteenable(depthWrite);
+        gpu_set_zwriteenable(transparent ? false : depthWrite);
         gpu_set_zfunc(depthFunc);
         gpu_set_alphatestenable(transparent);
         gpu_set_alphatestref(alphaTest);

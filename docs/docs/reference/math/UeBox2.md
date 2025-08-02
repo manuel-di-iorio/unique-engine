@@ -39,10 +39,10 @@ new UeBox2(min = new UeVector2(infinity, infinity), max = new UeVector2(-infinit
 | `intersect(box)`                     | `self`      | Updates this box to be the intersection of itself and another        |
 | `intersectsBox(box)`                 | `boolean`   | Returns `true` if the two boxes intersect                            |
 | `union(box)`                         | `self`      | Merges this box with another, expanding the bounds                   |
-| `getCenter(target?)`                 | `UeVector2` | Returns the center point of the box                                  |
-| `getSize(target?)`                   | `UeVector2` | Returns the size (width, height) of the box                          |
-| `getParameter(point, target?)`       | `UeVector2` | Returns normalized coordinates of a point relative to the box (0..1) |
-| `clampPoint(point, target?)`         | `UeVector2` | Clamps a point to stay within the box limits                         |
+| `getCenter(target)`                 | `UeVector2` | Returns the center point of the box                                  |
+| `getSize(target)`                   | `UeVector2` | Returns the size (width, height) of the box                          |
+| `getParameter(point, target)`       | `UeVector2` | Returns normalized coordinates of a point relative to the box (0..1) |
+| `clampPoint(point, target)`         | `UeVector2` | Clamps a point to stay within the box limits                         |
 | `distanceToPoint(point)`             | `number`    | Returns distance from point to the box (0 if point is inside)        |
 | `translate(offset)`                  | `self`      | Moves the box by an offset                                           |
 | `equals(box)`                        | `boolean`   | Checks whether this box is equal to another (min and max match)      |

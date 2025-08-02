@@ -76,7 +76,7 @@ new UeVector3(x = 0, y = 0, z = 0)
 | `setLength(len)`                    | `self`      | Sets the vector's length                             |
 | `fromArray(arr, offset = 0)`        | `self`      | Sets components from an array                        |
 | `getComponent(index)`               | `number`    | Gets a component by index (0: x, 1: y, 2: z)         |
-| `toArray(arr?, offset = 0)`         | `Array`     | Converts vector to array                             |
+| `toArray(arr, offset = 0)`         | `Array`     | Converts vector to array                             |
 | `random()`                          | `self`      | Fills the vector with random values in range \[0, 1) |
 | `randomDirection()`                 | `self`      | Sets the vector to a random unit direction           |
 | `setFromMatrixColumn(matrix, i)`    | `self`      | Sets components from the column at index `i` of a 4×4 matrix.                          |

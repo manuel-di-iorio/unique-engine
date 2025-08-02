@@ -94,9 +94,9 @@ void main()
     // === Tone mapping (reinhard) ===
     // @todo Should be configurable
     //litColor = litColor / (litColor + vec3(1.0));
-
+    
     // === Back to sRGB color space ===
     vec3 finalColor = LinearToSRGB(clamp(litColor, 0.0, 1.0));
-
+    
     gl_FragColor = vec4(finalColor, baseColor.a);
 }

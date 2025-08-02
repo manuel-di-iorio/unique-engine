@@ -39,7 +39,7 @@ function UeTransform(data = {}) constructor {
             if (parent == undefined) {
                 matrixWorld.copy(matrix);
             } else {
-                matrixWorld.multiplyMatrices(parent.matrixWorld, matrix);
+                matrixWorld.multiplyMatrices(matrix, parent.matrixWorld);
             }
             
             matrixWorldNeedsUpdate = false; 

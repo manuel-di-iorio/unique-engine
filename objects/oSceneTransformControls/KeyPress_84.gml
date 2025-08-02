@@ -1,0 +1,1 @@
+control.setSpace(control.space == "world" ? "local" : "world");
