@@ -1,16 +1,18 @@
 /**
  * UeTransformControls constructor
  * Provides interactive gizmo controls to translate, rotate, and scale 3D objects.
- * @param {UeCamera} camera - Camera used for raycasting and projection.
- * @param {Object} data - Optional initial settings.
+ * @param {Struct} camera - Camera used for raycasting and projection.
+ * @param {Struct} data - Optional initial settings.
  */
 function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     // === BASE PROPERTIES ===
     self.camera = camera;             // Camera for raycasting calculations
-    self.axis = undefined;            // Currently selected axis: "X", "Y", "Z" or undefined
+    self.hoveredAxis = undefined;     // Currently hovered axis object
+    self.selectedAxis = undefined;    // Currently selected axis object
+    self.axis = undefined;            // Currently selected axis object name (X, Y, Z, etc..)
     self.dragging = false;            // Flag to indicate if dragging is in progress
     self.size = 1;                    // Gizmo visual size multiplier
-    self.mode = "translate";          // Current transform mode: "translate", "rotate", or "scale"
+    self.mode = "move";               // Current transform mode: "move", "rotate", or "scale"
     self.space = "world";             // Transform space: "world" or "local"
 
     // === BOUNDS AND SNAP SETTINGS ===
@@ -28,9 +30,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
     // === INTERNAL HELPERS ===
     self._raycaster = new UeRaycaster();  // Raycaster for mouse picking
-    self._root = new UeMesh();         // Root Object3D for the gizmo
-
-    self._plane = new UePlane();           // Plane used for intersection during dragging
+    self._root = new UeMesh();         // Root object    
+    self._plane = new UePlane();       // Plane used for intersection during dragging
 
     // Temporary vectors for dragging calculations
     self.pointStart = new UeVector3();
@@ -41,7 +42,33 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     self._positionStart = new UeVector3();
     self._rotationStart = new UeQuaternion();
     self._scaleStart = new UeVector3();
-
+    
+    // === Build properties ===
+    __xVec = new UeVector3(1, 0, 0);  // Unit vector for X axis
+    __yVec = new UeVector3(0, 1, 0);  // Unit vector for Y axis
+    __zVec = new UeVector3(0, 0, 1);  // Unit vector for Z axis
+    
+    // Base material for all gizmo components with transparency and depth testing disabled
+    __matMesh = new UeMeshBasicMaterial({
+        depthTest: false,
+        depthWrite: false,
+        transparent: true
+    });
+    
+    /**
+     * Computes the visual dimensions of the gizmo axes based on the current size setting.
+     * These calculations determine the proportions of arrows, planes, and interactive elements.
+     */
+    function __computeAxesSize() {
+        __axisLength = self.size * 0.8;          // Total length of each axis arrow
+        __axisLengthHalf = __axisLength * .5;    // Half the axis length for positioning
+        __axisLineWidth = .7;                    // Width/thickness of axis lines
+        __axisOffset = 1;                        // Offset from origin for axis positioning
+        __planeOpacity = 0.3;                    // Transparency level for plane handles
+        __planeDepth = .5;                       // Thickness of plane interaction handles
+        __planeSize = __axisLength * 0.2;        // Size of square plane handles
+    }
+    
     /**
      * Attaches the transform controls to a 3D object, enabling manipulation.
      * @param {UeObject3D} object - The target object to control.
@@ -51,11 +78,13 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         self.object = object;
         
+        // Auto-scale gizmo based on object's bounding box size for better visual proportion
         var objectBox = object.geometry[$ "boundingBox"];
         if (objectBox != undefined) self.size = objectBox.getSize().x;
+        __computeAxesSize();
             
         build();
-        updateGizmo();                    // Sync gizmo transform with object
+        updateGizmo();
         return self;
     }
 
@@ -65,204 +94,281 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
      */
     function detach() {
         gml_pragma("forceinline");
-        self._root.visible = false;  // Hide gizmo
+        self.hoveredAxis = undefined;
+        self.selectedAxis = undefined;
         self.axis = undefined;
         self.object = undefined;
+        self.clearGizmo(self._root);
         return self;
-    }
+    } 
     
     /**
      * Builds the gizmo visual lines for the axes according to current size and visibility.
+     * Creates arrow geometries for each axis and plane handles for multi-axis manipulation.
      */
     function build() {
         gml_pragma("forceinline");
-        clearGizmo();  // Remove previous gizmo geometry to avoid memory leaks
+        clearGizmo(self._root);  // Remove previous gizmo geometry to avoid memory leaks
+        self._gizmo = new UeMesh(); // Interactable gizmo container
+        self._root.add(self._gizmo);
+        var _baseLength = __axisLengthHalf + __axisOffset;
         
-        var axisLength = self.size * 1.2;
-        var axisLengthHalf = axisLength * .5;
-        var axisLineWidth = 1;
-        var axisOffset = 1;
-        var axisMaterial = new UeMeshBasicMaterial();
+        // Create X axis line (Red)
+        var geoX = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, undefined, { color: c_red });
+        geoX.boundingBox = new UeBox3();
+        geoX.computeBoundingBox();
+        var meshX = new UeMesh(geoX, __matMesh.clone());
+        meshX.name = "X";
+        meshX.rotation.setFromAxisAngle(__zVec, 180);  // Rotate to point in positive X direction
+        meshX.position.x = -_baseLength;
+        meshX.raycastOrder = 0;  // Higher priority for raycasting (axes before planes)
+        self._gizmo.add(meshX);
         
-        // Create X axis line if visible
-        if (self.showX) {
-            var geoX = new UeArrowGeometry(axisLineWidth, axisLength, 10, undefined, { color: c_red });
-            geoX.boundingBox = new UeBox3(
-                new UeVector3(-axisLength, -axisLength, -axisLength),
-                new UeVector3(axisLength, axisLength, axisLength)
-            );
-            var meshX = new UeMesh(geoX, axisMaterial);
-            meshX.name = "X";
-            meshX.rotation.setFromAxisAngle(new UeVector3(0, 0, 1), 180);
-            meshX.position.x = -axisLengthHalf - axisOffset;
-            meshX.material.depthTest = false;
-            meshX.material.transparent = true;
-            
-            self._root.add(meshX);
-        }
+        // Create Y axis line (Blue)
+        var geoY = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, undefined, { color: #2277B3 });
+        geoY.boundingBox = new UeBox3();
+        geoY.computeBoundingBox();
+        var meshY = new UeMesh(geoY, __matMesh.clone());
+        meshY.name = "Y";
+        meshY.rotation.setFromAxisAngle(__zVec, 270);  // Rotate to point in positive Y direction
+        meshY.position.y = -_baseLength;
+        meshY.raycastOrder = 0;
+        self._gizmo.add(meshY);
         
-        // Create Y axis line if visible
-        if (self.showY) {
-            var geoY = new UeArrowGeometry(axisLineWidth, axisLength, 10, undefined, { color: #2277B3 });
-            geoY.boundingBox = new UeBox3(
-                new UeVector3(-axisLength, -axisLength, -axisLength),
-                new UeVector3(axisLength, axisLength, axisLength)
-            );
-            var meshY = new UeMesh(geoY, axisMaterial);
-            meshY.name = "Y";
-            meshY.rotation.setFromAxisAngle(new UeVector3(0, 0, 1), 270);
-            meshY.position.y = -axisLengthHalf - axisOffset;
-            meshY.material.depthTest = false;
-            self._root.add(meshY);
-        }
+        // Create Z axis line (Green/Lime)
+        var geoZ = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, undefined, { color: c_lime });
+        geoZ.boundingBox = new UeBox3();
+        geoZ.computeBoundingBox();
+        var meshZ = new UeMesh(geoZ, __matMesh.clone());
+        meshZ.name = "Z";
+        meshZ.rotation.setFromAxisAngle(__yVec, -90);  // Rotate to point in positive Z direction
+        meshZ.position.z = _baseLength;
+        meshZ.raycastOrder = 0;
+        self._gizmo.add(meshZ); 
         
-        // Create Z axis line if visible
-        if (self.showZ) {
-            var geoZ = new UeArrowGeometry(axisLineWidth, axisLength, 10, undefined, { color: c_lime });
-            geoZ.boundingBox = new UeBox3(
-                new UeVector3(-axisLength, -axisLength, -axisLength),
-                new UeVector3(axisLength, axisLength, axisLength)
-            );
-            var meshZ = new UeMesh(geoZ, axisMaterial);
-            meshZ.name = "Z";
-            meshZ.rotation.setFromAxisAngle(new UeVector3(0, 1, 0), 270);
-            meshZ.position.z = axisLengthHalf + axisOffset;
-            meshZ.material.depthTest = false;
-            self._root.add(meshZ);
-        }
+        // === ADDITIONAL PLANES FOR COMBINED AXES ===
+        // These planes allow dragging along two axes simultaneously
         
-        // Add the center cube
-        var geoBox = new UeBoxGeometry(axisOffset*2, axisOffset*2, axisOffset*2, { color: c_ltgray });
-        var meshBox = new UeMesh(geoBox, axisMaterial);
-        meshBox.material.depthTest = false;
-        meshBox.renderOrder = -1;
-        //meshBox.material.transparent = true;
-        self._root.add(meshBox);
-    }
+        // XZ plane (Blue) - allows movement along X and Z axes simultaneously
+        var geoXZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: #2277B3, alpha: __planeOpacity });
+        geoXZ.boundingBox = new UeBox3();
+        geoXZ.computeBoundingBox();
+        var meshXZ = new UeMesh(geoXZ, __matMesh.clone());
+        meshXZ.name = "XZ";
+        meshXZ.raycastOrder = 1;  // Lower priority than individual axes
+        self._gizmo.add(meshXZ);
+        
+        // YZ plane (Red) - allows movement along Y and Z axes simultaneously
+        var geoYZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_red, alpha: __planeOpacity });
+        geoYZ.boundingBox = new UeBox3();
+        geoYZ.computeBoundingBox();
+        var meshYZ = new UeMesh(geoYZ, __matMesh.clone());
+        meshYZ.name = "YZ";
+        meshYZ.raycastOrder = 1;
+        self._gizmo.add(meshYZ);
+        
+        // XY plane (Green) - allows movement along X and Y axes simultaneously
+        var geoXY = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_lime, alpha: __planeOpacity });
+        geoXY.boundingBox = new UeBox3();
+        geoXY.computeBoundingBox();
+        var meshXY = new UeMesh(geoXY, __matMesh.clone());
+        meshXY.name = "XY";
+        meshXY.raycastOrder = 1;
+        self._gizmo.add(meshXY);
 
+        // === Add the center cube (XYZ) ===
+        // Center cube allows free movement in all three axes simultaneously
+        var geoBox = new UeBoxGeometry(__axisOffset*5, __axisOffset*5, __axisOffset*5, { color: c_ltgray });
+        geoBox.boundingBox = new UeBox3();
+        geoBox.computeBoundingBox();
+        var meshBox = new UeMesh(geoBox, __matMesh.clone());
+        meshBox.name = "XYZ";
+        meshBox.renderOrder = -1;   // Render behind other elements
+        meshBox.raycastOrder = 2;   // Lowest raycast priority
+        self._gizmo.add(meshBox);
+    }
+    
     /**
-     * Updates the gizmo's position and orientation to match the attached object's transform.
+     * Updates the gizmo's position and orientation to match the attached object's transform and camera direction.
+     * In world space, plane handles are positioned relative to camera to maintain visibility.
      */
     function updateGizmo() {
         gml_pragma("forceinline");
-        if (!self.object) return;
 
         // Set gizmo root position to the object's position
         self._root.position.copy(self.object.position);
 
-        // Rotate gizmo to match object's rotation if in local space,
-        // otherwise reset gizmo rotation to identity for world space mode
         if (self.space == "local") {
+            // In local space, gizmo rotates with the object
             self._root.rotation.copy(self.object.rotation);
         } else {
-            self._root.rotation.identity();
+            // In world space, position plane handles based on camera direction for optimal visibility
+            var camDir = self.camera.getWorldDirection();
+            
+            // XZ plane positioning - place on the side of the gizmo facing away from camera
+            var meshXZ = self._gizmo.getObjectByName("XZ");    
+            meshXZ.rotation.setFromAxisAngle(__xVec, 90);  // Orient plane horizontally
+            meshXZ.position.x = (camDir.x < 0) ? -__planeSize : __planeSize;
+            meshXZ.position.z = (camDir.z < 0) ? -__planeSize : __planeSize;
+                 
+            // YZ plane positioning
+            var meshYZ = self._gizmo.getObjectByName("YZ");
+            meshYZ.rotation.setFromAxisAngle(__yVec, 90);  // Orient plane vertically
+            meshYZ.position.y = (camDir.y < 0) ? -__planeSize : __planeSize;
+            meshYZ.position.z = (camDir.z < 0) ? -__planeSize : __planeSize;
+            
+            // XY plane positioning
+            var meshXY = self._gizmo.getObjectByName("XY");
+            meshXY.rotation.setFromAxisAngle(__zVec, 0);   // Keep plane facing camera
+            meshXY.position.z = 0;
+            meshXY.position.x = (camDir.x < 0) ? -__planeSize : __planeSize;
+            meshXY.position.y = (camDir.y < 0) ? -__planeSize : __planeSize;
         }
     }
 
     /**
      * Updates the currently hovered/selected axis by performing raycast on gizmo lines.
+     * Handles visual feedback (scaling and emissive highlighting) for interactive elements.
      */
     function updateInteraction() {
         gml_pragma("forceinline");
         
-        // Reset scala e emissive di tutti gli assi
-        for (var i = 0, l = array_length(self._root.children); i < l; i++) {
-            var child = self._root.children[i];
-            child.scale.set(1, 1, 1);
-            child.material.emissive = undefined;
-        }
-        
-        
-        var intersects = self._raycaster.intersectObjects(self._root.children);
-     
-        if (array_length(intersects) > 0) {
-            var hovered = intersects[0].object;
-            //hovered.scale.set(1.5, 1.5, 1.5);
-            self.axis = hovered.name;
-            self.hovered = hovered;
-        } else {
-            self.hovered = undefined;
-            self.axis = undefined;                  // No axis hovered
-        }
-    } 
-
-    /**
-     * Handles pointer down event to start dragging the selected axis if possible.
-     */
-    function onPointerDown() {
-        gml_pragma("forceinline");
-        if (!self.object || self.dragging) return;
-
-        // Setup raycaster from current mouse position
         self._raycaster.setFromCamera(self.camera);
-        updateInteraction();  // Update which axis is hovered
-
-        if (self.axis != undefined) {
-            self.dragging = true;
-
-            // Determine plane normal based on selected axis for dragging
-            var axisVec = new UeVector3();
-            switch (self.axis) {
-                case "X": 
-                    axisVec.set(1,0,0);
-                    break;
-                case "Y": 
-                    axisVec.set(0,1,0); 
-                    break;
-                case "Z": 
-                    axisVec.set(0,0,1); 
-                    break;
+        
+        if (!self.dragging) {
+            // Reset scale and emissive properties of all axes when not dragging
+            for (var i = 0, l = array_length(self._gizmo.children); i < l; i++) {
+                var child = self._gizmo.children[i];
+                child.scale.set(1, 1, 1);
+                child.material.uniforms.ueEmissive.value = [0, 0, 0];
             }
-            log(self.hovered.material)
-            self.hovered.material.uniforms.ueEmissive.value = [1, 1, 0];
-
-            // Rotate plane normal by object's rotation if in local space
-            if (self.space == "local") {
-                axisVec.applyQuaternion(self.object.rotation);
-            }
-
-            // Calculate the plane normal perpendicular to the camera direction
-            var camDir = self.camera.getWorldDirection();
-            var planeNormal = camDir.clone().cross(axisVec).cross(axisVec).normalize();
-            self._plane.setFromNormalAndCoplanarPoint(planeNormal, self.object.position);
-
-            // Calculate initial intersection point of ray and plane
-            var intersectionPoint = self._raycaster.ray.intersectPlane(self._plane);
-            if (intersectionPoint == undefined) {
-                // No intersection found; cancel dragging
-                self.dragging = false;
-                return;
-            }
-            self.pointStart.copy(intersectionPoint);
-
-            // Save the initial transform state before dragging begins
-            self._positionStart.copy(self.object.position);
-            self._rotationStart.copy(self.object.rotation);
-            self._scaleStart.copy(self.object.scale);
+            
+            // Perform raycasting to find intersected gizmo elements
+            var intersects = self._raycaster.intersectObjects(self._gizmo.children, false, false);
+            
+            // Sort intersections by raycast priority first, then by distance
+            // This ensures axes have priority over planes, and closer objects over farther ones
+            array_sort(intersects, function(a, b) {
+                var pa = a.object.raycastOrder;
+                var pb = b.object.raycastOrder;
+                
+                if (pa != pb) {
+                    return pb - pa;  // Higher raycastOrder = higher priority
+                } else {
+                    return a.distance - b.distance;  // Closer objects preferred when same priority
+                }
+            });
+         
+            if (array_length(intersects) > 0) {
+                // Highlight the hovered axis with slight scaling
+                var hovered = intersects[0].object;
+                hovered.scale.set(1.05, 1.05, 1.05);
+                self.hoveredAxis = hovered;
+            } else {
+                self.hoveredAxis = undefined;
+            } 
         }
     }
 
     /**
+     * Handles pointer down event to start dragging the selected axis if possible.
+     * Sets up the drag plane based on the selected axis and camera orientation.
+     */
+    function onPointerDown() {
+        gml_pragma("forceinline");
+        if (self.hoveredAxis == undefined || self.dragging) return;
+
+        self.dragging = true;
+        self.selectedAxis = self.hoveredAxis;
+        self.axis = self.selectedAxis.name;
+
+        // Determine axis vector based on selected axis for mathematical calculations
+        var axisVec = undefined;
+        switch (self.axis) {
+            case "X": axisVec = __xVec; break; 
+            case "Y": axisVec = __yVec; break; 
+            case "Z": axisVec = __zVec; break;
+        }
+        
+        // Visual feedback: reset scale and add yellow emissive highlight
+        self.selectedAxis.scale.set(1, 1, 1);
+        self.selectedAxis.material.uniforms.ueEmissive.value = [1, 1, 0];
+
+        // Transform axis vector to local space if needed
+        if (self.space == "local" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
+            axisVec.applyQuaternion(self.object.rotation);
+        }
+
+        // Calculate the optimal plane for dragging based on camera direction and selected axis
+        var camDir = self.camera.getWorldDirection(); 
+        var _planeNormal = camDir;
+        
+        if (self.axis == "X" || self.axis == "Y" || self.axis == "Z") {
+            // For single axis: create plane perpendicular to both camera direction and axis
+            // Mathematical explanation: cross(camDir, axis) gives perpendicular vector,
+            // then cross that with axis again to get plane normal that contains the axis
+            _planeNormal = camDir.clone().cross(axisVec).cross(axisVec).normalize();
+        } else if (self.axis == "XZ" || self.axis == "YZ" || self.axis == "XY") {
+            // For plane handles: use the plane's natural normal
+            switch (self.axis) {
+                case "XY": _planeNormal = __zVec.clone(); break; 
+                case "XZ": _planeNormal = __yVec.clone(); break;
+                case "YZ": _planeNormal = __xVec.clone(); break;
+            }
+        
+            // Transform normal to local space if needed
+            if (self.space == "local") {
+                _planeNormal.applyQuaternion(self.object.rotation);
+            }
+        
+            // Flip plane normal if camera is looking from the wrong side
+            // Dot product tells us if camera and normal are pointing in same direction
+            var dot = camDir.dot(_planeNormal);
+            if (dot > 0) {
+                _planeNormal.negate();
+            }
+        }
+        
+        // Create the drag plane using the calculated normal and object position
+        self._plane.setFromNormalAndCoplanarPoint(_planeNormal, self.object.position);
+
+        // Calculate initial intersection point where mouse ray meets the drag plane
+        var intersectionPoint = self._raycaster.ray.intersectPlane(self._plane);
+        if (intersectionPoint == undefined) {
+            // No intersection found; cancel dragging
+            self.dragging = false;
+            self.selectedAxis = undefined;
+            self.axis = undefined;
+            return;
+        }
+        self.pointStart.copy(intersectionPoint);
+
+        // Save the initial transform state before dragging begins for delta calculations
+        self._positionStart.copy(self.object.position);
+        self._rotationStart.copy(self.object.rotation);
+        self._scaleStart.copy(self.object.scale);
+    }
+
+    /**
      * Handles pointer move event to update dragging transform.
+     * Calculates the drag delta and applies the appropriate transformation.
      */
     function onPointerMove() {
         gml_pragma("forceinline");
         if (!self.dragging) return;
 
-        // Update raycaster for current mouse position
-        self._raycaster.setFromCamera(self.camera);
-
-        // Calculate intersection with drag plane
+        // Calculate current intersection with drag plane
         var intersectionPoint = self._raycaster.ray.intersectPlane(self._plane);
         if (intersectionPoint == undefined) return;
 
         self.pointEnd.copy(intersectionPoint);
 
         // Calculate drag delta vector between current and start points
+        // This delta represents the movement in 3D space
         self.delta.copy(self.pointEnd).sub(self.pointStart);
 
         applyTransform();  // Apply transform change to object based on delta
-        updateGizmo();          // Update gizmo transform to match object
+        updateGizmo();     // Update gizmo transform to match object
     }
 
     /**
@@ -271,11 +377,20 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function onPointerUp() {
         gml_pragma("forceinline");
         self.dragging = false;
+        self.selectedAxis = undefined;
         self.axis = undefined;
     }
     
-    // Listen for mouse events and call the respective methods
-    function update() {
+    /**
+     * Main update loop - handles mouse events and interaction updates.
+     */
+    function update() { 
+        if (!self.object) return;
+            
+        // Update which axis is hovered based on mouse position
+        updateInteraction();
+        
+        // Handle mouse events for dragging
         if (mouse_check_button_pressed(mb_left)) {
             onPointerDown();
         }
@@ -288,105 +403,132 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     }
 
     /**
-     * Applies the transformation (translate, rotate, scale) to the attached object based on drag delta.
+     * Applies the transformation (move, rotate, scale) to the attached object based on drag delta.
+     * Handles coordinate space conversion, axis constraints, snapping, and bounds clamping.
      */
     function applyTransform() {
         gml_pragma("forceinline");
         if (!self.object) return;
     
-        if (self.mode == "translate") {
+        if (self.mode == "move") {
             var newPos = self._positionStart.clone();
-    
             var delta = self.delta.clone();
             
             if (self.space == "local") {
-                // Trasforma il delta dal world space al local space dell'oggetto
+                // Transform delta from world space to object's local space
+                // Mathematical explanation: multiply by inverse rotation to "undo" the object's rotation
                 var invRotation = self.object.rotation.clone().invert();
                 delta.applyQuaternion(invRotation);
             }
     
-            // Apply delta only along the selected axis
+            // Apply delta only along the selected axis/axes
             if (self.axis == "X") newPos.x += delta.x;
             else if (self.axis == "Y") newPos.y += delta.y;
             else if (self.axis == "Z") newPos.z += delta.z;
+            else if (self.axis == "XZ") {
+                newPos.x += delta.x;
+                newPos.z += delta.z;
+            }
+            else if (self.axis == "YZ") {
+                newPos.y += delta.y;
+                newPos.z += delta.z;
+            }
+            else if (self.axis == "XY") {
+                newPos.x += delta.x;
+                newPos.y += delta.y;
+            }
+            else if (self.axis == "XYZ") {
+                newPos.add(delta);  // Free movement in all axes
+            }
   
-            // Snap translation if enabled
+            // Apply snapping if enabled - rounds to nearest snap increment
             if (self.translationSnap != undefined) {
                 if (self.axis == "X") newPos.x = round(newPos.x / self.translationSnap) * self.translationSnap;
                 else if (self.axis == "Y") newPos.y = round(newPos.y / self.translationSnap) * self.translationSnap;
                 else if (self.axis == "Z") newPos.z = round(newPos.z / self.translationSnap) * self.translationSnap;
+                else if (self.axis == "XYZ") {
+                    delta.x = round(delta.x / self.translationSnap) * self.translationSnap;
+                    delta.y = round(delta.y / self.translationSnap) * self.translationSnap;
+                    delta.z = round(delta.z / self.translationSnap) * self.translationSnap;
+                    newPos.add(delta);
+                }
             }
     
-            // Clamp to configured limits
+            // Clamp to configured limits to prevent object from going out of bounds
             newPos.x = clamp(newPos.x, self.minX, self.maxX);
             newPos.y = clamp(newPos.y, self.minY, self.maxY);
             newPos.z = clamp(newPos.z, self.minZ, self.maxZ);
     
-            // Apply position change
+            // Apply the final position change to the object
             self.object.position.copy(newPos);
         }
-        else if (self.mode == "rotate") {
-            var axisVec = new UeVector3();
-            if (self.axis == "X") axisVec.set(1,0,0);
-            else if (self.axis == "Y") axisVec.set(0,1,0);
-            else if (self.axis == "Z") axisVec.set(0,0,1);
-            else return; // no axis selected
+        
+        // Note: Rotation and scaling modes are commented out but would follow similar patterns:
+        // - Rotation: Convert drag delta to angular rotation around the selected axis
+        // - Scaling: Convert drag delta to scale factors with proper sensitivity
+        
+        //else if (self.mode == "rotate") {
+            //var axisVec = new UeVector3();
+            //if (self.axis == "X") axisVec.set(1,0,0);
+            //else if (self.axis == "Y") axisVec.set(0,1,0);
+            //else if (self.axis == "Z") axisVec.set(0,0,1);
+            //else return; // no axis selected
+    //
+            //if (self.space == "local") {
+                //axisVec.applyQuaternion(self.object.rotation);
+            //}
+    //
+            //// Use delta projection for rotation sensitivity
+            //var deltaLength = self.delta.length();
+            //var angle = deltaLength * 0.01; // Sensitivity factor for rotation
+            //
+            //if (self.rotationSnap != undefined) {
+                //angle = round(angle / self.rotationSnap) * self.rotationSnap;
+            //}
+    //
+            //// Create quaternion for rotation around axisVec by angle
+            //var q = new UeQuaternion();
+            //q.setFromAxisAngle(axisVec, angle);
+    //
+            //self.object.rotation.multiplyQuaternions(q, self._rotationStart);
+        //}
+        //else if (self.mode == "scale") {
+            //var newScale = self._scaleStart.clone();
+            //var delta = self.delta.clone();
+    //
+            //var scaleFactor = 1.0 + (delta.length() * 0.01); // Sensitivity factor
+            //
+            //if (self.space == "local") {
+                //var invRotation = self.object.rotation.clone().invert();
+                //delta.applyQuaternion(invRotation);
+            //}
+    //
+            //// Apply scale factor only to the selected axis
+            //if (self.axis == "X") newScale.x = self._scaleStart.x * scaleFactor;
+            //else if (self.axis == "Y") newScale.y = self._scaleStart.y * scaleFactor;
+            //else if (self.axis == "Z") newScale.z = self._scaleStart.z * scaleFactor;
+    //
+            //// Snap scale if enabled
+            //if (self.scaleSnap != undefined) {
+                //if (self.axis == "X") newScale.x = round(newScale.x / self.scaleSnap) * self.scaleSnap;
+                //else if (self.axis == "Y") newScale.y = round(newScale.y / self.scaleSnap) * self.scaleSnap;
+                //else if (self.axis == "Z") newScale.z = round(newScale.z / self.scaleSnap) * self.scaleSnap;
+            //}
+    //
+            //// Clamp scale to configured limits (prevent negative scaling)
+            //newScale.x = clamp(newScale.x, max(0.01, self.minX), self.maxX);
+            //newScale.y = clamp(newScale.y, max(0.01, self.minY), self.maxY);
+            //newScale.z = clamp(newScale.z, max(0.01, self.minZ), self.maxZ);
+    //
+            //self.object.scale.copy(newScale);
+        //}
+    } 
     
-            if (self.space == "local") {
-                axisVec.applyQuaternion(self.object.rotation);
-            }
-    
-            // Usa la proiezione del delta sull'asse perpendicolare
-            var deltaLength = self.delta.length();
-            var angle = deltaLength * 0.01; // Fattore di sensibilità per la rotazione
-            
-            if (self.rotationSnap != undefined) {
-                angle = round(angle / self.rotationSnap) * self.rotationSnap;
-            }
-    
-            // Create quaternion for rotation around axisVec by angle
-            var q = new UeQuaternion();
-            q.setFromAxisAngle(axisVec, angle);
-    
-            self.object.rotation.multiplyQuaternions(q, self._rotationStart);
-        }
-        else if (self.mode == "scale") {
-            var newScale = self._scaleStart.clone();
-            var delta = self.delta.clone();
-    
-            var scaleFactor = 1.0 + (delta.length() * 0.01); // Fattore di sensibilità
-            
-            if (self.space == "local") {
-                var invRotation = self.object.rotation.clone().invert();
-                delta.applyQuaternion(invRotation);
-            }
-    
-            // Apply scale factor only to the selected axis
-            if (self.axis == "X") newScale.x = self._scaleStart.x * scaleFactor;
-            else if (self.axis == "Y") newScale.y = self._scaleStart.y * scaleFactor;
-            else if (self.axis == "Z") newScale.z = self._scaleStart.z * scaleFactor;
-    
-            // Snap scale if enabled
-            if (self.scaleSnap != undefined) {
-                if (self.axis == "X") newScale.x = round(newScale.x / self.scaleSnap) * self.scaleSnap;
-                else if (self.axis == "Y") newScale.y = round(newScale.y / self.scaleSnap) * self.scaleSnap;
-                else if (self.axis == "Z") newScale.z = round(newScale.z / self.scaleSnap) * self.scaleSnap;
-            }
-    
-            // Clamp scale to configured limits
-            newScale.x = clamp(newScale.x, max(0.01, self.minX), self.maxX);
-            newScale.y = clamp(newScale.y, max(0.01, self.minY), self.maxY);
-            newScale.z = clamp(newScale.z, max(0.01, self.minZ), self.maxZ);
-    
-            self.object.scale.copy(newScale);
-        }
-    }
-
     // === API METHODS ===
 
     /**
-     * Returns the root Object3D node of the gizmo for attaching to the scene.
-     * @returns {UeObject3D}
+     * Returns the root node of the gizmo for attaching to the scene.
+     * @returns {Struct}
      */
     function getHelper() { 
         gml_pragma("forceinline");
@@ -395,7 +537,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     
     /**
      * Returns the raycaster instance used for picking.
-     * @returns {UeRaycaster}
+     * @returns {Struct}
      */
     function getRaycaster() {
         gml_pragma("forceinline"); 
@@ -403,55 +545,13 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     }
     
     /**
-     * Returns the current transform mode.
-     * @returns {string} "translate", "rotate", or "scale"
-     */
-    function getMode() {
-        gml_pragma("forceinline");
-        return self.mode; 
-    }
-    
-    /**
      * Sets the transform mode.
-     * @param {string} mode - "translate", "rotate", or "scale"
+     * @param {string} mode - "move", "rotate", or "scale"
      * @returns {self}
      */
     function setMode(mode) {
         gml_pragma("forceinline"); 
         self.mode = mode; 
-        return self; 
-    }
-    
-    /**
-     * Sets the translation snap increment.
-     * @param {number} value
-     * @returns {self}
-     */
-    function setTranslationSnap(value) {
-        gml_pragma("forceinline"); 
-        self.translationSnap = value; 
-        return self; 
-    }
-    
-    /**
-     * Sets the rotation snap increment (radians).
-     * @param {number} value
-     * @returns {self}
-     */
-    function setRotationSnap(value) {
-        gml_pragma("forceinline"); 
-        self.rotationSnap = value; 
-        return self; 
-    }
-    
-    /**
-     * Sets the scale snap increment.
-     * @param {number} value
-     * @returns {self}
-     */
-    function setScaleSnap(value) { 
-        gml_pragma("forceinline");
-        self.scaleSnap = value; 
         return self; 
     }
     
@@ -497,20 +597,26 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     }
     
     /**
-     * Clears and disposes of the gizmo geometry and children.
+     * Recursively clears and disposes of the gizmo geometry and children.
+     * Important for memory management to prevent geometry leaks.
      */
-    function clearGizmo() {
+    function clearGizmo(node) {
         gml_pragma("forceinline");
-        var _children = self._root.children;
+         
+        var _children = node.children;
         var count = array_length(_children);
+        
+        // Iterate backwards to safely remove children while iterating
         for (var i = count - 1; i >= 0; i--) {
             var child = _children[i];
             var geometry = child[$ "geometry"];
             if (geometry != undefined) {
-                child.geometry.dispose();  // Dispose geometry to free memory
+                child.geometry.dispose();  // Dispose geometry to free GPU memory
             }
+            clearGizmo(child);  // Recursively clear child nodes
         }
-        self._root.clear();  // Remove all children from gizmo root
+        
+        node.clear();  // Remove all children from node
     }
     
     return self;

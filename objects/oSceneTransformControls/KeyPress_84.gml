@@ -1,1 +1,1 @@
-control.setSpace(control.space == "world" ? "local" : "world");
+//control.setSpace(control.space == "world" ? "local" : "world");

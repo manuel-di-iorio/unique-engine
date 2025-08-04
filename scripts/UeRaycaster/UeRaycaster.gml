@@ -61,10 +61,11 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * Intersects the ray with an object and optionally its descendants recursively
      * @param {Struct} object - The object to test for intersections
      * @param {bool} recursive - Whether to check children recursively (default: true)
+     * @param {bool} sort - Whether to automatically sort the hits based on the camera distance
      * @param {Array} hits - Optional array to store intersection results
      * @returns {Array} Sorted array of intersection hits, closest first
      */
-    function intersectObject(object, recursive = true, hits = []) {
+    function intersectObject(object, recursive = true, sort = true, hits = []) {
         gml_pragma("forceinline");
         // If the object has a raycast method, invoke it
         if (object.visible && object[$ "geometry"] && layers.test(object.layers)) {
@@ -77,12 +78,12 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         // Recursively test child objects if requested
         if (recursive) {
             for (var i = 0, n = array_length(object.children); i < n; i++) {
-                intersectObject(object.children[i], true, hits);
+                intersectObject(object.children[i], true, sort, hits);
             }
         }
 
         // Sort intersections by distance ascending
-        array_sort(hits, function (a, b) { return a.distance - b.distance; });
+        if (sort) array_sort(hits, function (a, b) { return a.distance - b.distance; });
 
         return hits;
     }
@@ -91,17 +92,18 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * Intersects the ray with multiple objects
      * @param {Array} objects - Array of objects to test intersections
      * @param {bool} recursive - Whether to check children recursively (default: true)
+     * @param {bool} sort - Whether to automatically sort the hits based on the camera distance
      * @param {Array} hits - Optional array to store intersection results
      * @returns {Array} Sorted array of intersection hits, closest first
      */
-    function intersectObjects(objects, recursive = true, hits = []) {
+    function intersectObjects(objects, recursive = true, sort = true, hits = []) {
         gml_pragma("forceinline");
         for (var i = 0, n = array_length(objects); i < n; i++) {
-            intersectObject(objects[i], recursive, hits);
+            intersectObject(objects[i], recursive, sort, hits);
         }
 
         // Sort intersections by distance ascending
-        array_sort(hits, function (a, b) { return a.distance - b.distance; });
+        if (sort) array_sort(hits, function (a, b) { return a.distance - b.distance; });
 
         return hits;
     }

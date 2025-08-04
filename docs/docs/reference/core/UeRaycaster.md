@@ -28,8 +28,8 @@ UeRaycaster(origin = new UeVector3(), direction = new UeVector3(0, 0, -1), near 
 | ------------------------------------------------------------------ | ------- | ----------------------------------------------------------------------------------------------- |
 | `set(origin, direction)`                                           | `self`  | Sets the ray origin and direction                                                            |
 | `setFromCamera(camera)`                                  | `self`  | Sets the ray based on mouse coordinates and camera                             |
-| `intersectObject(object, recursive = true, hits = [])`   | `Array` | Intersects ray with an object and optionally its descendants recursively, returning sorted hits by distance |
-| `intersectObjects(objects, recursive = true, hits = [])` | `Array` | Intersects ray with multiple objects, optionally recursive, returning sorted hits by distance              |
+| `intersectObject(object, recursive = true, sort = true, hits = [])`   | `Array` | Intersects ray with an object and optionally its descendants recursively, returning sorted hits by distance |
+| `intersectObjects(objects, recursive = true, sort = true, hits = [])` | `Array` | Intersects ray with multiple objects, optionally recursive, returning sorted hits by distance              |
 
 ## Usage example
 

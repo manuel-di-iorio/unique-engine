@@ -29,7 +29,7 @@ function UeTransform(data = {}) constructor {
     }
 
     // Update local matrix and matrix world, also on children
-    function updateMatrixWorld(force = false) {    
+    function updateMatrixWorld(force = false) {
         gml_pragma("forceinline");
         if (matrixAutoUpdate) {
             updateMatrix();

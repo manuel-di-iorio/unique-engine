@@ -53,7 +53,6 @@ function UeDirectionalLight(horizontal = 0, vertical = 0, data = {}): UeLight(da
     lightType = "DirectionalLight";
     target = new UeVector3();
     
-    // @undocumented
     function setDirection(horizontal = 0, vertical = 0) {
         // Base forward vector
         var xx = 0;

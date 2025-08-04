@@ -33,6 +33,7 @@ new UeVector3(x = 0, y = 0, z = 0)
 | `scale(scalar)`                     | `self`      | Scales this vector by a scalar                       |
 | `dot(vec)`                          | `number`    | Dot product with another vector                      |
 | `cross(vec)`                        | `UeVector3` | Cross product with another vector                    |
+| `crossVectors(a, b)`                | `self`      | Sets this vector to cross product of a and b         |
 | `length()`                          | `number`    | Euclidean length of the vector                       |
 | `normalize()`                       | `self`      | Normalizes the vector                                |
 | `equals(vec)`                       | `boolean`   | Checks if the vectors are equal in all components    |

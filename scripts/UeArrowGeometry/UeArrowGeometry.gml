@@ -4,7 +4,7 @@ function UeArrowGeometry(radius = 1, height = 1, radialSegments = 32, arrowSize 
     var _radialSegments = radialSegments ?? 32;
     var _color = data[$ "color"] ?? c_white;
     var _alpha = data[$ "alpha"] ?? 1;
-    var _arrowSize = arrowSize ?? 0.2;
+    var _arrowSize = arrowSize ?? 0.15;
 
     var arrowHeight = _height * _arrowSize;
     var cylinderHeight = _height - arrowHeight;

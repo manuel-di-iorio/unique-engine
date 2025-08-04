@@ -77,6 +77,14 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         var cz = self.x * vec.y - self.y * vec.x;
         return new UeVector3(cx, cy, cz);
     }
+    
+    // Sets this vector to cross product of a and b.
+    function crossVectors(a, b) {
+        self.x = a.y * b.z - a.z * b.y;
+        self.y = a.z * b.x - a.x * b.z;
+        self.z = a.x * b.y - a.y * b.x;
+        return self;
+    }
 
     /// Returns the Euclidean length (magnitude) of this vector.
     function length() {

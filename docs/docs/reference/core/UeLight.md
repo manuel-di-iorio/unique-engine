@@ -53,12 +53,16 @@ new UeDirectionalLight(horizontal = 0, vertical = 0, data = {})
 ```
 Simulates sunlight-like directional lighting, affecting all objects from a direction (starting from the forward vector, rotated around XZ axes).
 
-**Extra Properties**
+**Properties**
 
 | Property     | Type        | Default        | Description                            |
 | --------     | ----------- | -------------- | -------------------------------------- |
 | `horizontal` | `real`      | `0`            | Pitch direction (in degrees)           |
 | `vertical`   | `real`      | `0`            | Yaw direction (in degrees)             |
+
+Available methods: 
+  
+  - `setDirection(horizontal, vertical)`
 
 
 💡 **UePointLight**

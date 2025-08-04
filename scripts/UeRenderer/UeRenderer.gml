@@ -19,7 +19,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         
         for (var i = 0, len = array_length(objects); i < len; i++) {
             var object = objects[i];
-            
             if (!object.layers.test(cameraLayers)) continue;
             
             if (object[$ "isLight"]) {
@@ -31,7 +30,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             
             if (object[$ "geometry"] != undefined && object.visible) {
                 // Test the frustum intersection
-                // @todo not working correctly
                 if (object.frustumCulled && !__frustum.intersectsObject(object)) continue;
                  
                 // Precompute distance from camera for sorting

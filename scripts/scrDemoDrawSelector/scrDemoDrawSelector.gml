@@ -1,4 +1,8 @@
 function scrDemoDrawSelector() {
+    if (mouse_check_button_pressed(mb_left) && device_mouse_x_to_gui(0) < selectorW) {
+       selectorMouseStart = true;
+    }
+    
     draw_set_color(#080808);
     draw_rectangle(0, 0, selectorW, view_hport, false);
     draw_set_color(#111111); draw_set_alpha(.2);
@@ -26,7 +30,7 @@ function scrDemoDrawSelector() {
             if (hover) {
                 isHovering = true;
                 
-                if (mouse_check_button_released(mb_left)) {
+                if (mouse_check_button_released(mb_left) && selectorMouseStart) {
                     btnCol = #3377FF;
                     setScene(i);
                     
@@ -53,4 +57,8 @@ function scrDemoDrawSelector() {
     }
     
     window_set_cursor(isHovering ? cr_handpoint : cr_default);
+    
+    if (mouse_check_button_released(mb_left)) {
+        selectorMouseStart = false;
+    }
 }

@@ -43,9 +43,9 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
 
             for (var c = 0, cn = array_length(objects); c < cn; c++) {
                 var object = objects[c];
-                removeFromParent(object);
+                self.removeFromParent(object);
                 object.parent = self;
-                array_push(children, object);
+                array_push(self.children, object);
             }
         }
         
