@@ -48,7 +48,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     self._deltaAzimuth = 0;
     self._deltaElevation = 0;
-    self._deltaPan = new UeVector3(0, 0, 0);  
+    self._deltaPan = new UeVector3(0, 0, 0);
 
     function update() {
         gml_pragma("forceinline");
@@ -62,8 +62,18 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var displayHeight = display_get_height();
         var worldUp = global.UE_OBJECT3D_DEFAULT_UP;
         
-        var isRotatingNow = mouse_check_button(self.mouseButtonRotate) && self.enableRotate;
-        var isPanningNow = mouse_check_button(self.mouseButtonPan) && self.enablePan;
+        // Allow interactions only if they have been allowed from the user
+        var allowInteractions = shouldHandleInput();
+        if (mouse_check_button_pressed(mb_any) && allowInteractions) {
+            __canInteract = true;
+        }
+        
+        if (mouse_check_button_released(mb_any)) {
+            __canInteract = false;
+        }
+        
+        var isRotatingNow = __canInteract && mouse_check_button(self.mouseButtonRotate) && self.enableRotate;
+        var isPanningNow = __canInteract && mouse_check_button(self.mouseButtonPan) && self.enablePan;
 
         if (isRotatingNow && !self._dragging) {
             self._prevMouseX = mx;
@@ -121,7 +131,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         }
 
         // Mouse zoom
-        if (enableZoom) {
+        if (enableZoom && allowInteractions) {
             if (mouse_wheel_up()) self.radius -= self.zoomSpeed * 5;
             if (mouse_wheel_down()) self.radius += self.zoomSpeed * 5;
                 
@@ -142,34 +152,35 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var camTarget = self.target;
         var camDir = camTarget.clone().sub(camPos).normalize();
 
-        if (!shiftPressed) {
-            if (self.screenSpacePanning) {
-                // Pan aligned to camera screen space
-                var right = camDir.cross(worldUp).normalize();
-                var up = right.cross(camDir).normalize();
-        
-                if (keyboard_check(self.keys.LEFT))   self._deltaPan.add(right.scale(panKeyAmount));
-                if (keyboard_check(self.keys.RIGHT))  self._deltaPan.add(right.scale(-panKeyAmount));
-                if (keyboard_check(self.keys.UP))     self._deltaPan.add(up.scale(-panKeyAmount));
-                if (keyboard_check(self.keys.BOTTOM)) self._deltaPan.add(up.scale(panKeyAmount));
+        if (allowInteractions) {
+            if (!shiftPressed) {
+                if (self.screenSpacePanning) {
+                    // Pan aligned to camera screen space
+                    var right = camDir.cross(worldUp).normalize();
+                    var up = right.cross(camDir).normalize();
+            
+                    if (keyboard_check(self.keys.LEFT))   self._deltaPan.add(right.scale(panKeyAmount));
+                    if (keyboard_check(self.keys.RIGHT))  self._deltaPan.add(right.scale(-panKeyAmount));
+                    if (keyboard_check(self.keys.UP))     self._deltaPan.add(up.scale(-panKeyAmount));
+                    if (keyboard_check(self.keys.BOTTOM)) self._deltaPan.add(up.scale(panKeyAmount));
+                } else {
+                    // Project cam direction onto world XY plane
+                    var forward = new UeVector3(camDir.x, camDir.y, 0).normalize();
+                    var right = new UeVector3(-forward.y, forward.x, 0);
+                    
+                    // World space pan (assumed XY plane)
+                    if (keyboard_check(self.keys.LEFT))   self._deltaPan.add(right.scale(panKeyAmount));
+                    if (keyboard_check(self.keys.RIGHT))  self._deltaPan.add(right.scale(-panKeyAmount));
+                    if (keyboard_check(self.keys.UP))     self._deltaPan.add(forward.scale(panKeyAmount));
+                    if (keyboard_check(self.keys.BOTTOM)) self._deltaPan.add(forward.scale(-panKeyAmount));
+                }
             } else {
-                // Project cam direction onto world XY plane
-                var forward = new UeVector3(camDir.x, camDir.y, 0).normalize();
-                var right = new UeVector3(-forward.y, forward.x, 0);
-                
-                // World space pan (assumed XY plane)
-                if (keyboard_check(self.keys.LEFT))   self._deltaPan.add(right.scale(panKeyAmount));
-                if (keyboard_check(self.keys.RIGHT))  self._deltaPan.add(right.scale(-panKeyAmount));
-                if (keyboard_check(self.keys.UP))     self._deltaPan.add(forward.scale(panKeyAmount));
-                if (keyboard_check(self.keys.BOTTOM)) self._deltaPan.add(forward.scale(-panKeyAmount));
+                if (keyboard_check(self.keys.LEFT))  self._deltaAzimuth += rotateKeyAmount;
+                if (keyboard_check(self.keys.RIGHT)) self._deltaAzimuth -= rotateKeyAmount;
+                if (keyboard_check(self.keys.UP))    self._deltaElevation += rotateKeyAmount;
+                if (keyboard_check(self.keys.BOTTOM))self._deltaElevation -= rotateKeyAmount;
             }
-        } else {
-            if (keyboard_check(self.keys.LEFT))  self._deltaAzimuth += rotateKeyAmount;
-            if (keyboard_check(self.keys.RIGHT)) self._deltaAzimuth -= rotateKeyAmount;
-            if (keyboard_check(self.keys.UP))    self._deltaElevation += rotateKeyAmount;
-            if (keyboard_check(self.keys.BOTTOM))self._deltaElevation -= rotateKeyAmount;
         }
-
 
         // Auto-rotate
         if (self.autoRotate && !self._dragging && !self._panning) {
@@ -202,7 +213,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var cx = self.target.x + self.radius * cos(self.elevation) * cos(self.azimuth);
         var cy = self.target.y + self.radius * cos(self.elevation) * sin(self.azimuth);
         var cz = self.target.z + self.radius * sin(self.elevation);
-      
+    
         self.camera.setPosition(cx, cy, cz);
         self.camera.target.copy(self.target);
         

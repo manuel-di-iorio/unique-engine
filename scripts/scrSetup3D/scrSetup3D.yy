@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"log",
+  "%Name":"scrSetup3D",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"log",
+  "name":"scrSetup3D",
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"scripts",
+    "path":"folders/Scene Editor/scripts.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

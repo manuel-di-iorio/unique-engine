@@ -1,7 +1,6 @@
-display_reset(4, false);
 currentDemo = undefined;
 bgLayer = layer_background_get_id("Background");
-selectorW = view_xport;
+selectorW = view_xport[0];
 selectorMouseStart = false;
 showDebug = false;
 

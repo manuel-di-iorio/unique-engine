@@ -1,14 +1,19 @@
 function UeControls(data = {}) constructor {
-    enabled = true;
+    self.enabled = true;
+    
+    // @undocumented
+    self.shouldHandleInput = data[$"shouldHandleInput"] ?? function() { return true; };
     
     // @undocumented @todo
-    object = undefined;
-    keys = {};
-    mouseButtons = {
+    self.object = undefined;
+    self.keys = {};
+    self.mouseButtons = {
         LEFT: undefined,
         MIDDLE: undefined,
         RIGHT: undefined 
     }
+    
+    self.__canInteract = false;
     
     function dispose() {
         gml_pragma("forceinline");

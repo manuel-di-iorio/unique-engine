@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"log",
+  "%Name":"UiText",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"log",
+  "name":"UiText",
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"UniqueUI",
+    "path":"folders/UniqueUI.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

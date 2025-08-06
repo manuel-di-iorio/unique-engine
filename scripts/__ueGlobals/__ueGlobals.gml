@@ -1,3 +1,4 @@
+global.UE_VERSION = "0.0.4";
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_TEXTURE_MAP = new UeTexture({ image: sprUeMapTex });
 global.UE_TEXTURE_EMISSIVE = new UeTexture({ image: sprUeEmissiveTex });
