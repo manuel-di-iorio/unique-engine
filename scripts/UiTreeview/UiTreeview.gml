@@ -1,66 +1,176 @@
+/**
+ * 
+ */
 function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     var _this = self;
-    self.selected = [];
+    self.selectedItems = [];  
+    self.pointerEvents = true;
+    setName(style[$ "name"] ?? "UiTreeview");
     
     // Create the items container
-    self.Items = new UiNode({ padding: 5, paddingTop: 3 }, { hoverable: false });
-    self.Items.draw = function(x1, y1, x2, y2, hovered, xp1, yp1, xp2, yp2) {
-        draw_set_color(oSceneEditor.uiColBox);
-        draw_line(x1-1, y1, x2, y1);
-    }
-    
+    self.Items = new UiNode({ name: "UiTreeview.Items", marginTop: 5, paddingBottom: 5 });
+    self.add(self.Items);
+
     // Create the root folder items
-    var _treeviewItemStyle = {
-        flex: 1, 
-        height: 20,
-        marginBottom: 12, 
-        padding: 5 
-    };
+    var rootAssetItemStyle = { name: "UiTreeview.Item", paddingVertical: 3 };
     
-    var _treeviewItemOnSelect = method(_this, function(item) {
-        self.selected = [item];
-        self.Items.traverseChildren(method({ item }, function(child) {
-            child.isSelected = child == self.item;
-        }))
-    });
-    
-    self.Textures = new UiTreeviewItem(_treeviewItemStyle, {
-        label: "Textures",
-        type: "Folder",
-        deletable: false,
+    self.Textures = new UiTreeviewItem(rootAssetItemStyle, {
+        treeview: _this,
+        name: "Textures",
+        type: "folder",
+        assetType: "texture",
         icon: sprUiTextures,
-        onSelect: _treeviewItemOnSelect
+        root: true
     });
     
-    self.Materials = new UiTreeviewItem(_treeviewItemStyle, {
-        label: "Materials",
-        type: "Folder",
-        deletable: false,
+    self.Materials = new UiTreeviewItem(rootAssetItemStyle, {
+        treeview: _this,
+        name: "Materials",
+        type: "folder",
+        assetType: "material",
         icon: sprUiMaterials,
-        onSelect: _treeviewItemOnSelect
+        root: true
     });
     
-    self.Objects = new UiTreeviewItem(_treeviewItemStyle, {
-        label: "Objects",
-        type: "Folder",
-        deletable: false,
+    self.Objects = new UiTreeviewItem(rootAssetItemStyle, {
+        treeview: _this,
+        name: "Objects",
+        type: "folder",
+        assetType: "object",
         icon: sprUiObjects,
-        onSelect: _treeviewItemOnSelect
+        root: true
     });
     
-    self.Scenes = new UiTreeviewItem(_treeviewItemStyle, {
-        label: "Scenes",
-        type: "Folder",
-        deletable: false,
+    self.Scenes = new UiTreeviewItem(rootAssetItemStyle, {
+        treeview: _this,
+        name: "Scenes",
+        type: "folder",
+        assetType: "scene",
         icon: sprUiScenes,
-        onSelect: _treeviewItemOnSelect
+        root: true
     });
        
-    self.add(self.Items);
     self.Items.add(self.Textures, self.Materials, self.Objects, self.Scenes);
     
-    function draw(x1, y1, x2, y2, hovered, xp1, yp1, xp2, yp2) {
-        draw_set_color(oSceneEditor.uiColTreeBg);
-        draw_rectangle(xp1, yp1, xp2, yp2, false);
+    function onItemSelect(treeviewItem) {
+        self.selectedItems = [treeviewItem];
+        self.Items.traverseChildren(method({ treeviewItem }, function(child) {
+            child.selected = child == self.treeviewItem;
+        }));
+    }
+}
+
+/**
+ * 
+ */
+function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructor {
+    var _this = self;
+    self.treeview = props[$ "treeview"];
+    self.name = props[$ "name"];
+    self.assetType = props[$ "assetType"];
+    self.type = props[$ "type"];
+    self.icon = props[$ "icon"];
+    self.selected = false;
+    self.collapsed = props[$ "collapsed"] ?? true;
+    self.root = props[$ "root"] ?? false;
+    
+    // Content
+    self.Content = new UiNode({ name: "UiTreeview.Item.Content", padding: 2, flexDirection: "row", justifyContent: "space-between", alignItems: "center" });
+    self.Content.pointerEvents = true;
+    
+    self.Content.onMouseDown(function(ev) {
+        self.treeview.onItemSelect(self);
+    });
+    
+    self.Content.onDraw = method(self, function() {
+        if (self.selected) {
+            draw_set_color(global.UI_COL_SELECTED);
+            draw_rectangle(0, self.yp1 + 3, self.xp2-2, self.yp1 + 24 + 6, false);
+        }
+    });
+    
+    self.add(self.Content);
+    
+    // Left and right content
+    self.LeftContent = new UiNode({ name: "UiTreeview.Item.Content.LeftContent", flexDirection: "row", alignItems: "center"  });
+    self.RightContent = new UiNode({ name: "UiTreeview.Item.Content.RightContent", flexDirection: "row", alignItems: "center"  });
+    self.Content.add(LeftContent, RightContent);
+
+    // Arrow
+    self.Arrow = new UiButton(sprUiTreeviewArrowDown, { 
+        name: "UiTreeview.Item.Content.ArrowBtn",
+        padding: 4, marginLeft: 5, marginRight: 10, width: 14, height: 9,
+    }, { outline: true, autoResize: false, visible: false });
+    
+    self.Arrow.onClick(method(self, function() {
+        if (self.collapsed) {
+            self.expandItem();
+        } else {
+            self.collapseItem();
+        }
+    }));
+    
+    self.LeftContent.add(self.Arrow);
+    
+    // Icon
+    if (self.icon) {
+        self.Icon = new UiSprite(self.icon, { name: "UiTreeview.Item.Content.Icon", marginRight: 5 });
+        self.LeftContent.add(self.Icon);
+    }
+    
+    // Name
+    self.Name = new UiText(self.name);
+    self.LeftContent.add(self.Name);
+    
+    // Create button
+    if (self.type == "folder" || self.type == "object") {
+        self.CreateIcon = new UiButton(sprUiCreateAsset, { 
+            name: "UiTreeview.Item.Content.CreateBtn", padding: 5, paddingBottom: 4, marginRight: 20 
+        }, { outline: true });
+        self.CreateIcon.treeview = self.treeview;
+        self.CreateIcon.onClick(method(_this, function() {
+            self.addItem();
+        }));
+        
+        self.RightContent.add(self.CreateIcon); 
+    }
+    
+    self.Items = new UiNode();
+    self.add(self.Items);
+    
+     
+    function addItem() {
+        var name = string_upper(string_char_at(self.assetType, 1)) + string_copy(self.assetType, 2, string_length(self.assetType) - 1);
+        
+        var child = new UiTreeviewItem({ name: "UiTreeview.Item", marginLeft: 15, paddingVertical: 2.5 }, {
+            treeview: self.treeview,
+            name,
+            assetType: self.assetType,
+            type: self.assetType
+        });
+        
+        self.Items.add(child);
+        self.Arrow.visible = true;
+        self.expandItem();
+    }
+    
+    function expandItem() {
+        self.collapsed = false;
+        self.Arrow.sprite = sprUiTreeviewArrowDown;
+        self.Items.show();
+    }
+    
+    function collapseItem() {
+        self.collapsed = true;
+        self.Arrow.sprite = sprUiTreeviewArrowRight;
+        self.Items.hide();
+    }
+    
+    function onDraw() {
+        // Draw the item background if not collapsed
+        if (self.root && !self.collapsed) {
+            draw_set_color(global.UI_COL_TREE_BG);
+            draw_rectangle(self.xp1, self.y1, self.xp2, self.y2, false);
+        }
     }
 }

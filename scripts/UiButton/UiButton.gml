@@ -1,49 +1,65 @@
-// #52B9B9 cyan
-// #F012BE magenta
-
 function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) constructor {
-    text = undefined;
-    sprite = undefined;
-    onClick = function() {};
+    setName(style[$ "name"] ?? "UiButton");
+    self.text = undefined;
+    self.sprite = undefined; 
     autoResize = props[$ "autoResize"] ?? true;
-    self.textOrImage = textOrImage;
+    self.outline = props[$ "outline"] ?? false;
+    self.pointerEvents = true;
     
-    // Set the size of the button
-    if (autoResize) {
+    function resize() {
         var _w, _h;
-        if (is_string(textOrImage)) {
+        if (self.text != undefined) {
             draw_set_font(fText)
-            _w = string_width(textOrImage) + 10;
-            _h = string_height(textOrImage) + 5;
+            _w = string_width(self.text) + 10;
+            _h = string_height(self.text) + 5;
         } else {
-            _w = sprite_get_width(textOrImage);
-            _h = sprite_get_height(textOrImage);
+            _w = sprite_get_width(self.sprite);
+            _h = sprite_get_height(self.sprite);
         }
         setSize(_w, _h);
     }
     
-    function draw(x1, y1, x2, y2, hovered, xp1, yp1, xp2, yp2) {
-        if (hovered) {
-            draw_set_color(#282A36);
-            draw_rectangle(xp1, yp1, xp2, yp2, false);
-            
-            if (mouse_check_button_released(mb_left)) onClick();
+    function setText(text) {
+        self.text = text;
+        self.resize();
+    }
+    
+    function setSprite(sprite) {
+        self.sprite = sprite;
+        self.resize();
+    }
+    
+    function onDraw() {
+        if (self.hovered) {
+            draw_set_color(global.UI_COL_BTN_HOVER);
+            draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, false);
         }
         
-        draw_set_color(#191A21);
-        draw_rectangle(xp1, yp1, xp2, yp2, true);
+        if (!self.outline) {
+            draw_set_color(global.UI_COL_BOX);
+            draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, true);
+        }
         
-        var xm = ~~mean(x1, x2);
-        var ym = ~~mean(y1, y2);
+        var xm = ~~mean(self.x1, self.x2);
+        var ym = ~~mean(self.y1, self.y2);
         
-        if (text != undefined) {
+        if (self.text != undefined) {
             // Draw text
             draw_set_font(fText); draw_set_color(c_white); draw_set_halign(fa_center); draw_set_valign(fa_middle);
-            draw_text(xm, ym, textOrImage);
+            draw_text(xm, ym, self.text);
         } else {
             // Draw sprite
             _subimg = hovered ? 1 : 0;
-            draw_sprite(textOrImage, _subimg, xm, ym);
+            draw_sprite(self.sprite, _subimg, xm, ym);
         }
     }
+    
+    // Set the text/sprite and resize the button if specified
+    if (is_string(textOrImage)) {
+        self.text = textOrImage;
+    } else {
+        self.sprite = textOrImage;
+    }
+    
+    if (autoResize) self.resize();
 }

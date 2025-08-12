@@ -1,10 +1,10 @@
 function UiSprite(sprite, style = {}, props = {}): UiNode(style, props) constructor {
+    setName(style[$ "name"] ?? "UiSprite");
     self.sprite = sprite;
-    self.hoverable = false;
-    subimg = 0;
+    self.subimg = 0;
     setSize(sprite_get_width(sprite), sprite_get_height(sprite));
     
-    function draw(x1, y1, x2, y2) {
-        draw_sprite(sprite, subimg, ~~mean(x1, x2), ~~mean(y1, y2));
+    function onDraw() {
+        draw_sprite(self.sprite, self.subimg, ~~mean(self.x1, self.x2), ~~mean(self.y1, self.y2));
     }
 }

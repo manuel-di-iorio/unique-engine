@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UiTreeviewItem",
+  "%Name":"__UiEvent",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UiTreeviewItem",
+  "name":"__UiEvent",
   "parent":{
     "name":"UniqueUI",
     "path":"folders/UniqueUI.yy",

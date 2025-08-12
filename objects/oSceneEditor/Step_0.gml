@@ -13,7 +13,7 @@ if ((winW != winWNew || winH != winHNew) && winWNew != 0 && winHNew != 0) {
     view_set_wport(0, winW);
     view_set_hport(0, winH);
     
-    var uiScenePos = ui.Scene.getPosition(false);
+    var uiScenePos = ui.Scene.layout;
     view_set_xport(1, uiScenePos.left);
     view_set_yport(1, uiScenePos.top);
     view_set_wport(1, uiScenePos.width);

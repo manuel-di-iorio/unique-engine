@@ -1,5 +1,5 @@
 draw_set_font(fText);
-global.UI.render(is_debug_overlay_open());
+global.UI.render(uiDebug);
 
 draw_set_font(fTextSmall);
 draw_set_halign(fa_right); draw_set_valign(fa_top); draw_set_color(c_gray);

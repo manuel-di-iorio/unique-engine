@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":4,
   "parent":{
-    "name":"icons",
-    "path":"folders/Scene Editor/scripts/UI/icons.yy",
+    "name":"Icons",
+    "path":"folders/Scene Editor/Scripts/UI/Icons.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

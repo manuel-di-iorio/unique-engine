@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scrSetupUI",
   "parent":{
-    "name":"scripts",
-    "path":"folders/Scene Editor/scripts.yy",
+    "name":"Scripts",
+    "path":"folders/Scene Editor/Scripts.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

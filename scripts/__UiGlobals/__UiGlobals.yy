@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"scrSetup3D",
+  "%Name":"__UiGlobals",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scrSetup3D",
+  "name":"__UiGlobals",
   "parent":{
-    "name":"Scripts",
-    "path":"folders/Scene Editor/Scripts.yy",
+    "name":"UniqueUI",
+    "path":"folders/UniqueUI.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
