@@ -1,7 +1,8 @@
-global.UE_VERSION = "0.0.4";
+global.UE_OBJECT_ID = 0;
+global.UE_VERSION = "2025.8.14.1";
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
-global.UE_TEXTURE_MAP = new UeTexture({ image: sprUeMapTex });
-global.UE_TEXTURE_EMISSIVE = new UeTexture({ image: sprUeEmissiveTex });
+global.UE_TEXTURE_MAP = new UeTexture(sprUeMapTex);
+global.UE_TEXTURE_EMISSIVE = new UeTexture(sprUeEmissiveTex);
 global.UE_OBJECT3D_DEFAULT_UP = new UeVector3(0, 0, -1);
 global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE = true;
 global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE = true;
@@ -34,7 +35,6 @@ enum UE_TEXTURE_WRAP {
 
 // Internal globals
 #macro UE_EPSILON 0.00001
-global.UE_OBJECT_ID = 0;
 global.UE_DUMMY_VECTOR3 = new UeVector3();
 global.UE_DUMMY_VECTOR3_B = new UeVector3();
 global.UE_DUMMY_VECTOR3_C = new UeVector3();
@@ -44,7 +44,6 @@ global.UE_DUMMY_VECTOR3_F = new UeVector3();
 global.UE_DUMMY_VECTOR3_G = new UeVector3();
 global.UE_DUMMY_VECTOR3_H = new UeVector3();
 global.UE_DUMMY_VECTOR3_J = new UeVector3();
-global.UE_DUMMY_VECTOR3_K = new UeVector3();
 global.UE_DUMMY_QUATERNION = new UeQuaternion();
 global.UE_DUMMY_SPHERE = new UeSphere();
 global.UE_DUMMY_DEFAULT_SPRITE_CENTER = new UeVector2(0.5, 0.5);
@@ -72,3 +71,9 @@ global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL] = array
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = 0;
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT] = array_create(2);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = 0;
+
+
+// Ue wagliòò
+function ue_waglio() { 
+    show_message(global.UE_VERSION);
+}

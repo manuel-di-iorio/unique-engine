@@ -168,8 +168,8 @@
   "maintainGms1Font":false,
   "name":"fTextSmall",
   "parent":{
-    "name":"Scene Editor",
-    "path":"folders/Scene Editor.yy",
+    "name":"Fonts",
+    "path":"folders/Scene Editor/Fonts.yy",
   },
   "pointRounding":0,
   "ranges":[
@@ -183,10 +183,7 @@
   "sdfSpread":8,
   "size":10.0,
   "styleName":"Regular",
-  "textureGroupId":{
-    "name":"Default",
-    "path":"texturegroups/Default",
-  },
+  "textureGroupId":null,
   "TTFName":"",
   "usesSDF":false,
 }

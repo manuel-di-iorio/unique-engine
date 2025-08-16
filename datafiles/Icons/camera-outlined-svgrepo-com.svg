@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   width="64px"
+   height="64px"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="camera-outlined-svgrepo-com.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="12.734375"
+     inkscape:cx="32"
+     inkscape:cy="32"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <g
+     id="SVGRepo_bgCarrier"
+     stroke-width="0"
+     transform="matrix(0.30457763,0,0,0.30457763,15.299292,13.213025)" />
+  <g
+     id="SVGRepo_tracerCarrier"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     transform="matrix(0.30457763,0,0,0.30457763,15.299292,13.213025)" />
+  <g
+     id="SVGRepo_iconCarrier"
+     transform="matrix(0.30457763,0,0,0.30457763,15.299292,13.213025)"
+     inkscape:export-filename="SVGRepo_iconCarrier.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <path
+       d="M 17,11 V 8.5 C 17,7.67157 16.3284,7 15.5,7 H 5.5 C 4.67157,7 4,7.67157 4,8.5 v 8 C 4,17.3284 4.67157,18 5.5,18 h 10 c 0.8284,0 1.5,-0.6716 1.5,-1.5 v -2"
+       stroke="#ffffff"
+       stroke-width="2"
+       stroke-linecap="round"
+       id="path1" />
+    <path
+       d="M 17,11 20.2764,9.3618 C 20.6088,9.19558 21,9.43733 21,9.80902 v 5.46948 c 0,0.3491 -0.3487,0.5907 -0.6756,0.4682 L 17,14.5"
+       stroke="#ffffff"
+       stroke-width="2"
+       stroke-linecap="round"
+       id="path2" />
+  </g>
+</svg>

@@ -5,6 +5,9 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
     self.dragStartScrollTop = undefined; 
     self.maxScroll = 0;
     self.pointerEvents = true;
+    self.__contentHeight = undefined;
+    self.__maxThumbPosition = undefined;
+    self.__maxScroll = undefined;
     
     // Create the thumb
     self.Thumb = new UiScrollbarThumb({ position: "absolute", left: 0, right: 0, top: 0, height: 0 }, { isScrollbar: true });
@@ -16,48 +19,49 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         });
         
         self.parent.onWheelDown(function(ev) {
-            self.parent.scrollTop = min(self.maxScroll, self.parent.scrollTop + 30);
+            self.parent.scrollTop = min(self.__maxScroll, self.parent.scrollTop + 30);
         });
     }
     
     function onStep() {
         var layoutHeight = self.layout.height;
         
-        // Height calculation
-        var contentHeight = self.parent.reduceChildren(function(height, child) {
-            if (child.getName() == "__UiScrollbar") return height;
-            return height + child.layout.height;
-        }, 0, false);
-        
-        var thumbHeight = max(10, min(layoutHeight, layoutHeight * (layoutHeight / contentHeight)));
-
-        if (thumbHeight != self.Thumb.getHeight()) {
-            self.Thumb.setHeight(thumbHeight);
-        }
+        if (self.updated) {
+            // Height calculation
+            self.__contentHeight = self.parent.reduceChildren(function(height, child) {
+                if (child.isScrollbar) return height;
+                return height + child.layout.height;
+            }, 0, false);
+            
+            var _thumbHeight = max(10, min(layoutHeight, layoutHeight * (layoutHeight / __contentHeight)));
+            if (_thumbHeight != self.Thumb.getHeight()) {
+                self.Thumb.setHeight(_thumbHeight);
+            }
+            
+            self.__maxThumbPosition = layoutHeight - _thumbHeight;
+            self.__maxScroll = max(0, __contentHeight - self.parent.layout.height);
+        } 
         
         // Dragging
         if (self.dragged) {
-            var currentMouseY = self.getMouseY();
+            var currentMouseY = self.mouseY;
             var deltaY = currentMouseY - self.dragStartY;
             
-            if (self.maxScroll > 0) {
-                var maxThumbPosition = layoutHeight - thumbHeight;
-                
-                if (maxThumbPosition > 0) {
+            if (self.__maxScroll > 0) {
+                if (self.__maxThumbPosition > 0) {
                     // Convert thumb movement to scroll position
-                    var scrollDelta = (deltaY / maxThumbPosition) * self.maxScroll;
-                    self.parent.scrollTop = clamp(self.dragStartScrollTop + scrollDelta, 0, self.maxScroll);
+                    var scrollDelta = (deltaY / self.__maxThumbPosition) * self.__maxScroll;
+                    self.parent.scrollTop = clamp(self.dragStartScrollTop + scrollDelta, 0, self.__maxScroll);
                 }
             }
         }
         
         // Compute the thumb max scroll and position
-        self.maxScroll = max(0, contentHeight - self.parent.layout.height);
-        
-        var maxThumbPosition = layoutHeight - thumbHeight;
-        var thumbPosition = (self.parent.scrollTop / self.maxScroll) * maxThumbPosition; 
-        self.Thumb.setTop(thumbPosition);
-    }
+        var thumbPosition = (self.parent.scrollTop / self.__maxScroll) * self.__maxThumbPosition; 
+        if (self.Thumb.getTop() != thumbPosition) {
+            self.Thumb.setTop(thumbPosition);
+        }
+    };
 }
 
 function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) constructor {
@@ -66,7 +70,7 @@ function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) construc
     
     onMouseDown(function(ev) {
         self.parent.dragged = true;
-        self.parent.dragStartY = self.parent.getMouseY();
+        self.parent.dragStartY = self.parent.mouseY;
         self.parent.dragStartScrollTop = self.parent.parent.scrollTop;
         
         self.setWidth(12);
@@ -74,9 +78,11 @@ function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) construc
     });
     
     onMouseUp(function() {
-        self.parent.dragged = false;
-        self.setWidth(6);
-        self.setLeft(0);
+        if (self.parent.dragged) {
+            self.parent.dragged = false;
+            self.setWidth(6);
+            self.setLeft(0);
+        }
     });
     
     function onDraw() {

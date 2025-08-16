@@ -6,38 +6,39 @@ A texture wrapper class for GameMaker that supports UV transformations, wrapping
 
 ### Constructor
 ```js
-new UeTexture(data = {})
+new UeTexture(sprite = undefined, data = {})
 ```
 
 ### Data parameters
 
 | Key               | Type      | Default      | Description                                    |
 | ----------------- | --------- | ------------ | ---------------------------------------------- |
-| `image`           | `sprite`  |              | A sprite resource or image                     |
 | `repeat`          | `boolean` | `true`       | Whether the texture repeats                    |
 | `filter`          | `boolean` | `true`       | Enables texture smoothing                      |
 | `generateMipmaps` | `boolean` | `true`       | Whether to enable mipmaps for minification     |
 
 ### Properties
 
-| Name               | Type        | Description                                                         |
-| ------------------ | ----------- | ------------------------------------------------------------------- |
-| `isTexture`        | `true`      | Identifies this as a texture.                                       |
-| `type`             | `"Texture"` | Constant string.                                                    |
-| `uuid`             | `string`    | Unique texture ID.                                                  |
-| `name`             | `string`    | Optional name.                                                      |
-| `image`            | `sprite`    | Base image sprite.                                                  |
-| `offset`           | `UeVector2` | UV offset.                                                          |
-| `repeat`           | `UeVector2` | UV repeat count.                                                    |
-| `center`           | `UeVector2` | Pivot point for transforms.                                         |
-| `rotation`         | `float`     | Rotation in degrees (Z-axis).                                       |
+| Name               | Type           | Description                                                         |
+| ------------------ | -----------    | ------------------------------------------------------------------- |
+| `id`               | `real`         | Incremental object ID (auto-generated)                              | 
+| `sprite`           | `sprite`       | A sprite resource                                                   | 
+| `isTexture`        | `true`         | Identifies this as a texture.                                       |
+| `type`             | `"Texture"`    | Constant string.                                                    |
+| `uuid`             | `string`       | Unique texture ID.                                                  |
+| `name`             | `string`       | Optional name.                                                      |
+| `image`            | `sprite`       | Base image sprite.                                                  |
+| `offset`           | `UeVector2`    | UV offset.                                                          |
+| `repeat`           | `UeVector2`    | UV repeat count.                                                    |
+| `center`           | `UeVector2`    | Pivot point for transforms.                                         |
+| `rotation`         | `real`         | Rotation in degrees (Z-axis).                                       |
 | `flipX`            | `boolean`      | Flips horizontally.                                                 |
 | `flipY`            | `boolean`      | Flips vertically.                                                   |
 | `wrapS`            | `boolean`      | Horizontal wrapping (`UE_TEXTURE_WRAP.REPEAT`, `UE_TEXTURE_WRAP.CLAMP_TO_EDGE`, `UE_TEXTURE_WRAP.MIRRORED_REPEAT`). |
 | `wrapT`            | `boolean`      | Vertical wrapping                                                   |
 | `filter`           | `boolean`      | Texture filtering mode.                                             |
 | `generateMipmaps`  | `boolean`      | Enables mipmap generation.                                          |
-| `matrix`           | `UeMatrix4` | UV transformation matrix.                                           |
+| `matrix`           | `UeMatrix4`    | UV transformation matrix.                                           |
 | `matrixAutoUpdate` | `boolean`      | Auto-updates matrix when needed.                                    |
 | `needsUpdate`      | `boolean`      | Marks texture as needing rebake.                                    |
 

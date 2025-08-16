@@ -45,19 +45,26 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     self._dragging = false;
     self._panning = false;
+    self._zooming = false;
+    self.transforming = false; // Variabile principale per tutte le trasformazioni
 
     self._deltaAzimuth = 0;
     self._deltaElevation = 0;
     self._deltaPan = new UeVector3(0, 0, 0);
 
-    function update() {
+    // Update the camera orbit. 
+    // Optionally takes the mouse coordinates in input, otherwise it will get it automatically from the UeMouse class
+    function update(mx = undefined, my = undefined) {
         gml_pragma("forceinline");
         
         if (!enabled) return;
         
-        var mouse = global.UE_MOUSE.get(); 
-        var mx = mouse.x;
-        var my = mouse.y;
+        if (mx == undefined) {
+            var mouse = global.UE_MOUSE.get(); 
+            mx = mouse.x;
+            my = mouse.y;
+        }
+        
         var displayWidth = display_get_width();
         var displayHeight = display_get_height();
         var worldUp = global.UE_OBJECT3D_DEFAULT_UP;
@@ -74,6 +81,8 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         
         var isRotatingNow = __canInteract && mouse_check_button(self.mouseButtonRotate) && self.enableRotate;
         var isPanningNow = __canInteract && mouse_check_button(self.mouseButtonPan) && self.enablePan;
+        var isZoomingNow = __canInteract && mouse_check_button(self.mouseButtonZoom) && self.enableZoom;
+        var isWheelZooming = enableZoom && allowInteractions && (mouse_wheel_up() || mouse_wheel_down());
 
         if (isRotatingNow && !self._dragging) {
             self._prevMouseX = mx;
@@ -83,13 +92,21 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             self._prevMouseX = mx;
             self._prevMouseY = my;
         }
+        if (isZoomingNow && !self._zooming) {
+            self._prevMouseX = mx;
+            self._prevMouseY = my;
+        }
 
         self._dragging = isRotatingNow;
         self._panning = isPanningNow;
+        self._zooming = isZoomingNow;
+        
+        // Aggiorna la variabile transforming
+        self.transforming = self._dragging || self._panning || self._zooming || isWheelZooming;
 
         var dx = 0;
         var dy = 0;
-        if (self._dragging || self._panning) {
+        if (self._dragging || self._panning || self._zooming) {
             dx = mx - self._prevMouseX;
             dy = my - self._prevMouseY;
         }
@@ -135,9 +152,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             if (mouse_wheel_up()) self.radius -= self.zoomSpeed * 5;
             if (mouse_wheel_down()) self.radius += self.zoomSpeed * 5;
                 
-            if (mouse_check_button(self.mouseButtonZoom)) {
-                dy = my - self._prevMouseY;
-        
+            if (self._zooming) {
                 // Zoom in base al movimento verticale del mouse (drag)
                 self.radius += dy * self.zoomSpeed * 0.1;
             }
@@ -207,7 +222,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         }
         
         self.radius = clamp(self.radius, self.minTargetRadius, self.maxTargetRadius);
-        self.elevation = clamp(self.elevation, -pi * 0.49, pi * 0.49);
+        self.elevation = clamp(self.elevation, -pi * 0.4999, pi * 0.4999);
 
         // Update camera position
         var cx = self.target.x + self.radius * cos(self.elevation) * cos(self.azimuth);

@@ -23,4 +23,34 @@ if ((winW != winWNew || winH != winHNew) && winWNew != 0 && winHNew != 0) {
 }
 
 ui.update();
-orbit.update();
+
+// Wrap the mouse coords when out of bounds
+var winMouseX = window_mouse_get_x();
+var winMouseY = window_mouse_get_y();
+
+if (mouse_button != mb_none && orbit.transforming) {
+    var fixMousePos = false;
+
+    if (winMouseX < 1) {
+        winMouseX = winW - 2;
+        fixMousePos = true;
+    } else if (winMouseY < 1) {
+        winMouseY = winH - 2;
+        fixMousePos = true;
+    } else if (winMouseX > winW - 2) {
+        winMouseX = 2;
+        fixMousePos = true;
+    } else if (winMouseY > winH - 1) {
+        winMouseY = 2;
+        fixMousePos = true;
+    }
+
+    if (fixMousePos) {
+        window_mouse_set(winMouseX, winMouseY); 
+        
+        orbit._prevMouseX = winMouseX;
+        orbit._prevMouseY = winMouseY;
+    }
+}
+
+orbit.update(winMouseX, winMouseY);

@@ -15,7 +15,7 @@ loadTime = (get_timer() - loadTime) / 1000;
 
 // Manually import the texture into the model's material
 sprAirplane = sprite_add("airplane/11804_Airplane_diff.jpg", 1, false, false, 0, 0);
-texAirplane = new UeTexture({ image: sprAirplane });
+texAirplane = new UeTexture(sprAirplane);
 
 airplaneMesh.traverse(function(mesh) {
     mesh.matrixAutoUpdate = false;

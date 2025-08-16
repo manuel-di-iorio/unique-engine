@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"__UiEvent",
+  "%Name":"scrEditorUiMenu",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"__UiEvent",
+  "name":"scrEditorUiMenu",
   "parent":{
-    "name":"UniqueUI",
-    "path":"folders/UniqueUI.yy",
+    "name":"Components",
+    "path":"folders/Scene Editor/UI/Components.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -6,6 +6,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.selectedItems = [];  
     self.pointerEvents = true;
     setName(style[$ "name"] ?? "UiTreeview");
+    self.onNewAsset = undefined;
+    self.onItemSelected = undefined;
     
     // Create the items container
     self.Items = new UiNode({ name: "UiTreeview.Items", marginTop: 5, paddingBottom: 5 });
@@ -19,7 +21,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         name: "Textures",
         type: "folder",
         assetType: "texture",
-        icon: sprUiTextures,
+        icon: sprUiTexture,
         root: true
     });
     
@@ -28,35 +30,54 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         name: "Materials",
         type: "folder",
         assetType: "material",
-        icon: sprUiMaterials,
+        icon: sprUiMaterial,
         root: true
     });
     
-    self.Objects = new UiTreeviewItem(rootAssetItemStyle, {
+    self.Models = new UiTreeviewItem(rootAssetItemStyle, {
         treeview: _this,
-        name: "Objects",
+        name: "Models",
         type: "folder",
-        assetType: "object",
-        icon: sprUiObjects,
+        assetType: "model",
+        icon: sprUiObject,
         root: true
     });
+    
+    //self.Lights = new UiTreeviewItem(rootAssetItemStyle, {
+        //treeview: _this,
+        //name: "Lights",
+        //type: "folder",
+        //assetType: "light",
+        //icon: sprUiLight,
+        //root: true
+    //});
+    //
+    //self.Cameras = new UiTreeviewItem(rootAssetItemStyle, {
+        //treeview: _this,
+        //name: "Cameras",
+        //type: "folder",
+        //assetType: "camera",
+        //icon: sprUiCamera,
+        //root: true
+    //});
     
     self.Scenes = new UiTreeviewItem(rootAssetItemStyle, {
         treeview: _this,
         name: "Scenes",
         type: "folder",
         assetType: "scene",
-        icon: sprUiScenes,
+        icon: sprUiScene,
         root: true
     });
        
-    self.Items.add(self.Textures, self.Materials, self.Objects, self.Scenes);
+    self.Items.add(self.Textures, self.Materials, self.Models, /*self.Lights, self.Cameras,*/ self.Scenes);
     
-    function onItemSelect(treeviewItem) {
+    function __onItemSelected(treeviewItem) {
         self.selectedItems = [treeviewItem];
         self.Items.traverseChildren(method({ treeviewItem }, function(child) {
             child.selected = child == self.treeviewItem;
         }));
+        if (self.onItemSelected != undefined) self.onItemSelected(treeviewItem);
     }
 }
 
@@ -73,13 +94,15 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.selected = false;
     self.collapsed = props[$ "collapsed"] ?? true;
     self.root = props[$ "root"] ?? false;
+    self.asset = undefined;
     
     // Content
     self.Content = new UiNode({ name: "UiTreeview.Item.Content", padding: 2, flexDirection: "row", justifyContent: "space-between", alignItems: "center" });
     self.Content.pointerEvents = true;
     
-    self.Content.onMouseDown(function(ev) {
-        self.treeview.onItemSelect(self);
+    self.Content.onMouseDown(function() {
+        if (self.root) return;
+        self.treeview.__onItemSelected(self);
     });
     
     self.Content.onDraw = method(self, function() {
@@ -122,14 +145,28 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.Name = new UiText(self.name);
     self.LeftContent.add(self.Name);
     
+    // Import model button
+    if (self.type == "folder" && self.assetType == "model") {
+        self.ImportModelIcon = new UiButton(sprUiImportModel, { 
+            name: "UiTreeview.Item.Content.ImportModelBtn", padding: 5, paddingBottom: 4, marginRight: 15 
+        }, { outline: true, tooltip: "Import model from file" });
+        self.ImportModelIcon.treeview = self.treeview;
+        self.ImportModelIcon.onClick(method(_this, function() {
+            //self.__importModel(
+            show_message("@todo");
+        }));
+        
+        self.RightContent.add(self.ImportModelIcon); 
+    }
+    
     // Create button
-    if (self.type == "folder" || self.type == "object") {
+    if (self.type == "folder" || self.assetType == "model") {
         self.CreateIcon = new UiButton(sprUiCreateAsset, { 
             name: "UiTreeview.Item.Content.CreateBtn", padding: 5, paddingBottom: 4, marginRight: 20 
-        }, { outline: true });
+        }, { outline: true, tooltip: "Create a new asset" });
         self.CreateIcon.treeview = self.treeview;
         self.CreateIcon.onClick(method(_this, function() {
-            self.addItem();
+            self.__addItem();
         }));
         
         self.RightContent.add(self.CreateIcon); 
@@ -139,12 +176,9 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.add(self.Items);
     
      
-    function addItem() {
-        var name = string_upper(string_char_at(self.assetType, 1)) + string_copy(self.assetType, 2, string_length(self.assetType) - 1);
-        
+    function __addItem() {
         var child = new UiTreeviewItem({ name: "UiTreeview.Item", marginLeft: 15, paddingVertical: 2.5 }, {
             treeview: self.treeview,
-            name,
             assetType: self.assetType,
             type: self.assetType
         });
@@ -152,6 +186,8 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.Items.add(child);
         self.Arrow.visible = true;
         self.expandItem();
+        
+        if (self.treeview.onNewAsset != undefined) self.treeview.onNewAsset(child);
     }
     
     function expandItem() {

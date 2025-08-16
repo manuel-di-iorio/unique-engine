@@ -1,11 +1,4 @@
-// Anti-aliasing
-if (display_aa >= 8) {
-    display_reset(8, false);
-} else if (display_aa >= 4) {
-    display_reset(4, false);
-}
-
-ideVersion = "2025.8.11.1";
+ideVersion = "2025.8.14.1";
 uiDebug = false;
 
 scrSetupUI();

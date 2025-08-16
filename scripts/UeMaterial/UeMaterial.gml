@@ -107,7 +107,7 @@ function UeMaterial(data = {}) constructor {
         for (var t=0; t<textureNamesCount; t++) {
             var textureName = textureNames[t];
             var texture = textures[$ textureName];
-            if (texture == undefined || texture.image == undefined) continue;
+            if (texture == undefined || texture.sprite == undefined) continue;
             __texturesCached[t] = [
                 texture,
                 shader_get_sampler_index(shader, $"s_{textureName}")

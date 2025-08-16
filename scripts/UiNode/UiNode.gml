@@ -8,6 +8,7 @@ function UiNode(style = {}, props = {}) constructor {
     self.pointerEvents = props[$ "pointerEvents"] ?? false;
     self.border = props[$ "border"] ?? false;
     self.visible = props[$ "visible"] ?? true;
+    self.children = [];
     self.layout = {
         left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0,
         marginLeft: 0, marginTop: 0, marginRight: 0, marginBottom: 0,
@@ -28,34 +29,18 @@ function UiNode(style = {}, props = {}) constructor {
     self.__UiScrollbar = undefined;
     self.scrollTop = 0;
     self.surface = undefined;
-    self.__scrollBoundsResult = undefined;
+    self.__scrollBoundsCachedScrollTop = undefined;
+    self.__scrollBoundsCachedResult = undefined;
     self.isScrollbar = props[$ "isScrollbar"] ?? false;
     self.mounted = false;
     self.scrollableParent = undefined;
-    
-    function getMouseX() {
-        return device_mouse_x_to_gui(0);
-    }
-    
-    function getMouseY() {
-        return device_mouse_y_to_gui(0);
-    }
-    
-    // Get the mouse Y coordinate, based on scrolling of the parents
-    function getMouseYByScroll() {
-        var totalScrollTop = 0;
-        var currentNode = self.parent;
-        
-        while (currentNode != undefined) {
-            totalScrollTop += currentNode.scrollTop;
-            currentNode = currentNode.parent;
-        }
-        
-        return device_mouse_y_to_gui(0) + totalScrollTop;
-    }
+    self.updated = false;
+    self.__surface = undefined;
+    self.display = true;
     
     // Set the size of the node
     function setSize(winW, winH) {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_width(self.node, winW, flexpanel_unit.point);
         flexpanel_node_style_set_height(self.node, winH, flexpanel_unit.point);
         global.UI.needsUpdate = true;
@@ -65,6 +50,7 @@ function UiNode(style = {}, props = {}) constructor {
     // Add one or more children to this node
     // @param ...objects
     function add() {
+        gml_pragma("forceinline");
         for (var i=0; i<argument_count; i++) {
             var elem = argument[i];
             
@@ -75,6 +61,7 @@ function UiNode(style = {}, props = {}) constructor {
             }
             
             flexpanel_node_insert_child(self.node, elem.node, flexpanel_node_get_num_children(self.node));
+            array_push(children, elem);
             elem.parent = self;
         }
         global.UI.needsUpdate = true;
@@ -84,26 +71,30 @@ function UiNode(style = {}, props = {}) constructor {
     
     // Remove a child
     function remove(child) {
+        gml_pragma("forceinline");
         child.parent = undefined;
-        flexpanel_node_remove_child(node, child.node);
+        flexpanel_node_remove_child(node, child.node); 
         global.UI.needsUpdate = true;
         return self;
     }
     
     // Remove all children
     function clear() {
-        flexpanel_node_remove_all_children(node);
+        gml_pragma("forceinline");
+        flexpanel_node_remove_all_children(self.node);
         global.UI.needsUpdate = true;
         return self;
     }
     
     // Count the children
     function count() {
-        return flexpanel_node_get_num_children(node);
+        gml_pragma("forceinline");
+        return flexpanel_node_get_num_children(self.node);
     }
     
     // Run a callback on the node itself and its children
     function traverse(cb, recursive = true) {
+        gml_pragma("forceinline");
         cb(self);
         traverseChildren(cb, recursive);
         return self;
@@ -111,6 +102,7 @@ function UiNode(style = {}, props = {}) constructor {
     
     // Run a callback on the children
     function traverseChildren(cb, recursive = true) {
+        gml_pragma("forceinline");
         for (var i = 0, l = flexpanel_node_get_num_children(self.node); i < l; i++) {
             var _child = flexpanel_node_get_data(flexpanel_node_get_child(self.node, i));
             cb(_child);
@@ -123,6 +115,7 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     function reduceChildren(cb, acc, recursive = true) {
+        gml_pragma("forceinline");
         for (var i = 0, l = flexpanel_node_get_num_children(self.node); i < l; i++) {
             var _child = flexpanel_node_get_data(flexpanel_node_get_child(self.node, i));
             acc = cb(acc, _child, i);
@@ -136,20 +129,26 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     function show() {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_display(self.node, flexpanel_display.flex);
+        self.display = true;
         global.UI.needsUpdate = true;
     }
     
     function hide() {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_display(self.node, flexpanel_display.none);
+        self.display = false;
         global.UI.needsUpdate = true;
     }
     
     function isVisible() {
-        return flexpanel_node_style_get_display(self.node) == flexpanel_display.flex && self.visible && self.__isInScrollBounds();
+        gml_pragma("forceinline");
+        return self.display && self.visible && self.__isInScrollBounds();
     }
     
     function setName(name) {
+        gml_pragma("forceinline");
         flexpanel_node_set_name(self.node, name); 
         return self;
     }
@@ -159,58 +158,70 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     function getWidth() {
+        gml_pragma("forceinline");
         return flexpanel_node_style_get_width(self.node).value;
     }
     
     function getHeight() {
+        gml_pragma("forceinline");
         return flexpanel_node_style_get_height(self.node).value;
     }
     
     function setLeft(value) {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_position(self.node, flexpanel_edge.left, value, flexpanel_unit.point);
         global.UI.needsUpdate = true;
     }
     
     function setTop(value) {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_position(self.node, flexpanel_edge.top, value, flexpanel_unit.point);
         global.UI.needsUpdate = true;
     }
     
     function getTop() {
+        gml_pragma("forceinline");
         return flexpanel_node_style_get_position(self.node, flexpanel_edge.top).value;
     }
     
     function setMarginTop(value) {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_margin(self.node, flexpanel_edge.top, value);
         global.UI.needsUpdate = true;
     }
     
     function getMarginTop() {
+        gml_pragma("forceinline");
         return flexpanel_node_style_get_margin(self.node, flexpanel_edge.top).value;
     }
     
     function setRight(value) {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_position(self.node, flexpanel_edge.right, value, flexpanel_unit.point);
         global.UI.needsUpdate = true;
     }
     
     function setBottom(value) {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_position(self.node, flexpanel_edge.bottom, value, flexpanel_unit.point);
         global.UI.needsUpdate = true;
     }
     
     function setWidth(value) {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_width(self.node, value, flexpanel_unit.point);
         global.UI.needsUpdate = true;
     }
     
     function setHeight(value) {
+        gml_pragma("forceinline");
         flexpanel_node_style_set_height(self.node, value, flexpanel_unit.point);
         global.UI.needsUpdate = true;
     }
     
     // Scrollbar
     function enableScrollbar() {
+        gml_pragma("forceinline");
         self.__UiScrollbar = new UiScrollbar({
             position: "absolute",
             top: 0,
@@ -222,37 +233,47 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     function disableScrollbar() {
+        gml_pragma("forceinline");
         self.remove(self.__UiScrollbar);
+        self.__UiScrollbar.destroy();
         self.__UiScrollbar = undefined;
     }
     
     // Events
     function onClick(cb) {
+        gml_pragma("forceinline");
         self.addEventListener(UI_EVENT.click, cb);
         return self;
     }
     
     function onMouseDown(cb) {
+        gml_pragma("forceinline");
         self.addEventListener(UI_EVENT.mousedown, cb);
         return self;
     }
     
     function onMouseUp(cb) {
+        gml_pragma("forceinline");
+        var _this = self;
         self.addEventListener(UI_EVENT.mouseup, cb);
+        //array_push(global.UI.__mouseUpCallbacks, [ cb, _this ]);
         return self;
     }
     
     function onWheelUp(cb) {
+        gml_pragma("forceinline");
         self.addEventListener(UI_EVENT.wheelup, cb); 
         return self;
     }
     
     function onWheelDown(cb) {
+        gml_pragma("forceinline");
         self.addEventListener(UI_EVENT.wheeldown, cb); 
         return self;
     }
     
     function addEventListener(eventType, callback, useCapture = false) {
+        gml_pragma("forceinline");
         if (self.eventListeners[$ eventType] == undefined) {
             self.eventListeners[$ eventType] = { capture: [], bubble: [] };
         }
@@ -264,6 +285,7 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     function removeEventListener(eventType, callback, useCapture = false) {
+        gml_pragma("forceinline");
         if (self.eventListeners[$ eventType] == undefined) return;
         
         var phase = useCapture ? "capture" : "bubble";
@@ -280,63 +302,75 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     function clearEventListeners(eventType) {
+        gml_pragma("forceinline");
         delete self.eventListeners[$ eventType];
         return self;
     }
     
-    function dispatchEvent(event) {
+    function dispatchEvent(event, target) {
+        gml_pragma("forceinline");
         // Build path from root to target
         var path = [];
-        var current = event.target;
+        var current = target;
         while (current != undefined) {
             array_insert(path, 0, current); // Insert at beginning
             current = current.parent;
         }
         
         // CAPTURE PHASE - from root to target (excluding target)
-        event.phase = "capture";
-        for (var i = 0; i < array_length(path) - 1 && !event.stopped; i++) {
+        var _stopped = false;
+        
+        for (var i = 0; i < array_length(path) - 1; i++) {
             current = path[i];
-            event.currentTarget = current;
             
-            if (current.eventListeners[$ event.type] != undefined) {
-                var captureListeners = current.eventListeners[$ event.type].capture;
-                for (var j = 0; j < array_length(captureListeners) && !event.stopped; j++) {
-                    captureListeners[j](event);
+            if (current.eventListeners[$ event] != undefined) {
+                var captureListeners = current.eventListeners[$ event].capture;
+                for (var j = 0; j < array_length(captureListeners); j++) {
+                    if (captureListeners[j](current)) {
+                        _stopped = true;
+                        break;
+                    }
                 }
             }
+            
+            if (_stopped) break;
         }
         
         // TARGET PHASE - on the target itself
-        if (!event.stopped) {
-            event.phase = "target";
-            event.currentTarget = event.target;
-            
-            if (event.target.eventListeners[$ event.type] != undefined) {
+        if (!_stopped) {
+            if (target.eventListeners[$ event] != undefined) {
                 // Execute both capture and bubble listeners on target
-                var targetListeners = event.target.eventListeners[$ event.type];
+                var targetListeners = target.eventListeners[$ event];
                 
-                for (var j = 0, jl = array_length(targetListeners.capture); j < jl && !event.stopped; j++) {
-                    targetListeners.capture[j](event);
+                for (var j = 0, jl = array_length(targetListeners.capture); j < jl; j++) {
+                    if (targetListeners.capture[j](target)) {
+                        _stopped = true;
+                        break;
+                    }
                 }
                 
-                for (var j = 0, jl = array_length(targetListeners.bubble); j < jl && !event.stopped; j++) {
-                    targetListeners.bubble[j](event);
+                if (!_stopped) {
+                    for (var j = 0, jl = array_length(targetListeners.bubble); j < jl; j++) {
+                        if (targetListeners.bubble[j](event)) {
+                            _stopped = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
         
         // BUBBLE PHASE - from target parent to root
-        if (!event.stopped && event.type != UI_EVENT.mouseenter && event.type != UI_EVENT.mouseleave) {
-            event.phase = "bubble";
-            for (var i = array_length(path) - 2; i >= 0 && !event.stopped; i--) {
+        if (!_stopped) { // && event != UI_EVENT.mouseenter && event != UI_EVENT.mouseleave) {
+            for (var i = array_length(path) - 2; i >= 0; i--) {
                 current = path[i];
-                event.currentTarget = current;
                 
-                if (current.eventListeners[$ event.type] != undefined) {
-                    var bubbleListeners = current.eventListeners[$ event.type].bubble;
-                    for (var j = 0, jl = array_length(bubbleListeners); j < jl && !event.stopped; j++) {
-                        bubbleListeners[j](event);
+                if (current.eventListeners[$ event] != undefined) {
+                    var bubbleListeners = current.eventListeners[$ event].bubble;
+                    for (var j = 0, jl = array_length(bubbleListeners); j < jl; j++) {
+                        if (bubbleListeners[j](current)) {
+                            break;
+                        }
                     }
                 }
             }
@@ -347,6 +381,7 @@ function UiNode(style = {}, props = {}) constructor {
     
     // @todo recursive mode
     function focus(recursive = false, parentLimit = undefined) {
+        gml_pragma("forceinline");
         if (parent != undefined) {
             flexpanel_node_remove_child(parent.node, self.node);
             flexpanel_node_insert_child(parent.node, self.node, flexpanel_node_get_num_children(parent.node));
@@ -357,15 +392,23 @@ function UiNode(style = {}, props = {}) constructor {
     
     
     function __isInScrollBounds() {
-        if (self.isScrollbar) return true;
+        gml_pragma("forceinline");
+        var scrollableParent = self.scrollableParent;
+
+        if (self.isScrollbar || scrollableParent == undefined) return true;
         
+        if (self.__scrollBoundsCachedScrollTop == self.scrollTop && !self.updated) {
+            return self.__scrollBoundsCachedValue;
+        }
+        
+        self.__scrollBoundsCachedScrollTop = self.scrollTop;
+    
+    
         // Relative start position
         var elemLayout = self.layout;
         var elemTop = elemLayout.top - elemLayout.paddingTop;
         var elemBottom = elemTop + elemLayout.height + elemLayout.paddingBottom;
     
-        var scrollableParent = self.scrollableParent;
-        if (scrollableParent == undefined) return true;
         var parentLayout = scrollableParent.layout;
 
         // Calculate the visible area based on the scroll
@@ -374,18 +417,23 @@ function UiNode(style = {}, props = {}) constructor {
 
         // If fully outside then it is invisible
         if (elemBottom < visibleTop || elemTop > visibleBottom) {
+            self.__scrollBoundsCachedValue = false;
             return false;
         }
     
+        self.__scrollBoundsCachedValue = true;
         return true;
     }
     
     function __updateLayout() {
+        gml_pragma("forceinline");
         self.layout = flexpanel_node_layout_get_position(self.node, false);
+        self.width = self.layout.width;
+        self.height = self.layout.height;
         self.x1 = self.layout.left; 
         self.y1 = self.layout.top; 
-        self.x2 = self.layout.left + self.layout.width; 
-        self.y2 = self.layout.top + self.layout.height;
+        self.x2 = self.layout.left + self.width; 
+        self.y2 = self.layout.top + self.height;
         self.xp1 = self.x1 - self.layout.paddingLeft;
         self.yp1 = self.y1 - self.layout.paddingTop;
         self.xp2 = self.x2 + self.layout.paddingRight;
@@ -411,39 +459,48 @@ function UiNode(style = {}, props = {}) constructor {
         }
     }
     
-    function checkEvents(updated) {
+    function checkEvents(layoutUpdated) {
+        gml_pragma("forceinline");
+        var ui = global.UI;
+        self.updated = layoutUpdated;
+        
         // Cache the position
-        if (!self.mounted || updated) {
+        if (!mounted || layoutUpdated) {
             self.__updateLayout();
         }
         
-        if (!self.mounted) {
-            self.mounted = true;
+        if (!mounted) {
+            mounted = true;
             if (self.onMount != undefined) self.onMount();
         }
         
-        self.__scrollBoundsResult = undefined;
         if (!self.isVisible()) return undefined;
         
         // Process children first
         var deepestTarget = undefined;
         
+        //for (var i = array_length(self.children) - 1; i >= 0; i--) {
         for (var i = flexpanel_node_get_num_children(self.node) - 1; i >= 0; i--) {
             var child = flexpanel_node_get_data(flexpanel_node_get_child(self.node, i));
+            //var child = self.children[i];
             
-            var childDeepest = child.checkEvents(updated);
-            if (childDeepest != undefined && deepestTarget == undefined) {
+            var childDeepest = child.checkEvents(layoutUpdated);
+            if (deepestTarget == undefined && childDeepest != undefined) {
                 deepestTarget = childDeepest;
             }
         }
         
+        // Store the mouse relateive coords for this element
+        self.mouseX = ui.mouseX;
+        self.mouseY = self.parent == undefined || !self.parent.isScrollbar ?
+            ui.mouseY + (self.scrollableParent != undefined ? self.scrollableParent.scrollTop : 0) 
+            : ui.mouseY;
+        
         // Check hover state
         if (self.pointerEvents) {
-            var mx = self.getMouseX();
-            var my = self.parent == undefined || !self.parent.isScrollbar ? self.getMouseYByScroll() : self.getMouseY();
-            var currentlyHovered = point_in_rectangle(mx, my, self.xp1, self.yp1, self.xp2, self.yp2);
+            var currentlyHovered = point_in_rectangle(self.mouseX, self.mouseY, self.xp1, self.yp1, self.xp2, self.yp2);
     
-            if (currentlyHovered && deepestTarget == undefined) {
+            if (deepestTarget == undefined && currentlyHovered) {
                 deepestTarget = self;
             }
             
@@ -451,40 +508,47 @@ function UiNode(style = {}, props = {}) constructor {
             //if (currentlyHovered != self.hovered) {
                 //if (currentlyHovered) {
                     //// Mouse entered
-                    //global.UI.dispatchEvent(new UiEvent(UI_EVENT.mouseenter, self));
+                    //global.UI.dispatchEvent(UI_EVENT.mouseenter, self);
                     //
-                    //global.UI.dispatchEvent(new UiEvent(UI_EVENT.mouseover, self));
+                    //global.UI.dispatchEvent(UI_EVENT.mouseover, self);
                 //} else {
                     //// Mouse left
-                    //global.UI.dispatchEvent(new UiEvent(UI_EVENT.mouseleave, self));
+                    //global.UI.dispatchEvent(UI_EVENT.mouseleave, self);
                     //
-                    //global.UI.dispatchEvent(new UiEvent(UI_EVENT.mouseout, self));
+                    //global.UI.dispatchEvent(UI_EVENT.mouseout, self);
                 //}
             //}
             
-            if (mouse_check_button_released(mb_left)) {
-                global.UI.dispatchEvent(new UiEvent(UI_EVENT.mouseup, self));
-            }
-            
             self.hovered = false;
+        } 
+        
+        if (global.UI.mouseLeftReleased) {
+            global.UI.dispatchEvent(UI_EVENT.mouseup, self);
         }
         
-        // Run the step method of the current element
         if (self.onStep != undefined) self.onStep();
+        self.updated = false;
         
         return deepestTarget;
     }
     
     // Calculate the layout of this node and its children
     function update() {
-        var _updated = false;
+        gml_pragma("forceinline"); 
+        var _layoutUpdated = false;
+        
         if (self.needsUpdate) {
             self.needsUpdate = false;
-            _updated = true;
+            _layoutUpdated = true;
             flexpanel_calculate_layout(self.node, undefined, undefined, flexpanel_direction.LTR);
         }
         
-        var deepestTarget = self.checkEvents(_updated);
+        // Cache mouse vars
+        self.mouseX = device_mouse_x_to_gui(0);
+        self.mouseY = device_mouse_y_to_gui(0);
+        self.mouseLeftReleased = mouse_check_button_released(mb_left);
+        
+        var deepestTarget = self.checkEvents(_layoutUpdated);
         
         // Click event handled only on root
         if (deepestTarget != undefined) {
@@ -492,25 +556,25 @@ function UiNode(style = {}, props = {}) constructor {
 
             // Mouse move event
             // @todo expensive to always dispatch this event on a hovered element
-            //global.UI.dispatchEvent(new UiEvent(UI_EVENT.mousemove, deepestTarget));
+            //global.UI.dispatchEvent(UI_EVENT.mousemove, deepestTarget));
             
             // Wheel events
             if (mouse_wheel_up()) {
-                global.UI.dispatchEvent(new UiEvent(UI_EVENT.wheelup, deepestTarget));
+                global.UI.dispatchEvent(UI_EVENT.wheelup, deepestTarget);
             }
             if (mouse_wheel_down()) {
-                global.UI.dispatchEvent(new UiEvent(UI_EVENT.wheeldown, deepestTarget));
+                global.UI.dispatchEvent(UI_EVENT.wheeldown, deepestTarget);
             }
             
             if (mouse_check_button_pressed(mb_left)) {
                 global.UI_CLICK_START = deepestTarget;
-                global.UI.dispatchEvent(new UiEvent(UI_EVENT.mousedown, deepestTarget));
+                global.UI.dispatchEvent(UI_EVENT.mousedown, deepestTarget);
             }
             
-            if (mouse_check_button_released(mb_left)) {
+            if (self.mouseLeftReleased) {
                 if (deepestTarget == global.UI_CLICK_START) {
                     call_later(1, time_source_units_frames, method({ deepestTarget }, function() {
-                        global.UI.dispatchEvent(new UiEvent(UI_EVENT.click, deepestTarget));
+                        global.UI.dispatchEvent(UI_EVENT.click, deepestTarget);
                     }));
                 }
                 
@@ -518,12 +582,15 @@ function UiNode(style = {}, props = {}) constructor {
             }
         }
         
+        
+        
         return self;
     } 
     
     // Render the node and its children, with corrected scroll trasformation if needed
     // Pass `true` as first argument to draw the nodes bounds and their (optional) name.
     function render(debug = false) {
+        gml_pragma("forceinline");
         if (!self.isVisible()) return;
         
         var _matrixPushed = false;

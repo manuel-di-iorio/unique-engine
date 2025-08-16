@@ -1,4 +1,6 @@
-function UeTexture(data = {}) constructor {
+function UeTexture(sprite = undefined, data = {}) constructor {
+    id = global.UE_OBJECT_ID++;
+    
     // Flag indicating this object is a texture
     isTexture = true;
 
@@ -12,7 +14,7 @@ function UeTexture(data = {}) constructor {
     name = data[$ "name"] ?? "";
 
     // Base image sprite used for this texture
-    image = data[$ "image"];
+    self.sprite = sprite;
 
     // UV offset for texture coordinates (Vector2)
     offset = new UeVector2(0, 0);
@@ -23,7 +25,7 @@ function UeTexture(data = {}) constructor {
     // Center point for rotation and transformations (Vector2)
     center = new UeVector2(0, 0);
 
-    // Rotation angle in radians (around Z axis)
+    // Rotation angle in degrees (around Z axis)
     rotation = 0;
 
     // Flip horizontally (boolean)
@@ -54,10 +56,10 @@ function UeTexture(data = {}) constructor {
     needsUpdate = false;
 
     // Cached sprite created from baked surface with applied transforms
-    __cachedSprite = image;
+    __cachedSprite = sprite;
 
     // Cached texture handle from the cached sprite
-    __cachedTexture = image != undefined ? sprite_get_texture(image, 0) : undefined;
+    __cachedTexture = sprite != undefined ? sprite_get_texture(sprite, 0) : undefined;
 
     /**
      * Updates the UV transformation matrix combining offset, repeat,
@@ -100,8 +102,8 @@ function UeTexture(data = {}) constructor {
         var tilesX = ceil(abs(repeatVec.x));
         var tilesY = ceil(abs(repeatVec.y));
         
-        var spriteW = sprite_get_width(image);
-        var spriteH = sprite_get_height(image);
+        var spriteW = sprite_get_width(sprite);
+        var spriteH = sprite_get_height(sprite);
         var surfW = spriteW * tilesX;
         var surfH = spriteH * tilesY; 
         var surf = surface_create(surfW, surfH);
@@ -125,7 +127,7 @@ function UeTexture(data = {}) constructor {
                 var scaleX = mirrorX ? -1 : 1;
                 var scaleY = mirrorY ? -1 : 1;
 
-                draw_sprite_ext(image, 0, px, py, scaleX, scaleY, 0, c_white, 1);
+                draw_sprite_ext(sprite, 0, px, py, scaleX, scaleY, 0, c_white, 1);
             } 
         }
         
@@ -170,7 +172,7 @@ function UeTexture(data = {}) constructor {
     function dispose() {
         gml_pragma("forceinline");
 
-        if (image != __cachedSprite && sprite_exists(__cachedSprite)) {
+        if (sprite != __cachedSprite && sprite_exists(__cachedSprite)) {
             sprite_delete(__cachedSprite);
         }
         
@@ -267,8 +269,8 @@ function UeTexture(data = {}) constructor {
      */
     function contain(aspect) {
         gml_pragma("forceinline");
-        var imageW = sprite_get_width(image);
-        var imageH = sprite_get_height(image);
+        var imageW = sprite_get_width(sprite);
+        var imageH = sprite_get_height(sprite);
         var imageAspect = imageW / imageH;
     
         var scaleX = 1;
@@ -296,8 +298,8 @@ function UeTexture(data = {}) constructor {
      */
     function cover(aspect) {
         gml_pragma("forceinline");
-        var imageW = sprite_get_width(image);
-        var imageH = sprite_get_height(image);
+        var imageW = sprite_get_width(sprite);
+        var imageH = sprite_get_height(sprite);
         var imageAspect = imageW / imageH;
     
         var scaleX = 1;

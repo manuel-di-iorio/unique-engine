@@ -26,7 +26,7 @@
   "origin":4,
   "parent":{
     "name":"Icons",
-    "path":"folders/Scene Editor/Scripts/UI/Icons.yy",
+    "path":"folders/Scene Editor/UI/Icons.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

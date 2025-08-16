@@ -24,7 +24,7 @@ new UeOrbitControls(data = {})
 | `enablePan`          | `boolean`   | `true`       | Enables panning                     |
 | `enableRotate`       | `boolean`   | `true`       | Enables orbit rotation              |
 | `enableDamping`      | `boolean`   | `true`       | Enables inertia smoothing           |
-| `dampingFactor`      | `number`    | `0.1`        | Lerp factor for smooth motion       |
+| `dampingFactor`      | `number`    | `0.9`        | Lerp factor for smooth motion       |
 | `autoRotateSpeed`    | `number`    | `0.1`        | Speed of automatic rotation         |
 | `minTargetRadius`    | `number`    | `5`          | Minimum zoom radius                 |
 | `maxTargetRadius`    | `number`    | `Infinity`   | Maximum zoom radius                 |
@@ -48,14 +48,16 @@ new UeOrbitControls(data = {})
 | `mouseButtonZoom`   | `number`    | Mouse button for zoom drag        |
 | `mouseButtonPan`    | `number`    | Mouse button for panning          |
 | `keys`              | `object`    | Directional keyboard key mappings |
+| `transforming`      | `boolean`   | Whether the camera is being orbited with the mouse (read-only) |
 
 ## 🧩 Methods
 
 ```js
-update()
+update(mouseX = undefined, mouseY = undefined)
 ```
 Updates the camera position and direction based on current input.
 Must be called every frame in the game loop.
+Optionally takes the mouse coordinates in input, otherwise it will get it automatically from the `UeMouse` class
 
 ## 🧠 Notes
 
