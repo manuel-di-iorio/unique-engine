@@ -1,4 +1,6 @@
 function UeBufferLoader() constructor {
+    game = new UeGame();
+    
     // Temporary internal variables
     cache = {
         formats: {},
@@ -143,6 +145,7 @@ function UeBufferLoader() constructor {
         texture.flipY = obj.flipY;
         texture.wrapS = obj.wrapS;
         texture.wrapT = obj.wrapT;
+        texture.userData = obj.userData;
         
         cache.textures[$ obj.uuid] = texture;
     }

@@ -8,24 +8,24 @@ function UeMatrix4(_data = undefined) constructor {
         return variable_clone(self);
     }
     
-    /// Multiplies this matrix by another
+    /// Multiplies this matrix by another (result = self * m)
     function multiply(m) {
         gml_pragma("forceinline");
-        data = matrix_multiply(self.data, m.data);
+        data = matrix_multiply(m.data, self.data);
         return self;
     }
 
     /// Multiplies two matrices: result = a * b
     function multiplyMatrices(a, b) {
         gml_pragma("forceinline");
-        data = matrix_multiply(a.data, b.data);
+        data = matrix_multiply(b.data, a.data);
         return self;
     }
 
     /// Pre-multiplies this matrix: result = m * self
     function premultiply(m) {
         gml_pragma("forceinline");
-        data = matrix_multiply(m.data, self.data);
+        data = matrix_multiply(self.data, m.data);
         return self;
     }
 
@@ -279,6 +279,15 @@ function UeMatrix4(_data = undefined) constructor {
         data[0] *= v.x; data[1] *= v.x; data[2] *= v.x; data[3] *= v.x;
         data[4] *= v.y; data[5] *= v.y; data[6] *= v.y; data[7] *= v.y;
         data[8] *= v.z; data[9] *= v.z; data[10] *= v.z; data[11] *= v.z;
+        return self;
+    }
+    
+    /// Scales this matrix by the XYZ components (column-wise)
+    function scaleXYZ(x, y, z) {
+        gml_pragma("forceinline");
+        data[0] *= x; data[1] *= x; data[2] *= x; data[3] *= x;
+        data[4] *= y; data[5] *= y; data[6] *= y; data[7] *= y;
+        data[8] *= z; data[9] *= z; data[10] *= z; data[11] *= z;
         return self;
     }
 

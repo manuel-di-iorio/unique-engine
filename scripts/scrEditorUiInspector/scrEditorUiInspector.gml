@@ -2,20 +2,24 @@ function EditorUiInspector(ui) constructor {
     self.ui = ui;
     self.assimp = new UeAssimpLoader();
     
-    ui.Inspector = new UiNode({ name: "Inspector", width: "20%", marginBottom: 62 }, { border: true });
-    ui.Inspector.Title = new UiText("Inspector", { margin: 5, marginLeft: 10, marginRight: 10 });
-    ui.Inspector.Content = new UiNode({ name: "Inspector.Content", flex: 1, height: "100%", flexDirection: "column" });
+    ui.Inspector = new UiNode({ name: "Inspector", minWidth: 300, width: "20%", marginBottom: 62 }, { border: true });
+    ui.Inspector.Content = new UiNode({ marginTop: 38, name: "Inspector.Content", flex: 1, height: "90%", flexDirection: "column", padding: 10 });
     
-    ui.Inspector.add(ui.Inspector.Title, ui.Inspector.Content);
+    ui.Inspector.add(ui.Inspector.Content);
     
-    ui.Inspector.Content.draw = method(ui.Inspector.Content, function() {
+    ui.Inspector.onDraw = method(ui.Inspector, function() {
+        draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top);
+        draw_text(self.x1 + 20, self.y1 + 8, "Inspector");
+    });
+    
+    ui.Inspector.Content.onDraw = method(ui.Inspector.Content, function() {
         draw_set_color(global.UI_COL_INSPECTOR_BG);
         draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
     });
     
     // Assets fields configuration
     fields = {
-        "texture": [
+        "Texture": [
             { 
                 id: "name",
                 field: "name",
@@ -25,31 +29,45 @@ function EditorUiInspector(ui) constructor {
             {
                 id: "sprite",
                 field: "sprite",
-                label: "Choose a sprite",
-                type: "spriteFilePicker"
+                label: "Import",
+                type: "spriteFilePicker",
+                onChange: function(value) {
+                    self.asset.sprite = value;
+                    self.asset.update();
+                }
+            },
+            {
+                id: "flipY",
+                field: "flipY",
+                label: "Flip Vertically",
+                type: "checkbox",
+                onChange: function(value) {
+                    self.asset[$ self.field] = value;
+                    self.asset.update();
+                }
             }
         ],
         
-        "material": [
+        "Material": [
             { 
                 id: "name",
                 field: "name",
                 label: "Name", 
                 type: "text"
             },
-            { 
-                id: "shader",
-                field: "shader",
-                label: "Shader", 
-                type: "dropdown",
-                items: [
-                    { key: "Standard", value: sh_ue_standard },
-                    { key: "Basic (unlit)", value: sh_ue_basic },
-                    { key: "Line", value: sh_ue_line },
-                    { key: "Sprite", value: sh_ue_sprite },
-                    { key: "Custom (set by code)", value: undefined }
-                ]
-            },
+            //{ 
+                //id: "shader",
+                //field: "shader",
+                //label: "Shader", 
+                //type: "dropdown",
+                //items: [
+                    //{ key: "Standard", value: sh_ue_standard },
+                    //{ key: "Basic (unlit)", value: sh_ue_basic },
+                    //{ key: "Line", value: sh_ue_line },
+                    //{ key: "Sprite", value: sh_ue_sprite },
+                    //{ key: "Custom (set by code)", value: undefined }
+                //]
+            //},
             //{ 
                 //type: "section",
                 //label: "Properties"
@@ -58,17 +76,23 @@ function EditorUiInspector(ui) constructor {
                 id: "transparent",
                 field: "transparent",
                 label: "Transparent", 
-                type: "boolean",
+                type: "checkbox",
                 onChange: function(value) {
                     self.transparent = value;
                     self.blending = value;
                 }
             },
+            { 
+                id: "wireframe",
+                field: "wireframe",
+                label: "Wireframe", 
+                type: "checkbox"
+            },
             //{ 
                 //id: "lights",
                 //field: "lights",
                 //label: "Lights",
-                //type: "boolean",
+                //type: "checkbox",
                 //onChange: function(value) {
                     //self.lights = value ? 2 : 0;
                 //}
@@ -89,23 +113,23 @@ function EditorUiInspector(ui) constructor {
                 //type: "section",
                 //label: "Textures"
             //},
-            { 
-                id: "texturesMap",
-                field: "textures",
-                label: "Textures", 
-                type: "texturePicker",
-                extra: { mapType: "map" }
-            },
-            { 
-                id: "texturesEmissiveMap",
-                field: "textures",
-                label: "Textures", 
-                type: "texturePicker",
-                extra: { mapType: "emissiveMap" }
-            },
+            //{ 
+                //id: "texturesMap",
+                //field: "textures",
+                //label: "Textures", 
+                //type: "texturePicker",
+                //extra: { mapType: "map" }
+            //},
+            //{ 
+                //id: "texturesEmissiveMap",
+                //field: "textures",
+                //label: "Textures", 
+                //type: "texturePicker",
+                //extra: { mapType: "emissiveMap" }
+            //},
         ],
         
-        "mesh": [
+        "Mesh": [
            { 
                 id: "name",
                 field: "name",
@@ -116,7 +140,7 @@ function EditorUiInspector(ui) constructor {
                 id: "static",
                 field: "matrixAutoUpdate",
                 label: "Static", 
-                type: "boolean",
+                type: "checkbox",
                 onValue: function(value) {
                     return !value;
                 },
@@ -124,6 +148,12 @@ function EditorUiInspector(ui) constructor {
                     self.matrixAutoUpdate = !value;
                 }
            },
+           { 
+                id: "frustumCulled",
+                field: "frustumCulled",
+                label: "Frustum Culled", 
+                type: "checkbox"
+           }, 
            {
                 id: "geometry",
                 field: "geometry",
@@ -140,7 +170,11 @@ function EditorUiInspector(ui) constructor {
                     { key: "Line", value: new UeLineGeometry().setPositions([ 0,0,0, 1,0,0 ]) },
                     { key: "LineSegments", value: new UeLineSegmentsGeometry().setPositions([ 0,0,0, 1,0,0, 3,0,0, 4,0,0 ]) },
                     { key: "Custom", disabled: true },
-                ]
+                ],
+                onChange: function(value) {
+                    self.geometry.dispose();
+                    self.geometry = value;
+                }
            },
            { 
                 id: "material",
@@ -255,12 +289,76 @@ function EditorUiInspector(ui) constructor {
                     self.scale.z = value;
                 }
            },
+        ],
+        
+        "Scene": [
+           { 
+                id: "name",
+                field: "name",
+                label: "Name", 
+                type: "text"
+           }, 
         ]
     }
     
-    
+    /**
+     * Dynamically create the inspector fields
+     */
     function inspect(asset) {
-        log(asset.type)
-        var assetConfig = fields[$ asset.type];
+        var assetFields = fields[$ asset.type];
+        
+        // Clear the previous content
+        var Content = self.ui.Inspector.Content;
+        Content.destroyChildren();
+        
+        for (var i = 0, l = array_length(assetFields); i < l; i++) {
+            var assetField = assetFields[i];
+            var input = undefined;
+            var width = assetField[$ "width"] ?? "100%";
+            var scope = { asset, field: assetField.field };
+            var marginTop = !i ? 0 : 20;
+            var onChangeFn = assetField[$ "onChange"];
+            var onChange = method(scope, onChangeFn != undefined ? onChangeFn : function(value, input) {
+                self.asset[$ self.field] = value;
+            });
+            
+            switch (assetField.type) {
+                case "text": 
+                    // Textbox
+                    input = new UiTextbox({ width, height: 32, marginTop }, {
+                        label: assetField.label,
+                        disabled: assetField[$ "disabled"],
+                        value: asset[$ assetField.field],
+                        onBlur: method(scope, function(value, input) {
+                            if (value == "") {
+                                input.value = self.asset[$ self.field];
+                                return;
+                            }
+                            self.asset[$ self.field] = value;
+                        })
+                    });
+                break;  
+                
+                // Import a new sprite for the texture
+                case "spriteFilePicker":
+                    input = new UiInspectorSpriteFilePicker({ marginTop }, {
+                         valueGetter: method(scope, function() { 
+                            return asset.__cachedSprite;
+                        }),
+                        onChange
+                    });
+                break;
+                
+                case "checkbox": 
+                    input = new UiCheckbox({ marginTop }, {
+                        label: assetField.label,
+                        value: asset[$ assetField.field],
+                        onChange
+                    });
+                break;
+            }
+            
+            Content.add(input);
+        }
     }
 }

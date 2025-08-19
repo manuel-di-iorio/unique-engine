@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"UiCheckbox",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"UiCheckbox",
+  "parent":{
+    "name":"UniqueUI",
+    "path":"folders/UniqueUI.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

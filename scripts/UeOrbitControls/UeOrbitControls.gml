@@ -46,7 +46,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self._dragging = false;
     self._panning = false;
     self._zooming = false;
-    self.transforming = false; // Variabile principale per tutte le trasformazioni
+    self.transforming = false;
 
     self._deltaAzimuth = 0;
     self._deltaElevation = 0;

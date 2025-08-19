@@ -1,11 +1,15 @@
 function EditorUiAssets(ui) constructor {
     self.ui = ui;
     
-    ui.Assets = new UiNode({ name: "Assets", width: "20%", /*height: "30%",*/marginBottom: 62 }, { border: true });
-    ui.Assets.Title = new UiText("Assets", { margin: 5, marginLeft: 10, marginRight: 10 });
-    ui.Assets.Treeview = new UiTreeview({ flex: 1, height: "90%", flexDirection: "column" });
+    ui.Assets = new UiNode({ name: "Assets", minWidth: 300, width: "20%", /*height: "30%",*/marginBottom: 62 }, { border: true });
+    ui.Assets.Treeview = new UiTreeview({ marginTop: 35, flex: 1, height: "90%", flexDirection: "column" });
     
-    ui.Assets.add(ui.Assets.Title, ui.Assets.Treeview);
+    ui.Assets.add(ui.Assets.Treeview);
+        
+    ui.Assets.onDraw = method(ui.Assets, function() {
+        draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top);
+        draw_text(self.x1 + 20, self.y1 + 8, "Assets");
+    });
         
     /** Events */
     var Treeview = ui.Assets.Treeview;
@@ -51,12 +55,11 @@ function EditorUiAssets(ui) constructor {
         }
         
         var name = string_upper(string_char_at(assetType, 1)) + string_copy(assetType, 2, string_length(assetType) - 1) + string(assetId);
-        treeviewItem.name = name;
-        treeviewItem.Name.text = name;
         treeviewItem.asset = asset; 
+        asset.name = name;
     };
         
-    Treeview.onItemSelect = function(treeviewItem) {
-        inspector.inspect(treeviewItem.asset); 
+    Treeview.onItemSelected = function(treeviewItem) {
+        oSceneEditor.inspector.inspect(treeviewItem.asset); 
     };
 }

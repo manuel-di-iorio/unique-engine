@@ -45,11 +45,12 @@ new UeMatrix4(data)
 | `makePerspective(left, right, top, bottom, near, far)`  | `self`      | Builds a perspective projection matrix                        |
 | `makeOrthographic(left, right, top, bottom, near, far)` | `self`      | Builds an orthographic projection matrix                      |
 | `fromArray(arr, offset)`             | `self`      | Loads data from an array                                      |
-| `toArray(arr, offset)`              | `number[]`  | Exports data to array                                         |
+| `toArray(arr, offset)`               | `number[]`  | Exports data to array                                         |
 | `transpose()`                        | `self`      | Transposes the matrix                                         |
 | `getMaxScaleOnAxis()`                | `number`    | Returns the largest scale among all axes                      |
 | `applyToVector3(vec)`                | `UeVector3` | Applies matrix to a vector (as a position, w=1)               |
 | `scale(vec)`                         | `self`      | Scales matrix per vector component                            |
+| `scaleXYZ(x, y, z)`                  | `self`      | Scales matrix per XYZ components                              |
 | `set(...values)`                     | `self`      | Sets all 16 values (row-major input, internally converted)    |
 | `setPosition(vec)`                   | `self`      | Sets position component (x, y, z) from a vector               |
 | `setPositionXYZ(x, y, z)`            | `self`      | Sets position from individual components                      |

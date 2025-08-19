@@ -23,6 +23,7 @@ function UiNode(style = {}, props = {}) constructor {
     self.xp2 = 0;
     self.yp2 = 0;
     self.hovered = false;
+    self.deepestTarget = undefined;
     self.needsUpdate = true;
     self.parent = undefined;
     self.eventListeners = {};
@@ -57,7 +58,7 @@ function UiNode(style = {}, props = {}) constructor {
             // Remove the element from its previous parent
             // @todo: flexpanel may do this operation automatically, need to test it.
             if (elem.parent != undefined) {
-                flexpanel_node_remove_child(elem.parent, elem.node);
+                flexpanel_node_remove_child(elem.parent.node, elem.node);
             }
             
             flexpanel_node_insert_child(self.node, elem.node, flexpanel_node_get_num_children(self.node));
@@ -78,12 +79,32 @@ function UiNode(style = {}, props = {}) constructor {
         return self;
     }
     
-    // Remove all children
+    // Remove all children from the node tree (not from the memory, use destroy() for that)
     function clear() {
         gml_pragma("forceinline");
         flexpanel_node_remove_all_children(self.node);
         global.UI.needsUpdate = true;
         return self;
+    }
+    
+    // Delete this node and optionally also its children from memory
+    function destroy(recursive = false) {
+        gml_pragma("forceinline");
+        flexpanel_delete_node(self.node, true);
+        global.UI.needsUpdate = true;
+        return self; 
+    }
+    
+    // Delete the node's children from memory but not the node itself
+    function destroyChildren() {
+        gml_pragma("forceinline");
+        
+        for (var i = flexpanel_node_get_num_children(self.node) - 1; i >= 0; i--) {
+            flexpanel_delete_node(flexpanel_node_get_child(self.node, i), true);
+        }
+         
+        global.UI.needsUpdate = true;
+        return self; 
     }
     
     // Count the children
@@ -240,6 +261,10 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     // Events
+    function click() {
+        global.UI.dispatchEvent(UI_EVENT.click, self);    
+    }
+    
     function onClick(cb) {
         gml_pragma("forceinline");
         self.addEventListener(UI_EVENT.click, cb);
@@ -256,7 +281,19 @@ function UiNode(style = {}, props = {}) constructor {
         gml_pragma("forceinline");
         var _this = self;
         self.addEventListener(UI_EVENT.mouseup, cb);
-        //array_push(global.UI.__mouseUpCallbacks, [ cb, _this ]);
+        return self;
+    }
+    
+    function onMouseEnter(cb) {
+        gml_pragma("forceinline");
+        self.addEventListener(UI_EVENT.mouseenter, cb);
+        return self;
+    }
+    
+    function onMouseLeave(cb) {
+        gml_pragma("forceinline");
+        var _this = self;
+        self.addEventListener(UI_EVENT.mouseleave, cb);
         return self;
     }
     
@@ -309,6 +346,7 @@ function UiNode(style = {}, props = {}) constructor {
     
     function dispatchEvent(event, target) {
         gml_pragma("forceinline");
+        
         // Build path from root to target
         var path = [];
         var current = target;
@@ -361,7 +399,7 @@ function UiNode(style = {}, props = {}) constructor {
         }
         
         // BUBBLE PHASE - from target parent to root
-        if (!_stopped) { // && event != UI_EVENT.mouseenter && event != UI_EVENT.mouseleave) {
+        if (!_stopped && event != UI_EVENT.mouseenter && event != UI_EVENT.mouseleave) {
             for (var i = array_length(path) - 2; i >= 0; i--) {
                 current = path[i];
                 
@@ -380,7 +418,7 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     // @todo recursive mode
-    function focus(recursive = false, parentLimit = undefined) {
+    function bringOnTop(recursive = false, parentLimit = undefined) {
         gml_pragma("forceinline");
         if (parent != undefined) {
             flexpanel_node_remove_child(parent.node, self.node);
@@ -428,16 +466,16 @@ function UiNode(style = {}, props = {}) constructor {
     function __updateLayout() {
         gml_pragma("forceinline");
         self.layout = flexpanel_node_layout_get_position(self.node, false);
-        self.width = self.layout.width;
-        self.height = self.layout.height;
-        self.x1 = self.layout.left; 
-        self.y1 = self.layout.top; 
-        self.x2 = self.layout.left + self.width; 
-        self.y2 = self.layout.top + self.height;
-        self.xp1 = self.x1 - self.layout.paddingLeft;
-        self.yp1 = self.y1 - self.layout.paddingTop;
-        self.xp2 = self.x2 + self.layout.paddingRight;
-        self.yp2 = self.y2 + self.layout.paddingBottom;
+        self.width = layout.width;
+        self.height = layout.height;
+        self.x1 = layout.left; 
+        self.y1 = layout.top; 
+        self.x2 = layout.left + self.width; 
+        self.y2 = layout.top + self.height;
+        self.xp1 = self.x1 - layout.paddingLeft;
+        self.yp1 = self.y1 - layout.paddingTop;
+        self.xp2 = self.x2 + layout.paddingRight;
+        self.yp2 = self.y2 + layout.paddingBottom;
         
         // Cache the nearest scrollable parent (if exists)
         if (self.isScrollbar) return;
@@ -459,7 +497,7 @@ function UiNode(style = {}, props = {}) constructor {
         }
     }
     
-    function checkEvents(layoutUpdated) {
+    function checkEvents(layoutUpdated, _currentlyHovered) {
         gml_pragma("forceinline");
         var ui = global.UI;
         self.updated = layoutUpdated;
@@ -477,20 +515,12 @@ function UiNode(style = {}, props = {}) constructor {
         if (!self.isVisible()) return undefined;
         
         // Process children first
-        var deepestTarget = undefined;
-        
-        //for (var i = array_length(self.children) - 1; i >= 0; i--) {
         for (var i = flexpanel_node_get_num_children(self.node) - 1; i >= 0; i--) {
-            var child = flexpanel_node_get_data(flexpanel_node_get_child(self.node, i));
-            //var child = self.children[i];
-            
-            var childDeepest = child.checkEvents(layoutUpdated);
-            if (deepestTarget == undefined && childDeepest != undefined) {
-                deepestTarget = childDeepest;
-            }
+            flexpanel_node_get_data(flexpanel_node_get_child(self.node, i))
+                .checkEvents(layoutUpdated, _currentlyHovered);
         }
         
-        // Store the mouse relateive coords for this element
+        // Store the mouse relative coords for this element
         self.mouseX = ui.mouseX;
         self.mouseY = self.parent == undefined || !self.parent.isScrollbar ?
             ui.mouseY + (self.scrollableParent != undefined ? self.scrollableParent.scrollTop : 0) 
@@ -498,28 +528,14 @@ function UiNode(style = {}, props = {}) constructor {
         
         // Check hover state
         if (self.pointerEvents) {
-            var currentlyHovered = point_in_rectangle(self.mouseX, self.mouseY, self.xp1, self.yp1, self.xp2, self.yp2);
-    
-            if (deepestTarget == undefined && currentlyHovered) {
-                deepestTarget = self;
-            }
-            
-            // Mouse hover events
-            //if (currentlyHovered != self.hovered) {
-                //if (currentlyHovered) {
-                    //// Mouse entered
-                    //global.UI.dispatchEvent(UI_EVENT.mouseenter, self);
-                    //
-                    //global.UI.dispatchEvent(UI_EVENT.mouseover, self);
-                //} else {
-                    //// Mouse left
-                    //global.UI.dispatchEvent(UI_EVENT.mouseleave, self);
-                    //
-                    //global.UI.dispatchEvent(UI_EVENT.mouseout, self);
-                //}
-            //}
-            
             self.hovered = false;
+            
+            if (ui.deepestTarget == undefined && point_in_rectangle(self.mouseX, self.mouseY, self.xp1, self.yp1, self.xp2, self.yp2)) {
+                self.hovered = true;
+                ui.deepestTarget = self;
+                ui.dispatchEvent(UI_EVENT.mouseenter, self); 
+                ui.dispatchEvent(UI_EVENT.mouseover, self);
+           } 
         } 
         
         if (global.UI.mouseLeftReleased) {
@@ -528,8 +544,6 @@ function UiNode(style = {}, props = {}) constructor {
         
         if (self.onStep != undefined) self.onStep();
         self.updated = false;
-        
-        return deepestTarget;
     }
     
     // Calculate the layout of this node and its children
@@ -547,33 +561,34 @@ function UiNode(style = {}, props = {}) constructor {
         self.mouseX = device_mouse_x_to_gui(0);
         self.mouseY = device_mouse_y_to_gui(0);
         self.mouseLeftReleased = mouse_check_button_released(mb_left);
+
+        var _currentlyHovered = self.deepestTarget;
+        self.deepestTarget = undefined;
+        self.checkEvents(_layoutUpdated, _currentlyHovered);
         
-        var deepestTarget = self.checkEvents(_layoutUpdated);
+        if (_currentlyHovered != undefined && _currentlyHovered != self.deepestTarget) {
+            self.dispatchEvent(UI_EVENT.mouseleave, _currentlyHovered); 
+            self.dispatchEvent(UI_EVENT.mouseout, _currentlyHovered);
+        }
         
         // Click event handled only on root
-        if (deepestTarget != undefined) {
-            deepestTarget.hovered = true;
-
-            // Mouse move event
-            // @todo expensive to always dispatch this event on a hovered element
-            //global.UI.dispatchEvent(UI_EVENT.mousemove, deepestTarget));
-            
+        if (self.deepestTarget != undefined) {
             // Wheel events
             if (mouse_wheel_up()) {
-                global.UI.dispatchEvent(UI_EVENT.wheelup, deepestTarget);
+                global.UI.dispatchEvent(UI_EVENT.wheelup, self.deepestTarget);
             }
             if (mouse_wheel_down()) {
-                global.UI.dispatchEvent(UI_EVENT.wheeldown, deepestTarget);
+                global.UI.dispatchEvent(UI_EVENT.wheeldown, self.deepestTarget);
             }
             
             if (mouse_check_button_pressed(mb_left)) {
-                global.UI_CLICK_START = deepestTarget;
-                global.UI.dispatchEvent(UI_EVENT.mousedown, deepestTarget);
+                global.UI_CLICK_START = self.deepestTarget;
+                global.UI.dispatchEvent(UI_EVENT.mousedown, self.deepestTarget);
             }
             
             if (self.mouseLeftReleased) {
-                if (deepestTarget == global.UI_CLICK_START) {
-                    call_later(1, time_source_units_frames, method({ deepestTarget }, function() {
+                if (self.deepestTarget == global.UI_CLICK_START) {
+                    call_later(1, time_source_units_frames, method({ deepestTarget: self.deepestTarget }, function() {
                         global.UI.dispatchEvent(UI_EVENT.click, deepestTarget);
                     }));
                 }
@@ -581,17 +596,15 @@ function UiNode(style = {}, props = {}) constructor {
                 global.UI_CLICK_START = undefined;
             }
         }
-        
-        
-        
-        return self;
     } 
     
     // Render the node and its children, with corrected scroll trasformation if needed
     // Pass `true` as first argument to draw the nodes bounds and their (optional) name.
     function render(debug = false) {
         gml_pragma("forceinline");
-        if (!self.isVisible()) return;
+        if (!self.isVisible() || !self.mounted) return;
+        
+        var ui = global.UI;
         
         var _matrixPushed = false;
         var _scissor = undefined;

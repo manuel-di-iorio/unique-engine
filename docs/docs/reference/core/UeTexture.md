@@ -41,6 +41,7 @@ new UeTexture(sprite = undefined, data = {})
 | `matrix`           | `UeMatrix4`    | UV transformation matrix.                                           |
 | `matrixAutoUpdate` | `boolean`      | Auto-updates matrix when needed.                                    |
 | `needsUpdate`      | `boolean`      | Marks texture as needing rebake.                                    |
+| `userData`         | `struct`       | Custom user data                                                    |
 
 
 
@@ -49,6 +50,7 @@ new UeTexture(sprite = undefined, data = {})
 | Method            | Description |
 |-------------------|-------------|
 | `updateMatrix()`  | Rebuilds the internal UV transformation matrix using `offset`, `repeat`, `center`, `rotation`, `flipX`, and `flipY`. |
+| `update()`        | Rebake the texture sprite based on the matrix and texture props. This is done automatically when `matrixAutoUpdate` is thruthy |
 | `dispose()`       | Frees any GPU resources (like the cached sprite and texture). Should be called before replacing or destroying the texture. |
 | `toJSON()`        | Returns a plain JSON-like struct containing all the serializable parameters (wrap, repeat, filter, etc.). |
 | `contain(aspect)`  | Scales the texture to fit entirely within the surface without cropping or stretching. Preserves the original aspect ratio. Similar to CSS 

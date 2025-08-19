@@ -1,3 +1,5 @@
+device_mouse_dbclick_enable(false);
+
 // Anti-aliasing
 if (display_aa >= 8) {
     display_reset(8, false);

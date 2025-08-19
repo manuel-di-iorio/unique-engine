@@ -60,6 +60,9 @@ function UeTexture(sprite = undefined, data = {}) constructor {
 
     // Cached texture handle from the cached sprite
     __cachedTexture = sprite != undefined ? sprite_get_texture(sprite, 0) : undefined;
+    
+    // A struct that can be used to store custom data about the texture(also exported on the buffer)
+    userData = {};
 
     /**
      * Updates the UV transformation matrix combining offset, repeat,
@@ -68,7 +71,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
      */
     function updateMatrix() {
         gml_pragma("forceinline");
-
+    
         var tx = -center.x;
         var ty = -center.y;
 
@@ -78,13 +81,29 @@ function UeTexture(sprite = undefined, data = {}) constructor {
 
         var ox = offset.x + center.x;
         var oy = offset.y + center.y;
+    
         
-        matrix.identity()
-            .multiply(matrix.makeTranslation(tx, ty, 0))
-            .multiply(matrix.makeRotationFromEuler(0, rotation, 0))
-            .multiply(matrix.makeScale(sx, sy, 1))
-            .multiply(matrix.makeTranslation(ox, oy, 0));
+        var cx = sprite_get_width(sprite) * 0.5;
+        var cy = sprite_get_height(sprite) * 0.5;
 
+        
+        var dummyMat = global.UE_DUMMY_MATRIX4;
+        matrix.identity()
+            // Move the offset (@todo needs to be tested)
+            .multiply(dummyMat.makeTranslation(ox, oy, 0))
+            // Move the pivot to the sprite center
+            .multiply(dummyMat.makeTranslation(cx, cy, 0))
+            // Rotate around the pivot
+            .multiply(dummyMat.makeRotationFromEuler(0, 0, rotation))
+            // Flip if requested
+            .multiply(dummyMat.makeScale(sx, sy, 1))
+            // Move back the pivot
+            .multiply(dummyMat.makeTranslation(-cx, -cy, 0))
+            // Move to the specified center
+            .multiply(dummyMat.makeTranslation(tx, ty, 0));
+        
+        log(matrix.data)
+        
         return self;
     }
 
@@ -93,10 +112,10 @@ function UeTexture(sprite = undefined, data = {}) constructor {
      * then create a persistent sprite from that surface.
      * Handles wrapping modes and tiling by repeated drawing.
      */
-    function __update() {
+    function update() {
         gml_pragma("forceinline");
         dispose();    // Clear previous cached sprite
-        updateMatrix();  // Build the transformation matrix
+        if (!sprite_exists(sprite)) return;
         
         var repeatVec = self[$ "repeat"];
         var tilesX = ceil(abs(repeatVec.x));
@@ -107,10 +126,19 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         var surfW = spriteW * tilesX;
         var surfH = spriteH * tilesY; 
         var surf = surface_create(surfW, surfH);
+
         surface_set_target(surf);
-        draw_clear_alpha(c_white, 0);
+        draw_clear_alpha(c_black, 0);
         
+        var currentBlendEnable = gpu_get_blendenable();
+        gpu_set_blendenable(false);
+        
+        updateMatrix();  // Build the transformation matrix
         matrix_set(matrix_world, matrix.data);
+        //matrix_set(matrix_world,   matrix_multiply(matrix_build(-512, -512, 0, 0, 0, 0, 1, 1, 1),
+        //matrix_build(512, 512, 0, 0, 0, 0, 1, -1, 1)))
+      
+
      
         for (var ix = 0; ix < tilesX; ix++) {
             for (var iy = 0; iy < tilesY; iy++) {
@@ -128,9 +156,12 @@ function UeTexture(sprite = undefined, data = {}) constructor {
                 var scaleY = mirrorY ? -1 : 1;
 
                 draw_sprite_ext(sprite, 0, px, py, scaleX, scaleY, 0, c_white, 1);
+           
             } 
         }
         
+        gpu_set_blendenable(currentBlendEnable);
+
         surface_reset_target();
 
         // Create cached sprite from baked surface
@@ -154,7 +185,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         gml_pragma("forceinline");
         if (__cachedTexture == undefined) return;
 
-        if (matrixAutoUpdate && needsUpdate) __update();
+        if (matrixAutoUpdate && needsUpdate) update();
 
         var repeatFlag = wrapS == UE_TEXTURE_WRAP.REPEAT || wrapT == UE_TEXTURE_WRAP.REPEAT;
         gpu_set_texrepeat_ext(sampler, repeatFlag);
@@ -206,7 +237,10 @@ function UeTexture(sprite = undefined, data = {}) constructor {
             
             // Wrapping modes
             wrapS,
-            wrapT
+            wrapT,
+            
+            // Custom user data
+            userData
         };
 
         payload[$ "repeat"] = [repeatVec.x, repeatVec.y];

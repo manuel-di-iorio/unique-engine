@@ -13,6 +13,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     layers = new UeLayers();
     userData = {};
     frustumCulled = true;
+    object = undefined; // @doc
+    instances = new UeInstanceList(self); // @doc
     //animations = []; // @todo
     //castShadow = false; // @todo
     //receiveShadow = false; // @todo
@@ -87,7 +89,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         if (_object.parent == undefined) return;
         var parentChildren = _object.parent.children;
         
-        for (var i = 0, len = array_length(parentChildren); i < len; i++) {
+        for (var i = array_length(parentChildren) - 1; i >= 0; i--) {
             if (parentChildren[i] == _object) {
                 array_delete(parentChildren, i, 1);
                 break;
@@ -118,7 +120,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         callback(self);
         
         for (var i=0, len=array_length(children); i<len; i++) {
-            callback(children[i]);
+            children[i].traverse(callback);
         }
         
         return self;
@@ -133,7 +135,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         
         for (var i=0, len=array_length(children); i<len; i++) {
             var child = children[i];
-            if (child.visible) callback(child);
+            if (child.visible) child.traverseVisible(callback);
         }
         
         return self;
@@ -149,6 +151,24 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             current = current.parent;
         }
         return self;
+    }
+    
+    // Executes the callback on all children of this object (not on the object itself)
+    // @doc
+    function traverseChildren(callback) {
+        for (var i=0, len=array_length(children); i<len; i++) {
+            with (children[i]) {
+                callback();
+                traverseChildren(callback);
+            }
+        }
+        return self;
+    }
+    
+    // Executes the callback on all instances of this object
+    // @doc
+    function traverseInstances(callback) {
+        return instances.traverseInstances(callback);
     }
     
     /**

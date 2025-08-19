@@ -6,6 +6,16 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     self.outline = props[$ "outline"] ?? false;
     self.pointerEvents = true;
     
+    onMouseEnter(function() {
+       if (window_get_cursor() == cr_default) {
+           window_set_cursor(cr_handpoint);
+       }
+    });
+    
+    onMouseLeave(function() {
+        window_set_cursor(cr_default);
+    });
+    
     function resize() {
         var _w, _h;
         if (self.text != undefined) {
@@ -49,8 +59,7 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
             draw_text(xm, ym, self.text);
         } else {
             // Draw sprite
-            _subimg = hovered ? 1 : 0;
-            draw_sprite(self.sprite, _subimg, xm, ym);
+            draw_sprite(self.sprite, self.hovered ? 1 : 0, xm, ym);
         }
     }
     

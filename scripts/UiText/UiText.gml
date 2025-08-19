@@ -1,14 +1,26 @@
-function UiText(text, style = {}, props = {}): UiNode(style, props) constructor {
+function UiText(text = "", style = {}, props = {}): UiNode(style, props) constructor {
     setName(style[$ "name"] ?? "UiText");
     self.text = text;
     self.autoResize = props[$ "autoResize"] ?? true;
     self.halign = fa_left;
     self.valign = fa_top;
+    self.valueGetter = props[$ "valueGetter"];
     
     // Set the size of the button
     if (self.autoResize) {
-        draw_set_font(fText)
+        draw_set_font(fText);
         setSize(string_width(self.text), string_height(self.text));
+    }
+    
+    function onStep() {
+        if (self.valueGetter != undefined) {
+            var _newText = self.valueGetter();
+            if (_newText != self.text) {
+                self.text = _newText;
+                draw_set_font(fText);
+                setSize(string_width(self.text), string_height(self.text));
+            }
+        }
     }
     
     function onDraw() {
