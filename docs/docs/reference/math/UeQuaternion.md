@@ -23,34 +23,35 @@ new UeQuaternion(x = 0, y = 0, z = 0)
 
 ## Methods
 
-| Method                       | Returns        | Description                                                                       |
-| -------------------------    | -------------- | ---------------------------------------------------------------                   |
-| `set()`                      | `sekf`         | Sets the quaternion components.                                                   |
-| `clone()`                    | `UeQuaternion` | Returns a copy of this quaternion.                                                |
-| `copy()`                     | `self`         | Copies values from another quaternion.                                            |
-| `setFromEuler()`             | `self`         | Sets the quaternion from Euler angles (in degrees).                               |
-| `normalize()`                | `self`         | Normalizes the quaternion to unit length.                                         |
-| `multiply()`                 | `self`         | Multiplies this quaternion by another (combines rotations).                       |
-| `setFromAxisAngle()`         | `self`         | Sets the quaternion from a rotation axis and angle.                               |
-| `slerp()`                    | `self`         | Spherically interpolates toward another quaternion.                               |
-| `rotate()`                   | `self`         | Applies rotation around a given axis.                                             |
-| `rotateX()`                  | `self`         | Rotates around the X axis.                                                        |
-| `rotateY()`                  | `self`         | Rotates around the Y axis.                                                        |
-| `rotateZ()`                  | `self`         | Rotates around the Z axis.                                                        |
-| `toMat3()`                   | `UeMatrix3`    | Converts this quaternion to a 3×3 rotation matrix.                                |
-| `setFromRotationMatrix()`    | `self`         | Sets the quaternion from a rotation matrix.                                       |
-| `setFromUnitVectors()`       | `self`         | Sets the quaternion from two unit vectors (rotation from → to).                   |
-| `identity()`                 | `self`         | Resets this quaternion to the identity rotation.                                  |
-| `rotateTowards(q, step)`     | `self`         | Rotates toward another quaternion by a given angular step.                        |
-| `conjugate()`                | `self`         | Returns the rotational conjugate (opposite direction).                            |
-| `invert()`                   | `self`         | Inverts this quaternion (same as conjugate if unit length).                       |
-| `lengthSq()`                 | `real`         | Returns the squared length of the quaternion.                                     |
-| `length()`                   | `real`         | Returns the magnitude (length) of the quaternion.                                 |
-| `dot(q)`                    | `real`         | Returns the dot product between this quaternion and `q`.                          |     
-| `angleTo(q)`                | `real`         | Returns the angle in degrees between this quaternion and `q`.                     |  
-| `multiplyQuaternions(a, b)` | `self`         | Sets this quaternion to the multiplication `a * b`, composing the two rotations.  |       
-| `equals(q)`                 | `boolean`      | Returns `true` if all components are approximately equal within `UE_EPSILON`.     |
-| `toArray()`                 | `array`        | Returns a 4-element array `[x, y, z, w]`.                                         |
+| Method                       | Returns        | Description                                                                              |
+| -------------------------    | -------------- | ---------------------------------------------------------------                          |
+| `set()`                      | `sekf`         | Sets the quaternion components.                                                          |
+| `clone()`                    | `UeQuaternion` | Returns a copy of this quaternion.                                                       |
+| `copy()`                     | `self`         | Copies values from another quaternion.                                                   |
+| `normalize()`                | `self`         | Normalizes the quaternion to unit length.                                                |
+| `multiply()`                 | `self`         | Multiplies this quaternion by another (combines rotations).                              |
+| `setFromAxisAngle()`         | `self`         | Sets the quaternion from a rotation axis and angle.                                      |
+| `slerp()`                    | `self`         | Spherically interpolates toward another quaternion.                                      |
+| `rotate()`                   | `self`         | Applies rotation around a given axis.                                                    |
+| `rotateX()`                  | `self`         | Rotates around the X axis.                                                               |
+| `rotateY()`                  | `self`         | Rotates around the Y axis.                                                               |
+| `rotateZ()`                  | `self`         | Rotates around the Z axis.                                                               |
+| `toMat3()`                   | `UeMatrix3`    | Converts this quaternion to a 3×3 rotation matrix.                                       |
+| `setFromRotationMatrix()`    | `self`         | Sets the quaternion from a rotation matrix.                                              |
+| `setFromUnitVectors()`       | `self`         | Sets the quaternion from two unit vectors (rotation from → to).                          |
+| `identity()`                 | `self`         | Resets this quaternion to the identity rotation.                                         |
+| `rotateTowards(q, step)`     | `self`         | Rotates toward another quaternion by a given angular step.                               |
+| `conjugate()`                | `self`         | Returns the rotational conjugate (opposite direction).                                   |
+| `invert()`                   | `self`         | Inverts this quaternion (same as conjugate if unit length).                              |
+| `lengthSq()`                 | `real`         | Returns the squared length of the quaternion.                                            |
+| `length()`                   | `real`         | Returns the magnitude (length) of the quaternion.                                        |
+| `dot(q)`                     | `real`         | Returns the dot product between this quaternion and `q`.                                 |     
+| `angleTo(q)`                 | `real`         | Returns the angle in degrees between this quaternion and `q`.                            |  
+| `multiplyQuaternions(a, b)`  | `self`         | Sets this quaternion to the multiplication `a * b`, composing the two rotations.         |       
+| `equals(q)`                  | `boolean`      | Returns `true` if all components are approximately equal within `UE_EPSILON`.            |
+| `toArray()`                  | `array`        | Returns a 4-element array `[x, y, z, w]`.                                                |
+| `setFromEuler()`             | `self`         | Sets the quaternion from Euler angles (in degrees). It assumes imperfections             |
+| `toEuler()`                  | `array`        | Returns a 3-element Euler array `[x, y, z]` (pitch, yaw, roll). It assumes imperfections |
 
 
 

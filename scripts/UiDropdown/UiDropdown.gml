@@ -1,0 +1,173 @@
+function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
+    var _this = self;
+    setName(props[$ "name"] ?? "UiDropdown");
+    self.value = props[$ "value"] ?? false;
+    self.items = props[$ "items"] ?? undefined;
+    self.label = props[$ "label"] ?? undefined;
+    self.onChange = props[$ "onChange"] ?? function(input, value) {};
+    var _marginLeft = self.label == undefined ? 0 : 3 + string_width(self.label) + 20;
+    self.List = undefined;
+    
+    // Draw the label if present
+    function onDraw() {
+       if (self.label != undefined) {
+           draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle);
+           draw_text(self.x1 + 3, ~~mean(self.y1, self.y2), self.label);
+       }
+    }
+    
+    //self.onMouseUp(function() {
+        //if (self.List == undefined) return;
+        //
+        //var y1 = min(self.y1, self.List.y1);
+        //var y2 = max(self.y2, self.List.y2);
+        //
+        //if (!point_in_rectangle(global.UI.mouseX, global.UI.mouseY, self.x1, y1, self.x2, y2)) {
+            //self.closeList();
+        //}
+    //});
+    
+    // Input
+    self.Input = new UiButton(undefined, {
+        name: "UiDropdown.Input", 
+        marginLeft: _marginLeft,
+        height: 25
+    }, { border: true });
+    self.add(self.Input);
+    
+    with (self.Input) {
+        self.onClick(function() {
+            var List = self.parent.List;
+            if (List != undefined) {
+                self.parent.closeList();
+            } else {
+                self.parent.createList(); 
+            }
+        });
+        
+        self.onDraw = function() {
+            if (self.hovered) {
+                draw_set_color(global.UI_COL_BTN_HOVER);
+                draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+            }
+            
+            // Button
+            draw_sprite(sprUiDropdownArrow, 0, self.x2 - 12, self.y2 - 12);
+            draw_line(self.x2 - 25, self.y1 - 1, self.x2 - 25, self.y2);
+            
+            // Selected value
+            draw_set_halign(fa_left); draw_set_valign(fa_middle); draw_set_color(c_white);
+            var _selectedIndex = array_find_index(self.parent.items, method({ value: self.parent.value }, function(item) {
+                return item.value == self.value;
+            }));
+       
+            var _text = _selectedIndex != -1 ? self.parent.items[_selectedIndex].label : "Select...";
+            draw_text(self.x1 + 5, ~~mean(self.y1, self.y2), _text);
+         };
+    } 
+    
+    self.createList = function() {
+        var _this = self;
+        self.List = new UiNode({ 
+            name: "UiDropdown.List", position: "absolute", padding: 5, maxHeight: 500
+        });
+        
+        with (self.List) {
+            self.Dropdown = _this;
+            
+            self.computePosition = function() {
+                var _Dropdown = self.Dropdown;
+                if (!_Dropdown.Input.isVisible()) return _Dropdown.closeList();
+                
+                var _height = self.layout.height;
+                if (!_height) return;
+                
+                var Input = _Dropdown.Input;
+                if (self.x1 != Input.x1) self.setLeft(Input.x1);
+                if (self.width != Input.width) self.setWidth(Input.width); 
+                
+                var yy = Input.y1 + 30;
+                if (yy + _height > oSceneEditor.winH) {
+                    yy = yy - 30 - self.layout.height;
+                }
+                if (self.y1 != yy) self.setTop(yy);
+            }
+    
+            self.onStep = function() {
+                self.computePosition();
+                
+                if (mouse_check_button_released(mb_left)) {
+                    var y1 = min(self.y1, self.Dropdown.y1);
+                    var y2 = max(self.y2, self.Dropdown.y2);
+                    
+                    if (!point_in_rectangle(global.UI.mouseX, global.UI.mouseY, self.x1, y1, self.x2, y2)) {
+                        self.Dropdown.closeList();
+                    }
+                }
+            } 
+            
+            self.onDraw = function() {
+                draw_set_color(global.UI_COL_DROPDOWN_LIST_BG);
+                draw_roundrect(self.x1, self.y1, self.x2, self.y2, false);
+            }
+            
+            self.Items = new UiNode({ height: "100%" });
+            self.add(self.Items);
+    
+            // Add the items
+            var _items = self.Dropdown.items;
+            for (var i = 0, l = array_length(_items); i < l; i++) {
+                var _item = _items[i];
+                var _itemNode = new UiNode({
+                    name: "UiDropdown.List.Item",
+                    width: "100%",
+                    height: 25
+                });
+                _itemNode.label = _item.label;
+                _itemNode.value = _item.value;
+                
+                with (_itemNode) {
+                    self.pointerEvents = true;
+                    self.handpoint = true;
+                    
+                    self.onClick(function() {
+                        var Dropdown = self.parent.parent.Dropdown;
+                        Dropdown.value = self.value;
+                        Dropdown.onChange(self.value);
+                        Dropdown.closeList();
+                    });
+                    
+                    self.onMouseEnter(function() {
+                        global.UI.needsRedraw = true;
+                    });
+                    
+                    self.onMouseLeave(function() {
+                        global.UI.needsRedraw = true;
+                    });
+                    
+                    self.onDraw = function() {
+                        if (self.parent.parent.Dropdown.value == self.value || self.hovered) {
+                            draw_set_color(global.UI_COL_INSPECTOR_BG);
+                            draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+                        }
+                        
+                        draw_set_halign(fa_left); draw_set_valign(fa_middle); draw_set_color(c_white);
+                        draw_text(self.x1 + 5, ~~mean(self.y1, self.y2), self.label);
+                    };
+                }
+                
+                self.Items.add(_itemNode);
+            }
+            
+            self.Items.enableScrollbar(global.UI_COL_CHECKBOX_HOVER);
+        }
+        
+        global.UI.Overlay.add(self.List);
+        self.List.computePosition();
+    }
+    
+    self.closeList = function() {
+        self.List.destroy();
+        self.List = undefined;
+    }
+}

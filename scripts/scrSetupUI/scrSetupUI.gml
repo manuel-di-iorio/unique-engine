@@ -4,7 +4,7 @@ function scrSetupUI() {
     winH = window_get_height();
     
     // Create the UI elements
-    ui = global.UI;
+    ui = global.UI.Main;
     ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
     ui.SceneTools = new UiNode({ name: "SceneTools", width: 300, height: 40, position: "absolute" });
     

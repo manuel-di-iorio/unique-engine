@@ -18,13 +18,13 @@ function UeMaterial(data = {}) constructor {
     userData = {};
     
     // Blending
-    blending = data[$ "blending"] ?? transparent;
+    blending = data[$ "blending"] ?? false;
     blendEquation = data[$ "blendEquation"] ?? bm_eq_add;
-    blendEquationAlpha = data[$ "blendEquationAlpha "] ?? 1;
+    blendEquationAlpha = data[$ "blendEquationAlpha "] ?? bm_eq_add;
     blendSrc = data[$ "blendSrc"] ?? bm_src_alpha;
     blendDst = data[$ "blendDst"] ?? bm_inv_src_alpha;
-    blendSrcAlpha = data[$ "blendSrcAlpha"] ?? 1;
-    blendDstAlpha = data[$ "blendDstAlpha"] ?? 1; 
+    blendSrcAlpha = data[$ "blendSrcAlpha"] ?? bm_one;
+    blendDstAlpha = data[$ "blendDstAlpha"] ?? bm_inv_src_alpha; 
 
     // Shader
     shader = data[$ "shader"] ?? sh_ue_standard;

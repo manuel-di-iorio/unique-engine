@@ -2,18 +2,18 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     setName(style[$ "name"] ?? "UiButton");
     self.text = undefined;
     self.sprite = undefined; 
-    autoResize = props[$ "autoResize"] ?? true;
+    self.autoResize = props[$ "autoResize"] ?? (style[$ "width"] == undefined && style[$ "height"] == undefined) ?? true;
     self.outline = props[$ "outline"] ?? false;
     self.pointerEvents = true;
+    self.halign = props[$ "halign"] ?? fa_center;
+    self.handpoint = true;
     
-    onMouseEnter(function() {
-       if (window_get_cursor() == cr_default) {
-           window_set_cursor(cr_handpoint);
-       }
+    self.onMouseEnter(function() {
+        global.UI.needsRedraw = true;
     });
     
-    onMouseLeave(function() {
-        window_set_cursor(cr_default);
+    self.onMouseLeave(function() {
+        global.UI.needsRedraw = true;
     });
     
     function resize() {
@@ -49,26 +49,34 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
             draw_set_color(global.UI_COL_BOX);
             draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, true);
         }
+
+        var xm;
+        switch (self.halign) {
+            case fa_left: xm = self.x1; break;
+            case fa_center: xm = ~~mean(self.x1, self.x2); break;
+            case fa_right: xm = self.x2; break;
+        } 
         
-        var xm = ~~mean(self.x1, self.x2);
         var ym = ~~mean(self.y1, self.y2);
         
         if (self.text != undefined) {
             // Draw text
-            draw_set_font(fText); draw_set_color(c_white); draw_set_halign(fa_center); draw_set_valign(fa_middle);
+            draw_set_font(fText); draw_set_color(c_white); draw_set_halign(self.halign); draw_set_valign(fa_middle);
             draw_text(xm, ym, self.text);
-        } else {
+        } else if (self.sprite) {
             // Draw sprite
             draw_sprite(self.sprite, self.hovered ? 1 : 0, xm, ym);
         }
     }
     
     // Set the text/sprite and resize the button if specified
-    if (is_string(textOrImage)) {
-        self.text = textOrImage;
-    } else {
-        self.sprite = textOrImage;
+    if (textOrImage != undefined) {
+        if (is_string(textOrImage)) {
+            self.text = textOrImage;
+        } else {
+            self.sprite = textOrImage;
+        }
+        
+        if (autoResize) self.resize();
     }
-    
-    if (autoResize) self.resize();
 }

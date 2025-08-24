@@ -209,6 +209,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         if (view_current != camera.view) return;
         var currentBlendEnable = gpu_get_blendenable();
         var currentCullMode = gpu_get_cullmode();
+        var currentBlendMode = gpu_get_blendmode_ext();
         
         // Collect and classify all renderable objects
         if (camera.matrixAutoUpdate) camera.updateMatrixWorld();
@@ -245,6 +246,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         matrix_set(matrix_world, matrix_build_identity()); 
         gpu_set_blendenable(currentBlendEnable);
         gpu_set_cullmode(currentCullMode);
+        gpu_set_blendmode_ext(currentBlendMode);
 
         return self;
     }

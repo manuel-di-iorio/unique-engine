@@ -2,10 +2,10 @@
  * Treeview
  */
 function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
+    setName(style[$ "name"] ?? "UiTreeview");
     var _this = self;
     self.selectedItem = undefined;  
     self.pointerEvents = true;
-    setName(style[$ "name"] ?? "UiTreeview");
     self.onNewAsset = undefined;
     self.onItemSelected = undefined;
     
@@ -22,7 +22,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         type: "folder",
         assetType: "texture",
         icon: sprUiTexture,
-        root: true
+        entity: true
     });
     
     self.Materials = new UiTreeviewItem(rootAssetItemStyle, {
@@ -31,7 +31,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         type: "folder",
         assetType: "material",
         icon: sprUiMaterial,
-        root: true
+        entity: true
     });
     
     self.Models = new UiTreeviewItem(rootAssetItemStyle, {
@@ -40,7 +40,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         type: "folder",
         assetType: "model",
         icon: sprUiObject,
-        root: true
+        entity: true
     });
     
     //self.Lights = new UiTreeviewItem(rootAssetItemStyle, {
@@ -49,7 +49,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         //type: "folder",
         //assetType: "light",
         //icon: sprUiLight,
-        //root: true
+        //entity: true
     //});
     //
     //self.Cameras = new UiTreeviewItem(rootAssetItemStyle, {
@@ -58,7 +58,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         //type: "folder",
         //assetType: "camera",
         //icon: sprUiCamera,
-        //root: true
+        //entity: true
     //});
     
     self.Scenes = new UiTreeviewItem(rootAssetItemStyle, {
@@ -67,7 +67,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         type: "folder",
         assetType: "scene",
         icon: sprUiScene,
-        root: true
+        entity: true
     });
        
     self.Items.add(self.Textures, self.Materials, self.Models, /*self.Lights, self.Cameras,*/ self.Scenes);
@@ -83,7 +83,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
 }
 
 /**
- * 
+ * Treeview Item
  */
 function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructor {
     var _this = self;
@@ -94,46 +94,64 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.name = props[$ "name"];
     self.selected = false;
     self.collapsed = props[$ "collapsed"] ?? true;
-    self.root = props[$ "root"] ?? false;
+    self.entity = props[$ "entity"] ?? false;
     self.asset = undefined;
     
     // Content
-    self.Content = new UiNode({ name: "UiTreeview.Item.Content", padding: 2, height: 30, flexDirection: "row", justifyContent: "space-between", alignItems: "center" });
-    self.Content.pointerEvents = true;
+    self.Content = new UiNode({ 
+        name: "UiTreeview.Item.Content", 
+        padding: 2, 
+        height: 30, 
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center"
+     });
     
-    self.Content.onMouseEnter(method(self.Content, function() {
-       if (!self.parent.root && window_get_cursor() == cr_default) {
-           window_set_cursor(cr_handpoint);
-       }
-    }));
-    
-    self.Content.onMouseLeave(method(self.Content, function() {
-        window_set_cursor(cr_default);
-    }));
-    
-    self.Content.onMouseDown(function() {
-        if (self.root) return;
-        self.treeview.__onItemSelected(self);
-    });
-    
-    self.Content.onDraw = method(self.Content, function() {
-        if (self.parent.selected) {
-            draw_set_color(global.UI_COL_SELECTED);
-            draw_rectangle(0, self.yp1 + 3, self.xp2-2, self.yp2, false);
-        }
+    with (self.Content) {
+        self.pointerEvents = true;
         
-        // Draw the icon
-        var xx = self.x1 + 30;
-        var meanY = ~~mean(self.y1, self.y2);
-        if (self.parent.icon) {
-            draw_sprite(self.parent.icon, 0, xx + 10, meanY);
-            xx += 25;
-        }
+        self.onMouseEnter(function() {
+            global.UI.needsRedraw = true;
+            
+            if (!self.parent.entity && window_get_cursor() == cr_default) {
+                window_set_cursor(cr_handpoint);
+            }
+        });
         
-        // Draw the label
-        draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle);
-        draw_text(xx, meanY, self.parent.asset == undefined ? self.parent.name : self.parent.asset.name);
-    });
+        self.onMouseLeave(function() {
+            global.UI.needsRedraw = true; 
+            window_set_cursor(cr_default);
+        });
+        
+        self.onMouseDown(function() {
+            if (self.parent.entity) return;
+            self.parent.treeview.__onItemSelected(self.parent);
+        });
+        
+        self.onDraw = function() {
+            if (!self.parent.entity && self.hovered) {
+                draw_set_color(global.UI_COL_BTN_HOVER);
+                draw_rectangle(0, self.yp1 + 3, self.xp2-2, self.yp2, false);
+            }
+            
+            if (self.parent.selected) {
+                draw_set_color(global.UI_COL_SELECTED);
+                draw_rectangle(0, self.yp1 + 3, self.xp2-2, self.yp2, false);
+            }
+            
+            // Draw the icon
+            var xx = self.x1 + 30;
+            var meanY = ~~mean(self.y1, self.y2);
+            if (self.parent.icon) {
+                draw_sprite(self.parent.icon, 0, xx + 10, meanY);
+                xx += 25;
+            }
+            
+            // Draw the label
+            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle); draw_set_font(fText);
+            draw_text(xx, meanY, self.parent.asset == undefined ? self.parent.name : self.parent.asset.name);
+        };
+    }
     
     // Left and right content
     self.LeftContent = new UiNode({ name: "UiTreeview.Item.Content.LeftContent", flexDirection: "row", alignItems: "center"  });
@@ -144,7 +162,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.Arrow = new UiButton(sprUiTreeviewArrowDown, { 
         name: "UiTreeview.Item.Content.ArrowBtn",
         padding: 4, marginLeft: 5, marginRight: 10, width: 14, height: 9,
-    }, { outline: true, autoResize: false, visible: false });
+    }, { outline: true, visible: false });
     
     self.Arrow.onClick(method(self, function() {
         if (self.collapsed) {
@@ -225,7 +243,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     
     function onDraw() {
         // Draw the item background if not collapsed
-        if (self.root && !self.collapsed) {
+        if (self.entity && !self.collapsed) {
             draw_set_color(global.UI_COL_TREE_BG);
             draw_rectangle(self.xp1, self.y1, self.xp2, self.y2, false);
         }

@@ -15,21 +15,16 @@ function UiCheckbox(style = {}, props = {}) : UiNode(style, props) constructor {
     });
     self.add(self.Input);
     
-    self.onClick(function() {
-        self.parent.click();
-    });
-    
     with (self.Input) {
         self.pointerEvents = true;
+        self.handpoint = true;
         
         self.onMouseEnter(function() {
-           if (window_get_cursor() == cr_default) {
-               window_set_cursor(cr_handpoint);
-           }
+            global.UI.needsRedraw = true;
         });
         
         self.onMouseLeave(function() {
-            window_set_cursor(cr_default);
+            global.UI.needsRedraw = true;
         });
         
         self.onDraw = function() {
@@ -55,6 +50,8 @@ function UiCheckbox(style = {}, props = {}) : UiNode(style, props) constructor {
     self.onClick(function() {
         self.value = !self.value;
         self.onChange(self.value, self);
+        global.UI.needsRedraw = true;
+        return true;
     });
     
     // Draw label if present

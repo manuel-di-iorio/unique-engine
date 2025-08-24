@@ -355,6 +355,39 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         gml_pragma("forceinline");
         return [self.x, self.y, self.z, self.w];
     }
+    
+    function toEuler() {
+        gml_pragma("forceinline");
+    
+        var _x = self.x;
+        var _y = self.y;
+        var _z = self.z;
+        var _w = self.w;
+    
+        // Rotazione ordine XYZ
+        var test = 2 * (_w * _y - _z * _x);
+    
+        // Clamp per stabilità numerica
+        test = clamp(test, -1, 1);
+    
+        var pitch, yaw, roll;
+    
+        // Pitch (X)
+        pitch = arctan2(2 * (_w * _x + _y * _z), 1 - 2 * (_x * _x + _y * _y));
+    
+        // Yaw (Y)
+        yaw = arcsin(test);
+    
+        // Roll (Z)
+        roll = arctan2(2 * (_w * _z + _x * _y), 1 - 2 * (_y * _y + _z * _z));
+    
+        // Converti in gradi
+        return [
+            radtodeg(pitch),
+            radtodeg(yaw),
+            radtodeg(roll)
+        ];
+    }
 
     setFromEuler(_x, _y, _z);
 }

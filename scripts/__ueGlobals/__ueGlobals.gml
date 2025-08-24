@@ -1,5 +1,5 @@
 global.UE_OBJECT_ID = 0;
-global.UE_VERSION = "2025.8.19.1";
+global.UE_VERSION = "2025.8.25.1";
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_TEXTURE_MAP = new UeTexture(sprUeMapTex);
 global.UE_TEXTURE_EMISSIVE = new UeTexture(sprUeEmissiveTex);

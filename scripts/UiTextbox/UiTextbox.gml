@@ -10,15 +10,18 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     self.valueGetter = props[$ "valueGetter"] ?? undefined;
     self.onChange = props[$ "onChange"] ?? function(value, input) {};
     self.maxLength = props[$ "maxLength"] ?? 255;
-    var marginLeft = self.label == undefined ? 0 : 3 + string_width(self.label) + 20;
+    var marginLeft = self.label == undefined ? 0 : string_width(self.label) + 15;
     self.onBlur = props[$ "onBlur"] ?? function(value, input) {};
+    self.format = props[$ "format"] ?? "string"; // string, float, integer
+    self.min = props[$ "min"];
+    self.max = props[$ "max"];
     
     self.Input = new UiNode({ 
         name: "UiTextbox.Input", 
         marginLeft,
-        marginRight: 5,
         paddingLeft: 5, 
         paddingRight: 5, 
+        flex: 1,
         height: "100%" 
     });
     self.add(self.Input);
@@ -159,7 +162,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         // Calculate cursor position from mouse coordinates
         self.getMouseCursorPos = function(mouseX) {
             // Usa la stessa formula del disegno per calcolare textX
-            var textX = self.xp1 + self.layout.paddingLeft - self.scrollOffset;
+            var textX = self.x1 + self.layout.paddingLeft - self.scrollOffset;
             
             // Calcola posizione relativa del mouse rispetto al testo
             var relativeX = mouseX - textX;
@@ -246,13 +249,8 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             
             self.lastClickTime = now;
             self.lastClickPos = clickPos;
-        });
-        
-        // Handle mouse up event
-        self.onMouseUp(function() {
-            self.isDragging = false;
-        });
-        
+        }); 
+         
         // Set focus to textbox
         self.focus = function() {
             self.focused = true;
@@ -266,12 +264,55 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             self.keyRepeat.key = -1;
             self.keyRepeat.pressed = false;
             self.isDragging = false;
-
+            
+            // Clean up incomplete numeric values on blur
+            var format = self.parent.format;
+            var value = self.parent.value;
+            
+            if (format == "integer" || format == "float") {
+                // Remove trailing decimal point or minus sign
+                if (string_char_at(value, string_length(value)) == "." || 
+                    string_char_at(value, string_length(value)) == "-") {
+                    value = string_copy(value, 1, string_length(value) - 1);
+                }
+                
+                // If empty, set to 0 or min value if specified
+                if (value == "") {
+                    if (self.parent.min != undefined) {
+                        value = string(self.parent.min);
+                    } else {
+                        value = "0";
+                    }
+                }
+                
+                // Clamp to min/max range
+                var numValue = real(value);
+                if (self.parent.min != undefined && numValue < self.parent.min) {
+                    numValue = self.parent.min;
+                }
+                if (self.parent.max != undefined && numValue > self.parent.max) {
+                    numValue = self.parent.max;
+                }
+                
+                // Format the final value
+                if (format == "integer") {
+                    value = string(floor(numValue));
+                } else {
+                    value = string(numValue);
+                }
+                
+                self.parent.value = value;
+                self.parent.onChange(self.parent.value, self.parent);
+            }
+            
+            global.UI.needsRedraw = true;
+            
             if (self.parent.onBlur != undefined) self.parent.onBlur(self.parent.value, self.parent);
         };
         
         // Update horizontal scroll based on cursor position
         self.updateScrollOffset = function() {
+            global.UI.needsRedraw = true;
             var text = self.parent.value;
             var cursorX = 0;
             
@@ -342,62 +383,58 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         // Insert text at cursor position with maxLength validation
         self.insertText = function(newText) {
             self.saveUndoState(); // Save state before modification
-            
             self.deleteSelected();
             
-            var text = self.parent.value;
-            var newValue = string_insert(newText, text, self.cursorPos + 1);
+            var currentText = self.parent.value;
+            var format = self.parent.format;
+            
+            // Filter characters based on format
+            var filteredText = "";
+            for (var i = 1; i <= string_length(newText); i++) {
+                var char = string_char_at(newText, i);
+                var testText = string_insert(char, currentText, self.cursorPos + string_length(filteredText) + 1);
+                
+                if (self.isValidCharacter(char, currentText, self.cursorPos + string_length(filteredText))) {
+                    // For numeric formats, also check if the resulting value would be valid
+                    if (format == "integer" || format == "float") {
+                        if (self.validateValue(testText)) {
+                            filteredText += char;
+                        }
+                    } else {
+                        filteredText += char;
+                    }
+                }
+            }
+            
+            if (filteredText == "") return; // No valid characters to insert
+            
+            var newValue = string_insert(filteredText, currentText, self.cursorPos + 1);
             
             // Check maxLength constraint
             if (string_length(newValue) > self.parent.maxLength) {
-                var availableSpace = self.parent.maxLength - string_length(text);
+                var availableSpace = self.parent.maxLength - string_length(currentText);
                 if (availableSpace > 0) {
-                    newText = string_copy(newText, 1, availableSpace);
-                    newValue = string_insert(newText, text, self.cursorPos + 1);
+                    filteredText = string_copy(filteredText, 1, availableSpace);
+                    newValue = string_insert(filteredText, currentText, self.cursorPos + 1);
                 } else {
                     return; // Don't insert anything if already at limit
                 }
             }
             
+            // Final validation for numeric formats
+            if (format == "integer" || format == "float") {
+                if (!self.validateValue(newValue)) {
+                    return; // Don't insert if it would violate min/max constraints
+                }
+            }
+            
             self.parent.value = newValue;
             self.parent.onChange(self.parent.value, self.parent);
-            self.cursorPos += string_length(newText);
+            self.cursorPos += string_length(filteredText);
             self.selectionStart = self.cursorPos;
             self.selectionEnd = self.cursorPos;
             
             self.updateScrollOffset();
-        };
-        
-        // Find word boundary for word-based navigation
-        self.findWordBoundary = function(pos, direction) {
-            var text = self.parent.value;
-            var len = string_length(text);
-            
-            if (direction > 0) {
-                // Movement to the right
-                while (pos < len && string_char_at(text, pos + 1) == " ") {
-                    pos++;
-                }
-                while (pos < len && string_char_at(text, pos + 1) != " ") {
-                    pos++;
-                }
-            } else {
-                // Movement to the left
-                if (pos > 0) {
-                    pos--;
-                    while (pos > 0 && string_char_at(text, pos + 1) == " ") {
-                        pos--;
-                    }
-                    while (pos > 0 && string_char_at(text, pos) != " ") {
-                        pos--;
-                    }
-                    if (pos > 0 && string_char_at(text, pos + 1) == " ") {
-                        pos++;
-                    }
-                }
-            }
-            
-            return clamp(pos, 0, len);
         };
         
         // Handle keyboard input (only when focused)
@@ -466,7 +503,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             if (keyboard_check_pressed(vk_left) || (self.keyRepeat.key == vk_left && self.handleKeyRepeat())) {
                 if (ctrl) {
                     // Move by word
-                    self.cursorPos = self.findWordBoundary(self.cursorPos, -1);
+                    self.cursorPos = self.findWordStart(self.cursorPos, -1);
                 } else {
                     // Move by character
                     self.cursorPos = max(0, self.cursorPos - 1);
@@ -487,7 +524,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             if (keyboard_check_pressed(vk_right) || (self.keyRepeat.key == vk_right && self.handleKeyRepeat())) {
                 if (ctrl) {
                     // Move by word
-                    self.cursorPos = self.findWordBoundary(self.cursorPos, 1);
+                    self.cursorPos = self.findWordEnd(self.cursorPos, 1);
                 } else {
                     // Move by character
                     self.cursorPos = min(string_length(self.parent.value), self.cursorPos + 1);
@@ -614,6 +651,8 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             // Update the selection
             self.selectionStart = self.dragStartPos;
             self.selectionEnd = self.cursorPos;
+            
+            global.UI.needsRedraw = true;
         };
         
         // Handle key repeat timing
@@ -662,12 +701,18 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Main update loop
         self.onStep = function() {
+            // Handle mouse up event
+            if (mouse_check_button_released(mb_left)) {
+                self.isDragging = false;
+            }
+            
             // Only process input events when focused
             if (self.focused) {
                 // Handle cursor blinking
                 if (current_time - self.cursorBlinkTime > TEXTBOX_CURSOR_BLINK) {
                     self.showCursor = !self.showCursor;
                     self.cursorBlinkTime = current_time;
+                    global.UI.needsRedraw = true;
                 }
                 
                 self.updateKeyRepeat();
@@ -685,15 +730,16 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         self.onDraw = function() {
             // Background
             draw_set_color(global.UI_COL_INPUT_BG);
-            draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, false);
+            draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
             
             // Border
             draw_set_color(global.UI_COL_BOX);
-            draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, true);
+            draw_rectangle(self.x1, self.y1, self.x2, self.y2, true);
             
             // Set clipping region to prevent text overflow
+            var _scrollableParent = self.scrollableParent;
             var _scissor = gpu_get_scissor();
-            gpu_set_scissor(self.x1, self.y1, self.x2 - self.x1, self.y2 - self.y1);
+            gpu_set_scissor(self.x1, max(_scrollableParent.y1, self.y1), self.x2 - self.x1, min(_scrollableParent.y2 - _scrollableParent.y1, self.y2 - self.y1));
             
             // Text drawing settings
             draw_set_color(c_white);
@@ -701,7 +747,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             draw_set_valign(fa_middle);
             
             var text = self.parent.value;
-            var textX = self.xp1 + self.layout.paddingLeft - self.scrollOffset;
+            var textX = self.x1 + self.layout.paddingLeft - self.scrollOffset;
             var textY = floor(mean(self.y1, self.y2));
             
             // Draw selection highlight (only when focused)
@@ -757,7 +803,69 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         
         self.resetCursorBlink = function() {
             self.cursorBlinkTime = current_time;
-            self.showCursor = true;
+            self.showCursor = true; 
+        };
+        
+        // Validate character based on format
+        self.isValidCharacter = function(char, currentText, cursorPos) {
+            var format = self.parent.format;
+            var charCode = ord(char);
+            
+            switch (format) {
+                case "integer":
+                    // Allow digits and minus sign only at the beginning
+                    if (charCode >= ord("0") && charCode <= ord("9")) {
+                        return true;
+                    }
+                    //if (char == "-" && cursorPos == 0 && string_pos("-", currentText) == 0) {
+                        //return true;
+                    //}
+                    return false;
+                    
+                case "float":
+                    // Allow digits, decimal point (only one), and minus sign at the beginning
+                    if (charCode >= ord("0") && charCode <= ord("9")) {
+                        return true;
+                    }
+                    if (char == "." && string_count(".", currentText) == 0) {
+                        return true;
+                    }
+                    //if (char == "-" && cursorPos == 0 && string_pos("-", currentText) == 0) {
+                        //return true;
+                    //}
+                    return false;
+                    
+                case "string":
+                default:
+                    return true; // Allow all characters for string format
+            }
+        };
+        
+        // Validate the complete value against min/max constraints
+        self.validateValue = function(value) {
+            var format = self.parent.format;
+            var _min = self.parent.min;
+            var _max = self.parent.max;
+            
+            switch (format) {
+                case "integer":
+                    if (value == ""/* || value == "-"*/) return true; // Allow empty or just minus during typing
+                    //var intValue = real(value);
+                    //if (_min != undefined && intValue < _min) return false;
+                    //if (_max != undefined && intValue > _max) return false;
+                    return true;
+                    
+                case "float":
+                    if (value == "" || /*value == "-" ||*/ value == ".") return true; // Allow partial values during typing
+                    //var floatValue = real(value);
+                    //if (_min != undefined && floatValue < _min) return false;
+                    //if (_max != undefined && floatValue > _max) return false;
+                    return true;
+                    
+                case "string":
+                default:
+                    return true;
+            }
         };
     }
     

@@ -30,13 +30,13 @@ new UeMaterial(data = {})
 | `forceSinglePass`      | `boolean` | `false`                 | Prevents double-pass rendering for transparent materials |
 | `alphaTest`            | `number`  | `0`                     | Alpha test reference value                               |
 | `colorWrite`           | `boolean` | `true`                  | Whether to write to the color buffer                     |
-| `blending`             | `boolean` | `transparent`           | Whether to enable blending                               |
+| `blending`             | `boolean` | `false`                 | Whether to enable blending                               |
 | `blendEquation`        | `number`  | `bm_eq_add`             | Blend equation for color                                 |
-| `blendEquationAlpha`   | `number`  | `1`                     | Blend equation for alpha                                 |
+| `blendEquationAlpha`   | `number`  | `bm_eq_add`             | Blend equation for alpha                                 |
 | `blendSrc`             | `number`  | `bm_src_alpha`          | Blend source factor (RGB)                                |
 | `blendDst`             | `number`  | `bm_inv_src_alpha`      | Blend destination factor (RGB)                           |
-| `blendSrcAlpha`        | `number`  | `1`                     | Blend source factor (alpha)                              |
-| `blendDstAlpha`        | `number`  | `1`                     | Blend destination factor (alpha)                         |
+| `blendSrcAlpha`        | `number`  | `bm_one`                | Blend source factor (alpha)                              |
+| `blendDstAlpha`        | `number`  | `bm_inv_src_alpha`      | Blend destination factor (alpha)                         |
 | `shader`               | `shader`  | `sh_ue_standard`        | The shader program to use                                |
 | `uniforms`             | `object`  | `{}`                    | Custom uniforms to pass to the shader                    |
 | `lights`               | `number`  | `2`                     | Number of supported lights (0 to disable lighting)       |

@@ -102,8 +102,6 @@ function UeTexture(sprite = undefined, data = {}) constructor {
             // Move to the specified center
             .multiply(dummyMat.makeTranslation(tx, ty, 0));
         
-        log(matrix.data)
-        
         return self;
     }
 
@@ -135,10 +133,6 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         
         updateMatrix();  // Build the transformation matrix
         matrix_set(matrix_world, matrix.data);
-        //matrix_set(matrix_world,   matrix_multiply(matrix_build(-512, -512, 0, 0, 0, 0, 1, 1, 1),
-        //matrix_build(512, 512, 0, 0, 0, 0, 1, -1, 1)))
-      
-
      
         for (var ix = 0; ix < tilesX; ix++) {
             for (var iy = 0; iy < tilesY; iy++) {

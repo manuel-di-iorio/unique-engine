@@ -70,9 +70,6 @@ function UeObjLoader() constructor {
     
     function _endMesh() {
         gml_pragma("forceinline");
-        //currentMesh.geometry.vertices = currentVertices;
-        //currentMesh.geometry.index = currentIndices;
-        //currentMesh.geometry.build();
         vertex_end(currentVb);
         root.add(currentMesh);
     }
@@ -126,65 +123,6 @@ function UeObjLoader() constructor {
         }
     }
 
-    // @note: slower version but theoricatically safer
-    //function _parseFace(tokens, tokensLength) {
-        //gml_pragma("forceinline");
-        //var baseIndex = array_length(currentVertices);
-        //var faceIndices = array_create(4);
-        //var faceIndicesIdx = 0;
-        //var count = tokensLength - 1;
-    //
-        //for (var i = 1; i <= count; i++) {
-            //var parts = string_split(tokens[i], "/");
-            //var partsCount = array_length(parts);
-            //var vi = real(parts[0]) - 1;
-            //var ti = (partsCount >= 2 && parts[1] != "") ? real(parts[1]) - 1 : -1;
-            //var ni = (partsCount >= 3 && parts[2] != "") ? real(parts[2]) - 1 : -1;
-    //
-            //var pos = positions[vi];
-            //var uv  = (ti >= 0) ? uvs[ti] : [0, 0];
-            //var nor = (ni >= 0) ? normals[ni] : [0, 0, 1];
-            //var col = (vi < colorsIdx) ? colors[vi] : c_white;
-    //
-            //var vert = {
-                //x: pos[0], y: pos[1], z: pos[2],
-                //nx: nor[0], ny: nor[1], nz: nor[2],
-                //u: uv[0], v: uv[1],
-                //color: col,
-                //alpha: 1
-            //};
-    //
-            //array_push(currentVertices, vert);
-            //faceIndices[faceIndicesIdx++] = baseIndex + i - 1;
-        //}
-    //
-        //if (count > 3) {
-            //for (var i = 1; i < count - 1; i++) {
-                //if (reverseWinding) {
-                    //array_push(currentIndices, faceIndices[i + 1]);
-                    //array_push(currentIndices, faceIndices[i]);
-                    //array_push(currentIndices, faceIndices[0]);
-                //} else {
-                    //array_push(currentIndices, faceIndices[0]);
-                    //array_push(currentIndices, faceIndices[i]);
-                    //array_push(currentIndices, faceIndices[i + 1]);
-                //}
-            //}
-        //} else {
-            //if (reverseWinding) {
-                //array_push(currentIndices, faceIndices[2]);
-                //array_push(currentIndices, faceIndices[1]);
-                //array_push(currentIndices, faceIndices[0]);
-            //} else {
-                //for (var j = 0, jl = array_length(faceIndices); j < jl; j++) {
-                    //array_push(currentIndices, faceIndices[j]);
-                //}
-            //}
-        //}
-        //
-        //faceIndices = undefined;
-    //}
-    
     function _parseFace(tokens, tokensLength) {
         gml_pragma("forceinline");
         var vb = currentVb;
@@ -214,7 +152,7 @@ function UeObjLoader() constructor {
             };
         }
         
-        // Seconda pass: scrivi direttamente nel vertex buffer
+        // Second pass: scrivi direttamente nel vertex buffer
         if (count == 3) {
             // Triangolo semplice
             var indices = reverseWinding ? [2, 1, 0] : [0, 1, 2];

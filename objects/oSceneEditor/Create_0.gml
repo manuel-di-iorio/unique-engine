@@ -1,4 +1,4 @@
-ideVersion = "2025.8.19.1";
+ideVersion = "2025.8.25.1";
 uiDebug = false;
 
 scrSetupUI();

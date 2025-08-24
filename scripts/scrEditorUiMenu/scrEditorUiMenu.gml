@@ -2,13 +2,16 @@ function EditorUiMenu(ui) constructor {
     self.ui = ui;
     
     ui.Menu = new UiNode({ name: "Menu", width: "100%", height: 50, flexDirection: "row", alignItems: "center", paddingLeft: 10, paddingRight: 10, marginBottom: 10  });
-    ui.Menu.NewProjectBtn = new UiButton(sprUiNew, { padding: 5, marginLeft: 80, marginRight: 15, width: 15, height: 15 }, { autoResize: false });
-    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { padding: 5, marginRight: 15, width: 15, height: 15 }, { autoResize: false });
-    ui.Menu.SaveProjectBtn = new UiButton(sprUiSave, { padding: 5, marginRight: 15, width: 15, height: 15 }, { autoResize: false });
+    ui.Menu.NewProjectBtn = new UiButton(sprUiNew, { padding: 5, marginLeft: 80, marginRight: 15, width: 15, height: 15 });
+    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { padding: 5, marginRight: 15, width: 15, height: 15 });
+    ui.Menu.SaveProjectBtn = new UiButton(sprUiSave, { padding: 5, marginRight: 15, width: 15, height: 15 });
     
     ui.Menu.add(ui.Menu.NewProjectBtn, ui.Menu.LoadProjectBtn, ui.Menu.SaveProjectBtn); 
     
     ui.Menu.onDraw = method(ui.Menu, function() {
+        draw_set_color(global.UI_COL_INPUT_BG);
+        draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+        
         draw_sprite(sprDemoLogo, 0, 35, ~~mean(self.y1, self.y2));
     });
     

@@ -8,18 +8,24 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
     self.__contentHeight = undefined;
     self.__maxThumbPosition = undefined;
     self.__maxScroll = undefined;
+    self.thumbColor = props[$ "thumbColor"] ?? global.UI_COL_BOX;
     
     // Create the thumb
-    self.Thumb = new UiScrollbarThumb({ position: "absolute", left: 0, right: 0, top: 0, height: 0 }, { isScrollbar: true });
+    self.Thumb = new UiScrollbarThumb({ position: "absolute", left: 0, right: 0, top: 0, height: 0 }, {
+        isScrollbar: true, 
+        thumbColor: self.thumbColor 
+    });
     self.add(self.Thumb);
     
     function onMount() {
         self.parent.onWheelUp(function(ev) {
             self.parent.scrollTop = max(0, self.parent.scrollTop - 30);
+            global.UI.needsRedraw = true;
         });
         
         self.parent.onWheelDown(function(ev) {
             self.parent.scrollTop = min(self.__maxScroll, self.parent.scrollTop + 30);
+            global.UI.needsRedraw = true;
         });
     }
     
@@ -33,7 +39,7 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
                 return height + child.layout.height;
             }, 0, false);
             
-            var _thumbHeight = max(10, min(layoutHeight, layoutHeight * (layoutHeight / __contentHeight)));
+            var _thumbHeight = ~~(max(10, min(layoutHeight, layoutHeight * (layoutHeight / __contentHeight))));
             if (_thumbHeight != self.Thumb.getHeight()) {
                 self.Thumb.setHeight(_thumbHeight);
             }
@@ -44,7 +50,7 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Dragging
         if (self.dragged) {
-            var currentMouseY = self.mouseY;
+            var currentMouseY = global.UI.mouseY;
             var deltaY = currentMouseY - self.dragStartY;
             
             if (self.__maxScroll > 0) {
@@ -52,14 +58,17 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
                     // Convert thumb movement to scroll position
                     var scrollDelta = (deltaY / self.__maxThumbPosition) * self.__maxScroll;
                     self.parent.scrollTop = clamp(self.dragStartScrollTop + scrollDelta, 0, self.__maxScroll);
+                    global.UI.needsRedraw = true;
                 }
             }
         }
         
         // Compute the thumb max scroll and position
-        var thumbPosition = (self.parent.scrollTop / self.__maxScroll) * self.__maxThumbPosition; 
-        if (self.Thumb.getTop() != thumbPosition) {
-            self.Thumb.setTop(thumbPosition);
+        if (self.__maxScroll > 0) {
+            var thumbPosition = (self.parent.scrollTop / self.__maxScroll) * self.__maxThumbPosition; 
+            if (self.Thumb.getTop() != thumbPosition) {
+                self.Thumb.setTop(thumbPosition);
+            }
         }
     };
 }
@@ -67,28 +76,32 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
 function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) constructor {
     self.pointerEvents = true;
     setName(style[$ "name"] ?? "__UiScrollbar.Thumb");
+    self.thumbColor = props[$ "thumbColor"];
     
-    onMouseDown(function(ev) {
+    self.onMouseDown(function(ev) {
         self.parent.dragged = true;
-        self.parent.dragStartY = self.parent.mouseY;
+        self.parent.dragStartY = global.UI.mouseY;
         self.parent.dragStartScrollTop = self.parent.parent.scrollTop;
         
-        self.setWidth(12);
+        self.setWidth(17);
         self.setLeft(-3);
+        return true;
     });
     
-    onMouseUp(function() {
-        if (self.parent.dragged) {
-            self.parent.dragged = false;
-            self.setWidth(6);
-            self.setLeft(0);
+    function onStep() {
+        if (mouse_check_button_released(mb_left)) {
+            if (self.parent.dragged) {
+                self.parent.dragged = false;
+                self.setWidth(11);
+                self.setLeft(0);
+            }
         }
-    });
+    }
     
     function onDraw() {
         if (getHeight() == self.parent.layout.height) return;
 
-        draw_set_color(global.UI_COL_BOX);
-        draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+        draw_set_color(self.thumbColor);
+        draw_rectangle(self.x1, self.y1, self.x2 - 5, self.y2, false);
     }
 }

@@ -134,6 +134,6 @@ function UeMtlLoader() constructor {
         var image = sprite_add(baseDir + fname, 1, false, false, 0, 0);
         if (image < 0) return undefined;
    
-        return new UeTexture({ image });
+        return new UeTexture(image);
     }
 }

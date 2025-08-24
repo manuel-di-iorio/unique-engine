@@ -7,7 +7,10 @@ function EditorUiAssets(ui) constructor {
     ui.Assets.add(ui.Assets.Treeview);
         
     ui.Assets.onDraw = method(ui.Assets, function() {
-        draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top);
+        draw_set_color(global.UI_COL_INPUT_BG);
+        draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+        
+        draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
         draw_text(self.x1 + 20, self.y1 + 8, "Assets");
     });
         
@@ -28,6 +31,7 @@ function EditorUiAssets(ui) constructor {
             
             case "material": 
                 asset = new UeMaterial(); 
+                asset.shader = sh_ue_standard;
                 assetId = global.UI_ASSETS_MATERIALS_ID++;
             break;
             

@@ -2,20 +2,35 @@ function EditorUiInspector(ui) constructor {
     self.ui = ui;
     self.assimp = new UeAssimpLoader();
     
-    ui.Inspector = new UiNode({ name: "Inspector", minWidth: 300, width: "20%", marginBottom: 62 }, { border: true });
-    ui.Inspector.Content = new UiNode({ marginTop: 38, name: "Inspector.Content", flex: 1, height: "90%", flexDirection: "column", padding: 10 });
+    ui.Inspector = new UiNode({ name: "Inspector", minWidth: 330, width: "21%", marginBottom: 62 }, { border: true });
     
+    with (ui.Inspector) {
+        self.onDraw = function() {
+            draw_set_color(global.UI_COL_INPUT_BG);
+            draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+            
+            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top);
+            draw_text(self.x1 + 20, self.y1 + 8, "Inspector");
+        };
+    }
+    
+    ui.Inspector.Content = new UiNode({ 
+        marginTop: 38, name: "Inspector.Content", height: "90%", 
+        flex: 1, flexDirection: "column"
+    }, { pointerEvents: true });
     ui.Inspector.add(ui.Inspector.Content);
     
-    ui.Inspector.onDraw = method(ui.Inspector, function() {
-        draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top);
-        draw_text(self.x1 + 20, self.y1 + 8, "Inspector");
-    });
+    with (ui.Inspector.Content) {
+        self.enableScrollbar();
+
+        self.onDraw = function() {
+            draw_set_color(global.UI_COL_INSPECTOR_BG);
+            draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+        };
+    }
     
-    ui.Inspector.Content.onDraw = method(ui.Inspector.Content, function() {
-        draw_set_color(global.UI_COL_INSPECTOR_BG);
-        draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
-    });
+    ui.Inspector.Content.Items = new UiNode({ name: "Inspector.Content.Items", padding: 10, paddingRight: 25, paddingBottom: 30 });
+    ui.Inspector.Content.add(ui.Inspector.Content.Items);
     
     // Assets fields configuration
     fields = {
@@ -29,21 +44,12 @@ function EditorUiInspector(ui) constructor {
             {
                 id: "sprite",
                 field: "sprite",
-                label: "Import",
                 type: "spriteFilePicker",
                 onChange: function(value) {
+                    self.asset.dispose();
                     self.asset.sprite = value;
-                    self.asset.update();
-                }
-            },
-            {
-                id: "flipY",
-                field: "flipY",
-                label: "Flip Vertically",
-                type: "checkbox",
-                onChange: function(value) {
-                    self.asset[$ self.field] = value;
-                    self.asset.update();
+                    self.asset.__cachedSprite = value;
+                    self.asset.__cachedTexture = sprite_get_texture(value, 0);
                 }
             }
         ],
@@ -55,48 +61,217 @@ function EditorUiInspector(ui) constructor {
                 label: "Name", 
                 type: "text"
             },
+            { 
+                id: "shader",
+                field: "shader",
+                label: "Shader", 
+                type: "dropdown",
+                items: [
+                    { label: "None", value: undefined },
+                    { label: "Standard", value: sh_ue_standard },
+                    { label: "Basic (unlit)", value: sh_ue_basic },
+                    { label: "Line", value: sh_ue_line },
+                    { label: "Sprite", value: sh_ue_sprite }
+                ],
+                onAfterChange: function() {
+                    self.asset.build();
+                }
+            },
+        
+            { 
+                type: "label",
+                label: "Textures"
+            },
+            { 
+                id: "texturesMap",
+                field: "textures",
+                label: "Diffuse", 
+                type: "dropdown",
+                items: [{ label: "", value: undefined}],
+                search: true,
+                itemsGetter: function(searchValue) {
+                    return [];
+                },
+                onChange: function(value, input) {
+                    // save in self.asset.textures[$ "map"] = 
+                }
+            },
             //{ 
-                //id: "shader",
-                //field: "shader",
-                //label: "Shader", 
+                //id: "texturesEmissiveMap",
+                //field: "textures",
+                //label: "Emissive", 
                 //type: "dropdown",
-                //items: [
-                    //{ key: "Standard", value: sh_ue_standard },
-                    //{ key: "Basic (unlit)", value: sh_ue_basic },
-                    //{ key: "Line", value: sh_ue_line },
-                    //{ key: "Sprite", value: sh_ue_sprite },
-                    //{ key: "Custom (set by code)", value: undefined }
-                //]
+                 //items: [{ label: "", value: undefined}],
+                //search: true,
+                //itemsGetter: function(searchValue) {
+                    //return [];
+                //},
+                //onChange: function(value, input) {
+                    //// save in self.asset.textures[$ "emissiveMap"] = 
+                //}
             //},
-            //{ 
-                //type: "section",
-                //label: "Properties"
-            //},
+        
+            { 
+                type: "label",
+                label: "Basic Properties"
+            },
+            { 
+                id: "visible",
+                field: "visible",
+                label: "Visible", 
+                type: "checkbox"
+            },
             { 
                 id: "transparent",
                 field: "transparent",
                 label: "Transparent", 
-                type: "checkbox",
-                onChange: function(value) {
-                    self.transparent = value;
-                    self.blending = value;
-                }
+                type: "checkbox"
             },
+            //{ 
+                //id: "opacity",
+                //field: "opacity",
+                //label: "Opacity", 
+                //type: "text",
+                //format: "float",
+                //min: 0,
+                //max: 1
+            //},
             { 
                 id: "wireframe",
                 field: "wireframe",
                 label: "Wireframe", 
                 type: "checkbox"
             },
-            //{ 
-                //id: "lights",
-                //field: "lights",
-                //label: "Lights",
-                //type: "checkbox",
-                //onChange: function(value) {
-                    //self.lights = value ? 2 : 0;
-                //}
-            //},
+            { 
+                id: "lights",
+                field: "lights",
+                label: "Receive Lights",
+                type: "checkbox",
+                onChange: function(value) {
+                    self.asset.lights = value ? 2 : 0;
+                }
+            },
+            { 
+                id: "side",
+                field: "side",
+                label: "Backface Culling", 
+                type: "dropdown",
+                items: [
+                    { label: "No culling", value: cull_noculling },
+                    { label: "Counter Clockwise", value: cull_counterclockwise },
+                    { label: "Clockwise", value: cull_clockwise },
+                ]
+            }, 
+        
+            { 
+                type: "label",
+                label: "Advanced Properties"
+            },
+            { 
+                id: "depthTest",
+                field: "depthTest",
+                label: "Depth Test",
+                type: "checkbox"
+            },
+            { 
+                id: "depthWrite",
+                field: "depthWrite",
+                label: "Depth Write",
+                type: "checkbox"
+            },
+            { 
+                id: "depthFunc",
+                field: "depthFunc",
+                label: "Depth Function", 
+                type: "dropdown",
+                items: [
+                    { label: "Always", value: cmpfunc_always },
+                    { label: "Equal", value: cmpfunc_equal },
+                    { label: "Greater", value: cmpfunc_greater },
+                    { label: "Greater Equal", value: cmpfunc_greaterequal },
+                    { label: "Less", value: cmpfunc_less },
+                    { label: "Less Equal", value: cmpfunc_lessequal },
+                    { label: "Never", value: cmpfunc_never },
+                    { label: "Not Equal", value: cmpfunc_notequal },
+                ]
+            },
+            
+            { 
+                id: "alphaTest",
+                field: "alphaTest",
+                label: "Alpha Test (0-255)", 
+                type: "text",
+                format: "integer",
+                min: 0,
+                max: 255
+            },
+            {
+                id: "forceSinglePass",
+                field: "forceSinglePass",
+                label: "Force Single Pass", 
+                type: "checkbox"
+            },
+            { 
+                id: "colorWrite",
+                field: "colorWrite",
+                label: "Color Write", 
+                type: "checkbox"
+            },
+            { 
+                id: "blending",
+                field: "blending",
+                label: "Blending", 
+                type: "checkbox"
+            },
+            { 
+                id: "blendEquation",
+                field: "blendEquation",
+                label: "Blend Equation", 
+                type: "dropdown",
+                items: [
+                    { label: "Add", value: bm_eq_add },
+                    { label: "Max", value: bm_eq_max },
+                    { label: "Min", value: bm_eq_min },
+                    { label: "Reverse Subtract", value: bm_eq_reverse_subtract },
+                    { label: "Subtract", value: bm_eq_subtract },
+                ]
+            },
+            { 
+                id: "blendSrc",
+                field: "blendSrc",
+                label: "Blend Source", 
+                type: "dropdown",
+                items: [
+                    { label: "Zero", value: bm_zero },
+                    { label: "One", value: bm_one },
+                    { label: "Source Color", value: bm_src_colour },
+                    { label: "Inverse Source Color", value: bm_inv_src_colour },                    
+                    { label: "Source Alpha", value: bm_src_alpha },
+                    { label: "Inverse Source Alpha", value: bm_inv_src_alpha },
+                    { label: "Destination Alpha", value: bm_dest_alpha },
+                    { label: "Inverse Destination Alpha", value: bm_inv_dest_alpha },
+                    { label: "Destination Color", value: bm_dest_colour },
+                    { label: "Inverse Destination Color", value: bm_inv_dest_colour },
+                ]
+            },
+            { 
+                id: "blendDst",
+                field: "blendDst",
+                label: "Blend Destination", 
+                type: "dropdown",
+                items: [
+                    { label: "Zero", value: bm_zero },
+                    { label: "One", value: bm_one },
+                    { label: "Source Color", value: bm_src_colour },
+                    { label: "Inverse Source Color", value: bm_inv_src_colour },                    
+                    { label: "Source Alpha", value: bm_src_alpha },
+                    { label: "Inverse Source Alpha", value: bm_inv_src_alpha },
+                    { label: "Destination Alpha", value: bm_dest_alpha },
+                    { label: "Inverse Destination Alpha", value: bm_inv_dest_alpha },
+                    { label: "Destination Color", value: bm_dest_colour },
+                    { label: "Inverse Destination Color", value: bm_inv_dest_colour },
+                ]
+            },
             //{ 
                 //id: "emissive",
                 //field: "emissive",
@@ -108,25 +283,7 @@ function EditorUiInspector(ui) constructor {
                 //field: "emissiveIntensity",
                 //label: "Emissive Intensity", 
                 //type: "float"
-            //},
-            //{ 
-                //type: "section",
-                //label: "Textures"
-            //},
-            //{ 
-                //id: "texturesMap",
-                //field: "textures",
-                //label: "Textures", 
-                //type: "texturePicker",
-                //extra: { mapType: "map" }
-            //},
-            //{ 
-                //id: "texturesEmissiveMap",
-                //field: "textures",
-                //label: "Textures", 
-                //type: "texturePicker",
-                //extra: { mapType: "emissiveMap" }
-            //},
+            //},            
         ],
         
         "Mesh": [
@@ -160,133 +317,81 @@ function EditorUiInspector(ui) constructor {
                 label: "Geometry",
                 type: "dropdown",
                 items: [
-                    { key: "Box", value: new UeBoxGeometry() },
-                    { key: "Sphere", value: new UeSphereGeometry(1) },
-                    { key: "Plane", value: new UePlaneGeometry() },
-                    { key: "Circle", value: new UeCircleGeometry() },
-                    { key: "Cone", value: new UeConeGeometry() },
-                    { key: "Cylinder", value: new UeCylinderGeometry() },
-                    { key: "Arrow", value: new UeArrowGeometry() },
-                    { key: "Line", value: new UeLineGeometry().setPositions([ 0,0,0, 1,0,0 ]) },
-                    { key: "LineSegments", value: new UeLineSegmentsGeometry().setPositions([ 0,0,0, 1,0,0, 3,0,0, 4,0,0 ]) },
-                    { key: "Custom", disabled: true },
+                    { label: "Box", value: new UeBoxGeometry() },
+                    { label: "Sphere", value: new UeSphereGeometry(1) },
+                    { label: "Plane", value: new UePlaneGeometry() },
+                    { label: "Circle", value: new UeCircleGeometry() },
+                    { label: "Cone", value: new UeConeGeometry() },
+                    { label: "Cylinder", value: new UeCylinderGeometry() },
+                    { label: "Arrow", value: new UeArrowGeometry() },
+                    { label: "Line", value: new UeLineGeometry().setPositions([ 0,0,0, 1,0,0 ]) },
+                    { label: "LineSegments", value: new UeLineSegmentsGeometry().setPositions([ 0,0,0, 1,0,0, 3,0,0, 4,0,0 ]) },
                 ],
                 onChange: function(value) {
-                    self.geometry.dispose();
-                    self.geometry = value;
+                    if (self.asset.geometry != undefined) self.asset.geometry.dispose();
+                    self.asset.geometry = value;
                 }
            },
            { 
                 id: "material",
                 field: "material",
                 label: "Material", 
-                type: "materialPicker"
+                type: "dropdown",
+                items: [{ label: "", value: undefined}],
+                search: true,
+                itemsGetter: function(searchValue) {
+                    return [];
+                },
+                onChange: function(value, input) {
+                    // save in self.asset.textures[$ "map"] = 
+                }
            },
            {
                 id: "labelPosition",
+                label: "Transform", 
+                type: "label"
+           },
+           { 
+                id: "position",
+                field: "position",
                 label: "Position", 
-                type: "label"
-           },
-           { 
-                id: "positionX",
-                field: "position.x",
-                label: "X", 
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.position.x = value;
-                }
-           },
-           { 
-                id: "positionY",
-                field: "position.y",
-                label: "Y",
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.position.y = value;
-                }
-           },
-           { 
-                id: "positionZ",
-                field: "position.z",
-                label: "Z", 
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.position.z = value;
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.position;
+                },
+                onBlur: function(value) {
+                    self.asset.position.x = value[0];
+                    self.asset.position.y = value[1];
+                    self.asset.position.z = value[2];
                 }
            },
         
-           {
-                id: "labelRotation",
+           { 
+                id: "rotation",
+                field: "rotation",
                 label: "Rotation", 
-                type: "label"
-           },
-           { 
-                id: "rotationX",
-                field: "rotation.x",
-                label: "X", 
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.rotation.x = value;
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.rotation;
+                },
+                onBlur: function(value) {
+                    self.asset.rotation.x = value[0];
+                    self.asset.rotation.y = value[1];
+                    self.asset.rotation.z = value[2];
                 }
            },
            { 
-                id: "rotationY",
-                field: "rotation.y",
-                label: "Y",
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.rotation.y = value;
-                }
-           },
-           { 
-                id: "rotationZ",
-                field: "rotation.z",
-                label: "Z", 
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.rotation.z = value;
-                }
-           },
-        
-           {
-                id: "labelScale",
+                id: "scale",
+                field: "scale",
                 label: "Scale", 
-                type: "label"
-           },
-           { 
-                id: "scaleX",
-                field: "scale.x",
-                label: "X", 
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.scale.x = value;
-                }
-           },
-           { 
-                id: "scaleY",
-                field: "scale.y",
-                label: "Y",
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.scale.y = value;
-                }
-           },
-           { 
-                id: "scaleZ",
-                field: "scale.z",
-                label: "Z", 
-                type: "float",
-                width: "33%",
-                onChange: function(value) {
-                    self.scale.z = value;
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.scale;
+                },
+                onBlur: function(value) {
+                    self.asset.scale.x = value[0];
+                    self.asset.scale.y = value[1];
+                    self.asset.scale.z = value[2];
                 }
            },
         ],
@@ -308,40 +413,43 @@ function EditorUiInspector(ui) constructor {
         var assetFields = fields[$ asset.type];
         
         // Clear the previous content
-        var Content = self.ui.Inspector.Content;
-        Content.destroyChildren();
+        var _Items = self.ui.Inspector.Content.Items;
+        _Items.destroyChildren();
         
+        // First pass: calculate the max label width among all items
+        var _labelWidth = 0;
+        draw_set_font(fText);
+        for (var i = 0, l = array_length(assetFields); i < l; i++) {
+            var _label = assetFields[i][$ "label"];
+            if (_label == undefined) continue;
+            _labelWidth = max(_labelWidth, string_width(_label)); 
+        }
+        
+        // Second pass: add the labels and inputs
         for (var i = 0, l = array_length(assetFields); i < l; i++) {
             var assetField = assetFields[i];
             var input = undefined;
             var width = assetField[$ "width"] ?? "100%";
-            var scope = { asset, field: assetField.field };
-            var marginTop = !i ? 0 : 20;
+            var scope = { asset, assetField };
+            var marginTop = !i ? 0 : (assetField.type == "label" ? 35 : 15);
+            
             var onChangeFn = assetField[$ "onChange"];
             var onChange = method(scope, onChangeFn != undefined ? onChangeFn : function(value, input) {
-                self.asset[$ self.field] = value;
+                self.asset[$ self.assetField.field] = value;
+                
+                var _onAfterChange = self.assetField[$ "onAfterChange"];
+                if (_onAfterChange != undefined) {
+                    method(self, _onAfterChange)();
+                } 
             });
             
+            var valueGetterFn = assetField[$ "valueGetter"];
+            var valueGetter = valueGetterFn != undefined ? method(scope, valueGetterFn) : undefined;
+            
             switch (assetField.type) {
-                case "text": 
-                    // Textbox
-                    input = new UiTextbox({ width, height: 32, marginTop }, {
-                        label: assetField.label,
-                        disabled: assetField[$ "disabled"],
-                        value: asset[$ assetField.field],
-                        onBlur: method(scope, function(value, input) {
-                            if (value == "") {
-                                input.value = self.asset[$ self.field];
-                                return;
-                            }
-                            self.asset[$ self.field] = value;
-                        })
-                    });
-                break;  
-                
                 // Import a new sprite for the texture
                 case "spriteFilePicker":
-                    input = new UiInspectorSpriteFilePicker({ marginTop }, {
+                    input = new UiInspectorSpriteFilePicker({ flex: 1, justifyContent: "center" }, {
                          valueGetter: method(scope, function() { 
                             return asset.__cachedSprite;
                         }),
@@ -349,16 +457,69 @@ function EditorUiInspector(ui) constructor {
                     });
                 break;
                 
-                case "checkbox": 
-                    input = new UiCheckbox({ marginTop }, {
-                        label: assetField.label,
+                case "transformXYZ":
+                 input = new UiInspectorTransformXYZ({ flex: 1, justifyContent: "space-between", flexDirection: "row", gap: 15 }, {
+                        valueGetter,
+                        onBlur: method(scope, function(value, input) {
+                            if (value == "") {
+                                input.value = self.asset[$ self.assetField.field];
+                                return;
+                            }
+                            self.asset[$ self.assetField.field] = value;
+                        })
+                    });
+                break;
+                
+                case "text": 
+                    input = new UiTextbox({ flex: 1, height: 25 }, {
+                        format: assetField[$ "format"],
+                        min: assetField[$ "min"],
+                        max: assetField[$ "max"],
+                        disabled: assetField[$ "disabled"],
                         value: asset[$ assetField.field],
+                        valueGetter,
+                        onBlur: method(scope, function(value, input) {
+                            if (value == "") {
+                                input.value = self.asset[$ self.assetField.field];
+                                return;
+                            }
+                            self.asset[$ self.assetField.field] = value;
+                        })
+                    });
+                break; 
+                 
+                case "checkbox": 
+                    input = new UiCheckbox({ flex: 1, }, {
+                        value: asset[$ assetField.field],
+                        valueGetter,
+                        onChange
+                    });
+                break;
+                
+                case "dropdown": 
+                    input = new UiDropdown({ flex: 1, }, {
+                        items: assetField.items,
+                        value: asset[$ assetField.field],
+                        valueGetter,
                         onChange
                     });
                 break;
             }
             
-            Content.add(input);
-        }
-    }
+            var _Container = new UiNode({ marginTop, width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center" });
+    
+            // Item label
+            var _label = assetField[$ "label"];
+            if (_label != undefined) {
+                var _icon = assetField.type == "label" ? sprUiSection : undefined;
+                _Container.add(new UiText(assetField.label, { width: _labelWidth + 15, height: 20 }, { icon: _icon }));
+            }
+            
+            if (input != undefined) {
+                _Container.add(input);
+            }
+            
+            _Items.add(_Container);
+        } 
+    } 
 }

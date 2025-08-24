@@ -31,9 +31,9 @@ function UiInspectorSpriteFilePicker(style = {}, props = {}): UiNode(style, prop
     
     // Import button
     self.Button = new UiButton("Import image", {
-        height: 32,
+        height: 30,
         marginTop: 15
-    }, { autoResize: false });
+    });
     
     with (self.Button) {
         self.onClick(function() {
@@ -47,12 +47,13 @@ function UiInspectorSpriteFilePicker(style = {}, props = {}): UiNode(style, prop
     }
     
     // Info container
-    self.Info = new UiNode({ display: _this.value ? "flex" : "none", height: 20, marginTop: 15 });
+    self.Info = new UiNode({ display: _this.value ? "flex" : "none", height: 40, marginTop: 15 });
     with (self.Info) {
         self.onDraw = function() {
             if (!self.parent.value) return;
-            var yy = self.y1; draw_set_halign(fa_left); draw_set_valign(fa_top);
-            draw_text(self.x1, yy, $"Size: {self.parent.spriteW}/{self.parent.spriteH}px");
+            draw_set_halign(fa_left); draw_set_valign(fa_top);
+            var yy = self.y1; 
+            draw_text(self.x1, yy, $"Width: {self.parent.spriteW}{chr(13) + chr(10)}Height: {self.parent.spriteH}");
         }
     }
     

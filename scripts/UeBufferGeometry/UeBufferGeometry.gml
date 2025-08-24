@@ -112,6 +112,19 @@ function UeBufferGeometry(data = {}) constructor {
         return self;
     }
     
+    // Vertically flip the UV of the vertices and rebuild the geometry
+    function flipUV() {
+        gml_pragma("forceinline");
+    
+        for (var i = 0, l= array_length(vertices); i < l; i++) {
+            var v = vertices[i];
+            v.v = 1 - v.v;
+        }
+    
+        build(); 
+        return self;
+    }
+    
     function toJSON() {
         gml_pragma("forceinline");
         var payload = { 
