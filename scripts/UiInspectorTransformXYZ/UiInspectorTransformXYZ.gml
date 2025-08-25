@@ -3,7 +3,7 @@ function UiInspectorTransformXYZ(style = {}, props = {}): UiNode(style, props) c
     self.valueGetter = props[$ "valueGetter"];
     
     var _onBlur = function() {
-       self.onBlur([ self.X.value, self.Y.value, self.Z.value ]);
+       self.onBlur([ real(self.X.value), real(self.Y.value), real(self.Z.value) ]);
     };
     
     var _textStyle = { width: "29%", height: 25 };
@@ -16,9 +16,9 @@ function UiInspectorTransformXYZ(style = {}, props = {}): UiNode(style, props) c
     function onStep() {
         if (self.valueGetter != undefined) {
             var values = self.valueGetter();
-            if (!self.X.Input.focused) self.X.value = values.x;
-            if (!self.Y.Input.focused) self.Y.value = values.y;
-            if (!self.Z.Input.focused) self.Z.value = values.z;
+            if (!self.X.Input.focused) self.X.value = string(values.x);
+            if (!self.Y.Input.focused) self.Y.value = string(values.y);
+            if (!self.Z.Input.focused) self.Z.value = string(values.z);
         }
     }
 }

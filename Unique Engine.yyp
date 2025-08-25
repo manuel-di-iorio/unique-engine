@@ -116,6 +116,7 @@
     {"id":{"name":"UeControls","path":"scripts/UeControls/UeControls.yy",},},
     {"id":{"name":"UeCylinderGeometry","path":"scripts/UeCylinderGeometry/UeCylinderGeometry.yy",},},
     {"id":{"name":"ueError","path":"scripts/ueError/ueError.yy",},},
+    {"id":{"name":"UeEuler","path":"scripts/UeEuler/UeEuler.yy",},},
     {"id":{"name":"UeFrustum","path":"scripts/UeFrustum/UeFrustum.yy",},},
     {"id":{"name":"UeGame","path":"scripts/UeGame/UeGame.yy",},},
     {"id":{"name":"UeGridHelper","path":"scripts/UeGridHelper/UeGridHelper.yy",},},

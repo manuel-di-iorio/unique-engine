@@ -37,11 +37,13 @@ function EditorUiAssets(ui) constructor {
             
             case "model": 
                 asset = new UeMesh(); 
+                asset.__rotationEuler = new UeEuler();
                 assetId = global.UI_ASSETS_MODELS_ID++;
             break;
             
             case "light":    
                 asset = new UeLight(); 
+                asset.__rotationEuler = new UeEuler();
                 assetId = global.UI_ASSETS_LIGHTS_ID++;
             break;
             
@@ -49,6 +51,7 @@ function EditorUiAssets(ui) constructor {
                 asset = new UeObject3D();
                 asset.isCamera = true;
                 asset.type = "camera";
+                asset.__rotationEuler = new UeEuler();
                 assetId = global.UI_ASSETS_CAMERAS_ID++;
             break;
             

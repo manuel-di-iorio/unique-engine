@@ -2,7 +2,7 @@ function EditorUiInspector(ui) constructor {
     self.ui = ui;
     self.assimp = new UeAssimpLoader();
     
-    ui.Inspector = new UiNode({ name: "Inspector", minWidth: 330, width: "21%", marginBottom: 62 }, { border: true });
+    ui.Inspector = new UiNode({ name: "Inspector", minWidth: 350, width: "21%", marginBottom: 62 }, { border: true });
     
     with (ui.Inspector) {
         self.onDraw = function() {
@@ -372,12 +372,12 @@ function EditorUiInspector(ui) constructor {
                 label: "Rotation", 
                 type: "transformXYZ",
                 valueGetter: function() {
-                    return self.asset.rotation;
+                    return self.asset.__rotationEuler;
                 },
                 onBlur: function(value) {
-                    self.asset.rotation.x = value[0];
-                    self.asset.rotation.y = value[1];
-                    self.asset.rotation.z = value[2];
+                    var euler = self.asset.__rotationEuler;
+                    euler.set(value[0], value[1], value[2]);
+                    self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
                 }
            },
            { 
@@ -446,6 +446,9 @@ function EditorUiInspector(ui) constructor {
             var valueGetterFn = assetField[$ "valueGetter"];
             var valueGetter = valueGetterFn != undefined ? method(scope, valueGetterFn) : undefined;
             
+            var onBlurFn = assetField[$ "onBlur"];
+            var onBlur = onBlurFn != undefined ? method(scope, onBlurFn) : undefined;
+            
             switch (assetField.type) {
                 // Import a new sprite for the texture
                 case "spriteFilePicker":
@@ -460,13 +463,7 @@ function EditorUiInspector(ui) constructor {
                 case "transformXYZ":
                  input = new UiInspectorTransformXYZ({ flex: 1, justifyContent: "space-between", flexDirection: "row", gap: 15 }, {
                         valueGetter,
-                        onBlur: method(scope, function(value, input) {
-                            if (value == "") {
-                                input.value = self.asset[$ self.assetField.field];
-                                return;
-                            }
-                            self.asset[$ self.assetField.field] = value;
-                        })
+                        onBlur
                     });
                 break;
                 
