@@ -6,11 +6,8 @@ function UiText(text = "", style = {}, props = {}): UiNode(style, props) constru
     self.valign = fa_top;
     self.valueGetter = props[$ "valueGetter"];
     self.icon = props[$ "icon"];
-    
-    // Set the size of the button
-    if (self.autoResize) {
-        computeSize();
-    }
+    self.color = props[$ "color"] ?? c_white;
+    self.font = props[$ "font"] ?? fText;
     
     function computeSize() {
         draw_set_font(fText);
@@ -37,7 +34,12 @@ function UiText(text = "", style = {}, props = {}): UiNode(style, props) constru
             _x += 23;
         }
         
-        draw_set_font(fText); draw_set_color(c_white); draw_set_halign(self.halign); draw_set_valign(self.valign);
+        draw_set_font(self.font); draw_set_color(self.color); draw_set_halign(self.halign); draw_set_valign(self.valign);
         draw_text(_x, self.y1, self.text);
+    }
+    
+    // Set the size of the button
+    if (self.autoResize) {
+        computeSize();
     }
 }

@@ -15,6 +15,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     self.format = props[$ "format"] ?? "string"; // string, float, integer
     self.min = props[$ "min"];
     self.max = props[$ "max"];
+    self.placeholder = props[$ "placeholder"];
     
     self.Input = new UiNode({ 
         name: "UiTextbox.Input", 
@@ -737,9 +738,14 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, true);
             
             // Set clipping region to prevent text overflow
-            var _scrollableParent = self.scrollableParent;
             var _scissor = gpu_get_scissor();
-            gpu_set_scissor(self.x1, max(_scrollableParent.y1, self.y1), self.x2 - self.x1, min(_scrollableParent.y2 - _scrollableParent.y1, self.y2 - self.y1));
+
+            var _scrollableParent = self.scrollableParent;
+            if (_scrollableParent == undefined) { 
+                gpu_set_scissor(self.x1, self.y1, self.x2 - self.x1, self.y2 - self.y1);
+            } else {
+                gpu_set_scissor(self.x1, max(_scrollableParent.y1, self.y1), self.x2 - self.x1, min(_scrollableParent.y2 - _scrollableParent.y1, self.y2 - self.y1));
+            }
             
             // Text drawing settings
             draw_set_color(c_white);
@@ -780,7 +786,16 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             
             // Draw text (always visible)
             draw_set_color(c_white); draw_set_font(fText);
-            draw_text(textX, textY, text);
+            
+            if (text == "" && !self.focused && self.parent.placeholder != undefined) {
+                // Draw placeholder text
+                draw_set_alpha(0.5); // Make placeholder semi-transparent
+                draw_text(textX, textY, self.parent.placeholder);
+                draw_set_alpha(1);
+            } else {
+                // Draw actual text
+                draw_text(textX, textY, text);
+            }
             
             // Draw cursor (only when focused and no selection)
             if (self.focused && self.showCursor && self.selectionStart == self.selectionEnd) {

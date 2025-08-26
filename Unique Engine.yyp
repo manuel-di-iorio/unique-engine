@@ -76,6 +76,7 @@
     {"id":{"name":"GMAssimp","path":"extensions/GMAssimp/GMAssimp.yy",},},
     {"id":{"name":"window_command_hook","path":"extensions/window_command_hook/window_command_hook.yy",},},
     {"id":{"name":"fText","path":"fonts/fText/fText.yy",},},
+    {"id":{"name":"fTextItalic","path":"fonts/fTextItalic/fTextItalic.yy",},},
     {"id":{"name":"fTextSmall","path":"fonts/fTextSmall/fTextSmall.yy",},},
     {"id":{"name":"oSceneAssimpLoader","path":"objects/oSceneAssimpLoader/oSceneAssimpLoader.yy",},},
     {"id":{"name":"oSceneCube","path":"objects/oSceneCube/oSceneCube.yy",},},

@@ -2,11 +2,13 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
     var _this = self;
     setName(props[$ "name"] ?? "UiDropdown");
     self.value = props[$ "value"] ?? false;
-    self.items = props[$ "items"] ?? undefined;
+    self.items = props[$ "items"] ?? [];
+    self.itemsGetter = props[$ "itemsGetter"];
     self.label = props[$ "label"] ?? undefined;
     self.onChange = props[$ "onChange"] ?? function(input, value) {};
     var _marginLeft = self.label == undefined ? 0 : 3 + string_width(self.label) + 20;
     self.List = undefined;
+    self.search = props[$ "search"];
     
     // Draw the label if present
     function onDraw() {
@@ -15,17 +17,6 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
            draw_text(self.x1 + 3, ~~mean(self.y1, self.y2), self.label);
        }
     }
-    
-    //self.onMouseUp(function() {
-        //if (self.List == undefined) return;
-        //
-        //var y1 = min(self.y1, self.List.y1);
-        //var y2 = max(self.y2, self.List.y2);
-        //
-        //if (!point_in_rectangle(global.UI.mouseX, global.UI.mouseY, self.x1, y1, self.x2, y2)) {
-            //self.closeList();
-        //}
-    //});
     
     // Input
     self.Input = new UiButton(undefined, {
@@ -36,7 +27,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
     self.add(self.Input);
     
     with (self.Input) {
-        self.onClick(function() {
+        self.onMouseDown(function() {
             var List = self.parent.List;
             if (List != undefined) {
                 self.parent.closeList();
@@ -65,16 +56,18 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
             draw_text(self.x1 + 5, ~~mean(self.y1, self.y2), _text);
          };
     } 
-    
-    self.createList = function() {
-        var _this = self;
+     
+    self.createList = function() { 
+        var _Dropdown = self;
+        var _Input = self.Input;
         self.List = new UiNode({ 
-            name: "UiDropdown.List", position: "absolute", padding: 5, maxHeight: 500
+            name: "UiDropdown.List", position: "absolute", padding: 5, maxHeight: 500, 
+            left: -9999, top: -9999
         });
         
         with (self.List) {
-            self.Dropdown = _this;
-            
+            self.Dropdown = _Dropdown;
+         
             self.computePosition = function() {
                 var _Dropdown = self.Dropdown;
                 if (!_Dropdown.Input.isVisible()) return _Dropdown.closeList();
@@ -111,55 +104,83 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                 draw_roundrect(self.x1, self.y1, self.x2, self.y2, false);
             }
             
-            self.Items = new UiNode({ height: "100%" });
-            self.add(self.Items);
-    
-            // Add the items
-            var _items = self.Dropdown.items;
-            for (var i = 0, l = array_length(_items); i < l; i++) {
-                var _item = _items[i];
-                var _itemNode = new UiNode({
-                    name: "UiDropdown.List.Item",
-                    width: "100%",
-                    height: 25
-                });
-                _itemNode.label = _item.label;
-                _itemNode.value = _item.value;
-                
-                with (_itemNode) {
-                    self.pointerEvents = true;
-                    self.handpoint = true;
-                    
-                    self.onClick(function() {
-                        var Dropdown = self.parent.parent.Dropdown;
-                        Dropdown.value = self.value;
-                        Dropdown.onChange(self.value);
-                        Dropdown.closeList();
+            self.createItems = function() {
+                var _Dropdown = self.Dropdown;
+                var _items = _Dropdown.items;
+        
+                if (!array_length(_items)) {
+                    self.Items.add(new UiText("No assets found", { marginLeft: 5 }, { color: c_ltgray, font: fTextItalic }));
+                }
+        
+                // Add the items
+                for (var i = 0, l = array_length(_items); i < l; i++) {
+                    var _item = _items[i];
+                    var _itemNode = new UiNode({
+                        name: "UiDropdown.List.Item",
+                        width: "100%",
+                        height: 25
                     });
+                    _itemNode.label = _item.label;
+                    _itemNode.value = _item.value;
                     
-                    self.onMouseEnter(function() {
-                        global.UI.needsRedraw = true;
-                    });
-                    
-                    self.onMouseLeave(function() {
-                        global.UI.needsRedraw = true;
-                    });
-                    
-                    self.onDraw = function() {
-                        if (self.parent.parent.Dropdown.value == self.value || self.hovered) {
-                            draw_set_color(global.UI_COL_INSPECTOR_BG);
-                            draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
-                        }
+                    with (_itemNode) {
+                        self.pointerEvents = true;
+                        self.handpoint = true;
                         
-                        draw_set_halign(fa_left); draw_set_valign(fa_middle); draw_set_color(c_white);
-                        draw_text(self.x1 + 5, ~~mean(self.y1, self.y2), self.label);
-                    };
+                        self.onClick(function() {
+                            var Dropdown = self.parent.parent.Dropdown;
+                            Dropdown.value = self.value;
+                            Dropdown.onChange(self.value);
+                            Dropdown.closeList();
+                        });
+                        
+                        self.onMouseEnter(function() {
+                            global.UI.needsRedraw = true;
+                        });
+                        
+                        self.onMouseLeave(function() {
+                            global.UI.needsRedraw = true;
+                        });
+                        
+                        self.onDraw = function() {
+                            if (self.parent.parent.Dropdown.value == self.value || self.hovered) {
+                                draw_set_color(global.UI_COL_INSPECTOR_BG);
+                                draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+                            }
+                            
+                            draw_set_halign(fa_left); draw_set_valign(fa_middle); draw_set_color(c_white);
+                            draw_text(self.x1 + 5, ~~mean(self.y1, self.y2), self.label);
+                        };
+                    }
+                    
+                    self.Items.add(_itemNode);
                 }
                 
-                self.Items.add(_itemNode);
+                self.Items.enableScrollbar(global.UI_COL_CHECKBOX_HOVER);
             }
             
-            self.Items.enableScrollbar(global.UI_COL_CHECKBOX_HOVER);
+            // Create the search input
+            if (_Dropdown.search != undefined) {
+                self.Search = new UiTextbox({ height: 25, marginBottom: 10 }, {
+                    placeholder: _Dropdown.search ?? "Search..",
+                    onChange: method({ _Dropdown }, function(searchValue) {
+                        _Dropdown.List.Items.destroyChildren();
+                        _Dropdown.items = [];
+                        
+                        if (_Dropdown.itemsGetter != undefined) _Dropdown.items = _Dropdown.itemsGetter(searchValue);
+                        _Dropdown.List.createItems();
+                    })
+                });
+                self.add(self.Search);
+            }
+            
+            // Create the items container
+            self.Items = new UiNode({ height: "100%" });
+            self.add(self.Items);
+            
+            // Create the initial items
+            if (_Dropdown.itemsGetter != undefined) _Dropdown.items = _Dropdown.itemsGetter(self.Search.value);
+            self.createItems(); 
         }
         
         global.UI.Overlay.add(self.List);

@@ -25,7 +25,8 @@
     {"name":"UniqueUI","order":13,"path":"folders/UniqueUI.yy",},
   ],
   "ResourceOrderSettings":[
-    {"name":"fTextSmall","order":1,"path":"fonts/fTextSmall/fTextSmall.yy",},
+    {"name":"fTextItalic","order":1,"path":"fonts/fTextItalic/fTextItalic.yy",},
+    {"name":"fTextSmall","order":2,"path":"fonts/fTextSmall/fTextSmall.yy",},
     {"name":"oSceneAssimpLoader","order":5,"path":"objects/oSceneAssimpLoader/oSceneAssimpLoader.yy",},
     {"name":"oSceneEditor","order":1,"path":"objects/oSceneEditor/oSceneEditor.yy",},
     {"name":"oSceneLinesRaycasting","order":3,"path":"objects/oSceneLinesRaycasting/oSceneLinesRaycasting.yy",},

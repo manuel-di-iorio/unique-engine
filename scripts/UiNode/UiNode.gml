@@ -52,10 +52,10 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     // Set the size of the node
-    function setSize(winW, winH) {
+    function setSize(w, h) {
         gml_pragma("forceinline");
-        flexpanel_node_style_set_width(self.node, winW, flexpanel_unit.point);
-        flexpanel_node_style_set_height(self.node, winH, flexpanel_unit.point);
+        flexpanel_node_style_set_width(self.node, w, flexpanel_unit.point);
+        flexpanel_node_style_set_height(self.node, h, flexpanel_unit.point);
         global.UI.needsUpdate = true;
         return self;
     }
@@ -114,10 +114,18 @@ function UiNode(style = {}, props = {}) constructor {
         for (var i = flexpanel_node_get_num_children(self.node) - 1; i >= 0; i--) {
             var node = flexpanel_node_get_child(self.node, i);
             var elem = flexpanel_node_get_data(node);
+            
+            elem.destroyChildren();
+            
             var elemOnDestroy = elem[$ "onDestroy"];
             if (elemOnDestroy != undefined) elemOnDestroy(); 
-            flexpanel_delete_node(node, true);
+         
+            flexpanel_delete_node(node, false);
         }
+        
+        flexpanel_node_remove_all_children(self.node);
+        self.__UiScrollbar = undefined;
+
          
         global.UI.needsUpdate = true;
         return self; 
