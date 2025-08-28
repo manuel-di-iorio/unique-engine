@@ -16,7 +16,7 @@ function UiText(text = "", style = {}, props = {}): UiNode(style, props) constru
         setSize(_w, string_height(self.text));
     }
     
-    function onStep() {
+    self.onStep(function() {
         if (self.valueGetter != undefined) {
             var _newText = self.valueGetter();
             if (_newText != self.text) {
@@ -24,7 +24,7 @@ function UiText(text = "", style = {}, props = {}): UiNode(style, props) constru
                 computeSize();
             }
         }
-    }
+    });
     
     function onDraw() {
         var _x = self.x1;

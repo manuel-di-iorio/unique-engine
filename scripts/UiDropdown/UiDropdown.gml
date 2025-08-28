@@ -86,10 +86,10 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                 if (self.y1 != yy) self.setTop(yy);
             }
     
-            self.onStep = function() {
+            self.onStep(function() {
                 self.computePosition();
                 
-                if (mouse_check_button_released(mb_left)) {
+                if (global.UI.mouseLeftReleased) {
                     var y1 = min(self.y1, self.Dropdown.y1);
                     var y2 = max(self.y2, self.Dropdown.y2);
                     
@@ -97,7 +97,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                         self.Dropdown.closeList();
                     }
                 }
-            } 
+            });
             
             self.onDraw = function() {
                 draw_set_color(global.UI_COL_DROPDOWN_LIST_BG);

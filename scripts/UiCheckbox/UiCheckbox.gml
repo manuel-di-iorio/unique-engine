@@ -43,9 +43,9 @@ function UiCheckbox(style = {}, props = {}) : UiNode(style, props) constructor {
     }
     
     // Update value from external source
-    function onStep() {
+    self.onStep(function() {
         if (self.valueGetter != undefined) self.value = self.valueGetter();
-    }
+    });
     
     self.onClick(function() {
         self.value = !self.value;

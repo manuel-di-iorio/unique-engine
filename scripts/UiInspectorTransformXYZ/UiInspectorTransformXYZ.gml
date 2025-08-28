@@ -13,12 +13,12 @@ function UiInspectorTransformXYZ(style = {}, props = {}): UiNode(style, props) c
     
     self.add(self.X, self.Y, self.Z);
     
-    function onStep() {
+    self.onStep(function() {
         if (self.valueGetter != undefined) {
             var values = self.valueGetter();
             if (!self.X.Input.focused) self.X.value = string(values.x);
             if (!self.Y.Input.focused) self.Y.value = string(values.y);
             if (!self.Z.Input.focused) self.Z.value = string(values.z);
         }
-    }
+    });
 }

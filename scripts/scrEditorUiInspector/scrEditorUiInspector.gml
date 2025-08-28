@@ -428,7 +428,7 @@ function EditorUiInspector(ui) constructor {
         
         // Clear the previous content
         var _Items = self.ui.Inspector.Content.Items;
-        _Items.destroyChildren();
+        self.close();
         
         // First pass: calculate the max label width among all items
         var _labelWidth = 0;
@@ -535,4 +535,8 @@ function EditorUiInspector(ui) constructor {
             _Items.add(_Container);
         } 
     } 
+    
+    function close() {
+        self.ui.Inspector.Content.Items.destroyChildren();
+    }
 }

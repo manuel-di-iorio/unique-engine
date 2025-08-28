@@ -8,7 +8,7 @@ function log() {
         if (is_struct(data)) {
             str += json_stringify(ueStructMap(data, function(key, value) {
                 return __logItemToString(value);
-            }), false);
+            }), true);
             
         } else if (is_array(data)) {
             str += json_stringify(array_map(data, function(value) {
@@ -20,7 +20,7 @@ function log() {
                 } else {
                     return __logItemToString(value);
                 }
-            }), false);
+            }), true);
         
 		} else {
 			str += string(data);

@@ -200,6 +200,7 @@
     {"id":{"name":"sprUiScene","path":"sprites/sprUiScene/sprUiScene.yy",},},
     {"id":{"name":"sprUiSection","path":"sprites/sprUiSection/sprUiSection.yy",},},
     {"id":{"name":"sprUiTexture","path":"sprites/sprUiTexture/sprUiTexture.yy",},},
+    {"id":{"name":"sprUiTrash","path":"sprites/sprUiTrash/sprUiTrash.yy",},},
     {"id":{"name":"sprUiTreeviewArrowDown","path":"sprites/sprUiTreeviewArrowDown/sprUiTreeviewArrowDown.yy",},},
     {"id":{"name":"sprUiTreeviewArrowRight","path":"sprites/sprUiTreeviewArrowRight/sprUiTreeviewArrowRight.yy",},},
   ],

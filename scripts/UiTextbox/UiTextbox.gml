@@ -701,9 +701,9 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         };
         
         // Main update loop
-        self.onStep = function() {
+        self.onStep(function() {
             // Handle mouse up event
-            if (mouse_check_button_released(mb_left)) {
+            if (global.UI.mouseLeftReleased) {
                 self.isDragging = false;
             }
             
@@ -725,7 +725,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                     self.blur();
                 }
             }
-        };
+        });
     
         // Draw the textbox
         self.onDraw = function() {
@@ -885,9 +885,9 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     }
     
     // Update value from external source
-    function onStep() {
+    self.onStep(function() {
         if (self.valueGetter != undefined) self.value = self.valueGetter();
-    }
+    });
     
     // Draw label if present
     function onDraw() {

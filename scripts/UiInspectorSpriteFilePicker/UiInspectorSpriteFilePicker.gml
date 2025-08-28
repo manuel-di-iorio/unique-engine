@@ -60,7 +60,7 @@ function UiInspectorSpriteFilePicker(style = {}, props = {}): UiNode(style, prop
     self.add(self.ImageContainer, self.Button, self.Info); 
     
     // Update value from external source
-    function onStep() {
+    self.onStep(function() {
         if (self.valueGetter != undefined) {
             var _currentValue = self.value;
             self.value = self.valueGetter();
@@ -71,5 +71,5 @@ function UiInspectorSpriteFilePicker(style = {}, props = {}): UiNode(style, prop
                 self.Info.show();
             }
         }
-    }
+    });
 }

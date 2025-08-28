@@ -29,21 +29,22 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         });
     }
     
-    function onStep() {
+    self.onStep(function(layoutUpdated) {
         var layoutHeight = self.layout.height;
         
-        if (self.updated) {
+        if (layoutUpdated) {
             // Height calculation
             self.__contentHeight = self.parent.reduceChildren(function(height, child) {
                 if (child.isScrollbar) return height;
                 return height + child.layout.height;
             }, 0, false);
-            
+           
             var _thumbHeight = ~~(max(10, min(layoutHeight, layoutHeight * (layoutHeight / __contentHeight))));
+            
             if (_thumbHeight != self.Thumb.getHeight()) {
                 self.Thumb.setHeight(_thumbHeight);
             }
-            
+        
             self.__maxThumbPosition = layoutHeight - _thumbHeight;
             self.__maxScroll = max(0, __contentHeight - self.parent.layout.height);
         } 
@@ -70,7 +71,7 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
                 self.Thumb.setTop(thumbPosition);
             }
         }
-    };
+    });
 }
 
 function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) constructor {
@@ -88,15 +89,15 @@ function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) construc
         return true;
     });
     
-    function onStep() {
-        if (mouse_check_button_released(mb_left)) {
+    self.onStep(function() {
+        if (global.UI.mouseLeftReleased) {
             if (self.parent.dragged) {
                 self.parent.dragged = false;
                 self.setWidth(11);
                 self.setLeft(0);
             }
         }
-    }
+    });
     
     function onDraw() {
         if (getHeight() == self.parent.layout.height) return;

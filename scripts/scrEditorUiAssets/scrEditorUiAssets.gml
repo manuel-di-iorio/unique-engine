@@ -71,6 +71,30 @@ function EditorUiAssets(ui) constructor {
         asset.name = name;
     };
         
+    Treeview.onRemoveItem = function(treeviewItem, isSelected) { 
+        if (isSelected) {
+            oSceneEditor.inspector.close();
+        }
+        
+        var assetType = treeviewItem.assetType;
+        var asset = treeviewItem.asset;
+        var list;
+         
+        switch (assetType) {
+            case "texture": list = oSceneEditor.projectTextures; break;
+            case "material": list = oSceneEditor.projectMaterials; break;
+            case "model": list = oSceneEditor.projectModels; break;
+            case "light": list = oSceneEditor.projectLights; break;
+            case "camera": list = oSceneEditor.projectCameras; break;
+            case "scene": list = oSceneEditor.projectScenes; break;
+        }
+        
+        var _itemIdx = array_find_index(list, method({ asset }, function(value) {
+            return value == asset;
+        }))
+        if (_itemIdx != -1) array_delete(list, _itemIdx, 1);
+    }
+            
     Treeview.onItemSelected = function(treeviewItem) {
         oSceneEditor.inspector.inspect(treeviewItem.asset); 
     };

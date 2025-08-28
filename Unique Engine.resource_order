@@ -129,6 +129,7 @@
     {"name":"sprUiScene","order":8,"path":"sprites/sprUiScene/sprUiScene.yy",},
     {"name":"sprUiSection","order":15,"path":"sprites/sprUiSection/sprUiSection.yy",},
     {"name":"sprUiTexture","order":3,"path":"sprites/sprUiTexture/sprUiTexture.yy",},
+    {"name":"sprUiTrash","order":16,"path":"sprites/sprUiTrash/sprUiTrash.yy",},
     {"name":"sprUiTreeviewArrowDown","order":12,"path":"sprites/sprUiTreeviewArrowDown/sprUiTreeviewArrowDown.yy",},
     {"name":"sprUiTreeviewArrowRight","order":11,"path":"sprites/sprUiTreeviewArrowRight/sprUiTreeviewArrowRight.yy",},
   ],

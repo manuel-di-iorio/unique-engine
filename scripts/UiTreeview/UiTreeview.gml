@@ -7,6 +7,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.selectedItem = undefined;  
     self.pointerEvents = true;
     self.onNewAsset = undefined;
+    self.onRemoveItem = undefined;
     self.onItemSelected = undefined;
     
     // Create the items container
@@ -189,10 +190,28 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.RightContent.add(self.ImportModelIcon); 
     }
     
+    // Delete button
+    if (!self.entity) {
+        self.DeleteIcon = new UiButton(sprUiTrash, { 
+            name: "UiTreeview.Item.ContentDeleteBtn", padding: 5, paddingBottom: 4, marginRight: 15
+        }, { outline: true, tooltip: "Delete this asset" });
+        self.DeleteIcon.treeview = self.treeview;
+        
+        // Stop the propagation of the "mouse down" event
+        self.DeleteIcon.onMouseDown(function() {  return true; });
+        
+        self.DeleteIcon.onClick(method(_this, function() {
+            self.__removeItem();
+            return true;
+        }));
+        
+        self.RightContent.add(self.DeleteIcon); 
+    }
+    
     // Create button
     if (self.type == "folder" || self.assetType == "model") {
         self.CreateIcon = new UiButton(sprUiCreateAsset, { 
-            name: "UiTreeview.Item.Content.CreateBtn", padding: 5, paddingBottom: 4, marginRight: 20 
+            name: "UiTreeview.Item.Content.CreateBtn", padding: 5, paddingBottom: 4, marginRight: 20
         }, { outline: true, tooltip: "Create a new asset" });
         self.CreateIcon.treeview = self.treeview;
         
@@ -229,9 +248,29 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.treeview.__onItemSelected(child);
     }
     
+    function __removeItem() {
+        if (!show_question("Are you sure you want to delete this asset?")) return;
+
+        var _isSelected = self.treeview.selectedItem == self;
+        if (_isSelected) {
+            self.treeview.selectedItem = undefined;
+        }
+        
+        if (self.treeview.onRemoveItem != undefined) self.treeview.onRemoveItem(self, _isSelected);
+        
+        var _parent = self.parent;
+        self.destroy();
+        
+        if (!_parent.count()) {
+            _parent.parent.collapseItem();
+            _parent.parent.Arrow.hide();
+        }
+    }
+    
     function expandItem() {
         self.collapsed = false;
         self.Arrow.sprite = sprUiTreeviewArrowDown;
+        self.Arrow.show();
         self.Items.show();
     }
     
