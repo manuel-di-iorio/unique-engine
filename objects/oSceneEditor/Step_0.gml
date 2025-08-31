@@ -21,7 +21,6 @@ if ((winW != winWNew || winH != winHNew) && winWNew != 0 && winHNew != 0) {
     
     camera.aspect = view_wport[1] / view_hport[1];
 }
-
 ui.update();
 
 // Wrap the mouse coords when out of bounds

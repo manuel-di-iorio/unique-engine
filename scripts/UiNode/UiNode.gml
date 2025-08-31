@@ -41,6 +41,7 @@ function UiNode(style = {}, props = {}) constructor {
     self.__scrollBoundsCachedScrollTop = undefined;
     self.__scrollBoundsCachedResult = undefined;
     self.destroyed = false;
+    self.drawIndex = 0;
     
     // Root-only props
     if (self.root) {  
@@ -55,6 +56,11 @@ function UiNode(style = {}, props = {}) constructor {
         self.mouseYPrev = undefined;
         self.stepHandlers = [];
         self.layoutUpdated = undefined;
+        self.grid = ds_grid_create(0, 0);
+        self.gridW = 0;
+        self.gridH = 0;
+        self.gridSize = 64;
+        self.hoveredElements = [];
     }
     
     // Set the size of the node
@@ -63,6 +69,14 @@ function UiNode(style = {}, props = {}) constructor {
         flexpanel_node_style_set_width(self.node, w, flexpanel_unit.point);
         flexpanel_node_style_set_height(self.node, h, flexpanel_unit.point);
         global.UI.needsUpdate = true;
+        
+        if (self.root) {
+            self.gridW = ceil(w / self.gridSize);
+            self.gridH = ceil(h / self.gridSize);
+            ds_grid_resize(self.grid, self.gridW, self.gridH);
+            ds_grid_clear(self.grid, undefined);
+        }
+        
         return self;
     }
     
@@ -230,6 +244,40 @@ function UiNode(style = {}, props = {}) constructor {
         flexpanel_node_style_set_display(self.node, flexpanel_display.none);
         self.display = false;
         global.UI.needsUpdate = true;
+    }
+    
+    // Scrolling bound check    
+    function __isInScrollBounds() {
+        gml_pragma("forceinline");
+        var _scrollableParent = self.scrollableParent;
+
+        if (self.isScrollbar || _scrollableParent == undefined) return true;
+        
+        if (self.__scrollBoundsCachedScrollTop == self.scrollTop && !global.UI.layoutUpdated) {
+            return self.__scrollBoundsCachedValue;
+        }
+        
+        self.__scrollBoundsCachedScrollTop = _scrollableParent.scrollTop;
+    
+        // Relative start position
+        var elemLayout = self.layout;
+        var elemTop = elemLayout.top - elemLayout.paddingTop;
+        var elemBottom = elemTop + elemLayout.height + elemLayout.paddingBottom;
+    
+        var parentLayout = _scrollableParent.layout;
+
+        // Calculate the visible area based on the scroll
+        var visibleTop = parentLayout.top + _scrollableParent.scrollTop;
+        var visibleBottom = visibleTop + parentLayout.height;
+
+        // If fully outside then it is invisible
+        if (elemBottom < visibleTop || elemTop > visibleBottom) {
+            self.__scrollBoundsCachedValue = false;
+            return false;
+        }
+    
+        self.__scrollBoundsCachedValue = true;
+        return true;
     }
     
     function isVisible() {
@@ -506,40 +554,6 @@ function UiNode(style = {}, props = {}) constructor {
         return self;
     }
     
-    // Scrolling bound check    
-    function __isInScrollBounds() {
-        gml_pragma("forceinline");
-        var _scrollableParent = self.scrollableParent;
-
-        if (self.isScrollbar || _scrollableParent == undefined) return true;
-        
-        if (self.__scrollBoundsCachedScrollTop == self.scrollTop && !global.UI.layoutUpdated) {
-            return self.__scrollBoundsCachedValue;
-        }
-        
-        self.__scrollBoundsCachedScrollTop = _scrollableParent.scrollTop;
-    
-        // Relative start position
-        var elemLayout = self.layout;
-        var elemTop = elemLayout.top - elemLayout.paddingTop;
-        var elemBottom = elemTop + elemLayout.height + elemLayout.paddingBottom;
-    
-        var parentLayout = _scrollableParent.layout;
-
-        // Calculate the visible area based on the scroll
-        var visibleTop = parentLayout.top + _scrollableParent.scrollTop;
-        var visibleBottom = visibleTop + parentLayout.height;
-
-        // If fully outside then it is invisible
-        if (elemBottom < visibleTop || elemTop > visibleBottom) {
-            self.__scrollBoundsCachedValue = false;
-            return false;
-        }
-    
-        self.__scrollBoundsCachedValue = true;
-        return true;
-    }
-    
     function __updateLayout() {
         gml_pragma("forceinline");
         
@@ -572,49 +586,68 @@ function UiNode(style = {}, props = {}) constructor {
         self.yp1 = self.y1 - layout.paddingTop;
         self.xp2 = self.x2 + layout.paddingRight;
         self.yp2 = self.y2 + layout.paddingBottom;
-    }
-    
-    function checkEvents() {
-        gml_pragma("forceinline");
-        var ui = global.UI;
         
-        // Cache the position
-        if (!self.mounted || ui.layoutUpdated) {
-            self.__updateLayout();
-        }
+        self.__addToGrid();
         
+        // Run the onMount method
         if (!self.mounted) {
             self.mounted = true;
             if (self.onMount != undefined) self.onMount();
         }
         
-        if (!self.isVisible()) return;
-        
-        // Process children first
         var _children = self.children;
         for (var i = self.childrenLength - 1; i >= 0; i--) {
-            _children[i].checkEvents();
+            _children[i].__updateLayout();
+        }
+    }
+    
+   function __getNearestGridElements() {
+        gml_pragma("forceinline");
+        var ui = global.UI;
+        if (ui.gridW == 0 || ui.gridH == 0) return [];
+        
+        // Calculate expanded area around mouse
+        var margin = 16;
+        var mouseX1 = mouseX - margin;
+        var mouseY1 = mouseY - margin;
+        var mouseX2 = mouseX + margin;
+        var mouseY2 = mouseY + margin;
+        
+        // Convert to grid coordinates
+        var gridX1 = max(0, ~~(mouseX1 / ui.gridSize));
+        var gridY1 = max(0, ~~(mouseY1 / ui.gridSize));
+        var gridX2 = min(ui.gridW - 1, ~~(mouseX2 / ui.gridSize));
+        var gridY2 = min(ui.gridH - 1, ~~(mouseY2 / ui.gridSize));
+        
+        var candidates = [];
+        var processedIds = {};
+        
+        // Collect all nodes in the area
+        for (var gx = gridX1; gx <= gridX2; gx++) {
+            for (var gy = gridY1; gy <= gridY2; gy++) {
+                var cell = ds_grid_get(ui.grid, gx, gy);
+                if (!is_array(cell)) continue;
+                
+                for (var i = 0, l = array_length(cell); i < l; i++) {
+                    var elem = cell[i];
+                    
+                    // Avoid duplicates
+                    if (!processedIds[$ elem.id] && elem.pointerEvents && elem.isVisible()) {
+                        processedIds[$ elem.id] = true;
+                        array_push(candidates, elem);
+                    }
+                }
+            }
         }
         
-        // Check hover state
-        if (self.pointerEvents && ui.mouseChanged) {
-            self.hovered = false;
-            
-            if (ui.deepestTarget == undefined && point_in_rectangle(ui.mouseX, ui.mouseY, self.xp1, self.yp1, self.xp2, self.yp2)) {
-                self.hovered = true;
-                ui.deepestTarget = self;
-                
-                if (self.handpoint && window_get_cursor() == cr_default) {
-                    window_set_cursor(cr_handpoint);
-                }
-                
-                if (ui.previousTarget != self) {
-                    ui.previousTarget = self; 
-                    ui.dispatchEvent(UI_EVENT.mouseenter, self); 
-                    ui.dispatchEvent(UI_EVENT.mouseover, self);
-                } 
-           } 
-        }
+        // Sort candidates by drawIndex (higher drawIndex = drawn later = on top)
+        array_sort(candidates, function(a, b) {
+            if (a.drawIndex < b.drawIndex) return -1;
+            if (a.drawIndex > b.drawIndex) return 1;
+            return 0;
+        });
+        
+        return candidates;
     }
     
     // Calculate the layout of this node and its children
@@ -626,6 +659,12 @@ function UiNode(style = {}, props = {}) constructor {
             self.needsUpdate = false;
             self.layoutUpdated = true;
             flexpanel_calculate_layout(self.node, undefined, undefined, flexpanel_direction.LTR);
+            
+            // Clear the spatial grid
+            ds_grid_clear(self.grid, undefined);
+            
+            // Update the elements position when the layout changes
+            self.__updateLayout();
         }
         
         // Cache mouse vars
@@ -634,17 +673,42 @@ function UiNode(style = {}, props = {}) constructor {
         self.mouseChanged = self.mouseX != self.mouseXPrev || self.mouseY != self.mouseYPrev;
         self.mouseLeftReleased = mouse_check_button_released(mb_left);
         
-        // Events check
+        // Check the hover/unhover events
         var _currentlyHovered = self.deepestTarget;
-        if (self.mouseChanged) self.deepestTarget = undefined;
-        self.checkEvents();
+        if (self.mouseChanged) {
+            self.deepestTarget = undefined;
         
-        if (self.mouseChanged && _currentlyHovered != undefined && _currentlyHovered != self.deepestTarget) {
-            window_set_cursor(cr_default);
-            self.dispatchEvent(UI_EVENT.mouseleave, _currentlyHovered); 
-            self.dispatchEvent(UI_EVENT.mouseout, _currentlyHovered);
-            self.previousTarget = undefined;
+            var _nearestElems = self.__getNearestGridElements();
+        
+            for (var i = array_length(_nearestElems) - 1; i >= 0; i--) {
+                var _elem = _nearestElems[i];   
+                
+                if (self.deepestTarget == undefined && point_in_rectangle(self.mouseX, self.mouseY, _elem.xp1, _elem.yp1, _elem.xp2, _elem.yp2)) {
+                    _elem.hovered = true;
+                    self.dispatchEvent(UI_EVENT.mouseenter, _elem); 
+                    self.dispatchEvent(UI_EVENT.mouseover, _elem);
+                    self.deepestTarget = _elem;
+                    
+                    if (_elem.handpoint && window_get_cursor() == cr_default) {
+                        window_set_cursor(cr_handpoint);
+                    }
+                    
+                    break;
+                }
+            }
+
+            // Unhover the previous element
+            if (_currentlyHovered != undefined && _currentlyHovered != self.deepestTarget) {
+                window_set_cursor(cr_default);
+                _currentlyHovered.hovered = false;
+                self.dispatchEvent(UI_EVENT.mouseleave, _currentlyHovered); 
+                self.dispatchEvent(UI_EVENT.mouseout, _currentlyHovered);
+                self.previousTarget = undefined;
+            }
+            
+            self.previousTarget = self.deepestTarget;
         }
+        
         
         // Click event handled only on root
         if (self.deepestTarget != undefined) {
@@ -684,6 +748,8 @@ function UiNode(style = {}, props = {}) constructor {
         if (!self.isVisible() || !self.mounted) return;
 
         var ui = global.UI;
+        
+        self.drawIndex = ui.rootDrawIndex++;
         var _scissor = undefined;
 
         // Draw the border if enabled
@@ -711,6 +777,7 @@ function UiNode(style = {}, props = {}) constructor {
         if (self.__UiScrollbar != undefined && _scissor != undefined) {
             gpu_set_scissor(_scissor);
             self.__UiScrollbar.renderChild(debug);
+            self.__UiScrollbar.Thumb.drawIndex = ui.rootDrawIndex++;
             self.__UiScrollbar.Thumb.onDraw();
         }
         
@@ -730,6 +797,8 @@ function UiNode(style = {}, props = {}) constructor {
     // Render the node and its children to the static surface
     // Pass `true` as first argument to draw the nodes bounds and their (optional) name.
     function render(debug = false) {
+        self.rootDrawIndex = 0;
+        
         gml_pragma("forceinline");
         if (self.width) {
             if (!surface_exists(self.surface)) {
@@ -752,5 +821,30 @@ function UiNode(style = {}, props = {}) constructor {
         }
     }
     
+    // Spatial partition grid methods
+    function __addToGrid() {
+        var ui = global.UI;
+        if (ui.gridW == 0 || ui.gridH == 0) return;
+        
+        // Calculate grid bounds for this node
+        var gridX1 = max(0, floor(self.xp1 / ui.gridSize));
+        var gridY1 = max(0, floor(self.yp1 / ui.gridSize));
+        var gridX2 = min(ui.gridW - 1, floor(self.xp2 / ui.gridSize));
+        var gridY2 = min(ui.gridH - 1, floor(self.yp2 / ui.gridSize));
+        
+        // Store cells this node occupies
+        for (var gx = gridX1; gx <= gridX2; gx++) {
+            for (var gy = gridY1; gy <= gridY2; gy++) {
+                
+                var cells = ds_grid_get(ui.grid, gx, gy);
+                if (cells == undefined) {
+                    cells = [];
+                    ds_grid_set(ui.grid, gx, gy, cells);
+                }
+                array_push(cells, self);
+            }
+        }
+    }
+     
     setName(style[$ "name"] ?? "UiNode");
 }

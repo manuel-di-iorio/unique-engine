@@ -14,3 +14,13 @@ projectModels = [];
 projectLights = [];
 projectCameras = [];
 projectScenes = [];
+
+function countUI(node) {
+    c = 1
+    
+    for (var i=0; i<array_length(node.children); i++) {
+        c += countUI(node.children[i])
+    }
+    
+    return c
+}
