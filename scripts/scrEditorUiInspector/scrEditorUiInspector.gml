@@ -360,6 +360,16 @@ function EditorUiInspector(ui) constructor {
                     });
                 }
            },
+        
+           { 
+                id: "renderOrder",
+                field: "renderOrder",
+                label: "Render Order", 
+                type: "text",
+                format: "integer",
+                negative: true,
+            },
+        
            //{
                 //id: "labelPosition",
                 //label: "Transform", 
@@ -486,6 +496,7 @@ function EditorUiInspector(ui) constructor {
                         format: assetField[$ "format"],
                         min: assetField[$ "min"],
                         max: assetField[$ "max"],
+                        negative: assetField[$ "negative"],
                         disabled: assetField[$ "disabled"],
                         value: asset[$ assetField.field],
                         valueGetter,

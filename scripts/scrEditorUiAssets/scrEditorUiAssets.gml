@@ -98,4 +98,169 @@ function EditorUiAssets(ui) constructor {
     Treeview.onItemSelected = function(treeviewItem) {
         oSceneEditor.inspector.inspect(treeviewItem.asset); 
     };
+    
+    // Asset drag & drop handler
+    Treeview.onAssetDrop = function(draggedTreeviewItem, targetTreeviewItem) {
+        var draggedItem = draggedTreeviewItem; // Il TreeviewItem che stiamo trascinando
+        var targetItem = targetTreeviewItem; // Il TreeviewItem su cui stiamo droppando
+        
+        // Log per debug
+        log("Asset Drag & Drop:", draggedItem.assetType, "->", targetItem.assetType);
+        
+        // Verifica se il drop è valido
+        var isValidDrop = false;
+        var dropAction = ""; // "reparent", "instance", "invalid"
+        
+        // Regole di validazione
+        // 1. Texture e Material non sono draggabili
+        if (draggedItem.assetType == "texture" || draggedItem.assetType == "material") {
+            log("Drop invalid: Textures and materials are not draggable");
+            return false;
+        }
+        
+        // 2. Scene può essere spostata solo sotto un'altra Scene
+        if (draggedItem.assetType == "scene") {
+            if (targetItem.assetType == "scene" && !targetItem.entity) {
+                isValidDrop = true;
+                dropAction = "reparent";
+            } else {
+                log("Drop invalid: Scenes can only be moved under other scenes");
+                return false;
+            }
+        }
+        
+        // 3. Model può essere spostato sotto un altro Model (reparenting) o sotto una Scene (istanza)
+        else if (draggedItem.assetType == "model") {
+            if (targetItem.assetType == "model" && !targetItem.entity) {
+                isValidDrop = true;
+                dropAction = "reparent";
+            } else if (targetItem.assetType == "scene" && !targetItem.entity) {
+                isValidDrop = true;
+                dropAction = "instance";
+            } else {
+                log("Drop invalid: Models can only be moved under other models or scenes");
+                return false;
+            }
+        }
+        
+        // 4. Altri tipi di asset
+        else {
+            // Per ora, altri tipi seguono le stesse regole dei model
+            if (targetItem.assetType == draggedItem.assetType && !targetItem.entity) {
+                isValidDrop = true;
+                dropAction = "reparent";
+            } else {
+                log("Drop invalid: Asset type mismatch or invalid target");
+                return false;
+            }
+        }
+        
+        // Verifica che non stiamo provando a spostare un item su se stesso
+        if (draggedItem == targetItem) {
+            log("Drop invalid: Cannot drop item on itself");
+            return false;
+        }
+        
+        // Verifica che non stiamo provando a reparentare un parent dentro uno dei suoi figli
+        // (questo creerebbe un ciclo nella gerarchia)
+        if (dropAction == "reparent" && draggedItem.asset != undefined && targetItem.asset != undefined) {
+            // Controlla se il targetItem è un discendente del draggedItem
+            var currentParent = targetItem.asset.parent;
+            while (currentParent != undefined) {
+                if (currentParent == draggedItem.asset) {
+                    log("Drop invalid: Cannot reparent a parent into its own descendant (would create a cycle)");
+                    return false;
+                }
+                currentParent = currentParent.parent;
+            }
+            
+            // Controlla anche nella gerarchia UI del treeview
+            var currentTreeviewParent = targetItem.parent;
+            while (currentTreeviewParent != undefined) {
+                if (currentTreeviewParent == draggedItem) {
+                    log("Drop invalid: Cannot reparent a parent into its own descendant in UI hierarchy");
+                    return false;
+                }
+                currentTreeviewParent = currentTreeviewParent.parent;
+            }
+        }
+        
+        // Esegui l'azione di drop
+        if (isValidDrop) {
+            if (dropAction == "reparent") {
+                // Reparenting: sposta l'asset nella gerarchia
+                log("Reparenting:", draggedItem.asset.name, "under", targetItem.asset.name);
+                
+                // Rimuovi dall'asset genitore precedente
+                if (draggedItem.asset.parent != undefined) {
+                    draggedItem.asset.parent.remove(draggedItem.asset);
+                }
+                
+                // Aggiungi al nuovo genitore
+                targetItem.asset.add(draggedItem.asset);
+                
+                // Aggiorna la UI del treeview
+                // draggedItem.removeFromParent();
+                targetItem.Items.add(draggedItem);
+                
+                // Espandi il target item per mostrare il nuovo figlio
+                if (targetItem.collapsed) {
+                    targetItem.expandItem();
+                }
+                
+                // Mostra la freccia se non era visibile
+                if (!targetItem.Arrow.visible) {
+                    targetItem.Arrow.show();
+                }
+            }
+            else if (dropAction == "instance") {
+                // Istanziazione: crea una nuova istanza del modello nella scena
+                log("Creating instance of:", draggedItem.asset.name, "in scene:", targetItem.asset.name);
+                
+                // Clona l'asset model
+                var instanceAsset = draggedItem.asset.clone();
+                instanceAsset.name = draggedItem.asset.name + "_instance";
+                
+                // Aggiungi l'istanza alla scena
+                targetItem.asset.add(instanceAsset);
+                
+                // Crea un nuovo TreeviewItem per l'istanza
+                var instanceTreeviewItem = new UiTreeviewItem({ 
+                    name: "UiTreeview.Item", 
+                    marginLeft: 15, 
+                    paddingVertical: 2.5 
+                }, {
+                    treeview: targetItem.treeview,
+                    assetType: draggedItem.assetType,
+                    type: draggedItem.assetType,
+                    icon: draggedItem.icon
+                });
+                instanceTreeviewItem.asset = instanceAsset;
+                
+                // Aggiungi alla UI
+                targetItem.Items.add(instanceTreeviewItem);
+                
+                // Espandi il target item per mostrare la nuova istanza
+                if (targetItem.collapsed) {
+                    targetItem.expandItem();
+                }
+                
+                // Mostra la freccia se non era visibile
+                if (!targetItem.Arrow.visible) {
+                    targetItem.Arrow.show();
+                }
+                
+                // Seleziona la nuova istanza
+                targetItem.treeview.__onItemSelected(instanceTreeviewItem);
+            }
+            
+            // Forza il redraw dell'UI
+            global.UI.needsRedraw = true;
+            global.UI.needsUpdate = true;
+            
+            return true;
+        }
+        
+        return false;
+    };
 }

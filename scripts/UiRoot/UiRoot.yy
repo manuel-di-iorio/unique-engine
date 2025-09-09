@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"__UiGlobals",
+  "%Name":"UiRoot",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"__UiGlobals",
+  "name":"UiRoot",
   "parent":{
     "name":"UniqueUI",
     "path":"folders/UniqueUI.yy",

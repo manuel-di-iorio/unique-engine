@@ -16,6 +16,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     self.min = props[$ "min"];
     self.max = props[$ "max"];
     self.placeholder = props[$ "placeholder"];
+    self.negative = props[$ "negative"] ?? false;
     
     self.Input = new UiNode({ 
         name: "UiTextbox.Input", 
@@ -832,9 +833,9 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                     if (charCode >= ord("0") && charCode <= ord("9")) {
                         return true;
                     }
-                    //if (char == "-" && cursorPos == 0 && string_pos("-", currentText) == 0) {
-                        //return true;
-                    //}
+                    if (char == "-" && self.parent.negative && cursorPos == 0 && string_pos("-", currentText) == 0) {
+                        return true;
+                    }
                     return false;
                     
                 case "float":
@@ -845,9 +846,9 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                     if (char == "." && string_count(".", currentText) == 0) {
                         return true;
                     }
-                    //if (char == "-" && cursorPos == 0 && string_pos("-", currentText) == 0) {
-                        //return true;
-                    //}
+                    if (char == "-" && self.parent.negative && cursorPos == 0 && string_pos("-", currentText) == 0) {
+                        return true;
+                    }
                     return false;
                     
                 case "string":
@@ -864,14 +865,14 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             
             switch (format) {
                 case "integer":
-                    if (value == ""/* || value == "-"*/) return true; // Allow empty or just minus during typing
+                    if (value == "" || (value == "-" && self.parent.negative)) return true; // Allow empty or just minus during typing
                     //var intValue = real(value);
                     //if (_min != undefined && intValue < _min) return false;
                     //if (_max != undefined && intValue > _max) return false;
                     return true;
                     
                 case "float":
-                    if (value == "" || /*value == "-" ||*/ value == ".") return true; // Allow partial values during typing
+                    if (value == "" || (value == "-" && self.parent.negative) || value == ".") return true; // Allow partial values during typing
                     //var floatValue = real(value);
                     //if (_min != undefined && floatValue < _min) return false;
                     //if (_max != undefined && floatValue > _max) return false;

@@ -9,6 +9,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.onNewAsset = undefined;
     self.onRemoveItem = undefined;
     self.onItemSelected = undefined;
+    self.onAssetDrop = undefined;
     
     // Create the items container
     self.Items = new UiNode({ name: "UiTreeview.Items", marginTop: 5, paddingBottom: 5 });
@@ -105,23 +106,28 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         height: 30, 
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center"
-     });
+        alignItems: "center",
+    }, {
+        pointerEvents: true,
+        dropzone: true,
+    });
     
-    with (self.Content) {
-        self.pointerEvents = true;
+    self.add(self.Content);
+    
+    with (self.Content) { 
+        // If this is not the root treeview item, enable the dragging
+        if (!self.parent.entity) {
+            self.draggable = true;
+            self.handpoint = true;
+        }
         
         self.onMouseEnter(function() {
             global.UI.needsRedraw = true;
             
-            if (!self.parent.entity && window_get_cursor() == cr_default) {
-                window_set_cursor(cr_handpoint);
-            }
         });
         
         self.onMouseLeave(function() {
             global.UI.needsRedraw = true; 
-            window_set_cursor(cr_default);
         });
         
         self.onMouseDown(function() {
@@ -151,6 +157,19 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             // Draw the label
             draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle); draw_set_font(fText);
             draw_text(xx, meanY, self.parent.asset == undefined ? self.parent.name : self.parent.asset.name);
+        };
+        
+        // Use the external onAssetDrop callback if available
+        self.onDrop = function(draggedTreeviewItem) {
+            var draggedItem = draggedTreeviewItem.parent; // Il TreeviewItem che stiamo trascinando
+            var targetItem = self.parent; // Il TreeviewItem su cui stiamo droppando
+            
+            // Check if there's an external callback defined in the treeview
+            if (targetItem.treeview.onAssetDrop != undefined) {
+                return targetItem.treeview.onAssetDrop(draggedItem, targetItem);
+            }
+            
+            return false;
         };
     }
     
@@ -228,15 +247,14 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     
     self.Items = new UiNode();
     
-    self.add(self.Content, self.Items);
-    
+    self.add(self.Items);
     
     // Methods 
     function __addItem() {
         var child = new UiTreeviewItem({ name: "UiTreeview.Item", marginLeft: 15, paddingVertical: 2.5 }, {
             treeview: self.treeview,
             assetType: self.assetType,
-            type: self.assetType
+            type: self.assetType,
         });
         
         self.Items.add(child);
@@ -286,5 +304,5 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             draw_set_color(global.UI_COL_TREE_BG);
             draw_rectangle(self.xp1, self.y1, self.xp2, self.y2, false);
         }
-    }
+    } 
 }
