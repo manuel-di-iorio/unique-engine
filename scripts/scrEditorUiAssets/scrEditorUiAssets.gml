@@ -69,6 +69,20 @@ function EditorUiAssets(ui) constructor {
         var name = string_upper(string_char_at(assetType, 1)) + string_copy(assetType, 2, string_length(assetType) - 1) + string(assetId);
         treeviewItem.asset = asset; 
         asset.name = name;
+        
+        // Se l'item è stato creato sotto un parent (non root entity), stabilisci la gerarchia degli asset
+        if (treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined && !treeviewItem.parent.parent.entity) {
+            var parentTreeviewItem = treeviewItem.parent.parent;
+            if (parentTreeviewItem.asset != undefined) {
+                // Stabilisci la gerarchia: il nuovo asset diventa figlio del parent asset
+                parentTreeviewItem.asset.add(asset);
+                // Debug: ora asset.parent dovrebbe essere == parentTreeviewItem.asset
+                show_debug_message("New asset '" + asset.name + "' added under parent '" + parentTreeviewItem.asset.name + "'");
+            }
+        } else {
+            // Asset creato al livello root
+            show_debug_message("New asset '" + asset.name + "' created at root level");
+        }
     };
         
     Treeview.onRemoveItem = function(treeviewItem, isSelected) { 
@@ -104,32 +118,35 @@ function EditorUiAssets(ui) constructor {
         var draggedItem = draggedTreeviewItem; // Il TreeviewItem che stiamo trascinando
         var targetItem = targetTreeviewItem; // Il TreeviewItem su cui stiamo droppando
         
-        // Log per debug
-        log("Asset Drag & Drop:", draggedItem.assetType, "->", targetItem.assetType);
-        
         // Verifica se il drop è valido
         var isValidDrop = false;
-        var dropAction = ""; // "reparent", "instance", "invalid"
+        var dropAction = "";
         
         // Regole di validazione
         // 1. Texture e Material non sono draggabili
         if (draggedItem.assetType == "texture" || draggedItem.assetType == "material") {
-            log("Drop invalid: Textures and materials are not draggable");
             return false;
         }
         
-        // 2. Scene può essere spostata solo sotto un'altra Scene
-        if (draggedItem.assetType == "scene") {
+        // 2. Drop su root entity item per liberare da parent
+        // Controlla se l'item è sotto un parent nella UI (non solo nell'asset)
+        if ((draggedItem.assetType == "model" || draggedItem.assetType == "scene") &&
+         targetItem.entity && targetItem.assetType == draggedItem.assetType && draggedItem.asset != undefined) {
+            isValidDrop = true;
+            dropAction = "unparent";
+        }
+        
+        // 3. Scene può essere spostata solo sotto un'altra Scene
+        else if (draggedItem.assetType == "scene") {
             if (targetItem.assetType == "scene" && !targetItem.entity) {
                 isValidDrop = true;
                 dropAction = "reparent";
             } else {
-                log("Drop invalid: Scenes can only be moved under other scenes");
                 return false;
             }
         }
         
-        // 3. Model può essere spostato sotto un altro Model (reparenting) o sotto una Scene (istanza)
+        // 4. Model può essere spostato sotto un altro Model (reparenting) o sotto una Scene (istanza)
         else if (draggedItem.assetType == "model") {
             if (targetItem.assetType == "model" && !targetItem.entity) {
                 isValidDrop = true;
@@ -138,26 +155,23 @@ function EditorUiAssets(ui) constructor {
                 isValidDrop = true;
                 dropAction = "instance";
             } else {
-                log("Drop invalid: Models can only be moved under other models or scenes");
                 return false;
             }
         }
         
-        // 4. Altri tipi di asset
+        // 5. Altri tipi di asset
         else {
             // Per ora, altri tipi seguono le stesse regole dei model
             if (targetItem.assetType == draggedItem.assetType && !targetItem.entity) {
                 isValidDrop = true;
                 dropAction = "reparent";
             } else {
-                log("Drop invalid: Asset type mismatch or invalid target");
                 return false;
             }
         }
         
         // Verifica che non stiamo provando a spostare un item su se stesso
         if (draggedItem == targetItem) {
-            log("Drop invalid: Cannot drop item on itself");
             return false;
         }
         
@@ -168,7 +182,6 @@ function EditorUiAssets(ui) constructor {
             var currentParent = targetItem.asset.parent;
             while (currentParent != undefined) {
                 if (currentParent == draggedItem.asset) {
-                    log("Drop invalid: Cannot reparent a parent into its own descendant (would create a cycle)");
                     return false;
                 }
                 currentParent = currentParent.parent;
@@ -178,7 +191,6 @@ function EditorUiAssets(ui) constructor {
             var currentTreeviewParent = targetItem.parent;
             while (currentTreeviewParent != undefined) {
                 if (currentTreeviewParent == draggedItem) {
-                    log("Drop invalid: Cannot reparent a parent into its own descendant in UI hierarchy");
                     return false;
                 }
                 currentTreeviewParent = currentTreeviewParent.parent;
@@ -187,9 +199,47 @@ function EditorUiAssets(ui) constructor {
         
         // Esegui l'azione di drop
         if (isValidDrop) {
-            if (dropAction == "reparent") {
+            if (dropAction == "unparent") {
+                // Rimuovi dall'asset genitore corrente
+                if (draggedItem.asset.parent != undefined) {
+                    draggedItem.asset.parent.remove(draggedItem.asset);
+                    draggedItem.asset.parent = undefined;
+                }
+                
+                // Salva il riferimento al parent UI corrente prima di rimuovere
+                var currentUIParent = draggedItem.parent;
+                
+                // Aggiorna la UI del treeview: sposta l'item al livello root
+                // Rimuovi dall'attuale posizione nella UI
+                if (draggedItem.parent != undefined) {
+                    draggedItem.parent.remove(draggedItem);
+                }
+                
+                // Aggiungi al target root entity item
+                targetItem.Items.add(draggedItem);
+                
+                // Espandi il target item per mostrare l'item spostato
+                if (targetItem.collapsed) {
+                    targetItem.expandItem();
+                }
+                
+                // Mostra la freccia se non era visibile
+                if (!targetItem.Arrow.visible) {
+                    targetItem.Arrow.show();
+                }
+                
+                // Se il parent precedente non ha più figli, nascondi la freccia
+                if (currentUIParent != undefined && currentUIParent.count() == 0) {
+                    // Trova il TreeviewItem parent (il nonno del draggedItem)
+                    var parentTreeviewItem = currentUIParent.parent;
+                    if (parentTreeviewItem != undefined && parentTreeviewItem.Arrow != undefined) {
+                        parentTreeviewItem.collapseItem();
+                        parentTreeviewItem.Arrow.hide();
+                    }
+                }
+            }
+            else if (dropAction == "reparent") {
                 // Reparenting: sposta l'asset nella gerarchia
-                log("Reparenting:", draggedItem.asset.name, "under", targetItem.asset.name);
                 
                 // Rimuovi dall'asset genitore precedente
                 if (draggedItem.asset.parent != undefined) {
@@ -215,7 +265,6 @@ function EditorUiAssets(ui) constructor {
             }
             else if (dropAction == "instance") {
                 // Istanziazione: crea una nuova istanza del modello nella scena
-                log("Creating instance of:", draggedItem.asset.name, "in scene:", targetItem.asset.name);
                 
                 // Clona l'asset model
                 var instanceAsset = draggedItem.asset.clone();
@@ -253,10 +302,6 @@ function EditorUiAssets(ui) constructor {
                 // Seleziona la nuova istanza
                 targetItem.treeview.__onItemSelected(instanceTreeviewItem);
             }
-            
-            // Forza il redraw dell'UI
-            global.UI.needsRedraw = true;
-            global.UI.needsUpdate = true;
             
             return true;
         }

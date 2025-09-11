@@ -40,11 +40,8 @@
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
     {"$GMIncludedFile":"","%Name":"11804_Airplane_diff.jpg","CopyToMask":-1,"filePath":"datafiles/airplane","name":"11804_Airplane_diff.jpg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"11804_Airplane_diff.jpg","CopyToMask":-1,"filePath":"datafiles/Airplane","name":"11804_Airplane_diff.jpg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"11804_Airplane_v2_l2.mtl","CopyToMask":-1,"filePath":"datafiles/airplane","name":"11804_Airplane_v2_l2.mtl","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"11804_Airplane_v2_l2.mtl","CopyToMask":-1,"filePath":"datafiles/Airplane","name":"11804_Airplane_v2_l2.mtl","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"11804_Airplane_v2_l2.obj","CopyToMask":-1,"filePath":"datafiles/airplane","name":"11804_Airplane_v2_l2.obj","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"11804_Airplane_v2_l2.obj","CopyToMask":-1,"filePath":"datafiles/Airplane","name":"11804_Airplane_v2_l2.obj","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"12221_Cat_v1_l3.mtl","CopyToMask":-1,"filePath":"datafiles/cat","name":"12221_Cat_v1_l3.mtl","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"12221_Cat_v1_l3.obj","CopyToMask":-1,"filePath":"datafiles/cat","name":"12221_Cat_v1_l3.obj","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Cat_bump.jpg","CopyToMask":-1,"filePath":"datafiles/cat","name":"Cat_bump.jpg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},

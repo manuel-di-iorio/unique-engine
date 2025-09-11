@@ -381,16 +381,28 @@ function UiNode(style = {}, props = {}) constructor {
         return flexpanel_node_style_get_position(self.node, flexpanel_edge.bottom).value;
     } 
     
+    
+    // Margin
     function setMarginTop(value) {
         gml_pragma("forceinline");
         flexpanel_node_style_set_margin(self.node, flexpanel_edge.top, value);
         global.UI.needsUpdate = true;
     }
     
-    // Margin
     function getMarginTop() {
         gml_pragma("forceinline");
         return flexpanel_node_style_get_margin(self.node, flexpanel_edge.top).value;
+    }
+    
+    function setMarginLeft(value) {
+        gml_pragma("forceinline");
+        flexpanel_node_style_set_margin(self.node, flexpanel_edge.left, value);
+        global.UI.needsUpdate = true;
+    }
+    
+    function getMarginLeft() {
+        gml_pragma("forceinline");
+        return flexpanel_node_style_get_margin(self.node, flexpanel_edge.left).value;
     }
     
     function setMarginRight(value) {
