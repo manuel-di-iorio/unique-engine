@@ -83,6 +83,11 @@ function EditorUiAssets(ui) constructor {
             // Asset creato al livello root
             show_debug_message("New asset '" + asset.name + "' created at root level");
         }
+        
+        // Se è una scena, selezionala automaticamente
+        if (assetType == "scene") {
+            ui.Assets.Treeview.__onItemSelected(treeviewItem);
+        }
     };
         
     Treeview.onRemoveItem = function(treeviewItem, isSelected) { 
@@ -110,7 +115,7 @@ function EditorUiAssets(ui) constructor {
     }
             
     Treeview.onItemSelected = function(treeviewItem) {
-        oSceneEditor.inspector.inspect(treeviewItem.asset); 
+        oSceneEditor.inspector.inspect(treeviewItem.asset);
     };
     
     // Asset drag & drop handler
@@ -206,37 +211,8 @@ function EditorUiAssets(ui) constructor {
                     draggedItem.asset.parent = undefined;
                 }
                 
-                // Salva il riferimento al parent UI corrente prima di rimuovere
-                var currentUIParent = draggedItem.parent;
-                
-                // Aggiorna la UI del treeview: sposta l'item al livello root
-                // Rimuovi dall'attuale posizione nella UI
-                if (draggedItem.parent != undefined) {
-                    draggedItem.parent.remove(draggedItem);
-                }
-                
-                // Aggiungi al target root entity item
-                targetItem.Items.add(draggedItem);
-                
-                // Espandi il target item per mostrare l'item spostato
-                if (targetItem.collapsed) {
-                    targetItem.expandItem();
-                }
-                
-                // Mostra la freccia se non era visibile
-                if (!targetItem.Arrow.visible) {
-                    targetItem.Arrow.show();
-                }
-                
-                // Se il parent precedente non ha più figli, nascondi la freccia
-                if (currentUIParent != undefined && currentUIParent.count() == 0) {
-                    // Trova il TreeviewItem parent (il nonno del draggedItem)
-                    var parentTreeviewItem = currentUIParent.parent;
-                    if (parentTreeviewItem != undefined && parentTreeviewItem.Arrow != undefined) {
-                        parentTreeviewItem.collapseItem();
-                        parentTreeviewItem.Arrow.hide();
-                    }
-                }
+                // Aggiorna la UI del treeview usando il nuovo helper
+                draggedItem.moveItemTo(targetItem);
             }
             else if (dropAction == "reparent") {
                 // Reparenting: sposta l'asset nella gerarchia
@@ -249,29 +225,37 @@ function EditorUiAssets(ui) constructor {
                 // Aggiungi al nuovo genitore
                 targetItem.asset.add(draggedItem.asset);
                 
-                // Aggiorna la UI del treeview
-                // draggedItem.removeFromParent();
-                targetItem.Items.add(draggedItem);
-                
-                // Espandi il target item per mostrare il nuovo figlio
-                if (targetItem.collapsed) {
-                    targetItem.expandItem();
-                }
-                
-                // Mostra la freccia se non era visibile
-                if (!targetItem.Arrow.visible) {
-                    targetItem.Arrow.show();
-                }
+                // Aggiorna la UI del treeview usando il nuovo helper
+                draggedItem.moveItemTo(targetItem);
             }
             else if (dropAction == "instance") {
                 // Istanziazione: crea una nuova istanza del modello nella scena
                 
                 // Clona l'asset model
-                var instanceAsset = draggedItem.asset.clone();
-                instanceAsset.name = draggedItem.asset.name + "_instance";
+                //var instanceAsset = draggedItem.asset.clone();
+                
+                var geometry = new UeBoxGeometry(100,100,100)
+                var instanceAsset = new UeStaticMesh(geometry);
+                
+                // Marca come istanza per l'inspector
+                instanceAsset.type = "Instance";
+                instanceAsset.__rotationEuler = new UeEuler();
+                
+                instanceAsset.name = draggedItem.asset.name;
                 
                 // Aggiungi l'istanza alla scena
                 targetItem.asset.add(instanceAsset);
+                
+                // Se questa è la scena attualmente attiva, aggiungi l'oggetto anche al renderer
+                // Oppure forza il refresh della scena se è quella attiva
+                // if (oSceneEditor.activeSceneAsset == targetItem.asset) {
+                //     oSceneEditor.objects.add(instanceAsset);
+                //     show_debug_message("Added instance to active scene renderer");
+                // } else {
+                //     show_debug_message("Scene not active - activeSceneAsset: " + string(oSceneEditor.activeSceneAsset) + ", targetScene: " + string(targetItem.asset));
+                //     // Se la scena di destinazione non è attiva, potremmo attivarla automaticamente
+                //     // oppure semplicemente lasciare che l'oggetto sia aggiunto solo alla scena asset
+                // }
                 
                 // Crea un nuovo TreeviewItem per l'istanza
                 var instanceTreeviewItem = new UiTreeviewItem({ 
@@ -283,21 +267,11 @@ function EditorUiAssets(ui) constructor {
                     assetType: draggedItem.assetType,
                     type: draggedItem.assetType,
                     icon: draggedItem.icon
-                });
+                }); 
                 instanceTreeviewItem.asset = instanceAsset;
                 
-                // Aggiungi alla UI
-                targetItem.Items.add(instanceTreeviewItem);
-                
-                // Espandi il target item per mostrare la nuova istanza
-                if (targetItem.collapsed) {
-                    targetItem.expandItem();
-                }
-                
-                // Mostra la freccia se non era visibile
-                if (!targetItem.Arrow.visible) {
-                    targetItem.Arrow.show();
-                }
+                // Aggiorna la UI del treeview usando il nuovo helper
+                targetItem.addChild(instanceTreeviewItem);
                 
                 // Seleziona la nuova istanza
                 targetItem.treeview.__onItemSelected(instanceTreeviewItem);

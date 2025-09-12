@@ -10,6 +10,11 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
     self.List = undefined;
     self.search = props[$ "search"];
     
+    // Se c'è un itemsGetter, popola gli items inizialmente
+    if (self.itemsGetter != undefined) {
+        self.items = self.itemsGetter("");
+    }
+    
     // Draw the label if present
     function onDraw() {
        if (self.label != undefined) {

@@ -17,6 +17,9 @@ function scrSetupUI() {
     menu = new EditorUiMenu(ui);
     treeview = new EditorUiAssets(ui);
     inspector = new EditorUiInspector(ui);
+    
+    // Store reference to inspector in the scene editor
+    oSceneEditor.inspector = inspector;
         
     // Add the UI elements
     ui.add(ui.Menu, ui.Assets, ui.Scene, ui.Inspector);

@@ -370,54 +370,110 @@ function EditorUiInspector(ui) constructor {
                 negative: true,
             },
         
-           //{
-                //id: "labelPosition",
-                //label: "Transform", 
-                //type: "label"
-           //},
-           //{ 
-                //id: "position",
-                //field: "position",
-                //label: "Position", 
-                //type: "transformXYZ",
-                //valueGetter: function() {
-                    //return self.asset.position;
-                //},
-                //onBlur: function(value) {
-                    //self.asset.position.x = value[0];
-                    //self.asset.position.y = value[1];
-                    //self.asset.position.z = value[2];
-                //}
-           //},
-        //
-           //{ 
-                //id: "rotation",
-                //field: "rotation",
-                //label: "Rotation", 
-                //type: "transformXYZ",
-                //valueGetter: function() {
-                    //return self.asset.__rotationEuler;
-                //},
-                //onBlur: function(value) {
-                    //var euler = self.asset.__rotationEuler;
-                    //euler.set(value[0], value[1], value[2]);
-                    //self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
-                //}
-           //},
-           //{ 
-                //id: "scale",
-                //field: "scale",
-                //label: "Scale", 
-                //type: "transformXYZ",
-                //valueGetter: function() {
-                    //return self.asset.scale;
-                //},
-                //onBlur: function(value) {
-                    //self.asset.scale.x = value[0];
-                    //self.asset.scale.y = value[1];
-                    //self.asset.scale.z = value[2];
-                //}
-           //},
+           {
+                id: "labelPosition",
+                label: "Transform", 
+                type: "label"
+           },
+           { 
+                id: "position",
+                field: "position",
+                label: "Position", 
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.position;
+                },
+                onBlur: function(value) {
+                    self.asset.position.x = value[0];
+                    self.asset.position.y = value[1];
+                    self.asset.position.z = value[2];
+                }
+           },
+        
+           { 
+                id: "rotation",
+                field: "rotation",
+                label: "Rotation", 
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.__rotationEuler;
+                },
+                onBlur: function(value) {
+                    var euler = self.asset.__rotationEuler;
+                    euler.set(value[0], value[1], value[2]);
+                    self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
+                }
+           },
+           { 
+                id: "scale",
+                field: "scale",
+                label: "Scale", 
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.scale;
+                },
+                onBlur: function(value) {
+                    self.asset.scale.x = value[0];
+                    self.asset.scale.y = value[1];
+                    self.asset.scale.z = value[2];
+                }
+           },
+        ],
+        
+        "Instance": [
+           { 
+                id: "visible",
+                field: "visible",
+                label: "Visible", 
+                type: "checkbox"
+           },
+           {
+                id: "labelTransform",
+                label: "Transform", 
+                type: "label"
+           },
+           { 
+                id: "position",
+                field: "position",
+                label: "Position", 
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.position;
+                },
+                onBlur: function(value) {
+                    self.asset.position.x = value[0];
+                    self.asset.position.y = value[1];
+                    self.asset.position.z = value[2];
+                }
+           },
+           { 
+                id: "rotation",
+                field: "rotation",
+                label: "Rotation", 
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.__rotationEuler;
+                },
+                onBlur: function(value) {
+                    var euler = self.asset.__rotationEuler;
+                    euler.set(value[0], value[1], value[2]);
+                    self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
+                }
+           },
+           { 
+                id: "scale",
+                field: "scale",
+                label: "Scale", 
+                type: "transformXYZ",
+                valueGetter: function() {
+                    return self.asset.scale;
+                },
+                onBlur: function(value) {
+                    self.asset.scale.x = value[0];
+                    self.asset.scale.y = value[1];
+                    self.asset.scale.z = value[2];
+                }
+           },
         ],
         
         "Scene": [
@@ -435,6 +491,11 @@ function EditorUiInspector(ui) constructor {
      */
     function inspect(asset) {
         var assetFields = fields[$ asset.type];
+        
+        // Se stiamo ispezionando una scena, cambiala come scena attiva
+        if (asset.type == "Scene") {
+            changeActiveScene(asset);
+        }
         
         // Clear the previous content
         var _Items = self.ui.Inspector.Content.Items;
@@ -549,5 +610,27 @@ function EditorUiInspector(ui) constructor {
     
     function close() {
         self.ui.Inspector.Content.Items.destroyChildren();
+    }
+    
+    /**
+     * Cambia la scena attiva nel renderer
+     */
+    function changeActiveScene(sceneAsset) {
+        with (oSceneEditor) {
+            // Aggiorna la scena attiva
+            activeSceneAsset = sceneAsset;
+            
+            // Rimuovi tutti gli oggetti dalla scena corrente (tranne grid)
+            // Nota: aggiungiamo gli oggetti della scena dentro objects per mantenerli organizzati
+            objects.clear(); // Pulisce il container objects
+
+            objects.add(sceneAsset);
+            
+            // Aggiungi tutti gli oggetti della nuova scena selezionata dentro objects
+            // for (var i = 0, l = array_length(sceneAsset.children); i < l; i++) {
+            //     var sceneChild = sceneAsset.children[i];
+            //     objects.add(sceneChild);
+            // }
+        }
     }
 }

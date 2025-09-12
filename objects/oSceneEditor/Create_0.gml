@@ -36,3 +36,6 @@ projectModels = [];
 projectLights = [];
 projectCameras = [];
 projectScenes = [];
+
+// Scene management
+activeSceneAsset = undefined;

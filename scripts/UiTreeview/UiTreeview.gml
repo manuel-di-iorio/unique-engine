@@ -257,13 +257,60 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             type: self.assetType,
         });
         
-        self.Items.add(child);
-        self.Arrow.visible = true;
-        self.expandItem();
+        self.addChild(child);
         
         if (self.treeview.onNewAsset != undefined) self.treeview.onNewAsset(child);
         
         self.treeview.__onItemSelected(child);
+    }
+    
+    function addChild(childItem) {
+        self.Items.add(childItem);
+        self.__updateArrowVisibility();
+        self.expandItem();
+    }
+    
+    function removeChild(childItem) {
+        if (childItem.parent != undefined) {
+            childItem.parent.remove(childItem);
+        }
+        self.__updateArrowVisibility();
+    }
+    
+    function __updateArrowVisibility() {
+        var hasChildren = (self.Items.count() > 0);
+        self.Arrow.visible = hasChildren;
+        
+        if (!hasChildren && !self.collapsed) {
+            self.collapseItem();
+        }
+    }
+    
+    function moveItemTo(targetParent, shouldExpand = true) {
+        // Salva il riferimento al vecchio parent prima di rimuovere
+        var oldParent = undefined;
+        if (self.parent != undefined && self.parent.parent != undefined) {
+            oldParent = self.parent.parent;
+        }
+        
+        // Rimuovi dall'attuale parent
+        if (self.parent != undefined) {
+            self.parent.remove(self);
+        }
+        
+        // Aggiorna il vecchio parent
+        if (oldParent != undefined) {
+            oldParent.__updateArrowVisibility();
+        }
+        
+        // Aggiungi al nuovo parent
+        targetParent.Items.add(self);
+        
+        // Aggiorna il nuovo parent
+        targetParent.__updateArrowVisibility();
+        if (shouldExpand && targetParent.collapsed) {
+            targetParent.expandItem();
+        }
     }
     
     function __removeItem() {
@@ -279,9 +326,8 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         var _parent = self.parent;
         self.destroy();
         
-        if (!_parent.count()) {
-            _parent.parent.collapseItem();
-            _parent.parent.Arrow.hide();
+        if (_parent != undefined && _parent.parent != undefined) {
+            _parent.parent.__updateArrowVisibility();
         }
     }
     
