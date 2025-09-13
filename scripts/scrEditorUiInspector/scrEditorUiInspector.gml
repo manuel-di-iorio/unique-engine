@@ -623,14 +623,7 @@ function EditorUiInspector(ui) constructor {
             // Rimuovi tutti gli oggetti dalla scena corrente (tranne grid)
             // Nota: aggiungiamo gli oggetti della scena dentro objects per mantenerli organizzati
             objects.clear(); // Pulisce il container objects
-
             objects.add(sceneAsset);
-            
-            // Aggiungi tutti gli oggetti della nuova scena selezionata dentro objects
-            // for (var i = 0, l = array_length(sceneAsset.children); i < l; i++) {
-            //     var sceneChild = sceneAsset.children[i];
-            //     objects.add(sceneChild);
-            // }
         }
     }
 }

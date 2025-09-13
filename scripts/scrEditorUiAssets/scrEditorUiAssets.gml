@@ -232,30 +232,23 @@ function EditorUiAssets(ui) constructor {
                 // Istanziazione: crea una nuova istanza del modello nella scena
                 
                 // Clona l'asset model
-                //var instanceAsset = draggedItem.asset.clone();
-                
-                var geometry = new UeBoxGeometry(100,100,100)
-                var instanceAsset = new UeStaticMesh(geometry);
+                var instanceAsset = draggedItem.asset.clone();
+
+                // Per ora, crea un semplice box come placeholder
+                var geometry = new UeBoxGeometry(100,100,100); // @placeholder
+                var instanceAsset = new UeStaticMesh(geometry); // @placeholder
+
+                // Aggiungi l'istanza all'elenco delle istanze del parent asset
+                draggedItem.asset.instances.add(instanceAsset);
+                instanceAsset.object = draggedItem.asset;
                 
                 // Marca come istanza per l'inspector
                 instanceAsset.type = "Instance";
-                instanceAsset.__rotationEuler = new UeEuler();
-                
-                instanceAsset.name = draggedItem.asset.name;
+                instanceAsset.__rotationEuler = new UeEuler();                
+                instanceAsset.name = draggedItem.asset.name; // @placeholder
                 
                 // Aggiungi l'istanza alla scena
                 targetItem.asset.add(instanceAsset);
-                
-                // Se questa è la scena attualmente attiva, aggiungi l'oggetto anche al renderer
-                // Oppure forza il refresh della scena se è quella attiva
-                // if (oSceneEditor.activeSceneAsset == targetItem.asset) {
-                //     oSceneEditor.objects.add(instanceAsset);
-                //     show_debug_message("Added instance to active scene renderer");
-                // } else {
-                //     show_debug_message("Scene not active - activeSceneAsset: " + string(oSceneEditor.activeSceneAsset) + ", targetScene: " + string(targetItem.asset));
-                //     // Se la scena di destinazione non è attiva, potremmo attivarla automaticamente
-                //     // oppure semplicemente lasciare che l'oggetto sia aggiunto solo alla scena asset
-                // }
                 
                 // Crea un nuovo TreeviewItem per l'istanza
                 var instanceTreeviewItem = new UiTreeviewItem({ 
