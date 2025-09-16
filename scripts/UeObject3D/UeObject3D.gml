@@ -13,8 +13,11 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     layers = new UeLayers();
     userData = {};
     frustumCulled = true;
+
     object = undefined; // @doc
-    instances = new UeInstanceList(self); // @doc
+    instances = new UeInstanceList(self); // @doc    
+    isInstance = false; // @doc
+    
     //animations = []; // @todo
     //castShadow = false; // @todo
     //receiveShadow = false; // @todo
@@ -263,7 +266,38 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     
         return optionalTarget;
     }
+    /**
+     * Creates an instance with proper master-instance relationship (Unity Prefab-style)
+     */
+    function createInstance() {
+        gml_pragma("forceinline");
+        var instance = self.clone(true);
+        instance.isInstance = true;
+        instance.object = self;
+        
+        // Add to instances list
+        instances.add(instance);
+        
+        return instance;
+    }
 
+    /**
+     * Propagates multiple properties at once to all instances
+     * @param {struct} properties - Object containing property-value pairs to propagate
+     */
+    function propagatePropsToInstances(properties) {
+        gml_pragma("forceinline");
+        var propertyNames = variable_struct_get_names(properties);
+        
+        for (var i = 0; i < array_length(propertyNames); i++) {
+            var propName = propertyNames[i];
+            self[$ propName] = properties[$ propName];
+        }
+        
+        return self;
+    }
+  
+    
     // Initial matrix build
     updateMatrix();
 }

@@ -1,6 +1,6 @@
 function scrSetup3D(){
     renderer = new UeRenderer();
-    camera = new UePerspectiveCamera({ x: 30, z: 50, far: 10000, yt: 200, view: 1 });
+    camera = new UePerspectiveCamera({ x: 100, y: -300, z: 70, far: 10000, view: 1 });
     orbit = new UeOrbitControls(camera, {
         shouldHandleInput: function() {
             return global.UI.Main.Scene.hovered;

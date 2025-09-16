@@ -88,6 +88,7 @@ function EditorUiInspector(ui) constructor {
                 label: "Diffuse", 
                 type: "dropdown",
                 search: "Search texture..",
+                subKey: "map",
                 itemsGetter: function(searchValue) {
                     var textures = array_filter(oSceneEditor.projectTextures, method({ searchValue }, function(texture) {
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
@@ -116,7 +117,7 @@ function EditorUiInspector(ui) constructor {
                     //return [];
                 //},
                 //onChange: function(value, input) {
-                    //// save in self.asset.textures[$ "emissiveMap"] = 
+                    // save in self.asset.textures[$ "emissiveMap"] = value;
                 //}
             //},
         
@@ -319,28 +320,7 @@ function EditorUiInspector(ui) constructor {
                 field: "frustumCulled",
                 label: "Frustum Culled", 
                 type: "checkbox"
-           }, 
-           {
-                id: "geometry",
-                field: "geometry",
-                label: "Geometry",
-                type: "dropdown",
-                items: [
-                    { label: "Box", value: new UeBoxGeometry() },
-                    { label: "Sphere", value: new UeSphereGeometry(1) },
-                    { label: "Plane", value: new UePlaneGeometry() },
-                    { label: "Circle", value: new UeCircleGeometry() },
-                    { label: "Cone", value: new UeConeGeometry() },
-                    { label: "Cylinder", value: new UeCylinderGeometry() },
-                    { label: "Arrow", value: new UeArrowGeometry() },
-                    { label: "Line", value: new UeLineGeometry().setPositions([ 0,0,0, 1,0,0 ]) },
-                    { label: "LineSegments", value: new UeLineSegmentsGeometry().setPositions([ 0,0,0, 1,0,0, 3,0,0, 4,0,0 ]) },
-                ],
-                onChange: function(value) {
-                    if (self.asset.geometry != undefined) self.asset.geometry.dispose();
-                    self.asset.geometry = value;
-                }
-           },
+           },           
            { 
                 id: "material",
                 field: "material",
@@ -420,7 +400,7 @@ function EditorUiInspector(ui) constructor {
            },
         ],
         
-        "Instance": [
+        "ModelInstance": [
            { 
                 id: "visible",
                 field: "visible",
@@ -580,9 +560,13 @@ function EditorUiInspector(ui) constructor {
                 break;
                 
                 case "dropdown": 
+                    var dropdownValue = asset[$ assetField.field];
+                    if (is_struct(dropdownValue) && assetField[$ "subKey"] != undefined) {
+                        dropdownValue = dropdownValue[$ assetField[$ "subKey"]];
+                    }
                     input = new UiDropdown({ flex: 1, }, {
                         items: assetField[$ "items"],
-                        value: asset[$ assetField.field],
+                        value: dropdownValue,
                         valueGetter,
                         onChange,
                         itemsGetter: assetField[$ "itemsGetter"],
@@ -617,12 +601,15 @@ function EditorUiInspector(ui) constructor {
      */
     function changeActiveScene(sceneAsset) {
         with (oSceneEditor) {
+            // Se la scena selezionata è già attiva, non ricostruire gli oggetti
+            if (activeSceneAsset == sceneAsset) return;
+
+            objects.clear();
+
             // Aggiorna la scena attiva
             activeSceneAsset = sceneAsset;
-            
-            // Rimuovi tutti gli oggetti dalla scena corrente (tranne grid)
-            // Nota: aggiungiamo gli oggetti della scena dentro objects per mantenerli organizzati
-            objects.clear(); // Pulisce il container objects
+
+            // Aggiungi la nuova scena al container globale degli oggetti
             objects.add(sceneAsset);
         }
     }

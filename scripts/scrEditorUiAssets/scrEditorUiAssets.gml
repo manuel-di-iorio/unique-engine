@@ -37,7 +37,7 @@ function EditorUiAssets(ui) constructor {
             break;
             
             case "model": 
-                asset = new UeMesh(); 
+                asset = new UeMesh(new UeBoxGeometry(70, 70, 70));
                 asset.__rotationEuler = new UeEuler();
                 assetId = global.UI_ASSETS_MODELS_ID++;
                 array_push(oSceneEditor.projectModels, asset);
@@ -76,12 +76,7 @@ function EditorUiAssets(ui) constructor {
             if (parentTreeviewItem.asset != undefined) {
                 // Stabilisci la gerarchia: il nuovo asset diventa figlio del parent asset
                 parentTreeviewItem.asset.add(asset);
-                // Debug: ora asset.parent dovrebbe essere == parentTreeviewItem.asset
-                show_debug_message("New asset '" + asset.name + "' added under parent '" + parentTreeviewItem.asset.name + "'");
             }
-        } else {
-            // Asset creato al livello root
-            show_debug_message("New asset '" + asset.name + "' created at root level");
         }
         
         // Se è una scena, selezionala automaticamente
@@ -97,21 +92,61 @@ function EditorUiAssets(ui) constructor {
         
         var assetType = treeviewItem.assetType;
         var asset = treeviewItem.asset;
-        var list;
-         
-        switch (assetType) {
-            case "texture": list = oSceneEditor.projectTextures; break;
-            case "material": list = oSceneEditor.projectMaterials; break;
-            case "model": list = oSceneEditor.projectModels; break;
-            case "light": list = oSceneEditor.projectLights; break;
-            case "camera": list = oSceneEditor.projectCameras; break;
-            case "scene": list = oSceneEditor.projectScenes; break;
-        }
         
-        var _itemIdx = array_find_index(list, method({ asset }, function(value) {
-            return value == asset;
-        }))
-        if (_itemIdx != -1) array_delete(list, _itemIdx, 1);
+        // Se l'asset è un'istanza, rimuovilo dalla scena
+        if (asset != undefined && asset[$ "isInstance"] == true) {
+            // Rimuovi l'istanza dalla scena (dal suo parent)
+            if (asset.parent != undefined) {
+                asset.parent.remove(asset);
+            }
+            
+            // Rimuovi l'istanza dalla lista delle istanze del modello originale
+            if (asset[$ "object"] != undefined && asset.object[$ "instances"] != undefined) {
+                asset.object.instances.remove(asset);
+            }
+        } else {
+            // Se l'asset è un asset master (non un'istanza), rimuovilo dalla lista del progetto
+            var list;
+            switch (assetType) {
+                case "texture": list = oSceneEditor.projectTextures; break;
+                case "material": list = oSceneEditor.projectMaterials; break;
+                case "model": list = oSceneEditor.projectModels; break;
+                case "light": list = oSceneEditor.projectLights; break;
+                case "camera": list = oSceneEditor.projectCameras; break;
+                case "scene": list = oSceneEditor.projectScenes; break;
+            }
+            
+            var _itemIdx = array_find_index(list, method({ asset }, function(value) {
+                return value == asset;
+            }))
+            if (_itemIdx != -1) array_delete(list, _itemIdx, 1);
+            
+            // Se l'asset ha istanze, rimuovile tutte dalle scene
+            if (asset != undefined && asset[$ "instances"] != undefined) {
+                // Crea una copia della lista delle istanze perché la rimuoveremo durante l'iterazione
+                var instancesList = asset.instances.list;
+                var instancesToRemove = [];
+                for (var i = 0; i < array_length(instancesList); i++) {
+                    array_push(instancesToRemove, instancesList[i]);
+                }
+                
+                // Rimuovi ogni istanza
+                for (var i = 0; i < array_length(instancesToRemove); i++) {
+                    var instance = instancesToRemove[i];
+                    
+                    // Rimuovi l'istanza dalla scena (dal suo parent)
+                    if (instance.parent != undefined) {
+                        instance.parent.remove(instance);
+                    }
+                    
+                    // Cerca e rimuovi l'istanza dalla treeview
+                    _removeInstanceFromTreeview(instance);
+                }
+                
+                // Pulisci la lista delle istanze
+                asset.instances.clear();
+            }
+        }
     }
             
     Treeview.onItemSelected = function(treeviewItem) {
@@ -156,7 +191,7 @@ function EditorUiAssets(ui) constructor {
             if (targetItem.assetType == "model" && !targetItem.entity) {
                 isValidDrop = true;
                 dropAction = "reparent";
-            } else if (targetItem.assetType == "scene" && !targetItem.entity) {
+            } else if ((targetItem.assetType == "scene" || targetItem.isInstance) && !targetItem.entity) {
                 isValidDrop = true;
                 dropAction = "instance";
             } else {
@@ -230,24 +265,23 @@ function EditorUiAssets(ui) constructor {
             }
             else if (dropAction == "instance") {
                 // Istanziazione: crea una nuova istanza del modello nella scena
-                
-                // Clona l'asset model
-                var instanceAsset = draggedItem.asset.clone();
 
                 // Per ora, crea un semplice box come placeholder
-                var geometry = new UeBoxGeometry(100,100,100); // @placeholder
-                var instanceAsset = new UeStaticMesh(geometry); // @placeholder
+                // var geometry = new UeBoxGeometry(100, 100, 100); // @placeholder
 
-                // Aggiungi l'istanza all'elenco delle istanze del parent asset
-                draggedItem.asset.instances.add(instanceAsset);
-                instanceAsset.object = draggedItem.asset;
+                var instanceAsset = draggedItem.asset.createInstance();
+
+                // instanceAsset.geometry = geometry; // @placeholder
                 
-                // Marca come istanza per l'inspector
-                instanceAsset.type = "Instance";
+                switch (draggedItem.assetType) {
+                    case "model": instanceAsset.type = "ModelInstance"; break;                    
+                    case "light": instanceAsset.type = "LightInstance"; break;
+                    case "camera": instanceAsset.type = "CameraInstance"; break;
+                }
                 instanceAsset.__rotationEuler = new UeEuler();                
-                instanceAsset.name = draggedItem.asset.name; // @placeholder
+                // instanceAsset.name = draggedItem.asset.name; // @placeholder
                 
-                // Aggiungi l'istanza alla scena
+                // Aggiungi l'istanza all'elemento target (scena o sotto-oggetto)
                 targetItem.asset.add(instanceAsset);
                 
                 // Crea un nuovo TreeviewItem per l'istanza
@@ -262,11 +296,8 @@ function EditorUiAssets(ui) constructor {
                     icon: draggedItem.icon
                 }); 
                 instanceTreeviewItem.asset = instanceAsset;
-                
-                // Aggiorna la UI del treeview usando il nuovo helper
                 targetItem.addChild(instanceTreeviewItem);
                 
-                // Seleziona la nuova istanza
                 targetItem.treeview.__onItemSelected(instanceTreeviewItem);
             }
             
@@ -275,4 +306,41 @@ function EditorUiAssets(ui) constructor {
         
         return false;
     };
+    
+    /**
+     * Helper function per rimuovere un'istanza dalla treeview
+     */
+    function _removeInstanceFromTreeview(instanceAsset) {
+        // Funzione ricorsiva per cercare l'istanza nella treeview
+        function _findAndRemoveInstance(treeviewItem, targetAsset) {
+            // Controlla se questo item è l'istanza che cerchiamo
+            // Prima verifica che l'item abbia la proprietà asset
+            if (treeviewItem[$ "asset"] != undefined && treeviewItem.asset == targetAsset) {
+                // Rimuovi questo item dalla treeview
+                var parent = treeviewItem.parent;
+                treeviewItem.destroy();
+                
+                // Aggiorna la visualizzazione dell'arrow del parent
+                if (parent != undefined && parent.parent != undefined) {
+                    parent.parent.__updateArrowVisibility();
+                }
+                return true;
+            }
+            
+            // Cerca nei figli
+            if (treeviewItem.Items != undefined) {
+                var children = treeviewItem.Items.children;
+                for (var i = array_length(children) - 1; i >= 0; i--) {
+                    if (_findAndRemoveInstance(children[i], targetAsset)) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        // Inizia la ricerca dalla root della treeview
+        _findAndRemoveInstance(ui.Assets.Treeview, instanceAsset);
+    }
 }
