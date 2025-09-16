@@ -275,6 +275,12 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         instance.isInstance = true;
         instance.object = self;
         
+        // Set isInstance = true on all descendants of the instance
+        // instance.traverse(function(obj) {
+        //     obj.isInstance = true;
+        //     obj.object = self; // Point to the master object
+        // });
+        
         // Add to instances list
         instances.add(instance);
         

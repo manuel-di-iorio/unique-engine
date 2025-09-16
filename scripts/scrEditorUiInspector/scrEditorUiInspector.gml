@@ -470,9 +470,10 @@ function EditorUiInspector(ui) constructor {
      * Dynamically create the inspector fields
      */
     function inspect(asset) {
-        var assetFields = fields[$ asset.type];
+        var assetType = asset.type;
+        var assetFields = fields[$ assetType];
         
-        // Se stiamo ispezionando una scena, cambiala come scena attiva
+        // If we are inspecting a scene, set it as the active scene
         if (asset.type == "Scene") {
             changeActiveScene(asset);
         }
@@ -597,19 +598,19 @@ function EditorUiInspector(ui) constructor {
     }
     
     /**
-     * Cambia la scena attiva nel renderer
+     * Change the active scene in the renderer
      */
     function changeActiveScene(sceneAsset) {
         with (oSceneEditor) {
-            // Se la scena selezionata è già attiva, non ricostruire gli oggetti
+            // If the selected scene is already active, do not rebuild objects
             if (activeSceneAsset == sceneAsset) return;
 
             objects.clear();
 
-            // Aggiorna la scena attiva
+            // Update the active scene
             activeSceneAsset = sceneAsset;
 
-            // Aggiungi la nuova scena al container globale degli oggetti
+            // Add the new scene to the global objects container
             objects.add(sceneAsset);
         }
     }

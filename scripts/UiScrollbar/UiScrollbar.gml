@@ -47,6 +47,12 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         
             self.__maxThumbPosition = layoutHeight - _thumbHeight;
             self.__maxScroll = max(0, __contentHeight - self.parent.layout.height);
+
+            // If content height is smaller than the visible area, reset scrollTop
+            if (self.__maxScroll <= 0) {
+                self.parent.scrollTop = 0;
+                if (self.Thumb.getTop() != 0) self.Thumb.setTop(0);
+            }
         } 
         
         // Dragging

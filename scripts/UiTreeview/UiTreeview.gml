@@ -161,8 +161,8 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         
         // Use the external onAssetDrop callback if available
         self.onDrop = function(draggedTreeviewItem) {
-            var draggedItem = draggedTreeviewItem.parent; // Il TreeviewItem che stiamo trascinando
-            var targetItem = self.parent; // Il TreeviewItem su cui stiamo droppando
+                var draggedItem = draggedTreeviewItem.parent; // The TreeviewItem being dragged
+                var targetItem = self.parent; // The TreeviewItem being dropped onto
             
             // Check if there's an external callback defined in the treeview
             if (targetItem.treeview.onAssetDrop != undefined) {
@@ -228,7 +228,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     // Create button
-    if (self.type == "folder" || self.assetType == "model") {
+    if ((self.type == "folder" || self.assetType == "model") && (self.asset == undefined || !self.asset.isInstance)) {
         self.CreateIcon = new UiButton(sprUiCreateAsset, { 
             name: "UiTreeview.Item.Content.CreateBtn", padding: 5, paddingBottom: 4, marginRight: 20
         }, { outline: true, tooltip: "Create a new asset" });
@@ -287,26 +287,26 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     function moveItemTo(targetParent, shouldExpand = true) {
-        // Salva il riferimento al vecchio parent prima di rimuovere
+    // Save reference to the old parent before removing
         var oldParent = undefined;
         if (self.parent != undefined && self.parent.parent != undefined) {
             oldParent = self.parent.parent;
         }
         
-        // Rimuovi dall'attuale parent
+        // Remove from current parent
         if (self.parent != undefined) {
             self.parent.remove(self);
         }
         
-        // Aggiorna il vecchio parent
+        // Update the old parent
         if (oldParent != undefined) {
             oldParent.__updateArrowVisibility();
         }
         
-        // Aggiungi al nuovo parent
+    // Add to the new parent
         targetParent.Items.add(self);
         
-        // Aggiorna il nuovo parent
+    // Update the new parent
         targetParent.__updateArrowVisibility();
         if (shouldExpand && targetParent.collapsed) {
             targetParent.expandItem();
@@ -315,7 +315,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     
     function __removeItem() {
         if (!show_question("Are you sure you want to delete this asset?")) return;
-
+       
         var _isSelected = self.treeview.selectedItem == self;
         if (_isSelected) {
             self.treeview.selectedItem = undefined;

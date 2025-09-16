@@ -70,16 +70,15 @@ function EditorUiAssets(ui) constructor {
         treeviewItem.asset = asset; 
         asset.name = name;
         
-        // Se l'item è stato creato sotto un parent (non root entity), stabilisci la gerarchia degli asset
+        // If the item was created under a parent (not a root entity), establish asset hierarchy
         if (treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined && !treeviewItem.parent.parent.entity) {
             var parentTreeviewItem = treeviewItem.parent.parent;
             if (parentTreeviewItem.asset != undefined) {
-                // Stabilisci la gerarchia: il nuovo asset diventa figlio del parent asset
                 parentTreeviewItem.asset.add(asset);
             }
         }
         
-        // Se è una scena, selezionala automaticamente
+        // If it's a scene, select it automatically
         if (assetType == "scene") {
             ui.Assets.Treeview.__onItemSelected(treeviewItem);
         }
@@ -93,19 +92,19 @@ function EditorUiAssets(ui) constructor {
         var assetType = treeviewItem.assetType;
         var asset = treeviewItem.asset;
         
-        // Se l'asset è un'istanza, rimuovilo dalla scena
+        // If the asset is an instance, remove it from the scene
         if (asset != undefined && asset[$ "isInstance"] == true) {
-            // Rimuovi l'istanza dalla scena (dal suo parent)
+            // Remove the instance from the scene (from its parent)
             if (asset.parent != undefined) {
                 asset.parent.remove(asset);
             }
             
-            // Rimuovi l'istanza dalla lista delle istanze del modello originale
+            // Remove the instance from the original model's instances list
             if (asset[$ "object"] != undefined && asset.object[$ "instances"] != undefined) {
                 asset.object.instances.remove(asset);
             }
         } else {
-            // Se l'asset è un asset master (non un'istanza), rimuovilo dalla lista del progetto
+            // If the asset is a master asset (not an instance), remove it from the project list
             var list;
             switch (assetType) {
                 case "texture": list = oSceneEditor.projectTextures; break;
@@ -121,29 +120,29 @@ function EditorUiAssets(ui) constructor {
             }))
             if (_itemIdx != -1) array_delete(list, _itemIdx, 1);
             
-            // Se l'asset ha istanze, rimuovile tutte dalle scene
+            // If the asset has instances, remove them all from scenes
             if (asset != undefined && asset[$ "instances"] != undefined) {
-                // Crea una copia della lista delle istanze perché la rimuoveremo durante l'iterazione
+                // Make a copy of the instances list because we'll remove items during iteration
                 var instancesList = asset.instances.list;
                 var instancesToRemove = [];
-                for (var i = 0; i < array_length(instancesList); i++) {
+                for (var i = 0, l = array_length(instancesList); i < l; i++) {
                     array_push(instancesToRemove, instancesList[i]);
                 }
                 
-                // Rimuovi ogni istanza
-                for (var i = 0; i < array_length(instancesToRemove); i++) {
+                // Remove each instance
+                for (var i = 0, l = array_length(instancesToRemove); i < l; i++) {
                     var instance = instancesToRemove[i];
-                    
-                    // Rimuovi l'istanza dalla scena (dal suo parent)
+
+                    // Remove the instance from the scene (from its parent)
                     if (instance.parent != undefined) {
                         instance.parent.remove(instance);
                     }
-                    
-                    // Cerca e rimuovi l'istanza dalla treeview
+
+                    // Find and remove the instance from the treeview
                     _removeInstanceFromTreeview(instance);
                 }
-                
-                // Pulisci la lista delle istanze
+
+                // Clear the instances list
                 asset.instances.clear();
             }
         }
@@ -158,7 +157,7 @@ function EditorUiAssets(ui) constructor {
         var draggedItem = draggedTreeviewItem; // Il TreeviewItem che stiamo trascinando
         var targetItem = targetTreeviewItem; // Il TreeviewItem su cui stiamo droppando
         
-        // Verifica se il drop è valido
+        // Check if the drop is valid
         var isValidDrop = false;
         var dropAction = "";
         
@@ -168,15 +167,15 @@ function EditorUiAssets(ui) constructor {
             return false;
         }
         
-        // 2. Drop su root entity item per liberare da parent
-        // Controlla se l'item è sotto un parent nella UI (non solo nell'asset)
+        // 2. Drop on a root entity item to unparent
+        // Check if the item is under a parent in the UI (not just in the asset)
         if ((draggedItem.assetType == "model" || draggedItem.assetType == "scene") &&
          targetItem.entity && targetItem.assetType == draggedItem.assetType && draggedItem.asset != undefined) {
             isValidDrop = true;
             dropAction = "unparent";
         }
         
-        // 3. Scene può essere spostata solo sotto un'altra Scene
+        // 3. Scene can only be moved under another Scene
         else if (draggedItem.assetType == "scene") {
             if (targetItem.assetType == "scene" && !targetItem.entity) {
                 isValidDrop = true;
@@ -186,22 +185,48 @@ function EditorUiAssets(ui) constructor {
             }
         }
         
-        // 4. Model può essere spostato sotto un altro Model (reparenting) o sotto una Scene (istanza)
+        // 4. Model can be moved under another Model (reparent) or under a Scene (instance)
         else if (draggedItem.assetType == "model") {
-            if (targetItem.assetType == "model" && !targetItem.entity) {
-                isValidDrop = true;
-                dropAction = "reparent";
-            } else if ((targetItem.assetType == "scene" || targetItem.isInstance) && !targetItem.entity) {
-                isValidDrop = true;
-                dropAction = "instance";
+            // Determine whether the dragged item is an instance (from a scene) or a master (from the Models list)
+            var draggedIsInstance = (draggedItem.asset != undefined && draggedItem.asset.isInstance == true);
+            var targetHasAsset = (targetItem.asset != undefined);
+            var targetIsInstance = targetHasAsset && (targetItem.asset.isInstance == true);
+
+            if (draggedIsInstance) {
+                // If we're dragging an existing instance, prefer reparenting
+                if (targetIsInstance && !targetItem.entity) {
+                    isValidDrop = true;
+                    dropAction = "reparent";
+                } else if (targetItem.assetType == "model" && !targetItem.entity && !targetIsInstance) {
+                    // Dragging an instance onto a master model -> reparent under that master
+                    isValidDrop = true;
+                    dropAction = "reparent";
+                } else if (targetItem.assetType == "scene" && !targetItem.entity) {
+                    // Move instance directly under the scene
+                    isValidDrop = true;
+                    dropAction = "reparent";
+                } else {
+                    return false;
+                }
             } else {
-                return false;
+                // Dragging from the Models list (master)
+                if (targetItem.assetType == "model" && !targetItem.entity && (!targetHasAsset || !targetIsInstance)) {
+                    // Dropping on a master model -> reparent the master under another master
+                    isValidDrop = true;
+                    dropAction = "reparent";
+                } else if ((targetItem.assetType == "scene" || targetIsInstance) && !targetItem.entity) {
+                    // Dropping a master onto a scene or onto an instance -> create a new instance
+                    isValidDrop = true;
+                    dropAction = "instance";
+                } else {
+                    return false;
+                }
             }
         }
         
-        // 5. Altri tipi di asset
+        // 5. Other types of assets
         else {
-            // Per ora, altri tipi seguono le stesse regole dei model
+            // For now, other asset types follow the same rules as models
             if (targetItem.assetType == draggedItem.assetType && !targetItem.entity) {
                 isValidDrop = true;
                 dropAction = "reparent";
@@ -210,15 +235,15 @@ function EditorUiAssets(ui) constructor {
             }
         }
         
-        // Verifica che non stiamo provando a spostare un item su se stesso
+        // Ensure we are not trying to move an item onto itself
         if (draggedItem == targetItem) {
             return false;
         }
         
-        // Verifica che non stiamo provando a reparentare un parent dentro uno dei suoi figli
-        // (questo creerebbe un ciclo nella gerarchia)
+        // Ensure we are not trying to reparent a parent into one of its children
+        // (this would create a cycle in the hierarchy)
         if (dropAction == "reparent" && draggedItem.asset != undefined && targetItem.asset != undefined) {
-            // Controlla se il targetItem è un discendente del draggedItem
+            // Check if the targetItem is a descendant of the draggedItem
             var currentParent = targetItem.asset.parent;
             while (currentParent != undefined) {
                 if (currentParent == draggedItem.asset) {
@@ -227,7 +252,7 @@ function EditorUiAssets(ui) constructor {
                 currentParent = currentParent.parent;
             }
             
-            // Controlla anche nella gerarchia UI del treeview
+            // Also check in the UI hierarchy of the treeview
             var currentTreeviewParent = targetItem.parent;
             while (currentTreeviewParent != undefined) {
                 if (currentTreeviewParent == draggedItem) {
@@ -237,54 +262,47 @@ function EditorUiAssets(ui) constructor {
             }
         }
         
-        // Esegui l'azione di drop
+        // Perform the drop action
         if (isValidDrop) {
             if (dropAction == "unparent") {
-                // Rimuovi dall'asset genitore corrente
+                // Remove from current asset parent
                 if (draggedItem.asset.parent != undefined) {
                     draggedItem.asset.parent.remove(draggedItem.asset);
                     draggedItem.asset.parent = undefined;
                 }
                 
-                // Aggiorna la UI del treeview usando il nuovo helper
+                // Update the treeview UI using the new helper
                 draggedItem.moveItemTo(targetItem);
             }
             else if (dropAction == "reparent") {
-                // Reparenting: sposta l'asset nella gerarchia
-                
-                // Rimuovi dall'asset genitore precedente
+                // Reparenting: move the asset within the hierarchy
+
+                // Remove from the previous asset parent
                 if (draggedItem.asset.parent != undefined) {
                     draggedItem.asset.parent.remove(draggedItem.asset);
                 }
                 
-                // Aggiungi al nuovo genitore
+                // Add to the new parent
                 targetItem.asset.add(draggedItem.asset);
                 
-                // Aggiorna la UI del treeview usando il nuovo helper
+                // Update the treeview UI using the new helper
                 draggedItem.moveItemTo(targetItem);
             }
             else if (dropAction == "instance") {
-                // Istanziazione: crea una nuova istanza del modello nella scena
-
-                // Per ora, crea un semplice box come placeholder
-                // var geometry = new UeBoxGeometry(100, 100, 100); // @placeholder
-
+                // Instantiation: create a new instance of the model in the scene
                 var instanceAsset = draggedItem.asset.createInstance();
-
-                // instanceAsset.geometry = geometry; // @placeholder
                 
                 switch (draggedItem.assetType) {
-                    case "model": instanceAsset.type = "ModelInstance"; break;                    
+                    case "model": instanceAsset.type = "ModelInstance"; break;
                     case "light": instanceAsset.type = "LightInstance"; break;
                     case "camera": instanceAsset.type = "CameraInstance"; break;
                 }
                 instanceAsset.__rotationEuler = new UeEuler();                
-                // instanceAsset.name = draggedItem.asset.name; // @placeholder
                 
-                // Aggiungi l'istanza all'elemento target (scena o sotto-oggetto)
+                // Add the instance to the target element (scene or sub-object)
                 targetItem.asset.add(instanceAsset);
                 
-                // Crea un nuovo TreeviewItem per l'istanza
+                // Create a new TreeviewItem for the instance
                 var instanceTreeviewItem = new UiTreeviewItem({ 
                     name: "UiTreeview.Item", 
                     marginLeft: 15, 
@@ -308,26 +326,26 @@ function EditorUiAssets(ui) constructor {
     };
     
     /**
-     * Helper function per rimuovere un'istanza dalla treeview
+     * Helper function to remove an instance from the treeview
      */
     function _removeInstanceFromTreeview(instanceAsset) {
-        // Funzione ricorsiva per cercare l'istanza nella treeview
+        // Recursive function to search for the instance in the treeview
         function _findAndRemoveInstance(treeviewItem, targetAsset) {
-            // Controlla se questo item è l'istanza che cerchiamo
-            // Prima verifica che l'item abbia la proprietà asset
+            // Check if this item is the instance we're looking for
+            // First verify that the item has the asset property
             if (treeviewItem[$ "asset"] != undefined && treeviewItem.asset == targetAsset) {
-                // Rimuovi questo item dalla treeview
+                // Remove this item from the treeview
                 var parent = treeviewItem.parent;
                 treeviewItem.destroy();
                 
-                // Aggiorna la visualizzazione dell'arrow del parent
+                // Update the parent's arrow visibility
                 if (parent != undefined && parent.parent != undefined) {
                     parent.parent.__updateArrowVisibility();
                 }
                 return true;
             }
             
-            // Cerca nei figli
+            // Search children
             if (treeviewItem.Items != undefined) {
                 var children = treeviewItem.Items.children;
                 for (var i = array_length(children) - 1; i >= 0; i--) {
@@ -340,7 +358,7 @@ function EditorUiAssets(ui) constructor {
             return false;
         }
         
-        // Inizia la ricerca dalla root della treeview
+        // Start the search from the root of the treeview
         _findAndRemoveInstance(ui.Assets.Treeview, instanceAsset);
     }
 }
