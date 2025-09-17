@@ -97,7 +97,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.selected = false;
     self.collapsed = props[$ "collapsed"] ?? true;
     self.entity = props[$ "entity"] ?? false;
-    self.asset = undefined;
+    self.asset = props[$ "asset"] ?? undefined;
     
     // Content
     self.Content = new UiNode({ 
@@ -287,7 +287,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     function moveItemTo(targetParent, shouldExpand = true) {
-    // Save reference to the old parent before removing
+        // Save reference to the old parent before removing
         var oldParent = undefined;
         if (self.parent != undefined && self.parent.parent != undefined) {
             oldParent = self.parent.parent;
@@ -303,10 +303,10 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             oldParent.__updateArrowVisibility();
         }
         
-    // Add to the new parent
+        // Add to the new parent
         targetParent.Items.add(self);
         
-    // Update the new parent
+        // Update the new parent
         targetParent.__updateArrowVisibility();
         if (shouldExpand && targetParent.collapsed) {
             targetParent.expandItem();

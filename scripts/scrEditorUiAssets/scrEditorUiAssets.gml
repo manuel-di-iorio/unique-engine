@@ -1,7 +1,7 @@
 function EditorUiAssets(ui) constructor {
     self.ui = ui;
     
-    ui.Assets = new UiNode({ name: "Assets", minWidth: 300, width: "20%", /*height: "30%",*/marginBottom: 62 }, { border: true });
+    ui.Assets = new UiNode({ name: "Assets", minWidth: 300, width: "20%", marginBottom: 62 }, { border: true });
     ui.Assets.Treeview = new UiTreeview({ marginTop: 35, flex: 1, height: "90%", flexDirection: "column" });
     
     ui.Assets.add(ui.Assets.Treeview);
@@ -66,9 +66,8 @@ function EditorUiAssets(ui) constructor {
             break;
         }
         
-        var name = string_upper(string_char_at(assetType, 1)) + string_copy(assetType, 2, string_length(assetType) - 1) + string(assetId);
         treeviewItem.asset = asset; 
-        asset.name = name;
+        asset.name = string_upper(string_char_at(assetType, 1)) + string_copy(assetType, 2, string_length(assetType) - 1) + string(assetId);
         
         // If the item was created under a parent (not a root entity), establish asset hierarchy
         if (treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined && !treeviewItem.parent.parent.entity) {
@@ -91,7 +90,12 @@ function EditorUiAssets(ui) constructor {
         
         var assetType = treeviewItem.assetType;
         var asset = treeviewItem.asset;
-        
+
+        // If the asset being removed is currently active, unset it
+        if (asset != undefined && oSceneEditor.activeAsset == asset) {
+            oSceneEditor.unsetActiveAsset();
+        }
+
         // If the asset is an instance, remove it from the scene
         if (asset != undefined && asset[$ "isInstance"] == true) {
             // Remove the instance from the scene (from its parent)
@@ -193,7 +197,7 @@ function EditorUiAssets(ui) constructor {
             var targetIsInstance = targetHasAsset && (targetItem.asset.isInstance == true);
 
             if (draggedIsInstance) {
-                // If we're dragging an existing instance, prefer reparenting
+                // If we're dragging an existing instance, do reparenting
                 if (targetIsInstance && !targetItem.entity) {
                     isValidDrop = true;
                     dropAction = "reparent";
@@ -311,9 +315,9 @@ function EditorUiAssets(ui) constructor {
                     treeview: targetItem.treeview,
                     assetType: draggedItem.assetType,
                     type: draggedItem.assetType,
-                    icon: draggedItem.icon
+                    icon: draggedItem.icon,
+                    asset: instanceAsset
                 }); 
-                instanceTreeviewItem.asset = instanceAsset;
                 targetItem.addChild(instanceTreeviewItem);
                 
                 targetItem.treeview.__onItemSelected(instanceTreeviewItem);

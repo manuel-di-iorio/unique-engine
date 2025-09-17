@@ -474,8 +474,25 @@ function EditorUiInspector(ui) constructor {
         var assetFields = fields[$ assetType];
         
         // If we are inspecting a scene, set it as the active scene
-        if (asset.type == "Scene") {
-            changeActiveScene(asset);
+        
+        switch (asset.type) {
+            case "Texture":
+            case "Material":
+                oSceneEditor.unsetActiveAsset();
+            break;
+                
+            case "ModelInstance":                
+                var scene = asset;
+                while (scene == undefined || scene.type != "Scene") {
+                    scene = scene.parent;
+                }
+                oSceneEditor.setActiveAsset(scene);
+            break;
+
+            case "Mesh":
+            case "Scene":
+                oSceneEditor.setActiveAsset(asset);
+            break;
         }
         
         // Clear the previous content
@@ -595,23 +612,5 @@ function EditorUiInspector(ui) constructor {
     
     function close() {
         self.ui.Inspector.Content.Items.destroyChildren();
-    }
-    
-    /**
-     * Change the active scene in the renderer
-     */
-    function changeActiveScene(sceneAsset) {
-        with (oSceneEditor) {
-            // If the selected scene is already active, do not rebuild objects
-            if (activeSceneAsset == sceneAsset) return;
-
-            objects.clear();
-
-            // Update the active scene
-            activeSceneAsset = sceneAsset;
-
-            // Add the new scene to the global objects container
-            objects.add(sceneAsset);
-        }
     }
 }

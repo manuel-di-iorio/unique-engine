@@ -37,5 +37,18 @@ projectLights = [];
 projectCameras = [];
 projectScenes = [];
 
-// Scene management
-activeSceneAsset = undefined;
+// Active treeview asset
+activeAsset = undefined;
+
+// Adds a preview instance of a model asset to the active scene (or scene root)
+function setActiveAsset(modelAsset) {
+	if (activeAsset == modelAsset) return;
+  objects.children = [];
+  activeAsset = modelAsset;
+  objects.add(modelAsset);
+}
+
+function unsetActiveAsset() {
+  objects.children = [];
+  activeAsset = undefined;
+}
