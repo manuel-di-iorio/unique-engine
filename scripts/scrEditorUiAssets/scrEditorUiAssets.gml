@@ -37,7 +37,7 @@ function EditorUiAssets(ui) constructor {
             break;
             
             case "model": 
-                asset = new UeMesh(new UeBoxGeometry(70, 70, 70));
+                asset = new UeMesh(new UeBoxGeometry(50, 50, 50));
                 asset.__rotationEuler = new UeEuler();
                 assetId = global.UI_ASSETS_MODELS_ID++;
                 array_push(oSceneEditor.projectModels, asset);
@@ -137,7 +137,7 @@ function EditorUiAssets(ui) constructor {
                 for (var i = 0, l = array_length(instancesToRemove); i < l; i++) {
                     var instance = instancesToRemove[i];
 
-                    // Remove the instance from the scene (from its parent)
+                    // Remove the instance from its parent
                     if (instance.parent != undefined) {
                         instance.parent.remove(instance);
                     }
@@ -152,7 +152,23 @@ function EditorUiAssets(ui) constructor {
         }
     }
             
+    // On item selected
     Treeview.onItemSelected = function(treeviewItem) {
+        switch (treeviewItem.asset.type) {
+            case "ModelInstance":                
+                var scene = treeviewItem.asset;
+                while (scene == undefined || scene.type != "Scene") {
+                    scene = scene.parent;
+                }
+                oSceneEditor.setActiveAsset(scene);
+            break;
+
+            case "Mesh":
+            case "Scene":
+                oSceneEditor.setActiveAsset(treeviewItem.asset);
+            break;
+        }
+
         oSceneEditor.inspector.inspect(treeviewItem.asset);
     };
     

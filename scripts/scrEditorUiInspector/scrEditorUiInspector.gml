@@ -79,7 +79,7 @@ function EditorUiInspector(ui) constructor {
             },
         
             { 
-                type: "label",
+                type: "section",
                 label: "Textures"
             },
             { 
@@ -122,7 +122,7 @@ function EditorUiInspector(ui) constructor {
             //},
         
             { 
-                type: "label",
+                type: "section",
                 label: "Basic Properties"
             },
             //{ 
@@ -159,6 +159,7 @@ function EditorUiInspector(ui) constructor {
                 type: "checkbox",
                 onChange: function(value) {
                     self.asset.lights = value ? 2 : 0;
+                    self.asset.build();
                 }
             },
             { 
@@ -174,7 +175,7 @@ function EditorUiInspector(ui) constructor {
             }, 
         
             { 
-                type: "label",
+                type: "section",
                 label: "Advanced Properties"
             },
             { 
@@ -401,6 +402,14 @@ function EditorUiInspector(ui) constructor {
         ],
         
         "ModelInstance": [
+           {
+                type: "label",
+                field: "model",
+                label: "Model",
+                valueGetter: function() {
+                    return self.asset.object.name;                    
+                }
+           },
            { 
                 id: "visible",
                 field: "visible",
@@ -473,28 +482,6 @@ function EditorUiInspector(ui) constructor {
         var assetType = asset.type;
         var assetFields = fields[$ assetType];
         
-        // If we are inspecting a scene, set it as the active scene
-        
-        switch (asset.type) {
-            case "Texture":
-            case "Material":
-                oSceneEditor.unsetActiveAsset();
-            break;
-                
-            case "ModelInstance":                
-                var scene = asset;
-                while (scene == undefined || scene.type != "Scene") {
-                    scene = scene.parent;
-                }
-                oSceneEditor.setActiveAsset(scene);
-            break;
-
-            case "Mesh":
-            case "Scene":
-                oSceneEditor.setActiveAsset(asset);
-            break;
-        }
-        
         // Clear the previous content
         var _Items = self.ui.Inspector.Content.Items;
         self.close();
@@ -533,6 +520,12 @@ function EditorUiInspector(ui) constructor {
             var onBlur = onBlurFn != undefined ? method(scope, onBlurFn) : undefined;
             
             switch (assetField.type) {
+                case "label":
+                    input = new UiText("", { flex: 1 }, {
+                        valueGetter
+                    });
+                break;
+
                 // Import a new sprite for the texture
                 case "spriteFilePicker":
                     input = new UiInspectorSpriteFilePicker({ flex: 1, justifyContent: "center" }, {
@@ -598,7 +591,7 @@ function EditorUiInspector(ui) constructor {
             // Item label
             var _label = assetField[$ "label"];
             if (_label != undefined) {
-                var _icon = assetField.type == "label" ? sprUiSection : undefined;
+                var _icon = assetField.type == "section" ? sprUiSection : undefined;
                 _Container.add(new UiText(assetField.label, { width: _labelWidth + 15, height: 20 }, { icon: _icon }));
             }
             
