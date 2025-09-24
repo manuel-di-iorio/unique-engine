@@ -18,12 +18,13 @@ function EditorUiAssets(ui) constructor {
 
     // Ricorsivo: unsetta la texture da obj, figli, istanze
     self.unsetTextureRecursive = function(obj, targetTexture) {
+        log(obj)
         // Rimuovi la texture dalla proprietà diretta
-        if (obj.texture == targetTexture) {
+        if (obj[$ "texture"] == targetTexture) {
             obj.texture = undefined;
         }
         // Se il figlio ha un material, rimuovi la texture dalla struct textures
-        if (obj.material != undefined && obj.material.textures != undefined) {
+        if (obj[$ "material"] != undefined && obj.material.textures != undefined) {
             var texNames = variable_struct_get_names(obj.material.textures);
             for (var t = 0; t < array_length(texNames); t++) {
                 var texName = texNames[t];
@@ -243,7 +244,7 @@ function EditorUiAssets(ui) constructor {
                 asset.instances.clear();
             }
 
-            // Se stiamo eliminando un materiale, rimuovilo da tutti i modelli e tutte le scene
+            // Se stiamo eliminando un materiale, rimuovilo da tutti i modelli
             if (assetType == "material") {
                 var models = oSceneEditor.projectModels;
                 for (var i = 0, l = array_length(models); i < l; i++) {

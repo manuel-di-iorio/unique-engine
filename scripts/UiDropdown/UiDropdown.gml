@@ -9,12 +9,28 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
     var _marginLeft = self.label == undefined ? 0 : 3 + string_width(self.label) + 20;
     self.List = undefined;
     self.search = props[$ "search"];
-    
-    // Se c'è un itemsGetter, popola gli items inizialmente
-    if (self.itemsGetter != undefined) {
-        self.items = self.itemsGetter("");
-    }
-    
+
+    self.onStep(function() {
+        if (self.itemsGetter != undefined) {
+            self.items = self.itemsGetter("");
+        }
+
+        // Check if current value is still valid
+        if (self.value != undefined) {
+            var found = false;
+            for (var i = 0; i < array_length(self.items); i++) {
+                if (self.items[i].value == self.value) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                self.value = undefined;
+                self.onChange(undefined);
+            }
+        }
+    });
+
     // Draw the label if present
     function onDraw() {
        if (self.label != undefined) {
