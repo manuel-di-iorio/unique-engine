@@ -94,12 +94,16 @@ function EditorUiInspector(ui) constructor {
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
                     }));
                     
-                    return array_map(textures, function(texture) {
+                    var mapped = array_map(textures, function(texture) {
                         return {
                             label: texture.name, 
                             value: texture
                         };
                     });
+                    
+                    array_insert(mapped, 0, { label: "<None>", value: undefined });
+
+                    return mapped;
                 },
                 onChange: function(value, input) {
                     self.asset.textures[$ "map"] = value;
@@ -333,12 +337,15 @@ function EditorUiInspector(ui) constructor {
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
                     }));
                     
-                    return array_map(items, function(item) {
+                    var mapped = array_map(items, function(item) {
                         return {
                             label: item.name, 
                             value: item
                         };
                     });
+                    
+                    array_insert(mapped, 0, { label: "<None>", value: undefined });
+                    return mapped;
                 }
            },
         
@@ -354,7 +361,7 @@ function EditorUiInspector(ui) constructor {
            {
                 id: "labelPosition",
                 label: "Transform", 
-                type: "label"
+                type: "section"
            },
            { 
                 id: "position",

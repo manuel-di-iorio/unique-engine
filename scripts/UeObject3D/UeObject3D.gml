@@ -35,7 +35,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      */
     function clone(recursive = true) {
         gml_pragma("forceinline");
-        // @todo need to test the children array
         return variable_clone(self, recursive ? 128 : 0);
     }
     

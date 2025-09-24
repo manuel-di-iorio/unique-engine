@@ -19,8 +19,9 @@ global.UI_ASSETS_MODELS_ID = 0;
 global.UI_ASSETS_LIGHTS_ID = 0;
 global.UI_ASSETS_CAMERAS_ID = 0;
 global.UI_ASSETS_SCENES_ID = 0;
+global.UI_ASSETS_INSTANCE_ID = 0;
 
-ideVersion = "2025.9.1.1";
+ideVersion = "2025.9.18.1";
 uiDebug = false;
 
 scrSetupUI();
