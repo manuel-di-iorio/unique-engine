@@ -28,8 +28,8 @@ function UiNode(style = {}, props = {}) constructor {
     self.__drawIndex = 0;
     self.destroyed = false;
     self.onMount = undefined;
-    self.onDraw = undefined;
-    self.onDestroy = undefined;
+    self.onDraw = props[$ "onDraw"] ?? undefined;
+    self.onDestroy = props[$ "onDestroy"] ?? undefined;
     self.pointerEvents = props[$ "pointerEvents"] ?? false;
     self.border = props[$ "border"] ?? false;
     self.visible = props[$ "visible"] ?? true;

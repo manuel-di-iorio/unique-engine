@@ -42,11 +42,11 @@ projectScenes = [];
 activeAsset = undefined;
 
 // Adds a preview instance of a model asset to the active scene (or scene root)
-function setActiveAsset(modelAsset) {
-	if (activeAsset == modelAsset) return;
+function setActiveAsset(selectedAsset) {
+	if (activeAsset == selectedAsset) return;
   objects.children = [];
-  activeAsset = modelAsset;
-  objects.add(modelAsset);
+  activeAsset = selectedAsset;
+  objects.add(selectedAsset);
 }
 
 function unsetActiveAsset() {

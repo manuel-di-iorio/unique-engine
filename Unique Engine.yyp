@@ -184,6 +184,7 @@
     {"id":{"name":"sprUeMapTex","path":"sprites/sprUeMapTex/sprUeMapTex.yy",},},
     {"id":{"name":"sprUiCamera","path":"sprites/sprUiCamera/sprUiCamera.yy",},},
     {"id":{"name":"sprUiCheckTick","path":"sprites/sprUiCheckTick/sprUiCheckTick.yy",},},
+    {"id":{"name":"sprUiClose","path":"sprites/sprUiClose/sprUiClose.yy",},},
     {"id":{"name":"sprUiCreateAsset","path":"sprites/sprUiCreateAsset/sprUiCreateAsset.yy",},},
     {"id":{"name":"sprUiDropdownArrow","path":"sprites/sprUiDropdownArrow/sprUiDropdownArrow.yy",},},
     {"id":{"name":"sprUiEmptyTransparentBg","path":"sprites/sprUiEmptyTransparentBg/sprUiEmptyTransparentBg.yy",},},

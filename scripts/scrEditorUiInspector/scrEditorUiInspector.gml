@@ -2,24 +2,39 @@ function EditorUiInspector(ui) constructor {
     self.ui = ui;
     self.assimp = new UeAssimpLoader();
     
-    ui.Inspector = new UiNode({ name: "Inspector", minWidth: 350, width: "21%", marginBottom: 62 }, { border: true });
-    
+
+    ui.Inspector = new UiNode({ name: "Inspector", minWidth: 350, width: "21%", marginBottom: 62, flexDirection: "column" }, { border: true });
+
     with (ui.Inspector) {
-        self.onDraw = function() {
+        function onDraw() {
             draw_set_color(global.UI_COL_INPUT_BG);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
             
-            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top);
+            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
             draw_text(self.x1 + 20, self.y1 + 8, "Inspector");
-        };
+        }
+    };
+
+    // Inspector close button
+    ui.Inspector.Close = new UiButton(sprUiClose, { display: "none", position: "absolute", top: 5, right: 5, width: 28, height: 28 }, { outline: true });
+
+    with (ui.Inspector.Close) {
+        self.onClick(function() {
+            oSceneEditor.unsetActiveAsset();
+            oSceneEditor.inspector.close();
+            self.hide();
+        });
     }
+
+    ui.Inspector.add(ui.Inspector.Close);
     
+    // Content
     ui.Inspector.Content = new UiNode({ 
         marginTop: 38, name: "Inspector.Content", height: "90%", 
         flex: 1, flexDirection: "column"
     }, { pointerEvents: true });
     ui.Inspector.add(ui.Inspector.Content);
-    
+
     with (ui.Inspector.Content) {
         self.enableScrollbar();
 
@@ -407,7 +422,7 @@ function EditorUiInspector(ui) constructor {
                 }
            },
         ],
-        
+
         "ModelInstance": [
            {
                 type: "label",
@@ -416,17 +431,67 @@ function EditorUiInspector(ui) constructor {
                 valueGetter: function() {
                     return self.asset.object.name;                    
                 }
+            },
+            { 
+                id: "name",
+                field: "name",
+                label: "Name", 
+                type: "text"
+           }, 
+           { 
+                id: "static",
+                field: "matrixAutoUpdate",
+                label: "Static", 
+                type: "checkbox",
+                onValue: function(value) {
+                    return !value;
+                },
+                onChange: function(value) {
+                    self.matrixAutoUpdate = !value;
+                }
            },
            { 
-                id: "visible",
-                field: "visible",
-                label: "Visible", 
+                id: "frustumCulled",
+                field: "frustumCulled",
+                label: "Frustum Culled", 
                 type: "checkbox"
+           },           
+           { 
+                id: "material",
+                field: "material",
+                label: "Material", 
+                type: "dropdown",
+                search: "Search material..",
+                itemsGetter: function(searchValue) {
+                    var items = array_filter(oSceneEditor.projectMaterials, method({ searchValue }, function(item) {
+                        return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
+                    }));
+                    
+                    var mapped = array_map(items, function(item) {
+                        return {
+                            label: item.name, 
+                            value: item
+                        };
+                    });
+                    
+                    array_insert(mapped, 0, { label: "<None>", value: undefined });
+                    return mapped;
+                }
            },
+        
+           { 
+                id: "renderOrder",
+                field: "renderOrder",
+                label: "Render Order", 
+                type: "text",
+                format: "integer",
+                negative: true,
+            },
+        
            {
-                id: "labelTransform",
+                id: "labelPosition",
                 label: "Transform", 
-                type: "label"
+                type: "section"
            },
            { 
                 id: "position",
@@ -442,6 +507,7 @@ function EditorUiInspector(ui) constructor {
                     self.asset.position.z = value[2];
                 }
            },
+        
            { 
                 id: "rotation",
                 field: "rotation",
@@ -472,6 +538,70 @@ function EditorUiInspector(ui) constructor {
            },
         ],
         
+        // "ModelInstance": [
+        //    {
+        //         type: "label",
+        //         field: "model",
+        //         label: "Model",
+        //         valueGetter: function() {
+        //             return self.asset.object.name;                    
+        //         }
+        //    },
+        //    { 
+        //         id: "visible",
+        //         field: "visible",
+        //         label: "Visible", 
+        //         type: "checkbox"
+        //    },
+        //    {
+        //         id: "labelTransform",
+        //         label: "Transform", 
+        //         type: "label"
+        //    },
+        //    { 
+        //         id: "position",
+        //         field: "position",
+        //         label: "Position", 
+        //         type: "transformXYZ",
+        //         valueGetter: function() {
+        //             return self.asset.position;
+        //         },
+        //         onBlur: function(value) {
+        //             self.asset.position.x = value[0];
+        //             self.asset.position.y = value[1];
+        //             self.asset.position.z = value[2];
+        //         }
+        //    },
+        //    { 
+        //         id: "rotation",
+        //         field: "rotation",
+        //         label: "Rotation", 
+        //         type: "transformXYZ",
+        //         valueGetter: function() {
+        //             return self.asset.__rotationEuler;
+        //         },
+        //         onBlur: function(value) {
+        //             var euler = self.asset.__rotationEuler;
+        //             euler.set(value[0], value[1], value[2]);
+        //             self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
+        //         }
+        //    },
+        //    { 
+        //         id: "scale",
+        //         field: "scale",
+        //         label: "Scale", 
+        //         type: "transformXYZ",
+        //         valueGetter: function() {
+        //             return self.asset.scale;
+        //         },
+        //         onBlur: function(value) {
+        //             self.asset.scale.x = value[0];
+        //             self.asset.scale.y = value[1];
+        //             self.asset.scale.z = value[2];
+        //         }
+        //    },
+        // ],
+        
         "Scene": [
            { 
                 id: "name",
@@ -486,6 +616,8 @@ function EditorUiInspector(ui) constructor {
      * Dynamically create the inspector fields
      */
     function inspect(asset) {
+        self.ui.Inspector.Close.show();
+
         var assetType = asset.type;
         var assetFields = fields[$ assetType];
         

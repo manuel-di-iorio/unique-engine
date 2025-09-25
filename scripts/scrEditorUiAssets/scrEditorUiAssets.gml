@@ -1,29 +1,29 @@
 function EditorUiAssets(ui) constructor {
-    // Ricorsivo: unsetta il materiale da obj, figli, istanze
-    self.unsetMaterialRecursive = function(obj, targetMaterial) {
-        if (obj.material == targetMaterial) {
+    // Recursive: unset material from obj, children, instances
+    self.__unsetMaterialRecursive = function(obj, targetMaterial) {
+        if (obj[$ "material"] == targetMaterial) {
             obj.material = undefined;
         }
         if (obj.children != undefined) {
             for (var j = 0; j < array_length(obj.children); j++) {
-                self.unsetMaterialRecursive(obj.children[j], targetMaterial);
+                self.__unsetMaterialRecursive(obj.children[j], targetMaterial);
             }
         }
         if (obj.instances != undefined && obj.instances.list != undefined) {
             for (var k = 0; k < array_length(obj.instances.list); k++) {
-                self.unsetMaterialRecursive(obj.instances.list[k], targetMaterial);
+                self.__unsetMaterialRecursive(obj.instances.list[k], targetMaterial);
             }
         }
     }
 
-    // Ricorsivo: unsetta la texture da obj, figli, istanze
-    self.unsetTextureRecursive = function(obj, targetTexture) {
-        log(obj)
-        // Rimuovi la texture dalla proprietà diretta
+    // Recursive: unset texture from obj, children, instances
+    self.__unsetTextureRecursive = function(obj, targetTexture) {
+        // Remove the texture from the direct property
         if (obj[$ "texture"] == targetTexture) {
             obj.texture = undefined;
         }
-        // Se il figlio ha un material, rimuovi la texture dalla struct textures
+
+        // If the child has a material, remove the texture from the textures struct
         if (obj[$ "material"] != undefined && obj.material.textures != undefined) {
             var texNames = variable_struct_get_names(obj.material.textures);
             for (var t = 0; t < array_length(texNames); t++) {
@@ -33,21 +33,24 @@ function EditorUiAssets(ui) constructor {
                 }
             }
         }
-        // Ricorsione su figli
+
+        // Recursion on children
         if (obj.children != undefined) {
             for (var j = 0; j < array_length(obj.children); j++) {
-                self.unsetTextureRecursive(obj.children[j], targetTexture);
+                self.__unsetTextureRecursive(obj.children[j], targetTexture);
             }
         }
-        // Ricorsione su istanze
+
+        // Recursion on instances
         if (obj.instances != undefined && obj.instances.list != undefined) {
             for (var k = 0; k < array_length(obj.instances.list); k++) {
-                self.unsetTextureRecursive(obj.instances.list[k], targetTexture);
+                self.__unsetTextureRecursive(obj.instances.list[k], targetTexture);
             }
         }
     }
-    // Funzione privata per creare ricorsivamente i TreeviewItem
-    self.__createTreeviewItemRecursive = function(asset, parentTreeviewItem, icon) {
+    
+    // Private function to recursively create TreeviewItems
+    self.__createTreeviewItem = function(asset, parentTreeviewItem, icon) {
         var treeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
             marginLeft: 15,
@@ -63,16 +66,16 @@ function EditorUiAssets(ui) constructor {
         return treeviewItem;
     }
     
-    // Funzione ricorsiva privata per aggiungere i children come TreeviewItem
+    // Private recursive function to add children as TreeviewItems
     self.__createTreeviewItemsForChildren = function(asset, treeviewItem, icon) {
         for (var i = 0; i < array_length(asset.children); i++) {
             var child = asset.children[i];
-            var childTreeviewItem = self.createTreeviewItemsRecursive(child, treeviewItem, icon);
+            var childTreeviewItem = self.__createTreeviewItem(child, treeviewItem, icon);
             self.__createTreeviewItemsForChildren(child, childTreeviewItem, icon);
         }
     }
 
-    // Funzione ricorsiva privata per cercare e rimuovere l'istanza
+    // Private recursive function to search and remove the instance
     self.__removeTreeviewItemByAsset = function(treeviewItem, targetAsset) {
         if (treeviewItem[$ "asset"] != undefined && treeviewItem.asset == targetAsset) {
             var parent = treeviewItem.parent;
@@ -82,7 +85,8 @@ function EditorUiAssets(ui) constructor {
             }
             return true;
         }
-        if (treeviewItem.Items != undefined) {
+
+        if (treeviewItem[$ "Items"] != undefined) {
             var children = treeviewItem.Items.children;
             for (var i = array_length(children) - 1; i >= 0; i--) {
                 if (self.__removeTreeviewItemByAsset(children[i], targetAsset)) {
@@ -90,6 +94,7 @@ function EditorUiAssets(ui) constructor {
                 }
             }
         }
+
         return false;
     }
     self.ui = ui;
@@ -231,46 +236,51 @@ function EditorUiAssets(ui) constructor {
                 for (var i = 0, l = array_length(instancesToRemove); i < l; i++) {
                     var instance = instancesToRemove[i];
 
+                    if (oSceneEditor.activeAsset == instance) {
+                        oSceneEditor.unsetActiveAsset();
+                        oSceneEditor.inspector.close();
+                    }
+
                     // Remove the instance from its parent
                     if (instance.parent != undefined) {
                         instance.parent.remove(instance);
                     }
 
                     // Find and remove the instance from the treeview
-                    _removeInstanceFromTreeview(instance);
+                    self.__removeTreeviewItemByAsset(ui.Assets.Treeview, instance);
                 }
 
                 // Clear the instances list
                 asset.instances.clear();
             }
 
-            // Se stiamo eliminando un materiale, rimuovilo da tutti i modelli
+            // If we are deleting a material, remove it from all models
             if (assetType == "material") {
                 var models = oSceneEditor.projectModels;
                 for (var i = 0, l = array_length(models); i < l; i++) {
-                    self.unsetMaterialRecursive(models[i], asset);
+                    self.__unsetMaterialRecursive(models[i], asset);
                 }
                 var scenes = oSceneEditor.projectScenes;
                 for (var i = 0, l = array_length(scenes); i < l; i++) {
                     if (scenes[i].children != undefined) {
                         for (var j = 0; j < array_length(scenes[i].children); j++) {
-                            self.unsetMaterialRecursive(scenes[i].children[j], asset);
+                            self.__unsetMaterialRecursive(scenes[i].children[j], asset);
                         }
                     }
                 }
             }
 
-            // Se stiamo eliminando una texture, rimuovila da tutti i modelli e tutte le scene
+            // If we are deleting a texture, remove it from all models and all scenes
             if (assetType == "texture") {
                 var models = oSceneEditor.projectModels;
                 for (var i = 0, l = array_length(models); i < l; i++) {
-                    self.unsetTextureRecursive(models[i], asset);
+                    self.__unsetTextureRecursive(models[i], asset);
                 }
                 var scenes = oSceneEditor.projectScenes;
                 for (var i = 0, l = array_length(scenes); i < l; i++) {
                     if (scenes[i].children != undefined) {
                         for (var j = 0; j < array_length(scenes[i].children); j++) {
-                            self.unsetTextureRecursive(scenes[i].children[j], asset);
+                            self.__unsetTextureRecursive(scenes[i].children[j], asset);
                         }
                     }
                 }
@@ -300,15 +310,15 @@ function EditorUiAssets(ui) constructor {
     
     // Asset drag & drop handler
     Treeview.onAssetDrop = function(draggedTreeviewItem, targetTreeviewItem) {
-        var draggedItem = draggedTreeviewItem; // Il TreeviewItem che stiamo trascinando
-        var targetItem = targetTreeviewItem; // Il TreeviewItem su cui stiamo droppando
+        var draggedItem = draggedTreeviewItem; // The TreeviewItem we are dragging
+        var targetItem = targetTreeviewItem; // The TreeviewItem we are dropping onto
         
         // Check if the drop is valid
         var isValidDrop = false;
         var dropAction = "";
         
-        // Regole di validazione
-        // 1. Texture e Material non sono draggabili
+        // Validation rules
+        // 1. Texture and Material are not draggable
         if (draggedItem.assetType == "texture" || draggedItem.assetType == "material") {
             return false;
         }
@@ -435,8 +445,7 @@ function EditorUiAssets(ui) constructor {
                 draggedItem.moveItemTo(targetItem);
             }
             else if (dropAction == "instance") {
-                // Instanzia una nuova istanza del modello nella scena
-                log(draggedItem.asset)
+                // Instantiate a new instance of the model in the scene
 
                 var instanceAsset = draggedItem.asset.createInstance();
                 
@@ -449,14 +458,14 @@ function EditorUiAssets(ui) constructor {
                 }
                 instanceAsset.__rotationEuler = new UeEuler();
 
-                // Aggiungi l'istanza all'elemento di destinazione (scena o sub-oggetto)
+                // Add the instance to the target element (scene or sub-object)
                 targetItem.asset.add(instanceAsset);
 
-                // Crea ricorsivamente i TreeviewItem per l'istanza e i suoi children
-                var instanceTreeviewItem = self.__createTreeviewItemRecursive(instanceAsset, targetItem, draggedItem.icon);
+                // Create TreeviewItems for the instance and its children
+                var instanceTreeviewItem = self.__createTreeviewItem(instanceAsset, targetItem, draggedItem.icon);
                 self.__createTreeviewItemsForChildren(instanceAsset, instanceTreeviewItem, draggedItem.icon);
 
-                // Solo sul parent principale chiama __onItemSelected
+                // Only on the main parent call __onItemSelected
                 targetItem.treeview.__onItemSelected(instanceTreeviewItem);
             }
             
@@ -465,13 +474,4 @@ function EditorUiAssets(ui) constructor {
         
         return false;
     };
-    
-    /**
-     * Helper function to remove an instance from the treeview
-     */
-    function _removeInstanceFromTreeview(instanceAsset) {
-        // Funzione ricorsiva privata per cercare e rimuovere l'istanza
-        // Avvia la ricerca dalla radice del treeview
-    self.__removeTreeviewItemByAsset(ui.Assets.Treeview, instanceAsset);
-    }
 }
