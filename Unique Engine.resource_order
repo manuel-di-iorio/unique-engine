@@ -9,6 +9,7 @@
     {"name":"Scripts","order":3,"path":"folders/Scene Editor/Scripts.yy",},
     {"name":"UI","order":2,"path":"folders/Scene Editor/UI.yy",},
     {"name":"Components","order":1,"path":"folders/Scene Editor/UI/Components.yy",},
+    {"name":"Treeview","order":3,"path":"folders/Scene Editor/UI/Components/Treeview.yy",},
     {"name":"Elements","order":2,"path":"folders/Scene Editor/UI/Elements.yy",},
     {"name":"Unique Engine","order":27,"path":"folders/Unique Engine.yy",},
     {"name":"__internals","order":11,"path":"folders/Unique Engine/__internals.yy",},

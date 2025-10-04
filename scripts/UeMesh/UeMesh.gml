@@ -83,4 +83,37 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         var _self = self;
         return { obj: _self, payload: toJSON() };
     }
+
+    /**
+     * Creates an instance with proper master-instance relationship (Unity Prefab-style)
+     * @todo missing doc
+     */
+    function createInstance() {
+        gml_pragma("forceinline");
+        var instance = new UeMesh();
+        instance.position = self.position.clone();
+        instance.rotation = self.rotation.clone();
+        instance.scale = self.scale.clone();
+        instance.up = self.up.clone();
+        instance.name = self.name;
+        instance.visible = self.visible;
+        instance.renderOrder = self.renderOrder;
+        instance.layers = new UeLayers();
+        instance.layers.mask = self.layers.mask;
+        instance.frustumCulled = self.frustumCulled;  
+        instance.geometry = self[$ "geometry"]; // Shared reference
+        instance.material = self[$ "material"]; // Shared reference
+        instance.object = self; // Point to the master object
+        instance.isInstance = true; // Mark as instance
+        
+        // Add to instances list
+        self.instances.add(instance);
+
+        for (var i=0; i<array_length(self.children); i++) {
+            var child = self.children[i];
+            instance.add(child.createInstance());
+        }
+        
+        return instance;
+    }
 }

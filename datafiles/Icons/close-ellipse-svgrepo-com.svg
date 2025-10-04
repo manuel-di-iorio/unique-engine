@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   width="64px"
+   height="64px"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="close-ellipse-svgrepo-com.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="9.0045629"
+     inkscape:cx="19.601173"
+     inkscape:cy="28.152394"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <g
+     id="SVGRepo_bgCarrier"
+     stroke-width="0" />
+  <g
+     id="SVGRepo_tracerCarrier"
+     stroke-linecap="round"
+     stroke-linejoin="round" />
+  <g
+     id="SVGRepo_iconCarrier"
+     transform="matrix(0.24774122,0,0,0.24774122,8.7898505,8.3733949)"
+     inkscape:export-filename="SVGRepo_iconCarrier.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <path
+       d="m 8.00386,9.41816 c -0.39053,-0.39053 -0.39052,-1.02369 0,-1.41421 0.39052,-0.39053 1.02369,-0.39053 1.41421,0 l 2.58763,2.58765 2.585,-2.58503 c 0.3906,-0.39052 1.0237,-0.39052 1.4142,0 0.3906,0.39053 0.3906,1.02369 0,1.41422 l -2.585,2.58501 2.584,2.5839 c 0.3905,0.3906 0.3905,1.0237 0,1.4142 -0.3906,0.3906 -1.0237,0.3906 -1.4143,0 L 12.0057,13.42 9.42097,16.0048 c -0.39052,0.3905 -1.02369,0.3905 -1.41421,0 -0.39052,-0.3906 -0.39052,-1.0237 0,-1.4143 l 2.58474,-2.5847 z"
+       fill="#ffffff"
+       id="path1" />
+    <path
+       fill-rule="evenodd"
+       clip-rule="evenodd"
+       d="M 23,12 C 23,18.0751 18.0751,23 12,23 5.92487,23 1,18.0751 1,12 1,5.92487 5.92487,1 12,1 18.0751,1 23,5.92487 23,12 Z M 3.00683,12 c 0,4.9668 4.02638,8.9932 8.99317,8.9932 4.9668,0 8.9932,-4.0264 8.9932,-8.9932 C 20.9932,7.03321 16.9668,3.00683 12,3.00683 7.03321,3.00683 3.00683,7.03321 3.00683,12 Z"
+       fill="#ffffff"
+       id="path2" />
+  </g>
+</svg>

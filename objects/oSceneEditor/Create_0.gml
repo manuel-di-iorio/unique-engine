@@ -46,7 +46,12 @@ function setActiveAsset(selectedAsset) {
 	if (activeAsset == selectedAsset) return;
   objects.children = [];
   activeAsset = selectedAsset;
-  objects.add(selectedAsset);
+
+  // if (selectedAsset[$ "isMesh"]) {
+  //   objects.add(selectedAsset.createInstance());
+  // } else {
+    objects.add(selectedAsset);
+  // }
 }
 
 function unsetActiveAsset() {
