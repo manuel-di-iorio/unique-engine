@@ -43,15 +43,10 @@ activeAsset = undefined;
 
 // Adds a preview instance of a model asset to the active scene (or scene root)
 function setActiveAsset(selectedAsset) {
-	if (activeAsset == selectedAsset) return;
-  objects.children = [];
-  activeAsset = selectedAsset;
-
-  // if (selectedAsset[$ "isMesh"]) {
-  //   objects.add(selectedAsset.createInstance());
-  // } else {
+    if (activeAsset == selectedAsset) return;
+    objects.children = [];
+    activeAsset = selectedAsset;
     objects.add(selectedAsset);
-  // }
 }
 
 function unsetActiveAsset() {

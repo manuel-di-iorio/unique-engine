@@ -9,12 +9,12 @@ function editorTreeviewOnItemSelected(treeviewItem) {
         break;
 
         case "Mesh":
-            var mesh = treeviewItem.asset;
-            while (mesh != undefined && mesh.isInstance == true) {
-                mesh = mesh.parent;
+            var currentAsset = treeviewItem.asset;
+            while (currentAsset.parent != undefined && currentAsset.parent.type == "Mesh") {
+                currentAsset = currentAsset.parent;
             }
-            oSceneEditor.setActiveAsset(mesh);
-            // oSceneEditor.setActiveAsset(treeviewItem.asset);
+        log(currentAsset)
+            oSceneEditor.setActiveAsset(currentAsset);
         break;
 
         case "Scene":

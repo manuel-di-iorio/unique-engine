@@ -9,21 +9,21 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     
     // Validation rules
     // 1. Texture and Material are not draggable
-    if (draggedItem.assetType == "texture" || draggedItem.assetType == "material") {
+    if (draggedItem.assetType == "Texture" || draggedItem.assetType == "Material") {
         return false;
     }
     
     // 2. Drop on a root entity item to unparent
     // Check if the item is under a parent in the UI (not just in the asset)
-    if ((draggedItem.assetType == "model" || draggedItem.assetType == "scene") &&
+    if ((draggedItem.assetType == "Mesh" || draggedItem.assetType == "Scene") &&
     targetItem.entity && targetItem.assetType == draggedItem.assetType && draggedItem.asset != undefined) {
         isValidDrop = true;
         dropAction = "unparent";
     }
     
     // 3. Scene can only be moved under another Scene
-    else if (draggedItem.assetType == "scene") {
-        if (targetItem.assetType == "scene" && !targetItem.entity) {
+    else if (draggedItem.assetType == "Scene") {
+        if (targetItem.assetType == "Scene" && !targetItem.entity) {
             isValidDrop = true;
             dropAction = "reparent";
         } else {
@@ -32,7 +32,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     }
     
     // 4. Model can be moved under another Model (reparent) or under a Scene (instance)
-    else if (draggedItem.assetType == "model") {
+    else if (draggedItem.assetType == "Mesh") {
         // Determine whether the dragged item is an instance (from a scene) or a master (from the Models list)
         var draggedIsInstance = (draggedItem.asset != undefined && draggedItem.asset.isInstance == true);
         var targetHasAsset = (targetItem.asset != undefined);
@@ -43,11 +43,11 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             if (targetIsInstance && !targetItem.entity) {
                 isValidDrop = true;
                 dropAction = "reparent";
-            } else if (targetItem.assetType == "model" && !targetItem.entity && !targetIsInstance) {
+            } else if (targetItem.assetType == "Mesh" && !targetItem.entity && !targetIsInstance) {
                 // Dragging an instance onto a master model -> reparent under that master
                 isValidDrop = true;
                 dropAction = "reparent";
-            } else if (targetItem.assetType == "scene" && !targetItem.entity) {
+            } else if (targetItem.assetType == "Scene" && !targetItem.entity) {
                 // Move instance directly under the scene
                 isValidDrop = true;
                 dropAction = "reparent";
@@ -56,11 +56,11 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             }
         } else {
             // Dragging from the Models list (master)
-            if (targetItem.assetType == "model" && !targetItem.entity && (!targetHasAsset || !targetIsInstance)) {
+            if (targetItem.assetType == "Mesh" && !targetItem.entity && (!targetHasAsset || !targetIsInstance)) {
                 // Dropping on a master model -> reparent the master under another master
                 isValidDrop = true;
                 dropAction = "reparent";
-            } else if ((targetItem.assetType == "scene" || targetIsInstance) && !targetItem.entity) {
+            } else if ((targetItem.assetType == "Scene" || targetIsInstance) && !targetItem.entity) {
                 // Dropping a master onto a scene or onto an instance -> create a new instance
                 isValidDrop = true;
                 dropAction = "instance";
@@ -163,9 +163,9 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
     obj.name += "_" + string(global.UI_ASSETS_INSTANCE_ID++)
 
     switch (assetType) {
-        case "model": obj.type = "ModelInstance"; break;
-        case "light": obj.type = "LightInstance"; break;
-        case "camera": obj.type = "CameraInstance"; break;
+        case "Mesh": obj.type = "ModelInstance"; break;
+        case "Light": obj.type = "LightInstance"; break;
+        case "Camera": obj.type = "CameraInstance"; break;
         default: obj.type = assetType + "Instance"; break;
     }
     // Assicura che __rotationEuler sia presente

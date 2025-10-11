@@ -1,5 +1,5 @@
 function editorTreeviewOnModelImport(modelAsset) {
-    var path = get_open_filename("Model File (*.obj,*.fbx,*.dae,*.gltf,*.3ds,*.blend,*.max)|*.obj;*.fbx;*.dae;*.gltf;*.3ds;*.blend;*.max", "");
+    var path = get_open_filename("Model File (*.obj,*.fbx,*.dae,*.gltf,*.3ds,*.blend,*.max,*.glb)|*.obj;*.fbx;*.dae;*.gltf;*.3ds;*.blend;*.max;*.glb", "");
     if (path == "") return;
 
     var ui = oSceneEditor.ui;
