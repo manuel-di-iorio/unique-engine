@@ -7,6 +7,27 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
   var assetType = treeviewItem.assetType;
   var asset = treeviewItem.asset;
 
+  // Check if the currently selected item is a descendant of the item being removed
+  var treeview = treeviewItem.treeview;
+  if (treeview.selectedItem != undefined && __editorTreeview_isDescendantOf(treeview.selectedItem, treeviewItem)) {
+      treeview.selectedItem = undefined;
+      oSceneEditor.inspector.close();
+      if (oSceneEditor.activeAsset != undefined) {
+          oSceneEditor.unsetActiveAsset();
+      }
+  }
+
+  // Also check if the selected item's asset is a descendant of the asset being removed
+  if (treeview.selectedItem != undefined && treeview.selectedItem.asset != undefined && asset != undefined) {
+      if (__editorTreeview_isAssetDescendantOf(treeview.selectedItem.asset, asset)) {
+          treeview.selectedItem = undefined;
+          oSceneEditor.inspector.close();
+          if (oSceneEditor.activeAsset != undefined) {
+              oSceneEditor.unsetActiveAsset();
+          }
+      }
+  }
+
   // If the asset being removed is currently active, unset it
   if (asset != undefined && oSceneEditor.activeAsset == asset) {
       oSceneEditor.unsetActiveAsset();
@@ -27,12 +48,12 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
       // If the asset is a master asset (not an instance), remove it from the project list
       var list;
       switch (assetType) {
-          case "texture": list = oSceneEditor.projectTextures; break;
-          case "material": list = oSceneEditor.projectMaterials; break;
-          case "model": list = oSceneEditor.projectModels; break;
-          case "light": list = oSceneEditor.projectLights; break;
-          case "camera": list = oSceneEditor.projectCameras; break;
-          case "scene": list = oSceneEditor.projectScenes; break;
+          case "Texture": list = oSceneEditor.projectTextures; break;
+          case "Material": list = oSceneEditor.projectMaterials; break;
+          case "Mesh": list = oSceneEditor.projectModels; break;
+          case "Light": list = oSceneEditor.projectLights; break;
+          case "Camera": list = oSceneEditor.projectCameras; break;
+          case "Scene": list = oSceneEditor.projectScenes; break;
       }
       
       var _itemIdx = array_find_index(list, method({ asset }, function(value) {
@@ -64,7 +85,7 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
               }
 
               // Find and remove the instance from the treeview
-              __editorTreeview_removeTreeviewItemByAsset(ui.Assets.Treeview, instance);
+              __editorTreeview_removeTreeviewItemByAsset(oSceneEditor.ui.Assets.Treeview, instance);
           }
 
           // Clear the instances list
@@ -177,5 +198,33 @@ function __editorTreeview_removeTreeviewItemByAsset(treeviewItem, targetAsset) {
         }
     }
 
+    return false;
+}
+
+// Helper function to check if a treeview item is a descendant of another
+function __editorTreeview_isDescendantOf(childItem, potentialAncestor) {
+    var currentParent = childItem.parent;
+    
+    while (currentParent != undefined) {
+        if (currentParent == potentialAncestor) {
+            return true;
+        }
+        currentParent = currentParent.parent;
+    }
+    
+    return false;
+}
+
+// Helper function to check if an asset is a descendant of another asset in the 3D hierarchy
+function __editorTreeview_isAssetDescendantOf(childAsset, potentialAncestorAsset) {
+    var currentParent = childAsset.parent;
+    
+    while (currentParent != undefined) {
+        if (currentParent == potentialAncestorAsset) {
+            return true;
+        }
+        currentParent = currentParent.parent;
+    }
+    
     return false;
 }

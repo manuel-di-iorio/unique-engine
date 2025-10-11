@@ -22,4 +22,5 @@ function EditorUiAssets(ui) constructor {
     Treeview.onRemoveItem = editorTreeviewOnRemoveAsset;
     Treeview.onItemSelected = editorTreeviewOnItemSelected;
     Treeview.onAssetDrop = editorTreeviewOnAssetDrop; 
+    Treeview.onModelImport = editorTreeviewOnModelImport; 
 }

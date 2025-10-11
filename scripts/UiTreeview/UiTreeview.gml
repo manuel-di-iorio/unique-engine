@@ -10,6 +10,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.onRemoveItem = undefined;
     self.onItemSelected = undefined;
     self.onAssetDrop = undefined;
+    self.onModelImport = undefined;
     
     // Create the items container
     self.Items = new UiNode({ name: "UiTreeview.Items", marginTop: 5, paddingBottom: 5 });
@@ -21,8 +22,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.Textures = new UiTreeviewItem(rootAssetItemStyle, {
         treeview: _this,
         name: "Textures",
-        type: "folder",
-        assetType: "texture",
+        type: "Folder",
+        assetType: "Texture",
         icon: sprUiTexture,
         entity: true
     });
@@ -30,8 +31,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.Materials = new UiTreeviewItem(rootAssetItemStyle, {
         treeview: _this,
         name: "Materials",
-        type: "folder",
-        assetType: "material",
+        type: "Folder",
+        assetType: "Material",
         icon: sprUiMaterial,
         entity: true
     });
@@ -39,8 +40,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.Models = new UiTreeviewItem(rootAssetItemStyle, {
         treeview: _this,
         name: "Models",
-        type: "folder",
-        assetType: "model",
+        type: "Folder",
+        assetType: "Mesh",
         icon: sprUiObject,
         entity: true
     });
@@ -48,8 +49,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     //self.Lights = new UiTreeviewItem(rootAssetItemStyle, {
         //treeview: _this,
         //name: "Lights",
-        //type: "folder",
-        //assetType: "light",
+        //type: "Folder",
+        //assetType: "Light",
         //icon: sprUiLight,
         //entity: true
     //});
@@ -57,8 +58,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     //self.Cameras = new UiTreeviewItem(rootAssetItemStyle, {
         //treeview: _this,
         //name: "Cameras",
-        //type: "folder",
-        //assetType: "camera",
+        //type: "Folder",
+        //assetType: "Camera",
         //icon: sprUiCamera,
         //entity: true
     //});
@@ -66,8 +67,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.Scenes = new UiTreeviewItem(rootAssetItemStyle, {
         treeview: _this,
         name: "Scenes",
-        type: "folder",
-        assetType: "scene",
+        type: "Folder",
+        assetType: "Scene",
         icon: sprUiScene,
         entity: true
     });
@@ -196,14 +197,13 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
      
     
     // Import model button
-    if (self.type == "folder" && self.assetType == "model") {
+    if (self.type == "Folder" && self.assetType == "Mesh") {
         self.ImportModelIcon = new UiButton(sprUiImportModel, { 
             name: "UiTreeview.Item.Content.ImportModelBtn", padding: 5, paddingBottom: 4, marginRight: 15 
         }, { outline: true, tooltip: "Import model from file" });
         self.ImportModelIcon.treeview = self.treeview;
         self.ImportModelIcon.onClick(method(_this, function() {
-            //self.__importModel(
-            show_message("@todo: Button to import models from file");
+            self.treeview.onModelImport();
         }));
         
         self.RightContent.add(self.ImportModelIcon); 
@@ -228,7 +228,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     // Create button
-    if ((self.type == "folder" || self.assetType == "model") && (self.asset == undefined || !self.asset.isInstance)) {
+    if ((self.type == "Folder" || self.assetType == "Mesh") && (self.asset == undefined || !self.asset.isInstance)) {
         self.CreateIcon = new UiButton(sprUiCreateAsset, { 
             name: "UiTreeview.Item.Content.CreateBtn", padding: 5, paddingBottom: 4, marginRight: 20
         }, { outline: true, tooltip: "Create a new asset" });

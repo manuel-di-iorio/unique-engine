@@ -21,7 +21,7 @@ function UeAssimpLoader(data = {}) constructor {
 			
 			// Quality
 			GMA_PP.CALC_TANGENT_SPACE |
-			//GMA_PP.GEN_SMOOTH_NORMALS | // Not needed
+			//GMA_PP.GEN_SMOOTH_NORMALS | // Not needed probably
 			GMA_PP.JOIN_IDENTICAL_VERTICES |
 			GMA_PP.IMPROVE_CACHE_LOCALITY | 
 			//GMA_PP.LIMIT_BONE_WEIGHTS | // @todo: test
@@ -44,28 +44,39 @@ function UeAssimpLoader(data = {}) constructor {
 		}
 
 		GMA_BindScene();
-        var materials = _addMaterials(fname);
+        var textures = [];
+        var materials = _addMaterials(fname, textures);
         var model = _addMeshes(materials);
-        return model; 
+        return {
+            textures,
+            materials,
+            model
+        };
     }
     
-    function _addMaterials(fname) {
+    function _addMaterials(fname, textures) {
         gml_pragma("forceinline");
         var modelPath = filename_path(fname);
+        var modelName = filename_change_ext(filename_name(fname), "");
 		
 		// Get the materials
 		var materialsCount = GMA_GetMaterialNum();
         var materials = array_create(materialsCount);
         
-        for (var i=0; i<materialsCount; i++)	{
+        for (var i=0; i<materialsCount; i++) {
 		    GMA_BindMaterial(i);
-            materials[i] = new UeMeshStandardMaterial(_addTextures(modelPath));
+            var material = new UeMeshStandardMaterial(_addTextures(modelPath, textures));
+            material.name = string_trim(GMA_GetMaterialName());
+            if (material.name == "") material.name = modelName + "__Material" + string(i);
+            material.opacity = GMA_GetMaterialOpacity();
+            material.transparent = material.opacity < 1;
+            materials[i] = material;
 		}
         
         return materials;
     }
-    
-    function _addTextures(modelPath) {
+
+    function _addTextures(modelPath, globalTextures) {
         gml_pragma("forceinline");
         var textures = {};
         
@@ -89,7 +100,10 @@ function UeAssimpLoader(data = {}) constructor {
 			var materialType = materialTypes[i];
             var txtName = GMA_GetMaterialTextureName(materialType.type, 0);
             var txt = _addTexture(modelPath, filename_name(txtName));
-            if (txt) textures[$ materialType.name] = txt;
+            if (txt) {
+                textures[$ materialType.name] = txt;
+                array_push(globalTextures, txt);
+            }
         }
 
         return textures;
@@ -115,7 +129,7 @@ function UeAssimpLoader(data = {}) constructor {
     
     function _addMeshes(materials) {
         gml_pragma("forceinline");
-        var model = new UeObject3D();
+        var model = new UeMesh();
         
         for (var i = 0, n = GMA_GetMeshNum(); i < n; i++) {
 		    GMA_BindMesh(i);
@@ -125,9 +139,10 @@ function UeAssimpLoader(data = {}) constructor {
 		}
         
         // Rotate the model to match the engine camera directions
-        model.rotateZ(180);
-        model.updateMatrix();
-        model.updateMatrixWorld(true);
+        // @todo This is temporary
+        // model.rotateZ(180);
+        // model.updateMatrix();
+        // model.updateMatrixWorld(true);
         
         return model;
     }

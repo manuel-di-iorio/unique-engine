@@ -5,19 +5,19 @@ function editorTreeviewOnNewAsset(treeviewItem) {
   var assetId;
 
   switch (assetType) {
-      case "texture": 
+      case "Texture": 
           asset = new UeTexture();
           assetId = global.UI_ASSETS_TEXTURES_ID++;
           array_push(oSceneEditor.projectTextures, asset);
       break;
-      
-      case "material": 
-          asset = new UeMaterial(); 
+
+      case "Material":
+          asset = new UeMaterial();
           assetId = global.UI_ASSETS_MATERIALS_ID++;
           array_push(oSceneEditor.projectMaterials, asset);
       break;
       
-      case "model": 
+      case "Mesh": 
           asset = new UeMesh(new UeBoxGeometry(50, 50, 50));
           asset.material = undefined;
           asset.__rotationEuler = new UeEuler();
@@ -25,23 +25,23 @@ function editorTreeviewOnNewAsset(treeviewItem) {
           array_push(oSceneEditor.projectModels, asset);
       break;
       
-      case "light":
+      case "Light":
           asset = new UeLight(); 
           asset.__rotationEuler = new UeEuler();
           assetId = global.UI_ASSETS_LIGHTS_ID++;
           array_push(oSceneEditor.projectLights, asset);
       break;
       
-      case "camera":
+      case "Camera":
           asset = new UeObject3D();
           asset.isCamera = true;
-          asset.type = "camera";
+          asset.type = "Camera";
           asset.__rotationEuler = new UeEuler();
           assetId = global.UI_ASSETS_CAMERAS_ID++;
           array_push(oSceneEditor.projectCameras, asset);
       break;
       
-      case "scene":   
+      case "Scene":
           asset = new UeScene();
           assetId = global.UI_ASSETS_SCENES_ID++;
           array_push(oSceneEditor.projectScenes, asset);
@@ -60,7 +60,7 @@ function editorTreeviewOnNewAsset(treeviewItem) {
   }
   
   // If it's a scene, select it automatically
-  if (assetType == "scene") {
+  if (assetType == "Scene") {
       oSceneEditor.ui.Assets.Treeview.__onItemSelected(treeviewItem);
   }
 };

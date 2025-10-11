@@ -10,7 +10,7 @@ var sunLight = new UeDirectionalLight(90, 45, { color: #FFFFC8, intensity: .8 })
 // Load the model
 assimpLoader = new UeAssimpLoader();
 loadTime = get_timer();
-airplaneMesh = assimpLoader.load("airplane/11804_Airplane_v2_l2.obj");
+airplaneMesh = assimpLoader.load("airplane/11804_Airplane_v2_l2.obj").model;
 loadTime = (get_timer() - loadTime) / 1000;
 
 // Manually import the texture into the model's material

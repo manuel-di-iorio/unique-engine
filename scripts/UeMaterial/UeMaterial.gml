@@ -101,7 +101,7 @@ function UeMaterial(data = {}) constructor {
         var textureNames = variable_struct_get_names(textures);
         var textureNamesCount = array_length(textureNames);
     
-        __texturesCached = array_create(textureNamesCount);
+        __texturesCached = array_create(textureNamesCount, undefined);
         __texturesCachedCount = 0;
         
         for (var t=0; t<textureNamesCount; t++) {
@@ -214,6 +214,7 @@ function UeMaterial(data = {}) constructor {
         // Set the texture samplers
         for (var t=0; t<__texturesCachedCount; t++) {
             var textureCached = __texturesCached[t];
+            if (textureCached == undefined) continue;
             textureCached[0].__use(textureCached[1]);
         }
             

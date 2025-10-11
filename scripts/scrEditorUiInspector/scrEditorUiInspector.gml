@@ -1,7 +1,5 @@
 function EditorUiInspector(ui) constructor {
     self.ui = ui;
-    self.assimp = new UeAssimpLoader();
-    
 
     ui.Inspector = new UiNode({ name: "Inspector", minWidth: 350, width: "21%", marginBottom: 62, flexDirection: "column" }, { border: true });
 

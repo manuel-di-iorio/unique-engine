@@ -13,4 +13,6 @@ function scrSetup3D(){
     objects = new UeObject3D();
 
     scene.add(grid, objects);
+
+    assimp = new UeAssimpLoader();
 }
