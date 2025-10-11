@@ -15,8 +15,14 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
             shader_reset();
         }
         
+        var vb = geometry[$ "vb"];
+        if (vb == undefined) return;
+            
+        // Set the world matrix
         matrix_set(matrix_world, matrixWorld.data);
-        vertex_submit(geometry.vb, material != undefined && material.wireframe ? pr_linelist : primitive, -1); 
+
+        // Submit the vertex buffer
+        vertex_submit(vb, material != undefined && material.wireframe ? pr_linelist : primitive, -1); 
     }
     
     function toJSON() {

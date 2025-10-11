@@ -40,6 +40,7 @@ projectScenes = [];
 
 // Active treeview asset
 activeAsset = undefined;
+tool = "move"; // Current tool mode: "view", "move", "rotate", "scale"
 
 // Adds a preview instance of a model asset to the active scene (or scene root)
 function setActiveAsset(selectedAsset) {
@@ -47,9 +48,19 @@ function setActiveAsset(selectedAsset) {
     objects.children = [];
     activeAsset = selectedAsset;
     objects.add(selectedAsset);
+    
+    if (selectedAsset.type == "Mesh" || selectedAsset.type == "ModelInstance") {
+        transformControls.attach(selectedAsset);
+    } else {
+        transformControls.detach();
+    }
 }
 
 function unsetActiveAsset() {
-  objects.children = [];
-  activeAsset = undefined;
+    objects.children = [];
+    activeAsset = undefined;
+    selectedObject = undefined;
+    transformControls.detach();
 }
+
+

@@ -12,6 +12,10 @@ function scrSetup3D(){
     
     objects = new UeObject3D();
 
+    // Create the TransformControls helper (gizmo)
+    transformControls = new UeTransformControls(camera);
+    scene.add(transformControls.getHelper());
+
     scene.add(grid, objects);
 
     assimp = new UeAssimpLoader();

@@ -131,4 +131,17 @@ if (mouse_button != mb_none && orbit.transforming) {
     }
 }
 
-orbit.update(winMouseX, winMouseY);
+
+// Update transform controls based on current tool
+// orbit.update(winMouseX, winMouseY);
+switch (tool) {
+    case "view": 
+        orbit.update(winMouseX, winMouseY);
+        transformControls.updateGizmo();
+    break;
+    case "move":
+    case "rotate":
+    case "scale":
+        transformControls.update();
+    break;
+}

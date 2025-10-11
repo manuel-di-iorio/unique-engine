@@ -130,13 +130,18 @@ function UeAssimpLoader(data = {}) constructor {
     function _addMeshes(materials) {
         gml_pragma("forceinline");
         var model = new UeMesh();
+        var meshes = [];
         
         for (var i = 0, n = GMA_GetMeshNum(); i < n; i++) {
 		    GMA_BindMesh(i);
 			var mesh = _buildMesh();
 			mesh.material = materials[GMA_GetMeshMaterialIndex()];
 			model.add(mesh);
+			array_push(meshes, mesh);
 		}
+        
+        // Calculate model's overall bounding box and sphere based on all meshes
+        self._calculateModelBounds(model, meshes);
         
         // Rotate the model to match the engine camera directions
         // @todo This is temporary
@@ -198,6 +203,51 @@ function UeAssimpLoader(data = {}) constructor {
         geometry.boundingSphere = new UeSphere(center, center.distanceTo(maxV));
         
         return mesh;
+    }
+    
+    function _calculateModelBounds(model, meshes) {
+        gml_pragma("forceinline");
+        if (array_length(meshes) == 0) return;
+        
+        // Initialize with first mesh bounds
+        var firstGeometry = meshes[0].geometry;
+        if (!firstGeometry.boundingBox) return;
+        
+        var minX = firstGeometry.boundingBox.sizeMin.x;
+        var minY = firstGeometry.boundingBox.sizeMin.y;
+        var minZ = firstGeometry.boundingBox.sizeMin.z;
+        var maxX = firstGeometry.boundingBox.sizeMax.x;
+        var maxY = firstGeometry.boundingBox.sizeMax.y;
+        var maxZ = firstGeometry.boundingBox.sizeMax.z;
+
+        // Expand bounds for all other meshes
+        for (var i = 1; i < array_length(meshes); i++) {
+            var geometry = meshes[i].geometry;
+            if (geometry.boundingBox == undefined) continue;
+            
+            minX = min(minX, geometry.boundingBox.sizeMin.x);
+            minY = min(minY, geometry.boundingBox.sizeMin.y);
+            minZ = min(minZ, geometry.boundingBox.sizeMin.z);
+            maxX = max(maxX, geometry.boundingBox.sizeMax.x);
+            maxY = max(maxY, geometry.boundingBox.sizeMax.y);
+            maxZ = max(maxZ, geometry.boundingBox.sizeMax.z);
+        }
+        
+        // Set model's overall bounding box
+        var minV = new UeVector3(minX, minY, minZ);
+        var maxV = new UeVector3(maxX, maxY, maxZ);
+        
+        // Create geometry for the model if it doesn't exist
+        if (!model.geometry) {
+            model.geometry = new UeBufferGeometry();
+        }
+        
+        model.geometry.boundingBox = new UeBox3(minV, maxV);
+        
+        // Calculate bounding sphere from overall bounding box
+        var center = minV.clone().add(maxV).multiplyScalar(0.5);
+        var radius = center.distanceTo(maxV);
+        model.geometry.boundingSphere = new UeSphere(center, radius);
     }
     
     function dispose() {

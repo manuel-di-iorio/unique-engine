@@ -195,6 +195,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function updateGizmo() {
         gml_pragma("forceinline");
 
+        if (!self.object) return;
+
         // Set gizmo root position to the object's position
         self._root.position.copy(self.object.position);
 

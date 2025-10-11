@@ -13,7 +13,6 @@ function editorTreeviewOnItemSelected(treeviewItem) {
             while (currentAsset.parent != undefined && currentAsset.parent.type == "Mesh") {
                 currentAsset = currentAsset.parent;
             }
-        log(currentAsset)
             oSceneEditor.setActiveAsset(currentAsset);
         break;
 
