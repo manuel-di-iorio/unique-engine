@@ -191,6 +191,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     /**
      * Updates the gizmo's position and orientation to match the attached object's transform and camera direction.
      * In world space, plane handles are positioned relative to camera to maintain visibility.
+     * Automatically scales the gizmo based on distance from camera to maintain consistent apparent size.
      */
     function updateGizmo() {
         gml_pragma("forceinline");
@@ -199,6 +200,21 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
         // Set gizmo root position to the object's position
         self._root.position.copy(self.object.position);
+
+        // Calculate distance-based scale to maintain consistent apparent size (billboard-like behavior)
+        var distance = self.camera.position.distanceTo(self.object.position);
+        
+        // Use a perspective-correct scaling formula
+        // The scale should be proportional to distance to maintain constant apparent size
+        var baseScale = 0.075;  // Much smaller base size multiplier
+        var referenceDistance = 10;  // Smaller reference distance for larger gizmo
+        
+        // Calculate scale that makes gizmo appear same size regardless of distance
+        // Scale increases with distance to compensate for perspective
+        var distanceScale = (distance / referenceDistance) * baseScale;
+        
+        // Apply the distance-based scale to the entire gizmo
+        self._root.scale.set(distanceScale, distanceScale, distanceScale);
 
         if (self.space == "local") {
             // In local space, gizmo rotates with the object

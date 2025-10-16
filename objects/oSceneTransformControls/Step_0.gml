@@ -1,7 +1,7 @@
 switch (tool) {
     case "view": 
-        orbit.update(); 
         control.updateGizmo();
+        orbit.update(); 
     break;
     case "move":
     case "rotate":

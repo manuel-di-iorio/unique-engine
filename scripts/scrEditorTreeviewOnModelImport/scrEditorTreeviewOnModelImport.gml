@@ -63,7 +63,6 @@ function editorTreeviewOnModelImport(modelAsset) {
     
     // Create main model treeview item using helper function
     var modelTreeviewItem = __editorTreeview_createTreeviewItem(model, treeview.Models, sprUiObject);
-    log(modelTreeviewItem) // DEBUGs
     
     // 4. Add submeshes recursively with proper hierarchy
     __editorTreeview_createTreeviewItemsForChildren(model, modelTreeviewItem, sprUiObject);

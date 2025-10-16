@@ -102,10 +102,23 @@ if ((winW != winWNew || winH != winHNew) && winWNew != 0 && winHNew != 0) {
 }
 ui.update();
 
-// Wrap the mouse coords when out of bounds
 var winMouseX = window_mouse_get_x();
 var winMouseY = window_mouse_get_y();
 
+// Update transform controls based on current tool
+switch (tool) {
+    case "view": 
+        transformControls.updateGizmo();
+        orbit.update(winMouseX, winMouseY);
+    break;
+    case "move":
+    case "rotate":
+    case "scale":
+        transformControls.update();
+    break;
+}
+
+// Wrap the mouse coords when out of bounds
 if (mouse_button != mb_none && orbit.transforming) {
     var fixMousePos = false;
 
@@ -132,16 +145,6 @@ if (mouse_button != mb_none && orbit.transforming) {
 }
 
 
-// Update transform controls based on current tool
-// orbit.update(winMouseX, winMouseY);
-switch (tool) {
-    case "view": 
-        orbit.update(winMouseX, winMouseY);
-        transformControls.updateGizmo();
-    break;
-    case "move":
-    case "rotate":
-    case "scale":
-        transformControls.update();
-    break;
-}
+// @todo implement a proper focus management system on the UI
+if (keyboard_check_pressed(ord("Q"))) tool = "view";
+if (keyboard_check_pressed(ord("W"))) tool = "move";

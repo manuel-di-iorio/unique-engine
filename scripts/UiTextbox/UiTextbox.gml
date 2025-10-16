@@ -258,6 +258,9 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             self.focused = true;
             self.cursorBlinkTime = current_time;
             self.showCursor = true;
+            
+            // Clear any pending keyboard input to prevent unwanted character insertion
+            keyboard_lastchar = "";
         };
         
         // Remove focus from textbox

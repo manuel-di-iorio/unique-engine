@@ -3,6 +3,7 @@ bgLayer = layer_background_get_id("Background");
 selectorW = view_xport[0];
 selectorMouseStart = false;
 showDebug = false;
+global.UE_MOUSE.view = 0;
 
 scenes = [
     { name: "Cube", obj: oSceneCube, bg: c_black }, // 0

@@ -40,7 +40,7 @@ projectScenes = [];
 
 // Active treeview asset
 activeAsset = undefined;
-tool = "move"; // Current tool mode: "view", "move", "rotate", "scale"
+tool = "view"; // Current tool mode: "view", "move", "rotate", "scale"
 
 // Adds a preview instance of a model asset to the active scene (or scene root)
 function setActiveAsset(selectedAsset) {

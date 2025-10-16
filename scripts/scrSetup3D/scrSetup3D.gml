@@ -19,4 +19,6 @@ function scrSetup3D(){
     scene.add(grid, objects);
 
     assimp = new UeAssimpLoader();
+
+    global.UE_MOUSE.view = 1;
 }

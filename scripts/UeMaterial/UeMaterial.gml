@@ -46,7 +46,7 @@ function UeMaterial(data = {}) constructor {
     
     // Textures
     textures = {
-       map: data[$ "map"] ?? global.UE_TEXTURE_MAP,
+       map: data[$ "map"] ?? global.UE_TEXTURE_MAP.clone(),
     };
     if (data[$ "normalMap"] != undefined) textures.normalMap = data[$ "normalMap"];
     if (data[$ "roughnessMap"] != undefined) textures.roughnessMap = data[$ "roughnessMap"];

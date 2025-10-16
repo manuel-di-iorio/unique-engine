@@ -365,4 +365,12 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         needsUpdate = true;
         return self;
     } 
+
+    /**
+     * Clone this texture instance
+     * @todo undoocumented
+     */
+    function clone() {
+        return variable_clone(self);
+    }
 }
