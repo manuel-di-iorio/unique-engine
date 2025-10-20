@@ -55,6 +55,14 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         };
     }
     
+    /// @description Performs a raycast intersection test against this mesh object
+    /// @param {Struct} raycaster The raycaster object containing the ray to test against
+    /// @param {Array} hits Array to store hit results when intersections are found
+    /// @returns {Struct} Returns self for method chaining
+    /// @remarks This function tests if a ray intersects with the mesh by first transforming 
+    ///          the ray to local space, then performing bounding volume tests (sphere and box) 
+    ///          for early rejection. If the ray passes the bounding tests, a hit result is 
+    ///          added to the hits array containing the object reference and distance.
     function raycast(raycaster, hits) {
         gml_pragma("forceinline");
         var object = self;

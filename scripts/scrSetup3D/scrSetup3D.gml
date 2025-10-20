@@ -14,6 +14,11 @@ function scrSetup3D(){
 
     // Create the TransformControls helper (gizmo)
     transformControls = new UeTransformControls(camera);
+
+    transformControls.onDrag = function() {
+        global.UI.needsRedraw = true;
+    }
+
     scene.add(transformControls.getHelper());
 
     scene.add(grid, objects);

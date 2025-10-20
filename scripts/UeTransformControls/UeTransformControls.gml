@@ -47,6 +47,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     __xVec = new UeVector3(1, 0, 0);  // Unit vector for X axis
     __yVec = new UeVector3(0, 1, 0);  // Unit vector for Y axis
     __zVec = new UeVector3(0, 0, 1);  // Unit vector for Z axis
+
+    self.onDrag = undefined;
     
     // Base material for all gizmo components with transparency and depth testing disabled
     __matMesh = new UeMeshBasicMaterial({
@@ -66,7 +68,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         __axisOffset = 1;                        // Offset from origin for axis positioning
         __planeOpacity = 0.3;                    // Transparency level for plane handles
         __planeDepth = .5;                       // Thickness of plane interaction handles
-        __planeSize = __axisLength * 0.2;        // Size of square plane handles
+        __planeSize = __axisLength * 0.3;        // Size of square plane handles
     }
     
     /**
@@ -178,7 +180,9 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
         // === Add the center cube (XYZ) ===
         // Center cube allows free movement in all three axes simultaneously
-        var geoBox = new UeBoxGeometry(__axisOffset*5, __axisOffset*5, __axisOffset*5, { color: c_ltgray });
+        // Use axisLineWidth for proportional sizing instead of axisOffset to avoid oversized cubes
+        var cubeSize = __axisLineWidth * 3;
+        var geoBox = new UeBoxGeometry(cubeSize, cubeSize, cubeSize, { color: c_ltgray });
         geoBox.boundingBox = new UeBox3();
         geoBox.computeBoundingBox();
         var meshBox = new UeMesh(geoBox, __matMesh.clone());
@@ -394,6 +398,11 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
      */
     function onPointerUp() {
         gml_pragma("forceinline");
+
+        if (self.dragging) {
+            if (self.onDrag != undefined) self.onDrag();
+        }
+
         self.dragging = false;
         self.selectedAxis = undefined;
         self.axis = undefined;

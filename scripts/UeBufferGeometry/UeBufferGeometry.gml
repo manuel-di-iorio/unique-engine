@@ -160,6 +160,7 @@ function UeBufferGeometry(data = {}) constructor {
     
     
     function export(fname) {
+        if (vb == undefined) return self;
         var buf = buffer_create_from_vertex_buffer(vb, buffer_fast, 1);
         buffer_save(buf, fname);
         buffer_delete(buf);
