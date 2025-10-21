@@ -21,7 +21,7 @@ function EditorUiMenu(ui) constructor {
     // Recursive function to export buffer geometry for models and their children
     function __exportModelBuffers(model, projectFiles) {
         // Export this model's geometry if it exists and it's not an instance
-        if (model[$ "geometry"] != undefined && !model[$ "isInstance"]) {
+        if (model[$ "geometry"] != undefined) {
             var geometry = model.geometry;
             if (geometry[$ "export"] != undefined) {
                 var bufferFileName = projectFiles + "\\" + model.name + ".buf";
@@ -31,7 +31,7 @@ function EditorUiMenu(ui) constructor {
         
         // Recursively export children (which are also meshes)
         if (model[$ "children"] != undefined) {
-            for (var i = 0; i < array_length(model.children); i++) {
+            for (var i = 0, il = array_length(model.children); i < il; i++) {
                 __exportModelBuffers(model.children[i], projectFiles);
             }
         }
@@ -68,8 +68,6 @@ function EditorUiMenu(ui) constructor {
         
         // Create sprite .yy file content
         var spriteYYContent = {
-            "$GMSprite": "",
-            "%Name": texture.name,
             "bboxMode": 0,
             "bbox_bottom": spriteHeight - 1,
             "bbox_left": 0,
@@ -79,15 +77,13 @@ function EditorUiMenu(ui) constructor {
             "collisionTolerance": 0,
             "DynamicTexturePage": false,
             "edgeFiltering": false,
-            "For3D": false,
+            "For3D": true,
             "frames": [
-                {
-                    "$GMSpriteFrame": "",
-                    "%Name": frameUuid,
-                    "name": frameUuid,
-                    "resourceType": "GMSpriteFrame",
-                    "resourceVersion": "2.0"
-                }
+            {
+                "name": frameUuid,
+                "resourceType": "GMSpriteFrame",
+                "resourceVersion": "2.0"
+            }
             ],
             "gridX": 0,
             "gridY": 0,
@@ -95,8 +91,6 @@ function EditorUiMenu(ui) constructor {
             "HTile": false,
             "layers": [
                 {
-                    "$GMImageLayer": "",
-                    "%Name": layerUuid,
                     "blendMode": 0,
                     "displayName": "default",
                     "isLocked": false,
@@ -111,82 +105,74 @@ function EditorUiMenu(ui) constructor {
             "nineSlice": undefined,
             "origin": 4,
             "parent": {
-                "name": "Demo",
-                "path": "folders/Demo.yy"
+                "name": "__UeSprites",
+                "path": "folders/__UeSprites.yy",
             },
             "preMultiplyAlpha": false,
             "resourceType": "GMSprite",
             "resourceVersion": "2.0",
             "sequence": {
-                "$GMSequence": "v1",
-                "%Name": texture.name,
-                "autoRecord": true,
-                "backdropHeight": 768,
-                "backdropImageOpacity": 0.5,
-                "backdropImagePath": "",
-                "backdropWidth": 1366,
-                "backdropXOffset": 0.0,
-                "backdropYOffset": 0.0,
-                "events": {
-                    "$KeyframeStore<MessageEventKeyframe>": "",
-                    "Keyframes": [],
-                    "resourceType": "KeyframeStore<MessageEventKeyframe>",
-                    "resourceVersion": "2.0"
-                },
-                "eventStubScript": undefined,
-                "eventToFunction": {},
-                "length": 1.0,
-                "lockOrigin": false,
-                "moments": {
-                    "$KeyframeStore<MomentsEventKeyframe>": "",
-                    "Keyframes": [],
-                    "resourceType": "KeyframeStore<MomentsEventKeyframe>",
-                    "resourceVersion": "2.0"
-                },
-                "name": texture.name,
-                "playback": 1,
-                "playbackSpeed": 30.0,
-                "playbackSpeedType": 0,
-                "resourceType": "GMSequence",
-                "resourceVersion": "2.0",
-                "seqHeight": spriteHeight,
-                "seqWidth": spriteWidth,
-                "showBackdrop": true,
-                "showBackdropImage": false,
-                "timeUnits": 1,
-                "tracks": [
-                    {
-                        "$GMSpriteFramesTrack": "",
+                    "autoRecord": true,
+                    "backdropHeight": 768,
+                    "backdropImageOpacity": 0.5,
+                    "backdropImagePath": "",
+                    "backdropWidth": 1366,
+                    "backdropXOffset": 0.0,
+                    "backdropYOffset": 0.0,
+                    "events": {
+                        "Keyframes": [],
+                        "resourceType": "KeyframeStore<MessageEventKeyframe>",
+                        "resourceVersion": "2.0"
+                    },
+                    "eventStubScript": undefined,
+                    "eventToFunction": {},
+                    "length": 1.0,
+                    "lockOrigin": false,
+                    "moments": {
+                        "Keyframes": [],
+                        "resourceType": "KeyframeStore<MomentsEventKeyframe>",
+                        "resourceVersion": "2.0"
+                    },
+                    "name": texture.name,
+                    "playback": 1,
+                    "playbackSpeed": 30.0,
+                    "playbackSpeedType": 0,
+                    "resourceType": "GMSequence",
+                    "resourceVersion": "2.0",
+                    "seqHeight": spriteHeight,
+                    "seqWidth": spriteWidth,
+                    "showBackdrop": true,
+                    "showBackdropImage": false,
+                    "timeUnits": 1,
+                    "tracks": [
+                        {
                         "builtinName": 0,
                         "events": [],
                         "inheritsTrackColour": true,
                         "interpolation": 1,
                         "isCreationTrack": false,
                         "keyframes": {
-                            "$KeyframeStore<SpriteFrameKeyframe>": "",
                             "Keyframes": [
-                                {
-                                    "$Keyframe<SpriteFrameKeyframe>": "",
-                                    "Channels": {
-                                        "0": {
-                                            "$SpriteFrameKeyframe": "",
-                                            "Id": {
-                                                "name": frameUuid,
-                                                "path": "sprites/" + texture.name + "/" + texture.name + ".yy"
-                                            },
-                                            "resourceType": "SpriteFrameKeyframe",
-                                            "resourceVersion": "2.0"
-                                        }
+                            {
+                                "Channels": {
+                                "0": {
+                                    "Id": {
+                                    "name": frameUuid,
+                                    "path": "sprites/" + texture.name + "/" + texture.name + ".yy"
                                     },
-                                    "Disabled": false,
-                                    "id": ueUuid(),
-                                    "IsCreationKey": false,
-                                    "Key": 0.0,
-                                    "Length": 1.0,
-                                    "resourceType": "Keyframe<SpriteFrameKeyframe>",
-                                    "resourceVersion": "2.0",
-                                    "Stretch": false
+                                    "resourceType": "SpriteFrameKeyframe",
+                                    "resourceVersion": "2.0"
                                 }
+                                },
+                                "Disabled": false,
+                                "id": ueUuid(),
+                                "IsCreationKey": false,
+                                "Key": 0.0,
+                                "Length": 1.0,
+                                "resourceType": "Keyframe<SpriteFrameKeyframe>",
+                                "resourceVersion": "2.0",
+                                "Stretch": false
+                            }
                             ],
                             "resourceType": "KeyframeStore<SpriteFrameKeyframe>",
                             "resourceVersion": "2.0"
@@ -206,9 +192,9 @@ function EditorUiMenu(ui) constructor {
                 "xorigin": spriteWidth / 2,
                 "yorigin": spriteHeight / 2
             },
-            "swatchColours": undefined,
-            "swfPrecision": 0.5,
-            "textureGroupId": {
+                "swatchColours": undefined,
+                "swfPrecision": 0.5,
+                "textureGroupId": {
                 "name": "Default",
                 "path": "texturegroups/Default"
             },
@@ -216,6 +202,22 @@ function EditorUiMenu(ui) constructor {
             "VTile": false,
             "width": spriteWidth
         };
+        
+        // Set properties with special characters using accessor syntax
+        spriteYYContent[$ "$GMSprite"] = "";
+        spriteYYContent[$ "%Name"] = texture.name;
+        spriteYYContent.frames[0][$ "$GMSpriteFrame"] = "";
+        spriteYYContent.frames[0][$ "%Name"] = frameUuid;
+        spriteYYContent.layers[0][$ "$GMImageLayer"] = "";
+        spriteYYContent.layers[0][$ "%Name"] = layerUuid;
+        spriteYYContent.sequence[$ "$GMSequence"] = "v1";
+        spriteYYContent.sequence[$ "%Name"] = texture.name;
+        spriteYYContent.sequence.events[$ "$KeyframeStore<MessageEventKeyframe>"] = "";
+        spriteYYContent.sequence.moments[$ "$KeyframeStore<MomentsEventKeyframe>"] = "";
+        spriteYYContent.sequence.tracks[0][$ "$GMSpriteFramesTrack"] = "";
+        spriteYYContent.sequence.tracks[0].keyframes[$ "$KeyframeStore<SpriteFrameKeyframe>"] = "";
+        spriteYYContent.sequence.tracks[0].keyframes.Keyframes[0][$ "$Keyframe<SpriteFrameKeyframe>"] = "";
+        spriteYYContent.sequence.tracks[0].keyframes.Keyframes[0].Channels[$ "0"][$ "$SpriteFrameKeyframe"] = "";
         
         // Save sprite .yy file
         var spriteYYPath = spriteFolderPath + "\\" + texture.name + ".yy";
@@ -384,14 +386,13 @@ function EditorUiMenu(ui) constructor {
         }
         
         // Update the .yyp file with new sprite entries
-        if (array_length(newSpriteEntries) > 0) {
-            var yypFilePath = projectLocation + filename_name(selectedFile);
-            self.__updateYYPFile(yypFilePath, newSpriteEntries);
-        }
+        // if (array_length(newSpriteEntries) > 0) {
+        //     var yypFilePath = projectLocation + filename_name(selectedFile);
+        //     self.__updateYYPFile(yypFilePath, newSpriteEntries);
+        // }
         
         // Salva il file JSON nel datafiles del progetto
         var saveFileName = projectFiles + "\\ue.json";
-        log(saveFileName);
         var jsonString = json_stringify(projectData);
         
         // Crea il file e scrivi il JSON
