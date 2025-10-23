@@ -103,9 +103,9 @@ function EditorUiInspector(ui) constructor {
                 search: "Search texture..",
                 subKey: "map",
                 itemsGetter: function(searchValue) {
-                    var textures = array_filter(oSceneEditor.projectTextures, method({ searchValue }, function(texture) {
+                    var textures = []/*array_filter(oSceneEditor.projectTextures, method({ searchValue }, function(texture) {
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
-                    }));
+                    }));*/
                     
                     var mapped = array_map(textures, function(texture) {
                         return {
@@ -346,9 +346,9 @@ function EditorUiInspector(ui) constructor {
                 type: "dropdown",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
-                    var items = array_filter(oSceneEditor.projectMaterials, method({ searchValue }, function(item) {
+                    var items = []/*array_filter(oSceneEditor.projectMaterials, method({ searchValue }, function(item) {
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
-                    }));
+                    }));*/
                     
                     var mapped = array_map(items, function(item) {
                         return {
@@ -461,9 +461,9 @@ function EditorUiInspector(ui) constructor {
                 type: "dropdown",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
-                    var items = array_filter(oSceneEditor.projectMaterials, method({ searchValue }, function(item) {
+                    var items = []/*array_filter(oSceneEditor.projectMaterials, method({ searchValue }, function(item) {
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
-                    }));
+                    }));*/
                     
                     var mapped = array_map(items, function(item) {
                         return {

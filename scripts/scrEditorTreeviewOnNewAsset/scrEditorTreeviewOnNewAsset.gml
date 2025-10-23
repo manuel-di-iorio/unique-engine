@@ -8,13 +8,13 @@ function editorTreeviewOnNewAsset(treeviewItem) {
       case "Texture": 
           asset = new UeTexture();
           assetId = global.UI_ASSETS_TEXTURES_ID++;
-          array_push(oSceneEditor.projectTextures, asset);
+        //   array_push(oSceneEditor.projectTextures, asset);
       break;
 
       case "Material":
           asset = new UeMaterial();
           assetId = global.UI_ASSETS_MATERIALS_ID++;
-          array_push(oSceneEditor.projectMaterials, asset);
+        //   array_push(oSceneEditor.projectMaterials, asset);
       break;
       
       case "Mesh": 
@@ -22,14 +22,14 @@ function editorTreeviewOnNewAsset(treeviewItem) {
           asset.material = undefined;
           asset.__rotationEuler = new UeEuler();
           assetId = global.UI_ASSETS_MODELS_ID++;
-          array_push(oSceneEditor.projectModels, asset);
+        //   array_push(oSceneEditor.projectModels, asset);
       break;
       
       case "Light":
           asset = new UeLight(); 
           asset.__rotationEuler = new UeEuler();
           assetId = global.UI_ASSETS_LIGHTS_ID++;
-          array_push(oSceneEditor.projectLights, asset);
+        //   array_push(oSceneEditor.projectLights, asset);
       break;
       
       case "Camera":
@@ -38,13 +38,13 @@ function editorTreeviewOnNewAsset(treeviewItem) {
           asset.type = "Camera";
           asset.__rotationEuler = new UeEuler();
           assetId = global.UI_ASSETS_CAMERAS_ID++;
-          array_push(oSceneEditor.projectCameras, asset);
+        //   array_push(oSceneEditor.projectCameras, asset);
       break;
       
       case "Scene":
           asset = new UeScene();
           assetId = global.UI_ASSETS_SCENES_ID++;
-          array_push(oSceneEditor.projectScenes, asset);
+        //   array_push(oSceneEditor.projectScenes, asset);
       break;
   }
   

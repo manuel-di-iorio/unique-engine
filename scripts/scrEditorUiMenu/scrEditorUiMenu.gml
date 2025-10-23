@@ -67,7 +67,7 @@ function EditorUiMenu(ui) constructor {
         sprite_save(texture.sprite, 0, layerImagePath);
         
         // Create sprite .yy file content
-        var spriteYYContent = {
+        /*var spriteYYContent = {
             "bboxMode": 0,
             "bbox_bottom": spriteHeight - 1,
             "bbox_left": 0,
@@ -201,32 +201,32 @@ function EditorUiMenu(ui) constructor {
             "type": 0,
             "VTile": false,
             "width": spriteWidth
-        };
+        };*/
         
         // Set properties with special characters using accessor syntax
-        spriteYYContent[$ "$GMSprite"] = "";
-        spriteYYContent[$ "%Name"] = texture.name;
-        spriteYYContent.frames[0][$ "$GMSpriteFrame"] = "";
-        spriteYYContent.frames[0][$ "%Name"] = frameUuid;
-        spriteYYContent.layers[0][$ "$GMImageLayer"] = "";
-        spriteYYContent.layers[0][$ "%Name"] = layerUuid;
-        spriteYYContent.sequence[$ "$GMSequence"] = "v1";
-        spriteYYContent.sequence[$ "%Name"] = texture.name;
-        spriteYYContent.sequence.events[$ "$KeyframeStore<MessageEventKeyframe>"] = "";
-        spriteYYContent.sequence.moments[$ "$KeyframeStore<MomentsEventKeyframe>"] = "";
-        spriteYYContent.sequence.tracks[0][$ "$GMSpriteFramesTrack"] = "";
-        spriteYYContent.sequence.tracks[0].keyframes[$ "$KeyframeStore<SpriteFrameKeyframe>"] = "";
-        spriteYYContent.sequence.tracks[0].keyframes.Keyframes[0][$ "$Keyframe<SpriteFrameKeyframe>"] = "";
-        spriteYYContent.sequence.tracks[0].keyframes.Keyframes[0].Channels[$ "0"][$ "$SpriteFrameKeyframe"] = "";
+        // spriteYYContent[$ "$GMSprite"] = "";
+        // spriteYYContent[$ "%Name"] = texture.name;
+        // spriteYYContent.frames[0][$ "$GMSpriteFrame"] = "";
+        // spriteYYContent.frames[0][$ "%Name"] = frameUuid;
+        // spriteYYContent.layers[0][$ "$GMImageLayer"] = "";
+        // spriteYYContent.layers[0][$ "%Name"] = layerUuid;
+        // spriteYYContent.sequence[$ "$GMSequence"] = "v1";
+        // spriteYYContent.sequence[$ "%Name"] = texture.name;
+        // spriteYYContent.sequence.events[$ "$KeyframeStore<MessageEventKeyframe>"] = "";
+        // spriteYYContent.sequence.moments[$ "$KeyframeStore<MomentsEventKeyframe>"] = "";
+        // spriteYYContent.sequence.tracks[0][$ "$GMSpriteFramesTrack"] = "";
+        // spriteYYContent.sequence.tracks[0].keyframes[$ "$KeyframeStore<SpriteFrameKeyframe>"] = "";
+        // spriteYYContent.sequence.tracks[0].keyframes.Keyframes[0][$ "$Keyframe<SpriteFrameKeyframe>"] = "";
+        // spriteYYContent.sequence.tracks[0].keyframes.Keyframes[0].Channels[$ "0"][$ "$SpriteFrameKeyframe"] = "";
         
         // Save sprite .yy file
-        var spriteYYPath = spriteFolderPath + "\\" + texture.name + ".yy";
-        var spriteYYJson = json_stringify(spriteYYContent);
-        var file = file_text_open_write(spriteYYPath);
-        if (file != -1) {
-            file_text_write_string(file, spriteYYJson);
-            file_text_close(file);
-        }
+        // var spriteYYPath = spriteFolderPath + "\\" + texture.name + ".yy";
+        // var spriteYYJson = json_stringify(spriteYYContent);
+        // var file = file_text_open_write(spriteYYPath);
+        // if (file != -1) {
+        //     file_text_write_string(file, spriteYYJson);
+        //     file_text_close(file);
+        // }
         
         return {
             name: texture.name,
@@ -248,7 +248,7 @@ function EditorUiMenu(ui) constructor {
             yypContent += file_text_readln(file);
         }
         file_text_close(file);
-        
+
         // Parse the JSON
         var yypData = json_parse(yypContent);
         
@@ -276,10 +276,9 @@ function EditorUiMenu(ui) constructor {
     ui.Menu = new UiNode({ name: "Menu", width: "100%", height: 50, flexDirection: "row", alignItems: "center", paddingLeft: 10, paddingRight: 10, marginBottom: 10  });
     ui.Menu.NewProjectBtn = new UiButton(sprUiNew, { padding: 5, marginLeft: 80, marginRight: 15, width: 15, height: 15 });
     ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { padding: 5, marginRight: 15, width: 15, height: 15 });
-    ui.Menu.SaveProjectBtn = new UiButton(sprUiSave, { padding: 5, marginRight: 15, width: 15, height: 15 });
     
-    ui.Menu.add(ui.Menu.NewProjectBtn, ui.Menu.LoadProjectBtn, ui.Menu.SaveProjectBtn); 
-    
+    ui.Menu.add(ui.Menu.NewProjectBtn, ui.Menu.LoadProjectBtn);
+
     ui.Menu.onDraw = method(ui.Menu, function() {
         draw_set_color(global.UI_COL_INPUT_BG);
         draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
@@ -319,91 +318,4 @@ function EditorUiMenu(ui) constructor {
 
     });
     
-    ui.Menu.SaveProjectBtn.onClick(function() {
-        // Chiedi qual è il progetto Game Maker (come nel load)
-        // var selectedFile = get_open_filename("Game Maker Project (.yyp)|*.yyp", "");
-        var selectedFile = "C:\\Users\\Manuel\\GameMakerProjects\\Unique Engine\\Unique Engine.yyp";
-        if (selectedFile == "") return;
-        
-        // Salviamo le informazioni del progetto
-        projectName = string_copy(filename_name(selectedFile), 1, string_length(filename_name(selectedFile))-4);
-         projectLocation = filename_path(selectedFile);
-        projectFiles = projectLocation + "datafiles";
-        projectEdited = false;
-        
-        // Creiamo il file JSON con tutte le entità del progetto
-        var projectData = {
-            projectName,
-            textures: [],
-            materials: [],
-            models: [],
-            lights: [],
-            cameras: [],
-            scenes: []
-        };
-        
-        // Esporta textures
-        var entities = [
-            { key: "textures", array: oSceneEditor.projectTextures },
-            { key: "materials", array: oSceneEditor.projectMaterials },
-            { key: "models", array: oSceneEditor.projectModels },
-            { key: "lights", array: oSceneEditor.projectLights },
-            { key: "cameras", array: oSceneEditor.projectCameras },
-            { key: "scenes", array: oSceneEditor.projectScenes }
-        ];
-        
-        for (var i = 0, il = array_length(entities); i < il; i++) {
-            var entityInfo = entities[i];
-            var entityArray = entityInfo.array;
-            var entityKey = entityInfo.key;
-
-            for (var j = 0, jl = array_length(entityArray); j < jl; j++) {
-                var entity = entityArray[j];
-                var entityData = self.__exportLoopChildren(entity);
-                
-                array_push(projectData[$ entityKey], entityData);
-            }
-        }
-        
-        // Create GameMaker sprites for textures and collect sprite entries for .yyp
-        var newSpriteEntries = [];
-        var textures = oSceneEditor.projectTextures;
-        for (var i = 0; i < array_length(textures); i++) {
-            var texture = textures[i];
-            if (texture[$ "sprite"] != undefined && sprite_exists(texture.sprite)) {
-                var spriteInfo = self.__createGameMakerSprite(texture, projectLocation);
-                if (spriteInfo != undefined) {
-                    array_push(newSpriteEntries, spriteInfo);
-                }
-            }
-        }
-        
-        // Esporta buffer geometry dei modelli e dei loro children
-        var models = oSceneEditor.projectModels;
-        for (var i = 0, il = array_length(models); i < il; i++) {
-            var model = models[i];
-            self.__exportModelBuffers(model, projectFiles);
-        }
-        
-        // Update the .yyp file with new sprite entries
-        // if (array_length(newSpriteEntries) > 0) {
-        //     var yypFilePath = projectLocation + filename_name(selectedFile);
-        //     self.__updateYYPFile(yypFilePath, newSpriteEntries);
-        // }
-        
-        // Salva il file JSON nel datafiles del progetto
-        var saveFileName = projectFiles + "\\ue.json";
-        var jsonString = json_stringify(projectData);
-        
-        // Crea il file e scrivi il JSON
-        var file = file_text_open_write(saveFileName);
-        if (file != -1) {
-            file_text_write_string(file, jsonString);
-            file_text_close(file);
-            
-            show_message_async("Progetto salvato con successo in: " + saveFileName);
-        } else {
-            show_message_async("Errore nel salvare il progetto!");
-        }
-    });
 }

@@ -53,81 +53,81 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
   } else {
       // If the asset is a master asset (not an instance), remove it from the project list
       var list;
-      switch (assetType) {
-          case "Texture": list = oSceneEditor.projectTextures; break;
-          case "Material": list = oSceneEditor.projectMaterials; break;
-          case "Mesh": list = oSceneEditor.projectModels; break;
-          case "Light": list = oSceneEditor.projectLights; break;
-          case "Camera": list = oSceneEditor.projectCameras; break;
-          case "Scene": list = oSceneEditor.projectScenes; break;
-      }
+    //   switch (assetType) {
+    //       case "Texture": list = oSceneEditor.projectTextures; break;
+    //       case "Material": list = oSceneEditor.projectMaterials; break;
+    //       case "Mesh": list = oSceneEditor.projectModels; break;
+    //       case "Light": list = oSceneEditor.projectLights; break;
+    //       case "Camera": list = oSceneEditor.projectCameras; break;
+    //       case "Scene": list = oSceneEditor.projectScenes; break;
+    //   }
       
-      var _itemIdx = array_find_index(list, method({ asset }, function(value) {
-          return value == asset;
-      }))
-      if (_itemIdx != -1) array_delete(list, _itemIdx, 1);
+    //   var _itemIdx = array_find_index(list, method({ asset }, function(value) {
+    //       return value == asset;
+    //   }))
+    //   if (_itemIdx != -1) array_delete(list, _itemIdx, 1);
       
-      // If the asset has instances, remove them all from scenes
-      if (asset != undefined && asset[$ "instances"] != undefined) {
-          // Make a copy of the instances list because we'll remove items during iteration
-          var instancesList = asset.instances.list;
-          var instancesToRemove = [];
-          for (var i = 0, l = array_length(instancesList); i < l; i++) {
-              array_push(instancesToRemove, instancesList[i]);
-          }
+    //   // If the asset has instances, remove them all from scenes
+    //   if (asset != undefined && asset[$ "instances"] != undefined) {
+    //       // Make a copy of the instances list because we'll remove items during iteration
+    //       var instancesList = asset.instances.list;
+    //       var instancesToRemove = [];
+    //       for (var i = 0, l = array_length(instancesList); i < l; i++) {
+    //           array_push(instancesToRemove, instancesList[i]);
+    //       }
           
           // Remove each instance
-          for (var i = 0, l = array_length(instancesToRemove); i < l; i++) {
-              var instance = instancesToRemove[i];
+    //       for (var i = 0, l = array_length(instancesToRemove); i < l; i++) {
+    //           var instance = instancesToRemove[i];
 
-              if (oSceneEditor.activeAsset == instance) {
-                  oSceneEditor.unsetActiveAsset();
-                  oSceneEditor.inspector.close();
-              }
+    //           if (oSceneEditor.activeAsset == instance) {
+    //               oSceneEditor.unsetActiveAsset();
+    //               oSceneEditor.inspector.close();
+    //           }
 
-              // Remove the instance from its parent
-              if (instance.parent != undefined) {
-                  instance.parent.remove(instance);
-              }
+    //           // Remove the instance from its parent
+    //           if (instance.parent != undefined) {
+    //               instance.parent.remove(instance);
+    //           }
 
-              // Find and remove the instance from the treeview
-              __editorTreeview_removeTreeviewItemByAsset(oSceneEditor.ui.Assets.Treeview, instance);
-          }
+    //           // Find and remove the instance from the treeview
+    //           __editorTreeview_removeTreeviewItemByAsset(oSceneEditor.ui.Assets.Treeview, instance);
+    //       }
 
-          // Clear the instances list
-          asset.instances.clear();
-      }
+    //       // Clear the instances list
+    //       asset.instances.clear();
+    //   }
 
       // If we are deleting a material, remove it from all models
       if (assetType == "material") {
-          var models = oSceneEditor.projectModels;
-          for (var i = 0, l = array_length(models); i < l; i++) {
-              __editorTreeviewRemoveAsset_unsetMaterialRecursive(models[i], asset);
-          }
-          var scenes = oSceneEditor.projectScenes;
-          for (var i = 0, l = array_length(scenes); i < l; i++) {
-              if (scenes[i].children != undefined) {
-                  for (var j = 0; j < array_length(scenes[i].children); j++) {
-                      __editorTreeviewRemoveAsset_unsetMaterialRecursive(scenes[i].children[j], asset);
-                  }
-              }
-          }
-      }
+    //       var models = oSceneEditor.projectModels;
+    //       for (var i = 0, l = array_length(models); i < l; i++) {
+    //           __editorTreeviewRemoveAsset_unsetMaterialRecursive(models[i], asset);
+    //       }
+    //       var scenes = oSceneEditor.projectScenes;
+    //       for (var i = 0, l = array_length(scenes); i < l; i++) {
+    //           if (scenes[i].children != undefined) {
+    //               for (var j = 0; j < array_length(scenes[i].children); j++) {
+    //                   __editorTreeviewRemoveAsset_unsetMaterialRecursive(scenes[i].children[j], asset);
+    //               }
+    //           }
+    //       }
+    //   }
 
       // If we are deleting a texture, remove it from all models and all scenes
-      if (assetType == "texture") {
-          var models = oSceneEditor.projectModels;
-          for (var i = 0, l = array_length(models); i < l; i++) {
-              __editorTreeview_unsetTextureRecursive(models[i], asset);
-          }
-          var scenes = oSceneEditor.projectScenes;
-          for (var i = 0, l = array_length(scenes); i < l; i++) {
-              if (scenes[i].children != undefined) {
-                  for (var j = 0; j < array_length(scenes[i].children); j++) {
-                      __editorTreeview_unsetTextureRecursive(scenes[i].children[j], asset);
-                  }
-              }
-          }
+    //   if (assetType == "texture") {
+    //       var models = oSceneEditor.projectModels;
+    //       for (var i = 0, l = array_length(models); i < l; i++) {
+    //           __editorTreeview_unsetTextureRecursive(models[i], asset);
+    //       }
+    //       var scenes = oSceneEditor.projectScenes;
+    //       for (var i = 0, l = array_length(scenes); i < l; i++) {
+    //           if (scenes[i].children != undefined) {
+    //               for (var j = 0; j < array_length(scenes[i].children); j++) {
+    //                   __editorTreeview_unsetTextureRecursive(scenes[i].children[j], asset);
+    //               }
+    //           }
+    //       }
       }
   }
 }

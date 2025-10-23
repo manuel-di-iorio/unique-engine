@@ -20,7 +20,7 @@ function editorTreeviewOnModelImport(modelAsset) {
         
         // Add to project
         var textureId = global.UI_ASSETS_TEXTURES_ID++;
-        array_push(oSceneEditor.projectTextures, tex);
+        // array_push(oSceneEditor.projectTextures, tex);
         
         // Set name if not already set
         if (tex.name == undefined || tex.name == "") {
@@ -37,7 +37,7 @@ function editorTreeviewOnModelImport(modelAsset) {
         
         // Add to project
         var materialId = global.UI_ASSETS_MATERIALS_ID++;
-        array_push(oSceneEditor.projectMaterials, mat);
+        // array_push(oSceneEditor.projectMaterials, mat);
         
         // Set name if not already set
         if (mat.name == undefined || mat.name == "") {
@@ -50,7 +50,7 @@ function editorTreeviewOnModelImport(modelAsset) {
     
     // 3. Add model to project and treeview (with hierarchy)
     var modelId = global.UI_ASSETS_MODELS_ID++;
-    array_push(oSceneEditor.projectModels, model);
+    // array_push(oSceneEditor.projectModels, model);
     
     // Set name and properties
     if (model.name == undefined || model.name == "") {

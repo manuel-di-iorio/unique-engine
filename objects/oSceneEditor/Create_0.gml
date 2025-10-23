@@ -21,22 +21,11 @@ global.UI_ASSETS_CAMERAS_ID = 0;
 global.UI_ASSETS_SCENES_ID = 0;
 global.UI_ASSETS_INSTANCE_ID = 0;
 
-ideVersion = "2025.10.5.1";
 uiDebug = false;
 
+project = new Project();
 scrSetupUI();
 scrSetup3D();
-
-// Project
-projectLocation = undefined;
-projectFiles = undefined;
-projectEdited = false;
-projectTextures = [];
-projectMaterials = [];
-projectModels = [];
-projectLights = [];
-projectCameras = [];
-projectScenes = [];
 
 // Active treeview asset
 activeAsset = undefined;
