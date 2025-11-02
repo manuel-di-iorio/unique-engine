@@ -1,7 +1,7 @@
 /// Represents an axis-aligned 3D bounding box (AABB) defined by min and max corners.
-function UeBox3(_min = new UeVector3(infinity, infinity, infinity), _max = new UeVector3(-infinity, -infinity, -infinity)) constructor {
-    self.sizeMin = _min;
-    self.sizeMax = _max;
+function UeBox3(_min = undefined, _max = undefined) constructor {
+    self.sizeMin = _min ?? new UeVector3(infinity, infinity, infinity);
+    self.sizeMax = _max ?? new UeVector3(-infinity, -infinity, -infinity);
 
     /// Sets the min and max corners of the box.
     function set(_min, _max) {

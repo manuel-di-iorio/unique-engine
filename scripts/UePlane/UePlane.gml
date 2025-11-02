@@ -1,5 +1,5 @@
-function UePlane(_normal = global.UE_OBJECT3D_DEFAULT_UP.clone(), _constant = 0) constructor {
-    self.normal = _normal;
+function UePlane(_normal = undefined, _constant = 0) constructor {
+    self.normal = _normal ?? global.UE_OBJECT3D_DEFAULT_UP.clone();
     self.constant = _constant;
     
     /// Read-only flag to check if a given object is of type Plane

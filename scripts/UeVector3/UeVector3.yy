@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UeVector3",
   "parent":{
-    "name":"Math",
-    "path":"folders/Unique Engine/Math.yy",
+    "name":"UniqueMath",
+    "path":"folders/UniqueMath.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

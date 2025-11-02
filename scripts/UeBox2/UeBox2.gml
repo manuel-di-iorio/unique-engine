@@ -1,7 +1,7 @@
 /// Represents an axis-aligned 2D bounding box (AABB), defined by min and max corners.
-function UeBox2(_min = new UeVector2(infinity, infinity), _max = new UeVector2(-infinity, -infinity)) constructor {
-    self.min = _min;
-    self.max = _max;
+function UeBox2(_min = undefined, _max = undefined) constructor {
+    self.sizeMin = _min ?? new UeVector2(infinity, infinity);
+    self.sizeMax = _max ?? new UeVector2(-infinity, -infinity);
     
     /// Returns a clone of this box.
     function clone() {
@@ -12,23 +12,23 @@ function UeBox2(_min = new UeVector2(infinity, infinity), _max = new UeVector2(-
     /// Sets the box limits using two vectors.
     function set(_min, _max) {
         gml_pragma("forceinline");
-        self.min.copy(_min);
-        self.max.copy(_max);
+        self.sizeMin.copy(_min);
+        self.sizeMax.copy(_max);
         return self;
     }
     
     /// Empties the box so that it contains no points.
     function makeEmpty() {
         gml_pragma("forceinline");
-        self.min.set(+infinity, +infinity);
-        self.max.set(-infinity, -infinity);
+        self.sizeMin.set(+infinity, +infinity);
+        self.sizeMax.set(-infinity, -infinity);
         return self;
     }
     
     /// Returns true if the box has no area.
     function isEmpty() {
         gml_pragma("forceinline");
-        return self.max.x < self.min.x || self.max.y < self.min.y;
+        return self.sizeMax.x < self.sizeMin.x || self.sizeMax.y < self.sizeMin.y;
     }
     
     /// Sets the box bounds from an array of Vector2 points.
@@ -45,44 +45,44 @@ function UeBox2(_min = new UeVector2(infinity, infinity), _max = new UeVector2(-
     function setFromCenterAndSize(center, size) {
         gml_pragma("forceinline");
         var half = size.clone().scale(0.5);
-        self.min.copy(center).sub(half);
-        self.max.copy(center).add(half);
+        self.sizeMin.copy(center).sub(half);
+        self.sizeMax.copy(center).add(half);
         return self;
     }
     
     /// Copies the bounds from another box.
     function copy(box) {
         gml_pragma("forceinline");
-        self.min.copy(box.min);
-        self.max.copy(box.max);
+        self.sizeMin.copy(box.sizeMin);
+        self.sizeMax.copy(box.sizeMax);
         return self;
     }
     
     /// Expands the box to include a given point.
     function expandByPoint(point) {
         gml_pragma("forceinline");
-        self.min.x = min(self.min.x, point.x);
-        self.min.y = min(self.min.y, point.y);
-        self.max.x = max(self.max.x, point.x);
-        self.max.y = max(self.max.y, point.y);
+        self.sizeMin.x = min(self.sizeMin.x, point.x);
+        self.sizeMin.y = min(self.sizeMin.y, point.y);
+        self.sizeMax.x = max(self.sizeMax.x, point.x);
+        self.sizeMax.y = max(self.sizeMax.y, point.y);
         return self;
     }
     
     /// Expands the box by a scalar amount in all directions.
     function expandByScalar(scalar) {
         gml_pragma("forceinline");
-        self.min.x -= scalar;
-        self.min.y -= scalar;
-        self.max.x += scalar;
-        self.max.y += scalar;
+        self.sizeMin.x -= scalar;
+        self.sizeMin.y -= scalar;
+        self.sizeMax.x += scalar;
+        self.sizeMax.y += scalar;
         return self;
     }
     
     /// Expands the box in all directions by the given vector.
     function expandByVector(vec) {
         gml_pragma("forceinline");
-        self.min.sub(vec);
-        self.max.add(vec);
+        self.sizeMin.sub(vec);
+        self.sizeMax.add(vec);
         return self;
     }
     
@@ -90,8 +90,8 @@ function UeBox2(_min = new UeVector2(infinity, infinity), _max = new UeVector2(-
     function containsPoint(point) {
         gml_pragma("forceinline");
         return (
-            point.x >= self.min.x && point.x <= self.max.x &&
-            point.y >= self.min.y && point.y <= self.max.y
+            point.x >= self.sizeMin.x && point.x <= self.sizeMax.x &&
+            point.y >= self.sizeMin.y && point.y <= self.sizeMax.y
         );
     }
     
@@ -99,18 +99,18 @@ function UeBox2(_min = new UeVector2(infinity, infinity), _max = new UeVector2(-
     function containsBox(box) {
         gml_pragma("forceinline");
         return (
-            self.min.x <= box.min.x && box.max.x <= self.max.x &&
-            self.min.y <= box.min.y && box.max.y <= self.max.y
+            self.sizeMin.x <= box.sizeMin.x && box.sizeMax.x <= self.sizeMax.x &&
+            self.sizeMin.y <= box.sizeMin.y && box.sizeMax.y <= self.sizeMax.y
         );
     }
     
     /// Updates this box to be the intersection with another box.
     function intersect(box) {
         gml_pragma("forceinline");
-        self.min.x = max(self.min.x, box.min.x);
-        self.min.y = max(self.min.y, box.min.y);
-        self.max.x = min(self.max.x, box.max.x);
-        self.max.y = min(self.max.y, box.max.y);
+        self.sizeMin.x = max(self.sizeMin.x, box.sizeMin.x);
+        self.sizeMin.y = max(self.sizeMin.y, box.sizeMin.y);
+        self.sizeMax.x = min(self.sizeMax.x, box.sizeMax.x);
+        self.sizeMax.y = min(self.sizeMax.y, box.sizeMax.y);
     
         if (isEmpty()) makeEmpty();
         return self;
@@ -120,46 +120,46 @@ function UeBox2(_min = new UeVector2(infinity, infinity), _max = new UeVector2(-
     function intersectsBox(box) {
         gml_pragma("forceinline");
         return !(
-            box.max.x < self.min.x || box.min.x > self.max.x ||
-            box.max.y < self.min.y || box.min.y > self.max.y
+            box.sizeMax.x < self.sizeMin.x || box.sizeMin.x > self.sizeMax.x ||
+            box.sizeMax.y < self.sizeMin.y || box.sizeMin.y > self.sizeMax.y
         );
     }
     
     /// Merges this box with another, expanding bounds to fit both.
     function union(box) {
         gml_pragma("forceinline");
-        self.min.x = min(self.min.x, box.min.x);
-        self.min.y = min(self.min.y, box.min.y);
-        self.max.x = max(self.max.x, box.max.x);
-        self.max.y = max(self.max.y, box.max.y);
+        self.sizeMin.x = min(self.sizeMin.x, box.sizeMin.x);
+        self.sizeMin.y = min(self.sizeMin.y, box.sizeMin.y);
+        self.sizeMax.x = max(self.sizeMax.x, box.sizeMax.x);
+        self.sizeMax.y = max(self.sizeMax.y, box.sizeMax.y);
         return self;
     }
     
     /// Returns the center point of the box.
     function getCenter(target = new UeVector2()) {
         gml_pragma("forceinline");
-        return target.copy(self.min).add(self.max).scale(0.5);
+        return target.copy(self.sizeMin).add(self.sizeMax).scale(0.5);
     }
     
     /// Returns the width and height of the box.
     function getSize(target = new UeVector2()) {
         gml_pragma("forceinline");
-        return target.copy(self.max).sub(self.min);
+        return target.copy(self.sizeMax).sub(self.sizeMin);
     }
     
     /// Returns the normalized coordinates of a point (0..1 range) relative to box bounds.
     function getParameter(point, target = new UeVector2()) {
         gml_pragma("forceinline");
-        target.x = (point.x - self.min.x) / (self.max.x - self.min.x);
-        target.y = (point.y - self.min.y) / (self.max.y - self.min.y);
+        target.x = (point.x - self.sizeMin.x) / (self.sizeMax.x - self.sizeMin.x);
+        target.y = (point.y - self.sizeMin.y) / (self.sizeMax.y - self.sizeMin.y);
         return target;
     }
     
     /// Clamps a point to the box bounds.
     function clampPoint(point, target = new UeVector2()) {
         gml_pragma("forceinline");
-        target.x = clamp(point.x, self.min.x, self.max.x);
-        target.y = clamp(point.y, self.min.y, self.max.y);
+        target.x = clamp(point.x, self.sizeMin.x, self.sizeMax.x);
+        target.y = clamp(point.y, self.sizeMin.y, self.sizeMax.y);
         return target;
     }
     
@@ -173,14 +173,14 @@ function UeBox2(_min = new UeVector2(infinity, infinity), _max = new UeVector2(-
     /// Translates (moves) the box by an offset.
     function translate(offset) {
         gml_pragma("forceinline");
-        self.min.add(offset);
-        self.max.add(offset);
+        self.sizeMin.add(offset);
+        self.sizeMax.add(offset);
         return self;
     }
     
     /// Returns true if this box is equal to another.
     function equals(box) {
         gml_pragma("forceinline");
-        return self.min.equals(box.min) && self.max.equals(box.max);
+        return self.sizeMin.equals(box.sizeMin) && self.sizeMax.equals(box.sizeMax);
     }
 }

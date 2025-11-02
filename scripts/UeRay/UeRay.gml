@@ -1,10 +1,10 @@
 /// A 3D ray defined by an origin point and a normalized direction vector.
 /// Used for raycasting, intersection tests, and spatial queries.
-function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAULT_UP.clone()) constructor {
+function UeRay(_origin = undefined, _direction = undefined) constructor {
     /// The origin point of the ray
-    self.origin = _origin.clone();
+    self.origin = _origin ? _origin.clone() : new UeVector3();
     /// The normalized direction vector of the ray
-    self.direction = _direction.clone().normalize();
+    self.direction = _direction ? _direction.clone().normalize() : global.UE_OBJECT3D_DEFAULT_UP.clone().normalize();
 
     /// Sets the ray's origin and direction based on two points: from -> to
     function setFromPoints(from, to) {
@@ -18,15 +18,6 @@ function UeRay(_origin = new UeVector3(), _direction = global.UE_OBJECT3D_DEFAUL
     function getPoint(t) {
         gml_pragma("forceinline");
         return self.origin.clone().add(self.direction.clone().scale(t));
-    }
-
-    /// Returns the shortest distance from the ray to a given point
-    function distanceToPoint(point) {
-        gml_pragma("forceinline");
-        var v = point.clone().sub(self.origin);
-        var t = self.direction.dot(v);
-        var proj = self.direction.clone().scale(t);
-        return v.sub(proj).length();
     }
 
     /// Returns true if a point is within maxDist from the ray

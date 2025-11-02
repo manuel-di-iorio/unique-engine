@@ -1,4 +1,6 @@
-function UeTransform(data = {}) constructor {
+function UeTransform(_data = undefined) constructor {
+    var data = _data ?? {};
+    
     // Local transform components
     position = data[$ "position"] ?? new UeVector3(data[$ "x"] ?? 0, data[$ "y"] ?? 0, data[$ "z"] ?? 0);
     rotation = data[$ "rotation"] ?? new UeQuaternion(data[$ "rx"] ?? 0, data[$ "ry"] ?? 0, data[$ "rz"] ?? 0);

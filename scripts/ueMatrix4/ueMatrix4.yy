@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"ueMatrix4",
+  "%Name":"UeMatrix4",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"ueMatrix4",
+  "name":"UeMatrix4",
   "parent":{
-    "name":"Math",
-    "path":"folders/Unique Engine/Math.yy",
+    "name":"UniqueMath",
+    "path":"folders/UniqueMath.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

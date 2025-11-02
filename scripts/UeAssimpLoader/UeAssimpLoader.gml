@@ -95,7 +95,7 @@ function UeAssimpLoader(data = {}) constructor {
 			{ name: "specularMap", type: GMA_TEXTURE_TYPE_SPECULAR },
 			{ name: "unknownMap", type: GMA_TEXTURE_TYPE_UNKNOWN },
 		];
-		
+
 		for (var i = 0, len = array_length(materialTypes); i < len; i++) {
 			var materialType = materialTypes[i];
             var txtName = GMA_GetMaterialTextureName(materialType.type, 0);

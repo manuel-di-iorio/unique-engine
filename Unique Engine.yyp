@@ -2,7 +2,7 @@
   "$GMProject":"v1",
   "%Name":"Unique Engine",
   "AudioGroups":[
-    {"$GMAudioGroup":"","%Name":"audiogroup_default","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
+    {"$GMAudioGroup":"v1","%Name":"audiogroup_default","exportDir":"","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
   ],
   "configs":{
     "children":[],
@@ -10,7 +10,6 @@
   },
   "defaultScriptType":1,
   "Folders":[
-    {"$GMFolder":"","%Name":"__UeSprites","folderPath":"folders/__UeSprites.yy","name":"__UeSprites","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Demo","folderPath":"folders/Demo.yy","name":"Demo","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Scenes","folderPath":"folders/Demo/Scenes.yy","name":"Scenes","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Textures","folderPath":"folders/Demo/Textures.yy","name":"Textures","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -33,10 +32,10 @@
     {"$GMFolder":"","%Name":"Loaders","folderPath":"folders/Unique Engine/Loaders.yy","name":"Loaders","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"UeAssimpLoader","folderPath":"folders/Unique Engine/Loaders/UeAssimpLoader.yy","name":"UeAssimpLoader","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Materials","folderPath":"folders/Unique Engine/Materials.yy","name":"Materials","resourceType":"GMFolder","resourceVersion":"2.0",},
-    {"$GMFolder":"","%Name":"Math","folderPath":"folders/Unique Engine/Math.yy","name":"Math","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Objects","folderPath":"folders/Unique Engine/Objects.yy","name":"Objects","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Shaders","folderPath":"folders/Unique Engine/Shaders.yy","name":"Shaders","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Utils","folderPath":"folders/Unique Engine/Utils.yy","name":"Utils","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"UniqueMath","folderPath":"folders/UniqueMath.yy","name":"UniqueMath","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"UniqueUI","folderPath":"folders/UniqueUI.yy","name":"UniqueUI","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
   "ForcedPrefabProjectReferences":[],
@@ -70,7 +69,7 @@
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
-    "IDEVersion":"2024.13.1.193",
+    "IDEVersion":"2024.14.0.207",
   },
   "name":"Unique Engine",
   "resources":[
@@ -93,6 +92,7 @@
     {"id":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
     {"id":{"name":"__GMassimp_Macros","path":"scripts/__GMassimp_Macros/__GMassimp_Macros.yy",},},
     {"id":{"name":"__ueGlobals","path":"scripts/__ueGlobals/__ueGlobals.yy",},},
+    {"id":{"name":"__UniqueMathGlobals","path":"scripts/__UniqueMathGlobals/__UniqueMathGlobals.yy",},},
     {"id":{"name":"log","path":"scripts/log/log.yy",},},
     {"id":{"name":"scrDemoDrawSelector","path":"scripts/scrDemoDrawSelector/scrDemoDrawSelector.yy",},},
     {"id":{"name":"scrEditorTreeviewOnAssetDrop","path":"scripts/scrEditorTreeviewOnAssetDrop/scrEditorTreeviewOnAssetDrop.yy",},},
@@ -137,7 +137,7 @@
     {"id":{"name":"UeLineSegmentsGeometry","path":"scripts/UeLineSegmentsGeometry/UeLineSegmentsGeometry.yy",},},
     {"id":{"name":"UeMaterial","path":"scripts/UeMaterial/UeMaterial.yy",},},
     {"id":{"name":"UeMatrix3","path":"scripts/UeMatrix3/UeMatrix3.yy",},},
-    {"id":{"name":"ueMatrix4","path":"scripts/ueMatrix4/ueMatrix4.yy",},},
+    {"id":{"name":"UeMatrix4","path":"scripts/UeMatrix4/UeMatrix4.yy",},},
     {"id":{"name":"UeMesh","path":"scripts/UeMesh/UeMesh.yy",},},
     {"id":{"name":"UeMeshBasicMaterial","path":"scripts/UeMeshBasicMaterial/UeMeshBasicMaterial.yy",},},
     {"id":{"name":"UeMeshStandardMaterial","path":"scripts/UeMeshStandardMaterial/UeMeshStandardMaterial.yy",},},
@@ -211,7 +211,6 @@
     {"id":{"name":"sprUiTrash","path":"sprites/sprUiTrash/sprUiTrash.yy",},},
     {"id":{"name":"sprUiTreeviewArrowDown","path":"sprites/sprUiTreeviewArrowDown/sprUiTreeviewArrowDown.yy",},},
     {"id":{"name":"sprUiTreeviewArrowRight","path":"sprites/sprUiTreeviewArrowRight/sprUiTreeviewArrowRight.yy",},},
-    {"id":{"name":"sTest","path":"sprites/sTest/sTest.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",

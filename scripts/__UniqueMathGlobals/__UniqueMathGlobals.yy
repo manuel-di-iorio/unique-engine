@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeRay",
+  "%Name":"__UniqueMathGlobals",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeRay",
+  "name":"__UniqueMathGlobals",
   "parent":{
     "name":"UniqueMath",
     "path":"folders/UniqueMath.yy",
