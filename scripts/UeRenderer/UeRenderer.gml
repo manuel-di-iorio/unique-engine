@@ -3,7 +3,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     type = "Renderer";
     sortObjects = data[$ "sortObjects"] ?? true;
     
-    __frustum = new UeFrustum(); 
+    //__frustum = new UeFrustum(); 
     __opaqueIdx = 0;
     __transparentIdx = 0;
     __lightIdx = 0;
@@ -30,7 +30,14 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             
             if (object[$ "geometry"] != undefined && object.visible) {
                 // Test the frustum intersection
-                if (object.frustumCulled && !__frustum.intersectsObject(object)) continue;
+                //if (object.frustumCulled && !__frustum.intersectsObject(object)) continue; // OLD
+                
+                if (object.frustumCulled) {
+                    var _intersectionSphere = object.__intersectionSphere;
+                    var _position = object.position;
+                    if (_intersectionSphere != undefined &&
+                        !sphere_is_visible(_position.x, _position.y, _position.z, _intersectionSphere.radius)) continue;
+                }
                  
                 // Precompute distance from camera for sorting
                 object.__ueSortDistanceToCam = object.position.distanceToSquared(cameraPos);
@@ -214,9 +221,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
         // Frustum updated from camera. 
         // It needs to test using world coords, so we multiply the matrixes from camera space to world space 
-        __frustum.setFromProjectionMatrix(
-            matrix_multiply(camera.matrixWorldInverse.data, camera.projectionMatrix.data)
-        ); 
+        //__frustum.setFromProjectionMatrix(
+            //matrix_multiply(camera.matrixWorldInverse.data, camera.projectionMatrix.data)
+        //); 
         
         __lightIdx = 0;
         __opaqueIdx = 0;
@@ -241,7 +248,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         
         // Reset the world after rendering
         shader_reset();  
-        matrix_set(matrix_world, matrix_build_identity()); 
+        matrix_set(matrix_world, global.UE_MATRIX_IDENTITY);
         gpu_set_state(_gpuState);
 
         return self;

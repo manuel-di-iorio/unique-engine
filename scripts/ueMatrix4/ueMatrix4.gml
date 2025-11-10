@@ -11,21 +11,21 @@ function UeMatrix4(_data = undefined) constructor {
     /// Multiplies this matrix by another (result = self * m)
     function multiply(m) {
         gml_pragma("forceinline");
-        data = matrix_multiply(m.data, self.data);
+        matrix_multiply(m.data, self.data, data);
         return self;
     }
 
     /// Multiplies two matrices: result = a * b
     function multiplyMatrices(a, b) {
         gml_pragma("forceinline");
-        data = matrix_multiply(b.data, a.data);
+        matrix_multiply(b.data, a.data, data);
         return self;
     }
 
     /// Pre-multiplies this matrix: result = m * self
     function premultiply(m) {
         gml_pragma("forceinline");
-        data = matrix_multiply(self.data, m.data);
+        matrix_multiply(self.data, m.data, data);
         return self;
     }
 
@@ -121,7 +121,7 @@ function UeMatrix4(_data = undefined) constructor {
     /// Inverts the matrix
     function invert() {
         gml_pragma("forceinline");
-        self.data = matrix_inverse(self.data);
+        matrix_inverse(self.data, self.data);
         return self;
     }
 
@@ -151,7 +151,7 @@ function UeMatrix4(_data = undefined) constructor {
         return self;
     }
 
-    /// Resets the matrix to ty
+    /// Resets the matrix to identity
     function identity() {
         gml_pragma("forceinline");
         data = matrix_build_identity();
@@ -161,7 +161,7 @@ function UeMatrix4(_data = undefined) constructor {
     /// Builds a lookAt matrix from eye, target and up vectors
     function lookAt(eye, target, up) {
         gml_pragma("forceinline");
-        data = matrix_build_lookat(eye.x, eye.y, eye.z, target.x, target.y, target.z, up.x, up.y, up.z);
+        matrix_build_lookat(eye.x, eye.y, eye.z, target.x, target.y, target.z, up.x, up.y, up.z, self.data);
         return self;
     }
 
@@ -210,7 +210,7 @@ function UeMatrix4(_data = undefined) constructor {
         var height = top - bottom;
         var aspect = width / height;
         var fov_y_deg = radtodeg(2 * arctan(height * 0.5 / near));
-        data = matrix_build_projection_perspective(fov_y_deg, aspect, near, far);
+        matrix_build_projection_perspective(fov_y_deg, aspect, near, far, self.data);
         return self;
     }
 
@@ -219,7 +219,7 @@ function UeMatrix4(_data = undefined) constructor {
         gml_pragma("forceinline");
         var width  = right - left;
         var height = top - bottom;
-        data = matrix_build_projection_ortho(width, height, near, far);
+        matrix_build_projection_ortho(width, height, near, far, self.data);
         return self;
     }
 

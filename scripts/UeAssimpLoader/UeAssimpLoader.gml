@@ -245,7 +245,7 @@ function UeAssimpLoader(data = {}) constructor {
         model.geometry.boundingBox = new UeBox3(minV, maxV);
         
         // Calculate bounding sphere from overall bounding box
-        var center = minV.clone().add(maxV).multiplyScalar(0.5);
+        var center = minV.add(maxV).multiplyScalar(0.5);
         var radius = center.distanceTo(maxV);
         model.geometry.boundingSphere = new UeSphere(center, radius);
     }

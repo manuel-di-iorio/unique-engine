@@ -18,10 +18,10 @@
     {"name":"Helpers","order":5,"path":"folders/Unique Engine/Helpers.yy",},
     {"name":"Loaders","order":8,"path":"folders/Unique Engine/Loaders.yy",},
     {"name":"Materials","order":3,"path":"folders/Unique Engine/Materials.yy",},
-    {"name":"UniqueMath","order":3,"path":"folders/UniqueMath.yy",},
     {"name":"Objects","order":2,"path":"folders/Unique Engine/Objects.yy",},
     {"name":"Shaders","order":4,"path":"folders/Unique Engine/Shaders.yy",},
     {"name":"Utils","order":10,"path":"folders/Unique Engine/Utils.yy",},
+    {"name":"UniqueMath","order":3,"path":"folders/UniqueMath.yy",},
     {"name":"UniqueUI","order":2,"path":"folders/UniqueUI.yy",},
   ],
   "ResourceOrderSettings":[
