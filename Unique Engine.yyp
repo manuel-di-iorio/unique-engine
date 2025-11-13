@@ -2,7 +2,7 @@
   "$GMProject":"v1",
   "%Name":"Unique Engine",
   "AudioGroups":[
-    {"$GMAudioGroup":"v1","%Name":"audiogroup_default","exportDir":"","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
+    {"$GMAudioGroup":"","%Name":"audiogroup_default","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
   ],
   "configs":{
     "children":[],
@@ -56,6 +56,7 @@
     {"$GMIncludedFile":"","%Name":"color-palette-svgrepo-com (1).svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"color-palette-svgrepo-com (1).svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"create-svgrepo-com.svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"create-svgrepo-com.svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"cube-alt-2-svgrepo-com.svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"cube-alt-2-svgrepo-com.svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"icon-folder.svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"icon-folder.svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"image-square-svgrepo-com.svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"image-square-svgrepo-com.svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"light-svgrepo-com.svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"light-svgrepo-com.svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"new-file-svgrepo-com.svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"new-file-svgrepo-com.svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},

@@ -51,7 +51,20 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       break;
       
       case "Mesh": 
-          asset = new UeMesh(new UeBoxGeometry(50, 50, 50));
+          var size = 50;
+          var geometry = new UeBoxGeometry(size, size, size);
+          
+          // Set bounding box
+          geometry.boundingBox = new UeBox3();
+          geometry.boundingBox.setFromCenterAndSize(
+              new UeVector3(0, 0, 0),
+              new UeVector3(size, size, size)
+          );
+          
+          // Set bounding sphere
+          geometry.boundingSphere = new UeSphere(new UeVector3(0, 0, 0), size * 0.866); // sqrt(3)/2 ≈ 0.866
+          
+          asset = new UeMesh(geometry);
           asset.material = undefined;
           asset.__rotationEuler = new UeEuler();
           assetId = global.UI_ASSETS_MODELS_ID++;

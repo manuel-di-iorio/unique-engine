@@ -64,10 +64,10 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function __computeAxesSize() {
         __axisLength = self.size * 0.8;          // Total length of each axis arrow
         __axisLengthHalf = __axisLength * .5;    // Half the axis length for positioning
-        __axisLineWidth = .7;                    // Width/thickness of axis lines
+        __axisLineWidth = .3;                    // Width/thickness of axis lines (reduced from 0.7)
         __axisOffset = 1;                        // Offset from origin for axis positioning
         __planeOpacity = 0.3;                    // Transparency level for plane handles
-        __planeDepth = .5;                       // Thickness of plane interaction handles
+        __planeDepth = .2;                       // Thickness of plane interaction handles
         __planeSize = __axisLength * 0.3;        // Size of square plane handles
     }
     
@@ -80,9 +80,20 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         self.object = object;
         
-        // Auto-scale gizmo based on object's bounding box size for better visual proportion
+        // Auto-scale gizmo based on object's bounding sphere radius for better visual proportion
         var objectBox = object.geometry[$ "boundingBox"];
-        if (objectBox != undefined) self.size = objectBox.getSize().x;
+        if (objectBox != undefined) {
+            // Use bounding sphere radius for more accurate sizing
+            // This gives us the distance from center to furthest corner
+            var center = objectBox.getCenter();
+            var size = objectBox.getSize();
+            // Calculate radius as half the diagonal (distance from center to corner)
+            var radius = size.length() * 0.5;
+            self.size = radius * 0.5; // Use half the radius so gizmo doesn't overwhelm the object
+        } else {
+            // Default size if bounding box not available
+            self.size = 8;
+        }
         __computeAxesSize();
             
         build();
@@ -116,7 +127,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         var _baseLength = __axisLengthHalf + __axisOffset;
         
         // Create X axis line (Red)
-        var geoX = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, undefined, { color: c_red });
+        var geoX = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_red });
         geoX.boundingBox = new UeBox3();
         geoX.computeBoundingBox();
         var meshX = new UeMesh(geoX, __matMesh.clone());
@@ -127,7 +138,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self._gizmo.add(meshX);
         
         // Create Y axis line (Blue)
-        var geoY = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, undefined, { color: #2277B3 });
+        var geoY = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: #2277B3 });
         geoY.boundingBox = new UeBox3();
         geoY.computeBoundingBox();
         var meshY = new UeMesh(geoY, __matMesh.clone());
@@ -138,7 +149,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self._gizmo.add(meshY);
         
         // Create Z axis line (Green/Lime)
-        var geoZ = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, undefined, { color: c_lime });
+        var geoZ = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_lime });
         geoZ.boundingBox = new UeBox3();
         geoZ.computeBoundingBox();
         var meshZ = new UeMesh(geoZ, __matMesh.clone());
@@ -210,8 +221,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // Use a perspective-correct scaling formula
         // The scale should be proportional to distance to maintain constant apparent size
-        var baseScale = 0.075;  // Much smaller base size multiplier
-        var referenceDistance = 10;  // Smaller reference distance for larger gizmo
+        var baseScale = 0.2;  // Base size multiplier - increased for better visibility
+        var referenceDistance = 10;  // Reference distance for scaling
         
         // Calculate scale that makes gizmo appear same size regardless of distance
         // Scale increases with distance to compensate for perspective

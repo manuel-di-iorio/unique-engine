@@ -33,11 +33,11 @@ assetManager = new UeAssetManager();
 
 // Initialize editor state with references
 global.EditorState.init({
-    project: project,
-    inspector: inspector,
+    project,
+    inspector,
     treeview: ui.Assets.Treeview,
-    transformControls: transformControls,
-    objects: objects
+    transformControls,
+    objects
 });
 
 // Deprecated properties (kept for compatibility during migration)

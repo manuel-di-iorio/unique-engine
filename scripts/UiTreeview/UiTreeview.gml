@@ -178,8 +178,8 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     
     // Left and right content
     self.LeftContent = new UiNode({ name: "UiTreeview.Item.Content.LeftContent", flexDirection: "row", alignItems: "center"  });
-    self.RightContent = new UiNode({ name: "UiTreeview.Item.Content.RightContent", flexDirection: "row", alignItems: "center"  });
-    self.Content.add(LeftContent, RightContent);
+    // self.RightContent = new UiNode({ name: "UiTreeview.Item.Content.RightContent", flexDirection: "row", alignItems: "center"  });
+    self.Content.add(self.LeftContent/*, self.RightContent*/);
 
     // Arrow
     self.Arrow = new UiButton(sprUiTreeviewArrowDown, { 
@@ -274,7 +274,10 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             self.treeview.selectedItem = undefined;
         }
         
-        if (self.treeview.onRemoveItem != undefined) self.treeview.onRemoveItem(self, _isSelected);
+        // Only call onRemoveItem if treeview exists (folders might not have it set)
+        if (self.treeview != undefined && self.treeview[$ "onRemoveItem"] != undefined) {
+            self.treeview.onRemoveItem(self, _isSelected);
+        }
         
         var _parent = self.parent;
         self.destroy();

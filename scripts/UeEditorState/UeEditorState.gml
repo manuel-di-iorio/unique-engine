@@ -78,7 +78,7 @@ function UeEditorState() constructor {
             if (self.transformControls != undefined) {
                 switch (tool) {
                     case "move":
-                        self.transformControls.setMode("translate");
+                        self.transformControls.setMode("move");
                         break;
                     case "rotate":
                         self.transformControls.setMode("rotate");

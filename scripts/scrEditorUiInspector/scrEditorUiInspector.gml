@@ -103,9 +103,11 @@ function EditorUiInspector(ui) constructor {
                 search: "Search texture..",
                 subKey: "map",
                 itemsGetter: function(searchValue) {
-                    var textures = []/*array_filter(oSceneEditor.projectTextures, method({ searchValue }, function(texture) {
+                    var allTextures = oSceneEditor.assetManager.textures;
+                    var textures = array_filter(allTextures, method({ searchValue }, function(texture) {
+                        if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
-                    }));*/
+                    }));
                     
                     var mapped = array_map(textures, function(texture) {
                         return {
@@ -346,9 +348,11 @@ function EditorUiInspector(ui) constructor {
                 type: "dropdown",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
-                    var items = []/*array_filter(oSceneEditor.projectMaterials, method({ searchValue }, function(item) {
+                    var allMaterials = oSceneEditor.assetManager.materials;
+                    var items = array_filter(allMaterials, method({ searchValue }, function(item) {
+                        if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
-                    }));*/
+                    }));
                     
                     var mapped = array_map(items, function(item) {
                         return {
@@ -461,9 +465,11 @@ function EditorUiInspector(ui) constructor {
                 type: "dropdown",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
-                    var items = []/*array_filter(oSceneEditor.projectMaterials, method({ searchValue }, function(item) {
+                    var allMaterials = oSceneEditor.assetManager.materials;
+                    var items = array_filter(allMaterials, method({ searchValue }, function(item) {
+                        if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
-                    }));*/
+                    }));
                     
                     var mapped = array_map(items, function(item) {
                         return {

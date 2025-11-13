@@ -9,13 +9,14 @@ function UeAssetManager() constructor {
     self.scenes = [];        // Array of scene assets (with instances)
     self.lights = [];        // Array of light assets
     self.cameras = [];       // Array of camera assets
+    self.folders = [];       // Array of folder structures (for UI organization)
     
     // Asset lookup by name for quick access
     self.assetsByName = {};
     
     /**
      * Add an asset to the manager
-     * @param {String} type - Asset type: "texture", "material", "model", "scene", "light", "camera"
+     * @param {String} type - Asset type: "texture", "material", "model", "scene", "light", "camera", "folder"
      * @param {Struct} asset - The asset to add
      * @param {Struct} parent - Optional parent asset for hierarchical assets
      */
@@ -40,6 +41,9 @@ function UeAssetManager() constructor {
                     break;
                 case "camera":
                     array_push(self.cameras, asset);
+                    break;
+                case "folder":
+                    array_push(self.folders, asset);
                     break;
             }
         } else {
@@ -70,6 +74,7 @@ function UeAssetManager() constructor {
             case "scene": list = self.scenes; break;
             case "light": list = self.lights; break;
             case "camera": list = self.cameras; break;
+            case "folder": list = self.folders; break;
         }
         
         if (list != undefined) {
@@ -131,6 +136,7 @@ function UeAssetManager() constructor {
             case "scene": return self.scenes;
             case "light": return self.lights;
             case "camera": return self.cameras;
+            case "folder": return self.folders;
         }
         return [];
     }
@@ -145,6 +151,7 @@ function UeAssetManager() constructor {
         self.scenes = [];
         self.lights = [];
         self.cameras = [];
+        self.folders = [];
         self.assetsByName = {};
     }
     
@@ -182,16 +189,18 @@ function UeAssetManager() constructor {
     
     /**
      * Export all assets to a JSON structure
+     * @param {Struct} treeview - The treeview to extract folder structure from
      * @return {Struct} JSON-compatible structure
      */
-    function toJSON() {
+    function toJSON(treeview = undefined) {
         var json = {
             textures: {},
             materials: {},
             models: {},
             scenes: {},
             lights: {},
-            cameras: {}
+            cameras: {},
+            folders: [] // Array to preserve folder hierarchy
         };
         
         // Helper function to convert asset to JSON recursively
@@ -217,6 +226,31 @@ function UeAssetManager() constructor {
             return data;
         };
         
+        // Helper to export folder structure from treeview
+        var exportTreeviewItem = function(item) {
+            var itemData = {
+                name: item.name ?? "Unnamed",
+                type: item.type,
+                assetType: item.assetType
+            };
+            
+            // If it has an asset, reference it by name
+            if (item[$ "asset"] != undefined && item.asset != undefined) {
+                itemData.assetName = item.asset.name;
+            }
+            
+            // Export children recursively
+            if (item[$ "Items"] != undefined && item.Items[$ "children"] != undefined) {
+                itemData.children = [];
+                var children = item.Items.children;
+                for (var i = 0; i < array_length(children); i++) {
+                    array_push(itemData.children, exportTreeviewItem(children[i]));
+                }
+            }
+            
+            return itemData;
+        };
+        
         // Convert each asset type
         for (var i = 0; i < array_length(self.textures); i++) {
             var asset = self.textures[i];
@@ -236,6 +270,16 @@ function UeAssetManager() constructor {
         for (var i = 0; i < array_length(self.scenes); i++) {
             var asset = self.scenes[i];
             json.scenes[$ asset.name] = assetToJSON(asset);
+        }
+        
+        // Export folder structure from treeview if provided
+        if (treeview != undefined && treeview[$ "Items"] != undefined) {
+            var rootItems = treeview.Items[$ "children"];
+            if (rootItems != undefined) {
+                for (var i = 0; i < array_length(rootItems); i++) {
+                    array_push(json.folders, exportTreeviewItem(rootItems[i]));
+                }
+            }
         }
         
         return json;

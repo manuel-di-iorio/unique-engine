@@ -5,8 +5,9 @@ function editorTreeviewOnItemSelected(treeviewItem) {
     if (treeviewItem.asset == undefined) {
         if (treeviewItem.type == "Folder") {
             // Folders don't have an asset to inspect
-            editorState.clearActiveAsset();
+            // editorState.clearActiveAsset();
         }
+        global.UI.needsRedraw = true;
         return;
     }
     
@@ -16,7 +17,9 @@ function editorTreeviewOnItemSelected(treeviewItem) {
             while (scene == undefined || scene.type != "Scene") {
                 scene = scene.parent;
             }
-            editorState.setActiveAsset(scene, treeviewItem);
+            if (scene != undefined && scene.type == "Scene") {
+                editorState.setActiveAsset(scene, treeviewItem);
+            }
         break;
 
         case "Mesh":
