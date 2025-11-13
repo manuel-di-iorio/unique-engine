@@ -2,7 +2,7 @@
   "$GMProject":"v1",
   "%Name":"Unique Engine",
   "AudioGroups":[
-    {"$GMAudioGroup":"","%Name":"audiogroup_default","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
+    {"$GMAudioGroup":"v1","%Name":"audiogroup_default","exportDir":"","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
   ],
   "configs":{
     "children":[],
@@ -82,6 +82,7 @@
     {"id":{"name":"oSceneAssimpLoader","path":"objects/oSceneAssimpLoader/oSceneAssimpLoader.yy",},},
     {"id":{"name":"oSceneCube","path":"objects/oSceneCube/oSceneCube.yy",},},
     {"id":{"name":"oSceneEditor","path":"objects/oSceneEditor/oSceneEditor.yy",},},
+    {"id":{"name":"oSceneEditorProjectManager","path":"objects/oSceneEditorProjectManager/oSceneEditorProjectManager.yy",},},
     {"id":{"name":"oSceneLinesRaycasting","path":"objects/oSceneLinesRaycasting/oSceneLinesRaycasting.yy",},},
     {"id":{"name":"oSceneMeshRaycasting","path":"objects/oSceneMeshRaycasting/oSceneMeshRaycasting.yy",},},
     {"id":{"name":"oSceneObjLoader","path":"objects/oSceneObjLoader/oSceneObjLoader.yy",},},

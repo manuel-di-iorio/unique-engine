@@ -274,48 +274,23 @@ function EditorUiMenu(ui) constructor {
     }
     
     ui.Menu = new UiNode({ name: "Menu", width: "100%", height: 50, flexDirection: "row", alignItems: "center", paddingLeft: 10, paddingRight: 10, marginBottom: 10  });
-    ui.Menu.NewProjectBtn = new UiButton(sprUiNew, { padding: 5, marginLeft: 80, marginRight: 15, width: 15, height: 15 });
-    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { padding: 5, marginRight: 15, width: 15, height: 15 });
+    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { padding: 5, marginLeft: 80, marginRight: 15, width: 15, height: 15 });
     
-    ui.Menu.add(ui.Menu.NewProjectBtn, ui.Menu.LoadProjectBtn);
+    ui.Menu.add(ui.Menu.LoadProjectBtn);
 
     ui.Menu.onDraw = method(ui.Menu, function() {
         draw_set_color(global.UI_COL_INPUT_BG);
         draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
         
-        draw_sprite(sprDemoLogo, 0, 35, ~~mean(self.y1, self.y2));
+        draw_sprite(sprDemoLogo, 0, 35, (self.y1 + self.y2) / 2);
     });
     
-    // Events
-    ui.Menu.NewProjectBtn.onClick(function() {
-        global.UI_ASSETS_TEXTURES_ID = 0;
-        global.UI_ASSETS_MATERIALS_ID = 0;
-        global.UI_ASSETS_MODELS_ID = 0;
-        global.UI_ASSETS_LIGHTS_ID = 0;
-        global.UI_ASSETS_CAMERAS_ID = 0;
-        global.UI_ASSETS_SCENES_ID = 0;
-        window_set_caption("Unique Engine");
-        ui.destroyChildren();
-        instance_destroy(oSceneEditor);
-        instance_create_layer(0, 0, "Instances", oSceneEditor);
-    });
-    
+    // Load Project Button - closes current editor and goes back to project manager
     ui.Menu.LoadProjectBtn.onClick(function() {
-        //var selectedFile = get_open_filename("Game Maker Project (.yyp)|*.yyp", "");
-        var selectedFile = "C:\\Users\\Manuel\\GameMakerProjects\\Unique Engine\\Unique Engine.yyp";
-        if (selectedFile == "") return;
-        
-        // projectLocation deve essere la cartella, non il file .yyp
-        projectLocation = filename_path(selectedFile);
-        projectFiles = projectLocation + "datafiles";
-        projectEdited = false;
-        
-        var _name = filename_name(selectedFile);
-        //projectName = string_copy(_name, 1, string_length(_name)-4);
-        //window_set_caption($"{projectName} - Unique Engine");
-        window_set_caption("New project - Unique Engine*");
-
-
+        // Destroy current editor and return to project manager
+        global.UI.destroyChildren();
+        instance_destroy(oSceneEditor);
+        instance_create_layer(0, 0, "Instances", oSceneEditorProjectManager);
     });
     
 }
