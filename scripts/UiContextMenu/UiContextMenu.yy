@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UiTreeview",
+  "%Name":"UiContextMenu",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UiTreeview",
+  "name":"UiContextMenu",
   "parent":{
     "name":"UniqueUI",
     "path":"folders/UniqueUI.yy",

@@ -96,7 +96,7 @@ function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) construc
     });
     
     self.onStep(function() {
-        if (global.UI.mouseLeftReleased) {
+        if (global.UI.mouseReleased) {
             if (self.parent.dragged) {
                 self.parent.dragged = false;
                 self.setWidth(11);

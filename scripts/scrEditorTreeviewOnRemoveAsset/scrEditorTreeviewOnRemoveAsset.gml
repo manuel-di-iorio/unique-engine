@@ -9,7 +9,7 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
   var selectedAsset = oSceneEditor.activeAsset;
 
   // If the asset being removed is the currently active asset, detach the associated transform controls
-  if (selectedAsset == asset && (selectedAsset.type == "Mesh" || selectedAsset.type == "ModelInstance")) {
+  if (asset != undefined && selectedAsset == asset && (selectedAsset.type == "Mesh" || selectedAsset.type == "ModelInstance")) {
     oSceneEditor.transformControls.detach();
   }
 

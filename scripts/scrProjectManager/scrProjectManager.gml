@@ -70,10 +70,7 @@ function Project() constructor {
 
     // Svuota la treeview
     var treeview = global.UI.Main.Assets.Treeview;
-    treeview.Textures.Items.clear();
-    treeview.Materials.Items.clear();
-    treeview.Models.Items.clear();
-    treeview.Scenes.Items.clear();
+    treeview.Items.destroyChildren();
 
     // Helper per creare asset e treeview ricorsivamente
     function createAssetAndTreeview(assetData, parentTreeviewItem) {
@@ -130,14 +127,10 @@ function Project() constructor {
       for (var a = 0, al = array_length(assetList); a < al; a++) {
         var assetName = assetList[a];
         var assetData = assetsByType[$ type][$ assetName];
-        var parentTreeviewItem;
-
-        switch (type) {
-          case "texture": parentTreeviewItem = treeview.Textures; break;
-          case "material": parentTreeviewItem = treeview.Materials; break;
-          case "mesh": parentTreeviewItem = treeview.Models; break;
-          case "scene": parentTreeviewItem = treeview.Scenes; break;
-        }
+        
+        // In free mode, add directly to root Items
+        var parentTreeviewItem = { Items: treeview.Items, treeview: treeview };
+        
         createAssetAndTreeview(assetData, parentTreeviewItem);
       }
     }

@@ -1,11 +1,11 @@
 {
   "$GMScript":"v1",
-  "%Name":"UiTreeview",
+  "%Name":"UiFocusManager",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UiTreeview",
+  "name":"UiFocusManager",
   "parent":{
-    "name":"UniqueUI",
+    "name":"UI",
     "path":"folders/UniqueUI.yy",
   },
   "resourceType":"GMScript",

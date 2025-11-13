@@ -9,10 +9,7 @@ global.UI_COL_SELECTION        = #464a53; // 53,57,66
 global.UI_COL_CHECKBOX_HOVER   = #8993a0; // 137,147,160
 global.UI_COL_DROPDOWN_LIST_BG = #181818; // 24,24,24
 
-// #52B9B9 cyan
-// #F012BE magenta
-
-// Globals
+// Asset ID counters (for naming new assets)
 global.UI_ASSETS_TEXTURES_ID = 0;
 global.UI_ASSETS_MATERIALS_ID = 0;
 global.UI_ASSETS_MODELS_ID = 0;
@@ -20,36 +17,44 @@ global.UI_ASSETS_LIGHTS_ID = 0;
 global.UI_ASSETS_CAMERAS_ID = 0;
 global.UI_ASSETS_SCENES_ID = 0;
 global.UI_ASSETS_INSTANCE_ID = 0;
+global.UI_ASSETS_FOLDERS_ID = 0;
 
 uiDebug = false;
 
+// Initialize project
 project = new Project();
+
+// Setup UI and 3D scene
 scrSetupUI();
 scrSetup3D();
 
-// Active treeview asset
-activeAsset = undefined;
-tool = "view"; // Current tool mode: "view", "move", "rotate", "scale"
+// Initialize asset manager
+assetManager = new UeAssetManager();
 
-// Adds a preview instance of a model asset to the active scene (or scene root)
+// Initialize editor state with references
+global.EditorState.init({
+    project: project,
+    inspector: inspector,
+    treeview: ui.Assets.Treeview,
+    transformControls: transformControls,
+    objects: objects
+});
+
+// Deprecated properties (kept for compatibility during migration)
+// These should be accessed through global.EditorState instead
+activeAsset = undefined;
+tool = "view";
+
+// Legacy functions - redirect to EditorState
 function setActiveAsset(selectedAsset) {
-    if (activeAsset == selectedAsset) return;
-    objects.children = [];
-    activeAsset = selectedAsset;
-    objects.add(selectedAsset);
-    
-    if (selectedAsset.type == "Mesh" || selectedAsset.type == "ModelInstance") {
-        transformControls.attach(selectedAsset);
-    } else {
-        transformControls.detach();
-    }
+    global.EditorState.setActiveAsset(selectedAsset);
+    activeAsset = global.EditorState.activeAsset;
 }
 
 function unsetActiveAsset() {
-    objects.children = [];
+    global.EditorState.clearActiveAsset();
     activeAsset = undefined;
     selectedObject = undefined;
-    transformControls.detach();
 }
 
 

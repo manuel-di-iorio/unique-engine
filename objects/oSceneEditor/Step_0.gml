@@ -106,7 +106,8 @@ var winMouseX = window_mouse_get_x();
 var winMouseY = window_mouse_get_y();
 
 // Update transform controls based on current tool
-switch (tool) {
+var currentTool = global.EditorState.activeTool;
+switch (currentTool) {
     case "view": 
         transformControls.updateGizmo();
         orbit.update(winMouseX, winMouseY);
@@ -146,5 +147,24 @@ if (mouse_button != mb_none && orbit.transforming) {
 
 
 // @todo implement a proper focus management system on the UI
-if (keyboard_check_pressed(ord("Q"))) tool = "view";
-if (keyboard_check_pressed(ord("W"))) tool = "move";
+// Only handle shortcuts when no UI element has focus
+var uiHasFocus = global[$ "UiFocusManager"] != undefined && global.UiFocusManager.hasAnyFocus();
+
+if (!uiHasFocus) {
+    if (keyboard_check_pressed(ord("Q"))) {
+        global.EditorState.setTool("view");
+        tool = "view";
+    }
+    if (keyboard_check_pressed(ord("W"))) {
+        global.EditorState.setTool("move");
+        tool = "move";
+    }
+    if (keyboard_check_pressed(ord("E"))) {
+        global.EditorState.setTool("rotate");
+        tool = "rotate";
+    }
+    if (keyboard_check_pressed(ord("R"))) {
+        global.EditorState.setTool("scale");
+        tool = "scale";
+    }
+}

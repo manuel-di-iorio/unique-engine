@@ -164,7 +164,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         self.mouseX = device_mouse_x_to_gui(0);
         self.mouseY = device_mouse_y_to_gui(0);
         self.mouseChanged = self.mouseX != self.mouseXPrev || self.mouseY != self.mouseYPrev;
-        self.mouseLeftReleased = mouse_check_button_released(mb_left);
+        self.mouseReleased = mouse_check_button_released(mb_any);
         
         // Check the hover/unhover events
         var _currentlyHovered = self.deepestTarget;
@@ -232,20 +232,22 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                 global.UI.dispatchEvent(UI_EVENT.wheeldown, self.deepestTarget);
             }
             
-            if (mouse_check_button_pressed(mb_left)) {
+            if (mouse_check_button_pressed(mb_any)) {
                 global.UI_CLICK_START = self.deepestTarget;
                 global.UI.dispatchEvent(UI_EVENT.mousedown, self.deepestTarget);
-         
-                if (self.deepestTarget.draggable) {
-                    self.potentialDraggedElement = self.deepestTarget;
-                    self.potentialDraggedElement.dragStartX = self.mouseX;
-                    self.potentialDraggedElement.dragStartY = self.mouseY;
+
+                if (mouse_check_button_pressed(mb_left)) {
+                    if (self.deepestTarget.draggable) {
+                        self.potentialDraggedElement = self.deepestTarget;
+                        self.potentialDraggedElement.dragStartX = self.mouseX;
+                        self.potentialDraggedElement.dragStartY = self.mouseY;
+                    }
                 }
             }
         }
         
         // Handle mouse release
-        if (self.mouseLeftReleased) {
+        if (self.mouseReleased) {
             // First, handle the drag end if we got a dragged element
             if (self.draggedElement != undefined) {
                 self.draggedElement.dragging = false;
@@ -267,7 +269,11 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             
             // Then handle the normal click (if it was not a drag operation)
             else if (self.deepestTarget != undefined && self.deepestTarget == global.UI_CLICK_START) {
-                global.UI.dispatchEvent(UI_EVENT.click, self.deepestTarget);
+                global.UI.dispatchEvent(UI_EVENT.mouseup, self.deepestTarget);
+
+                if (mouse_lastbutton == mb_left) {
+                    global.UI.dispatchEvent(UI_EVENT.click, self.deepestTarget);
+                }
             }
             
             global.UI_CLICK_START = undefined;

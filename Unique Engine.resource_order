@@ -122,6 +122,7 @@
     {"name":"sprUiCreateAsset","order":10,"path":"sprites/sprUiCreateAsset/sprUiCreateAsset.yy",},
     {"name":"sprUiDropdownArrow","order":15,"path":"sprites/sprUiDropdownArrow/sprUiDropdownArrow.yy",},
     {"name":"sprUiEmptyTransparentBg","order":3,"path":"sprites/sprUiEmptyTransparentBg/sprUiEmptyTransparentBg.yy",},
+    {"name":"sprUiFolder","order":18,"path":"sprites/sprUiFolder/sprUiFolder.yy",},
     {"name":"sprUiImportModel","order":11,"path":"sprites/sprUiImportModel/sprUiImportModel.yy",},
     {"name":"sprUiLight","order":7,"path":"sprites/sprUiLight/sprUiLight.yy",},
     {"name":"sprUiLoad","order":1,"path":"sprites/sprUiLoad/sprUiLoad.yy",},

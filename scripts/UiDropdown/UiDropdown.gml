@@ -110,7 +110,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
             self.onStep(function() {
                 self.computePosition();
                 
-                if (global.UI.mouseLeftReleased) {
+                if (global.UI.mouseReleased) {
                     var y1 = min(self.y1, self.Dropdown.y1);
                     var y2 = max(self.y2, self.Dropdown.y2);
                     

@@ -8,22 +8,19 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     var dropAction = "";
     
     // Validation rules
-    // 1. Texture and Material are not draggable
-    if (draggedItem.assetType == "Texture" || draggedItem.assetType == "Material") {
+    // Allow dropping anything into a Folder
+    if (targetItem.assetType == "Folder") {
+        isValidDrop = true;
+        dropAction = "move_to_folder";
+    }
+    // Texture and Material are not draggable
+    else if (draggedItem.assetType == "Texture" || draggedItem.assetType == "Material") {
         return false;
     }
     
-    // 2. Drop on a root entity item to unparent
-    // Check if the item is under a parent in the UI (not just in the asset)
-    if ((draggedItem.assetType == "Mesh" || draggedItem.assetType == "Scene") &&
-    targetItem.entity && targetItem.assetType == draggedItem.assetType && draggedItem.asset != undefined) {
-        isValidDrop = true;
-        dropAction = "unparent";
-    }
-    
-    // 3. Scene can only be moved under another Scene
+    // Scene can only be moved under another Scene
     else if (draggedItem.assetType == "Scene") {
-        if (targetItem.assetType == "Scene" && !targetItem.entity) {
+        if (targetItem.assetType == "Scene") {
             isValidDrop = true;
             dropAction = "reparent";
         } else {
@@ -31,23 +28,23 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         }
     }
     
-    // 4. Model can be moved under another Model (reparent) or under a Scene (instance)
+    // Model can be moved under another Model (reparent) or under a Scene (instance)
     else if (draggedItem.assetType == "Mesh") {
         // Determine whether the dragged item is an instance (from a scene) or a master (from the Models list)
-        var draggedIsInstance = (draggedItem.asset != undefined && draggedItem.asset.isInstance == true);
+        var draggedIsInstance = (draggedItem.asset != undefined && draggedItem.asset[$ "isInstance"] == true);
         var targetHasAsset = (targetItem.asset != undefined);
-        var targetIsInstance = targetHasAsset && (targetItem.asset.isInstance == true);
+        var targetIsInstance = targetHasAsset && (targetItem.asset[$ "isInstance"] == true);
 
         if (draggedIsInstance) {
             // If we're dragging an existing instance, do reparenting
-            if (targetIsInstance && !targetItem.entity) {
+            if (targetIsInstance) {
                 isValidDrop = true;
                 dropAction = "reparent";
-            } else if (targetItem.assetType == "Mesh" && !targetItem.entity && !targetIsInstance) {
+            } else if (targetItem.assetType == "Mesh"  && !targetIsInstance) {
                 // Dragging an instance onto a master model -> reparent under that master
                 isValidDrop = true;
                 dropAction = "reparent";
-            } else if (targetItem.assetType == "Scene" && !targetItem.entity) {
+            } else if (targetItem.assetType == "Scene") {
                 // Move instance directly under the scene
                 isValidDrop = true;
                 dropAction = "reparent";
@@ -56,11 +53,11 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             }
         } else {
             // Dragging from the Models list (master)
-            if (targetItem.assetType == "Mesh" && !targetItem.entity && (!targetHasAsset || !targetIsInstance)) {
+            if (targetItem.assetType == "Mesh" && (!targetHasAsset || !targetIsInstance)) {
                 // Dropping on a master model -> reparent the master under another master
                 isValidDrop = true;
                 dropAction = "reparent";
-            } else if ((targetItem.assetType == "Scene" || targetIsInstance) && !targetItem.entity) {
+            } else if ((targetItem.assetType == "Scene" || targetIsInstance)) {
                 // Dropping a master onto a scene or onto an instance -> create a new instance
                 isValidDrop = true;
                 dropAction = "instance";
@@ -70,10 +67,10 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         }
     }
     
-    // 5. Other types of assets
+    // Other types of assets
     else {
         // For now, other asset types follow the same rules as models
-        if (targetItem.assetType == draggedItem.assetType && !targetItem.entity) {
+        if (targetItem.assetType == draggedItem.assetType) {
             isValidDrop = true;
             dropAction = "reparent";
         } else {
@@ -110,7 +107,12 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     
     // Perform the drop action
     if (isValidDrop) {
-        if (dropAction == "unparent") {
+        if (dropAction == "move_to_folder") {
+            // Move any asset into a folder (folders don't have 3D assets, only UI organization)
+            // Just update the treeview UI
+            draggedItem.moveItemTo(targetItem);
+        }
+        else if (dropAction == "unparent") {
             // Remove from current asset parent
             if (draggedItem.asset.parent != undefined) {
                 draggedItem.asset.parent.remove(draggedItem.asset);
@@ -123,13 +125,15 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         else if (dropAction == "reparent") {
             // Reparenting: move the asset within the hierarchy
 
-            // Remove from the previous asset parent
-            if (draggedItem.asset.parent != undefined) {
+            // Remove from the previous asset parent (only if asset exists)
+            if (draggedItem.asset != undefined && draggedItem.asset.parent != undefined) {
                 draggedItem.asset.parent.remove(draggedItem.asset);
             }
             
-            // Add to the new parent
-            targetItem.asset.add(draggedItem.asset);
+            // Add to the new parent (only if both assets exist)
+            if (draggedItem.asset != undefined && targetItem.asset != undefined) {
+                targetItem.asset.add(draggedItem.asset);
+            }
             
             // Update the treeview UI using the new helper
             draggedItem.moveItemTo(targetItem);
@@ -183,7 +187,6 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
 function __editorTreeview_createTreeviewItem(asset, parentTreeviewItem, icon) {
     var treeviewItem = new UiTreeviewItem({
         name: "UiTreeview.Item",
-        marginLeft: 15,
         paddingVertical: 2.5
     }, {
         treeview: parentTreeviewItem.treeview,

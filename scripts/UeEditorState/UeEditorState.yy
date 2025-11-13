@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"UiTreeview",
+  "%Name":"UeEditorState",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UiTreeview",
+  "name":"UeEditorState",
   "parent":{
-    "name":"UniqueUI",
-    "path":"folders/UniqueUI.yy",
+    "name":"Scripts",
+    "path":"folders/Scene Editor/Scripts.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

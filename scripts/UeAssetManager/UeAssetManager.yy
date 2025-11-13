@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"scrProject",
+  "%Name":"UeAssetManager",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scrProject",
+  "name":"UeAssetManager",
   "parent":{
     "name":"Scripts",
     "path":"folders/Scene Editor/Scripts.yy",

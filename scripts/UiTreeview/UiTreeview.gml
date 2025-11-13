@@ -1,80 +1,23 @@
 /**
- * Treeview
+ * Treeview - Free-form hierarchical tree structure
+ * Supports flexible asset organization with drag & drop
  */
 function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     setName(style[$ "name"] ?? "UiTreeview");
     var _this = self;
     self.selectedItem = undefined;  
     self.pointerEvents = true;
-    self.onNewAsset = undefined;
-    self.onRemoveItem = undefined;
     self.onItemSelected = undefined;
     self.onAssetDrop = undefined;
-    self.onModelImport = undefined;
+    self.onContextMenu = undefined; // Callback for showing context menu
     
     // Create the items container
     self.Items = new UiNode({ name: "UiTreeview.Items", marginTop: 5, paddingBottom: 5 });
     self.add(self.Items);
-
-    // Create the root folder items
-    var rootAssetItemStyle = { name: "UiTreeview.Item", paddingVertical: 3 };
     
-    self.Textures = new UiTreeviewItem(rootAssetItemStyle, {
-        treeview: _this,
-        name: "Textures",
-        type: "Folder",
-        assetType: "Texture",
-        icon: sprUiTexture,
-        entity: true
-    });
-    
-    self.Materials = new UiTreeviewItem(rootAssetItemStyle, {
-        treeview: _this,
-        name: "Materials",
-        type: "Folder",
-        assetType: "Material",
-        icon: sprUiMaterial,
-        entity: true
-    });
-    
-    self.Models = new UiTreeviewItem(rootAssetItemStyle, {
-        treeview: _this,
-        name: "Models",
-        type: "Folder",
-        assetType: "Mesh",
-        icon: sprUiObject,
-        entity: true
-    });
-    
-    //self.Lights = new UiTreeviewItem(rootAssetItemStyle, {
-        //treeview: _this,
-        //name: "Lights",
-        //type: "Folder",
-        //assetType: "Light",
-        //icon: sprUiLight,
-        //entity: true
-    //});
-    //
-    //self.Cameras = new UiTreeviewItem(rootAssetItemStyle, {
-        //treeview: _this,
-        //name: "Cameras",
-        //type: "Folder",
-        //assetType: "Camera",
-        //icon: sprUiCamera,
-        //entity: true
-    //});
-    
-    self.Scenes = new UiTreeviewItem(rootAssetItemStyle, {
-        treeview: _this,
-        name: "Scenes",
-        type: "Folder",
-        assetType: "Scene",
-        icon: sprUiScene,
-        entity: true
-    });
-       
-    self.Items.add(self.Textures, self.Materials, self.Models, /*self.Lights, self.Cameras,*/ self.Scenes);
-    
+    /**
+     * Select a treeview item
+     */
     function __onItemSelected(treeviewItem) {
         if (self.selectedItem == treeviewItem) return;
         self.selectedItem = treeviewItem;
@@ -83,10 +26,55 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         }));
         if (self.onItemSelected != undefined) self.onItemSelected(treeviewItem);
     }
+    
+    /**
+     * Validate if an asset can be dropped on a target
+     * @param {Struct} draggedItem - The treeview item being dragged
+     * @param {Struct} targetItem - The target treeview item
+     * @return {Bool} True if the drop is valid
+     */
+    function validateDrop(draggedItem, targetItem) {
+        var draggedType = draggedItem.assetType;
+        var targetType = targetItem.assetType;
+        
+        // Cannot drop on itself
+        if (draggedItem == targetItem) return false;
+        
+        // Textures and Materials cannot be moved
+        if (draggedType == "Texture" || draggedType == "Material") {
+            return false;
+        }
+        
+        // Check if target accepts this type
+        if (targetItem[$ "acceptsDropOf"] != undefined) {
+            var accepts = targetItem.acceptsDropOf;
+            var found = false;
+            for (var i = 0; i < array_length(accepts); i++) {
+                if (accepts[i] == draggedType) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return false;
+        }
+        
+        // Folders can accept anything
+        if (targetType == "Folder") return true;
+        
+        // Models can be dropped on other models or scenes
+        if (draggedType == "Mesh" || draggedType == "ModelInstance") {
+            if (targetType == "Mesh" || targetType == "ModelInstance" || targetType == "Scene") {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }
 
 /**
- * Treeview Item
+ * Treeview Item - Represents an item in the tree hierarchy
+ * Supports both category folders and individual assets
  */
 function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructor {
     var _this = self;
@@ -97,8 +85,8 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.name = props[$ "name"];
     self.selected = false;
     self.collapsed = props[$ "collapsed"] ?? true;
-    self.entity = props[$ "entity"] ?? false;
     self.asset = props[$ "asset"] ?? undefined;
+    self.acceptsDropOf = props[$ "acceptsDropOf"] ?? undefined;
     
     // Content
     self.Content = new UiNode({ 
@@ -115,55 +103,69 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     
     self.add(self.Content);
     
-    with (self.Content) { 
+    // Store reference for use in callbacks
+    var treeviewItem = _this;
+    
+    with (self.Content) {
+        var contentNode = self;  // Capture the Content node reference
+        
         // If this is not the root treeview item, enable the dragging
-        if (!self.parent.entity) {
-            self.draggable = true;
-            self.handpoint = true;
-        }
+        self.draggable = true;
+        self.handpoint = true;
         
         self.onMouseEnter(function() {
             global.UI.needsRedraw = true;
-            
         });
         
         self.onMouseLeave(function() {
             global.UI.needsRedraw = true; 
         });
         
-        self.onMouseDown(function() {
-            if (self.parent.entity) return;
-            self.parent.treeview.__onItemSelected(self.parent);
-        });
+        self.onMouseDown(method({ item: treeviewItem }, function() {
+            // Left click - select item
+            item.treeview.__onItemSelected(item);
+            return false;
+        }));
         
-        self.onDraw = function() {
-            if (!self.parent.entity && self.hovered) {
+        // Right click - context menu
+        self.onMouseUp(method({ item: treeviewItem }, function() {
+            if (mouse_lastbutton == mb_right) {
+                if (item.treeview.onContextMenu != undefined) {
+                    item.treeview.onContextMenu(item);
+                    return true;
+                }
+            }
+            return false;
+        }));
+        
+        self.onDraw = method({ item: treeviewItem, node: contentNode }, function() {
+            if (node.hovered) {
                 draw_set_color(global.UI_COL_BTN_HOVER);
-                draw_rectangle(0, self.yp1 + 3, self.xp2-2, self.yp2, false);
+                draw_rectangle(0, node.yp1 + 3, node.xp2-2, node.yp2, false);
             }
             
-            if (self.parent.selected) {
+            if (item.selected) {
                 draw_set_color(global.UI_COL_SELECTED);
-                draw_rectangle(0, self.yp1 + 3, self.xp2-2, self.yp2, false);
+                draw_rectangle(0, node.yp1 + 3, node.xp2-2, node.yp2, false);
             }
             
             // Draw the icon
-            var xx = self.x1 + 30;
-            var meanY = ~~mean(self.y1, self.y2);
-            if (self.parent.icon) {
-                draw_sprite(self.parent.icon, 0, xx + 10, meanY);
+            var xx = node.x1 + 30;
+            var meanY = (node.y1 + node.y2) div 2;
+            if (item.icon) {
+                draw_sprite(item.icon, 0, xx + 10, meanY);
                 xx += 25;
             }
             
             // Draw the label
             draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle); draw_set_font(fText);
-            draw_text(xx, meanY, self.parent.asset == undefined ? self.parent.name : self.parent.asset.name);
-        };
+            draw_text(xx, meanY, item.asset == undefined ? item.name : item.asset.name);
+        });
         
         // Use the external onAssetDrop callback if available
-        self.onDrop = function(draggedTreeviewItem) {
-                var draggedItem = draggedTreeviewItem.parent; // The TreeviewItem being dragged
-                var targetItem = self.parent; // The TreeviewItem being dropped onto
+        self.onDrop = method({ item: treeviewItem }, function(draggedTreeviewItem) {
+            var draggedItem = draggedTreeviewItem.parent; // The TreeviewItem being dragged
+            var targetItem = item; // The TreeviewItem being dropped onto
             
             // Check if there's an external callback defined in the treeview
             if (targetItem.treeview.onAssetDrop != undefined) {
@@ -171,7 +173,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             }
             
             return false;
-        };
+        });
     }
     
     // Left and right content
@@ -194,59 +196,8 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }));
     
     self.LeftContent.add(self.Arrow);
-     
     
-    // Import model button
-    if (self.type == "Folder" && self.assetType == "Mesh") {
-        self.ImportModelIcon = new UiButton(sprUiImportModel, { 
-            name: "UiTreeview.Item.Content.ImportModelBtn", padding: 5, paddingBottom: 4, marginRight: 15 
-        }, { outline: true, tooltip: "Import model from file" });
-        self.ImportModelIcon.treeview = self.treeview;
-        self.ImportModelIcon.onClick(method(_this, function() {
-            self.treeview.onModelImport();
-        }));
-        
-        self.RightContent.add(self.ImportModelIcon); 
-    }
-    
-    // Delete button
-    if (!self.entity) {
-        self.DeleteIcon = new UiButton(sprUiTrash, { 
-            name: "UiTreeview.Item.ContentDeleteBtn", padding: 5, paddingBottom: 4, marginRight: 15
-        }, { outline: true, tooltip: "Delete this asset" });
-        self.DeleteIcon.treeview = self.treeview;
-        
-        // Stop the propagation of the "mouse down" event
-        self.DeleteIcon.onMouseDown(function() {  return true; });
-        
-        self.DeleteIcon.onClick(method(_this, function() {
-            self.__removeItem();
-            return true;
-        }));
-        
-        self.RightContent.add(self.DeleteIcon); 
-    }
-    
-    // Create button
-    if ((self.type == "Folder" || self.assetType == "Mesh") && (self.asset == undefined || !self.asset.isInstance)) {
-        self.CreateIcon = new UiButton(sprUiCreateAsset, { 
-            name: "UiTreeview.Item.Content.CreateBtn", padding: 5, paddingBottom: 4, marginRight: 20
-        }, { outline: true, tooltip: "Create a new asset" });
-        self.CreateIcon.treeview = self.treeview;
-        
-        // Stop the propagation of the "mouse down" event
-        self.CreateIcon.onMouseDown(function() {  return true; });
-        
-        self.CreateIcon.onClick(method(_this, function() {
-            self.__addItem();
-            return true;
-        }));
-        
-        self.RightContent.add(self.CreateIcon); 
-    }
-    
-    self.Items = new UiNode();
-    
+    self.Items = new UiNode({ marginLeft: 15 });
     self.add(self.Items);
     
     // Methods 
@@ -298,16 +249,18 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             self.parent.remove(self);
         }
         
-        // Update the old parent
-        if (oldParent != undefined) {
+        // Update the old parent (only if it's a real TreeviewItem)
+        if (oldParent != undefined && oldParent[$ "__updateArrowVisibility"]) {
             oldParent.__updateArrowVisibility();
         }
         
         // Add to the new parent
         targetParent.Items.add(self);
         
-        // Update the new parent
-        targetParent.__updateArrowVisibility();
+        // Update the new parent (only if it's a real TreeviewItem)
+        if (targetParent[$ "__updateArrowVisibility"]) {
+            targetParent.__updateArrowVisibility();
+        }
         if (shouldExpand && targetParent.collapsed) {
             targetParent.expandItem();
         }
@@ -327,7 +280,10 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.destroy();
         
         if (_parent != undefined && _parent.parent != undefined) {
-            _parent.parent.__updateArrowVisibility();
+            var parentItem = _parent.parent;
+            if (variable_struct_exists(parentItem, "__updateArrowVisibility")) {
+                parentItem.__updateArrowVisibility();
+            }
         }
     }
     
@@ -346,9 +302,10 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     
     function onDraw() {
         // Draw the item background if not collapsed
-        if (self.entity && !self.collapsed) {
+        if (!self.collapsed) {
             draw_set_color(global.UI_COL_TREE_BG);
             draw_rectangle(self.xp1, self.y1, self.xp2, self.y2, false);
         }
-    } 
+    }
 }
+

@@ -40,6 +40,11 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         self.cursorBlinkTime = 0;
         self.showCursor = true;
         
+        // Register with focus manager
+        if (global[$ "UiFocusManager"] != undefined) {
+            global.UiFocusManager.register(self);
+        }
+        
         // Mouse drag selection management
         self.isDragging = false;
         self.dragStartPos = 0;
@@ -258,6 +263,11 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             self.focused = true;
             self.cursorBlinkTime = current_time;
             self.showCursor = true;
+            
+            // Register with focus manager
+            if (global[$ "UiFocusManager"] != undefined) {
+                global.UiFocusManager.setFocus(self);
+            }
             
             // Clear any pending keyboard input to prevent unwanted character insertion
             keyboard_lastchar = "";
@@ -707,7 +717,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         // Main update loop
         self.onStep(function() {
             // Handle mouse up event
-            if (global.UI.mouseLeftReleased) {
+            if (global.UI.mouseReleased) {
                 self.isDragging = false;
             }
             

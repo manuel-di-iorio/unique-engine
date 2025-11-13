@@ -27,8 +27,18 @@ function editorTreeviewOnModelImport(modelAsset) {
             tex.name = "Texture" + string(textureId);
         }
         
-        // Add to treeview using helper function
-        var textureTreeviewItem = __editorTreeview_createTreeviewItem(tex, treeview.Textures, sprUiTexture);
+        // Add to treeview root
+        var textureTreeviewItem = new UiTreeviewItem({
+            name: "UiTreeview.Item",
+            paddingVertical: 2.5
+        }, {
+            treeview: treeview,
+            assetType: "Texture",
+            type: "Texture",
+            icon: sprUiTexture,
+            asset: tex
+        });
+        treeview.Items.add(textureTreeviewItem);
     }
     
     // 2. Add materials to project and treeview
@@ -44,8 +54,18 @@ function editorTreeviewOnModelImport(modelAsset) {
             mat.name = "Material" + string(materialId);
         }
         
-        // Add to treeview using helper function
-        var materialTreeviewItem = __editorTreeview_createTreeviewItem(mat, treeview.Materials, sprUiMaterial);
+        // Add to treeview root
+        var materialTreeviewItem = new UiTreeviewItem({
+            name: "UiTreeview.Item",
+            paddingVertical: 2.5
+        }, {
+            treeview: treeview,
+            assetType: "Material",
+            type: "Material",
+            icon: sprUiMaterial,
+            asset: mat
+        });
+        treeview.Items.add(materialTreeviewItem);
     }
     
     // 3. Add model to project and treeview (with hierarchy)
@@ -61,8 +81,18 @@ function editorTreeviewOnModelImport(modelAsset) {
         node.__rotationEuler = new UeEuler();
     });
     
-    // Create main model treeview item using helper function
-    var modelTreeviewItem = __editorTreeview_createTreeviewItem(model, treeview.Models, sprUiObject);
+    // Create main model treeview item at root level
+    var modelTreeviewItem = new UiTreeviewItem({
+        name: "UiTreeview.Item",
+        paddingVertical: 2.5
+    }, {
+        treeview: treeview,
+        assetType: "Mesh",
+        type: "Mesh",
+        icon: sprUiObject,
+        asset: model
+    });
+    treeview.Items.add(modelTreeviewItem);
     
     // 4. Add submeshes recursively with proper hierarchy
     __editorTreeview_createTreeviewItemsForChildren(model, modelTreeviewItem, sprUiObject);
