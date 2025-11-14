@@ -1,1 +1,1 @@
-if (view_current == 1) renderer.render(scene, camera);
+if (projectLoaded && view_current == 1) renderer.render(scene, camera);

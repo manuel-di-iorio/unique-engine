@@ -15,13 +15,4 @@ function scrSetupUI() {
     ui.SceneTools = new UiNode({ name: "SceneTools", width: 300, height: 40, position: "absolute" });
     
     menu = new EditorUiMenu(ui);
-    treeview = new EditorUiAssets(ui);
-    inspector = new EditorUiInspector(ui);
-    
-    // Store reference to inspector in the scene editor
-    oSceneEditor.inspector = inspector;
-        
-    // Add the UI elements
-    ui.add(ui.Menu, ui.Assets, ui.Scene, ui.Inspector);
-    ui.Scene.add(ui.SceneTools);
 }
