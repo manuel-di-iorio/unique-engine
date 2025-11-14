@@ -9,14 +9,14 @@ A bounding sphere defined by a center point and a radius. Useful for spatial que
 ## Constructor
 
 ```js
-new UeSphere(center = new UeVector3(0, 0, 0), radius = -1)
+new UeSphere(center = undefined, radius = -1)
 ```
 
 ### Data parameters
 
 | Name     | Type        | Default     | Description                           |
 | -------- | ----------- | ----------- | ------------------------------------- |
-| `center` | `UeVector3` | `(0, 0, 0)` | Center point of the sphere            |
+| `center` | `UeVector3` | `undefined` | Center point of the sphere (defaults to (0, 0, 0) if not provided) |
 | `radius` | `number`    | `-1`        | Radius of the sphere; < 0 means empty |
 
 

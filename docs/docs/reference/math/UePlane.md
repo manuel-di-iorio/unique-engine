@@ -9,16 +9,16 @@ Represents a mathematical plane in 3D space defined by a normal vector and a dis
 ## Constructor
 
 ```js
-new UePlane(normal = new UeVector3(0, 0, -1), d = 0)
+new UePlane(normal = undefined, constant = 0)
 ```
 
 ### Properties
 
-| Name       | Type        | Default                   | Description                                       |
-| --------   | ----------- | ------------------------  | ------------------------------------------------  |
-| `normal`   | `UeVector3` | `new UeVector3(0, 0, -1)` | The normal vector of the plane                    |
-| `constant` | `number`    | `0`                       | The signed distance from the origin along normal  |
-| `isPlane`  | `boolean`   | `true`                    | Indicates that this is a plane                    |
+| Name       | Type        | Default     | Description                                       |
+| --------   | ----------- | ----------- | ------------------------------------------------  |
+| `normal`   | `UeVector3` | `undefined` | The normal vector of the plane (defaults to (0, 0, -1) if not provided) |
+| `constant` | `number`    | `0`         | The signed distance from the origin along normal  |
+| `isPlane`  | `boolean`   | `true`      | Indicates that this is a plane                    |
 
 ## Methods
 

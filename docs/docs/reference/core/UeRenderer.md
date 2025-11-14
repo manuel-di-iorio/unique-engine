@@ -2,9 +2,9 @@
 sidebar_position: 7
 ---
 
-The `UeRenderer` is responsible for rendering a scene with proper sorting and handling of opaque and transparent objects.
+`UeRenderer` is responsible for rendering the scene, collecting visible objects, computing their sort order using a **52-bit packed integer key**, building the lighting state, and issuing the draw calls.
 
-It traverses the scene graph, builds lighting state, sorts renderables by distance to the camera, and performs the draw calls.
+The renderer recursively traverses the scene graph, extracts lights and meshes, constructs a global render queue, sorts it, and renders all objects in the correct order.
 
 ### Constructor
 ```js
@@ -22,55 +22,123 @@ new UeRenderer(data = {})
 
 ## 🔧 Internal Logic
 
-**Object Classification**
+**1️⃣ Object Collection**
 
-Objects are split into two queues:
+Rendering starts by recursively walking the scene graph:
 
-- Opaque queue → rendered first, front-to-back
+- Lights are stored into an internal array (__lights).
+- Meshes (objects with geometry) are added to the main __queue.
+- Frustum culling is applied when frustumCulled == true.
+- For each mesh, a sort key is computed (see below).
+- Collected objects are then rendered in a single unified pass.
 
-- Transparent queue → rendered last, back-to-front, with zwrite disabled
+**2️⃣ Sort Key (52-bit Packed Integer)**
 
-- Each object's .material.transparent flag determines which queue it goes to.
+Each object receives a packed integer used for sorting all renderables with a single fast comparison.
 
-**Sorting**
+```
+Bit Layout (MSB → LSB)
+[51]        1 bit   → transparency flag (opaque first, transparent last)
+[50..43]    8 bits  → renderOrder (user override)
+[42..31]   12 bits  → material ID (minimizes state changes)
+[30..0]    31 bits  → quantized depth (front-to-back or inverted)
+```
 
-Objects are sorted by distance to the camera using quicksort:
+**🔍 Depth Quantization (31 bits)**
 
-- Opaque → front-to-back (to reduce overdraw)
-
-- Transparent → back-to-front (to ensure correct alpha blending)
-
-**Transparency Rendering**
-
-- Transparent objects are rendered with:
-
-- Depth write disabled (`gpu_set_zwriteenable(false)`)
-
-- Double-pass rendering if the material does not have forceSinglePass = true
-
-**Lighting Aggregation**
-
-When the internal `render()` method is called, the renderer collects all active lights, and builds a lightState object:
+The squared distance to the camera is normalized and mapped into a 31-bit integer:
 
 ```js
-{
-  ambient: [r, g, b], // Total ambient light
-  directional: [...], // Array of directional lights
-  point: [...]        // Array of point lights
-}
+var nd = clamp(distSquared / MAX_SORT_DIST, 0, 1);
+var quantDepth = floor(nd * 0x7FFFFFFF); // max 31-bit integer
 ```
-Each light contributes only if enabled == true.
 
-## 🧠 Notes
+Why quantize?
 
-- The renderer expects all visible meshes to implement a .render(renderState) method.
-- The renderState struct passed to each mesh includes:
+- Float comparisons are unstable at high distance.
+- Quantization guarantees uniform precision.
+- Integer sorting is faster and deterministic.
 
-  - scene, lightState, camera.
+**🔁 Transparent Depth Inversion**
 
-- World matrix is reset to identity after rendering to avoid side effects.
+Transparent objects must be sorted back-to-front.
 
-Example
+Instead of separate algorithms or reverse sorts, depth is bitwise inverted:
+
+```js
+quantDepth ^= (-transparent & 0x7FFFFFFF);
+```
+
+Opaque → normal depth
+
+Transparent → inverted depth
+
+**🧮 Final Sort Key Assembly**
+
+```js
+_sortKey = 0;
+_sortKey |= (transparent ? 1 : 0) << 51;      // 1 bit
+_sortKey |= (renderOrder & 0xFF) << 43;       // 8 bits
+_sortKey |= (materialId & 0xFFF) << 31;       // 12 bits
+_sortKey |= quantDepth;                       // 31 bits
+```
+
+The final 52-bit key is stored in:
+
+```
+object.__sortKey
+```
+
+**3️⃣ Sorting (Quicksort)**
+
+The renderer uses an optimized quicksort:
+
+```js
+if (array[j].__sortKey < pivot)
+```
+
+Only one integer comparison is performed per element → very fast.
+
+Opaque/transparent ordering, material sorting, and depth sorting all happen automatically via the key.
+
+**4️⃣ Rendering Objects**
+
+Rendering obeys the sorted order.
+
+Transparent materials:
+
+- disable culling (cull_noculling)
+- may render in double-pass unless forceSinglePass == true
+
+Opaque materials render normally.
+
+`onBeforeRender` and `onAfterRender` callbacks are supported.
+
+**5️⃣ Lighting Aggregation**
+
+Before rendering, the renderer collects all lights into a global light state:
+
+- Ambient light is accumulated.
+- Directional lights are stored in order.
+- Point lights are stored in order.
+- Counts are updated in the global shared arrays.
+- Mesh shaders access this state via UE_RENDERER_LIGHT_STATE.
+
+**6️⃣ Render Flow**
+
+The `render(scene, camera)` method:
+
+- Validates the target view.
+- Updates camera world matrix.
+- Clears internal queues.
+- Collects objects and lights.
+- Sorts renderables.
+- Builds the light state.
+- Renders all objects in order.
+- Resets shader and world matrix.
+- Restores previous GPU state.
+
+## 📘 Example
 ```js
 const scene = new UeScene();
 const camera = new UePerspectiveCamera();

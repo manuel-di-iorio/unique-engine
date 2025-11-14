@@ -9,15 +9,15 @@ A 3D axis-aligned bounding box (AABB) class that defines a cuboid using minimum 
 ## Constructor
 
 ```js
-new UeBox3(min = new UeVector3(infinity, infinity, infinity), max = new UeVector3(-infinity, -infinity, -infinity))
+new UeBox3(min = undefined, max = undefined)
 ```
 
 ### Data parameters
 
-| Name  | Type        | Default                             | Description               |
-| ----- | ----------- | ----------------------------------- | ------------------------- |
-| `min` | `UeVector3` | `(infinity, infinity, infinity)`    | Minimum corner of the box |
-| `max` | `UeVector3` | `(-infinity, -infinity, -infinity)` | Maximum corner of the box |
+| Name  | Type        | Default     | Description               |
+| ----- | ----------- | ----------- | ------------------------- |
+| `min` | `UeVector3` | `undefined` | Minimum corner of the box (defaults to infinity if not provided) |
+| `max` | `UeVector3` | `undefined` | Maximum corner of the box (defaults to -infinity if not provided) |
 
 
 ## Methods

@@ -36,24 +36,65 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 
                 // ** Precompute the sort hash **
 
-                // Check if the material is transparent
+                // --- MATERIAL & TRANSPARENCY -------------------------------------------------
+                // Determine whether the material is transparent.
+                // Transparent objects must be rendered *after* opaque ones,
+                // and sorted back-to-front inside their own group.
                 var _material = object[$ "material"];
                 var _transparent = _material != undefined ? _material.transparent : false;
+
+                // Material ID (12-bit). If the object has no material, use 0xFF
+                // so that "missing material" is sorted consistently and safely.
                 var _materialId = _material != undefined ? _material.id : 0xFF;
 
-                // Get the quantized distance of the object from the camera
+                // --- DEPTH QUANTIZATION (31 bits) -------------------------------------------
+                // We convert the object distance into a normalized value (0..1),
+                // then map it into a 31-bit integer range (0..2^31-1).
+                //
+                // Why quantize instead of using the raw float distance?
+                // - Floating-point precision becomes poor for large distances.
+                // - Sorting with floats introduces instability and z-fighting-like errors.
+                // - By converting to a 31-bit integer, we guarantee a stable and uniform
+                //   precision distribution across the whole range.
                 var _nd = clamp(object.position.distanceToSquared(cameraPos) / 32000, 0, 1);
-                var _quantDepth = floor(_nd * 2147483647); // 31 bit
-                
-                // Invert depth for transparent materials (XOR bitwise)
-                _quantDepth ^= (-_transparent & 0x7FFFFFFF); // 31 bit invertiti se trasparente
+                var _quantDepth = floor(_nd * 0x7FFFFFFF);  // 31-bit integer depth value
 
-                // Combine into a single sort key
+                // --- DEPTH INVERSION FOR TRANSPARENT OBJECTS --------------------------------
+                // Transparent objects must be sorted *back-to-front*, while opaque objects
+                // are sorted *front-to-back*.
+                //
+                // Instead of using two different sort passes, we invert the depth integer
+                // when the object is transparent.
+                //
+                // Bitwise trick:
+                //     _quantDepth ^= mask
+                //
+                // The mask is (0x7FFFFFFF) when the object is transparent,
+                // and (0) when opaque. This works because:
+                //
+                //     -_transparent  →  0xFFFFFFFF when true, 0x00000000 when false
+                //     & 0x7FFFFFFF   →  either full-mask or zero-mask
+                //
+                // Result: all 31 bits of depth are flipped only when needed.
+                _quantDepth ^= (-_transparent & 0x7FFFFFFF);
+
+                // --- SORT KEY COMPOSITION (52 bits) ------------------------------------------
+                // We pack all sorting criteria into a single integer key.
+                // Higher-order bits have higher sorting priority.
+                //
+                // Bit layout (from MSB → LSB):
+                //
+                //  [51]        : 1 bit   → transparency flag (opaque first, transparent later)
+                //  [50..43]    : 8 bits  → renderOrder (explicit user sorting)
+                //  [42..31]    : 12 bits → material ID (minimizes shader/material switches)
+                //  [30..0]     : 31 bits → quantized depth (front-to-back or inverted)
+                //
+                // The final 52-bit key ensures a single fast integer comparison for sorting.
                 var _sortKey = 0;
-                _sortKey |= (_transparent ? 1 : 0) << 51;          // 1 bit trasparenza
-                _sortKey |= (object.renderOrder & 0xFF) << 43;     // 8 bit renderOrder
-                _sortKey |= (_materialId & 0xFFF) << 31;           // 12 bit materialID
-                _sortKey |= _quantDepth;                           // 31 bit depth
+                _sortKey |= (_transparent ? 1 : 0) << 51;      // 1 bit  transparency flag
+                _sortKey |= (object.renderOrder & 0xFF) << 43; // 8 bits renderOrder
+                _sortKey |= (_materialId & 0xFFF) << 31;       // 12 bits material ID
+                _sortKey |= _quantDepth;                       // 31 bits depth
                 object.__sortKey = _sortKey;
 
                 __queue[__queueIdx++] = object;

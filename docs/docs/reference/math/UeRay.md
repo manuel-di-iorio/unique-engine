@@ -9,15 +9,15 @@ Represents a ray in 3D space defined by an origin and a normalized direction vec
 ## Constructor
 
 ```js
-new UeRay(origin = new UeVector3(), direction = new UeVector3(0, 0, -1))
+new UeRay(origin = undefined, direction = undefined)
 ```
 
 ### Data parameters
 
-| Name        | Type        | Default                   | Description                                |
-| ----------- | ----------- | ------------------------- | ------------------------------------------ |
-| `origin`    | `UeVector3` | `new UeVector3()`         | The origin point of the ray                |
-| `direction` | `UeVector3` | `new UeVector3(0, 0, -1)` | The direction of the ray (auto-normalized) |
+| Name        | Type        | Default     | Description                                |
+| ----------- | ----------- | ----------- | ------------------------------------------ |
+| `origin`    | `UeVector3` | `undefined` | The origin point of the ray (defaults to (0, 0, 0) if not provided) |
+| `direction` | `UeVector3` | `undefined` | The direction of the ray (defaults to (0, 0, -1) if not provided, auto-normalized) |
 
 ## Methods
 

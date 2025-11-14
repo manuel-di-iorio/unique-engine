@@ -9,15 +9,15 @@ A 2D axis-aligned bounding box (AABB) class that defines a rectangle using minim
 ## Constructor
 
 ```js
-new UeBox2(min = new UeVector2(infinity, infinity), max = new UeVector2(-infinity, -infinity))
+new UeBox2(min = undefined, max = undefined)
 ```
 
 ### Data parameters
 
-| Name  | Type        | Default                  | Description               |
-| ----- | ----------- | ------------------------ | ------------------------- |
-| `min` | `UeVector2` | `(infinity, infinity)`   | Minimum corner of the box |
-| `max` | `UeVector2` | `(-infinity, -infinity)` | Maximum corner of the box |
+| Name  | Type        | Default     | Description               |
+| ----- | ----------- | ----------- | ------------------------- |
+| `min` | `UeVector2` | `undefined` | Minimum corner of the box (defaults to infinity if not provided) |
+| `max` | `UeVector2` | `undefined` | Maximum corner of the box (defaults to -infinity if not provided) |
 
 
 ## Methods
