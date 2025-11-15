@@ -29,7 +29,6 @@
     {"name":"fTextSmall","order":2,"path":"fonts/fTextSmall/fTextSmall.yy",},
     {"name":"oSceneAssimpLoader","order":5,"path":"objects/oSceneAssimpLoader/oSceneAssimpLoader.yy",},
     {"name":"oSceneEditor","order":1,"path":"objects/oSceneEditor/oSceneEditor.yy",},
-    {"name":"oSceneEditorProjectManager","order":6,"path":"objects/oSceneEditorProjectManager/oSceneEditorProjectManager.yy",},
     {"name":"oSceneLinesRaycasting","order":3,"path":"objects/oSceneLinesRaycasting/oSceneLinesRaycasting.yy",},
     {"name":"oSceneMeshRaycasting","order":4,"path":"objects/oSceneMeshRaycasting/oSceneMeshRaycasting.yy",},
     {"name":"oSceneObjLoader","order":6,"path":"objects/oSceneObjLoader/oSceneObjLoader.yy",},

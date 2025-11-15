@@ -18,8 +18,8 @@ function EditorUiInspector(ui) constructor {
 
     with (ui.Inspector.Close) {
         self.onClick(function() {
-            oSceneEditor.unsetActiveAsset();
-            oSceneEditor.inspector.close();
+            global.EditorState.clearActiveAsset();
+            global.EditorState.inspector.close();
             self.hide();
         });
     }

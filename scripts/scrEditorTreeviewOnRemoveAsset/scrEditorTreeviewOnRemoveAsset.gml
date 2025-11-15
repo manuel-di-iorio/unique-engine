@@ -1,25 +1,25 @@
 //* Remove an asset when clicking the remove icon button on the Treeview */
 function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
   if (isSelected) {
-      oSceneEditor.inspector.close();
+      global.EditorState.inspector.close();
   }
   
   var assetType = treeviewItem.assetType;
   var asset = treeviewItem.asset;
-  var selectedAsset = oSceneEditor.activeAsset;
+  var selectedAsset = global.EditorState.activeAsset;
 
   // If the asset being removed is the currently active asset, detach the associated transform controls
   if (asset != undefined && selectedAsset == asset && (selectedAsset.type == "Mesh" || selectedAsset.type == "ModelInstance")) {
-    oSceneEditor.transformControls.detach();
+    global.EditorState.transformControls.detach();
   }
 
   // Check if the currently selected item is a descendant of the item being removed
   var treeview = treeviewItem.treeview;
   if (treeview.selectedItem != undefined && __editorTreeview_isDescendantOf(treeview.selectedItem, treeviewItem)) {
       treeview.selectedItem = undefined;
-      oSceneEditor.inspector.close();
-      if (oSceneEditor.activeAsset != undefined) {
-          oSceneEditor.unsetActiveAsset();
+      global.EditorState.inspector.close();
+      if (global.EditorState.activeAsset != undefined) {
+          global.EditorState.clearActiveAsset();
       }
   }
 
@@ -27,16 +27,16 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
   if (treeview.selectedItem != undefined && treeview.selectedItem.asset != undefined && asset != undefined) {
       if (__editorTreeview_isAssetDescendantOf(treeview.selectedItem.asset, asset)) {
           treeview.selectedItem = undefined;
-          oSceneEditor.inspector.close();
-          if (oSceneEditor.activeAsset != undefined) {
-              oSceneEditor.unsetActiveAsset();
+          global.EditorState.inspector.close();
+          if (global.EditorState.activeAsset != undefined) {
+              global.EditorState.clearActiveAsset();
           }
       }
   }
 
   // If the asset being removed is currently active, unset it
-  if (asset != undefined && oSceneEditor.activeAsset == asset) {
-      oSceneEditor.unsetActiveAsset();
+  if (asset != undefined && global.EditorState.activeAsset == asset) {
+      global.EditorState.clearActiveAsset();
   }
 
   // If the asset is an instance, remove it from the scene
@@ -82,7 +82,7 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
 
     //           if (oSceneEditor.activeAsset == instance) {
     //               oSceneEditor.unsetActiveAsset();
-    //               oSceneEditor.inspector.close();
+    //               global.EditorState.inspector.close();
     //           }
 
     //           // Remove the instance from its parent

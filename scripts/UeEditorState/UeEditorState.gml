@@ -7,9 +7,6 @@ function UeEditorState() constructor {
     self.activeScene = undefined;       // Currently active scene being edited
     self.activeTool = "view";          // Current tool mode: "view", "move", "rotate", "scale"
     
-    // Project reference
-    self.project = undefined;
-    
     // UI References
     self.inspector = undefined;
     self.treeview = undefined;
@@ -92,18 +89,6 @@ function UeEditorState() constructor {
                 }
             }
         }
-    }
-    
-    /**
-     * Initialize the editor state with required references
-     * @param {Struct} config - Configuration object with references
-     */
-    function init(config) {
-        self.project = config[$ "project"];
-        self.inspector = config[$ "inspector"];
-        self.treeview = config[$ "treeview"];
-        self.transformControls = config[$ "transformControls"];
-        self.objects = config[$ "objects"];
     }
 }
 
