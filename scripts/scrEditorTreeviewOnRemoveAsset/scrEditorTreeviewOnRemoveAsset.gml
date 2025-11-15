@@ -27,6 +27,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     
     // Mesh/Model: rimuovere dal parent o dalla lista globale
     else if (assetType == "Mesh" && asset != undefined) {
+        // Prima rimuovi tutte le istanze di questa mesh dalle scene
+        __editorTreeview_removeMeshInstances(asset, treeviewItem.treeview);
+        
         // Se ha un parent, rimuovilo dal parent
         if (asset.parent != undefined) {
             asset.parent.remove(asset);
@@ -62,6 +65,62 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
 }
 
 // === HELPER FUNCTIONS ===
+
+/**
+ * Rimuove tutte le istanze di una mesh dalle scene
+ */
+function __editorTreeview_removeMeshInstances(targetMesh, treeview) {
+    // Controlla se il modello ha istanze
+    if (targetMesh[$ "instances"] == undefined || targetMesh.instances[$ "list"] == undefined) {
+        return;
+    }
+    
+    var instances = targetMesh.instances.list;
+    
+    // Rimuovi tutte le istanze (itera all'indietro per evitare problemi con l'array che cambia)
+    for (var i = array_length(instances) - 1; i >= 0; i--) {
+        var instance = instances[i];
+        
+        // Trova e rimuovi il treeview item associato all'istanza
+        if (treeview != undefined && treeview[$ "Items"] != undefined) {
+            __editorTreeview_findAndRemoveTreeviewItem(treeview.Items, instance);
+        }
+        
+        // Rimuovi l'istanza dal suo parent (scena)
+        if (instance.parent != undefined) {
+            instance.parent.remove(instance);
+        }
+    }
+    
+    // Pulisci la lista delle istanze
+    targetMesh.instances.list = [];
+}
+
+/**
+ * Trova ricorsivamente un treeview item per un asset e lo rimuove
+ */
+function __editorTreeview_findAndRemoveTreeviewItem(container, asset) {
+    if (container == undefined || container.children == undefined) return false;
+    
+    for (var i = array_length(container.children) - 1; i >= 0; i--) {
+        var child = container.children[i];
+        
+        // Se questo è un TreeviewItem con l'asset corrispondente, rimuovilo
+        if (child[$ "asset"] != undefined && child.asset == asset) {
+            child.destroy();
+            return true;
+        }
+        
+        // Altrimenti cerca ricorsivamente nei suoi figli
+        if (child[$ "Items"] != undefined) {
+            if (__editorTreeview_findAndRemoveTreeviewItem(child.Items, asset)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
 
 /**
  * Rimuove una texture da tutti i material che la usano

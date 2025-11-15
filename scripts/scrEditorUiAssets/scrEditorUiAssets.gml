@@ -41,7 +41,8 @@ function EditorUiAssets(ui) constructor {
     Treeview.enableScrollbar();
         
     Treeview.onItemSelected = editorTreeviewOnItemSelected;
-    Treeview.onAssetDrop = editorTreeviewOnAssetDrop; 
+    Treeview.onAssetDrop = editorTreeviewOnAssetDrop;
+    Treeview.onRemoveItem = editorTreeviewOnRemoveAsset; 
     
     // Store reference for context menu
     var currentMenu = undefined;

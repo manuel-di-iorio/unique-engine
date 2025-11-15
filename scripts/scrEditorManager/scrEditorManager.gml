@@ -18,27 +18,34 @@ function EditorManager() constructor {
      * Set the currently active asset
      * @param {Struct} asset - The asset to set as active
      * @param {Struct} treeviewItem - Optional treeview item reference
+     * @param {Struct} gizmoTarget - Optional target for transform controls (used for instances in scenes)
      */
-    function setActiveAsset(asset, treeviewItem = undefined) {
-        if (self.activeAsset == asset) return;
+    function setActiveAsset(asset, treeviewItem = undefined, gizmoTarget = undefined) {
+        var assetChanged = self.activeAsset != asset;
+        var gizmoTargetChanged = gizmoTarget != undefined;
         
-        // Clear previous objects
-        if (oSceneEditor.sceneManager.objects != undefined) {
+        // Se né l'asset né il gizmo target sono cambiati, esci
+        if (!assetChanged && !gizmoTargetChanged) return;
+        
+        // Clear previous objects solo se l'asset è cambiato
+        if (assetChanged && oSceneEditor.sceneManager.objects != undefined) {
             oSceneEditor.sceneManager.objects.children = [];
         }
         
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
         
-        // Add to objects for rendering
-        if (oSceneEditor.sceneManager.objects != undefined && asset != undefined) {
+        // Add to objects for rendering solo se l'asset è cambiato
+        if (assetChanged && oSceneEditor.sceneManager.objects != undefined && asset != undefined) {
             oSceneEditor.sceneManager.objects.add(asset);
         }
         
         // Attach transform controls if applicable
-        if (oSceneEditor.sceneManager.transformControls != undefined && asset != undefined) {
-            if (asset.type == "Mesh" || asset.type == "ModelInstance") {
-                oSceneEditor.sceneManager.transformControls.attach(asset);
+        // Use gizmoTarget if provided, otherwise use asset
+        var targetForGizmo = gizmoTarget != undefined ? gizmoTarget : asset;
+        if (oSceneEditor.sceneManager.transformControls != undefined && targetForGizmo != undefined) {
+            if (targetForGizmo.type == "Mesh" || targetForGizmo.type == "ModelInstance") {
+                oSceneEditor.sceneManager.transformControls.attach(targetForGizmo);
             } else {
                 oSceneEditor.sceneManager.transformControls.detach();
             }

@@ -70,6 +70,7 @@ if (GM_build_type == "run") {
         projectManager.loaded = true;
       
         ui.Menu.SaveProjectBtn.show();
+        ui.Menu.LoadProjectBtn.setMarginLeft(0);
     }
 }
 

@@ -24,7 +24,7 @@ function EditorUiMenu(ui) constructor {
     ui.Menu.add(ui.Menu.SaveProjectBtn);
 
     // Load Project Button
-    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { padding: 5, marginRight: 20, width: 15, height: 15 });    
+    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { marginLeft: 80, padding: 5, marginRight: 20, width: 15, height: 15 });    
     ui.Menu.add(ui.Menu.LoadProjectBtn);
     
     ui.Menu.LoadProjectBtn.onClick(function() {
@@ -41,6 +41,7 @@ function EditorUiMenu(ui) constructor {
                 delete ui.Center;
 
                 ui.Menu.SaveProjectBtn.show();
+                ui.Menu.LoadProjectBtn.setMarginLeft(0);
 
             } else {
                 ui.Inspector.destroy();

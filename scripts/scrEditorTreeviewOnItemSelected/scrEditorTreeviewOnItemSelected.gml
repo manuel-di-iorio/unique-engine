@@ -18,7 +18,8 @@ function editorTreeviewOnItemSelected(treeviewItem) {
                 scene = scene.parent;
             }
             if (scene != undefined && scene.type == "Scene") {
-                editorManager.setActiveAsset(scene, treeviewItem);
+                // Aggiungi la scena per il rendering, ma passa l'istanza per il gizmo
+                editorManager.setActiveAsset(scene, treeviewItem, treeviewItem.asset);
             }
         break;
 
