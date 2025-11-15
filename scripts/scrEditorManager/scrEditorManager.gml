@@ -53,7 +53,7 @@ function EditorManager() constructor {
         self.selectedTreeviewItem = undefined;
         oSceneEditor.sceneManager.objects.children = [];
         oSceneEditor.sceneManager.transformControls.detach();
-        oSceneEditor.editorManager.inspector.close();
+        self.inspector.close();
     }
     
     /**

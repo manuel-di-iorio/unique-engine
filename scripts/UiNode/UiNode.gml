@@ -33,6 +33,10 @@ function UiNode(style = {}, props = {}) constructor {
     self.pointerEvents = props[$ "pointerEvents"] ?? false;
     self.border = props[$ "border"] ?? false;
     self.visible = props[$ "visible"] ?? true;
+    self.focusable = props[$ "focusable"] ?? false;
+    self.focused = false;
+    self.onFocus = props[$ "onFocus"] ?? undefined;
+    self.onBlur = props[$ "onBlur"] ?? undefined;
     self.children = [];
     self.childrenLength = 0;
     self.layout = {
@@ -141,6 +145,11 @@ function UiNode(style = {}, props = {}) constructor {
     function destroy() {
         gml_pragma("forceinline");
         global.UI.needsUpdate = true;
+        
+        // Unregister from focus manager if focusable
+        if (self.focusable && !self.root) {
+            global.UI.focusManager.unregister(self);
+        }
         
         for (var i = self.childrenLength - 1; i >= 0; i--) {
             self.children[i].destroy();

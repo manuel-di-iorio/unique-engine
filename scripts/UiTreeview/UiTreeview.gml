@@ -269,7 +269,6 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     function __removeItem() {
         if (!show_question("Are you sure you want to delete this asset?")) return;
        
-        log(self.treeview.selectedItem);
         var _isSelected = self.treeview.selectedItem == self;
         if (_isSelected) {
             self.treeview.selectedItem = undefined;

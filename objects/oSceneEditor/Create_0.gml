@@ -38,14 +38,8 @@ uiDebug = false;
 // Setup UI and 3D scene
 scrSetupUI();
 sceneManager = new SceneManager();
-
-// Initialize asset manager
 assetManager = new AssetManager();
-
-// Initialize project manager
 projectManager = new ProjectManager();
-
-// Initialize editor manager
 editorManager = new EditorManager();
 
 
@@ -59,16 +53,13 @@ if (GM_build_type == "run") {
         
         window_set_caption("Unique Engine");
         
-        // Trigger project load UI
         var ui = global.UI.Main;
         
         // Clear welcome screen
         ui.Center.destroy();
         ui.Center = undefined;
         delete ui.Center;
-
         
-        // Create editor UI
         ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
         
         editorManager.treeview = new EditorUiAssets(ui);

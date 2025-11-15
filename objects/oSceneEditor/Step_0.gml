@@ -56,7 +56,7 @@ if (mouse_button != mb_none && sceneManager.orbit.transforming) {
 }
 
 // Only handle shortcuts when no UI element has focus
-var uiHasFocus = global[$ "UiFocusManager"] != undefined && global.UiFocusManager.hasAnyFocus();
+var uiHasFocus = global.UI.focusManager.hasAnyFocus();
 
 if (!uiHasFocus) {
     if (keyboard_check_pressed(ord("Q"))) {

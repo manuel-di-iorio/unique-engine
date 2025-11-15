@@ -176,7 +176,6 @@
     {"id":{"name":"UiCheckbox","path":"scripts/UiCheckbox/UiCheckbox.yy",},},
     {"id":{"name":"UiContextMenu","path":"scripts/UiContextMenu/UiContextMenu.yy",},},
     {"id":{"name":"UiDropdown","path":"scripts/UiDropdown/UiDropdown.yy",},},
-    {"id":{"name":"UiFocusManager","path":"scripts/UiFocusManager/UiFocusManager.yy",},},
     {"id":{"name":"UiInspectorSpriteFilePicker","path":"scripts/UiInspectorSpriteFilePicker/UiInspectorSpriteFilePicker.yy",},},
     {"id":{"name":"UiInspectorTransformXYZ","path":"scripts/UiInspectorTransformXYZ/UiInspectorTransformXYZ.yy",},},
     {"id":{"name":"UiNode","path":"scripts/UiNode/UiNode.yy",},},
