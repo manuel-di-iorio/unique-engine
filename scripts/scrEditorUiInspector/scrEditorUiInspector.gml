@@ -18,8 +18,8 @@ function EditorUiInspector(ui) constructor {
 
     with (ui.Inspector.Close) {
         self.onClick(function() {
-            global.EditorState.clearActiveAsset();
-            global.EditorState.inspector.close();
+            oSceneEditor.editorManager.clearActiveAsset();
+            oSceneEditor.editorManager.inspector.close();
             self.hide();
         });
     }
@@ -63,6 +63,9 @@ function EditorUiInspector(ui) constructor {
                     self.asset.sprite = value;
                     self.asset.__cachedSprite = value;
                     self.asset.__cachedTexture = sprite_get_texture(value, 0);
+                    
+                    // Track the change in asset manager
+                    oSceneEditor.assetManager.editAsset(self.asset);
                 }
             }
         ],
@@ -88,6 +91,9 @@ function EditorUiInspector(ui) constructor {
                 ],
                 onAfterChange: function() {
                     self.asset.build();
+                    
+                    // Track the change in asset manager
+                    oSceneEditor.assetManager.editAsset(self.asset);
                 }
             },
         
@@ -123,6 +129,9 @@ function EditorUiInspector(ui) constructor {
                 onChange: function(value, input) {
                     self.asset.textures[$ "map"] = value;
                     self.asset.build();
+                    
+                    // Track the change in asset manager
+                    oSceneEditor.assetManager.editAsset(self.asset);
                 }
             },
             //{ 
@@ -179,6 +188,9 @@ function EditorUiInspector(ui) constructor {
                 onChange: function(value) {
                     self.asset.lights = value ? 2 : 0;
                     self.asset.build();
+                    
+                    // Track the change in asset manager
+                    oSceneEditor.assetManager.editAsset(self.asset);
                 }
             },
             { 
@@ -333,6 +345,9 @@ function EditorUiInspector(ui) constructor {
                 },
                 onChange: function(value) {
                     self.matrixAutoUpdate = !value;
+                    
+                    // Track the change in asset manager
+                    oSceneEditor.assetManager.editAsset(self.asset);
                 }
            },
            { 
@@ -450,6 +465,9 @@ function EditorUiInspector(ui) constructor {
                 },
                 onChange: function(value) {
                     self.matrixAutoUpdate = !value;
+                    
+                    // Track the change in asset manager
+                    oSceneEditor.assetManager.editAsset(self.asset);
                 }
            },
            { 
@@ -650,6 +668,9 @@ function EditorUiInspector(ui) constructor {
             var onChange = method(scope, onChangeFn != undefined ? onChangeFn : function(value, input) {
                 self.asset[$ self.assetField.field] = value;
                 
+                // Track the change in asset manager
+                oSceneEditor.assetManager.editAsset(self.asset);
+                
                 var _onAfterChange = self.assetField[$ "onAfterChange"];
                 if (_onAfterChange != undefined) {
                     method(self, _onAfterChange)();
@@ -660,7 +681,13 @@ function EditorUiInspector(ui) constructor {
             var valueGetter = valueGetterFn != undefined ? method(scope, valueGetterFn) : undefined;
             
             var onBlurFn = assetField[$ "onBlur"];
-            var onBlur = onBlurFn != undefined ? method(scope, onBlurFn) : undefined;
+            var onBlur = onBlurFn != undefined ? method(scope, function(value, input) {
+                // Call the custom onBlur
+                method(self, self.assetField.onBlur)(value, input);
+                
+                // Track the change in asset manager
+                oSceneEditor.assetManager.editAsset(self.asset);
+            }) : undefined;
             
             switch (assetField.type) {
                 case "label":
@@ -701,6 +728,9 @@ function EditorUiInspector(ui) constructor {
                                 return;
                             }
                             self.asset[$ self.assetField.field] = value;
+                            
+                            // Track the change in asset manager
+                            oSceneEditor.assetManager.editAsset(self.asset);
                         })
                     });
                 break; 

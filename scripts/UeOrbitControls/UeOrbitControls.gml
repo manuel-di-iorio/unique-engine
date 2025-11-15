@@ -52,6 +52,16 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self._deltaElevation = 0;
     self._deltaPan = new UeVector3(0, 0, 0);
 
+    // @todo missing doc
+    function reset() {
+        gml_pragma("forceinline");
+        self.target.set(0, 0, 0); // @todo should set to the actual initial target
+        var dir = camera.position.clone().sub(target);
+        self.radius = camera.position.distanceTo(target);
+        self.azimuth = arctan2(dir.y, dir.x);
+        self.elevation = radius == 0 ? 0 : arcsin(clamp(dir.z / radius, -1, 1));
+    }
+
     // Update the camera orbit. 
     // Optionally takes the mouse coordinates in input, otherwise it will get it automatically from the UeMouse class
     function update(mx = undefined, my = undefined) {

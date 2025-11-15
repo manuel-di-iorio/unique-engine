@@ -9,7 +9,7 @@ if (display_aa >= 8) {
 
 // Maximize the window
 call_later(3, time_source_units_frames, function() {
-    // window_command_run(window_command_maximize);
+    window_command_run(window_command_maximize);
 });
 
 // UI Theme
@@ -34,15 +34,52 @@ global.UI_ASSETS_INSTANCE_ID = 0;
 global.UI_ASSETS_FOLDERS_ID = 0;
 
 uiDebug = false;
-projectLoaded = false;
 
 // Setup UI and 3D scene
 scrSetupUI();
-scrSetup3D();
+sceneManager = new SceneManager();
 
 // Initialize asset manager
-assetManager = new UeAssetManager();
+assetManager = new AssetManager();
 
-// Initialize editor state
-global.EditorState.transformControls = oSceneEditor.transformControls;
-global.EditorState.objects = oSceneEditor.objects;
+// Initialize project manager
+projectManager = new ProjectManager();
+
+// Initialize editor manager
+editorManager = new EditorManager();
+
+
+// MOCKUP: Auto-load project for development
+if (GM_build_type == "run") {
+    var mockupProjectPath = "C:\\Users\\Manuel\\GameMakerProjects\\Unique Engine\\Unique Engine.yyp";
+    if (file_exists(mockupProjectPath)) {
+        global.ProjectPath = mockupProjectPath;
+        global.ProjectLocation = filename_path(mockupProjectPath);
+        global.ProjectFiles = global.ProjectLocation + "datafiles";
+        
+        window_set_caption("Unique Engine");
+        
+        // Trigger project load UI
+        var ui = global.UI.Main;
+        
+        // Clear welcome screen
+        ui.Center.destroy();
+        ui.Center = undefined;
+        delete ui.Center;
+
+        
+        // Create editor UI
+        ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
+        
+        editorManager.treeview = new EditorUiAssets(ui);
+        editorManager.inspector = new EditorUiInspector(ui);
+
+        ui.add(ui.Assets, ui.Scene, ui.Inspector);
+        
+        projectManager.loaded = true;
+      
+        ui.Menu.SaveProjectBtn.show();
+    }
+}
+
+scrUiResizeViewports();

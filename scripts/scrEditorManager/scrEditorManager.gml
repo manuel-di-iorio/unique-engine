@@ -1,7 +1,7 @@
-/// @description Editor State Manager - Centralized state management for the editor
-/// This manages the global state of the editor including active assets, tools, and UI state
+/// @description Editor Manager - Manages editor state including selection, tools, and UI references
+/// This manages the state of the editor including active assets, tools, and UI state
 
-function UeEditorState() constructor {
+function EditorManager() constructor {
     // Active state
     self.activeAsset = undefined;      // Currently selected asset in the treeview
     self.activeScene = undefined;       // Currently active scene being edited
@@ -10,8 +10,6 @@ function UeEditorState() constructor {
     // UI References
     self.inspector = undefined;
     self.treeview = undefined;
-    self.transformControls = undefined;
-    self.objects = undefined;          // Scene objects for preview
     
     // Selection state
     self.selectedTreeviewItem = undefined;
@@ -25,24 +23,24 @@ function UeEditorState() constructor {
         if (self.activeAsset == asset) return;
         
         // Clear previous objects
-        if (self.objects != undefined) {
-            self.objects.children = [];
+        if (oSceneEditor.sceneManager.objects != undefined) {
+            oSceneEditor.sceneManager.objects.children = [];
         }
         
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
         
         // Add to objects for rendering
-        if (self.objects != undefined && asset != undefined) {
-            self.objects.add(asset);
+        if (oSceneEditor.sceneManager.objects != undefined && asset != undefined) {
+            oSceneEditor.sceneManager.objects.add(asset);
         }
         
         // Attach transform controls if applicable
-        if (self.transformControls != undefined && asset != undefined) {
+        if (oSceneEditor.sceneManager.transformControls != undefined && asset != undefined) {
             if (asset.type == "Mesh" || asset.type == "ModelInstance") {
-                self.transformControls.attach(asset);
+                oSceneEditor.sceneManager.transformControls.attach(asset);
             } else {
-                self.transformControls.detach();
+                oSceneEditor.sceneManager.transformControls.detach();
             }
         }
     }
@@ -51,16 +49,11 @@ function UeEditorState() constructor {
      * Clear the active asset selection
      */
     function clearActiveAsset() {
-        if (self.objects != undefined) {
-            self.objects.children = [];
-        }
-        
         self.activeAsset = undefined;
         self.selectedTreeviewItem = undefined;
-        
-        if (self.transformControls != undefined) {
-            self.transformControls.detach();
-        }
+        oSceneEditor.sceneManager.objects.children = [];
+        oSceneEditor.sceneManager.transformControls.detach();
+        oSceneEditor.editorManager.inspector.close();
     }
     
     /**
@@ -72,16 +65,16 @@ function UeEditorState() constructor {
             self.activeTool = tool;
             
             // Update transform controls mode
-            if (self.transformControls != undefined) {
+            if (oSceneEditor.sceneManager.transformControls != undefined) {
                 switch (tool) {
                     case "move":
-                        self.transformControls.setMode("move");
+                        oSceneEditor.sceneManager.transformControls.setMode("move");
                         break;
                     case "rotate":
-                        self.transformControls.setMode("rotate");
+                        oSceneEditor.sceneManager.transformControls.setMode("rotate");
                         break;
                     case "scale":
-                        self.transformControls.setMode("scale");
+                        oSceneEditor.sceneManager.transformControls.setMode("scale");
                         break;
                     case "view":
                         // In view mode, transform controls should be in translate but not actively used
@@ -90,7 +83,8 @@ function UeEditorState() constructor {
             }
         }
     }
-}
 
-// Global editor state instance
-global.EditorState = new UeEditorState();
+    function clear() {
+        self.clearActiveAsset();
+    }
+}

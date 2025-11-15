@@ -10,27 +10,27 @@ if ((winW != winWNew || winH != winHNew) && winWNew != 0 && winHNew != 0) {
 ui.update();
 
 // Exit early if project not loaded
-if (!projectLoaded) exit;
+if (!projectManager.loaded) exit;
 
 var winMouseX = window_mouse_get_x();
 var winMouseY = window_mouse_get_y();
 
 // Update transform controls based on current tool
-var currentTool = global.EditorState.activeTool;
+var currentTool = editorManager.activeTool;
 switch (currentTool) {
     case "view": 
-        transformControls.updateGizmo();
-        orbit.update(winMouseX, winMouseY);
+        sceneManager.transformControls.updateGizmo();
+        sceneManager.orbit.update(winMouseX, winMouseY);
     break;
     case "move":
     case "rotate":
     case "scale":
-        transformControls.update();
+        sceneManager.transformControls.update();
     break;
 }
 
 // Wrap the mouse coords when out of bounds
-if (mouse_button != mb_none && orbit.transforming) {
+if (mouse_button != mb_none && sceneManager.orbit.transforming) {
     var fixMousePos = false;
 
     if (winMouseX < 1) {
@@ -50,8 +50,8 @@ if (mouse_button != mb_none && orbit.transforming) {
     if (fixMousePos) {
         window_mouse_set(winMouseX, winMouseY); 
         
-        orbit._prevMouseX = winMouseX;
-        orbit._prevMouseY = winMouseY;
+        sceneManager.orbit._prevMouseX = winMouseX;
+        sceneManager.orbit._prevMouseY = winMouseY;
     }
 }
 
@@ -60,19 +60,19 @@ var uiHasFocus = global[$ "UiFocusManager"] != undefined && global.UiFocusManage
 
 if (!uiHasFocus) {
     if (keyboard_check_pressed(ord("Q"))) {
-        global.EditorState.setTool("view");
+        editorManager.setTool("view");
         tool = "view";
     }
     if (keyboard_check_pressed(ord("W"))) {
-        global.EditorState.setTool("move");
+        editorManager.setTool("move");
         tool = "move";
     }
     if (keyboard_check_pressed(ord("E"))) {
-        global.EditorState.setTool("rotate");
+        editorManager.setTool("rotate");
         tool = "rotate";
     }
     if (keyboard_check_pressed(ord("R"))) {
-        global.EditorState.setTool("scale");
+        editorManager.setTool("scale");
         tool = "scale";
     }
 }

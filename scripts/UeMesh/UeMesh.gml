@@ -100,7 +100,6 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
 
     /**
      * Creates an instance with proper master-instance relationship (Unity Prefab-style)
-     * @todo missing doc
      */
     function createInstance() {
         gml_pragma("forceinline");
