@@ -19,7 +19,7 @@ function EditorUiInspector(ui) constructor {
     with (ui.Inspector.Close) {
         self.onClick(function() {
             oSceneEditor.editorManager.clearActiveAsset();
-            oSceneEditor.editorManager.inspector.close();
+            //oSceneEditor.editorManager.inspector.close();
             self.hide();
         });
     }
@@ -631,6 +631,15 @@ function EditorUiInspector(ui) constructor {
                 label: "Name", 
                 type: "text"
            }, 
+        ],
+        
+        "Folder": [
+           { 
+                id: "name",
+                field: "name",
+                label: "Name", 
+                type: "text"
+           }, 
         ]
     }
     
@@ -727,6 +736,15 @@ function EditorUiInspector(ui) constructor {
                                 input.value = self.asset[$ self.assetField.field];
                                 return;
                             }
+                            
+                            // Special validation for name field
+                            if (self.assetField.field == "name") {
+                                var inspector = oSceneEditor.editorManager.inspector;
+                                if (!inspector.__validateAssetName(self.asset, value, input)) {
+                                    return;
+                                }
+                            }
+                            
                             self.asset[$ self.assetField.field] = value;
                             
                             // Track the change in asset manager
@@ -778,5 +796,66 @@ function EditorUiInspector(ui) constructor {
     
     function close() {
         self.ui.Inspector.Content.Items.destroyChildren();
+    }
+    
+    /**
+     * Validate asset name changes
+     * @param {Struct} asset - The asset being renamed
+     * @param {String} newName - The new name to validate
+     * @param {Struct} input - The textbox input for error recovery
+     * @return {Bool} True if valid, false otherwise
+     */
+    function __validateAssetName(asset, newName, input) {
+        // Check for invalid character /
+        if (string_pos("/", newName) > 0) {
+            show_message("Invalid character '/'. Please use a different name.");
+            input.value = asset.name;
+            return false;
+        }
+        
+        // Check for duplicate names
+        var assetManager = oSceneEditor.assetManager;
+        var isDuplicate = false;
+        
+        if (asset.type == "Folder") {
+            // For folders, check only same level (siblings)
+            var siblings = [];
+            
+            if (asset[$ "parent"] != undefined) {
+                // Has parent: check parent's children
+                siblings = asset.parent.children;
+            } else {
+                // Root level: check root folders
+                siblings = assetManager.folders;
+            }
+            
+            for (var i = 0; i < array_length(siblings); i++) {
+                var sibling = siblings[i];
+                if (sibling != asset && sibling.name == newName) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+        } else {
+            // For other assets, check globally by name lookup
+            var existing = assetManager.getAssetByName(newName);
+            if (existing != undefined && existing != asset) {
+                isDuplicate = true;
+            }
+        }
+        
+        if (isDuplicate) {
+            show_message("An asset with this name already exists. Please use a different name.");
+            input.value = asset.name;
+            return false;
+        }
+        
+        // Update name in lookup map
+        if (assetManager.assetsByName[$ asset.name] != undefined) {
+            delete assetManager.assetsByName[$ asset.name];
+        }
+        assetManager.assetsByName[$ newName] = asset;
+        
+        return true;
     }
 }

@@ -1,0 +1,27 @@
+{
+  "spriteBuffSize":0.0,
+  "filter":true,
+  "generateMipmaps":true,
+  "repeat":[
+    1.0,
+    1.0
+  ],
+  "rotation":0.0,
+  "offset":[
+    0.0,
+    {
+      "x":0.0,
+      "y":0.0
+    }
+  ],
+  "flipX":false,
+  "flipY":false,
+  "wrapS":1,
+  "wrapT":1,
+  "userData":{
+  },
+  "center":[
+    0.0,
+    0.0
+  ]
+}

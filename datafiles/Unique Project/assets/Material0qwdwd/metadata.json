@@ -1,0 +1,24 @@
+{
+  "blendDstAlpha":6.0,
+  "uniforms":{
+  },
+  "shader":"sh_ue_basic",
+  "depthTest":true,
+  "forceSinglePass":false,
+  "side":2.0,
+  "textures":{
+  },
+  "opacity":1.0,
+  "transparent":false,
+  "lights":2.0,
+  "depthWrite":true,
+  "depthFunc":4.0,
+  "alphaTest":0.0,
+  "colorWrite":true,
+  "blending":false,
+  "blendEquation":1.0,
+  "blendEquationAlpha":1.0,
+  "blendSrc":5.0,
+  "blendDst":6.0,
+  "blendSrcAlpha":2.0
+}

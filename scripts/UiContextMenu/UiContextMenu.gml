@@ -31,10 +31,11 @@ function UiContextMenu(x, y, items) constructor {
         self.Menu = new UiNode({ 
             name: "UiContextMenu", 
             position: "absolute", 
-            padding: 5,
+            paddingHorizontal: 10,
+            paddingVertical: 6,
             left: _x,
             top: _y,
-            minWidth: 180
+            minWidth: 160
         });
         
         with (self.Menu) {
@@ -108,6 +109,7 @@ function UiContextMenu(x, y, items) constructor {
                     name: "UiContextMenu.Item",
                     height: 28,
                     paddingHorizontal: 8,
+                    marginBottom: 2,
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 8
@@ -145,7 +147,7 @@ function UiContextMenu(x, y, items) constructor {
                             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
                         }
                         
-                        var xx = self.x1 + 8;
+                        var xx = self.x1 + 15;
                         var yy = mean(self.y1, self.y2);
                         
                         // Draw icon

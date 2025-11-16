@@ -59,6 +59,14 @@ if (mouse_button != mb_none && sceneManager.orbit.transforming) {
 var uiHasFocus = global.UI.focusManager.hasAnyFocus();
 
 if (!uiHasFocus) {
+    // Save project
+    if (keyboard_check(vk_control) && keyboard_check_pressed(ord("S"))) {
+        if (projectManager.hasUnsavedChanges) {
+            projectManager.save();
+        }
+    }
+    
+    // Tool shortcuts
     if (keyboard_check_pressed(ord("Q"))) {
         editorManager.setTool("view");
         tool = "view";

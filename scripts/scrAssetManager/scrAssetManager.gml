@@ -56,6 +56,9 @@ function AssetManager() constructor {
         if (asset[$ "name"] != undefined) {
             self.assetsByName[$ asset.name] = asset;
         }
+        
+        // Track creation
+        __trackChange("create", asset);
     }
     
     /**
@@ -102,6 +105,9 @@ function AssetManager() constructor {
         if (asset[$ "instances"] != undefined) {
             asset.instances.clear();
         }
+        
+        // Track removal
+        __trackChange("delete", asset);
     }
     
     /**
@@ -159,8 +165,56 @@ function AssetManager() constructor {
      * @param {Struct} asset - The asset that was modified
      */
     function editAsset(asset) {
-        oSceneEditor.projectManager.hasUnsavedChanges = true;
-        array_push(oSceneEditor.projectManager.changes, asset);
+        __trackChange("edit", asset);
+    }
+    
+    /**
+     * Internal: Track a change to an asset
+     * @param {String} action - "create", "edit", "delete"
+     * @param {Struct} asset - The asset that was modified
+     */
+    function __trackChange(action, asset) {
+        var projectManager = oSceneEditor.projectManager;
+        
+        var uuid = asset.uuid;
+        var existing = projectManager.changes[$ uuid];
+        
+        // If asset already has a change tracked
+        if (existing != undefined) {
+            // create -> delete = no change needed (asset never existed in saved state)
+            if (existing.action == "create" && action == "delete") {
+                delete projectManager.changes[$ uuid];
+                // Check if there are still other changes
+                if (variable_struct_names_count(projectManager.changes) == 0) {
+                    projectManager.markAsSaved();
+                }
+                return;
+            }
+            
+            // create -> edit = still create (new asset with edits)
+            if (existing.action == "create" && action == "edit") {
+                return; // Keep the create
+            }
+            
+            // edit -> delete = delete (override edit with delete)
+            if (existing.action == "edit" && action == "delete") {
+                existing.action = "delete";
+                projectManager.markAsUnsaved();
+                return;
+            }
+            
+            // edit -> edit = keep edit (already tracked)
+            if (existing.action == "edit" && action == "edit") {
+                return; // Already tracked
+            }
+        } else {
+            // New change
+            projectManager.changes[$ uuid] = {
+                action: action,
+                asset: asset
+            };
+            projectManager.markAsUnsaved();
+        }
     }
     
     /**

@@ -3,7 +3,7 @@ function editorTreeviewOnModelImport(modelAsset) {
     if (path == "") return;
 
     var ui = oSceneEditor.ui;
-    var assimp = oSceneEditor.assimp;
+    var assimp = oSceneEditor.sceneManager.assimp;
     var treeview = ui.Assets.Treeview;
 
     // Load the model
@@ -26,6 +26,12 @@ function editorTreeviewOnModelImport(modelAsset) {
     }
     
     // Create a folder for this model's assets
+    var folder = {
+        type: "Folder",
+        name: modelName,
+        children: []
+    };
+    
     var folderItem = new UiTreeviewItem({ 
         name: "UiTreeview.Item", 
         paddingVertical: 2.5 
@@ -34,9 +40,13 @@ function editorTreeviewOnModelImport(modelAsset) {
         name: modelName,
         assetType: "Folder",
         type: "Folder",
-        icon: sprUiFolder
+        icon: sprUiFolder,
+        asset: folder
     });
     treeview.Items.add(folderItem);
+    
+    // Add folder to AssetManager
+    oSceneEditor.assetManager.addAsset("folder", folder);
     
     // 1. Add textures to project and treeview (inside folder)
     for (var i = 0; i < array_length(textures); i++) {
@@ -52,6 +62,9 @@ function editorTreeviewOnModelImport(modelAsset) {
         
         // Add to asset manager
         oSceneEditor.assetManager.addAsset("texture", tex);
+        
+        // Add to folder children
+        array_push(folder.children, tex);
         
         // Add to treeview inside folder
         var textureTreeviewItem = new UiTreeviewItem({
@@ -82,6 +95,9 @@ function editorTreeviewOnModelImport(modelAsset) {
         // Add to asset manager
         oSceneEditor.assetManager.addAsset("material", mat);
         
+        // Add to folder children
+        array_push(folder.children, mat);
+        
         // Add to treeview inside folder
         var materialTreeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
@@ -110,6 +126,9 @@ function editorTreeviewOnModelImport(modelAsset) {
     
     // Add to asset manager
     oSceneEditor.assetManager.addAsset("model", model);
+    
+    // Add to folder children
+    array_push(folder.children, model);
     
     // Create main model treeview item inside folder
     var modelTreeviewItem = new UiTreeviewItem({

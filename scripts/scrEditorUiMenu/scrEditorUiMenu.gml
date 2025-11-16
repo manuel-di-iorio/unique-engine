@@ -42,24 +42,16 @@ function EditorUiMenu(ui) constructor {
 
                 ui.Menu.SaveProjectBtn.show();
                 ui.Menu.LoadProjectBtn.setMarginLeft(0);
+            
+                // Resize viewport after UI is created
+                scrUiResizeViewports();
 
             } else {
-                ui.Inspector.destroy();
-                ui.Assets.destroy();
-                ui.Scene.destroy();
-                // ui.SceneTools.destroy();
                 projectManager.clearProject();
             }
             
-            // Store project path
-            global.ProjectPath = selectedFile;
-            global.ProjectLocation = filename_path(selectedFile);
-            global.ProjectFiles = global.ProjectLocation + "datafiles";
-            
-            var projectName = filename_name(selectedFile);
-            projectName = string_copy(projectName, 1, string_length(projectName) - 4);
-            
-            window_set_caption(projectName + " - Unique Engine");
+            // Store project paths in ProjectManager
+            projectManager.setProjectPath(selectedFile);            
             
             // Recreate the UI elements
             ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
@@ -73,8 +65,8 @@ function EditorUiMenu(ui) constructor {
 
             projectManager.loaded = true;
             
-            // Resize viewport after UI is created
-            scrUiResizeViewports();
+            // Load project assets
+            projectManager.load();
         }
     });
 }

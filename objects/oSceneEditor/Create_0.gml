@@ -44,34 +44,30 @@ editorManager = new EditorManager();
 
 
 // MOCKUP: Auto-load project for development
-if (GM_build_type == "run") {
-    var mockupProjectPath = "C:\\Users\\Manuel\\GameMakerProjects\\Unique Engine\\Unique Engine.yyp";
-    if (file_exists(mockupProjectPath)) {
-        global.ProjectPath = mockupProjectPath;
-        global.ProjectLocation = filename_path(mockupProjectPath);
-        global.ProjectFiles = global.ProjectLocation + "datafiles";
+// if (GM_build_type == "run") {
+//     var mockupProjectPath = "C:\\Users\\Manuel\\GameMakerProjects\\Unique Engine\\Unique Engine.yyp";
+//     if (file_exists(mockupProjectPath)) {
+//         projectManager.setProjectPath(mockupProjectPath);
         
-        window_set_caption("Unique Engine");
+//         var ui = global.UI.Main;
         
-        var ui = global.UI.Main;
+//         // Clear welcome screen
+//         ui.Center.destroy();
+//         ui.Center = undefined;
+//         delete ui.Center;
         
-        // Clear welcome screen
-        ui.Center.destroy();
-        ui.Center = undefined;
-        delete ui.Center;
+//         ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
         
-        ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
-        
-        editorManager.treeview = new EditorUiAssets(ui);
-        editorManager.inspector = new EditorUiInspector(ui);
+//         editorManager.treeview = new EditorUiAssets(ui);
+//         editorManager.inspector = new EditorUiInspector(ui);
 
-        ui.add(ui.Assets, ui.Scene, ui.Inspector);
+//         ui.add(ui.Assets, ui.Scene, ui.Inspector);
         
-        projectManager.loaded = true;
+//         projectManager.loaded = true;
       
-        ui.Menu.SaveProjectBtn.show();
-        ui.Menu.LoadProjectBtn.setMarginLeft(0);
-    }
-}
+//         ui.Menu.SaveProjectBtn.show();
+//         ui.Menu.LoadProjectBtn.setMarginLeft(0);
+//     }
+// }
 
 scrUiResizeViewports();

@@ -42,7 +42,6 @@
     {"name":"scrDemoDrawSelector","order":5,"path":"scripts/scrDemoDrawSelector/scrDemoDrawSelector.yy",},
     {"name":"scrEditorUiAssets","order":1,"path":"scripts/scrEditorUiAssets/scrEditorUiAssets.yy",},
     {"name":"scrEditorUiInspector","order":2,"path":"scripts/scrEditorUiInspector/scrEditorUiInspector.yy",},
-    {"name":"scrSetup3D","order":1,"path":"scripts/scrSetup3D/scrSetup3D.yy",},
     {"name":"UeArrowGeometry","order":9,"path":"scripts/UeArrowGeometry/UeArrowGeometry.yy",},
     {"name":"UeArrowHelper","order":1,"path":"scripts/UeArrowHelper/UeArrowHelper.yy",},
     {"name":"UeAssimpLoader","order":2,"path":"scripts/UeAssimpLoader/UeAssimpLoader.yy",},

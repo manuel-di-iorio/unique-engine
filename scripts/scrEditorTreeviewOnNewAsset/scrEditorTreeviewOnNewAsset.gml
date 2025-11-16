@@ -13,23 +13,42 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       var treeview = global.UI.Main.Assets.Treeview;
       var folderId = global.UI_ASSETS_FOLDERS_ID++;
       
+      // Create folder asset object
+      var folder = {
+          type: "Folder",
+          name: "Folder" + string(folderId),
+          uuid: ueUuid(),
+          children: []
+      };
+      
       var folderItem = new UiTreeviewItem({ 
           name: "UiTreeview.Item", 
           paddingVertical: 2.5 
       }, {
           treeview,
-          name: "Folder" + string(folderId),
+          name: folder.name,
           assetType: "Folder",
           type: "Folder",
-          icon: sprUiFolder
+          icon: sprUiFolder,
+          asset: folder
       });
       
       // Add to root or parent
+      var parentAsset = undefined;
       if (treeviewItem != undefined) {
+          if (treeviewItem.asset != undefined) {
+              parentAsset = treeviewItem.asset;
+              if (parentAsset[$ "children"] != undefined) {
+                  array_push(parentAsset.children, folder);
+              }
+          }
           treeviewItem.addChild(folderItem);
       } else {
           treeview.Items.add(folderItem);
       }
+      
+      // Add to AssetManager
+      oSceneEditor.assetManager.addAsset("folder", folder, parentAsset);
       
       treeview.__onItemSelected(folderItem);
       return;
@@ -118,7 +137,16 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   var parentAsset = undefined;
   if (treeviewItem != undefined && treeviewItem.asset != undefined) {
       parentAsset = treeviewItem.asset;
-      parentAsset.add(asset);
+      
+      // Check if parent is a Folder (plain struct) or Object3D (has add method)
+      if (parentAsset.type == "Folder") {
+          // Folders use plain array for children
+          array_push(parentAsset.children, asset);
+      } else {
+          // Objects use the add() method
+          parentAsset.add(asset);
+      }
+      
       treeviewItem.addChild(newTreeviewItem);
   } else {
       // Add to root

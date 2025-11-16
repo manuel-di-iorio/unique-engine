@@ -252,7 +252,9 @@ function UeMaterial(data = {}) constructor {
         gml_pragma("forceinline");
         return {
             uniforms,
-            textures: ueStructMap(textures, function(name, texture) { return texture.uuid }),
+            textures: ueStructMap(textures, function(name, texture) { 
+                return texture != undefined ? texture.uuid : undefined;
+            }),
             shader: shader_get_name(shader),
             transparent,
             opacity,
