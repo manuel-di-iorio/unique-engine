@@ -61,8 +61,11 @@ function editorTreeviewOnModelImport(modelAsset) {
             tex.name = "Texture" + string(textureId);
         }
         
-        // Add to asset manager
-        oSceneEditor.assetManager.addAsset("texture", tex);
+        // Set parent folder
+        tex.parent = folder;
+        
+        // Add to asset manager (with folder as parent)
+        oSceneEditor.assetManager.addAsset("Texture", tex, folder);
         
         // Add to folder children
         array_push(folder.children, tex);
@@ -93,8 +96,11 @@ function editorTreeviewOnModelImport(modelAsset) {
             mat.name = "Material" + string(materialId);
         }
         
-        // Add to asset manager
-        oSceneEditor.assetManager.addAsset("material", mat);
+        // Set parent folder
+        mat.parent = folder;
+        
+        // Add to asset manager (with folder as parent)
+        oSceneEditor.assetManager.addAsset("Material", mat, folder);
         
         // Add to folder children
         array_push(folder.children, mat);
@@ -125,8 +131,11 @@ function editorTreeviewOnModelImport(modelAsset) {
         node.__rotationEuler = new UeEuler();
     });
     
-    // Add to asset manager
-    oSceneEditor.assetManager.addAsset("model", model);
+    // Set parent folder
+    model.parent = folder;
+    
+    // Add to asset manager (with folder as parent)
+    oSceneEditor.assetManager.addAsset("Model", model, folder);
     
     // Add to folder children
     array_push(folder.children, model);

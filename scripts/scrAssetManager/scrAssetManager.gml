@@ -23,24 +23,31 @@ function AssetManager() constructor {
         // Add to the appropriate array if it's a root asset
         if (parent == undefined) {
             switch (type) {
+                case "Texture":
                 case "texture":
                     array_push(self.textures, asset);
                     break;
+                case "Material":
                 case "material":
                     array_push(self.materials, asset);
                     break;
+                case "Mesh":
                 case "model":
                     array_push(self.models, asset);
                     break;
+                case "Scene":
                 case "scene":
                     array_push(self.scenes, asset);
                     break;
+                case "Light":
                 case "light":
                     array_push(self.lights, asset);
                     break;
+                case "Camera":
                 case "camera":
                     array_push(self.cameras, asset);
                     break;
+                case "Folder":
                 case "folder":
                     array_push(self.folders, asset);
                     break;
@@ -70,12 +77,19 @@ function AssetManager() constructor {
         var list = undefined;
         
         switch (type) {
+            case "Texture":
             case "texture": list = self.textures; break;
+            case "Material":
             case "material": list = self.materials; break;
+            case "Mesh":
             case "model": list = self.models; break;
+            case "Scene":
             case "scene": list = self.scenes; break;
+            case "Light":
             case "light": list = self.lights; break;
+            case "Camera":
             case "camera": list = self.cameras; break;
+            case "Folder":
             case "folder": list = self.folders; break;
         }
         
@@ -134,19 +148,65 @@ function AssetManager() constructor {
      * @return {Array} Array of assets
      */
     function getAssetsByType(type) {
-        var typeKey = string_lower(type);
-        if (typeKey == "mesh" || typeKey == "modelinstance") typeKey = "model";
-        
-        switch (typeKey) {
-            case "texture": return self.textures;
-            case "material": return self.materials;
-            case "model": return self.models;
-            case "scene": return self.scenes;
-            case "light": return self.lights;
-            case "camera": return self.cameras;
-            case "folder": return self.folders;
+        switch (type) {
+            case "Texture": return self.textures;
+            case "Material": return self.materials;
+            case "Mesh":
+            case "ModelInstance": return self.models;
+            case "Scene": return self.scenes;
+            case "Light": return self.lights;
+            case "Camera": return self.cameras;
+            case "Folder": return self.folders;
         }
         return [];
+    }
+    
+    /**
+     * Get all assets of a type recursively (including those in folders)
+     * @param {String} type - Asset type (texture, material, model, etc)
+     * @returns {Array} All assets of the specified type
+     */
+    function getAllAssetsByType(type) {
+        var result = [];
+        var rootAssets = getAssetsByType(type);
+        
+        // Add root assets
+        for (var i = 0; i < array_length(rootAssets); i++) {
+            array_push(result, rootAssets[i]);
+        }
+        
+        // Recursively collect from folders
+        __collectAssetsFromFolders(self.folders, type, result);
+        
+        return result;
+    }
+    
+    /**
+     * Helper: recursively collect assets from folders
+     */
+    function __collectAssetsFromFolders(folders, type, result) {
+        for (var i = 0; i < array_length(folders); i++) {
+            var folder = folders[i];
+            
+            if (folder[$ "children"] != undefined) {
+                var childFolders = [];
+                
+                for (var j = 0; j < array_length(folder.children); j++) {
+                    var child = folder.children[j];
+                    
+                    if (child[$ "type"] == "Folder") {
+                        array_push(childFolders, child);
+                    } else if (child[$ "type"] == type) {
+                        array_push(result, child);
+                    }
+                }
+                
+                // Recurse into subfolders
+                if (array_length(childFolders) > 0) {
+                    __collectAssetsFromFolders(childFolders, type, result);
+                }
+            }
+        }
     }
     
     /**

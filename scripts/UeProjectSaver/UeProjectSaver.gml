@@ -8,14 +8,10 @@ function UeProjectSaver() constructor {
      */
     function save(projectManager) {
         var projectDir = projectManager.projectDatafiles + "/Unique Project/";
-        var assetsDir = projectDir + "assets/";
         
         // Ensure directories exist
         if (!directory_exists(projectDir)) {
             directory_create(projectDir);
-        }
-        if (!directory_exists(assetsDir)) {
-            directory_create(assetsDir);
         }
         
         // Check if project files exist
@@ -25,10 +21,10 @@ function UeProjectSaver() constructor {
         
         if (isFirstSave) {
             // First save: save everything
-            __saveAll(projectManager, assetsJsonPath, projectJsonPath, assetsDir);
+            __saveAll(projectManager, assetsJsonPath, projectJsonPath, projectDir);
         } else {
             // Incremental save: save only changes
-            __saveIncremental(projectManager, assetsJsonPath, projectJsonPath, assetsDir);
+            __saveIncremental(projectManager, assetsJsonPath, projectJsonPath, projectDir);
         }
         
         projectManager.markAsSaved();
@@ -37,7 +33,7 @@ function UeProjectSaver() constructor {
     /**
      * Save all assets (first save)
      */
-    function __saveAll(projectManager, assetsJsonPath, projectJsonPath, assetsDir) {
+    function __saveAll(projectManager, assetsJsonPath, projectJsonPath, projectDir) {
         // Build project data
         var data = __buildProjectData();
         
@@ -51,15 +47,15 @@ function UeProjectSaver() constructor {
         });
         
         // Save individual asset files
-        __saveAllAssets(assetsDir);
+        __saveAllAssets(projectDir);
     }
     
     /**
      * Save only changed assets (incremental save)
      */
-    function __saveIncremental(projectManager, assetsJsonPath, projectJsonPath, assetsDir) {
+    function __saveIncremental(projectManager, assetsJsonPath, projectJsonPath, projectDir) {
         // Save changed assets
-        __saveChangedAssets(projectManager.changes, assetsDir);
+        __saveChangedAssets(projectManager.changes, projectDir);
         
         // Rebuild and save project data
         var data = __buildProjectData();
@@ -80,7 +76,40 @@ function UeProjectSaver() constructor {
       var hierarchy = [];
       __buildHierarchyRecursive(assetManager.folders, undefined, hierarchy);
       
-      // Build assets lists (only root-level assets)
+      // Add root-level assets (not in folders) to hierarchy
+      for (var i = 0; i < array_length(assetManager.textures); i++) {
+          var parent = assetManager.textures[i][$ "parent"];
+          // Skip if parent is a Folder
+          if (parent != undefined && parent[$ "type"] == "Folder") continue;
+          
+          array_push(hierarchy, { key: "txr/" + assetManager.textures[i].name });
+      }
+      
+      for (var i = 0; i < array_length(assetManager.materials); i++) {
+          var parent = assetManager.materials[i][$ "parent"];
+          // Skip if parent is a Folder
+          if (parent != undefined && parent[$ "type"] == "Folder") continue;
+          
+          array_push(hierarchy, { key: "mtl/" + assetManager.materials[i].name });
+      }
+      
+      for (var i = 0; i < array_length(assetManager.models); i++) {
+          var parent = assetManager.models[i][$ "parent"];
+          // Skip if parent is a Folder
+          if (parent != undefined && parent[$ "type"] == "Folder") continue;
+          
+          array_push(hierarchy, { key: "msh/" + assetManager.models[i].name });
+      }
+      
+      for (var i = 0; i < array_length(assetManager.scenes); i++) {
+          var parent = assetManager.scenes[i][$ "parent"];
+          // Skip if parent is a Folder
+          if (parent != undefined && parent[$ "type"] == "Folder") continue;
+          
+          array_push(hierarchy, { key: "scn/" + assetManager.scenes[i].name });
+      }
+      
+      // Build assets lists (all assets) using UUIDs
       var assets = {
           textures: [],
           materials: [],
@@ -89,19 +118,27 @@ function UeProjectSaver() constructor {
       };
       
       for (var i = 0; i < array_length(assetManager.textures); i++) {
-          array_push(assets.textures, assetManager.textures[i].name);
+          array_push(assets.textures, assetManager.textures[i].uuid);
       }
       
       for (var i = 0; i < array_length(assetManager.materials); i++) {
-          array_push(assets.materials, assetManager.materials[i].name);
+          array_push(assets.materials, assetManager.materials[i].uuid);
       }
       
       for (var i = 0; i < array_length(assetManager.models); i++) {
-          array_push(assets.models, assetManager.models[i].name);
+          var model = assetManager.models[i];
+          // Skip submeshes (children of other meshes) and instances (children of scenes)
+          if (model[$ "parent"] != undefined) {
+              var parentType = model.parent[$ "type"];
+              if (parentType == "Mesh" || parentType == "Scene") {
+                  continue;
+              }
+          }
+          array_push(assets.models, model.uuid);
       }
       
       for (var i = 0; i < array_length(assetManager.scenes); i++) {
-          array_push(assets.scenes, assetManager.scenes[i].name);
+          array_push(assets.scenes, assetManager.scenes[i].uuid);
       }
       
       return {
@@ -119,8 +156,7 @@ function UeProjectSaver() constructor {
           var folder = folders[i];
           
           var entry = {
-              type: "FLD",
-              name: folder.name,
+              key: "fld/" + folder.name,
               children: []
           };
           
@@ -134,15 +170,13 @@ function UeProjectSaver() constructor {
                   if (child[$ "type"] == "Folder") {
                       array_push(childFolders, child);
                   } else {
-                      // Add non-folder assets (only textures and materials)
-                      var childType = child[$ "type"];
-                      if (childType == "Texture" || childType == "Material") {
-                          var assetEntry = {
-                              type: __getTypePrefix(childType),
-                              name: child.name
-                          };
-                          array_push(entry.children, assetEntry);
-                      }
+                      // Add all non-folder assets to hierarchy as { key: "type/name" }
+                      // Mesh and Scene children are saved in their metadata files
+                      var typePrefix = __getTypePrefix(child[$ "type"]);
+                      var assetEntry = {
+                          key: typePrefix + "/" + child.name
+                      };
+                      array_push(entry.children, assetEntry);
                   }
               }
               
@@ -179,7 +213,7 @@ function UeProjectSaver() constructor {
     /**
      * Save only changed assets
      */
-    function __saveChangedAssets(changes, assetsDir) {
+    function __saveChangedAssets(changes, projectDir) {
       var uuids = variable_struct_get_names(changes);
       
       for (var i = 0; i < array_length(uuids); i++) {
@@ -193,16 +227,16 @@ function UeProjectSaver() constructor {
               case "edit":
                   switch (asset.type) {
                       case "Texture":
-                          __saveTexture(asset, assetsDir);
+                          __saveTexture(asset, projectDir);
                           break;
                       case "Material":
-                          __saveMaterial(asset, assetsDir);
+                          __saveMaterial(asset, projectDir);
                           break;
                       case "Mesh":
-                          __saveMesh(asset, assetsDir);
+                          __saveMesh(asset, projectDir);
                           break;
                       case "Scene":
-                          __saveScene(asset, assetsDir);
+                          __saveScene(asset, projectDir);
                           break;
                       case "Folder":
                           // Folders don't have files
@@ -211,9 +245,18 @@ function UeProjectSaver() constructor {
                   break;
                   
               case "delete":
-                  var assetDir = assetsDir + asset.name + "/";
-                  if (directory_exists(assetDir)) {
-                      directory_destroy(assetDir);
+                  var typeFolder = "";
+                  switch (asset.type) {
+                      case "Texture": typeFolder = "textures/"; break;
+                      case "Material": typeFolder = "materials/"; break;
+                      case "Mesh": typeFolder = "meshes/"; break;
+                      case "Scene": typeFolder = "scenes/"; break;
+                  }
+                  if (typeFolder != "") {
+                      var assetDir = projectDir + typeFolder + asset.uuid + "/";
+                      if (directory_exists(assetDir)) {
+                          directory_destroy(assetDir);
+                      }
                   }
                   break;
           }
@@ -223,8 +266,13 @@ function UeProjectSaver() constructor {
     /**
      * Save a texture asset
      */
-    function __saveTexture(texture, assetsDir) {
-      var assetDir = assetsDir + texture.name + "/";
+    function __saveTexture(texture, projectDir) {
+      var texturesDir = projectDir + "textures/";
+      if (!directory_exists(texturesDir)) {
+          directory_create(texturesDir);
+      }
+      
+      var assetDir = texturesDir + texture.uuid + "/";
       if (!directory_exists(assetDir)) {
           directory_create(assetDir);
       }
@@ -248,23 +296,28 @@ function UeProjectSaver() constructor {
     /**
      * Save a material asset
      */
-    function __saveMaterial(material, assetsDir) {
-      var assetDir = assetsDir + material.name + "/";
+    function __saveMaterial(material, projectDir) {
+      var materialsDir = projectDir + "materials/";
+      if (!directory_exists(materialsDir)) {
+          directory_create(materialsDir);
+      }
+      
+      var assetDir = materialsDir + material.uuid + "/";
       if (!directory_exists(assetDir)) {
           directory_create(assetDir);
       }
       
       var materialData = material.toJSON();
       
-      // Add texture references (names instead of objects)
+      // Add texture references (UUIDs instead of objects)
       if (material[$ "textures"] != undefined) {
           materialData.textures = {};
           var texNames = variable_struct_get_names(material.textures);
           for (var i = 0; i < array_length(texNames); i++) {
               var texName = texNames[i];
               var tex = material.textures[$ texName];
-              if (tex != undefined) {
-                  materialData.textures[$ texName] = tex.name;
+              if (tex != undefined && tex[$ "uuid"] != undefined) {
+                  materialData.textures[$ texName] = tex.uuid;
               }
           }
       }
@@ -275,8 +328,13 @@ function UeProjectSaver() constructor {
     /**
      * Save a scene asset
      */
-    function __saveScene(scene, assetsDir) {
-      var assetDir = assetsDir + scene.name + "/";
+    function __saveScene(scene, projectDir) {
+      var scenesDir = projectDir + "scenes/";
+      if (!directory_exists(scenesDir)) {
+          directory_create(scenesDir);
+      }
+      
+      var assetDir = scenesDir + scene.uuid + "/";
       if (!directory_exists(assetDir)) {
           directory_create(assetDir);
       }
@@ -288,8 +346,17 @@ function UeProjectSaver() constructor {
     /**
      * Save a mesh asset
      */
-    function __saveMesh(mesh, assetsDir) {
-      var assetDir = assetsDir + mesh.name + "/";
+    function __saveMesh(mesh, projectDir, isSubmesh = false) {
+      // Only add meshes/ folder for root meshes, not for submeshes
+      var baseDir = projectDir;
+      if (!isSubmesh) {
+          baseDir = projectDir + "meshes/";
+          if (!directory_exists(baseDir)) {
+              directory_create(baseDir);
+          }
+      }
+      
+      var assetDir = baseDir + mesh.uuid + "/";
       if (!directory_exists(assetDir)) {
           directory_create(assetDir);
       }
@@ -308,10 +375,10 @@ function UeProjectSaver() constructor {
           mesh.geometry.export(assetDir + "geometry.buf");
       }
       
-      // Save children recursively
+      // Save children recursively in subdirectories (mark as submesh)
       if (mesh[$ "children"] != undefined) {
           for (var i = 0; i < array_length(mesh.children); i++) {
-              __saveMesh(mesh.children[i], assetsDir);
+              __saveMesh(mesh.children[i], assetDir, true);
           }
       }
     }
@@ -321,13 +388,13 @@ function UeProjectSaver() constructor {
      */
     function __getTypePrefix(assetType) {
       switch(assetType) {
-          case "Folder": return "FLD";
-          case "Texture": return "TXR";
-          case "Material": return "MTL";
-          case "Mesh": return "MSH";
-          case "Scene": return "SCN";
-          case "ModelInstance": return "INS";
-          default: return "AST";
+          case "Folder": return "fld";
+          case "Texture": return "txr";
+          case "Material": return "mtl";
+          case "Mesh": return "msh";
+          case "Scene": return "scn";
+          case "ModelInstance": return "ins";
+          default: return "ast";
       }
     }
     

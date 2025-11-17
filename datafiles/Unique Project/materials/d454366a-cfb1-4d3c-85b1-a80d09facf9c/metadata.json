@@ -4,12 +4,12 @@
   "opacity":1.0,
   "transparent":false,
   "textures":{
-    "emissiveMap":"",
-    "map":""
+    "emissiveMap":"8cd414ef-93bd-4c24-a73a-f6ac6d3fc813",
+    "map":"8696c19d-ffd5-4702-b1d1-39f5eac0aa32"
   },
   "lights":2.0,
-  "name":"12221_Cat_v1_l3__Material0",
-  "uuid":"cff2a261-c323-4e00-abc0-67aa37e0320e",
+  "name":"12221_Cat_v1_l3__Material1",
+  "uuid":"d454366a-cfb1-4d3c-85b1-a80d09facf9c",
   "depthWrite":true,
   "depthFunc":4.0,
   "alphaTest":0.0,
@@ -36,6 +36,6 @@
       "value":1.0
     }
   },
-  "shader":"sh_ue_standard",
+  "shader":"sh_ue_basic",
   "depthTest":true
 }

@@ -48,6 +48,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             if (is_struct(child)) {
                 // ModelInstance: create instance from model and apply transform
                 var modelUUID = child[$ "model"];
+                
                 if (modelUUID != undefined && objectsByUUID[$ modelUUID] != undefined) {
                     var model = objectsByUUID[$ modelUUID];
                     
@@ -58,11 +59,21 @@ function UeScene(data = {}): UeObject3D(data) constructor {
                     instance.type = "ModelInstance";
                     instance.object = model;
                     instance.isInstance = true;
+                    instance.__rotationEuler = new UeEuler();
                     
                     // Apply transform
-                    if (child[$ "position"] != undefined) instance.position.fromArray(child.position);
-                    if (child[$ "rotation"] != undefined) instance.rotation.fromArray(child.rotation);
-                    if (child[$ "scale"] != undefined) instance.scale.fromArray(child.scale);
+                    if (child[$ "position"] != undefined) {
+                        var pos = child.position;
+                        instance.position.set(pos[0], pos[1], pos[2]);
+                    }
+                    if (child[$ "rotation"] != undefined) {
+                        var rot = child.rotation;
+                        instance.rotation.set(rot[0], rot[1], rot[2], rot[3]);
+                    }
+                    if (child[$ "scale"] != undefined) {
+                        var scl = child.scale;
+                        instance.scale.set(scl[0], scl[1], scl[2]);
+                    }
                     if (child[$ "visible"] != undefined) instance.visible = child.visible;
                     
                     add(instance);

@@ -1,0 +1,35 @@
+{
+  "hierarchy":[
+    {
+      "children":[
+        {
+          "key":"mtl\/12221_Cat_v1_l3__Material0"
+        },
+        {
+          "key":"mtl\/12221_Cat_v1_l3__Material1"
+        },
+        {
+          "key":"msh\/12221_Cat_v1_l3"
+        }
+      ],
+      "key":"fld\/12221_Cat_v1_l3"
+    },
+    {
+      "key":"txr\/Texture0"
+    },
+    {
+      "key":"mtl\/12221_Cat_v1_l3__Material0"
+    },
+    {
+      "key":"mtl\/12221_Cat_v1_l3__Material1"
+    },
+    {
+      "key":"msh\/12221_Cat_v1_l3"
+    },
+    {
+      "key":"scn\/Scene0"
+    }
+  ],
+  "settings":{
+  }
+}

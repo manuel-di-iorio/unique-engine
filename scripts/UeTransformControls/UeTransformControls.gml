@@ -81,7 +81,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self.object = object;
         
         // Auto-scale gizmo based on object's bounding sphere radius for better visual proportion
-        var objectBox = object.geometry[$ "boundingBox"];
+        var objectBox = object[$ "geometry"] != undefined ? object.geometry[$ "boundingBox"] : undefined;
         if (objectBox != undefined) {
             // Use bounding sphere radius for more accurate sizing
             // This gives us the distance from center to furthest corner

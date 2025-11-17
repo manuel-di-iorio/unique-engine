@@ -311,12 +311,20 @@ function UeMaterial(data = {}) constructor {
 
         // Load textures
         var texturesData = data[$ "textures"];
-        var textureNames = variable_struct_get_names(texturesData);
-        for (var i = 0; i < array_length(textureNames); i++) {
-            var textureName = textureNames[i];
-            var textureUUID = texturesData[$ textureName];
-            if (textureUUID != undefined && texturesByUUID[$ textureUUID] != undefined) {
-                textures[$ textureName] = texturesByUUID[$ textureUUID];
+        if (texturesData != undefined) {
+            var textureNames = variable_struct_get_names(texturesData);
+            for (var i = 0; i < array_length(textureNames); i++) {
+                var textureName = textureNames[i];
+                var textureUUID = texturesData[$ textureName];
+                if (textureUUID != undefined) {
+                    if (texturesByUUID[$ textureUUID] != undefined) {
+                        // Link to existing texture object
+                        textures[$ textureName] = texturesByUUID[$ textureUUID];
+                    } else {
+                        // Keep UUID for later linking
+                        textures[$ textureName] = textureUUID;
+                    }
+                }
             }
         }
         

@@ -109,7 +109,7 @@ function EditorUiInspector(ui) constructor {
                 search: "Search texture..",
                 subKey: "map",
                 itemsGetter: function(searchValue) {
-                    var allTextures = oSceneEditor.assetManager.textures;
+                    var allTextures = oSceneEditor.assetManager.getAllAssetsByType("Texture");
                     var textures = array_filter(allTextures, method({ searchValue }, function(texture) {
                         if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
@@ -363,7 +363,7 @@ function EditorUiInspector(ui) constructor {
                 type: "dropdown",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
-                    var allMaterials = oSceneEditor.assetManager.materials;
+                    var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
                     var items = array_filter(allMaterials, method({ searchValue }, function(item) {
                         if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
@@ -483,13 +483,13 @@ function EditorUiInspector(ui) constructor {
                 type: "dropdown",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
-                    var allMaterials = oSceneEditor.assetManager.materials;
+                    var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
                     var items = array_filter(allMaterials, method({ searchValue }, function(item) {
                         if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
                     }));
                     
-                    var mapped = array_map(items, function(item) {
+                    var mapped = array_map(items, function(item) {                        
                         return {
                             label: item.name, 
                             value: item

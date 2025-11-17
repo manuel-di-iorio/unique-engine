@@ -154,8 +154,8 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   }
   
   // Add asset to asset manager
-  var typeKey = string_lower(assetType);
-  if (typeKey == "mesh") typeKey = "model";
+  var typeKey = assetType;
+  if (typeKey == "Mesh") typeKey = "model";
   assetManager.addAsset(typeKey, asset, parentAsset);
   
   // Select the new item
