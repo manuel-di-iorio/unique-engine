@@ -28,6 +28,9 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     function toJSON() {
         gml_pragma("forceinline");
         return {
+            uuid,
+            type,
+            name,
             children: array_map(children, function(child) { return child.uuid }),
             visible,
             parent: parent && !parent[$ "isScene"] ? parent.uuid : undefined,
@@ -53,6 +56,22 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
             uy: up.y,
             uz: up.z,
         };
+    }
+
+    function fromJSON(data) {
+        gml_pragma("forceinline");
+        uuid = data[$ "uuid"];
+        name = data[$ "name"];
+        visible = data[$ "visible"];
+        renderOrder = data[$ "renderOrder"];
+        layers.mask = data[$ "layers"];
+        
+        position.set(data[$ "px"], data[$ "py"], data[$ "pz"]);
+        rotation.set(data[$ "rx"], data[$ "ry"], data[$ "rz"], data[$ "rw"]);
+        scale.set(data[$ "sx"], data[$ "sy"], data[$ "sz"]);
+        up.set(data[$ "ux"], data[$ "uy"], data[$ "uz"]);
+        
+        return self;
     }
     
     /// @description Performs a raycast intersection test against this mesh object

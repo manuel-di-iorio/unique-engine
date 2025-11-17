@@ -130,11 +130,14 @@ function AssetManager() constructor {
     
     /**
      * Get all assets of a specific type
-     * @param {String} type - Asset type
+     * @param {String} type - Asset type (case insensitive)
      * @return {Array} Array of assets
      */
     function getAssetsByType(type) {
-        switch (type) {
+        var typeKey = string_lower(type);
+        if (typeKey == "mesh" || typeKey == "modelinstance") typeKey = "model";
+        
+        switch (typeKey) {
             case "texture": return self.textures;
             case "material": return self.materials;
             case "model": return self.models;

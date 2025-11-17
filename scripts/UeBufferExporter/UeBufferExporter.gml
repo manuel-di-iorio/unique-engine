@@ -29,11 +29,7 @@ function UeBufferExporter() constructor {
             // Stringify the object's payload, by also enhancing it with other props
             var compiledData = obj._compileData(compilation);
             compiledData.obj = obj;
-            var payload = compiledData.payload;
-            payload.type = obj.type;
-            payload.uuid = obj.uuid;
-            payload.name = obj.name;
-            var payloadStr = json_stringify(payload);
+            var payloadStr = json_stringify(compiledData.payload);
             compiledData.payloadStr = payloadStr;
             
             // Update the compilation info

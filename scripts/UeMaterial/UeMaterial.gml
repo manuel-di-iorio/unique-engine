@@ -251,6 +251,9 @@ function UeMaterial(data = {}) constructor {
     function toJSON() {
         gml_pragma("forceinline");
         return {
+            uuid,
+            type,
+            name,
             uniforms,
             textures: ueStructMap(textures, function(name, texture) { 
                 return texture != undefined ? texture.uuid : undefined;
@@ -275,6 +278,49 @@ function UeMaterial(data = {}) constructor {
             blendDstAlpha,
             lights,
         };
+    }
+
+    function fromJSON(data, texturesByUUID) {
+        gml_pragma("forceinline");
+        uuid = data[$ "uuid"];
+        name = data[$ "name"];
+        uniforms = data[$ "uniforms"];
+        transparent = data[$ "transparent"];
+        opacity = data[$ "opacity"];
+        side = data[$ "side"];
+        depthTest = data[$ "depthTest"];
+        depthWrite = data[$ "depthWrite"];
+        depthFunc = data[$ "depthFunc"];
+        forceSinglePass = data[$ "forceSinglePass"];
+        alphaTest = data[$ "alphaTest"];
+        colorWrite = data[$ "colorWrite"];
+        blending = data[$ "blending"];
+        blendEquation = data[$ "blendEquation"];
+        blendEquationAlpha = data[$ "blendEquationAlpha"];
+        blendSrc = data[$ "blendSrc"];
+        blendDst = data[$ "blendDst"];
+        blendSrcAlpha = data[$ "blendSrcAlpha"];
+        blendDstAlpha = data[$ "blendDstAlpha"];
+        lights = data[$ "lights"];
+        
+        // Load shader
+        var shaderName = data[$ "shader"];
+        if (shaderName != undefined && shaderName != "") {
+            shader = asset_get_index(shaderName);
+        }
+
+        // Load textures
+        var texturesData = data[$ "textures"];
+        var textureNames = variable_struct_get_names(texturesData);
+        for (var i = 0; i < array_length(textureNames); i++) {
+            var textureName = textureNames[i];
+            var textureUUID = texturesData[$ textureName];
+            if (textureUUID != undefined && texturesByUUID[$ textureUUID] != undefined) {
+                textures[$ textureName] = texturesByUUID[$ textureUUID];
+            }
+        }
+        
+        return self;
     }
     
     /** Internal export methods */

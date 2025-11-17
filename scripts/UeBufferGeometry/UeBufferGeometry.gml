@@ -127,9 +127,20 @@ function UeBufferGeometry(data = {}) constructor {
     
     function toJSON() {
         gml_pragma("forceinline");
-        var payload = { 
-            format: format.uuid,
+        return { 
+            uuid,
+            type,
+            name,
+            format: format.toJSON(),
         };
+    }
+
+    function fromJSON(data) {
+        gml_pragma("forceinline");
+        uuid = data[$ "uuid"];
+        name = data[$ "name"];
+        format = new UeVertexFormat().fromJSON(data[$ "format"]);
+        return self;
     }
     
     /** Internal method: prepare data for export or serialization */
@@ -170,7 +181,7 @@ function UeBufferGeometry(data = {}) constructor {
     function import(fname) {
         var buf = buffer_load(fname);
         vb = vertex_create_buffer_from_buffer(buf, format.vf);
-        buffer_delete(buff);
+        buffer_delete(buf);
         return self;
     }
     

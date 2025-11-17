@@ -813,14 +813,13 @@ function EditorUiInspector(ui) constructor {
             return false;
         }
         
-        // Check for duplicate names
+        // Check for duplicate names at the same level (siblings only)
         var assetManager = oSceneEditor.assetManager;
         var isDuplicate = false;
+        var siblings = [];
         
-        if (asset.type == "Folder") {
-            // For folders, check only same level (siblings)
-            var siblings = [];
-            
+        if (asset[$ "type"] == "Folder") {
+            // For folders, get siblings
             if (asset[$ "parent"] != undefined) {
                 // Has parent: check parent's children
                 siblings = asset.parent.children;
@@ -828,24 +827,28 @@ function EditorUiInspector(ui) constructor {
                 // Root level: check root folders
                 siblings = assetManager.folders;
             }
-            
-            for (var i = 0; i < array_length(siblings); i++) {
-                var sibling = siblings[i];
-                if (sibling != asset && sibling.name == newName) {
-                    isDuplicate = true;
-                    break;
-                }
-            }
         } else {
-            // For other assets, check globally by name lookup
-            var existing = assetManager.getAssetByName(newName);
-            if (existing != undefined && existing != asset) {
+            // For other assets, check siblings at same level
+            if (asset[$ "parent"] != undefined) {
+                // Has parent: check parent's children
+                siblings = asset.parent.children;
+            } else {
+                // Root level: check all root assets of the same type
+                siblings = assetManager.getAssetsByType(asset[$ "type"]);
+            }
+        }
+        
+        // Check if any sibling has the same name
+        for (var i = 0; i < array_length(siblings); i++) {
+            var sibling = siblings[i];
+            if (sibling != asset && sibling.name == newName) {
                 isDuplicate = true;
+                break;
             }
         }
         
         if (isDuplicate) {
-            show_message("An asset with this name already exists. Please use a different name.");
+            show_message("An asset with this name already exists at this level. Please use a different name.");
             input.value = asset.name;
             return false;
         }

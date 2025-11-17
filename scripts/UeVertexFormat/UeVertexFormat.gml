@@ -65,7 +65,21 @@ function UeVertexFormat(data = {}) constructor {
     
     function toJSON() {
         gml_pragma("forceinline");
-        return { attrs };
+        return {
+            uuid,
+            type,
+            name,
+            attrs
+        };
+    }
+
+    function fromJSON(data) {
+        gml_pragma("forceinline");
+        uuid = data.uuid;
+        name = data.name;
+        attrs = data.attrs;
+        build();
+        return self;
     }
     
     /** Internal export methods */

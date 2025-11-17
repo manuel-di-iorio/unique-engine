@@ -29,6 +29,7 @@ function editorTreeviewOnModelImport(modelAsset) {
     var folder = {
         type: "Folder",
         name: modelName,
+        uuid: ueUuid(),
         children: []
     };
     

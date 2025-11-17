@@ -43,9 +43,6 @@ function EditorUiMenu(ui) constructor {
                 ui.Menu.SaveProjectBtn.show();
                 ui.Menu.LoadProjectBtn.setMarginLeft(0);
             
-                // Resize viewport after UI is created
-                scrUiResizeViewports();
-
             } else {
                 projectManager.clearProject();
             }
@@ -67,6 +64,8 @@ function EditorUiMenu(ui) constructor {
             
             // Load project assets
             projectManager.load();
+
+            scrUiResizeViewports();
         }
     });
 }

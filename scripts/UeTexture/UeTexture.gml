@@ -216,6 +216,9 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         var repeatVec = self[$ "repeat"];
 
         var payload = {
+            uuid,
+            type,
+            name,
             filter,
             generateMipmaps,
             spriteBuffSize: 0,
@@ -239,6 +242,34 @@ function UeTexture(sprite = undefined, data = {}) constructor {
 
         payload[$ "repeat"] = [repeatVec.x, repeatVec.y];
         return payload;
+    }
+
+    function fromJSON(data) {
+        gml_pragma("forceinline");
+
+        uuid = data.uuid;
+        name = data.name;
+        filter = data.filter;
+        generateMipmaps = data.generateMipmaps;
+
+        var repeatArr = data[$ "repeat"] ?? [1, 1];
+        self[$ "repeat"].set(repeatArr[0], repeatArr[1]);
+
+        var offsetArr = data[$ "offset"] ?? [0, 0];
+        offset.set(offsetArr[0], offsetArr[1]);
+
+        var centerArr = data[$ "center"] ?? [0, 0];
+        center.set(centerArr[0], centerArr[1]);
+
+        rotation = data.rotation ?? 0;
+        flipX = data.flipX ?? false;
+        flipY = data.flipY ?? false;
+        wrapS = data.wrapS ?? UE_TEXTURE_WRAP.CLAMP_TO_EDGE;
+        wrapT = data.wrapT ?? UE_TEXTURE_WRAP.CLAMP_TO_EDGE;
+
+        userData = data.userData ?? {};
+
+        return self;
     }
 
     /**
@@ -266,7 +297,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         data.size += spriteBuffSize;
 
         return {
-            payload: payload,
+            payload,
             ctx: { spriteWidth, spriteHeight, spriteBuffSize }
         };
     }

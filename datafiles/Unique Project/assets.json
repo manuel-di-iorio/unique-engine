@@ -1,0 +1,15 @@
+{
+  "models":[
+    "12221_Cat_v1_l3"
+  ],
+  "scenes":[
+    "Scene0"
+  ],
+  "textures":[
+    "Texture0"
+  ],
+  "materials":[
+    "12221_Cat_v1_l3__Material0",
+    "12221_Cat_v1_l3__Material1"
+  ]
+}
