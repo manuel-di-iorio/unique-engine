@@ -1,0 +1,30 @@
+{
+  "spriteBuffSize":0.0,
+  "filter":true,
+  "generateMipmaps":true,
+  "repeat":[
+    1.0,
+    1.0
+  ],
+  "offset":[
+    0.0,
+    {
+      "x":0.0,
+      "y":0.0
+    }
+  ],
+  "flipX":false,
+  "flipY":false,
+  "wrapS":1,
+  "uuid":"8696c19d-ffd5-4702-b1d1-39f5eac0aa32",
+  "wrapT":1,
+  "userData":{
+  },
+  "type":"Texture",
+  "center":[
+    0.0,
+    0.0
+  ],
+  "rotation":0.0,
+  "name":"Texture0"
+}

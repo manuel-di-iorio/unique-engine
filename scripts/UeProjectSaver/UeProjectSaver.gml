@@ -116,17 +116,27 @@ function UeProjectSaver() constructor {
           models: [],
           scenes: []
       };
+      // Helper: push uuid if not already added
+      function pushUnique(list, uuid, map) {
+          if (map[$ uuid] == undefined) {
+              map[$ uuid] = true;
+              array_push(list, uuid);
+          }
+      }
 
+      var seen = {};
       var allTextures = assetManager.getAllAssetsByType("Texture");
       for (var i = 0; i < array_length(allTextures); i++) {
-          array_push(assets.textures, allTextures[i].uuid);
+          pushUnique(assets.textures, allTextures[i].uuid, seen);
       }
 
+      seen = {};
       var allMaterials = assetManager.getAllAssetsByType("Material");
       for (var i = 0; i < array_length(allMaterials); i++) {
-          array_push(assets.materials, allMaterials[i].uuid);
+          pushUnique(assets.materials, allMaterials[i].uuid, seen);
       }
 
+      seen = {};
       var allModels = assetManager.getAllAssetsByType("Mesh");
       for (var i = 0; i < array_length(allModels); i++) {
           var model = allModels[i];
@@ -137,12 +147,13 @@ function UeProjectSaver() constructor {
                   continue;
               }
           }
-          array_push(assets.models, model.uuid);
+          pushUnique(assets.models, model.uuid, seen);
       }
 
+      seen = {};
       var allScenes = assetManager.getAllAssetsByType("Scene");
       for (var i = 0; i < array_length(allScenes); i++) {
-          array_push(assets.scenes, allScenes[i].uuid);
+          pushUnique(assets.scenes, allScenes[i].uuid, seen);
       }
       
       return {

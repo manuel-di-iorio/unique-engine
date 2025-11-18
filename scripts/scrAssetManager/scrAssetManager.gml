@@ -47,8 +47,21 @@ function AssetManager() constructor {
             }
         } else {
             // Add to parent's hierarchy
-            if (parent[$ "add"] != undefined) {
+            // If parent is a Folder struct, push into its children array
+            if (parent[$ "type"] != undefined && parent[$ "type"] == "Folder") {
+                asset.parent = parent;
+                if (parent[$ "children"] == undefined) parent.children = [];
+                array_push(parent.children, asset);
+            }
+            // If parent is an Object3D-like object with add(), use that
+            else if (parent[$ "add"] != undefined) {
                 parent.add(asset);
+                asset.parent = parent;
+            }
+            // Fallback: if parent has a children array, push into it
+            else if (parent[$ "children"] != undefined) {
+                asset.parent = parent;
+                array_push(parent.children, asset);
             }
         }
         
@@ -91,7 +104,18 @@ function AssetManager() constructor {
         
         // Remove from parent if it has one
         if (asset[$ "parent"] != undefined && asset.parent != undefined) {
-            if (asset.parent[$ "remove"] != undefined) {
+            // If parent is Folder struct, remove from children array
+            if (asset.parent[$ "type"] != undefined && asset.parent[$ "type"] == "Folder") {
+                var pchildren = asset.parent.children;
+                for (var i = array_length(pchildren) - 1; i >= 0; i--) {
+                    if (pchildren[i] == asset) {
+                        array_delete(pchildren, i, 1);
+                        break;
+                    }
+                }
+            }
+            // If parent has remove() method, call it
+            else if (asset.parent[$ "remove"] != undefined) {
                 asset.parent.remove(asset);
             }
         }

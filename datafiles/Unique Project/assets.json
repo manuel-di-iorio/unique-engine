@@ -1,12 +1,15 @@
 {
   "models":[
+    "039114bc-cff4-4feb-8edc-5bfc96d081c8"
   ],
   "scenes":[
+    "64642419-1437-4e2e-9838-485b26c12a4f"
   ],
   "textures":[
+    "8696c19d-ffd5-4702-b1d1-39f5eac0aa32"
   ],
   "materials":[
-    "8696c19d-ffd5-4702-b1d1-39f5eac0aa32",
-    "cff2a261-c323-4e00-abc0-67aa37e0320e"
+    "cff2a261-c323-4e00-abc0-67aa37e0320e",
+    "d454366a-cfb1-4d3c-85b1-a80d09facf9c"
   ]
 }

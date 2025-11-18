@@ -1,0 +1,30 @@
+{
+  "children":[
+    {
+      "scale":[
+        1.0,
+        1.0,
+        1.0
+      ],
+      "visible":true,
+      "uuid":"ecc50e1d-aa11-4200-aefe-181c4dc56ff4",
+      "position":[
+        0.0,
+        0.0,
+        0.0
+      ],
+      "type":"ModelInstance",
+      "rotation":[
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name":"Cat_0",
+      "model":"c94f8f71-6494-41ae-98df-3b6bd47ccb2f"
+    }
+  ],
+  "name":"Scene0",
+  "uuid":"64642419-1437-4e2e-9838-485b26c12a4f",
+  "type":"Scene"
+}

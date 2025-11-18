@@ -3,11 +3,6 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   // In free mode, assetType might not be set, so we use the override or prompt
   var assetType = assetTypeOverride ?? (treeviewItem != undefined ? treeviewItem.assetType : undefined);
   
-  if (assetType == undefined) {
-      show_debug_message("ERROR: Cannot create asset without type");
-      return;
-  }
-  
   // Handle folder creation
   if (assetType == "Folder") {
       var treeview = global.UI.Main.Assets.Treeview;

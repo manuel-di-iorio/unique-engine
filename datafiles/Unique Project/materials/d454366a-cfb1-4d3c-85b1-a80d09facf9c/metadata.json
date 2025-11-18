@@ -1,8 +1,4 @@
 {
-  "blendEquation":1.0,
-  "blendEquationAlpha":1.0,
-  "blendSrc":5.0,
-  "blendDst":6.0,
   "blendSrcAlpha":2.0,
   "blendDstAlpha":6.0,
   "uniforms":{
@@ -19,23 +15,27 @@
       "type":0
     }
   },
-  "shader":"sh_ue_standard",
+  "shader":"sh_ue_basic",
   "depthTest":true,
-  "textures":{
-    "map":"aff274f5-1f4f-43ad-9313-4ad13c758d45",
-    "emissiveMap":"8cd414ef-93bd-4c24-a73a-f6ac6d3fc813"
-  },
   "forceSinglePass":false,
   "side":2.0,
   "opacity":1.0,
   "transparent":false,
+  "textures":{
+    "map":"8696c19d-ffd5-4702-b1d1-39f5eac0aa32",
+    "emissiveMap":"8cd414ef-93bd-4c24-a73a-f6ac6d3fc813"
+  },
   "lights":2.0,
   "type":"Material",
-  "name":"12221_Cat_v1_l3__Material0",
-  "uuid":"8696c19d-ffd5-4702-b1d1-39f5eac0aa32",
+  "name":"12221_Cat_v1_l3__Material1",
+  "uuid":"d454366a-cfb1-4d3c-85b1-a80d09facf9c",
   "depthWrite":true,
   "depthFunc":4.0,
   "alphaTest":0.0,
   "colorWrite":true,
-  "blending":false
+  "blending":false,
+  "blendEquation":1.0,
+  "blendEquationAlpha":1.0,
+  "blendSrc":5.0,
+  "blendDst":6.0
 }
