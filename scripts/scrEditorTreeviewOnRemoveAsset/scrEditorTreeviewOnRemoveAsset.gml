@@ -15,14 +15,14 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     if (assetType == "Texture" && asset != undefined) {
         __editorTreeview_removeTextureFromMaterials(asset);
         // Rimuovi dall'AssetManager
-        assetManager.removeAsset("texture", asset);
+        assetManager.removeAsset("Texture", asset);
     }
     
     // Material: rimuoverlo dagli object che lo hanno
     else if (assetType == "Material" && asset != undefined) {
         __editorTreeview_removeMaterialFromObjects(asset);
         // Rimuovi dall'AssetManager
-        assetManager.removeAsset("material", asset);
+        assetManager.removeAsset("Material", asset);
     }
     
     // Mesh/Model: rimuovere dal parent o dalla lista globale
@@ -35,7 +35,7 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
             asset.parent.remove(asset);
         } else {
             // Altrimenti rimuovi dalla lista globale
-            assetManager.removeAsset("model", asset);
+            assetManager.removeAsset("Mesh", asset);
         }
     }
     
@@ -46,7 +46,7 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
             asset.parent.remove(asset);
         } else {
             // Altrimenti rimuovi dalla lista globale
-            assetManager.removeAsset("scene", asset);
+            assetManager.removeAsset("Scene", asset);
         }
     }
     

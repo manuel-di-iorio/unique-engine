@@ -9,9 +9,9 @@ function UeMeshBasicMaterial(data = {}): UeMaterial(data) constructor {
         emissive = [0, 0, 0];
     }
     uniforms.ueEmissive = { type: UE_UNIFORM_TYPE.ARRAY, value: emissive };
-    uniforms.ueEmissiveIntensity = { type: UE_UNIFORM_TYPE.FLOAT, value: data[$ "emissiveIntensity"] ?? 1 };
+    uniforms.ueEmissiveIntensity = { type: UE_UNIFORM_TYPE.FLOAT, value: data[$ "emissiveIntensity"] ?? 0 };
     
-    textures.emissiveMap = global.UE_TEXTURE_EMISSIVE;
+    textures.emissiveMap = data[$ "emissiveMap"] ?? global.UE_TEXTURE_EMISSIVE;
     
     build();
 }

@@ -79,7 +79,11 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function attach(object) {
         gml_pragma("forceinline");
         self.object = object;
-        
+        // Ensure object's world matrix is up-to-date so gizmo uses correct world transforms
+        if (object.updateWorldMatrix != undefined) {
+            object.updateWorldMatrix(true, false);
+        }
+
         // Auto-scale gizmo based on object's bounding sphere radius for better visual proportion
         var objectBox = object[$ "geometry"] != undefined ? object.geometry[$ "boundingBox"] : undefined;
         if (objectBox != undefined) {
@@ -213,15 +217,22 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
         if (!self.object) return;
 
-        // Set gizmo root position to the object's position
-        self._root.position.copy(self.object.position);
+        // Ensure object's world matrix is updated so world-space queries are correct
+        if (self.object.updateWorldMatrix != undefined) {
+            self.object.updateWorldMatrix(true, false);
+        }
+
+        // Set gizmo root position to the object's world position
+        var _wp = global.UE_DUMMY_VECTOR3;
+        self.object.getWorldPosition(_wp);
+        self._root.position.copy(_wp);
 
         // Calculate distance-based scale to maintain consistent apparent size (billboard-like behavior)
         var distance = self.camera.position.distanceTo(self.object.position);
         
         // Use a perspective-correct scaling formula
         // The scale should be proportional to distance to maintain constant apparent size
-        var baseScale = 0.2;  // Base size multiplier - increased for better visibility
+        var baseScale = 0.17;  // Base size multiplier - increased for better visibility
         var referenceDistance = 10;  // Reference distance for scaling
         
         // Calculate scale that makes gizmo appear same size regardless of distance
@@ -232,8 +243,10 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self._root.scale.set(distanceScale, distanceScale, distanceScale);
 
         if (self.space == "local") {
-            // In local space, gizmo rotates with the object
-            self._root.rotation.copy(self.object.rotation);
+            // In local space, gizmo rotates with the object's world rotation
+            var _wq = global.UE_DUMMY_QUATERNION;
+            self.object.getWorldQuaternion(_wq);
+            self._root.rotation.copy(_wq);
         } else {
             // In world space, position plane handles based on camera direction for optimal visibility
             var camDir = self.camera.getWorldDirection();

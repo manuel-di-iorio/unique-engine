@@ -19,7 +19,7 @@ function editorTreeviewOnModelImport(modelAsset) {
     var modelName = filename_change_ext(fileName, "");
     if (modelName == "" || modelName == undefined) {
         var modelId = global.UI_ASSETS_MODELS_ID++;
-        modelName = "Model" + string(modelId);
+        modelName = "Mesh" + string(modelId);
     } else {
         // Clean the name (remove invalid characters)
         modelName = string_replace_all(modelName, " ", "_");
@@ -47,7 +47,7 @@ function editorTreeviewOnModelImport(modelAsset) {
     treeview.Items.add(folderItem);
     
     // Add folder to AssetManager
-    oSceneEditor.assetManager.addAsset("folder", folder);
+    oSceneEditor.assetManager.addAsset("Folder", folder);
     
     // 1. Add textures to project and treeview (inside folder)
     for (var i = 0; i < array_length(textures); i++) {
@@ -135,7 +135,7 @@ function editorTreeviewOnModelImport(modelAsset) {
     model.parent = folder;
     
     // Add to asset manager (with folder as parent)
-    oSceneEditor.assetManager.addAsset("Model", model, folder);
+    oSceneEditor.assetManager.addAsset("Mesh", model, folder);
     
     // Add to folder children
     array_push(folder.children, model);

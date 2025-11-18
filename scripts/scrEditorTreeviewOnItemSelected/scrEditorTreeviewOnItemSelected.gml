@@ -25,10 +25,13 @@ function editorTreeviewOnItemSelected(treeviewItem) {
 
         case "Mesh":
             var currentAsset = treeviewItem.asset;
-            while (currentAsset.parent != undefined && currentAsset.parent.type == "Mesh") {
-                currentAsset = currentAsset.parent;
+            // Find the root mesh for rendering
+            var rootMesh = currentAsset;
+            while (rootMesh.parent != undefined && rootMesh.parent.type == "Mesh") {
+                rootMesh = rootMesh.parent;
             }
-            editorManager.setActiveAsset(currentAsset, treeviewItem);
+            // Pass the clicked submesh as gizmo target (third argument)
+            editorManager.setActiveAsset(rootMesh, treeviewItem, treeviewItem.asset);
         break;
 
         case "Scene":

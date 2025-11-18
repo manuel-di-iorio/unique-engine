@@ -124,7 +124,7 @@ function UeAssimpLoader(data = {}) constructor {
         var image = sprite_add(fullPath, 1, false, false, 0, 0);
         if (image == -1) return undefined;
         
-        return new UeTexture({ image });
+        return new UeTexture(image);
     }
     
     function _addMeshes(materials) {
@@ -143,18 +143,12 @@ function UeAssimpLoader(data = {}) constructor {
         // Calculate model's overall bounding box and sphere based on all meshes
         self._calculateModelBounds(model, meshes);
         
-        // Rotate the model to match the engine camera directions
-        // @todo This is temporary
-        // model.rotateZ(180);
-        // model.updateMatrix();
-        // model.updateMatrixWorld(true);
-        
         return model;
     }
     
     function _buildMesh() {
         gml_pragma("forceinline");
-        var mesh = new UeMesh(new UeBufferGeometry());
+        var mesh = new UeMesh(new UeBufferGeometry({ canFreeze: false }));
         mesh.name = GMA_GetMeshName();
         var geometry = mesh.geometry;
         var vb = vertex_create_buffer();

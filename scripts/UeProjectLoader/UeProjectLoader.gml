@@ -54,15 +54,15 @@ function UeProjectLoader() constructor {
       // Load root assets and place them in hierarchy
       var assetsByUUID = {};
       
-      __loadAssetsList(assetsLists.textures, projectDir, "texture", hierarchy, treeviewItemMap, folderMap, assetsByUUID, sprUiTexture);
-      __loadAssetsList(assetsLists.materials, projectDir, "material", hierarchy, treeviewItemMap, folderMap, assetsByUUID, sprUiMaterial);
-      __loadAssetsList(assetsLists.models, projectDir, "model", hierarchy, treeviewItemMap, folderMap, assetsByUUID, sprUiObject);
+      __loadAssetsList(assetsLists.textures, projectDir, "Texture", hierarchy, treeviewItemMap, folderMap, assetsByUUID, sprUiTexture);
+      __loadAssetsList(assetsLists.materials, projectDir, "Material", hierarchy, treeviewItemMap, folderMap, assetsByUUID, sprUiMaterial);
+      __loadAssetsList(assetsLists.models, projectDir, "Mesh", hierarchy, treeviewItemMap, folderMap, assetsByUUID, sprUiObject);
       
       // Link references (textures in materials, materials in meshes) before loading scenes
       __linkReferences(assetsByUUID);
       
       // Load scenes last, after all models are loaded and linked
-      __loadAssetsList(assetsLists.scenes, projectDir, "scene", hierarchy, treeviewItemMap, folderMap, assetsByUUID, sprUiScene);
+      __loadAssetsList(assetsLists.scenes, projectDir, "Scene", hierarchy, treeviewItemMap, folderMap, assetsByUUID, sprUiScene);
     }
     
     /**
@@ -124,7 +124,7 @@ function UeProjectLoader() constructor {
                   treeviewItemMap[$ folderName] = folderItem;
                   
                   // Add to asset manager
-                  oSceneEditor.assetManager.addAsset("folder", folder, parentFolder);
+                  oSceneEditor.assetManager.addAsset("Folder", folder, parentFolder);
                   
                   // Process children recursively
                   if (array_length(entry.children) > 0) {
@@ -143,10 +143,10 @@ function UeProjectLoader() constructor {
       
       var typeFolder = "";
       switch (assetType) {
-          case "texture": typeFolder = "textures/"; break;
-          case "material": typeFolder = "materials/"; break;
-          case "model": typeFolder = "meshes/"; break;
-          case "scene": typeFolder = "scenes/"; break;
+          case "Texture": typeFolder = "textures/"; break;
+          case "Material": typeFolder = "materials/"; break;
+          case "Mesh": typeFolder = "meshes/"; break;
+          case "Scene": typeFolder = "scenes/"; break;
       }
       
       for (var i = 0; i < array_length(assetUUIDs); i++) {
@@ -154,16 +154,16 @@ function UeProjectLoader() constructor {
           var asset = undefined;
           
           switch (assetType) {
-              case "texture":
+              case "Texture":
                   asset = __loadTexture(assetUUID, projectDir + typeFolder);
                   break;
-              case "material":
+              case "Material":
                   asset = __loadMaterial(assetUUID, projectDir + typeFolder);
                   break;
-              case "model":
+              case "Mesh":
                   asset = __loadMesh(assetUUID, projectDir + typeFolder, assetsByUUID);
                   break;
-              case "scene":
+              case "Scene":
                   asset = __loadScene(assetUUID, projectDir + typeFolder, assetsByUUID);
                   break;
           }
@@ -173,12 +173,12 @@ function UeProjectLoader() constructor {
               var treeviewItem = __placeInHierarchy(asset, hierarchy, treeviewItemMap, folderMap, icon);
               
               // For scenes, add instances as treeview children
-              if (assetType == "scene" && asset.children != undefined) {
+              if (assetType == "Scene" && asset.children != undefined) {
                   __addSceneInstancesToTreeview(asset, treeviewItem);
               }
               
               // For meshes, add submeshes as treeview children
-              if (assetType == "model" && asset.children != undefined && array_length(asset.children) > 0) {
+              if (assetType == "Mesh" && asset.children != undefined && array_length(asset.children) > 0) {
                   __addSubmeshesToTreeview(asset, treeviewItem);
               }
           }
@@ -339,7 +339,6 @@ function UeProjectLoader() constructor {
         
         // Add to asset manager
         var typeKey = asset.type;
-        if (typeKey == "Mesh") typeKey = "model";
         oSceneEditor.assetManager.addAsset(typeKey, asset, parentFolder);
         
         return assetItem;
@@ -372,7 +371,7 @@ function UeProjectLoader() constructor {
                 sceneTreeviewItem.addChild(instanceItem);
                 
                 // Add to asset manager
-                oSceneEditor.assetManager.addAsset("model", instance, scene);
+                oSceneEditor.assetManager.addAsset("Mesh", instance, scene);
             }
         }
     }
@@ -475,15 +474,7 @@ function UeProjectLoader() constructor {
                         asset.textures[$ slot] = undefined;
                     }
                 }
-                // LOG: Verifica texture map per Material1
-                if (asset.name == "12221_Cat_v1_l3__Material1") {
-                    var tex = asset.textures[?"map"];
-                    if (tex != undefined) {
-                        show_debug_message("Material1: map UUID=" + string(tex.uuid) + ", __cachedSprite=" + string(tex.__cachedSprite));
-                    } else {
-                        show_debug_message("Material1: map texture is undefined!");
-                    }
-                }
+                
                 asset.build();
             }
             

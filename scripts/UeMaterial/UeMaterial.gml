@@ -255,7 +255,7 @@ function UeMaterial(data = {}) constructor {
             type,
             name,
             uniforms,
-            textures: ueStructMap(textures, function(name, texture) { 
+            textures: ueStructMap(textures, function(name, texture) {
                 return texture != undefined ? texture.uuid : undefined;
             }),
             shader: shader_get_name(shader),
@@ -313,9 +313,10 @@ function UeMaterial(data = {}) constructor {
         var texturesData = data[$ "textures"];
         if (texturesData != undefined) {
             var textureNames = variable_struct_get_names(texturesData);
-            for (var i = 0; i < array_length(textureNames); i++) {
+            for (var i = 0, il = array_length(textureNames); i < il; i++) {
                 var textureName = textureNames[i];
                 var textureUUID = texturesData[$ textureName];
+                
                 if (textureUUID != undefined) {
                     if (texturesByUUID[$ textureUUID] != undefined) {
                         // Link to existing texture object

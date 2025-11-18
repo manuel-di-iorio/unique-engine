@@ -109,24 +109,27 @@ function UeProjectSaver() constructor {
           array_push(hierarchy, { key: "scn/" + assetManager.scenes[i].name });
       }
       
-      // Build assets lists (all assets) using UUIDs
+      // Build assets lists (all assets), including those inside folders
       var assets = {
           textures: [],
           materials: [],
           models: [],
           scenes: []
       };
-      
-      for (var i = 0; i < array_length(assetManager.textures); i++) {
-          array_push(assets.textures, assetManager.textures[i].uuid);
+
+      var allTextures = assetManager.getAllAssetsByType("Texture");
+      for (var i = 0; i < array_length(allTextures); i++) {
+          array_push(assets.textures, allTextures[i].uuid);
       }
-      
-      for (var i = 0; i < array_length(assetManager.materials); i++) {
-          array_push(assets.materials, assetManager.materials[i].uuid);
+
+      var allMaterials = assetManager.getAllAssetsByType("Material");
+      for (var i = 0; i < array_length(allMaterials); i++) {
+          array_push(assets.materials, allMaterials[i].uuid);
       }
-      
-      for (var i = 0; i < array_length(assetManager.models); i++) {
-          var model = assetManager.models[i];
+
+      var allModels = assetManager.getAllAssetsByType("Mesh");
+      for (var i = 0; i < array_length(allModels); i++) {
+          var model = allModels[i];
           // Skip submeshes (children of other meshes) and instances (children of scenes)
           if (model[$ "parent"] != undefined) {
               var parentType = model.parent[$ "type"];
@@ -136,9 +139,10 @@ function UeProjectSaver() constructor {
           }
           array_push(assets.models, model.uuid);
       }
-      
-      for (var i = 0; i < array_length(assetManager.scenes); i++) {
-          array_push(assets.scenes, assetManager.scenes[i].uuid);
+
+      var allScenes = assetManager.getAllAssetsByType("Scene");
+      for (var i = 0; i < array_length(allScenes); i++) {
+          array_push(assets.scenes, allScenes[i].uuid);
       }
       
       return {
@@ -192,21 +196,25 @@ function UeProjectSaver() constructor {
      */
     function __saveAllAssets(assetsDir) {
       var assetManager = oSceneEditor.assetManager;
-      
-      for (var i = 0; i < array_length(assetManager.textures); i++) {
-          __saveTexture(assetManager.textures[i], assetsDir);
+
+      var allTextures = assetManager.getAllAssetsByType("Texture");
+      for (var i = 0; i < array_length(allTextures); i++) {
+          __saveTexture(allTextures[i], assetsDir);
       }
-      
-      for (var i = 0; i < array_length(assetManager.materials); i++) {
-          __saveMaterial(assetManager.materials[i], assetsDir);
+
+      var allMaterials = assetManager.getAllAssetsByType("Material");
+      for (var i = 0; i < array_length(allMaterials); i++) {
+          __saveMaterial(allMaterials[i], assetsDir);
       }
-      
-      for (var i = 0; i < array_length(assetManager.models); i++) {
-          __saveMesh(assetManager.models[i], assetsDir);
+
+      var allModels = assetManager.getAllAssetsByType("Mesh");
+      for (var i = 0; i < array_length(allModels); i++) {
+          __saveMesh(allModels[i], assetsDir);
       }
-      
-      for (var i = 0; i < array_length(assetManager.scenes); i++) {
-          __saveScene(assetManager.scenes[i], assetsDir);
+
+      var allScenes = assetManager.getAllAssetsByType("Scene");
+      for (var i = 0; i < array_length(allScenes); i++) {
+          __saveScene(allScenes[i], assetsDir);
       }
     }
     

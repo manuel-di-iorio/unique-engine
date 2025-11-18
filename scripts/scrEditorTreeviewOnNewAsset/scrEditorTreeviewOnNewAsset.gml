@@ -48,7 +48,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       }
       
       // Add to AssetManager
-      oSceneEditor.assetManager.addAsset("folder", folder, parentAsset);
+      oSceneEditor.assetManager.addAsset("Folder", folder, parentAsset);
       
       treeview.__onItemSelected(folderItem);
       return;
@@ -71,7 +71,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       
       case "Mesh": 
           var size = 50;
-          var geometry = new UeBoxGeometry(size, size, size);
+          var geometry = new UeBoxGeometry(size, size, size, { canFreeze: false });
           
           // Set bounding box
           geometry.boundingBox = new UeBox3();
@@ -155,7 +155,6 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   
   // Add asset to asset manager
   var typeKey = assetType;
-  if (typeKey == "Mesh") typeKey = "model";
   assetManager.addAsset(typeKey, asset, parentAsset);
   
   // Select the new item
