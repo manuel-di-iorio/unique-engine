@@ -1,6 +1,6 @@
 /// @description Project Saver - Handles saving project data and assets
 
-function UeProjectSaver() constructor {
+function ProjectSaver() constructor {
     
     /**
      * Save the entire project
@@ -110,12 +110,14 @@ function UeProjectSaver() constructor {
       }
       
       // Build assets lists (all assets), including those inside folders
-      var assets = {
-          textures: [],
-          materials: [],
-          models: [],
-          scenes: []
-      };
+    //   var assets = {
+    //       textures: [],
+    //       materials: [],
+    //       models: [],
+    //       scenes: []
+    //   };
+      var assets = [];
+
       // Helper: push uuid if not already added
       function pushUnique(list, uuid, map) {
           if (map[$ uuid] == undefined) {
@@ -127,13 +129,13 @@ function UeProjectSaver() constructor {
       var seen = {};
       var allTextures = assetManager.getAllAssetsByType("Texture");
       for (var i = 0; i < array_length(allTextures); i++) {
-          pushUnique(assets.textures, allTextures[i].uuid, seen);
+          pushUnique(assets, allTextures[i].uuid, seen);
       }
 
       seen = {};
       var allMaterials = assetManager.getAllAssetsByType("Material");
       for (var i = 0; i < array_length(allMaterials); i++) {
-          pushUnique(assets.materials, allMaterials[i].uuid, seen);
+          pushUnique(assets, allMaterials[i].uuid, seen);
       }
 
       seen = {};
@@ -147,18 +149,18 @@ function UeProjectSaver() constructor {
                   continue;
               }
           }
-          pushUnique(assets.models, model.uuid, seen);
+          pushUnique(assets, model.uuid, seen);
       }
 
       seen = {};
       var allScenes = assetManager.getAllAssetsByType("Scene");
       for (var i = 0; i < array_length(allScenes); i++) {
-          pushUnique(assets.scenes, allScenes[i].uuid, seen);
+          pushUnique(assets, allScenes[i].uuid, seen);
       }
       
       return {
-          hierarchy: hierarchy,
-          assets: assets,
+          hierarchy,
+          assets,
           settings: {}
       };
     }

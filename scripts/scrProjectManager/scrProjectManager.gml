@@ -40,7 +40,7 @@ function ProjectManager() constructor {
      * Save the entire project
      */
     function save() {
-        var saver = new UeProjectSaver();
+        var saver = new ProjectSaver();
         saver.save(self);
     }
     
@@ -48,7 +48,7 @@ function ProjectManager() constructor {
      * Load project from disk
      */
     function load() {
-        var loader = new UeProjectLoader();
+        var loader = new ProjectLoader();
         loader.load(self);
     }
     

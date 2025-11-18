@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UeProjectLoader",
   "parent":{
-    "name":"Project Manager",
-    "path":"folders/Scene Editor/Scripts/Project Manager.yy",
+    "name":"Loaders",
+    "path":"folders/Unique Engine/Loaders.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

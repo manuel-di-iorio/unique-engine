@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeProjectSaver",
+  "%Name":"scrProjectManagerSaver",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeProjectSaver",
+  "name":"scrProjectManagerSaver",
   "parent":{
     "name":"Project Manager",
     "path":"folders/Scene Editor/Scripts/Project Manager.yy",
