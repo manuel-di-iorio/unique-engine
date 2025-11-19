@@ -7,7 +7,7 @@
         1.0
       ],
       "visible":true,
-      "uuid":"ecc50e1d-aa11-4200-aefe-181c4dc56ff4",
+      "uuid":"77c5f5f5-fae6-4189-83cd-07d53c14d549",
       "position":[
         0.0,
         0.0,
@@ -21,10 +21,10 @@
         1.0
       ],
       "name":"Cat_0",
-      "model":"c94f8f71-6494-41ae-98df-3b6bd47ccb2f"
+      "model":"bcef9a04-5d53-4a9c-8b0e-0411b1741d6d"
     }
   ],
   "name":"Scene0",
-  "uuid":"64642419-1437-4e2e-9838-485b26c12a4f",
+  "uuid":"d645b126-12e2-4bb2-b938-9ade20ee16c5",
   "type":"Scene"
 }

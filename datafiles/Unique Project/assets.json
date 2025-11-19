@@ -1,7 +1,35 @@
-[
-  "039114bc-cff4-4feb-8edc-5bfc96d081c8",
-  "64642419-1437-4e2e-9838-485b26c12a4f",
-  "8696c19d-ffd5-4702-b1d1-39f5eac0aa32",
-  "cff2a261-c323-4e00-abc0-67aa37e0320e",
-  "d454366a-cfb1-4d3c-85b1-a80d09facf9c"
-]
+{
+  "assets":[
+    {
+      "name":"Texture0",
+      "uuid":"c2b972c5-7f1c-4aa8-b3c9-17ac0b9f6b5b",
+      "type":"Texture"
+    },
+    {
+      "name":"12221_Cat_v1_l3__Material0",
+      "uuid":"27ae4175-0467-434a-a231-3a74f79cb534",
+      "type":"Material"
+    },
+    {
+      "name":"12221_Cat_v1_l3__Material1",
+      "uuid":"9f38c1f5-c4fb-42c2-a58e-3d44bcc923ed",
+      "type":"Material"
+    },
+    {
+      "name":"12221_Cat_v1_l3",
+      "uuid":"d5b5159a-98ac-4c06-b326-d099487af20f",
+      "type":"Mesh"
+    },
+    {
+      "name":"Cat",
+      "uuid":"bcef9a04-5d53-4a9c-8b0e-0411b1741d6d",
+      "type":"Mesh"
+    },
+    {
+      "name":"Scene0",
+      "uuid":"d645b126-12e2-4bb2-b938-9ade20ee16c5",
+      "type":"Scene"
+    }
+  ],
+  "version":"2025.11.16.0"
+}

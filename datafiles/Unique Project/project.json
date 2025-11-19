@@ -1,32 +1,63 @@
 {
-  "hierarchy":[
+  "assets":[
+    {
+      "children":[
+      ],
+      "name":"Texture0",
+      "uuid":"c2b972c5-7f1c-4aa8-b3c9-17ac0b9f6b5b",
+      "type":"Texture"
+    },
     {
       "children":[
         {
-          "key":"mtl\/12221_Cat_v1_l3__Material0"
+          "children":[
+          ],
+          "name":"12221_Cat_v1_l3__Material0",
+          "uuid":"27ae4175-0467-434a-a231-3a74f79cb534",
+          "type":"Material"
         },
         {
-          "key":"mtl\/12221_Cat_v1_l3__Material0"
+          "children":[
+          ],
+          "name":"12221_Cat_v1_l3__Material1",
+          "uuid":"9f38c1f5-c4fb-42c2-a58e-3d44bcc923ed",
+          "type":"Material"
         },
         {
-          "key":"mtl\/12221_Cat_v1_l3__Material1"
-        },
-        {
-          "key":"mtl\/12221_Cat_v1_l3__Material1"
-        },
-        {
-          "key":"msh\/12221_Cat_v1_l3"
+          "children":[
+            {
+              "children":[
+              ],
+              "name":"Cat",
+              "uuid":"bcef9a04-5d53-4a9c-8b0e-0411b1741d6d",
+              "type":"Mesh"
+            }
+          ],
+          "name":"12221_Cat_v1_l3",
+          "uuid":"d5b5159a-98ac-4c06-b326-d099487af20f",
+          "type":"Mesh"
         }
       ],
-      "key":"fld\/12221_Cat_v1_l3"
+      "name":"12221_Cat_v1_l3",
+      "uuid":"26943897-447f-48a7-be11-0b059e097390",
+      "type":"Folder"
     },
     {
-      "key":"txr\/Texture0"
-    },
-    {
-      "key":"scn\/Scene0"
+      "children":[
+        {
+          "children":[
+          ],
+          "name":"Cat_0",
+          "uuid":"77c5f5f5-fae6-4189-83cd-07d53c14d549",
+          "type":"ModelInstance"
+        }
+      ],
+      "name":"Scene0",
+      "uuid":"d645b126-12e2-4bb2-b938-9ade20ee16c5",
+      "type":"Scene"
     }
   ],
   "settings":{
-  }
+  },
+  "version":"2025.11.16.0"
 }

@@ -35,7 +35,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
             visible,
             parent: parent && !parent[$ "isScene"] ? parent.uuid : undefined,
             renderOrder,
-            geometry: geometry ? geometry.uuid : undefined,
+            geometry: geometry ? geometry.toJSON() : undefined,
             material: material ? material.uuid : undefined,
             layers: layers.mask,
             

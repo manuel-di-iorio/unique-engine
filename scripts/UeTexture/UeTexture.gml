@@ -318,6 +318,12 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         buffer_get_surface(buffer, spriteSurf, buffer_tell(buffer));
         surface_free(spriteSurf);
     }
+
+    function export(fname) {
+        if (__cachedSprite == undefined) return self;
+        sprite_save(__cachedSprite, 0, fname);
+        return self;
+    }
     
     /**
      * --- Helpers --- 

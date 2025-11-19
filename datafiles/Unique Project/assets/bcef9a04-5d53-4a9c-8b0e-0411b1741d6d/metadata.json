@@ -1,4 +1,10 @@
 {
+  "visible":true,
+  "type":"Mesh",
+  "parent":"d5b5159a-98ac-4c06-b326-d099487af20f",
+  "children":[
+  ],
+  "name":"Cat",
   "renderOrder":0.0,
   "layers":1.0,
   "pz":0.0,
@@ -10,22 +16,18 @@
   "rx":0.0,
   "sz":1.0,
   "sy":1.0,
-  "visible":true,
   "sx":1.0,
   "uz":-1.0,
   "uy":0.0,
   "ux":0.0,
-  "type":"Mesh",
-  "parent":"502ca01a-e73f-4a29-8f24-8df099b916e6",
-  "children":[
-    "c94f8f71-6494-41ae-98df-3b6bd47ccb2f"
-  ],
-  "name":"12221_Cat_v1_l3",
-  "uuid":"039114bc-cff4-4feb-8edc-5bfc96d081c8",
+  "uuid":"bcef9a04-5d53-4a9c-8b0e-0411b1741d6d",
   "geometry":{
     "name":null,
-    "uuid":"14f509c7-fd23-4862-85d6-fe25f958f3ed",
+    "uuid":"e3c065ac-cea0-47c5-9003-b3ab7f1a1544",
     "format":{
+      "name":"",
+      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
+      "type":"VertexFormat",
       "attrs":[
         {
           "kind":0
@@ -39,12 +41,9 @@
         {
           "kind":3
         }
-      ],
-      "name":"",
-      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
-      "type":"VertexFormat"
+      ]
     },
     "type":"BufferGeometry"
   },
-  "material":null
+  "material":"9f38c1f5-c4fb-42c2-a58e-3d44bcc923ed"
 }
