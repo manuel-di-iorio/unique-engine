@@ -42,6 +42,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     self._positionStart = new UeVector3();
     self._rotationStart = new UeQuaternion();
     self._scaleStart = new UeVector3();
+    self._positionStartWorld = new UeVector3();
     
     // === Build properties ===
     __xVec = new UeVector3(1, 0, 0);  // Unit vector for X axis
@@ -393,6 +394,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self._positionStart.copy(self.object.position);
         self._rotationStart.copy(self.object.rotation);
         self._scaleStart.copy(self.object.scale);
+        self.object.getWorldPosition(self._positionStartWorld);
     }
 
     /**
@@ -462,50 +464,64 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         if (!self.object) return;
     
         if (self.mode == "move") {
-            var newPos = self._positionStart.clone();
-            var delta = self.delta.clone();
+            var worldDelta = self.delta.clone();
             
+            // --- Constrain Delta to Axis ---
             if (self.space == "local") {
-                // Transform delta from world space to object's local space
-                // Mathematical explanation: multiply by inverse rotation to "undo" the object's rotation
-                var invRotation = self.object.rotation.clone().invert();
-                delta.applyQuaternion(invRotation);
+                // We need the object's world rotation to align the delta
+                var objectWorldRot = new UeQuaternion();
+                self.object.getWorldQuaternion(objectWorldRot);
+                var invRot = objectWorldRot.clone().invert();
+                
+                // Transform world delta to "aligned" space
+                worldDelta.applyQuaternion(invRot);
+                
+                // Apply constraints
+                if (self.axis == "X") worldDelta.set(worldDelta.x, 0, 0);
+                else if (self.axis == "Y") worldDelta.set(0, worldDelta.y, 0);
+                else if (self.axis == "Z") worldDelta.set(0, 0, worldDelta.z);
+                else if (self.axis == "XY") worldDelta.z = 0;
+                else if (self.axis == "XZ") worldDelta.y = 0;
+                else if (self.axis == "YZ") worldDelta.x = 0;
+                
+                // Transform back to world space
+                worldDelta.applyQuaternion(objectWorldRot);
+            } else {
+                // World space constraints
+                if (self.axis == "X") worldDelta.set(worldDelta.x, 0, 0);
+                else if (self.axis == "Y") worldDelta.set(0, worldDelta.y, 0);
+                else if (self.axis == "Z") worldDelta.set(0, 0, worldDelta.z);
+                else if (self.axis == "XY") worldDelta.z = 0;
+                else if (self.axis == "XZ") worldDelta.y = 0;
+                else if (self.axis == "YZ") worldDelta.x = 0;
             }
-    
-            // Apply delta only along the selected axis/axes
-            if (self.axis == "X") newPos.x += delta.x;
-            else if (self.axis == "Y") newPos.y += delta.y;
-            else if (self.axis == "Z") newPos.z += delta.z;
-            else if (self.axis == "XZ") {
-                newPos.x += delta.x;
-                newPos.z += delta.z;
+
+            // Calculate Target World Position
+            var targetWorldPos = self._positionStartWorld.clone().add(worldDelta);
+            
+            // Convert to Parent Local Space
+            if (self.object.parent != undefined) {
+                var parentInv = new UeMatrix4().copy(self.object.parent.matrixWorld).invert();
+                targetWorldPos.applyMatrix4(parentInv);
             }
-            else if (self.axis == "YZ") {
-                newPos.y += delta.y;
-                newPos.z += delta.z;
-            }
-            else if (self.axis == "XY") {
-                newPos.x += delta.x;
-                newPos.y += delta.y;
-            }
-            else if (self.axis == "XYZ") {
-                newPos.add(delta);  // Free movement in all axes
-            }
-  
-            // Apply snapping if enabled - rounds to nearest snap increment
+            
+            // Apply to object (targetWorldPos is now the new local position)
+            var newPos = targetWorldPos;
+            
+            // Apply snapping (on local position for consistency with previous behavior, or we could snap worldDelta)
+            // For now, keeping local snapping as it maps to the grid usually expected in local editing
             if (self.translationSnap != undefined) {
                 if (self.axis == "X") newPos.x = round(newPos.x / self.translationSnap) * self.translationSnap;
                 else if (self.axis == "Y") newPos.y = round(newPos.y / self.translationSnap) * self.translationSnap;
                 else if (self.axis == "Z") newPos.z = round(newPos.z / self.translationSnap) * self.translationSnap;
                 else if (self.axis == "XYZ") {
-                    delta.x = round(delta.x / self.translationSnap) * self.translationSnap;
-                    delta.y = round(delta.y / self.translationSnap) * self.translationSnap;
-                    delta.z = round(delta.z / self.translationSnap) * self.translationSnap;
-                    newPos.add(delta);
+                    newPos.x = round(newPos.x / self.translationSnap) * self.translationSnap;
+                    newPos.y = round(newPos.y / self.translationSnap) * self.translationSnap;
+                    newPos.z = round(newPos.z / self.translationSnap) * self.translationSnap;
                 }
             }
     
-            // Clamp to configured limits to prevent object from going out of bounds
+            // Clamp to configured limits
             newPos.x = clamp(newPos.x, self.minX, self.maxX);
             newPos.y = clamp(newPos.y, self.minY, self.maxY);
             newPos.z = clamp(newPos.z, self.minZ, self.maxZ);

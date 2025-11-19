@@ -9,7 +9,7 @@ if (display_aa >= 8) {
 }
 
 // Maximize the window
-call_later(3, time_source_units_frames, function() {
+call_later(11, time_source_units_frames, function() {
     window_command_run(window_command_maximize);
 });
 

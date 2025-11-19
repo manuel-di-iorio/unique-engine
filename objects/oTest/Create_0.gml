@@ -30,5 +30,4 @@ setScene = function(idx) {
     layer_background_blend(bgLayer, currentDemo.bg);
 }
 
-display_reset(8, false);
-setScene(8);
+setScene(0);
