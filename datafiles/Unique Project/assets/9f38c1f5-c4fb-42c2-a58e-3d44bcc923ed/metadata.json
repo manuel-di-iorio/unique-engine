@@ -1,26 +1,32 @@
 {
+  "depthTest":true,
+  "forceSinglePass":false,
+  "side":2.0,
+  "opacity":1.0,
+  "transparent":false,
   "textures":{
     "map":"c2b972c5-7f1c-4aa8-b3c9-17ac0b9f6b5b",
     "emissiveMap":"8cd414ef-93bd-4c24-a73a-f6ac6d3fc813"
   },
   "lights":2.0,
+  "type":"Material",
+  "name":"12221_Cat_v1_l3__Material1",
   "depthWrite":true,
   "depthFunc":4.0,
   "alphaTest":0.0,
-  "type":"Material",
   "colorWrite":true,
   "blending":false,
   "blendEquation":1.0,
   "blendEquationAlpha":1.0,
-  "name":"12221_Cat_v1_l3__Material1",
   "blendSrc":5.0,
   "blendDst":6.0,
   "blendSrcAlpha":2.0,
+  "uuid":"9f38c1f5-c4fb-42c2-a58e-3d44bcc923ed",
   "blendDstAlpha":6.0,
   "uniforms":{
     "ueEmissiveIntensity":{
       "value":0.0,
-      "type":0
+      "type":0.0
     },
     "ueEmissive":{
       "value":[
@@ -28,14 +34,8 @@
         0.0,
         0.0
       ],
-      "type":5
+      "type":5.0
     }
   },
-  "shader":"sh_ue_basic",
-  "depthTest":true,
-  "forceSinglePass":false,
-  "side":2.0,
-  "opacity":1.0,
-  "transparent":false,
-  "uuid":"9f38c1f5-c4fb-42c2-a58e-3d44bcc923ed"
+  "shader":"sh_ue_basic"
 }

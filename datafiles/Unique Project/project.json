@@ -1,4 +1,7 @@
 {
+  "settings":{
+  },
+  "version":"2025.11.16.0",
   "assets":[
     {
       "children":[
@@ -44,20 +47,10 @@
     },
     {
       "children":[
-        {
-          "children":[
-          ],
-          "name":"Cat_0",
-          "uuid":"77c5f5f5-fae6-4189-83cd-07d53c14d549",
-          "type":"ModelInstance"
-        }
       ],
       "name":"Scene0",
       "uuid":"d645b126-12e2-4bb2-b938-9ade20ee16c5",
       "type":"Scene"
     }
-  ],
-  "settings":{
-  },
-  "version":"2025.11.16.0"
+  ]
 }

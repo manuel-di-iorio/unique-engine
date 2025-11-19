@@ -1,27 +1,27 @@
 {
   "children":[
     {
+      "model":"bcef9a04-5d53-4a9c-8b0e-0411b1741d6d",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
       "visible":true,
-      "uuid":"77c5f5f5-fae6-4189-83cd-07d53c14d549",
       "position":[
-        0.0,
+        -49.637493616220127,
         0.0,
         0.0
       ],
+      "uuid":"77c5f5f5-fae6-4189-83cd-07d53c14d549",
       "type":"ModelInstance",
+      "name":"Cat_0",
       "rotation":[
         0.0,
         0.0,
         0.0,
         1.0
-      ],
-      "name":"Cat_0",
-      "model":"bcef9a04-5d53-4a9c-8b0e-0411b1741d6d"
+      ]
     }
   ],
   "name":"Scene0",

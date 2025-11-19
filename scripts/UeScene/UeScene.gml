@@ -59,7 +59,6 @@ function UeScene(data = {}): UeObject3D(data) constructor {
                     instance.type = "ModelInstance";
                     instance.object = model;
                     instance.isInstance = true;
-                    instance.__rotationEuler = new UeEuler();
                     
                     // Apply transform
                     if (child[$ "position"] != undefined) {

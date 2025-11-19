@@ -322,13 +322,21 @@ function UeMaterial(data = {}) constructor {
                         // Link to existing texture object
                         textures[$ textureName] = texturesByUUID[$ textureUUID];
                     } else {
-                        // Keep UUID for later linking
-                        textures[$ textureName] = textureUUID;
+                        // Check if it's a default texture
+                        if (textureUUID == global.UE_TEXTURE_MAP.uuid) {
+                            textures[$ textureName] = global.UE_TEXTURE_MAP;
+                        } else if (textureUUID == global.UE_TEXTURE_EMISSIVE.uuid) {
+                            textures[$ textureName] = global.UE_TEXTURE_EMISSIVE;
+                        } else {
+                            // Keep UUID for later linking (texture not found)
+                            textures[$ textureName] = textureUUID;
+                        }
                     }
                 }
             }
         }
         
+        build();
         return self;
     }
     

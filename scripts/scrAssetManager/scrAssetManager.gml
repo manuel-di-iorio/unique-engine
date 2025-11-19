@@ -182,12 +182,34 @@ function AssetManager() constructor {
         // Add root assets
         for (var i = 0; i < array_length(rootAssets); i++) {
             array_push(result, rootAssets[i]);
+            
+            // If collecting meshes, also collect their children recursively
+            if (type == "Mesh" && rootAssets[i][$ "children"] != undefined) {
+                __collectMeshChildren(rootAssets[i], result);
+            }
         }
         
         // Recursively collect from folders
         __collectAssetsFromFolders(self.folders, type, result);
         
         return result;
+    }
+    
+    /**
+     * Helper: recursively collect mesh children
+     */
+    function __collectMeshChildren(mesh, result) {
+        for (var i = 0; i < array_length(mesh.children); i++) {
+            var child = mesh.children[i];
+            if (child[$ "isMesh"] == true) {
+                array_push(result, child);
+                
+                // Recurse into this child's children
+                if (child[$ "children"] != undefined) {
+                    __collectMeshChildren(child, result);
+                }
+            }
+        }
     }
     
     /**
@@ -207,6 +229,11 @@ function AssetManager() constructor {
                         array_push(childFolders, child);
                     } else if (child[$ "type"] == type) {
                         array_push(result, child);
+                        
+                        // If collecting meshes, also collect their children recursively
+                        if (type == "Mesh" && child[$ "children"] != undefined) {
+                            __collectMeshChildren(child, result);
+                        }
                     }
                 }
                 

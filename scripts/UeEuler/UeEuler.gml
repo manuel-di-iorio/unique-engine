@@ -61,7 +61,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
         self.x = v.x;
         self.y = v.y;
         self.z = v.z;
-        if (order != undefined) self._order = self.order;
+        if (order != undefined) self.order = self.order;
         return self;
     }
 
@@ -74,14 +74,14 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
     
     function setFromQuaternion(q, order = undefined) {
         gml_pragma("forceinline");
-        order ??= self._order;
+        order ??= self.order;
         global.UE_DUMMY_MATRIX4.makeRotationFromQuaternion(q);
         return self.setFromRotationMatrix(global.UE_DUMMY_MATRIX4, order);
     }
     
     function setFromRotationMatrix(m, order) {
         gml_pragma("forceinline");
-        order ??= self._order;
+        order ??= self.order;
     
         var te = m.data;
         var m11 = te[0],  m12 = te[4],  m13 = te[8];
@@ -156,7 +156,6 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
             break;
         }
     
-        self._order = order;
         return self;
     }
 

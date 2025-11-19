@@ -325,6 +325,22 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         return self;
     }
     
+    function import(fname) {
+        if (!file_exists(fname)) return self;
+        
+        // Delete old sprite if it exists
+        if (sprite_exists(sprite)) {
+            sprite_delete(sprite);
+        }
+        
+        // Load the sprite from file
+        sprite = sprite_add(fname, 0, false, false, 0, 0);
+        __cachedSprite = sprite;
+        __cachedTexture = sprite_exists(sprite) ? sprite_get_texture(sprite, 0) : undefined;
+        
+        return self;
+    }
+    
     /**
      * --- Helpers --- 
      */

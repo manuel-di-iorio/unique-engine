@@ -77,15 +77,17 @@ function ProjectSaver() constructor {
                     }
                 }
 
-                // Push child into project.json structure
-                assetNode = { 
-                    uuid: asset.uuid,
-                    type: asset.type, 
-                    name: asset.name,
-                    children: []
-                };
+                // Push child into project.json structure (skip ModelInstance as they're in scene metadata)
+                if (assetType != "ModelInstance") {
+                    assetNode = { 
+                        uuid: asset.uuid,
+                        type: asset.type, 
+                        name: asset.name,
+                        children: []
+                    };
 
-                array_push(projectAssets, assetNode);
+                    array_push(projectAssets, assetNode);
+                }
             }
 
             var childProjectAssets = projectAssets;

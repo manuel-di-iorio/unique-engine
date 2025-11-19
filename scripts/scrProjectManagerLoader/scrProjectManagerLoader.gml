@@ -1,4 +1,6 @@
 function ProjectLoader() constructor {
+  treeviewItemsByUUID = {};
+
   /**
    * Load project from project.json
    * @param {Struct} projectManager - The project manager instance
@@ -13,9 +15,105 @@ function ProjectLoader() constructor {
     var treeview = global.UI.Main.Assets.Treeview;
     __recurseNodes(projectDir, treeview, projectData.assets, undefined, undefined);
     __linkNodes();
+    
+    // Clear the cache
+    treeviewItemsByUUID = {};
+    
     projectManager.markAsSaved();
     show_debug_message("Project loaded successfully!");
   }
+
+  function __linkNodes() {
+    var assetManager = oSceneEditor.assetManager;
+    
+    // 1. Collect all assets by UUID for linking
+    var texturesByUUID = {};
+    var objectsByUUID = {};
+    
+    var textures = assetManager.getAllAssetsByType("Texture");
+    for (var i = 0; i < array_length(textures); i++) {
+        var texture = textures[i];
+        texturesByUUID[$ texture.uuid] = texture;
+        // Load texture metadata
+        if (texture[$ "__metadata"] != undefined) {
+            texture.fromJSON(texture.__metadata);
+            delete texture.__metadata;
+        }
+    }
+    
+    var meshes = assetManager.getAllAssetsByType("Mesh");
+    for (var i = 0; i < array_length(meshes); i++) {
+        var mesh = meshes[i];
+        objectsByUUID[$ mesh.uuid] = mesh;
+        // Load mesh metadata (transform, etc.)
+        if (mesh[$ "__metadata"] != undefined) {
+            mesh.fromJSON(mesh.__metadata);
+        }
+    }
+    
+    // 2. Link Materials (Textures)
+    var materials = assetManager.getAllAssetsByType("Material");
+    var materialsByUUID = {};
+    for (var i = 0; i < array_length(materials); i++) {
+        var material = materials[i];
+        materialsByUUID[$ material.uuid] = material;
+        if (material[$ "__metadata"] != undefined) {
+            material.fromJSON(material.__metadata, texturesByUUID);
+            delete material.__metadata;
+        }
+    }
+    
+    // 3. Link Meshes (Materials)
+    for (var i = 0; i < array_length(meshes); i++) {
+        var mesh = meshes[i];
+        if (mesh[$ "__metadata"] != undefined) {
+            var materialUUID = mesh.__metadata[$ "material"];
+            if (materialUUID != undefined && materialsByUUID[$ materialUUID] != undefined) {
+                mesh.material = materialsByUUID[$ materialUUID];
+            }
+            delete mesh.__metadata;
+        }
+    }
+    
+    // 3. Link Scenes (ModelInstances)
+    var scenes = assetManager.getAllAssetsByType("Scene");
+    for (var i = 0; i < array_length(scenes); i++) {
+        var scene = scenes[i];
+        if (scene[$ "__metadata"] != undefined) {
+            scene.fromJSON(scene.__metadata, objectsByUUID);
+            delete scene.__metadata;
+            
+            // 4. Update TreeView for new instances
+            // The scene.fromJSON() created new ModelInstance objects and added them to the scene children
+            // We need to create TreeView items for them
+            if (treeviewItemsByUUID[$ scene.uuid] != undefined) {
+                var sceneTreeItem = treeviewItemsByUUID[$ scene.uuid];
+                
+                // We need to find which children were added as instances
+                for (var j = 0; j < array_length(scene.children); j++) {
+                    var child = scene.children[j];
+                    if (child.type == "ModelInstance") {
+                        // Initialize rotation euler for inspector
+                        child.__rotationEuler = new UeEuler();
+                        child.__rotationEuler.setFromQuaternion(child.rotation);
+                        
+                        // Create TreeView item for the instance
+                        var icon = __iconForType("ModelInstance");
+                        var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
+                            treeview: sceneTreeItem.treeview,
+                            assetType: "ModelInstance",
+                            type: "ModelInstance",
+                            icon,
+                            asset: child
+                        });
+                        sceneTreeItem.addChild(tvItem);
+                    }
+                }
+            }
+        }
+    }
+  }
+
 
   // Helper: map type -> icon
   function __iconForType(type) {
@@ -27,6 +125,8 @@ function ProjectLoader() constructor {
       case "Scene": return sprUiScene;
       case "Light": return sprUiLight;
       case "Camera": return sprUiCamera;
+      case "ModelInstance": return sprUiObject;
+
     }
     return undefined;
   }
@@ -50,26 +150,40 @@ function ProjectLoader() constructor {
       case "Mesh": asset = new UeMesh(); break;
       case "Scene": asset = new UeScene(); break;
       case "Light": asset = new UeLight(); break;
-      case "Camera": asset = new UeObject3D(); asset[$ "isCamera"] = true; asset[$ "type"] = "Camera"; break;
+      case "Camera": asset = new UeObject3D(); asset.isCamera = true; asset.type = "Camera"; break;
     }
 
     if (asset != undefined) {
-      // Import the asset metadata
-      // var metadataPath = projectDir + "assets/" + node.uuid + "/metadata.json";
-      // if (file_exists(metadataPath) && is_callable(asset[$ "fromJSON"])) {
-      //   var meta = __readJson(metadataPath);
-      //   asset[$ "fromJSON"](meta);
-      // }
+      asset.name = node.name;
+      asset.uuid = node.uuid;
 
-      // Attempt to import binary resources (geometry/texture) if import() exists
+      // Import the asset metadata
+      var metadataPath = projectDir + "assets/" + node.uuid + "/metadata.json";
+      if (file_exists(metadataPath)) {
+        var meta = __readJson(metadataPath);
+        asset.__metadata = meta;
+      }
+
+      // For meshes, add the rotation euler
+      if (asset.type == "Mesh") {
+        asset.__rotationEuler = new UeEuler();
+        asset.__rotationEuler.setFromQuaternion(asset.rotation);
+        
+        // Load geometry if it exists
+        var geometryPath = projectDir + "assets/" + node.uuid + "/geometry.buf";
+        if (file_exists(geometryPath)) {
+          var geometry = new UeBufferGeometry();
+          geometry.import(geometryPath);
+          asset.geometry = geometry;
+        }
+      }
+
+      // Attempt to import binary resources (textures) if import() exists
       if (is_callable(asset[$ "import"])) {
         var assetPath = projectDir + "assets/" + node.uuid;
         if (directory_exists(assetPath)) {
           if (node.type == "Texture" && file_exists(assetPath + "/texture.png")) {
-            asset[$ "import"](assetPath + "/texture.png");
-          }
-          if (node.type == "Mesh" && file_exists(assetPath + "/geometry.buf")) {
-            asset[$ "import"](assetPath + "/geometry.buf");
+            asset.import(assetPath + "/texture.png");
           }
         }
       }
@@ -95,6 +209,10 @@ function ProjectLoader() constructor {
         icon,
         asset
       });
+      
+      if (node[$ "uuid"] != undefined) {
+        treeviewItemsByUUID[$ node.uuid] = tvItem;
+      }
 
       // Attach to UI
       if (parentTreeviewItem != undefined) {
@@ -123,4 +241,3 @@ function ProjectLoader() constructor {
       return json_parse(jsonString);
   }
 }
-

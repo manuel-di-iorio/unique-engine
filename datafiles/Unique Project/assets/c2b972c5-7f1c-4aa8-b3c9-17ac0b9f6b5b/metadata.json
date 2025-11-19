@@ -1,5 +1,4 @@
 {
-  "spriteBuffSize":0.0,
   "filter":true,
   "generateMipmaps":true,
   "repeat":[
@@ -10,21 +9,25 @@
     0.0,
     {
       "x":0.0,
-      "y":0.0
+      "y":{
+        "x":0.0,
+        "y":0.0
+      }
     }
   ],
   "flipX":false,
   "flipY":false,
-  "wrapS":1,
-  "wrapT":1,
+  "wrapS":1.0,
+  "wrapT":1.0,
   "userData":{
   },
-  "uuid":"c2b972c5-7f1c-4aa8-b3c9-17ac0b9f6b5b",
-  "type":"Texture",
   "center":[
     0.0,
     0.0
   ],
+  "uuid":"c2b972c5-7f1c-4aa8-b3c9-17ac0b9f6b5b",
+  "type":"Texture",
+  "name":"Texture0",
   "rotation":0.0,
-  "name":"Texture0"
+  "spriteBuffSize":0.0
 }
