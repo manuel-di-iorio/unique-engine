@@ -280,7 +280,7 @@ function UeMaterial(data = {}) constructor {
         };
     }
 
-    function fromJSON(data, texturesByUUID) {
+    function fromJSON(data, texturesByUUID = {}) {
         gml_pragma("forceinline");
         uuid = data[$ "uuid"];
         name = data[$ "name"];

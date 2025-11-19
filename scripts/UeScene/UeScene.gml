@@ -35,7 +35,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
      * Load scene data from JSON
      * The children are linked using the objectsByUUID
      */
-    function fromJSON(data, objectsByUUID) {
+    function fromJSON(data, objectsByUUID = {}) {
         gml_pragma("forceinline");
 
         uuid = data[$ "uuid"];
