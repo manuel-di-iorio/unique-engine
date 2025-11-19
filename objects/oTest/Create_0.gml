@@ -14,6 +14,7 @@ scenes = [
     { name: "Assimp Loader", obj: oSceneAssimpLoader, bg: #147FCC }, // 5
     { name: "OBJ Loader", obj: oSceneObjLoader, bg: #147FCC }, // 6
     { name: "TransformControls", obj: oSceneTransformControls, bg: #333333 }, // 7
+    { name: "Project Loader", obj: oSceneProjectLoader, bg: #147FCC }, // 7
 ];
 
 setScene = function(idx) {
@@ -29,4 +30,4 @@ setScene = function(idx) {
     layer_background_blend(bgLayer, currentDemo.bg);
 }
 
-setScene(0);
+setScene(8);

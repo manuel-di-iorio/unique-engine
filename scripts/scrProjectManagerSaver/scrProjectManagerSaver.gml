@@ -12,11 +12,29 @@ function ProjectSaver() constructor {
         var projectJsonPath = projectDir + "project.json";
         var assetsDir = projectDir + "assets/";
 
+        // Check if this is the first save (no existing project files)
+        var isFirstSave = !file_exists(projectJsonPath) || !file_exists(assetsJsonPath);
+        
+        if (isFirstSave) {
+            // Full save
+            show_debug_message("Performing FULL save...");
+            __performFullSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath);
+        } else {
+            // Incremental save
+            show_debug_message("Performing INCREMENTAL save...");
+            __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath);
+        }
+
+        projectManager.markAsSaved();
+    }
+    
+    /**
+     * Perform a full save of all assets
+     */
+    function __performFullSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath) {
         directory_destroy(projectDir);
 
         // Ensure project dirs exists
-        var isFirstSave = !directory_exists(projectDir);
-        if (isFirstSave) directory_create(projectDir);
         if (!directory_exists(projectDir)) directory_create(projectDir);
         if (!directory_exists(assetsDir)) directory_create(assetsDir);
 
@@ -38,8 +56,89 @@ function ProjectSaver() constructor {
         // Write assets.json and project.json
         self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
         self.__writeJson(projectJsonPath, project);
-
-        projectManager.markAsSaved();
+    }
+    
+    /**
+     * Perform an incremental save of only changed assets
+     */
+    function __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath) {
+        var changes = projectManager.changes;
+        var changeUUIDs = struct_get_names(changes);
+        
+        show_debug_message($"Processing {array_length(changeUUIDs)} changes");
+        
+        // Load existing assets.json
+        var assetsJson = json_parse(self.__readFile(assetsJsonPath));
+        var assets = assetsJson.assets;
+        
+        for (var i = 0; i < array_length(changeUUIDs); i++) {
+            var uuid = changeUUIDs[i];
+            var change = changes[$ uuid];
+            var action = change.action;
+            var asset = change.asset;
+            
+            show_debug_message($"  {action}: {asset.name} ({uuid})");
+            
+            switch (action) {
+                case "create":
+                case "edit":
+                    // Update or add to assets.json
+                    var assetIndex = -1;
+                    for (var j = 0; j < array_length(assets); j++) {
+                        if (assets[j].uuid == uuid) {
+                            assetIndex = j;
+                            break;
+                        }
+                    }
+                    
+                    if (assetIndex == -1) {
+                        // Add new asset
+                        array_push(assets, { uuid: uuid, type: asset.type, name: asset.name });
+                    } else {
+                        // Update existing
+                        assets[assetIndex].name = asset.name;
+                        assets[assetIndex].type = asset.type;
+                    }
+                    
+                    // Save asset metadata and resources
+                    var assetPath = assetsDir + uuid;
+                    if (!directory_exists(assetPath)) directory_create(assetPath);
+                    
+                    var assetToJSON = asset[$ "toJSON"];
+                    self.__writeJson(assetPath + "/metadata.json", is_callable(assetToJSON) ? assetToJSON() : asset);
+                    
+                    // Export binary resources
+                    switch (asset.type) {
+                        case "Texture":
+                            asset.export(assetPath + "/texture.png");
+                            break;
+                        case "Mesh":  
+                            var assetGeometry = asset[$ "geometry"];
+                            if (assetGeometry != undefined) assetGeometry.export(assetPath + "/geometry.buf");
+                            break;
+                    }
+                    break;
+                    
+                case "delete":
+                    // Remove from assets.json
+                    for (var j = array_length(assets) - 1; j >= 0; j--) {
+                        if (assets[j].uuid == uuid) {
+                            array_delete(assets, j, 1);
+                            break;
+                        }
+                    }
+                    
+                    // Delete asset directory
+                    var assetPath = assetsDir + uuid;
+                    if (directory_exists(assetPath)) {
+                        directory_destroy(assetPath);
+                    }
+                    break;
+            }
+        }
+        
+        // Write updated assets.json
+        self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
     }
 
     function __traverseTreeview(assetsDir, assetsMap, assets, treeviewChildren, projectAssets) {
@@ -105,5 +204,13 @@ function ProjectSaver() constructor {
         buffer_write(buf, buffer_text, jsonString);
         buffer_save(buf, path);
         buffer_delete(buf);
+    }
+    
+    function __readFile(path) {
+        if (!file_exists(path)) return "";
+        var buf = buffer_load(path);
+        var text = buffer_read(buf, buffer_text);
+        buffer_delete(buf);
+        return text;
     }
 }

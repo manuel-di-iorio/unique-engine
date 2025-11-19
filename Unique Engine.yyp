@@ -96,7 +96,7 @@
     {"id":{"name":"oSceneLinesRaycasting","path":"objects/oSceneLinesRaycasting/oSceneLinesRaycasting.yy",},},
     {"id":{"name":"oSceneMeshRaycasting","path":"objects/oSceneMeshRaycasting/oSceneMeshRaycasting.yy",},},
     {"id":{"name":"oSceneObjLoader","path":"objects/oSceneObjLoader/oSceneObjLoader.yy",},},
-    {"id":{"name":"oSceneProjectDemo","path":"objects/oSceneProjectDemo/oSceneProjectDemo.yy",},},
+    {"id":{"name":"oSceneProjectLoader","path":"objects/oSceneProjectLoader/oSceneProjectLoader.yy",},},
     {"id":{"name":"oScenePyramids","path":"objects/oScenePyramids/oScenePyramids.yy",},},
     {"id":{"name":"oSceneTransformControls","path":"objects/oSceneTransformControls/oSceneTransformControls.yy",},},
     {"id":{"name":"oSceneTree","path":"objects/oSceneTree/oSceneTree.yy",},},
@@ -235,8 +235,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
     {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
+    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

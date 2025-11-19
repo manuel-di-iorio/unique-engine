@@ -1,0 +1,1 @@
+renderer.render(project.scene, camera);
