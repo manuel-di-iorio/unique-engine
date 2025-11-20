@@ -22,7 +22,7 @@ function ProjectSaver() constructor {
         } else {
             // Incremental save
             show_debug_message("Performing INCREMENTAL save...");
-            __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath);
+            __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath);
         }
 
         projectManager.markAsSaved();
@@ -45,7 +45,7 @@ function ProjectSaver() constructor {
         var assets = []; // List of assets to save in assets.json
         // Project structure to save in project.json
         var project = {
-            settings: {},
+            settings: self.__getProjectSettings(),
             version: global.UE_VERSION,
             assets: []
         }
@@ -61,7 +61,7 @@ function ProjectSaver() constructor {
     /**
      * Perform an incremental save of only changed assets
      */
-    function __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath) {
+    function __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath) {
         var changes = projectManager.changes;
         var changeUUIDs = struct_get_names(changes);
         
@@ -139,6 +139,47 @@ function ProjectSaver() constructor {
         
         // Write updated assets.json
         self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
+        
+        // Update project.json settings
+        if (file_exists(projectJsonPath)) {
+            var projectData = json_parse(self.__readFile(projectJsonPath));
+            projectData.settings = self.__getProjectSettings();
+            self.__writeJson(projectJsonPath, projectData);
+        }
+    }
+
+    function __getProjectSettings() {
+        var sm = oSceneEditor.sceneManager;
+        var cameraSettings = {
+            position: [100, -300, 70],
+            target: [0, 0, 0],
+            damping: true
+        };
+
+        if (sm.camera != undefined) {
+            cameraSettings.position = [sm.camera.x, sm.camera.y, sm.camera.z];
+        }
+        if (sm.orbit != undefined) {
+            cameraSettings.target = [sm.orbit.target.x, sm.orbit.target.y, sm.orbit.target.z];
+            cameraSettings.damping = sm.orbit.enableDamping;
+        }
+
+        var counters = {
+            textures: global.UI_ASSETS_TEXTURES_ID ?? 0,
+            materials: global.UI_ASSETS_MATERIALS_ID ?? 0,
+            models: global.UI_ASSETS_MODELS_ID ?? 0,
+            lights: global.UI_ASSETS_LIGHTS_ID ?? 0,
+            cameras: global.UI_ASSETS_CAMERAS_ID ?? 0,
+            scenes: global.UI_ASSETS_SCENES_ID ?? 0,
+            instances: global.UI_ASSETS_INSTANCE_ID ?? 0,
+            folders: global.UI_ASSETS_FOLDERS_ID ?? 0
+        };
+
+        return {
+            camera: cameraSettings,
+            counters: counters,
+            activeTool: oSceneEditor.editorManager.activeTool
+        };
     }
 
     function __traverseTreeview(assetsDir, assetsMap, assets, treeviewChildren, projectAssets) {

@@ -52,14 +52,13 @@ function EditorUiMenu(ui) constructor {
             
             // Recreate the UI elements
             ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
-            // ui.SceneTools = new UiNode({ name: "SceneTools", width: 300, height: 40, position: "absolute" });
             
             editorManager.treeview = new EditorUiAssets(ui);
             editorManager.inspector = new EditorUiInspector(ui);
+            editorManager.sceneTools = new EditorUiSceneTools(global.UI.Overlay);
 
             ui.add(ui.Assets, ui.Scene, ui.Inspector);
-            // ui.Scene.add(ui.SceneTools);
-
+            
             projectManager.loaded = true;
             
             // Load project assets

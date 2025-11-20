@@ -12,6 +12,12 @@ function ProjectLoader() constructor {
     if (!file_exists(projectJsonPath)) return;
 
     var projectData = __readJson(projectJsonPath);
+    
+    // Apply settings
+    if (projectData[$ "settings"] != undefined) {
+        self.__applyProjectSettings(projectData.settings);
+    }
+
     var treeview = global.UI.Main.Assets.Treeview;
     __recurseNodes(projectDir, treeview, projectData.assets, undefined, undefined);
     __linkNodes();
@@ -22,6 +28,56 @@ function ProjectLoader() constructor {
     projectManager.markAsSaved();
     show_debug_message("Project loaded successfully!");
   }
+  
+  function __applyProjectSettings(settings) {
+        // Counters
+        if (settings[$ "counters"] != undefined) {
+            var c = settings.counters;
+            if (c[$ "textures"] != undefined) global.UI_ASSETS_TEXTURES_ID = c.textures;
+            if (c[$ "materials"] != undefined) global.UI_ASSETS_MATERIALS_ID = c.materials;
+            if (c[$ "models"] != undefined) global.UI_ASSETS_MODELS_ID = c.models;
+            if (c[$ "lights"] != undefined) global.UI_ASSETS_LIGHTS_ID = c.lights;
+            if (c[$ "cameras"] != undefined) global.UI_ASSETS_CAMERAS_ID = c.cameras;
+            if (c[$ "scenes"] != undefined) global.UI_ASSETS_SCENES_ID = c.scenes;
+            if (c[$ "instances"] != undefined) global.UI_ASSETS_INSTANCE_ID = c.instances;
+            if (c[$ "folders"] != undefined) global.UI_ASSETS_FOLDERS_ID = c.folders;
+        }
+        
+        // Camera
+        if (settings[$ "camera"] != undefined) {
+            var c = settings.camera;
+            var sm = oSceneEditor.sceneManager;
+            
+            if (sm.camera != undefined && c[$ "position"] != undefined) {
+                sm.camera.setPosition(c.position[0], c.position[1], c.position[2]);
+            }
+            
+            if (sm.orbit != undefined) {
+                if (c[$ "target"] != undefined) {
+                    sm.orbit.target.set(c.target[0], c.target[1], c.target[2]);
+                }
+                if (c[$ "damping"] != undefined) {
+                    sm.orbit.enableDamping = c.damping;
+                }
+                sm.orbit.update(); // Ensure orbit is updated
+            }
+            
+            // Update UI button
+            if (oSceneEditor.editorManager.sceneTools != undefined && oSceneEditor.editorManager.sceneTools.updateDampingButton != undefined) {
+                oSceneEditor.editorManager.sceneTools.updateDampingButton();
+            }
+        }
+        
+        // Active Tool
+        if (settings[$ "activeTool"] != undefined) {
+            oSceneEditor.editorManager.setTool(settings.activeTool);
+            
+            // Update UI buttons
+            if (oSceneEditor.editorManager.sceneTools != undefined && oSceneEditor.editorManager.sceneTools.updateToolButtons != undefined) {
+                oSceneEditor.editorManager.sceneTools.updateToolButtons();
+            }
+        }
+    }
 
   function __linkNodes() {
     var assetManager = oSceneEditor.assetManager;

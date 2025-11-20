@@ -14,6 +14,8 @@ function EditorManager() constructor {
     // Selection state
     self.selectedTreeviewItem = undefined;
     
+    self.gizmoTarget = undefined; // Store the target for the gizmo
+
     /**
      * Set the currently active asset
      * @param {Struct} asset - The asset to set as active
@@ -42,10 +44,11 @@ function EditorManager() constructor {
         
         // Attach transform controls if applicable
         // Use gizmoTarget if provided, otherwise use asset
-        var targetForGizmo = gizmoTarget != undefined ? gizmoTarget : asset;
-        if (oSceneEditor.sceneManager.transformControls != undefined && targetForGizmo != undefined) {
-            if (targetForGizmo.type == "Mesh" || targetForGizmo.type == "ModelInstance") {
-                oSceneEditor.sceneManager.transformControls.attach(targetForGizmo);
+        self.gizmoTarget = gizmoTarget != undefined ? gizmoTarget : asset;
+        
+        if (oSceneEditor.sceneManager.transformControls != undefined && self.gizmoTarget != undefined) {
+            if (self.activeTool != "view" && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
+                oSceneEditor.sceneManager.transformControls.attach(self.gizmoTarget);
             } else {
                 oSceneEditor.sceneManager.transformControls.detach();
             }
@@ -57,6 +60,7 @@ function EditorManager() constructor {
      */
     function clearActiveAsset() {
         self.activeAsset = undefined;
+        self.gizmoTarget = undefined;
         self.selectedTreeviewItem = undefined;
         oSceneEditor.sceneManager.objects.children = [];
         oSceneEditor.sceneManager.transformControls.detach();
@@ -73,19 +77,24 @@ function EditorManager() constructor {
             
             // Update transform controls mode
             if (oSceneEditor.sceneManager.transformControls != undefined) {
-                switch (tool) {
-                    case "move":
-                        oSceneEditor.sceneManager.transformControls.setMode("move");
-                        break;
-                    case "rotate":
-                        oSceneEditor.sceneManager.transformControls.setMode("rotate");
-                        break;
-                    case "scale":
-                        oSceneEditor.sceneManager.transformControls.setMode("scale");
-                        break;
-                    case "view":
-                        // In view mode, transform controls should be in translate but not actively used
-                        break;
+                if (tool == "view") {
+                    oSceneEditor.sceneManager.transformControls.detach();
+                } else {
+                    if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
+                        oSceneEditor.sceneManager.transformControls.attach(self.gizmoTarget);
+                    }
+                    
+                    switch (tool) {
+                        case "move":
+                            oSceneEditor.sceneManager.transformControls.setMode("move");
+                            break;
+                        case "rotate":
+                            oSceneEditor.sceneManager.transformControls.setMode("rotate");
+                            break;
+                        case "scale":
+                            oSceneEditor.sceneManager.transformControls.setMode("scale");
+                            break;
+                    }
                 }
             }
         }
