@@ -1,3 +1,4 @@
+// @todo doc: report fix on drag selection
 #macro TEXTBOX_INITIAL_DELAY 400    /* ms before starting key repeat */
 #macro TEXTBOX_REPEAT_DELAY 50      /* ms between each repeat */
 #macro TEXTBOX_CURSOR_BLINK 500     /* ms for cursor blinking */
@@ -166,35 +167,40 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Calculate cursor position from mouse coordinates
         self.getMouseCursorPos = function(mouseX) {
-            // Usa la stessa formula del disegno per calcolare textX
+            // Calculate text starting X position (including scroll)
             var textX = self.x1 + self.layout.paddingLeft - self.scrollOffset;
             
-            // Calcola posizione relativa del mouse rispetto al testo
+            // Calculate mouse position relative to the start of the text
             var relativeX = mouseX - textX;
             var text = self.parent.value;
             var length = string_length(text);
         
-            // Se il mouse è a sinistra del testo
+            // If mouse is to the left of the text start
             if (relativeX < 0) return 0;
         
-            // Calcola posizione carattere per carattere
-            draw_set_font(fText); // Assicurati di usare lo stesso font
+            draw_set_font(fText);
+            
+            // Optimization: if relativeX is beyond the total width, return length immediately
+            // This avoids the loop for clicks clearly at the end
+            if (relativeX > string_width(text)) return length;
+
             var currentX = 0;
             
             for (var i = 0; i < length; i++) {
-                var char = string_char_at(text, i + 1);
-                var charWidth = string_width(char);
+                // Calculate width up to the end of the current character
+                // We use string_copy to get the substring and measure it accurately (accounting for kerning)
+                var charEnd = string_width(string_copy(text, 1, i + 1));
+                var charWidth = charEnd - currentX;
+                var charCenter = currentX + (charWidth / 2);
                 
-                // Se il mouse è nella prima metà del carattere, posiziona prima
-                // Se è nella seconda metà, posiziona dopo
-                if (relativeX <= currentX + (charWidth / 2)) {
+                if (relativeX <= charCenter) {
                     return i;
                 }
                 
-                currentX += charWidth;
+                currentX = charEnd;
             }
             
-            // Se siamo oltre l'ultimo carattere
+            // If we're past the last character, return the end of the string
             return length;
         };
         
@@ -593,10 +599,11 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             if (shouldScrollLeft) {
                 self.scrollOffset = max(0, self.scrollOffset - scrollSpeed);
             } else if (shouldScrollRight) {
+                draw_set_font(fText);
                 var text = self.parent.value;
                 var totalWidth = string_width(text);
                 var textboxWidth = self.x2 - self.x1 - 10; // Margine interno ridotto
-                var maxScroll = max(0, totalWidth - textboxWidth + 20);
+                var maxScroll = max(0, totalWidth - textboxWidth + 5);
                 self.scrollOffset = min(maxScroll, self.scrollOffset + scrollSpeed);
             }
             

@@ -92,22 +92,30 @@ function EditorUiSceneTools(ui) constructor {
         onClick(function() {
             var sm = oSceneEditor.sceneManager;
             if (sm.orbit != undefined) {
-                sm.orbit.enableDamping = !sm.orbit.enableDamping;
-                self.selected = sm.orbit.enableDamping;
+                // Toggle between 0.3 (Damped) and 0.7 (More linear)
+                if (sm.orbit.dampingFactor >= 0.7) {
+                    sm.orbit.dampingFactor = 0.3;
+                } else {
+                    sm.orbit.dampingFactor = 0.7;
+                }
+                
+                self.selected = (sm.orbit.dampingFactor < 0.7);
+                sm.orbit.enableDamping = self.selected;
+                global.UI.needsRedraw = true;
             }
         });
     }
     
     // Set initial state
     if (oSceneEditor.sceneManager.orbit != undefined) {
-        ui.SceneTools.BtnCamAccel.selected = oSceneEditor.sceneManager.orbit.enableDamping;
+        ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 0.7);
     }
     
     self.updateDampingButton = function() {
-        //if (oSceneEditor.sceneManager.orbit != undefined) {
-        ui.SceneTools.BtnCamAccel.selected = oSceneEditor.sceneManager.orbit.enableDamping;
-        global.UI.needsRedraw = true;
-        //}
+        if (oSceneEditor.sceneManager.orbit != undefined) {
+            ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 0.7);
+            global.UI.needsRedraw = true;
+        }
     };
     
     // Reset camera position

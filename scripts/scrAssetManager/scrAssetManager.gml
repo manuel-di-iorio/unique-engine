@@ -122,7 +122,7 @@ function AssetManager() constructor {
         
         // Remove from lookup map
         if (asset[$ "name"] != undefined) {
-            delete self.assetsByName[$ asset.name];
+            variable_struct_remove(self.assetsByName, asset.name);
         }
         
         // Clean up instances if this is a model
@@ -282,7 +282,7 @@ function AssetManager() constructor {
         if (existing != undefined) {
             // create -> delete = no change needed (asset never existed in saved state)
             if (existing.action == "create" && action == "delete") {
-                delete projectManager.changes[$ uuid];
+                variable_struct_remove(projectManager.changes, uuid);
                 // Check if there are still other changes
                 if (variable_struct_names_count(projectManager.changes) == 0) {
                     projectManager.markAsSaved();

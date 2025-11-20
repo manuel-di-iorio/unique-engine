@@ -33,7 +33,7 @@ function UiInspectorSpriteFilePicker(style = {}, props = {}): UiNode(style, prop
     self.Button = new UiButton("Import image", {
         height: 30,
         marginTop: 15
-    });
+    }, { enableRipple: false });
     
     with (self.Button) {
         self.onClick(function() {

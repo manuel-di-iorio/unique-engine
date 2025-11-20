@@ -164,7 +164,10 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                         });
                         
                         self.onDraw = function() {
-                            if (self.parent.parent.Dropdown.value == self.value || self.hovered) {
+                            if (self.parent.parent.Dropdown.value == self.value) {
+                                draw_set_color(global.UI_COL_SELECTED);
+                                draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+                            } else if (self.hovered) {
                                 draw_set_color(global.UI_COL_INSPECTOR_BG);
                                 draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
                             }

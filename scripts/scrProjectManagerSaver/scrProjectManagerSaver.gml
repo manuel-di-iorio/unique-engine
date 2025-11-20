@@ -156,12 +156,11 @@ function ProjectSaver() constructor {
             damping: true
         };
 
-        if (sm.camera != undefined) {
-            cameraSettings.position = [sm.camera.x, sm.camera.y, sm.camera.z];
-        }
+        cameraSettings.position = [sm.camera.position.x, sm.camera.position.y, sm.camera.position.z];
+
         if (sm.orbit != undefined) {
             cameraSettings.target = [sm.orbit.target.x, sm.orbit.target.y, sm.orbit.target.z];
-            cameraSettings.damping = sm.orbit.enableDamping;
+            cameraSettings.dampingFactor = sm.orbit.dampingFactor;
         }
 
         var counters = {

@@ -56,8 +56,8 @@ function ProjectLoader() constructor {
                 if (c[$ "target"] != undefined) {
                     sm.orbit.target.set(c.target[0], c.target[1], c.target[2]);
                 }
-                if (c[$ "damping"] != undefined) {
-                    sm.orbit.enableDamping = c.damping;
+                if (c[$ "dampingFactor"] != undefined) {
+                    sm.orbit.dampingFactor = c.dampingFactor;
                 }
                 sm.orbit.update(); // Ensure orbit is updated
             }

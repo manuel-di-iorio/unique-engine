@@ -9,12 +9,35 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     self.halign = props[$ "halign"] ?? fa_center;
     self.handpoint = true;
     self.selected = false; // @todo missing doc
+    self.enableRipple = props[$ "enableRipple"] ?? true; // @todo missing doc
     
     self.onMouseEnter(function() {
         global.UI.needsRedraw = true;
     });
     
     self.onMouseLeave(function() {
+        global.UI.needsRedraw = true;
+    });
+    
+    self.ripples = [];
+    
+    self.onMouseDown(function() {
+        if (!self.enableRipple) return;
+        
+        var mx = window_mouse_get_x();
+        var my = window_mouse_get_y();
+        
+        var w = self.xp2 - self.xp1;
+        var h = self.yp2 - self.yp1;
+        var maxR = sqrt(w*w + h*h) * 1.2;
+        
+        array_push(self.ripples, {
+            x: mx,
+            y: my,
+            radius: 0,
+            alpha: 0.4,
+            maxRadius: maxR
+        });
         global.UI.needsRedraw = true;
     });
     
@@ -56,6 +79,33 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
         } else if (self.selected) {
             draw_set_color(global.UI_COL_SELECTED);
             draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, false);
+        }
+        
+        // Ripples
+        if (array_length(self.ripples) > 0) {
+            var _scissor = gpu_get_scissor();
+            gpu_set_scissor(self.xp1, self.yp1, self.xp2 - self.xp1, self.yp2 - self.yp1);
+            
+            for (var i = array_length(self.ripples) - 1; i >= 0; i--) {
+                var r = self.ripples[i];
+                r.radius += 3;
+                r.alpha -= 0.015;
+                
+                draw_set_alpha(r.alpha);
+                draw_set_color(c_white);
+                draw_circle(r.x, r.y, r.radius, false);
+                
+                if (r.alpha <= 0) {
+                    array_delete(self.ripples, i, 1);
+                }
+            }
+            
+            gpu_set_scissor(_scissor);
+            draw_set_alpha(1);
+            
+            if (array_length(self.ripples) > 0) {
+                global.UI.needsRedraw = true;
+            }
         }
         
         if (!self.outline) {

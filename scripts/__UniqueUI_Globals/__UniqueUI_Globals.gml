@@ -1,4 +1,5 @@
 // UniqueUI Version: 0.1.1
+// @todo: doc: report that changed selection color
 
 // UI Theme
 global.UI_COL_BTN_HOVER        = #393B47; // 57,59,71

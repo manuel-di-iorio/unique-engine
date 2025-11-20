@@ -24,7 +24,7 @@ function EditorUiMenu(ui) constructor {
     ui.Menu.add(ui.Menu.SaveProjectBtn);
 
     // Load Project Button
-    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { marginLeft: 80, padding: 5, marginRight: 20, width: 15, height: 15 });    
+    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { marginLeft: 80, padding: 5, marginRight: 20, width: 15, height: 15 }, { enableRipple: false });    
     ui.Menu.add(ui.Menu.LoadProjectBtn);
     
     ui.Menu.LoadProjectBtn.onClick(function() {
