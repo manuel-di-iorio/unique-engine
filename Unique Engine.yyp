@@ -142,7 +142,6 @@
     {"id":{"name":"ueError","path":"scripts/ueError/ueError.yy",},},
     {"id":{"name":"UeEuler","path":"scripts/UeEuler/UeEuler.yy",},},
     {"id":{"name":"UeFrustum","path":"scripts/UeFrustum/UeFrustum.yy",},},
-    {"id":{"name":"UeGame","path":"scripts/UeGame/UeGame.yy",},},
     {"id":{"name":"UeGridHelper","path":"scripts/UeGridHelper/UeGridHelper.yy",},},
     {"id":{"name":"UeInstanceList","path":"scripts/UeInstanceList/UeInstanceList.yy",},},
     {"id":{"name":"UeLayers","path":"scripts/UeLayers/UeLayers.yy",},},

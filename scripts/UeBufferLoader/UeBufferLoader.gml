@@ -1,6 +1,4 @@
 function UeBufferLoader() constructor {
-    game = new UeGame();
-    
     // Temporary internal variables
     cache = {
         formats: {},
