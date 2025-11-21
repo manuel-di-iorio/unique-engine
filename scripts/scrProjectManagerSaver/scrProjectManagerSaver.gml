@@ -177,7 +177,8 @@ function ProjectSaver() constructor {
         return {
             camera: cameraSettings,
             counters: counters,
-            activeTool: oSceneEditor.editorManager.activeTool
+            activeTool: oSceneEditor.editorManager.activeTool,
+            gridEnabled: sm.gridEnabled
         };
     }
 

@@ -10,7 +10,7 @@ function UiText(text = "", style = {}, props = {}): UiNode(style, props) constru
     self.font = props[$ "font"] ?? fText;
     
     function computeSize() {
-        draw_set_font(fText);
+        draw_set_font(self.font);
         var _w = string_width(self.text);
         if (self.icon != undefined) _w += sprite_get_width(self.icon) + 10;
         setSize(_w, string_height(self.text));

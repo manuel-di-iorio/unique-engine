@@ -14,7 +14,7 @@ function EditorUiInspector(ui) constructor {
     };
 
     // Inspector close button
-    ui.Inspector.Close = new UiButton(sprUiClose, { display: "none", position: "absolute", top: 5, right: 5, width: 28, height: 28 }, { outline: true });
+    ui.Inspector.Close = new UiButton(sprUiClose, { display: "none", position: "absolute", top: 5, right: 5, width: 28, height: 28 }, { outline: true, tooltip: "Close Inspector" });
 
     with (ui.Inspector.Close) {
         self.onClick(function() {
@@ -757,7 +757,17 @@ function EditorUiInspector(ui) constructor {
                     input = new UiCheckbox({ flex: 1, }, {
                         value: asset[$ assetField.field],
                         valueGetter,
-                        onChange
+                        onChange: method(scope, function(value) {
+                            self.asset[$ self.assetField.field] = value;
+                            
+                            // Track the change in asset manager
+                            oSceneEditor.assetManager.editAsset(self.asset);
+                            
+                            var _onChange = self.assetField[$ "onChange"];
+                            if (_onChange != undefined) {
+                                method(self, _onChange)(value);
+                            }
+                        })
                     });
                 break;
                 
@@ -770,7 +780,29 @@ function EditorUiInspector(ui) constructor {
                         items: assetField[$ "items"],
                         value: dropdownValue,
                         valueGetter,
-                        onChange,
+                        onChange: method(scope, function(value, input) {
+                            // If subKey is present, update the sub-property
+                            if (self.assetField[$ "subKey"] != undefined) {
+                                self.asset[$ self.assetField.field][$ self.assetField.subKey] = value;
+                            } else {
+                                self.asset[$ self.assetField.field] = value;
+                            }
+                            
+                            // Track the change in asset manager
+                            oSceneEditor.assetManager.editAsset(self.asset);
+                            
+                            // Call custom onChange if defined
+                            var _onChange = self.assetField[$ "onChange"];
+                            if (_onChange != undefined) {
+                                method(self, _onChange)(value, input);
+                            }
+                            
+                            // Call custom onAfterChange if defined
+                            var _onAfterChange = self.assetField[$ "onAfterChange"];
+                            if (_onAfterChange != undefined) {
+                                method(self, _onAfterChange)();
+                            }
+                        }),
                         itemsGetter: assetField[$ "itemsGetter"],
                         search: assetField[$ "search"],
                     });

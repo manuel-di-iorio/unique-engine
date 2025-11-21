@@ -13,6 +13,7 @@ function SceneManager() constructor {
     
     // Helpers
     self.grid = new UeGridHelper(10000, 50);
+    self.gridEnabled = true;
     self.objects = new UeObject3D();
     self.transformControls = new UeTransformControls(self.camera);
     

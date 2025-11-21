@@ -77,6 +77,17 @@ function ProjectLoader() constructor {
                 oSceneEditor.editorManager.sceneTools.updateToolButtons();
             }
         }
+        
+        // Grid Enabled
+        if (settings[$ "gridEnabled"] != undefined) {
+            var sm = oSceneEditor.sceneManager;
+            sm.gridEnabled = settings.gridEnabled;
+            
+            // Update UI button
+            if (global.UI.Main[$ "SceneTools"] != undefined && global.UI.Main.SceneTools[$ "BtnGrid"] != undefined) {
+                global.UI.Main.SceneTools.BtnGrid.updateGridButton();
+            }
+        }
     }
 
   function __linkNodes() {

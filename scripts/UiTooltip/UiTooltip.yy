@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"UiTooltip",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"UiTooltip",
+  "parent":{
+    "name":"UniqueUI",
+    "path":"folders/UniqueUI.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

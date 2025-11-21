@@ -151,6 +151,10 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.potentialDraggedElement = undefined;
     self.draggedElement = undefined;
     
+    // Tooltip props
+    self.tooltipElement = undefined;
+    self.tooltipTimer = -1;
+    
     // Set the size of the root node
     // @override
     function setSize(w, h) {
@@ -349,6 +353,26 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                         self.draggedElement.onDragStart(self.draggedElement);
                     }
                 }
+            }
+        }
+        
+        // Tooltip logic
+        if (self.deepestTarget != self.tooltipElement) {
+            // Target changed
+            if (global.UI.Tooltip != undefined) global.UI.Tooltip.hide();
+            self.tooltipElement = self.deepestTarget;
+            self.tooltipTimer = -1;
+            
+            if (self.tooltipElement != undefined && self.tooltipElement.tooltip != undefined) {
+                self.tooltipTimer = current_time + self.tooltipElement.tooltipDelay;
+            }
+        } else if (self.tooltipElement != undefined && self.tooltipTimer != -1) {
+            // Waiting for timer
+            if (current_time >= self.tooltipTimer) {
+                if (global.UI.Tooltip != undefined) {
+                    global.UI.Tooltip.show(self.tooltipElement, self.tooltipElement.tooltip);
+                }
+                self.tooltipTimer = -1; // Tooltip shown
             }
         }
         

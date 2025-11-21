@@ -6,7 +6,9 @@ function scrSetupUI() {
 
         self.Overlay = new UiNode({ name: "Overlay", flexDirection: "row", flexWrap: "wrap", width: "100%", height: "100%", position: "absolute" });
         
-        self.add(self.Main, self.Overlay);
+        self.Tooltip = new UiTooltip();
+        
+        self.add(self.Main, self.Overlay, self.Tooltip);
     }
     
     ui = global.UI.Main;

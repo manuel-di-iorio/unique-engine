@@ -67,6 +67,10 @@ function UiNode(style = {}, props = {}) constructor {
     self.__scrollBoundsCachedScrollTop = undefined;
     self.__scrollBoundsCachedResult = undefined;
     self.borderColor = #191A21;
+
+    // Tooltip props
+    self.tooltip = props[$ "tooltip"];
+    self.tooltipDelay = props[$ "tooltipDelay"] ?? 500;
     
     // Drag props
     self.draggable = props[$ "draggable"] ?? false;
@@ -496,7 +500,7 @@ function UiNode(style = {}, props = {}) constructor {
         var _this = self;
         self.addEventListener(UI_EVENT.mouseleave, cb);
         return self;
-    }
+    }    
     
     function onWheelUp(cb) {
         gml_pragma("forceinline");
@@ -616,5 +620,5 @@ function UiNode(style = {}, props = {}) constructor {
         }
         
         return self;
-    }
+    }    
 }
