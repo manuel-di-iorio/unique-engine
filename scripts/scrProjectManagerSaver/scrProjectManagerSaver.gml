@@ -140,12 +140,19 @@ function ProjectSaver() constructor {
         // Write updated assets.json
         self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
         
-        // Update project.json settings
-        if (file_exists(projectJsonPath)) {
-            var projectData = json_parse(self.__readFile(projectJsonPath));
-            projectData.settings = self.__getProjectSettings();
-            self.__writeJson(projectJsonPath, projectData);
-        }
+        // Rebuild and update project.json structure from treeview
+        var treeview = global.UI.Main.Assets.Treeview;
+        var project = {
+            settings: self.__getProjectSettings(),
+            version: global.UE_VERSION,
+            assets: []
+        };
+        
+        // Rebuild the project structure from the current treeview state
+        var assetsMap = {}; // Not used here but required by __traverseTreeview
+        self.__traverseTreeview(assetsDir, assetsMap, assets, treeview.Items.children, project.assets);
+        
+        self.__writeJson(projectJsonPath, project);
     }
 
     function __getProjectSettings() {

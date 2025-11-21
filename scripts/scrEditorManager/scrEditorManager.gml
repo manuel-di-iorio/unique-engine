@@ -59,6 +59,17 @@ function EditorManager() constructor {
      * Clear the active asset selection
      */
     function clearActiveAsset() {
+        // Deselect treeview item visually (for all asset types)
+        if (global.UI.Main[$ "Assets"] != undefined && global.UI.Main.Assets[$ "Treeview"] != undefined) {
+            var treeview = global.UI.Main.Assets.Treeview;
+            
+            // Deselect the currently selected item in the treeview
+            if (treeview.selectedItem != undefined) {
+                treeview.selectedItem.selected = false;
+                treeview.selectedItem = undefined;
+            }
+        }
+        
         self.activeAsset = undefined;
         self.gizmoTarget = undefined;
         self.selectedTreeviewItem = undefined;

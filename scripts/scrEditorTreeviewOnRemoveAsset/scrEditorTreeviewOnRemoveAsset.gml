@@ -33,6 +33,8 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         // Se ha un parent, rimuovilo dal parent
         if (asset.parent != undefined) {
             asset.parent.remove(asset);
+            // Track the deletion
+            assetManager.__trackChange("delete", asset);
         } else {
             // Altrimenti rimuovi dalla lista globale
             assetManager.removeAsset("Mesh", asset);
@@ -44,6 +46,8 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         // Se ha un parent, rimuovilo dal parent
         if (asset.parent != undefined) {
             asset.parent.remove(asset);
+            // Track the deletion
+            assetManager.__trackChange("delete", asset);
         } else {
             // Altrimenti rimuovi dalla lista globale
             assetManager.removeAsset("Scene", asset);
@@ -61,6 +65,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         if (asset[$ "object"] != undefined && asset.object[$ "instances"] != undefined) {
             asset.object.instances.remove(asset);
         }
+        
+        // Track the deletion
+        assetManager.__trackChange("delete", asset);
     }
 }
 
@@ -76,6 +83,7 @@ function __editorTreeview_removeMeshInstances(targetMesh, treeview) {
     }
     
     var instances = targetMesh.instances.list;
+    var assetManager = oSceneEditor.assetManager;
     
     // Rimuovi tutte le istanze (itera all'indietro per evitare problemi con l'array che cambia)
     for (var i = array_length(instances) - 1; i >= 0; i--) {
@@ -90,6 +98,9 @@ function __editorTreeview_removeMeshInstances(targetMesh, treeview) {
         if (instance.parent != undefined) {
             instance.parent.remove(instance);
         }
+        
+        // Track the deletion of this instance
+        assetManager.__trackChange("delete", instance);
     }
     
     // Pulisci la lista delle istanze

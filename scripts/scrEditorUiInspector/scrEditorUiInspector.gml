@@ -474,6 +474,13 @@ function EditorUiInspector(ui) constructor {
                 label: "Name", 
                 type: "text"
            }, 
+           {
+                id: "visible",
+                field: "visible",
+                label: "Visible",
+                type: "checkbox",
+                tooltip: "Enable mesh visibility",
+           },
            { 
                 id: "static",
                 field: "matrixAutoUpdate",

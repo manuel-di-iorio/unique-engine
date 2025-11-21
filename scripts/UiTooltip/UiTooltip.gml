@@ -1,10 +1,12 @@
-function UiTooltip() : UiNode({
+function UiTooltip(): UiNode({
     name: "UiTooltip",
     position: "absolute",
     padding: 3,
     paddingLeft: 6,
     paddingRight: 6,
     border: true,
+    left: -9999, 
+    top: -9999,
     display: "none" // Hidden by default
 }) constructor {
     self.backgroundColor = #282a36;
@@ -15,18 +17,17 @@ function UiTooltip() : UiNode({
     self.add(self.textNode);
     
     self.target = undefined;
+    self.isPositioned = false;
     
     // Override show to accept target and text
     self.show = function(target, text) {
+        self.isPositioned = false;
+        self.visible = false;
         self.target = target;
         self.textNode.text = text;
         self.textNode.computeSize();
         
         // Force size update on tooltip itself to match text (plus padding)
-        
-        // Show logic (inlined from UiNode)
-        flexpanel_node_style_set_display(self.node, flexpanel_display.flex);
-        self.display = true;
         
         // Calculate initial position immediately
         if (self.target != undefined) {
@@ -38,21 +39,26 @@ function UiTooltip() : UiNode({
              self.setTop(ty);
         }
         
+        // Show logic (inlined from UiNode)
+        flexpanel_node_style_set_display(self.node, flexpanel_display.flex);
+        self.display = true;
         global.UI.needsUpdate = true;
     };
     
     self.hide = function() {
+        self.setLeft(-9999);
+        self.setTop(-9999);
+
         // Hide logic (inlined from UiNode)
         flexpanel_node_style_set_display(self.node, flexpanel_display.none);
         self.display = false;
-        global.UI.needsUpdate = true;
         
         self.target = undefined;
     };
     
     // Update position to stay centered on target
-    self.onStep(function() {
-        if (self.display && self.target != undefined) {
+    self.onStep(function(layoutUpdated) {
+        if (layoutUpdated && self.display && self.target != undefined) {
             // Calculate centered position
             // Use actual width if available, otherwise fall back to estimate
             var currentWidth = self.width > 0 ? self.width : (self.textNode.getWidth() + 16);
@@ -71,6 +77,8 @@ function UiTooltip() : UiNode({
                 // Only update if changed to avoid constant layout invalidation
                 if (abs(self.getLeft() - tx) > 1) self.setLeft(tx);
                 if (abs(self.getTop() - ty) > 1) self.setTop(ty);
+
+                self.visible = true;
             }
         }
     });

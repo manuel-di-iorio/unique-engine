@@ -64,6 +64,7 @@ function EditorUiSceneTools(ui) constructor {
     ui.SceneTools.BtnView.onClick(function() {
         oSceneEditor.editorManager.setTool("view");
         self.updateToolButtons();
+        oSceneEditor.projectManager.markAsUnsaved();
     });
     
     // Move tool
@@ -71,6 +72,7 @@ function EditorUiSceneTools(ui) constructor {
     ui.SceneTools.BtnMove.onClick(function() {
         oSceneEditor.editorManager.setTool("move");
         self.updateToolButtons();
+        oSceneEditor.projectManager.markAsUnsaved();
     });
     
     self.updateToolButtons = function() {
@@ -102,6 +104,7 @@ function EditorUiSceneTools(ui) constructor {
                 self.selected = (sm.orbit.dampingFactor < 1.0);
                 sm.orbit.enableDamping = self.selected;
                 global.UI.needsRedraw = true;
+                oSceneEditor.projectManager.markAsUnsaved();
             }
         });
     }
@@ -130,17 +133,22 @@ function EditorUiSceneTools(ui) constructor {
                 sm.orbit.target.set(0, 0, 0);
                 sm.orbit.reset(); 
             }
+            oSceneEditor.projectManager.markAsUnsaved();
         }
     });
 
     // Toggle grid
     ui.SceneTools.BtnGrid = new UiButton(sprUiGrid, btnStyle, { tooltip: "Toggle grid" });
-    ui.SceneTools.BtnGrid.onClick(function() {
-        var sm = oSceneEditor.sceneManager;
-        sm.grid.visible = !sm.grid.visible;
-        self.selected = sm.grid.visible;
-        global.UI.needsRedraw = true;
-    });
+    
+    with (ui.SceneTools.BtnGrid) {
+        onClick(function() {
+            var sm = oSceneEditor.sceneManager;
+            sm.grid.visible = !sm.grid.visible;
+            self.selected = sm.grid.visible;
+            global.UI.needsRedraw = true;
+            oSceneEditor.projectManager.markAsUnsaved();
+        });
+    }
     
     // Set initial state
     ui.SceneTools.BtnGrid.selected = oSceneEditor.sceneManager.grid.visible;

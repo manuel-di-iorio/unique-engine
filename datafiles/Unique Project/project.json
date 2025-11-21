@@ -1,33 +1,47 @@
 {
+  "assets":[
+    {
+      "uuid":"07e5df8c-06a8-4729-9bb8-9a05a657b65d",
+      "type":"Mesh",
+      "children":[
+      ],
+      "name":"Mesh0"
+    },
+    {
+      "uuid":"72f6e67d-6e68-4276-9f0c-22f722adf5a8",
+      "type":"Scene",
+      "children":[
+      ],
+      "name":"Scene0"
+    }
+  ],
   "version":"2025.11.20.0",
   "settings":{
+    "counters":{
+      "textures":0.0,
+      "materials":0.0,
+      "models":1.0,
+      "scenes":1.0,
+      "lights":0.0,
+      "instances":1.0,
+      "cameras":0.0,
+      "folders":0.0
+    },
     "gridEnabled":true,
+    "activeTool":"move",
     "camera":{
-      "dampingFactor":0.10000000000000001,
-      "damping":true,
-      "position":[
-        -87.541549200179489,
-        -281.46938681154575,
-        134.2067861606298
-      ],
       "target":[
         0.0,
         0.0,
         0.0
-      ]
-    },
-    "activeTool":"move",
-    "counters":{
-      "textures":0.0,
-      "materials":1.0,
-      "models":1.0,
-      "scenes":1.0,
-      "lights":0.0,
-      "instances":0.0,
-      "cameras":0.0,
-      "folders":0.0
+      ],
+      "dampingFactor":0.10000000000000001,
+      "position":[
+        98.838032980119678,
+        -268.39988529599844,
+        151.96231378113336
+      ],
+      "damping":true
     }
-  },
-  "assets":[
-  ]
+  }
 }

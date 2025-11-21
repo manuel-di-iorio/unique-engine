@@ -1,13 +1,12 @@
 {
-  "uuid":"70e287e2-1b74-4fd8-81e0-ae23f7764976",
-  "renderOrder":0.0,
+  "uuid":"4ecd0e37-1693-4df3-8792-9856af5b4521",
   "geometry":{
-    "uuid":"318abf27-02a9-45ea-b04d-433c688ba06e",
+    "uuid":"00a6dd10-721a-4a12-8253-f87867c8e186",
     "type":"BufferGeometry",
-    "name":null,
     "format":{
       "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
       "type":"VertexFormat",
+      "name":"",
       "attrs":[
         {
           "kind":0
@@ -21,14 +20,15 @@
         {
           "kind":3
         }
-      ],
-      "name":""
-    }
+      ]
+    },
+    "name":null
   },
+  "renderOrder":0.0,
   "layers":1.0,
+  "material":null,
   "pz":0.0,
   "py":0.0,
-  "material":null,
   "px":0.0,
   "rw":1.0,
   "rz":0.0,
@@ -41,9 +41,9 @@
   "uy":0.0,
   "ux":0.0,
   "visible":true,
-  "type":"Mesh",
-  "parent":"03fcae42-7e28-4fd3-998b-43a3b5828598",
+  "type":"ModelInstance",
+  "parent":null,
   "children":[
   ],
-  "name":"Mesh0"
+  "name":"Mesh0_0"
 }
