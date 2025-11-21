@@ -1,0 +1,28 @@
+{
+  "uuid":"eeff9df1-7a61-44c9-9336-ba3e83eca32f",
+  "depthTest":true,
+  "forceSinglePass":false,
+  "side":2.0,
+  "opacity":1.0,
+  "transparent":false,
+  "textures":{
+    "map":null
+  },
+  "lights":2.0,
+  "type":"Material",
+  "name":"Material0",
+  "depthWrite":true,
+  "depthFunc":4.0,
+  "alphaTest":0.0,
+  "colorWrite":true,
+  "blending":false,
+  "blendEquation":1.0,
+  "blendEquationAlpha":1.0,
+  "blendSrc":5.0,
+  "blendDst":6.0,
+  "blendSrcAlpha":2.0,
+  "blendDstAlpha":6.0,
+  "uniforms":{
+  },
+  "shader":"sh_ue_standard"
+}

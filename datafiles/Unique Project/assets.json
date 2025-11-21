@@ -1,10 +1,25 @@
 {
+  "version":"2025.11.20.0",
   "assets":[
     {
       "uuid":"884eedad-b69c-403f-8333-ee9cfffc30b2",
       "type":"Texture",
       "name":"Texture0"
+    },
+    {
+      "uuid":"b370144b-cbc3-4650-9da0-c9d1e128cfc4",
+      "type":"Scene",
+      "name":"Scene0"
+    },
+    {
+      "uuid":"eeff9df1-7a61-44c9-9336-ba3e83eca32f",
+      "type":"Material",
+      "name":"Material0"
+    },
+    {
+      "uuid":"70e287e2-1b74-4fd8-81e0-ae23f7764976",
+      "type":"Mesh",
+      "name":"Mesh0"
     }
-  ],
-  "version":"2025.11.20.0"
+  ]
 }

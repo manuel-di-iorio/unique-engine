@@ -14,12 +14,11 @@ function EditorUiInspector(ui) constructor {
     };
 
     // Inspector close button
-    ui.Inspector.Close = new UiButton(sprUiClose, { display: "none", position: "absolute", top: 5, right: 5, width: 28, height: 28 }, { outline: true, tooltip: "Close Inspector" });
+    ui.Inspector.Close = new UiButton(sprUiClose, { display: "none", position: "absolute", top: 5, right: 5, width: 28, height: 28 }, { outline: true, tooltip: "Close inspector" });
 
     with (ui.Inspector.Close) {
         self.onClick(function() {
             oSceneEditor.editorManager.clearActiveAsset();
-            //oSceneEditor.editorManager.inspector.close();
             self.hide();
         });
     }
@@ -82,12 +81,13 @@ function EditorUiInspector(ui) constructor {
                 field: "shader",
                 label: "Shader", 
                 type: "dropdown",
+                tooltip: "Select the shader program to use for rendering",
                 items: [
-                    { label: "None", value: undefined },
-                    { label: "Standard", value: sh_ue_standard },
-                    { label: "Basic (unlit)", value: sh_ue_basic },
-                    { label: "Line", value: sh_ue_line },
-                    { label: "Sprite", value: sh_ue_sprite }
+                    { label: "None", value: undefined, tooltip: "No shader" },
+                    { label: "Standard", value: sh_ue_standard, tooltip: "Shader with lighting support" },
+                    { label: "Basic (unlit)", value: sh_ue_basic, tooltip: "Simple unlit shader" },
+                    { label: "Line", value: sh_ue_line, tooltip: "Shader for rendering lines" },
+                    { label: "Sprite", value: sh_ue_sprite, tooltip: "Shader for rendering sprites" }
                 ],
                 onAfterChange: function() {
                     self.asset.build();
@@ -106,6 +106,7 @@ function EditorUiInspector(ui) constructor {
                 field: "textures",
                 label: "Diffuse", 
                 type: "dropdown",
+                tooltip: "Base color/albedo texture",
                 search: "Search texture..",
                 subKey: "map",
                 itemsGetter: function(searchValue) {
@@ -163,7 +164,8 @@ function EditorUiInspector(ui) constructor {
                 id: "transparent",
                 field: "transparent",
                 label: "Transparent", 
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Enable transparency for this material"
             },
             //{ 
                 //id: "opacity",
@@ -178,13 +180,15 @@ function EditorUiInspector(ui) constructor {
                 id: "wireframe",
                 field: "wireframe",
                 label: "Wireframe", 
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Render only the edges of polygons"
             },
             { 
                 id: "lights",
                 field: "lights",
                 label: "Receive Lights",
                 type: "checkbox",
+                tooltip: "Enable lighting calculations for this material",
                 onChange: function(value) {
                     self.asset.lights = value ? 2 : 0;
                     self.asset.build();
@@ -198,10 +202,11 @@ function EditorUiInspector(ui) constructor {
                 field: "side",
                 label: "Backface Culling", 
                 type: "dropdown",
+                tooltip: "Control which polygon faces are rendered",
                 items: [
-                    { label: "No culling", value: cull_noculling },
-                    { label: "Counter Clockwise", value: cull_counterclockwise },
-                    { label: "Clockwise", value: cull_clockwise },
+                    { label: "No culling", value: cull_noculling, tooltip: "Render both front and back faces" },
+                    { label: "Counter Clockwise", value: cull_counterclockwise, tooltip: "Cull counter-clockwise faces" },
+                    { label: "Clockwise", value: cull_clockwise, tooltip: "Cull clockwise faces" },
                 ]
             }, 
         
@@ -213,28 +218,31 @@ function EditorUiInspector(ui) constructor {
                 id: "depthTest",
                 field: "depthTest",
                 label: "Depth Test",
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Enable depth buffer testing for proper occlusion"
             },
             { 
                 id: "depthWrite",
                 field: "depthWrite",
                 label: "Depth Write",
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Write to the depth buffer when rendering"
             },
             { 
                 id: "depthFunc",
                 field: "depthFunc",
                 label: "Depth Function", 
                 type: "dropdown",
+                tooltip: "Comparison function for depth testing",
                 items: [
-                    { label: "Always", value: cmpfunc_always },
-                    { label: "Equal", value: cmpfunc_equal },
-                    { label: "Greater", value: cmpfunc_greater },
-                    { label: "Greater Equal", value: cmpfunc_greaterequal },
-                    { label: "Less", value: cmpfunc_less },
-                    { label: "Less Equal", value: cmpfunc_lessequal },
-                    { label: "Never", value: cmpfunc_never },
-                    { label: "Not Equal", value: cmpfunc_notequal },
+                    { label: "Always", value: cmpfunc_always, tooltip: "Always pass depth test" },
+                    { label: "Equal", value: cmpfunc_equal, tooltip: "Pass if depth equals" },
+                    { label: "Greater", value: cmpfunc_greater, tooltip: "Pass if depth is greater" },
+                    { label: "Greater Equal", value: cmpfunc_greaterequal, tooltip: "Pass if depth is greater or equal" },
+                    { label: "Less", value: cmpfunc_less, tooltip: "Pass if depth is less (default)" },
+                    { label: "Less Equal", value: cmpfunc_lessequal, tooltip: "Pass if depth is less or equal" },
+                    { label: "Never", value: cmpfunc_never, tooltip: "Never pass depth test" },
+                    { label: "Not Equal", value: cmpfunc_notequal, tooltip: "Pass if depth not equal" },
                 ]
             },
             
@@ -245,37 +253,42 @@ function EditorUiInspector(ui) constructor {
                 type: "text",
                 format: "integer",
                 min: 0,
-                max: 255
+                max: 255,
+                tooltip: "Discard pixels with alpha below this threshold"
             },
             {
                 id: "forceSinglePass",
                 field: "forceSinglePass",
                 label: "Force Single Pass", 
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Force rendering in a single pass (disable multi-pass for transparent objects)"
             },
             { 
                 id: "colorWrite",
                 field: "colorWrite",
                 label: "Color Write", 
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Enable writing to the color buffer"
             },
             { 
                 id: "blending",
                 field: "blending",
                 label: "Blending", 
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Enable color blending with the framebuffer"
             },
             { 
                 id: "blendEquation",
                 field: "blendEquation",
                 label: "Blend Equation", 
                 type: "dropdown",
+                tooltip: "Mathematical operation for blending colors",
                 items: [
-                    { label: "Add", value: bm_eq_add },
-                    { label: "Max", value: bm_eq_max },
-                    { label: "Min", value: bm_eq_min },
-                    { label: "Reverse Subtract", value: bm_eq_reverse_subtract },
-                    { label: "Subtract", value: bm_eq_subtract },
+                    { label: "Add", value: bm_eq_add, tooltip: "Source + Destination" },
+                    { label: "Max", value: bm_eq_max, tooltip: "Maximum of Source and Destination" },
+                    { label: "Min", value: bm_eq_min, tooltip: "Minimum of Source and Destination" },
+                    { label: "Reverse Subtract", value: bm_eq_reverse_subtract, tooltip: "Destination - Source" },
+                    { label: "Subtract", value: bm_eq_subtract, tooltip: "Source - Destination" },
                 ]
             },
             { 
@@ -283,17 +296,18 @@ function EditorUiInspector(ui) constructor {
                 field: "blendSrc",
                 label: "Blend Source", 
                 type: "dropdown",
+                tooltip: "Source blend factor",
                 items: [
-                    { label: "Zero", value: bm_zero },
-                    { label: "One", value: bm_one },
-                    { label: "Source Color", value: bm_src_colour },
-                    { label: "Inverse Source Color", value: bm_inv_src_colour },                    
-                    { label: "Source Alpha", value: bm_src_alpha },
-                    { label: "Inverse Source Alpha", value: bm_inv_src_alpha },
-                    { label: "Destination Alpha", value: bm_dest_alpha },
-                    { label: "Inverse Destination Alpha", value: bm_inv_dest_alpha },
-                    { label: "Destination Color", value: bm_dest_colour },
-                    { label: "Inverse Destination Color", value: bm_inv_dest_colour },
+                    { label: "Zero", value: bm_zero, tooltip: "Multiply by 0" },
+                    { label: "One", value: bm_one, tooltip: "Multiply by 1" },
+                    { label: "Source Color", value: bm_src_colour, tooltip: "Multiply by source color" },
+                    { label: "Inverse Source Color", value: bm_inv_src_colour, tooltip: "Multiply by (1 - source color)" },                    
+                    { label: "Source Alpha", value: bm_src_alpha, tooltip: "Multiply by source alpha" },
+                    { label: "Inverse Source Alpha", value: bm_inv_src_alpha, tooltip: "Multiply by (1 - source alpha)" },
+                    { label: "Destination Alpha", value: bm_dest_alpha, tooltip: "Multiply by destination alpha" },
+                    { label: "Inverse Destination Alpha", value: bm_inv_dest_alpha, tooltip: "Multiply by (1 - destination alpha)" },
+                    { label: "Destination Color", value: bm_dest_colour, tooltip: "Multiply by destination color" },
+                    { label: "Inverse Destination Color", value: bm_inv_dest_colour, tooltip: "Multiply by (1 - destination color)" },
                 ]
             },
             { 
@@ -301,17 +315,18 @@ function EditorUiInspector(ui) constructor {
                 field: "blendDst",
                 label: "Blend Destination", 
                 type: "dropdown",
+                tooltip: "Destination blend factor",
                 items: [
-                    { label: "Zero", value: bm_zero },
-                    { label: "One", value: bm_one },
-                    { label: "Source Color", value: bm_src_colour },
-                    { label: "Inverse Source Color", value: bm_inv_src_colour },                    
-                    { label: "Source Alpha", value: bm_src_alpha },
-                    { label: "Inverse Source Alpha", value: bm_inv_src_alpha },
-                    { label: "Destination Alpha", value: bm_dest_alpha },
-                    { label: "Inverse Destination Alpha", value: bm_inv_dest_alpha },
-                    { label: "Destination Color", value: bm_dest_colour },
-                    { label: "Inverse Destination Color", value: bm_inv_dest_colour },
+                    { label: "Zero", value: bm_zero, tooltip: "Multiply by 0" },
+                    { label: "One", value: bm_one, tooltip: "Multiply by 1" },
+                    { label: "Source Color", value: bm_src_colour, tooltip: "Multiply by source color" },
+                    { label: "Inverse Source Color", value: bm_inv_src_colour, tooltip: "Multiply by (1 - source color)" },                    
+                    { label: "Source Alpha", value: bm_src_alpha, tooltip: "Multiply by source alpha" },
+                    { label: "Inverse Source Alpha", value: bm_inv_src_alpha, tooltip: "Multiply by (1 - source alpha)" },
+                    { label: "Destination Alpha", value: bm_dest_alpha, tooltip: "Multiply by destination alpha" },
+                    { label: "Inverse Destination Alpha", value: bm_inv_dest_alpha, tooltip: "Multiply by (1 - destination alpha)" },
+                    { label: "Destination Color", value: bm_dest_colour, tooltip: "Multiply by destination color" },
+                    { label: "Inverse Destination Color", value: bm_inv_dest_colour, tooltip: "Multiply by (1 - destination color)" },
                 ]
             },
             //{ 
@@ -340,6 +355,7 @@ function EditorUiInspector(ui) constructor {
                 field: "matrixAutoUpdate",
                 label: "Static", 
                 type: "checkbox",
+                tooltip: "Mark object as static (disable automatic matrix updates)",
                 onValue: function(value) {
                     return !value;
                 },
@@ -354,13 +370,15 @@ function EditorUiInspector(ui) constructor {
                 id: "frustumCulled",
                 field: "frustumCulled",
                 label: "Frustum Culled", 
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Enable frustum culling (skip rendering when outside camera view)"
            },           
            { 
                 id: "material",
                 field: "material",
                 label: "Material", 
                 type: "dropdown",
+                tooltip: "Material that controls the visual appearance of this mesh",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
                     var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
@@ -388,6 +406,7 @@ function EditorUiInspector(ui) constructor {
                 type: "text",
                 format: "integer",
                 negative: true,
+                tooltip: "Control rendering order (lower values render first)"
             },
         
            {
@@ -474,13 +493,15 @@ function EditorUiInspector(ui) constructor {
                 id: "frustumCulled",
                 field: "frustumCulled",
                 label: "Frustum Culled", 
-                type: "checkbox"
+                type: "checkbox",
+                tooltip: "Enable frustum culling (skip rendering when outside camera view)"
            },           
            { 
                 id: "material",
                 field: "material",
                 label: "Material", 
                 type: "dropdown",
+                tooltip: "Material that controls the visual appearance of this mesh",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
                     var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
@@ -815,7 +836,12 @@ function EditorUiInspector(ui) constructor {
             var _label = assetField[$ "label"];
             if (_label != undefined) {
                 var _icon = assetField.type == "section" ? sprUiSection : undefined;
-                _Container.add(new UiText(assetField.label, { width: _labelWidth + 15, height: 20 }, { icon: _icon }));
+                var _tooltip = assetField[$ "tooltip"];
+                _Container.add(new UiText(assetField.label, { width: _labelWidth + 15, height: 20 }, { 
+                    icon: _icon,
+                    tooltip: _tooltip,
+                    pointerEvents: true 
+                }));
             }
             
             if (input != undefined) {

@@ -1,32 +1,33 @@
 {
+  "version":"2025.11.20.0",
   "settings":{
-    "counters":{
-      "textures":1.0,
-      "materials":0.0,
-      "models":0.0,
-      "scenes":0.0,
-      "lights":0.0,
-      "instances":0.0,
-      "cameras":0.0,
-      "folders":0.0
-    },
+    "gridEnabled":true,
     "camera":{
-      "dampingFactor":0.69999999999999996,
+      "dampingFactor":0.10000000000000001,
+      "damping":true,
+      "position":[
+        -87.541549200179489,
+        -281.46938681154575,
+        134.2067861606298
+      ],
       "target":[
         0.0,
         0.0,
         0.0
-      ],
-      "position":[
-        99.999999962242214,
-        -299.99999988672664,
-        70.000000539396993
-      ],
-      "damping":true
+      ]
     },
-    "activeTool":"view"
+    "activeTool":"move",
+    "counters":{
+      "textures":0.0,
+      "materials":1.0,
+      "models":1.0,
+      "scenes":1.0,
+      "lights":0.0,
+      "instances":0.0,
+      "cameras":0.0,
+      "folders":0.0
+    }
   },
   "assets":[
-  ],
-  "version":"2025.11.20.0"
+  ]
 }

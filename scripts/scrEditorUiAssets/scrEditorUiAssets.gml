@@ -54,24 +54,24 @@ function EditorUiAssets(ui) constructor {
         if (treeviewItem == undefined) {
             // Background click - show "Add" menu
             items = [
-                { label: "New Folder", icon: sprUiFolder, onClick: method({ treeview: self.treeview }, function() {
+                { label: "New folder", icon: sprUiFolder, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Folder");
                 })},
                 { separator: true },
-                { label: "New Texture", icon: sprUiTexture, onClick: method({ treeview: self.treeview }, function() {
+                { label: "New texture", icon: sprUiTexture, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Texture");
                 })},
-                { label: "New Material", icon: sprUiMaterial, onClick: method({ treeview: self.treeview }, function() {
+                { label: "New material", icon: sprUiMaterial, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Material");
                 })},
-                { label: "New Mesh", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
+                { label: "New mesh", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Mesh");
                 })},
-                { label: "New Scene", icon: sprUiScene, onClick: method({ treeview: self.treeview }, function() {
+                { label: "New scene", icon: sprUiScene, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Scene");
                 })},
                 { separator: true },
-                { label: "Import Model", icon: sprUiImportModel, onClick: function() {
+                { label: "Import model", icon: sprUiImportModel, onClick: function() {
                     editorTreeviewOnModelImport(undefined);
                 }}
             ];
@@ -81,36 +81,36 @@ function EditorUiAssets(ui) constructor {
             
             // Add creation actions based on item type
             if (treeviewItem.assetType == "Mesh") {
-                array_push(items, { label: "New Mesh", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "New mesh", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Mesh");
                 })});
                 array_push(items, { separator: true });
             } else if (treeviewItem.assetType == "Folder") {
-                array_push(items, { label: "New Folder", icon: sprUiFolder, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "New folder", icon: sprUiFolder, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Folder");
                 })});
                 array_push(items, { separator: true });
-                array_push(items, { label: "New Texture", icon: sprUiTexture, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "New texture", icon: sprUiTexture, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Texture");
                 })});
-                array_push(items, { label: "New Material", icon: sprUiMaterial, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "New material", icon: sprUiMaterial, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Material");
                 })});
-                array_push(items, { label: "New Mesh", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "New mesh", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Mesh");
                 })});
-                array_push(items, { label: "New Scene", icon: sprUiScene, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "New scene", icon: sprUiScene, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Scene");
                 })});
                 array_push(items, { separator: true });
-                array_push(items, { label: "Import Model", icon: sprUiImportModel, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "Import model", icon: sprUiImportModel, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnModelImport(self.item);
                 })});
                 array_push(items, { separator: true });
             }
             
             // Delete action
-            array_push(items, { label: "Delete Asset", icon: sprUiTrash, onClick: method({ item: treeviewItem }, function() {
+            array_push(items, { label: "Delete asset", icon: sprUiTrash, onClick: method({ item: treeviewItem }, function() {
                 self.item.__removeItem();
             })});
         }

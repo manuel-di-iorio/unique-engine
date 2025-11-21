@@ -7,7 +7,7 @@ function EditorUiSceneTools(ui) constructor {
         position: "absolute",
         top: 65,
         left: "21%",
-        minWidth: 250,
+        minWidth: 300,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -60,14 +60,14 @@ function EditorUiSceneTools(ui) constructor {
     var btnStyle = { marginLeft: 5, marginRight: 5, width: 25, height: 25 };
     
     // View tool
-    ui.SceneTools.BtnView = new UiButton(sprUiEye, btnStyle, { tooltip: "View Tool" });
+    ui.SceneTools.BtnView = new UiButton(sprUiEye, btnStyle, { tooltip: "View tool (Q)" });
     ui.SceneTools.BtnView.onClick(function() {
         oSceneEditor.editorManager.setTool("view");
         self.updateToolButtons();
     });
     
     // Move tool
-    ui.SceneTools.BtnMove = new UiButton(sprUiMove, btnStyle, { tooltip: "Move Tool" });
+    ui.SceneTools.BtnMove = new UiButton(sprUiMove, btnStyle, { tooltip: "Move tool (W)" });
     ui.SceneTools.BtnMove.onClick(function() {
         oSceneEditor.editorManager.setTool("move");
         self.updateToolButtons();
@@ -86,7 +86,7 @@ function EditorUiSceneTools(ui) constructor {
     ui.SceneTools.Left.add(ui.SceneTools.BtnView, ui.SceneTools.BtnMove);
     
     // Toggle camera easing
-    ui.SceneTools.BtnCamAccel = new UiButton(sprUiCamera, btnStyle, { tooltip: "Toggle Camera Easing" });
+    ui.SceneTools.BtnCamAccel = new UiButton(sprUiCamera, btnStyle, { tooltip: "Toggle camera easing" });
 
     with (ui.SceneTools.BtnCamAccel) {
         onClick(function() {
@@ -119,7 +119,7 @@ function EditorUiSceneTools(ui) constructor {
     };
     
     // Reset camera position
-    ui.SceneTools.BtnResetCam = new UiButton(sprUiCenter, btnStyle, { tooltip: "Reset Camera" });
+    ui.SceneTools.BtnResetCam = new UiButton(sprUiCenter, btnStyle, { tooltip: "Reset camera" });
     ui.SceneTools.BtnResetCam.onClick(function() {
         var sm = oSceneEditor.sceneManager;
         if (sm.camera != undefined) {
@@ -134,7 +134,7 @@ function EditorUiSceneTools(ui) constructor {
     });
 
     // Toggle grid
-    ui.SceneTools.BtnGrid = new UiButton(sprUiGrid, btnStyle, { tooltip: "Toggle Grid" });
+    ui.SceneTools.BtnGrid = new UiButton(sprUiGrid, btnStyle, { tooltip: "Toggle grid" });
     ui.SceneTools.BtnGrid.onClick(function() {
         var sm = oSceneEditor.sceneManager;
         sm.grid.visible = !sm.grid.visible;

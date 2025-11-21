@@ -1,4 +1,5 @@
 var ui = global.UI;
+var uiOverlay = global.UI.Overlay;
 
 // Correctly resize the application surface to match the new window size
 var winWNew = window_get_width();
@@ -70,17 +71,21 @@ if (!uiHasFocus) {
     if (keyboard_check_pressed(ord("Q"))) {
         editorManager.setTool("view");
         tool = "view";
+        editorManager.sceneTools.updateToolButtons();
     }
     if (keyboard_check_pressed(ord("W"))) {
         editorManager.setTool("move");
         tool = "move";
+        editorManager.sceneTools.updateToolButtons();
     }
-    if (keyboard_check_pressed(ord("E"))) {
-        editorManager.setTool("rotate");
-        tool = "rotate";
-    }
-    if (keyboard_check_pressed(ord("R"))) {
-        editorManager.setTool("scale");
-        tool = "scale";
-    }
+    // if (keyboard_check_pressed(ord("E"))) {
+    //     editorManager.setTool("rotate");
+    //     tool = "rotate";
+    //     editorManager.sceneTools.updateToolButtons();
+    // }
+    // if (keyboard_check_pressed(ord("R"))) {
+    //     editorManager.setTool("scale");
+    //     tool = "scale";
+    //     editorManager.sceneTools.updateToolButtons();
+    // }
 }

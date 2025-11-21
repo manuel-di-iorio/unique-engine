@@ -145,6 +145,8 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                         name: "UiDropdown.List.Item",
                         width: "100%",
                         height: 25
+                    }, {
+                        tooltip: _item[$ "tooltip"]
                     });
                     _itemNode.label = _item.label;
                     _itemNode.value = _item.value;
