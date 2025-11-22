@@ -24,31 +24,31 @@ switch (currentTool) {
         sceneManager.orbit.update(winMouseX, winMouseY);
         
         // Handle mesh picking
-        // if (mouse_check_button_pressed(mb_left) && ui.Main.Scene.hovered) {
-        //     sceneManager.raycaster.setFromCamera(sceneManager.camera);
+        if (mouse_check_button_pressed(mb_left) && ui.Main.Scene.hovered) {
+            sceneManager.raycaster.setFromCamera(sceneManager.camera);
             
-        //     var objectsToTest = [];
-        //     if (editorManager.activeScene != undefined) {
-        //         objectsToTest = editorManager.activeScene.children;
-        //     } else {
-        //         objectsToTest = sceneManager.objects.children;
-        //     }
+            var objectsToTest = [];
+            if (editorManager.activeScene != undefined) {
+                objectsToTest = editorManager.activeScene.children;
+            } else {
+                objectsToTest = sceneManager.objects.children;
+            }
             
-        //     if (array_length(objectsToTest) > 0) {
-        //         // Raycast against all children
-        //         var hits = sceneManager.raycaster.intersectObjects(objectsToTest, false, true);
+            if (array_length(objectsToTest) > 0) {
+                var hits = sceneManager.raycaster.intersectObjects(objectsToTest, false, true);
+                log(hits)
                 
-        //         if (array_length(hits) > 0) {
-        //             var hitObject = hits[0].object;
+                if (array_length(hits) > 0) {
+                    var hitObject = hits[0].object;
                     
-        //             // Use the back-reference to get the treeview item directly
-        //             if (hitObject[$ "__treeviewItem"] != undefined) {
-        //                 var treeview = ui.Main.Assets.Treeview;
-        //                 treeview.__onItemSelected(hitObject.__treeviewItem);
-        //             }
-        //         }
-        //     }
-        // }
+                    // Use the back-reference to get the treeview item directly
+                    if (hitObject[$ "__treeviewItem"] != undefined) {
+                        var treeview = ui.Main.Assets.Treeview;
+                        treeview.__onItemSelected(hitObject.__treeviewItem);
+                    }
+                }
+            }
+        }
     break;
     case "move":
     case "rotate":
