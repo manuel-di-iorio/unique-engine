@@ -6,7 +6,14 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     
     // === 1. CHIUSURA INSPECTOR SE ASSET SELEZIONATO ===
     if (isSelected || (asset != undefined && editorManager.activeAsset == asset)) {
-        editorManager.clearActiveAsset();
+        var keepScene = editorManager.activeScene != undefined;
+        
+        // If we are deleting the active scene itself, don't keep it
+        if (assetType == "Scene" && asset == editorManager.activeScene) {
+            keepScene = false;
+        }
+        
+        editorManager.clearActiveAsset(keepScene);
     }
     
     // === 2. GESTIONE RIMOZIONE PER TIPO ===

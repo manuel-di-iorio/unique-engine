@@ -24,15 +24,13 @@ function EditorManager() constructor {
      */
     function setActiveAsset(asset, treeviewItem = undefined, gizmoTarget = undefined) {
         var assetChanged = self.activeAsset != asset;
-        var gizmoTargetChanged = gizmoTarget != undefined;
+        
+        // Determine the effective gizmo target (defaults to asset if not provided)
+        var newGizmoTarget = gizmoTarget != undefined ? gizmoTarget : asset;
+        var gizmoTargetChanged = self.gizmoTarget != newGizmoTarget;
         
         // Se né l'asset né il gizmo target sono cambiati, esci
         if (!assetChanged && !gizmoTargetChanged) return;
-        
-        // Clear previous objects solo se l'asset è cambiato
-        if (assetChanged && oSceneEditor.sceneManager.objects != undefined) {
-            oSceneEditor.sceneManager.objects.children = [];
-        }
         
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
@@ -44,12 +42,14 @@ function EditorManager() constructor {
                 self.activeScene = asset;
             } else if (asset.type == "Mesh" || asset.type == "ModelInstance") {
                 // Mesh/instance selected - find parent scene via treeview
+                var foundScene = undefined;
                 if (treeviewItem != undefined && treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
                     var parentTreeItem = treeviewItem.parent.parent;
-                    if (parentTreeItem.asset != undefined && parentTreeItem.asset.type == "Scene") {
-                        self.activeScene = parentTreeItem.asset;
+                    if (parentTreeItem[$ "asset"] != undefined && parentTreeItem.asset.type == "Scene") {
+                        foundScene = parentTreeItem.asset;
                     }
                 }
+                self.activeScene = foundScene;
             } else {
                 // Other asset type selected - clear active scene
                 self.activeScene = undefined;
@@ -58,9 +58,15 @@ function EditorManager() constructor {
             self.activeScene = undefined;
         }
         
-        // Add to objects for rendering solo se l'asset è cambiato
-        if (assetChanged && oSceneEditor.sceneManager.objects != undefined && asset != undefined) {
-            oSceneEditor.sceneManager.objects.add(asset);
+        // Add to objects for rendering only if the asset is changed
+        if (assetChanged && oSceneEditor.sceneManager.objects != undefined) {
+            oSceneEditor.sceneManager.objects.children = [];
+            
+            if (self.activeScene != undefined) {
+                oSceneEditor.sceneManager.objects.add(self.activeScene);
+            } else if (asset != undefined) {
+                oSceneEditor.sceneManager.objects.add(asset);
+            }
         }
         
         // Attach transform controls if applicable
@@ -79,7 +85,7 @@ function EditorManager() constructor {
     /**
      * Clear the active asset selection
      */
-    function clearActiveAsset() {
+    function clearActiveAsset(keepScene = false) {
         // Deselect treeview item visually (for all asset types)
         if (global.UI.Main[$ "Assets"] != undefined && global.UI.Main.Assets[$ "Treeview"] != undefined) {
             var treeview = global.UI.Main.Assets.Treeview;
@@ -91,12 +97,26 @@ function EditorManager() constructor {
             }
         }
         
+        var sceneToKeep = keepScene ? self.activeScene : undefined;
+        
         self.activeAsset = undefined;
         self.gizmoTarget = undefined;
         self.selectedTreeviewItem = undefined;
-        oSceneEditor.sceneManager.objects.children = [];
-        oSceneEditor.sceneManager.transformControls.detach();
-        self.inspector.close();
+        
+        if (sceneToKeep == undefined) {
+            oSceneEditor.sceneManager.objects.children = [];
+            self.activeScene = undefined;
+            oSceneEditor.sceneManager.transformControls.detach();
+            self.inspector.close();
+        } else {
+            // Re-set the scene as the active asset to maintain consistency
+            self.setActiveAsset(sceneToKeep);
+            
+            // Update inspector manually since we don't go through treeview callback
+            if (self.inspector != undefined) {
+                self.inspector.inspect(sceneToKeep);
+            }
+        }
     }
     
     /**

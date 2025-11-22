@@ -1,12 +1,12 @@
 {
-  "uuid":"c2ff78e9-2a66-4b9a-a2bb-fe2a987ee874",
+  "uuid":"bc36df7d-c015-44fb-a06f-d3556e398f45",
   "visible":true,
-  "type":"Mesh",
-  "parent":"42687c82-97f4-4612-beb5-88d8cdcd6480",
+  "type":"ModelInstance",
+  "parent":null,
   "children":[
   ],
-  "name":"meshTreeSnowA",
-  "ex":90.0,
+  "name":"meshTreeSnowA_3",
+  "ex":90.000000000000014,
   "ey":0.0,
   "geometry":{
     "uuid":"0a81090d-9e3e-4595-abe3-91851a098b86",
@@ -32,7 +32,7 @@
       "name":""
     }
   },
-  "ez":0.0,
+  "ez":-0.0,
   "eo":"XYZ",
   "renderOrder":0.0,
   "material":"38bf0fda-3b82-41b2-8f6d-67c095666083",

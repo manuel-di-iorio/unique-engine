@@ -11,7 +11,7 @@
   "androidsourcedir":"",
   "author":"Marton Giacomo",
   "classname":"",
-  "copyToTargets":3035426178912485614,
+  "copyToTargets":64,
   "description":"",
   "exportToGame":true,
   "extensionVersion":"0.0.1",

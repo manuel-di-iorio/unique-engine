@@ -1,5 +1,4 @@
 {
-  "version":"2025.11.22.0",
   "assets":[
     {
       "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
@@ -20,6 +19,12 @@
       "uuid":"752b53a3-2e3f-44df-94be-0850c32ed607",
       "type":"Scene",
       "name":"SnowScene"
+    },
+    {
+      "uuid":"bc36df7d-c015-44fb-a06f-d3556e398f45",
+      "type":"ModelInstance",
+      "name":"meshTreeSnowA_3"
     }
-  ]
+  ],
+  "version":"2025.11.22.0"
 }

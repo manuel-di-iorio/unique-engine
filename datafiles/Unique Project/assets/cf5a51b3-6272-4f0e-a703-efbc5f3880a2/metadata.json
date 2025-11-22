@@ -1,8 +1,13 @@
 {
   "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
   "type":"Texture",
-  "spriteBuffSize":0.0,
+  "rotation":0.0,
+  "center":[
+    0.0,
+    0.0
+  ],
   "name":"diffuseTex",
+  "spriteBuffSize":0.0,
   "filter":true,
   "generateMipmaps":true,
   "repeat":[
@@ -41,7 +46,10 @@
                                 "x":0.0,
                                 "y":{
                                   "x":0.0,
-                                  "y":0.0
+                                  "y":{
+                                    "x":0.0,
+                                    "y":0.0
+                                  }
                                 }
                               }
                             }
@@ -63,10 +71,5 @@
   "wrapS":1.0,
   "wrapT":1.0,
   "userData":{
-  },
-  "center":[
-    0.0,
-    0.0
-  ],
-  "rotation":0.0
+  }
 }

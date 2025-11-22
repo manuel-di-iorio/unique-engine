@@ -43,31 +43,32 @@
       "name":"Project"
     }
   ],
-  "version":"2025.11.22.0",
   "settings":{
+    "gridEnabled":true,
+    "camera":{
+      "damping":true,
+      "target":[
+        7.429541941871368,
+        72.759135846601353,
+        0.0
+      ],
+      "position":[
+        70.136913808222886,
+        -382.09551454927532,
+        195.08709775833859
+      ],
+      "dampingFactor":0.29999999999999999
+    },
     "counters":{
       "textures":1.0,
       "materials":3.0,
-      "models":4.0,
+      "models":6.0,
       "scenes":1.0,
       "lights":0.0,
-      "instances":4.0,
+      "instances":8.0,
       "cameras":0.0,
       "folders":2.0
-    },
-    "gridEnabled":true,
-    "camera":{
-      "target":[
-        -8.6661414102412184,
-        44.002146265249863,
-        0.0
-      ],
-      "dampingFactor":0.29999999999999999,
-      "position":[
-        -224.7932875025752,
-        -118.15854007710008,
-        293.42865018444581
-      ]
     }
-  }
+  },
+  "version":"2025.11.22.0"
 }

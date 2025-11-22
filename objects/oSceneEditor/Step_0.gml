@@ -23,15 +23,20 @@ switch (currentTool) {
         sceneManager.transformControls.updateGizmo();
         sceneManager.orbit.update(winMouseX, winMouseY);
         
-        // Handle mesh picking when a scene is active
+        // Handle mesh picking
         // if (mouse_check_button_pressed(mb_left) && ui.Main.Scene.hovered) {
         //     sceneManager.raycaster.setFromCamera(sceneManager.camera);
-        //     var activeScene = editorManager.activeScene;
             
-        //     // Only do picking if we have an active scene
-        //     if (activeScene != undefined) {
-        //         // Raycast against all children in the scene
-        //         var hits = sceneManager.raycaster.intersectObjects(activeScene.children, false, true);
+        //     var objectsToTest = [];
+        //     if (editorManager.activeScene != undefined) {
+        //         objectsToTest = editorManager.activeScene.children;
+        //     } else {
+        //         objectsToTest = sceneManager.objects.children;
+        //     }
+            
+        //     if (array_length(objectsToTest) > 0) {
+        //         // Raycast against all children
+        //         var hits = sceneManager.raycaster.intersectObjects(objectsToTest, false, true);
                 
         //         if (array_length(hits) > 0) {
         //             var hitObject = hits[0].object;
