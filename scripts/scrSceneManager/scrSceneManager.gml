@@ -7,6 +7,9 @@ function SceneManager() constructor {
     self.orbit = new UeOrbitControls(self.camera, {
         shouldHandleInput: function() {
             return global.UI.Main.Scene.hovered;
+        },
+        onChange: function() {
+            oSceneEditor.projectManager.saver.saveCameraPosition(oSceneEditor.projectManager);
         }
     });
     self.scene = new UeScene();
@@ -41,4 +44,8 @@ function SceneManager() constructor {
     // Test lights
     scene.add(new UeAmbientLight(c_dkgray));
     scene.add(new UeDirectionalLight(30, 60));
+
+    // Create raycaster and set from camera
+    self.raycaster = new UeRaycaster();
+    self.raycaster.setFromCamera(self.camera);
 }

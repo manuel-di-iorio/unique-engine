@@ -88,6 +88,11 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.asset = props[$ "asset"] ?? undefined;
     self.acceptsDropOf = props[$ "acceptsDropOf"] ?? undefined;
     
+    // Store back-reference in asset for efficient lookup
+    if (self.asset != undefined) {
+        self.asset.__treeviewItem = self;
+    }
+    
     // Content
     self.Content = new UiNode({ 
         name: "UiTreeview.Item.Content", 

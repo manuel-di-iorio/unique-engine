@@ -29,6 +29,34 @@ function ProjectSaver() constructor {
     }
     
     /**
+     * Save only the camera position and target to project.json
+     * This is called frequently (e.g., on camera movement) and doesn't mark the project as unsaved
+     */
+    function saveCameraPosition(projectManager) {
+        var projectDir = projectManager.projectDatafiles + "/Unique Project/";
+        var projectJsonPath = projectDir + "project.json";
+        
+        // Exit if project file doesn't exist yet
+        if (!file_exists(projectJsonPath)) return;
+        
+        // Load existing project.json
+        var projectJson = json_parse(self.__readFile(projectJsonPath));
+        
+        // Update only camera settings
+        var sm = oSceneEditor.sceneManager;
+        var cameraSettings = {
+            position: [sm.camera.position.x, sm.camera.position.y, sm.camera.position.z],
+            target: [sm.orbit.target.x, sm.orbit.target.y, sm.orbit.target.z],
+            dampingFactor: sm.orbit.dampingFactor
+        };
+        
+        projectJson.settings.camera = cameraSettings;
+        
+        // Write back to file
+        self.__writeJson(projectJsonPath, projectJson);
+    }
+    
+    /**
      * Perform a full save of all assets
      */
     function __performFullSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath) {
@@ -108,7 +136,17 @@ function ProjectSaver() constructor {
                     if (!directory_exists(assetPath)) directory_create(assetPath);
                     
                     var assetToJSON = asset[$ "toJSON"];
-                    self.__writeJson(assetPath + "/metadata.json", is_callable(assetToJSON) ? assetToJSON() : asset);
+                    var metadata = is_callable(assetToJSON) ? assetToJSON() : asset;
+                    
+                    // Add Euler rotation to metadata if it exists (editor-only data)
+                    if (asset[$ "__rotationEuler"] != undefined) {
+                        metadata.ex = asset.__rotationEuler.x;
+                        metadata.ey = asset.__rotationEuler.y;
+                        metadata.ez = asset.__rotationEuler.z;
+                        metadata.eo = asset.__rotationEuler.order;
+                    }
+                    
+                    self.__writeJson(assetPath + "/metadata.json", metadata);
                     
                     // Export binary resources
                     switch (asset.type) {
@@ -187,8 +225,7 @@ function ProjectSaver() constructor {
         return {
             camera: cameraSettings,
             counters: counters,
-            activeTool: oSceneEditor.editorManager.activeTool,
-            gridEnabled: sm.gridEnabled
+            gridEnabled: sm.gridEnabled,
         };
     }
 
@@ -215,7 +252,17 @@ function ProjectSaver() constructor {
                     if (!directory_exists(assetPath)) directory_create(assetPath);
 
                     var assetToJSON = asset[$ "toJSON"];
-                    self.__writeJson(assetPath + "/metadata.json", is_callable(assetToJSON) ? assetToJSON() : asset);
+                    var metadata = is_callable(assetToJSON) ? assetToJSON() : asset;
+                    
+                    // Add Euler rotation to metadata if it exists (editor-only data)
+                    if (asset[$ "__rotationEuler"] != undefined) {
+                        metadata.ex = asset.__rotationEuler.x;
+                        metadata.ey = asset.__rotationEuler.y;
+                        metadata.ez = asset.__rotationEuler.z;
+                        metadata.eo = asset.__rotationEuler.order;
+                    }
+                    
+                    self.__writeJson(assetPath + "/metadata.json", metadata);
                     
                     switch (assetType) {
                         case "Texture":

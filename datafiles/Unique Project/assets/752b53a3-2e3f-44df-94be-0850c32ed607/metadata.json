@@ -3,16 +3,11 @@
   "type":"Scene",
   "children":[
     {
-      "uuid":"052194c3-2802-4479-ba11-a49626850501",
+      "uuid":"bc36df7d-c015-44fb-a06f-d3556e398f45",
       "type":"ModelInstance",
+      "model":"c2ff78e9-2a66-4b9a-a2bb-fe2a987ee874",
       "visible":true,
-      "name":"meshTreeSnowA_0",
-      "rotation":[
-        0.70710678118654757,
-        0.0,
-        0.0,
-        0.70710678118654757
-      ],
+      "name":"meshTreeSnowA_3",
       "position":[
         0.0,
         0.0,
@@ -23,7 +18,12 @@
         1.0,
         1.0
       ],
-      "model":"c2ff78e9-2a66-4b9a-a2bb-fe2a987ee874"
+      "rotation":[
+        0.70710678118654757,
+        0.0,
+        0.0,
+        0.70710678118654757
+      ]
     }
   ],
   "name":"SnowScene"

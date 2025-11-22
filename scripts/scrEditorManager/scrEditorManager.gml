@@ -37,6 +37,27 @@ function EditorManager() constructor {
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
         
+        // Update active scene based on what was selected
+        if (asset != undefined) {
+            if (asset.type == "Scene") {
+                // Scene selected directly
+                self.activeScene = asset;
+            } else if (asset.type == "Mesh" || asset.type == "ModelInstance") {
+                // Mesh/instance selected - find parent scene via treeview
+                if (treeviewItem != undefined && treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
+                    var parentTreeItem = treeviewItem.parent.parent;
+                    if (parentTreeItem.asset != undefined && parentTreeItem.asset.type == "Scene") {
+                        self.activeScene = parentTreeItem.asset;
+                    }
+                }
+            } else {
+                // Other asset type selected - clear active scene
+                self.activeScene = undefined;
+            }
+        } else {
+            self.activeScene = undefined;
+        }
+        
         // Add to objects for rendering solo se l'asset è cambiato
         if (assetChanged && oSceneEditor.sceneManager.objects != undefined && asset != undefined) {
             oSceneEditor.sceneManager.objects.add(asset);

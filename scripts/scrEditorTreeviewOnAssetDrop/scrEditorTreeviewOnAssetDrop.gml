@@ -182,8 +182,10 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
         case "Camera": obj.type = "CameraInstance"; break;
         default: obj.type = assetType + "Instance"; break;
     }
-    // Assicura che __rotationEuler sia presente
+    
+    // Copy __rotationEuler from the master object if it exists, otherwise create new
     obj.__rotationEuler = new UeEuler();
+    obj.__rotationEuler.copy(obj.object.__rotationEuler);
 
     // Ricorsione su children
     if (obj.children != undefined) {

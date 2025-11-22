@@ -509,7 +509,8 @@ function EditorUiInspector(ui) constructor {
                 id: "static",
                 field: "matrixAutoUpdate",
                 label: "Static", 
-                type: "checkbox",
+                type: "checkbox", 
+                tooltip: "Mark object as static (disable automatic matrix updates)",
                 onValue: function(value) {
                     return !value;
                 },
@@ -560,6 +561,7 @@ function EditorUiInspector(ui) constructor {
                 type: "text",
                 format: "integer",
                 negative: true,
+                tooltip: "Control rendering order (lower values render first)"
             },
         
            {

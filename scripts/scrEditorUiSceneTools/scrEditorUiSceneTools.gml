@@ -64,7 +64,6 @@ function EditorUiSceneTools(ui) constructor {
     ui.SceneTools.BtnView.onClick(function() {
         oSceneEditor.editorManager.setTool("view");
         self.updateToolButtons();
-        oSceneEditor.projectManager.markAsUnsaved();
     });
     
     // Move tool
@@ -72,7 +71,6 @@ function EditorUiSceneTools(ui) constructor {
     ui.SceneTools.BtnMove.onClick(function() {
         oSceneEditor.editorManager.setTool("move");
         self.updateToolButtons();
-        oSceneEditor.projectManager.markAsUnsaved();
     });
     
     self.updateToolButtons = function() {

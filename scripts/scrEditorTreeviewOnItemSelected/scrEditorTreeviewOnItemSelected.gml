@@ -2,14 +2,14 @@ function editorTreeviewOnItemSelected(treeviewItem) {
     var editorManager = oSceneEditor.editorManager;
     
     // Handle folders (no asset)
-    if (treeviewItem.asset == undefined) {
-        if (treeviewItem.type == "Folder") {
-            // Folders don't have an asset to inspect
-            // editorManager.clearActiveAsset();
-        }
-        global.UI.needsRedraw = true;
-        return;
-    }
+    // if (treeviewItem.asset == undefined) {
+    //     // if (treeviewItem.type == "Folder") {
+    //     //     // Folders don't have an asset to inspect
+    //     //     // editorManager.clearActiveAsset();
+    //     // }
+    //     // global.UI.needsRedraw = true;
+    //     return;
+    // }
     
     switch (treeviewItem.asset.type) {
         case "ModelInstance":                

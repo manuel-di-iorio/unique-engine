@@ -88,8 +88,8 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         
         var matrixWorldInverse = global.UE_DUMMY_MATRIX4.copy(matrixWorld).invert();
         var localRay = global.UE_DUMMY_RAY.copy(raycaster.ray);
-        var localOrigin = localRay.origin.applyMatrix4(matrixWorldInverse);
-        var localDirection = localRay.direction.transformDirection(matrixWorldInverse);
+        localRay.origin.applyMatrix4(matrixWorldInverse);
+        localRay.direction.transformDirection(matrixWorldInverse);
         
         var boundingBox = geometry[$ "boundingBox"];
         var boundingSphere = geometry[$ "boundingSphere"];

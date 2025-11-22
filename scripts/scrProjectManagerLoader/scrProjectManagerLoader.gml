@@ -30,66 +30,57 @@ function ProjectLoader() constructor {
   }
   
   function __applyProjectSettings(settings) {
-        // Counters
-        if (settings[$ "counters"] != undefined) {
-            var c = settings.counters;
-            if (c[$ "textures"] != undefined) global.UI_ASSETS_TEXTURES_ID = c.textures;
-            if (c[$ "materials"] != undefined) global.UI_ASSETS_MATERIALS_ID = c.materials;
-            if (c[$ "models"] != undefined) global.UI_ASSETS_MODELS_ID = c.models;
-            if (c[$ "lights"] != undefined) global.UI_ASSETS_LIGHTS_ID = c.lights;
-            if (c[$ "cameras"] != undefined) global.UI_ASSETS_CAMERAS_ID = c.cameras;
-            if (c[$ "scenes"] != undefined) global.UI_ASSETS_SCENES_ID = c.scenes;
-            if (c[$ "instances"] != undefined) global.UI_ASSETS_INSTANCE_ID = c.instances;
-            if (c[$ "folders"] != undefined) global.UI_ASSETS_FOLDERS_ID = c.folders;
-        }
-        
-        // Camera
-        if (settings[$ "camera"] != undefined) {
-            var c = settings.camera;
-            var sm = oSceneEditor.sceneManager;
-            
-            if (sm.camera != undefined && c[$ "position"] != undefined) {
-                sm.camera.setPosition(c.position[0], c.position[1], c.position[2]);
-            }
-            
-            if (sm.orbit != undefined) {
-                if (c[$ "target"] != undefined) {
-                    sm.orbit.target.set(c.target[0], c.target[1], c.target[2]);
-                }
-                if (c[$ "dampingFactor"] != undefined) {
-                    sm.orbit.dampingFactor = c.dampingFactor;
-                }
-                sm.orbit.update(); // Ensure orbit is updated
-            }
-            
-            // Update UI button
-            if (oSceneEditor.editorManager.sceneTools != undefined && oSceneEditor.editorManager.sceneTools.updateDampingButton != undefined) {
-                oSceneEditor.editorManager.sceneTools.updateDampingButton();
-            }
-        }
-        
-        // Active Tool
-        if (settings[$ "activeTool"] != undefined) {
-            oSceneEditor.editorManager.setTool(settings.activeTool);
-            
-            // Update UI buttons
-            if (oSceneEditor.editorManager.sceneTools != undefined && oSceneEditor.editorManager.sceneTools.updateToolButtons != undefined) {
-                oSceneEditor.editorManager.sceneTools.updateToolButtons();
-            }
-        }
-        
-        // Grid Enabled
-        if (settings[$ "gridEnabled"] != undefined) {
-            var sm = oSceneEditor.sceneManager;
-            sm.gridEnabled = settings.gridEnabled;
-            
-            // Update UI button
-            if (global.UI.Main[$ "SceneTools"] != undefined && global.UI.Main.SceneTools[$ "BtnGrid"] != undefined) {
-                global.UI.Main.SceneTools.BtnGrid.updateGridButton();
-            }
-        }
-    }
-
+      // Counters
+      if (settings[$ "counters"] != undefined) {
+          var c = settings.counters;
+          if (c[$ "textures"] != undefined) global.UI_ASSETS_TEXTURES_ID = c.textures;
+          if (c[$ "materials"] != undefined) global.UI_ASSETS_MATERIALS_ID = c.materials;
+          if (c[$ "models"] != undefined) global.UI_ASSETS_MODELS_ID = c.models;
+          if (c[$ "lights"] != undefined) global.UI_ASSETS_LIGHTS_ID = c.lights;
+          if (c[$ "cameras"] != undefined) global.UI_ASSETS_CAMERAS_ID = c.cameras;
+          if (c[$ "scenes"] != undefined) global.UI_ASSETS_SCENES_ID = c.scenes;
+          if (c[$ "instances"] != undefined) global.UI_ASSETS_INSTANCE_ID = c.instances;
+          if (c[$ "folders"] != undefined) global.UI_ASSETS_FOLDERS_ID = c.folders;
+      }
+      
+      // Camera
+      if (settings[$ "camera"] != undefined) {
+          var c = settings.camera;
+          var sm = oSceneEditor.sceneManager;
+          
+          if (sm.camera != undefined && c[$ "position"] != undefined) {
+              sm.camera.setPosition(c.position[0], c.position[1], c.position[2]);
+          }
+          
+          if (sm.orbit != undefined) {
+              if (c[$ "target"] != undefined) {
+                  sm.orbit.target.set(c.target[0], c.target[1], c.target[2]);
+              }
+              if (c[$ "dampingFactor"] != undefined) {
+                  sm.orbit.dampingFactor = c.dampingFactor;
+              }
+              sm.orbit.updateSphericalCoordinates();
+              sm.orbit.update(); // Ensure orbit is updated
+          }
+          
+          // Update UI button
+          if (oSceneEditor.editorManager.sceneTools != undefined && oSceneEditor.editorManager.sceneTools.updateDampingButton != undefined) {
+              oSceneEditor.editorManager.sceneTools.updateDampingButton();
+          }
+      }
+      
+      // Grid Enabled
+      if (settings[$ "gridEnabled"] != undefined) {
+          var sm = oSceneEditor.sceneManager;
+          sm.gridEnabled = settings.gridEnabled;
+          
+          // Update UI button
+          if (global.UI.Main[$ "SceneTools"] != undefined && global.UI.Main.SceneTools[$ "BtnGrid"] != undefined) {
+              global.UI.Main.SceneTools.BtnGrid.updateGridButton();
+          }
+      }
+  }
+    
   function __linkNodes() {
     var assetManager = oSceneEditor.assetManager;
     
@@ -233,8 +224,18 @@ function ProjectLoader() constructor {
 
       // For meshes, add the rotation euler
       if (asset.type == "Mesh") {
-        asset.__rotationEuler = new UeEuler();
-        asset.__rotationEuler.setFromQuaternion(asset.rotation);
+        // Load Euler rotation from metadata if available, otherwise create from quaternion
+        if (meta[$ "ex"] != undefined && meta[$ "ey"] != undefined && meta[$ "ez"] != undefined) {
+          asset.__rotationEuler = new UeEuler(
+            meta[$ "ex"],
+            meta[$ "ey"],
+            meta[$ "ez"],
+            meta[$ "eo"] ?? "XYZ"
+          );
+        } else {
+          asset.__rotationEuler = new UeEuler();
+          asset.__rotationEuler.setFromQuaternion(asset.rotation);
+        }
         
         // Load geometry if it exists
         var geometryPath = projectDir + "assets/" + node.uuid + "/geometry.buf";

@@ -47,6 +47,9 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self._panning = false;
     self._zooming = false;
     self.transforming = false;
+    
+    // Callback fired when transformation ends
+    self.onChange = data[$"onChange"] ?? undefined;
 
     self._deltaAzimuth = 0;
     self._deltaElevation = 0;
@@ -60,6 +63,19 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         self.radius = camera.position.distanceTo(target);
         self.azimuth = arctan2(dir.y, dir.x);
         self.elevation = radius == 0 ? 0 : arcsin(clamp(dir.z / radius, -1, 1));
+    }
+
+    // Update spherical coordinates from current camera position and target
+    // Useful when manually setting the camera position and target
+    function updateSphericalCoordinates() {
+        var dir = camera.position.clone().sub(target);
+        self.radius = camera.position.distanceTo(target);
+        self.azimuth = arctan2(dir.y, dir.x);
+        self.elevation = self.radius == 0 ? 0 : arcsin(clamp(dir.z / self.radius, -1, 1));
+        
+        self._deltaAzimuth = 0;
+        self._deltaElevation = 0;
+        self._deltaPan.set(0, 0, 0);
     }
 
     // Update the camera orbit. 
@@ -111,8 +127,14 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         self._panning = isPanningNow;
         self._zooming = isZoomingNow;
         
-        // Aggiorna la variabile transforming
+        // Track transforming state and fire onChange when it ends
+        var wasTransforming = self.transforming;
         self.transforming = self._dragging || self._panning || self._zooming || isWheelZooming;
+        
+        // Fire onChange callback when transformation ends
+        if (wasTransforming && !self.transforming && self.onChange != undefined) {
+            self.onChange();
+        }
 
         var dx = 0;
         var dy = 0;
