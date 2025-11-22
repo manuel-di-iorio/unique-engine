@@ -1,31 +1,4 @@
 {
-  "version":"2025.11.22.0",
-  "settings":{
-    "counters":{
-      "textures":1.0,
-      "materials":3.0,
-      "models":4.0,
-      "scenes":1.0,
-      "lights":0.0,
-      "instances":4.0,
-      "cameras":0.0,
-      "folders":2.0
-    },
-    "gridEnabled":true,
-    "camera":{
-      "target":[
-        52.171227809739932,
-        32.382789355523997,
-        0.0
-      ],
-      "dampingFactor":0.29999999999999999,
-      "position":[
-        279.56322908912949,
-        -591.39926498943782,
-        288.43540400332228
-      ]
-    }
-  },
   "assets":[
     {
       "uuid":"42398633-94cd-4faf-a1db-3ca55366eaed",
@@ -69,5 +42,32 @@
       ],
       "name":"Project"
     }
-  ]
+  ],
+  "version":"2025.11.22.0",
+  "settings":{
+    "counters":{
+      "textures":1.0,
+      "materials":3.0,
+      "models":4.0,
+      "scenes":1.0,
+      "lights":0.0,
+      "instances":4.0,
+      "cameras":0.0,
+      "folders":2.0
+    },
+    "gridEnabled":true,
+    "camera":{
+      "target":[
+        -8.6661414102412184,
+        44.002146265249863,
+        0.0
+      ],
+      "dampingFactor":0.29999999999999999,
+      "position":[
+        -224.7932875025752,
+        -118.15854007710008,
+        293.42865018444581
+      ]
+    }
+  }
 }

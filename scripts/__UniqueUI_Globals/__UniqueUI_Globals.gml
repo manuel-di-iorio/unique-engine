@@ -1,14 +1,9 @@
 // UniqueUI Version: 0.1.1
-// @todo: doc: report that changed selection color
-
-// UI Theme
-global.UI_COL_BTN_HOVER        = #393B47; // 57,59,71
 
 // UI Theme
 global.UI_COL_BTN_HOVER        = #393B47; // 57,59,71
 global.UI_COL_BOX              = #191A21; // 25,26,33
 global.UI_COL_TREE_BG          = #2D3039; // 45,48,57
-//global.UI_COL_SELECTED         = #5A657E; // 90,101,126  @deprecated. This was used on the Treeview, for the selected item
 global.UI_COL_INSPECTOR_BG     = #282A36; // 40,42,54
 global.UI_COL_INPUT_BG         = #21222C; // 33,34,44
 global.UI_COL_SELECTION        = #464a53; // 53,57,66

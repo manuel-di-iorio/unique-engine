@@ -131,7 +131,7 @@ function EditorUiSceneTools(ui) constructor {
                 sm.orbit.target.set(0, 0, 0);
                 sm.orbit.reset(); 
             }
-            oSceneEditor.projectManager.markAsUnsaved();
+            oSceneEditor.projectManager.saver.saveCameraPosition(oSceneEditor.projectManager);
         }
     });
 

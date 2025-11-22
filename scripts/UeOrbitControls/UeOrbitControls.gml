@@ -67,6 +67,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     // Update spherical coordinates from current camera position and target
     // Useful when manually setting the camera position and target
+    // @todo missing doc
     function updateSphericalCoordinates() {
         var dir = camera.position.clone().sub(target);
         self.radius = camera.position.distanceTo(target);

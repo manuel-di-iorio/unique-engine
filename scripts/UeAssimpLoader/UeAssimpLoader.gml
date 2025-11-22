@@ -1,51 +1,52 @@
 function UeAssimpLoader(data = {}) constructor {
-    if (!GMA_IsWorking()) ueError("Assimp extension is not working");
+    if (!ASSIMP_IsWorking()) ueError("Assimp extension is not working");
     
-    importer = GMA_CreateImporter();
-    GMA_BindImporter(importer);
+    importer = ASSIMP_CreateImporter();
+    ASSIMP_BindImporter(importer);
     
     function load(fname) {
         gml_pragma("forceinline");
-		var check = GMA_ReadFile(fname,
-			GMA_PP.GEN_BOUNDING_BOXES |
+		var check = ASSIMP_ReadFile(fname,
+			ASSIMP_PP.GEN_BOUNDING_BOXES |
 			
-			GMA_PP.FLIP_UVS |
-			GMA_PP.FLIP_WINDING_ORDER |
+			ASSIMP_PP.FLIP_UVS |
+			ASSIMP_PP.FLIP_WINDING_ORDER |
 			
 			// Fast
-			GMA_PP.CALC_TANGENT_SPACE |
-			GMA_PP.GEN_NORMALS |
-			GMA_PP.JOIN_IDENTICAL_VERTICES |
-			GMA_PP.GEN_UV_COORDS |
-			GMA_PP.SORT_BY_PTYPE |
+			ASSIMP_PP.CALC_TANGENT_SPACE |
+			ASSIMP_PP.GEN_NORMALS |
+			ASSIMP_PP.JOIN_IDENTICAL_VERTICES |
+			ASSIMP_PP.GEN_UV_COORDS |
+			ASSIMP_PP.SORT_BY_PTYPE |
 			
 			// Quality
-			GMA_PP.CALC_TANGENT_SPACE |
-			//GMA_PP.GEN_SMOOTH_NORMALS | // Not needed probably
-			GMA_PP.JOIN_IDENTICAL_VERTICES |
-			GMA_PP.IMPROVE_CACHE_LOCALITY | 
-			//GMA_PP.LIMIT_BONE_WEIGHTS | // @todo: test
-			GMA_PP.TRIANGULATE |
-			GMA_PP.GEN_UV_COORDS |
-			GMA_PP.SORT_BY_PTYPE |
-			GMA_PP.FIND_DEGENERATES |
-			GMA_PP.FIND_INVALID_DATA
+			ASSIMP_PP.CALC_TANGENT_SPACE |
+			//ASSIMP_PP.GEN_SMOOTH_NORMALS | // Not needed probably
+			ASSIMP_PP.JOIN_IDENTICAL_VERTICES |
+			ASSIMP_PP.IMPROVE_CACHE_LOCALITY | 
+			//ASSIMP_PP.LIMIT_BONE_WEIGHTS | // @todo: test
+			ASSIMP_PP.TRIANGULATE |
+			ASSIMP_PP.GEN_UV_COORDS |
+			ASSIMP_PP.SORT_BY_PTYPE |
+			ASSIMP_PP.FIND_DEGENERATES |
+			ASSIMP_PP.FIND_INVALID_DATA
 			
 			// Max quality
-			//GMA_PP.FIND_INSTANCES | // @todo Random vertices count?? To test
-			//GMA_PP.VALIDATE_DATA_STRUCTURE |
-			//GMA_PP.OPTIMIZE_GRAPH | 
-			//GMA_PP.OPTIMIZE_MESHES 
+			//ASSIMP_PP.FIND_INSTANCES | // @todo Random vertices count?? To test
+			//ASSIMP_PP.VALIDATE_DATA_STRUCTURE |
+			//ASSIMP_PP.OPTIMIZE_GRAPH | 
+			//ASSIMP_PP.OPTIMIZE_MESHES 
 		);
 
 		// Check if the file is correctly loaded
 		if (!check) {	
-			ueError($"{GMA_GetImporterErrorString()}");
+			ueError($"{ASSIMP_GetImporterErrorString()}");
 		}
 
-		GMA_BindScene();
+		ASSIMP_BindScene();
         var textures = [];
-        var materials = _addMaterials(fname, textures);
+        var textureCache = {};
+        var materials = _addMaterials(fname, textures, textureCache);
         var model = _addMeshes(materials);
         return {
             textures,
@@ -54,21 +55,21 @@ function UeAssimpLoader(data = {}) constructor {
         };
     }
     
-    function _addMaterials(fname, textures) {
+    function _addMaterials(fname, textures, textureCache) {
         gml_pragma("forceinline");
         var modelPath = filename_path(fname);
         var modelName = filename_change_ext(filename_name(fname), "");
 		
 		// Get the materials
-		var materialsCount = GMA_GetMaterialNum();
+		var materialsCount = ASSIMP_GetMaterialNum();
         var materials = array_create(materialsCount);
         
         for (var i=0; i<materialsCount; i++) {
-		    GMA_BindMaterial(i);
-            var material = new UeMeshStandardMaterial(_addTextures(modelPath, textures));
-            material.name = string_trim(GMA_GetMaterialName());
+		    ASSIMP_BindMaterial(i);
+            var material = new UeMeshStandardMaterial(_addTextures(modelPath, textures, textureCache));
+            material.name = string_trim(ASSIMP_GetMaterialName());
             if (material.name == "") material.name = modelName + "__Material" + string(i);
-            material.opacity = GMA_GetMaterialOpacity();
+            material.opacity = ASSIMP_GetMaterialOpacity();
             material.transparent = material.opacity < 1;
             materials[i] = material;
 		}
@@ -76,33 +77,57 @@ function UeAssimpLoader(data = {}) constructor {
         return materials;
     }
 
-    function _addTextures(modelPath, globalTextures) {
+    function _addTextures(modelPath, globalTextures, textureCache) {
         gml_pragma("forceinline");
         var textures = {};
         
         var materialTypes = [
-			{ name: "map", type: GMA_TEXTURE_TYPE_DIFFUSE },
-			{ name: "normalMap", type: GMA_TEXTURE_TYPE_NORMALS },
-            { name: "aoMap", type: GMA_TEXTURE_AMBIENT_OCCLUSION },
-            { name: "emissiveMap", type: GMA_TEXTURE_TYPE_EMISSIVE },
-			{ name: "reflectionMap", type: GMA_TEXTURE_TYPE_REFLECTION },
-            { name: "ambientMap", type: GMA_TEXTURE_TYPE_AMBIENT },
-			{ name: "shininessMap", type: GMA_TEXTURE_TYPE_SHININESS },
-			{ name: "displacementMap", type: GMA_TEXTURE_TYPE_DISPLACEMENT },
-			{ name: "lightmapMap", type: GMA_TEXTURE_TYPE_LIGHTMAP },
-			{ name: "heightMap", type: GMA_TEXTURE_TYPE_HEIGHT },
-			{ name: "opacityMap", type: GMA_TEXTURE_TYPE_OPACITY },
-			{ name: "specularMap", type: GMA_TEXTURE_TYPE_SPECULAR },
-			{ name: "unknownMap", type: GMA_TEXTURE_TYPE_UNKNOWN },
+			{ name: "map", type: ASSIMP_TEXTURE_TYPE.DIFFUSE },
+			{ name: "normalsMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
+            { name: "ambientOcclusionMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
+            { name: "emissiveMap", type: ASSIMP_TEXTURE_TYPE.EMISSIVE },
+			{ name: "reflectionMap", type: ASSIMP_TEXTURE_TYPE.REFLECTION },
+            { name: "ambientMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT },
+			{ name: "shininessMap", type: ASSIMP_TEXTURE_TYPE.SHININESS },
+			{ name: "displacementMap", type: ASSIMP_TEXTURE_TYPE.DISPLACEMENT },
+			{ name: "lightmapMap", type: ASSIMP_TEXTURE_TYPE.LIGHTMAP },
+			{ name: "heightMap", type: ASSIMP_TEXTURE_TYPE.HEIGHT },
+			{ name: "opacityMap", type: ASSIMP_TEXTURE_TYPE.OPACITY },
+			{ name: "specularMap", type: ASSIMP_TEXTURE_TYPE.SPECULAR },
+			{ name: "baseColor", type: ASSIMP_TEXTURE_TYPE.BASE_COLOR },
+			{ name: "clearCotMap", type: ASSIMP_TEXTURE_TYPE.CLEARCOAT },
+			{ name: "diffuseRoughnessMap", type: ASSIMP_TEXTURE_TYPE.DIFFUSE_ROUGHNESS },
+			{ name: "emissionColorMap", type: ASSIMP_TEXTURE_TYPE.EMISSION_COLOR },
+			{ name: "metalnessMap", type: ASSIMP_TEXTURE_TYPE.METALNESS },
+			{ name: "normalsCameraMap", type: ASSIMP_TEXTURE_TYPE.NORMAL_CAMERA },
+			{ name: "sheenMap", type: ASSIMP_TEXTURE_TYPE.SHEEN },
+			{ name: "transmissionMap", type: ASSIMP_TEXTURE_TYPE.TRANSMISSION },
+			{ name: "unknownMap", type: ASSIMP_TEXTURE_TYPE.UNKNOWN },
 		];
 
 		for (var i = 0, len = array_length(materialTypes); i < len; i++) {
 			var materialType = materialTypes[i];
-            var txtName = GMA_GetMaterialTextureName(materialType.type, 0);
-            var txt = _addTexture(modelPath, filename_name(txtName));
+            
+            var txtName = ASSIMP_GetMaterialTextureName(materialType.type, 0);
+            if (txtName == "") continue;
+            
+            var fileName = filename_name(txtName);
+            var txt = undefined;
+            
+            // Check cache first
+            if (textureCache[$ fileName] != undefined) {
+                txt = textureCache[$ fileName];
+            } else {
+                // Load new texture
+                txt = _addTexture(modelPath, fileName);
+                if (txt) {
+                    textureCache[$ fileName] = txt;
+                    array_push(globalTextures, txt);
+                }
+            }
+            
             if (txt) {
                 textures[$ materialType.name] = txt;
-                array_push(globalTextures, txt);
             }
         }
 
@@ -132,10 +157,10 @@ function UeAssimpLoader(data = {}) constructor {
         var model = new UeMesh();
         var meshes = [];
         
-        for (var i = 0, n = GMA_GetMeshNum(); i < n; i++) {
-		    GMA_BindMesh(i);
+        for (var i = 0, n = ASSIMP_GetMeshNum(); i < n; i++) {
+		    ASSIMP_BindMesh(i);
 			var mesh = _buildMesh();
-			mesh.material = materials[GMA_GetMeshMaterialIndex()];
+			mesh.material = materials[ASSIMP_GetMeshMaterialIndex()];
 			model.add(mesh);
 			array_push(meshes, mesh);
 		}
@@ -149,45 +174,45 @@ function UeAssimpLoader(data = {}) constructor {
     function _buildMesh() {
         gml_pragma("forceinline");
         var mesh = new UeMesh(new UeBufferGeometry({ canFreeze: false }));
-        mesh.name = GMA_GetMeshName();
+        mesh.name = ASSIMP_GetMeshName();
         var geometry = mesh.geometry;
         var vb = vertex_create_buffer();
         geometry.vb = vb;
         vertex_begin(vb, geometry.format.vf);
         
-        var meshFacenum = GMA_GetMeshFacesNum();
-        var meshChannelNumColor = GMA_GetMeshColorChannelsNum();
-        var meshChannelNumTexcoord = GMA_GetMeshUVChannelsNum();
+        var meshFacenum = ASSIMP_GetMeshFacesNum();
+        var meshChannelNumColor = ASSIMP_GetMeshColorChannelsNum();
+        var meshChannelNumTexcoord = ASSIMP_GetMeshUVChannelsNum();
         
         for (var f = 0; f < meshFacenum; f++) {
-            var fn = GMA_GetMeshFaceVerticesNum(f);
+            var fn = ASSIMP_GetMeshFaceVerticesNum(f);
         
             for (var fi = 0; fi < fn; fi++) {
-                var v = GMA_GetMeshFaceVertexIndex(f, fi);
+                var v = ASSIMP_GetMeshFaceVertexIndex(f, fi);
         
-                vertex_position_3d(vb, GMA_GetMeshVertexX(v), GMA_GetMeshVertexY(v), GMA_GetMeshVertexZ(v));
+                vertex_position_3d(vb, ASSIMP_GetMeshVertexX(v), ASSIMP_GetMeshVertexY(v), ASSIMP_GetMeshVertexZ(v));
                 
-                vertex_normal(vb, GMA_GetMeshNormalX(v), GMA_GetMeshNormalY(v), GMA_GetMeshNormalZ(v));
+                vertex_normal(vb, ASSIMP_GetMeshNormalX(v), ASSIMP_GetMeshNormalY(v), ASSIMP_GetMeshNormalZ(v));
                 
                 vertex_texcoord(vb, 
-                    meshChannelNumTexcoord > 0 ? GMA_GetMeshTexCoordU(v, 0) : 0,
-                    meshChannelNumTexcoord > 0 ? GMA_GetMeshTexCoordV(v, 0) : 0
+                    meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordU(v, 0) : 0,
+                    meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordV(v, 0) : 0
                 );
                 
                 vertex_color(vb, 
-                    meshChannelNumColor > 0 ? make_color_rgb(GMA_GetMeshVertexColorGM(v, 0), GMA_GetMeshVertexColorGM(v, 1), GMA_GetMeshVertexColorGM(v, 2)) : c_white, 
-                    meshChannelNumColor > 0 ? GMA_GetMeshVertexAlpha(v, 0) : 1);
+                    meshChannelNumColor > 0 ? make_color_rgb(ASSIMP_GetMeshVertexColorGM(v, 0), ASSIMP_GetMeshVertexColorGM(v, 1), ASSIMP_GetMeshVertexColorGM(v, 2)) : c_white, 
+                    meshChannelNumColor > 0 ? ASSIMP_GetMeshVertexAlpha(v, 0) : 1);
             }
         }
         vertex_end(vb);
         
 		// Store the bounding box
-		var x1 = GMA_GetMeshAABBMinX();
-		var y1 = GMA_GetMeshAABBMinY();
-		var z1 = GMA_GetMeshAABBMinZ();
-		var x2 = GMA_GetMeshAABBMaxX();
-		var y2 = GMA_GetMeshAABBMaxY();
-		var z2 = GMA_GetMeshAABBMaxZ();
+		var x1 = ASSIMP_GetMeshAABBMinX();
+		var y1 = ASSIMP_GetMeshAABBMinY();
+		var z1 = ASSIMP_GetMeshAABBMinZ();
+		var x2 = ASSIMP_GetMeshAABBMaxX();
+		var y2 = ASSIMP_GetMeshAABBMaxY();
+		var z2 = ASSIMP_GetMeshAABBMaxZ();
         var minV = new UeVector3(x1, y1, z1);
         var maxV = new UeVector3(x2, y2, z2);
         
@@ -246,7 +271,7 @@ function UeAssimpLoader(data = {}) constructor {
     
     function dispose() {
         gml_pragma("forceinline");
-        GMA_DeleteImporter(importer);
+        ASSIMP_DeleteImporter(importer);
         return self;
     }
 }

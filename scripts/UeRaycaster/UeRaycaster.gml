@@ -65,8 +65,10 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * @param {Array} hits - Optional array to store intersection results
      * @returns {Array} Sorted array of intersection hits, closest first
      */
-    function intersectObject(object, recursive = true, sort = true, hits = []) {
+    function intersectObject(object, recursive = true, sort = true, hits = undefined) {
         gml_pragma("forceinline");
+        hits ??= [];
+        
         // If the object has a raycast method, invoke it
         if (object.visible && object[$ "geometry"] && layers.test(object.layers)) {
             var objectRaycast = object[$ "raycast"];
@@ -96,8 +98,9 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * @param {Array} hits - Optional array to store intersection results
      * @returns {Array} Sorted array of intersection hits, closest first
      */
-    function intersectObjects(objects, recursive = true, sort = true, hits = []) {
+    function intersectObjects(objects, recursive = true, sort = true, hits = undefined) {
         gml_pragma("forceinline");
+        hits ??= [];
         for (var i = 0, n = array_length(objects); i < n; i++) {
             intersectObject(objects[i], recursive, sort, hits);
         }

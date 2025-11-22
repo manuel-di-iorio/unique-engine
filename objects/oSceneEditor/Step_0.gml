@@ -24,25 +24,26 @@ switch (currentTool) {
         sceneManager.orbit.update(winMouseX, winMouseY);
         
         // Handle mesh picking when a scene is active
-        if (mouse_check_button_pressed(mb_left) && ui.Main.Scene.hovered) {
-            var activeScene = editorManager.activeScene;
+        // if (mouse_check_button_pressed(mb_left) && ui.Main.Scene.hovered) {
+        //     sceneManager.raycaster.setFromCamera(sceneManager.camera);
+        //     var activeScene = editorManager.activeScene;
             
-            // Only do picking if we have an active scene
-            if (activeScene != undefined) {
-                // Raycast against all children in the scene
-                var hits = sceneManager.raycaster.intersectObjects(activeScene.children, false, true);
+        //     // Only do picking if we have an active scene
+        //     if (activeScene != undefined) {
+        //         // Raycast against all children in the scene
+        //         var hits = sceneManager.raycaster.intersectObjects(activeScene.children, false, true);
                 
-                if (array_length(hits) > 0) {
-                    var hitObject = hits[0].object;
+        //         if (array_length(hits) > 0) {
+        //             var hitObject = hits[0].object;
                     
-                    // Use the back-reference to get the treeview item directly
-                    if (hitObject[$ "__treeviewItem"] != undefined) {
-                        var treeview = ui.Main.Assets.Treeview;
-                        treeview.__onItemSelected(hitObject.__treeviewItem);
-                    }
-                }
-            }
-        }
+        //             // Use the back-reference to get the treeview item directly
+        //             if (hitObject[$ "__treeviewItem"] != undefined) {
+        //                 var treeview = ui.Main.Assets.Treeview;
+        //                 treeview.__onItemSelected(hitObject.__treeviewItem);
+        //             }
+        //         }
+        //     }
+        // }
     break;
     case "move":
     case "rotate":
