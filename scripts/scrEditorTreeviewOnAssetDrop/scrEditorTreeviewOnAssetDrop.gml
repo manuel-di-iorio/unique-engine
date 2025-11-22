@@ -127,12 +127,19 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
 
             // Remove from the previous asset parent (only if asset exists)
             if (draggedItem.asset != undefined && draggedItem.asset.parent != undefined) {
+                var oldParent = draggedItem.asset.parent;
                 draggedItem.asset.parent.remove(draggedItem.asset);
+                
+                // Track change on old parent
+                oSceneEditor.assetManager.editAsset(oldParent);
             }
             
             // Add to the new parent (only if both assets exist)
             if (draggedItem.asset != undefined && targetItem.asset != undefined) {
                 targetItem.asset.add(draggedItem.asset);
+                
+                // Track change on new parent
+                oSceneEditor.assetManager.editAsset(targetItem.asset);
             }
             
             // Update the treeview UI using the new helper
@@ -147,6 +154,9 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
 
             // Add the instance to the target element (scene or sub-object)
             targetItem.asset.add(instanceAsset);
+            
+            // Track change
+            oSceneEditor.assetManager.editAsset(targetItem.asset);
 
             // Create TreeviewItems for the instance and its children
             var instanceTreeviewItem = __editorTreeview_createTreeviewItem(instanceAsset, targetItem, draggedItem.icon);

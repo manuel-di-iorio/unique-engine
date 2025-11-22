@@ -111,7 +111,19 @@ function EditorUiInspector(ui) constructor {
                 subKey: "map",
                 itemsGetter: function(searchValue) {
                     var allTextures = oSceneEditor.assetManager.getAllAssetsByType("Texture");
-                    var textures = array_filter(allTextures, method({ searchValue }, function(texture) {
+                    
+                    var uniqueTextures = [];
+                    var seen = {};
+                    for (var i = 0; i < array_length(allTextures); i++) {
+                        var _asset = allTextures[i];
+                        var _key = string(ptr(_asset));
+                        if (seen[$ _key] == undefined) {
+                            seen[$ _key] = true;
+                            array_push(uniqueTextures, _asset);
+                        }
+                    }
+                    
+                    var textures = array_filter(uniqueTextures, method({ searchValue }, function(texture) {
                         if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
                     }));
@@ -382,7 +394,19 @@ function EditorUiInspector(ui) constructor {
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
                     var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
-                    var items = array_filter(allMaterials, method({ searchValue }, function(item) {
+                    
+                    var uniqueMaterials = [];
+                    var seen = {};
+                    for (var i = 0; i < array_length(allMaterials); i++) {
+                        var _asset = allMaterials[i];
+                        var _key = string(ptr(_asset));
+                        if (seen[$ _key] == undefined) {
+                            seen[$ _key] = true;
+                            array_push(uniqueMaterials, _asset);
+                        }
+                    }
+                    
+                    var items = array_filter(uniqueMaterials, method({ searchValue }, function(item) {
                         if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
                     }));

@@ -1,47 +1,75 @@
 {
-  "assets":[
-    {
-      "uuid":"07e5df8c-06a8-4729-9bb8-9a05a657b65d",
-      "type":"Mesh",
-      "children":[
-      ],
-      "name":"Mesh0"
-    },
-    {
-      "uuid":"72f6e67d-6e68-4276-9f0c-22f722adf5a8",
-      "type":"Scene",
-      "children":[
-      ],
-      "name":"Scene0"
-    }
-  ],
   "version":"2025.11.20.0",
   "settings":{
-    "counters":{
-      "textures":0.0,
-      "materials":0.0,
-      "models":1.0,
-      "scenes":1.0,
-      "lights":0.0,
-      "instances":1.0,
-      "cameras":0.0,
-      "folders":0.0
-    },
     "gridEnabled":true,
-    "activeTool":"move",
     "camera":{
       "target":[
-        0.0,
-        0.0,
+        50.73886464309399,
+        262.89522088976412,
         0.0
       ],
-      "dampingFactor":0.10000000000000001,
+      "dampingFactor":0.29999999999999999,
+      "damping":true,
       "position":[
-        98.838032980119678,
-        -268.39988529599844,
-        151.96231378113336
-      ],
-      "damping":true
+        150.7388646053362,
+        -37.104778996962523,
+        70.000000539396993
+      ]
+    },
+    "activeTool":"view",
+    "counters":{
+      "textures":1.0,
+      "materials":3.0,
+      "models":4.0,
+      "scenes":1.0,
+      "lights":0.0,
+      "instances":2.0,
+      "cameras":0.0,
+      "folders":2.0
     }
-  }
+  },
+  "assets":[
+    {
+      "uuid":"42398633-94cd-4faf-a1db-3ca55366eaed",
+      "type":"Folder",
+      "children":[
+        {
+          "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
+          "type":"Texture",
+          "children":[
+          ],
+          "name":"diffuseTex"
+        },
+        {
+          "uuid":"c89918a5-bc73-4a4d-ad4b-dc9c4b3efcc1",
+          "type":"Folder",
+          "children":[
+            {
+              "uuid":"38bf0fda-3b82-41b2-8f6d-67c095666083",
+              "type":"Material",
+              "children":[
+              ],
+              "name":"matTreeSnowA"
+            },
+            {
+              "uuid":"c2ff78e9-2a66-4b9a-a2bb-fe2a987ee874",
+              "type":"Mesh",
+              "children":[
+              ],
+              "name":"meshTreeSnowA"
+            }
+          ],
+          "name":"Tree Snow A"
+        },
+        {
+          "uuid":"752b53a3-2e3f-44df-94be-0850c32ed607",
+          "type":"Scene",
+          "children":[
+          ],
+          "name":"SnowScene"
+        }
+      ],
+      "name":"Project"
+    }
+  ]
 }

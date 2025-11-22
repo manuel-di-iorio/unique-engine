@@ -32,39 +32,7 @@ function EditorUiMenu(ui) constructor {
             var selectedFile = get_open_filename("Game Maker Project (.yyp)|*.yyp", "");
             if (selectedFile == "") return;
 
-            var ui = global.UI.Main;
-
-            // Clear editor UI components if they exist
-            if (ui[$ "Center"] != undefined) {
-                ui.Center.destroy();
-                ui.Center = undefined;
-                delete ui.Center;
-
-                ui.Menu.SaveProjectBtn.show();
-                ui.Menu.LoadProjectBtn.setMarginLeft(0);
-            
-            } else {
-                projectManager.clearProject();
-            }
-            
-            // Store project paths in ProjectManager
-            projectManager.setProjectPath(selectedFile);            
-            
-            // Recreate the UI elements
-            ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
-            
-            editorManager.treeview = new EditorUiAssets(ui);
-            editorManager.inspector = new EditorUiInspector(ui);
-            editorManager.sceneTools = new EditorUiSceneTools(global.UI.Overlay);
-
-            ui.add(ui.Assets, ui.Scene, ui.Inspector);
-            
-            projectManager.loaded = true;
-            
-            // Load project assets
-            projectManager.load();
-
-            scrUiResizeViewports();
+            EditorLoadProject(selectedFile);
         }
     });
 }

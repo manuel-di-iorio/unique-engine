@@ -37,4 +37,8 @@ function SceneManager() constructor {
         self.camera.setPosition(100, -300, 70);
         self.orbit.reset();
     }
+    
+    // Test lights
+    scene.add(new UeAmbientLight(c_dkgray));
+    scene.add(new UeDirectionalLight(30, 60));
 }

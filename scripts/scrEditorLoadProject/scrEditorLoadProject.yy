@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"AES",
+  "%Name":"scrEditorLoadProject",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"AES",
+  "name":"scrEditorLoadProject",
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"Scripts",
+    "path":"folders/Scene Editor/Scripts.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

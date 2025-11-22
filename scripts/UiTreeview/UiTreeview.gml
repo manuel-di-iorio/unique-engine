@@ -141,12 +141,12 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.onDraw = method({ item: treeviewItem, node: contentNode }, function() {
             if (node.hovered) {
                 draw_set_color(global.UI_COL_BTN_HOVER);
-                draw_rectangle(0, node.yp1 + 3, node.xp2-2, node.yp2, false);
+                draw_rectangle(0, node.yp1 + 3, node.xp2-2, node.yp2 - 1, false);
             }
             
             if (item.selected) {
                 draw_set_color(global.UI_COL_SELECTED);
-                draw_rectangle(0, node.yp1 + 3, node.xp2-2, node.yp2, false);
+                draw_rectangle(0, node.yp1 + 3, node.xp2-2, node.yp2 - 1, false);
             }
             
             // Draw the icon
@@ -294,6 +294,24 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.Arrow.sprite = sprUiTreeviewArrowDown;
         self.Arrow.show();
         self.Items.show();
+        
+        // Temporarily hide children to prevent visual glitch
+        // They will be shown once the layout is updated
+        self.Items.visible = false;
+        
+        // Show children after layout update
+        var _items = self.Items;
+        var _hasRun = { value: false }; // Use object to pass by reference
+        _items.onStep(method({ items: _items, hasRun: _hasRun }, function(layoutUpdated) {
+            if (layoutUpdated && !hasRun.value) {
+                hasRun.value = true;
+                items.visible = true;
+                // Defer removal to next frame to avoid modifying array during iteration
+                call_later(1, time_source_units_frames, method(items, function() {
+                    __removeStepHandler();
+                }));
+            }
+        }));
     }
     
     function collapseItem() {

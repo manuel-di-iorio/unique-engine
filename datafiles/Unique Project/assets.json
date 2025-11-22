@@ -1,20 +1,25 @@
 {
+  "version":"2025.11.20.0",
   "assets":[
     {
-      "uuid":"72f6e67d-6e68-4276-9f0c-22f722adf5a8",
-      "type":"Scene",
-      "name":"Scene0"
+      "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
+      "type":"Texture",
+      "name":"diffuseTex"
     },
     {
-      "uuid":"4ecd0e37-1693-4df3-8792-9856af5b4521",
-      "type":"ModelInstance",
-      "name":"Mesh0_0"
+      "uuid":"38bf0fda-3b82-41b2-8f6d-67c095666083",
+      "type":"Material",
+      "name":"matTreeSnowA"
     },
     {
-      "uuid":"07e5df8c-06a8-4729-9bb8-9a05a657b65d",
+      "uuid":"c2ff78e9-2a66-4b9a-a2bb-fe2a987ee874",
       "type":"Mesh",
-      "name":"Mesh0"
+      "name":"meshTreeSnowA"
+    },
+    {
+      "uuid":"752b53a3-2e3f-44df-94be-0850c32ed607",
+      "type":"Scene",
+      "name":"SnowScene"
     }
-  ],
-  "version":"2025.11.20.0"
+  ]
 }

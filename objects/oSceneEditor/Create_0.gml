@@ -33,31 +33,19 @@ projectManager = new ProjectManager();
 editorManager = new EditorManager();
 
 
-// MOCKUP: Auto-load project for development
-if (GM_build_type == "run") {
-    var mockupProjectPath = "C:\\Users\\Manuel\\GameMakerProjects\\Unique Engine\\Unique Engine.yyp";
-    if (file_exists(mockupProjectPath)) {
-        projectManager.setProjectPath(mockupProjectPath);
-        
-        var ui = global.UI.Main;
-        
-        // Clear welcome screen
-        ui.Center.destroy();
-        ui.Center = undefined;
-        delete ui.Center;
-        
-        ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true });
-        
-        editorManager.treeview = new EditorUiAssets(ui);
-        editorManager.inspector = new EditorUiInspector(ui);
-        editorManager.sceneTools = new EditorUiSceneTools(global.UI.Overlay);
-
-        ui.add(ui.Assets, ui.Scene, ui.Inspector);
-        
-        projectManager.loaded = true;
-      
-        ui.Menu.SaveProjectBtn.show();
-        ui.Menu.LoadProjectBtn.setMarginLeft(0);
+// Auto-load project from settings
+if (file_exists("settings.json")) {
+    var buf = buffer_load("settings.json");
+    var jsonString = buffer_read(buf, buffer_text);
+    buffer_delete(buf);
+    
+    try {
+        var settings = json_parse(jsonString);
+        if (settings[$ "lastProject"] != undefined) {
+            EditorLoadProject(settings.lastProject);
+        }
+    } catch (e) {
+        show_debug_message("Error loading settings.json: " + string(e));
     }
 }
 

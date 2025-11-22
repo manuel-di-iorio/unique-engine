@@ -88,22 +88,7 @@ function UeDirectionalLight(horizontal = 0, vertical = 0, data = {}): UeLight(da
         var y2 = x1 * dsin(horizontal) + y1 * dcos(horizontal);
         var z2 = z1;
     
-        target.set(x2, z2, y2);
-        
-        
-        // Base forward vector
-        //var dir = new UeVector3(0, 1, 0);
-    //
-        //// First: rotate around X (pitch)
-        //dir.applyAxisAngle(new UeVector3(1, 0, 0), vertical);
-    //
-        //// Second: rotate around Z (yaw)  
-        //dir.applyAxisAngle(new UeVector3(0, 0, 1), horizontal);
-    //
-        //target.copy(new UeVector3(0, 1, 0)
-            //.applyAxisAngle(new UeVector3(1, 0, 0), vertical)
-            //.applyAxisAngle(new UeVector3(0, 0, 1), horizontal)
-        //);
+        target.set(x2, z2, y2); 
     }
     
     setDirection(horizontal, vertical)

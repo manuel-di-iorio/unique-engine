@@ -29,15 +29,13 @@ function UiTooltip(): UiNode({
         
         // Force size update on tooltip itself to match text (plus padding)
         
-        // Calculate initial position immediately
-        if (self.target != undefined) {
-             var estimatedWidth = self.textNode.getWidth() + 16; // 8 padding left + 8 padding right
-             var tx = self.target.x1 + (self.target.width / 2) - (estimatedWidth / 2);
-             var ty = self.target.y2 + 8;
-             
-             self.setLeft(tx);
-             self.setTop(ty);
-        }
+        // Calculate initial position based on cursor
+        var estimatedWidth = self.textNode.getWidth() + 16; // 8 padding left + 8 padding right
+        var tx = global.UI.mouseX + 15;
+        var ty = global.UI.mouseY + 20;
+        
+        self.setLeft(tx);
+        self.setTop(ty);
         
         // Show logic (inlined from UiNode)
         flexpanel_node_style_set_display(self.node, flexpanel_display.flex);
@@ -56,14 +54,15 @@ function UiTooltip(): UiNode({
         self.target = undefined;
     };
     
-    // Update position to stay centered on target
+    // Update position to follow cursor
     self.onStep(function(layoutUpdated) {
         if (layoutUpdated && self.display && self.target != undefined) {
-            // Calculate centered position
-            // Use actual width if available, otherwise fall back to estimate
+            // Position relative to cursor
             var currentWidth = self.width > 0 ? self.width : (self.textNode.getWidth() + 16);
-            var tx = self.target.x1 + (self.target.width / 2) - (currentWidth / 2);
-            var ty = self.target.y2 + 8;
+            var currentHeight = self.height > 0 ? self.height : 30;
+            
+            var tx = global.UI.mouseX + 15; // Offset to the right of cursor
+            var ty = global.UI.mouseY + 20; // Offset below cursor
             
             // Keep within screen bounds
             var winW = window_get_width();
@@ -72,7 +71,7 @@ function UiTooltip(): UiNode({
             // Ensure we have dimensions
             if (currentWidth > 0) {
                 tx = clamp(tx, 5, winW - currentWidth - 5);
-                ty = clamp(ty, 5, winH - (self.height > 0 ? self.height : 30) - 5);
+                ty = clamp(ty, 5, winH - currentHeight - 5);
                 
                 // Only update if changed to avoid constant layout invalidation
                 if (abs(self.getLeft() - tx) > 1) self.setLeft(tx);

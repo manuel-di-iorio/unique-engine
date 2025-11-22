@@ -82,6 +82,9 @@ function ProjectSaver() constructor {
             switch (action) {
                 case "create":
                 case "edit":
+                    // Skip folders (they are only saved in project.json structure)
+                    if (asset.type == "Folder") break;
+
                     // Update or add to assets.json
                     var assetIndex = -1;
                     for (var j = 0; j < array_length(assets); j++) {
