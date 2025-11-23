@@ -3,21 +3,11 @@ function editorTreeviewOnItemSelected(treeviewItem) {
     
     switch (treeviewItem.asset.type) {
         case "ModelInstance":                
-        //     var scene = treeviewItem.asset;
-        //     while (scene == undefined || scene.type != "Scene") {
-        //         scene = scene.parent;
-        //     }
-        //     if (scene != undefined && scene.type == "Scene") {
-        //         // Aggiungi la scena per il rendering, ma passa l'istanza per il gizmo
-        //         editorManager.setActiveAsset(scene, treeviewItem, treeviewItem.asset);
-        //     }
-        // break;
-
         case "Mesh":
             var currentAsset = treeviewItem.asset;
             // Find the root mesh for rendering
             var rootMesh = currentAsset;
-            while (rootMesh.parent != undefined && rootMesh.parent.type == "Mesh") {
+            while (rootMesh.parent != undefined && (rootMesh.parent.type == "Mesh" || rootMesh.parent.type == "ModelInstance")) {
                 rootMesh = rootMesh.parent;
             }
             // Pass the clicked submesh as gizmo target (third argument)

@@ -19,13 +19,9 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     }
     
     // Scene can only be moved under another Scene
+    // Scene cannot be moved under another Scene
     else if (draggedItem.assetType == "Scene") {
-        if (targetItem.assetType == "Scene") {
-            isValidDrop = true;
-            dropAction = "reparent";
-        } else {
-            return false;
-        }
+        return false;
     }
     
     // Model can be moved under another Model (reparent) or under a Scene (instance)

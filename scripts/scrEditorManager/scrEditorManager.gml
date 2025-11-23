@@ -35,8 +35,6 @@ function EditorManager() constructor {
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
 
-        log(asset)
-        
         // Update active scene based on what was selected
         if (asset != undefined) {
             if (asset.type == "Scene") {
