@@ -1,30 +1,30 @@
 {
+  "version":"2025.11.22.0",
   "assets":[
     {
       "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
       "type":"Texture",
-      "name":"diffuseTex"
+      "name":"tDiffuse"
     },
     {
       "uuid":"38bf0fda-3b82-41b2-8f6d-67c095666083",
       "type":"Material",
-      "name":"matTreeSnowA"
-    },
-    {
-      "uuid":"c2ff78e9-2a66-4b9a-a2bb-fe2a987ee874",
-      "type":"Mesh",
-      "name":"meshTreeSnowA"
+      "name":"mTreeSnowA"
     },
     {
       "uuid":"752b53a3-2e3f-44df-94be-0850c32ed607",
       "type":"Scene",
-      "name":"SnowScene"
+      "name":"sScene"
     },
     {
-      "uuid":"bc36df7d-c015-44fb-a06f-d3556e398f45",
+      "uuid":"3f3b69ce-9036-4d11-9601-76741cb6ebfe",
+      "type":"Mesh",
+      "name":"oTreeSnowA"
+    },
+    {
+      "uuid":"cb062d32-4892-4df3-b5ba-53298bbbe7d5",
       "type":"ModelInstance",
-      "name":"meshTreeSnowA_3"
+      "name":"iTreeSnowA"
     }
-  ],
-  "version":"2025.11.22.0"
+  ]
 }

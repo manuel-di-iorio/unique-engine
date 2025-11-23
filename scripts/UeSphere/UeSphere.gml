@@ -174,4 +174,18 @@ function UeSphere(center = undefined, radius = -1) constructor {
 
         return self;
     }
+    function toJSON() {
+        gml_pragma("forceinline");
+        return {
+            center: { x: center.x, y: center.y, z: center.z },
+            radius
+        };
+    }
+
+    function fromJSON(data) {
+        gml_pragma("forceinline");
+        center.set(data.center.x, data.center.y, data.center.z);
+        radius = data.radius;
+        return self;
+    }
 }

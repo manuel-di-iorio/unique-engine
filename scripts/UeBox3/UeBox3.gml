@@ -124,7 +124,9 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
             if (precise) {
                 box = new UeBox3().setFromPoints(geometry.vertices);
             } else {
-                box = geometry.boundingBox.clone();
+                var geometryBox = geometry[$ "boundingBox"];
+                if (geometryBox == undefined) return self;
+                box = geometryBox.clone();
             }
 
             box.applyMatrix4(object.matrixWorld);
@@ -304,6 +306,20 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
         self.sizeMax.y = max(self.sizeMax.y, box.sizeMax.y);
         self.sizeMax.z = max(self.sizeMax.z, box.sizeMax.z);
 
+        return self;
+    }
+    function toJSON() {
+        gml_pragma("forceinline");
+        return {
+            min: { x: sizeMin.x, y: sizeMin.y, z: sizeMin.z },
+            max: { x: sizeMax.x, y: sizeMax.y, z: sizeMax.z }
+        };
+    }
+
+    function fromJSON(data) {
+        gml_pragma("forceinline");
+        sizeMin.set(data.min.x, data.min.y, data.min.z);
+        sizeMax.set(data.max.x, data.max.y, data.max.z);
         return self;
     }
 }

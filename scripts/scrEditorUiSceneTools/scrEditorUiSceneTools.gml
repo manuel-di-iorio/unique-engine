@@ -113,10 +113,8 @@ function EditorUiSceneTools(ui) constructor {
     }
     
     self.updateDampingButton = function() {
-        if (oSceneEditor.sceneManager.orbit != undefined) {
-            ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 1.0);
-            global.UI.needsRedraw = true;
-        }
+        ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 1.0);
+        global.UI.needsRedraw = true;
     };
     
     // Reset camera position
@@ -142,6 +140,7 @@ function EditorUiSceneTools(ui) constructor {
         onClick(function() {
             var sm = oSceneEditor.sceneManager;
             sm.grid.visible = !sm.grid.visible;
+            sm.gridEnabled = sm.grid.visible;
             self.selected = sm.grid.visible;
             global.UI.needsRedraw = true;
             oSceneEditor.projectManager.markAsUnsaved();
@@ -151,10 +150,32 @@ function EditorUiSceneTools(ui) constructor {
     // Set initial state
     ui.SceneTools.BtnGrid.selected = oSceneEditor.sceneManager.grid.visible;
     
-    ui.SceneTools.Right.add(ui.SceneTools.BtnCamAccel, ui.SceneTools.BtnResetCam, ui.SceneTools.BtnGrid);
+    // Toggle box colliders
+    ui.SceneTools.BtnBoxColliders = new UiButton(sprUiGizmos, btnStyle, { tooltip: "Toggle box colliders" });
+    
+    with (ui.SceneTools.BtnBoxColliders) {
+        onClick(function() {
+            var sm = oSceneEditor.sceneManager;
+            sm.showBoxColliders = !sm.showBoxColliders;
+            sm.boxHelper.visible = sm.showBoxColliders;
+            self.selected = sm.showBoxColliders;
+            global.UI.needsRedraw = true;
+            oSceneEditor.projectManager.markAsUnsaved();
+        });
+    }
+    
+    // Set initial state
+    ui.SceneTools.BtnBoxColliders.selected = oSceneEditor.sceneManager.showBoxColliders;
+
+    ui.SceneTools.Right.add(ui.SceneTools.BtnCamAccel, ui.SceneTools.BtnResetCam, ui.SceneTools.BtnGrid, ui.SceneTools.BtnBoxColliders);
 
     self.updateGridButton = function() {
         ui.SceneTools.BtnGrid.selected = oSceneEditor.sceneManager.grid.visible;
+        global.UI.needsRedraw = true;
+    };
+
+    self.updateBoxCollidersButton = function() {
+        ui.SceneTools.BtnBoxColliders.selected = oSceneEditor.sceneManager.showBoxColliders;
         global.UI.needsRedraw = true;
     };
     

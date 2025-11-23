@@ -19,7 +19,7 @@ function editorTreeviewOnModelImport(modelAsset) {
     var modelName = filename_change_ext(fileName, "");
     if (modelName == "" || modelName == undefined) {
         var modelId = global.UI_ASSETS_MODELS_ID++;
-        modelName = "Mesh" + string(modelId);
+        modelName = "Object" + string(modelId);
     } else {
         // Clean the name (remove invalid characters)
         modelName = string_replace_all(modelName, " ", "_");

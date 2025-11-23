@@ -390,7 +390,7 @@ function EditorUiInspector(ui) constructor {
                 field: "material",
                 label: "Material", 
                 type: "dropdown",
-                tooltip: "Material that controls the visual appearance of this mesh",
+                tooltip: "Material that controls the visual appearance of this object",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
                     var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
@@ -486,8 +486,8 @@ function EditorUiInspector(ui) constructor {
         "ModelInstance": [
            {
                 type: "label",
-                field: "model",
-                label: "Model",
+                field: "object",
+                label: "Object",
                 valueGetter: function() {
                     return self.asset.object.name;                    
                 }
@@ -503,7 +503,7 @@ function EditorUiInspector(ui) constructor {
                 field: "visible",
                 label: "Visible",
                 type: "checkbox",
-                tooltip: "Enable mesh visibility",
+                tooltip: "Enable instance visibility",
            },
            { 
                 id: "static",
@@ -533,7 +533,7 @@ function EditorUiInspector(ui) constructor {
                 field: "material",
                 label: "Material", 
                 type: "dropdown",
-                tooltip: "Material that controls the visual appearance of this mesh",
+                tooltip: "Material that controls the visual appearance of this instance",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
                     var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
@@ -613,70 +613,6 @@ function EditorUiInspector(ui) constructor {
                 }
            },
         ],
-        
-        // "ModelInstance": [
-        //    {
-        //         type: "label",
-        //         field: "model",
-        //         label: "Model",
-        //         valueGetter: function() {
-        //             return self.asset.object.name;                    
-        //         }
-        //    },
-        //    { 
-        //         id: "visible",
-        //         field: "visible",
-        //         label: "Visible", 
-        //         type: "checkbox"
-        //    },
-        //    {
-        //         id: "labelTransform",
-        //         label: "Transform", 
-        //         type: "label"
-        //    },
-        //    { 
-        //         id: "position",
-        //         field: "position",
-        //         label: "Position", 
-        //         type: "transformXYZ",
-        //         valueGetter: function() {
-        //             return self.asset.position;
-        //         },
-        //         onBlur: function(value) {
-        //             self.asset.position.x = value[0];
-        //             self.asset.position.y = value[1];
-        //             self.asset.position.z = value[2];
-        //         }
-        //    },
-        //    { 
-        //         id: "rotation",
-        //         field: "rotation",
-        //         label: "Rotation", 
-        //         type: "transformXYZ",
-        //         valueGetter: function() {
-        //             return self.asset.__rotationEuler;
-        //         },
-        //         onBlur: function(value) {
-        //             var euler = self.asset.__rotationEuler;
-        //             euler.set(value[0], value[1], value[2]);
-        //             self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
-        //         }
-        //    },
-        //    { 
-        //         id: "scale",
-        //         field: "scale",
-        //         label: "Scale", 
-        //         type: "transformXYZ",
-        //         valueGetter: function() {
-        //             return self.asset.scale;
-        //         },
-        //         onBlur: function(value) {
-        //             self.asset.scale.x = value[0];
-        //             self.asset.scale.y = value[1];
-        //             self.asset.scale.z = value[2];
-        //         }
-        //    },
-        // ],
         
         "Scene": [
            { 

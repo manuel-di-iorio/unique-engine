@@ -41,7 +41,10 @@ function UeTransform(_data = undefined) constructor {
             if (parent == undefined) {
                 matrixWorld.copy(matrix);
             } else {
-                matrixWorld.multiplyMatrices(parent.matrixWorld, matrix);
+                var _parentMatrixWorld = parent[$ "matrixWorld"];
+                if (_parentMatrixWorld != undefined) {
+                    matrixWorld.multiplyMatrices(parent.matrixWorld, matrix);
+                }
             }
             
             matrixWorldNeedsUpdate = false; 

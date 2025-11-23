@@ -39,13 +39,9 @@ if (file_exists("settings.json")) {
     var jsonString = buffer_read(buf, buffer_text);
     buffer_delete(buf);
     
-    try {
-        var settings = json_parse(jsonString);
-        if (settings[$ "lastProject"] != undefined) {
-            EditorLoadProject(settings.lastProject);
-        }
-    } catch (e) {
-        show_debug_message("Error loading settings.json: " + string(e));
+    var settings = json_parse(jsonString);
+    if (settings[$ "lastProject"] != undefined) {
+        scrEditorLoadProject(settings.lastProject);
     }
 }
 

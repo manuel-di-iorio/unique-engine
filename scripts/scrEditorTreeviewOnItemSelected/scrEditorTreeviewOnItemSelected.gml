@@ -1,27 +1,17 @@
 function editorTreeviewOnItemSelected(treeviewItem) {
     var editorManager = oSceneEditor.editorManager;
     
-    // Handle folders (no asset)
-    // if (treeviewItem.asset == undefined) {
-    //     // if (treeviewItem.type == "Folder") {
-    //     //     // Folders don't have an asset to inspect
-    //     //     // editorManager.clearActiveAsset();
-    //     // }
-    //     // global.UI.needsRedraw = true;
-    //     return;
-    // }
-    
     switch (treeviewItem.asset.type) {
         case "ModelInstance":                
-            var scene = treeviewItem.asset;
-            while (scene == undefined || scene.type != "Scene") {
-                scene = scene.parent;
-            }
-            if (scene != undefined && scene.type == "Scene") {
-                // Aggiungi la scena per il rendering, ma passa l'istanza per il gizmo
-                editorManager.setActiveAsset(scene, treeviewItem, treeviewItem.asset);
-            }
-        break;
+        //     var scene = treeviewItem.asset;
+        //     while (scene == undefined || scene.type != "Scene") {
+        //         scene = scene.parent;
+        //     }
+        //     if (scene != undefined && scene.type == "Scene") {
+        //         // Aggiungi la scena per il rendering, ma passa l'istanza per il gizmo
+        //         editorManager.setActiveAsset(scene, treeviewItem, treeviewItem.asset);
+        //     }
+        // break;
 
         case "Mesh":
             var currentAsset = treeviewItem.asset;

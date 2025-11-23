@@ -36,7 +36,6 @@ switch (currentTool) {
             
             if (array_length(objectsToTest) > 0) {
                 var hits = sceneManager.raycaster.intersectObjects(objectsToTest, false, true);
-                log(hits)
                 
                 if (array_length(hits) > 0) {
                     var hitObject = hits[0].object;
@@ -55,6 +54,11 @@ switch (currentTool) {
     case "scale":
         sceneManager.transformControls.update();
     break;
+}
+
+// Update the box helper (if an object is selected)
+if (sceneManager.boxHelper.object != undefined) {
+    sceneManager.boxHelper.update();
 }
 
 // Wrap the mouse coords when out of bounds

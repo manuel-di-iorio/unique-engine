@@ -1,4 +1,4 @@
-function EditorLoadProject(projectPath) {
+function scrEditorLoadProject(projectPath) {
     if (!file_exists(projectPath)) return;
 
     var ui = global.UI.Main;

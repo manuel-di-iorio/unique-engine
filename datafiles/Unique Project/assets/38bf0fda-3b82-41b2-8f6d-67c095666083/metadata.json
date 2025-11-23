@@ -4,21 +4,25 @@
     "emissiveMap":"8cd414ef-93bd-4c24-a73a-f6ac6d3fc813",
     "map":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2"
   },
+  "lights":2.0,
+  "type":"Material",
+  "name":"mTreeSnowA",
   "depthWrite":true,
   "depthFunc":4.0,
   "alphaTest":0.0,
-  "lights":2.0,
   "colorWrite":true,
   "blending":false,
   "blendEquation":1.0,
   "blendEquationAlpha":1.0,
-  "type":"Material",
   "blendSrc":5.0,
   "blendDst":6.0,
   "blendSrcAlpha":2.0,
   "blendDstAlpha":6.0,
-  "name":"matTreeSnowA",
   "uniforms":{
+    "ueEmissiveIntensity":{
+      "type":0.0,
+      "value":0.0
+    },
     "ueEmissive":{
       "type":5.0,
       "value":[
@@ -26,10 +30,6 @@
         0.0,
         0.0
       ]
-    },
-    "ueEmissiveIntensity":{
-      "type":0.0,
-      "value":0.0
     }
   },
   "shader":"sh_ue_standard",

@@ -71,6 +71,10 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         scale.set(data[$ "sx"], data[$ "sy"], data[$ "sz"]);
         up.set(data[$ "ux"], data[$ "uy"], data[$ "uz"]);
         
+        if (geometry != undefined && data[$ "geometry"] != undefined) {
+            geometry.fromJSON(data.geometry);
+        }
+        
         return self;
     }
     

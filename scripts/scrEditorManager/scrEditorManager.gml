@@ -29,11 +29,13 @@ function EditorManager() constructor {
         var newGizmoTarget = gizmoTarget != undefined ? gizmoTarget : asset;
         var gizmoTargetChanged = self.gizmoTarget != newGizmoTarget;
         
-        // Se né l'asset né il gizmo target sono cambiati, esci
+        // If neither the asset nor the gizmo target have changed, exit
         if (!assetChanged && !gizmoTargetChanged) return;
-        
+        oSceneEditor.sceneManager.boxHelper.dispose();
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
+
+        log(asset)
         
         // Update active scene based on what was selected
         if (asset != undefined) {
@@ -41,6 +43,8 @@ function EditorManager() constructor {
                 // Scene selected directly
                 self.activeScene = asset;
             } else if (asset.type == "Mesh" || asset.type == "ModelInstance") {
+                oSceneEditor.sceneManager.boxHelper.setFromObject(asset);
+                
                 // Mesh/instance selected - find parent scene via treeview
                 var foundScene = undefined;
                 if (treeviewItem != undefined && treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
@@ -99,6 +103,7 @@ function EditorManager() constructor {
         
         var sceneToKeep = keepScene ? self.activeScene : undefined;
         
+        oSceneEditor.sceneManager.boxHelper.dispose();
         self.activeAsset = undefined;
         self.gizmoTarget = undefined;
         self.selectedTreeviewItem = undefined;

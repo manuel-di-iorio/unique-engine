@@ -64,7 +64,7 @@ function EditorUiAssets(ui) constructor {
                 { label: "New material", icon: sprUiMaterial, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Material");
                 })},
-                { label: "New mesh", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
+                { label: "New object", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Mesh");
                 })},
                 { label: "New scene", icon: sprUiScene, onClick: method({ treeview: self.treeview }, function() {
@@ -81,7 +81,7 @@ function EditorUiAssets(ui) constructor {
             
             // Add creation actions based on item type
             if (treeviewItem.assetType == "Mesh") {
-                array_push(items, { label: "New mesh", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "New object", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Mesh");
                 })});
                 array_push(items, { separator: true });
@@ -96,7 +96,7 @@ function EditorUiAssets(ui) constructor {
                 array_push(items, { label: "New material", icon: sprUiMaterial, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Material");
                 })});
-                array_push(items, { label: "New mesh", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
+                array_push(items, { label: "New object", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Mesh");
                 })});
                 array_push(items, { label: "New scene", icon: sprUiScene, onClick: method({ item: treeviewItem }, function() {

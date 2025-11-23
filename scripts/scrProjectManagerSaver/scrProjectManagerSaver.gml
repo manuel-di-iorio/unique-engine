@@ -226,6 +226,9 @@ function ProjectSaver() constructor {
             camera: cameraSettings,
             counters: counters,
             gridEnabled: sm.gridEnabled,
+            gizmos: {
+                showBoxColliders: sm.showBoxColliders
+            }
         };
     }
 

@@ -33,7 +33,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     function projectPoint(point) {
         gml_pragma("forceinline");
         var dist = distanceToPoint(point);
-        return point.clone().sub(self.normal.clone().scale(dist));
+        return point.clone().sub(self.normal.clone().multiplyScalar(dist));
     }
     
     /// Returns true if a point lies on the plane (within a small epsilon)
@@ -59,7 +59,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     /// Flips the normal and distance (i.e. inverts the plane)
     function flip() {
         gml_pragma("forceinline");
-        self.normal.scale(-1);
+        self.normal.multiplyScalar(-1);
         self.constant = -self.constant;
         return self;
     }
@@ -81,7 +81,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     /// Returns a Vector3 coplanar to the plane, by calculating the projection of the normal vector at the origin onto the plane
     function coplanarPoint() {
         gml_pragma("forceinline");
-        return self.normal.clone().scale(-self.constant);
+        return self.normal.clone().multiplyScalar(-self.constant);
     }
     
     /// Returns the signed distance from the sphere to the plane

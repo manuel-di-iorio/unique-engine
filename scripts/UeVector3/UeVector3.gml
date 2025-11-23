@@ -215,7 +215,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     /// Divides this vector by a scalar.
     function divideScalar(scalar) {
         gml_pragma("forceinline");
-        return self.scale(1 / scalar);
+        return self.multiplyScalar(1 / scalar);
     }
 
     /// Applies floor() to each component.
@@ -275,7 +275,10 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     /// Multiplies this vector by a scalar.
     function multiplyScalar(s) {
         gml_pragma("forceinline");
-        return scale(s);
+        self.x *= s;
+        self.y *= s;
+        self.z *= s;
+        return self;
     }
 
     /// Sets this vector as the component-wise multiplication of two other vectors.
@@ -405,7 +408,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     /// Projects this vector onto a plane defined by a normal.
     function projectOnPlane(normal) {
         gml_pragma("forceinline");
-        var v = normal.clone().scale(self.dot(normal));
+        var v = normal.clone().multiplyScalar(self.dot(normal));
         return self.sub(v);
     }
 
@@ -413,20 +416,20 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     function projectOnVector(v) {
         gml_pragma("forceinline");
         var scalar = self.dot(v) / v.dot(v);
-        return self.copy(v).scale(scalar);
+        return self.copy(v).multiplyScalar(scalar);
     }
 
     /// Reflects this vector over a given normal.
     function reflect(normal) {
         gml_pragma("forceinline");
-        return self.sub(normal.clone().scale(2 * self.dot(normal)));
+        return self.sub(normal.clone().multiplyScalar(2 * self.dot(normal)));
     }
 
     /// Sets the vector length to a given value.
     function setLength(l) {
         gml_pragma("forceinline");
         var old = length();
-        return old != 0 ? self.scale(l / old) : self.scale(0);
+        return old != 0 ? self.multiplyScalar(l / old) : self.multiplyScalar(0);
     }
 
     /// Sets components from a simple array.

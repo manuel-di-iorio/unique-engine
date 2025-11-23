@@ -64,20 +64,30 @@ function ProjectLoader() constructor {
           }
           
           // Update UI button
-          if (oSceneEditor.editorManager.sceneTools != undefined && oSceneEditor.editorManager.sceneTools.updateDampingButton != undefined) {
-              oSceneEditor.editorManager.sceneTools.updateDampingButton();
-          }
+          oSceneEditor.editorManager.sceneTools.updateDampingButton();
       }
       
       // Grid Enabled
       if (settings[$ "gridEnabled"] != undefined) {
           var sm = oSceneEditor.sceneManager;
           sm.gridEnabled = settings.gridEnabled;
+          sm.grid.visible = settings.gridEnabled;
+          
+          oSceneEditor.editorManager.sceneTools.updateGridButton();
+      }
+      
+      // Gizmos
+      if (settings[$ "gizmos"] != undefined) {
+          var g = settings.gizmos;
+          var sm = oSceneEditor.sceneManager;
+          
+          if (g[$ "showBoxColliders"] != undefined) {
+              sm.showBoxColliders = g.showBoxColliders;
+              sm.boxHelper.visible = sm.showBoxColliders;
+          }
           
           // Update UI button
-          if (global.UI.Main[$ "SceneTools"] != undefined && global.UI.Main.SceneTools[$ "BtnGrid"] != undefined) {
-              global.UI.Main.SceneTools.BtnGrid.updateGridButton();
-          }
+          oSceneEditor.editorManager.sceneTools.updateBoxCollidersButton();
       }
   }
     

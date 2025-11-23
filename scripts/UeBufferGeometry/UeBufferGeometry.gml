@@ -132,6 +132,8 @@ function UeBufferGeometry(data = {}) constructor {
             type,
             name,
             format: format.toJSON(),
+            boundingBox: boundingBox ? boundingBox.toJSON() : undefined,
+            boundingSphere: boundingSphere ? boundingSphere.toJSON() : undefined
         };
     }
 
@@ -140,6 +142,15 @@ function UeBufferGeometry(data = {}) constructor {
         uuid = data[$ "uuid"];
         name = data[$ "name"];
         format = new UeVertexFormat().fromJSON(data[$ "format"]);
+        
+        if (data[$ "boundingBox"] != undefined) {
+            boundingBox = new UeBox3().fromJSON(data.boundingBox);
+        }
+        
+        if (data[$ "boundingSphere"] != undefined) {
+            boundingSphere = new UeSphere().fromJSON(data.boundingSphere);
+        }
+        
         return self;
     }
     

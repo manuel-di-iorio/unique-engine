@@ -61,10 +61,10 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
 
         geometry.build();
         
-        // Copy the object transform into the bounding box    
-        rotation.copy(object.rotation);
-        scale.copy(object.scale);
-        position.copy(object.position);
+        // The box is already in world space, so we reset the transform to identity
+        // rotation.set(0, 0, 0, 1);
+        // scale.set(1, 1, 1);
+        // position.set(0, 0, 0);
         
     }
     
@@ -72,6 +72,11 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
         gml_pragma("forceinline");
         self.object = object;
         update();
+    }
+
+    function dispose() {
+        geometry.dispose();
+        object = undefined;
     }
     
     if (object != undefined) update();

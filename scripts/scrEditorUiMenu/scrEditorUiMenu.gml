@@ -32,7 +32,7 @@ function EditorUiMenu(ui) constructor {
             var selectedFile = get_open_filename("Game Maker Project (.yyp)|*.yyp", "");
             if (selectedFile == "") return;
 
-            EditorLoadProject(selectedFile);
+            scrEditorLoadProject(selectedFile);
         }
     });
 }

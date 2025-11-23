@@ -126,7 +126,9 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       asset: asset
   });
   
-  asset.name = string_upper(string_char_at(assetType, 1)) + string_copy(assetType, 2, string_length(assetType) - 1) + string(assetId);
+  _assetTypeName = string_upper(string_char_at(assetType, 1)) + string_copy(assetType, 2, string_length(assetType) - 1);
+  if (_assetTypeName == "Mesh") _assetTypeName = "Object";
+  asset.name = _assetTypeName + string(assetId);
   
   // Determine the parent asset
   var parentAsset = undefined;
