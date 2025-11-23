@@ -49,7 +49,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     __yVec = new UeVector3(0, 1, 0);  // Unit vector for Y axis
     __zVec = new UeVector3(0, 0, 1);  // Unit vector for Z axis
 
-    self.onDrag = undefined;
+    self.onDrag = data[$ "onDrag"] ?? undefined;
+    self.onDragEnd = data[$ "onDragEnd"] ?? undefined;
     
     // Base material for all gizmo components with transparency and depth testing disabled
     __matMesh = new UeMeshBasicMaterial({
@@ -417,6 +418,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
         applyTransform();  // Apply transform change to object based on delta
         updateGizmo();     // Update gizmo transform to match object
+        
+        if (self.onDrag != undefined) self.onDrag();
     }
 
     /**
@@ -425,9 +428,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function onPointerUp() {
         gml_pragma("forceinline");
 
-        if (self.dragging) {
-            if (self.onDrag != undefined) self.onDrag();
-        }
+        if (self.dragging && self.onDragEnd != undefined) self.onDragEnd();
 
         self.dragging = false;
         self.selectedAxis = undefined;

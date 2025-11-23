@@ -28,10 +28,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             if (object[$ "geometry"] != undefined && object.visible) {
                 // Test the frustum intersection
                 if (object.frustumCulled) {
-                    var _intersectionSphere = object.__intersectionSphere;
+                    var _boundingSphere = object.geometry[$ "boundingSphere"];
                     var _position = object.position;
-                    if (_intersectionSphere != undefined &&
-                        !sphere_is_visible(_position.x, _position.y, _position.z, _intersectionSphere.radius)) continue;
+                    if (_boundingSphere != undefined &&
+                        !sphere_is_visible(_position.x, _position.y, _position.z, _boundingSphere.radius)) continue;
                 }
                 
                 // ** Precompute the sort hash **

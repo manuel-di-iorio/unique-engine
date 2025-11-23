@@ -6,7 +6,7 @@
   "name":"UiInspectorSpriteFilePicker",
   "parent":{
     "name":"Elements",
-    "path":"folders/Scene Editor/UI/Elements.yy",
+    "path":"folders/Scene Editor/Scripts/Elements.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

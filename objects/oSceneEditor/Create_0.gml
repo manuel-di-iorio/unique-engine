@@ -32,17 +32,5 @@ assetManager = new AssetManager();
 projectManager = new ProjectManager();
 editorManager = new EditorManager();
 
-
-// Auto-load project from settings
-if (file_exists("settings.json")) {
-    var buf = buffer_load("settings.json");
-    var jsonString = buffer_read(buf, buffer_text);
-    buffer_delete(buf);
-    
-    var settings = json_parse(jsonString);
-    if (settings[$ "lastProject"] != undefined) {
-        scrEditorLoadProject(settings.lastProject);
-    }
-}
-
+projectManager.autoLoad();
 scrUiResizeViewports();

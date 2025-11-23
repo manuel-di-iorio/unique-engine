@@ -1,6 +1,13 @@
 {
-  "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
   "type":"Texture",
+  "filter":true,
+  "generateMipmaps":true,
+  "repeat":[
+    1.0,
+    1.0
+  ],
+  "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
+  "name":"tDiffuse",
   "offset":[
     0.0,
     {
@@ -75,7 +82,13 @@
                                                                           "x":0.0,
                                                                           "y":{
                                                                             "x":0.0,
-                                                                            "y":0.0
+                                                                            "y":{
+                                                                              "x":0.0,
+                                                                              "y":{
+                                                                                "x":0.0,
+                                                                                "y":0.0
+                                                                              }
+                                                                            }
                                                                           }
                                                                         }
                                                                       }
@@ -115,9 +128,8 @@
   ],
   "flipX":false,
   "flipY":false,
-  "wrapS":1.0,
-  "name":"tDiffuse",
   "rotation":0.0,
+  "wrapS":1.0,
   "wrapT":1.0,
   "userData":{
   },
@@ -125,11 +137,5 @@
     0.0,
     0.0
   ],
-  "spriteBuffSize":0.0,
-  "filter":true,
-  "generateMipmaps":true,
-  "repeat":[
-    1.0,
-    1.0
-  ]
+  "spriteBuffSize":0.0
 }

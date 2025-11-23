@@ -265,6 +265,11 @@ function AssetManager() constructor {
      */
     function editAsset(asset) {
         __trackChange("edit", asset);
+        
+        // Rebuild the box in the next frame in order to wait first for the matrix updates
+        if (asset.type == "Mesh" || asset.type == "ModelInstance") {
+            oSceneEditor.sceneManager.boxHelper.needsUpdate = true;
+        }
     }
     
     /**

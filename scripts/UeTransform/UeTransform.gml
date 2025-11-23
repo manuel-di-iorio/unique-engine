@@ -51,11 +51,12 @@ function UeTransform(_data = undefined) constructor {
 			force = true;
             
             // Update the object's frustum bounding sphere
-            var boundingSphere = self[$ "geometry"] != undefined ? geometry.boundingSphere : undefined;
-            if (boundingSphere != undefined) {
-                if (__intersectionSphere == undefined) __intersectionSphere = new UeSphere();
-                __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
-            }
+            // @todo not needed anymore, will be removed soon
+            // var boundingSphere = self[$ "geometry"] != undefined ? geometry.boundingSphere : undefined;
+            // if (boundingSphere != undefined) {
+            //     if (__intersectionSphere == undefined) __intersectionSphere = new UeSphere();
+            //     __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
+            // }
         } 
         
         for (var i = 0, len = array_length(children); i < len; i++) {

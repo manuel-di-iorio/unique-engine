@@ -2,23 +2,27 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
     self.object = object;
     self.color = color;
     self.material = new UeLineBasicMaterial({ color });
-    
-    update = function() {
+    self.box = new UeBox3();
+    self.needsUpdate = true;
+
+    function update() {
         gml_pragma("forceinline");
-        var box = new UeBox3().setFromObject(self.object);
-        var _min = box.sizeMin;
-        var _max = box.sizeMax;
+        if (self.object == undefined) return;
+
+        var _computedBox = global.UE_DUMMY_BOX.setFromObject(self.object);
+        
+        if (self.box.equals(_computedBox) && self.geometry.vb != undefined) return;
+        self.box.copy(_computedBox);
+
+        var _min = _computedBox.sizeMin;
+        var _max = _computedBox.sizeMax;
         
         // Dispose the old box and create a new one
         if (geometry != undefined) {
             geometry.dispose();
         } 
-
-        var _width = _max.x - _min.x;
-        var _height = _max.y - _min.y;
-        var _depth = _max.z - _min.z;
         
-        geometry.vertices = [
+        self.geometry.vertices = [
             // Back face
             { x: _min.x, y: _min.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 0, v: 0, color: c_white, alpha: 1 }, // 0 → 1
             { x: _max.x, y: _min.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 1, v: 0, color: c_white, alpha: 1 },
@@ -59,25 +63,24 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
             { x: _min.x, y: _max.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 0, v: 1, color: c_white, alpha: 1 },
         ];
 
-        geometry.build();
-        
-        // The box is already in world space, so we reset the transform to identity
-        // rotation.set(0, 0, 0, 1);
-        // scale.set(1, 1, 1);
-        // position.set(0, 0, 0);
-        
+        self.geometry.build();
+        self.needsUpdate = false;        
     }
     
     function setFromObject(object) {
         gml_pragma("forceinline");
         self.object = object;
-        update();
+        self.needsUpdate = true;
+        self.update();
     }
 
     function dispose() {
-        geometry.dispose();
-        object = undefined;
+        gml_pragma("forceinline");
+        self.geometry.dispose();
+        self.box.makeEmpty();
+        self.object = undefined;
+        self.needsUpdate = false;
     }
     
-    if (object != undefined) update();
+    self.update();
 }

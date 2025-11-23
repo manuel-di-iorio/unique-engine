@@ -352,7 +352,7 @@
   "name":"fTextSmall",
   "parent":{
     "name":"Fonts",
-    "path":"folders/Scene Editor/Fonts.yy",
+    "path":"folders/Scene Editor/UI/Fonts.yy",
   },
   "pointRounding":0,
   "ranges":[

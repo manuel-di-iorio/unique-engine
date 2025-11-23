@@ -6,7 +6,7 @@
   "name":"scrEditorTreeviewOnRemoveAsset",
   "parent":{
     "name":"Treeview",
-    "path":"folders/Scene Editor/UI/Components/Treeview.yy",
+    "path":"folders/Scene Editor/Scripts/Treeview.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -18,16 +18,21 @@ function SceneManager() constructor {
     self.gridEnabled = true;
     self.showBoxColliders = true;
     self.objects = new UeObject3D();
-    self.transformControls = new UeTransformControls(self.camera);
+    self.transformControls = new UeTransformControls(self.camera, {
+        onDrag: function() {
+            oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object);
+        }
+    });
+
     self.boxHelper = new UeBoxHelper(undefined, c_yellow);
+    with (self.boxHelper) {
+        function onBeforeRender() {
+            if (self.needsUpdate) self.update();
+        }
+    }
     
     // Assimp loader
     self.assimp = new UeAssimpLoader();
-    
-    // Setup scene
-    self.transformControls.onDrag = function() {
-        global.UI.needsRedraw = true;
-    }
     
     self.scene.add(self.transformControls.getHelper());
     self.scene.add(self.grid, self.objects, self.boxHelper);
@@ -36,8 +41,8 @@ function SceneManager() constructor {
     global.UE_MOUSE.view = 1;
     
     // Test lights
-    scene.add(new UeAmbientLight(c_dkgray));
-    scene.add(new UeDirectionalLight(30, 60));
+    self.scene.add(new UeAmbientLight(c_dkgray));
+    self.scene.add(new UeDirectionalLight(30, 60));
 
     // Create raycaster and set from camera
     self.raycaster = new UeRaycaster();

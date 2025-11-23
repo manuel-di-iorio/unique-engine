@@ -88,7 +88,22 @@ function ProjectManager() constructor {
         ui.Assets.destroy();
         ui.Scene.destroy();
     }
+    
+    function autoLoad() {
+       // Auto-load project from settings
+       if (file_exists("settings.json")) {
+          var buf = buffer_load("settings.json");
+          var jsonString = buffer_read(buf, buffer_text);
+          buffer_delete(buf);
+          
+          var settings = json_parse(jsonString);
+          if (settings[$ "lastProject"] != undefined) {
+              scrEditorLoadProject(settings.lastProject);
+          }
+       } 
+    }
 
     saver = new ProjectSaver();
     loader = new ProjectLoader();
+    
 }

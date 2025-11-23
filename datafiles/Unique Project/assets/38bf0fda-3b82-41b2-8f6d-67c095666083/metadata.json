@@ -1,4 +1,6 @@
 {
+  "forceSinglePass":false,
+  "side":2.0,
   "uuid":"38bf0fda-3b82-41b2-8f6d-67c095666083",
   "textures":{
     "emissiveMap":"8cd414ef-93bd-4c24-a73a-f6ac6d3fc813",
@@ -19,10 +21,6 @@
   "blendSrcAlpha":2.0,
   "blendDstAlpha":6.0,
   "uniforms":{
-    "ueEmissiveIntensity":{
-      "type":0.0,
-      "value":0.0
-    },
     "ueEmissive":{
       "type":5.0,
       "value":[
@@ -30,12 +28,14 @@
         0.0,
         0.0
       ]
+    },
+    "ueEmissiveIntensity":{
+      "type":0.0,
+      "value":0.0
     }
   },
   "shader":"sh_ue_standard",
   "opacity":1.0,
   "transparent":false,
-  "depthTest":true,
-  "forceSinglePass":false,
-  "side":2.0
+  "depthTest":true
 }

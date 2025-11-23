@@ -1,4 +1,8 @@
 {
+  "px":0.0,
+  "rw":0.70710678118654757,
+  "rz":0.0,
+  "ry":0.0,
   "uuid":"3f3b69ce-9036-4d11-9601-76741cb6ebfe",
   "rx":0.70710678118654757,
   "sz":1.0,
@@ -9,18 +13,24 @@
   "ux":0.0,
   "visible":true,
   "type":"Mesh",
-  "parent":"07aacac8-4c67-4cbf-a417-15e2e79746dd",
+  "parent":"c89918a5-bc73-4a4d-ad4b-dc9c4b3efcc1",
   "children":[
   ],
   "name":"oTreeSnowA",
   "geometry":{
-    "uuid":"714db87f-83c0-448f-a852-1c39f0400cd7",
     "type":"BufferGeometry",
+    "boundingSphere":{
+      "radius":127.6747154288026,
+      "center":{
+        "x":0.0,
+        "y":96.022560119628906,
+        "z":0.0
+      }
+    },
+    "uuid":"714db87f-83c0-448f-a852-1c39f0400cd7",
     "name":null,
     "format":{
-      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
       "type":"VertexFormat",
-      "name":"",
       "attrs":[
         {
           "kind":0.0
@@ -34,7 +44,9 @@
         {
           "kind":3.0
         }
-      ]
+      ],
+      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
+      "name":""
     },
     "boundingBox":{
       "min":{
@@ -47,14 +59,6 @@
         "y":192.04512023925781,
         "z":59.500003814697266
       }
-    },
-    "boundingSphere":{
-      "radius":127.6747154288026,
-      "center":{
-        "x":0.0,
-        "y":96.022560119628906,
-        "z":0.0
-      }
     }
   },
   "material":"38bf0fda-3b82-41b2-8f6d-67c095666083",
@@ -65,9 +69,5 @@
   "renderOrder":0.0,
   "layers":1.0,
   "pz":0.0,
-  "py":0.0,
-  "px":0.0,
-  "rw":0.70710678118654757,
-  "rz":0.0,
-  "ry":0.0
+  "py":0.0
 }

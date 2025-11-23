@@ -23,6 +23,8 @@ function EditorManager() constructor {
      * @param {Struct} gizmoTarget - Optional target for transform controls (used for instances in scenes)
      */
     function setActiveAsset(asset, treeviewItem = undefined, gizmoTarget = undefined) {
+        var sm = oSceneEditor.sceneManager;
+        
         var assetChanged = self.activeAsset != asset;
         
         // Determine the effective gizmo target (defaults to asset if not provided)
@@ -31,7 +33,7 @@ function EditorManager() constructor {
         
         // If neither the asset nor the gizmo target have changed, exit
         if (!assetChanged && !gizmoTargetChanged) return;
-        oSceneEditor.sceneManager.boxHelper.dispose();
+        sm.boxHelper.dispose();
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
 
@@ -41,9 +43,13 @@ function EditorManager() constructor {
                 // Scene selected directly
                 self.activeScene = asset;
             } else if (asset.type == "Mesh" || asset.type == "ModelInstance") {
-                oSceneEditor.sceneManager.boxHelper.setFromObject(asset);
+                sm.boxHelper.object = asset;
+                call_later(1, time_source_units_frames, method({ asset }, function() { 
+                    oSceneEditor.sceneManager.boxHelper.update();
+                }));
                 
                 // Mesh/instance selected - find parent scene via treeview
+                // @todo ma controlla solo un livello di parent??
                 var foundScene = undefined;
                 if (treeviewItem != undefined && treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
                     var parentTreeItem = treeviewItem.parent.parent;

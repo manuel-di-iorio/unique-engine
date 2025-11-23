@@ -56,11 +56,6 @@ switch (currentTool) {
     break;
 }
 
-// Update the box helper (if an object is selected)
-if (sceneManager.boxHelper.object != undefined) {
-    sceneManager.boxHelper.update();
-}
-
 // Wrap the mouse coords when out of bounds
 if (mouse_button != mb_none && sceneManager.orbit.transforming) {
     var fixMousePos = false;

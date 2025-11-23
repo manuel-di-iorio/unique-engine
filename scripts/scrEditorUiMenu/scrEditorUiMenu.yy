@@ -6,7 +6,7 @@
   "name":"scrEditorUiMenu",
   "parent":{
     "name":"Components",
-    "path":"folders/Scene Editor/UI/Components.yy",
+    "path":"folders/Scene Editor/Scripts/Components.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

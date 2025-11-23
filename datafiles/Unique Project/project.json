@@ -1,53 +1,5 @@
 {
-  "version":"2025.11.22.0",
-  "assets":[
-    {
-      "uuid":"42398633-94cd-4faf-a1db-3ca55366eaed",
-      "type":"Folder",
-      "children":[
-        {
-          "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
-          "type":"Texture",
-          "children":[
-          ],
-          "name":"tDiffuse"
-        },
-        {
-          "uuid":"c89918a5-bc73-4a4d-ad4b-dc9c4b3efcc1",
-          "type":"Folder",
-          "children":[
-            {
-              "uuid":"38bf0fda-3b82-41b2-8f6d-67c095666083",
-              "type":"Material",
-              "children":[
-              ],
-              "name":"mTreeSnowA"
-            },
-            {
-              "uuid":"3f3b69ce-9036-4d11-9601-76741cb6ebfe",
-              "type":"Mesh",
-              "children":[
-              ],
-              "name":"oTreeSnowA"
-            }
-          ],
-          "name":"Tree Snow A"
-        },
-        {
-          "uuid":"752b53a3-2e3f-44df-94be-0850c32ed607",
-          "type":"Scene",
-          "children":[
-          ],
-          "name":"sScene"
-        }
-      ],
-      "name":"Project"
-    }
-  ],
   "settings":{
-    "gizmos":{
-      "showBoxColliders":true
-    },
     "counters":{
       "textures":1.0,
       "materials":4.0,
@@ -58,19 +10,67 @@
       "cameras":0.0,
       "folders":2.0
     },
+    "gridEnabled":true,
+    "gizmos":{
+      "showBoxColliders":true
+    },
     "camera":{
       "target":[
-        734.947895812919,
-        8.577640609027565,
+        0.0,
+        0.0,
         0.0
       ],
       "dampingFactor":0.29999999999999999,
       "position":[
-        1489.8661412477613,
-        364.59157764191912,
-        789.48335371372684
+        -512.62316263200046,
+        107.4956458716738,
+        424.00479433801246
       ]
-    },
-    "gridEnabled":true
-  }
+    }
+  },
+  "version":"2025.11.22.0",
+  "assets":[
+    {
+      "type":"Folder",
+      "children":[
+        {
+          "type":"Texture",
+          "children":[
+          ],
+          "uuid":"cf5a51b3-6272-4f0e-a703-efbc5f3880a2",
+          "name":"tDiffuse"
+        },
+        {
+          "type":"Folder",
+          "children":[
+            {
+              "type":"Material",
+              "children":[
+              ],
+              "uuid":"38bf0fda-3b82-41b2-8f6d-67c095666083",
+              "name":"mTreeSnowA"
+            },
+            {
+              "type":"Mesh",
+              "children":[
+              ],
+              "uuid":"3f3b69ce-9036-4d11-9601-76741cb6ebfe",
+              "name":"oTreeSnowA"
+            }
+          ],
+          "uuid":"c89918a5-bc73-4a4d-ad4b-dc9c4b3efcc1",
+          "name":"Tree Snow A"
+        },
+        {
+          "type":"Scene",
+          "children":[
+          ],
+          "uuid":"752b53a3-2e3f-44df-94be-0850c32ed607",
+          "name":"sScene"
+        }
+      ],
+      "uuid":"42398633-94cd-4faf-a1db-3ca55366eaed",
+      "name":"Project"
+    }
+  ]
 }
