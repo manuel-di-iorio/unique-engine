@@ -1,3 +1,4 @@
+if (!enableUI) exit;
 draw_set_font(fText);
 global.UI.render(uiDebug);
 

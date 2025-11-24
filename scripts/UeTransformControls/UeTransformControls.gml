@@ -234,7 +234,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // Use a perspective-correct scaling formula
         // The scale should be proportional to distance to maintain constant apparent size
-        var baseScale = 0.17;  // Base size multiplier - increased for better visibility
+        var baseScale = 0.15;  // Base size multiplier - increased for better visibility
         var referenceDistance = 10;  // Reference distance for scaling
         
         // Calculate scale that makes gizmo appear same size regardless of distance

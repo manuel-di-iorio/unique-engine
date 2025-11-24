@@ -24,6 +24,7 @@ global.UI_ASSETS_INSTANCE_ID = 0;
 global.UI_ASSETS_FOLDERS_ID = 0;
 
 uiDebug = false;
+enableUI = true;
 
 // Setup UI and 3D scene
 scrSetupUI();

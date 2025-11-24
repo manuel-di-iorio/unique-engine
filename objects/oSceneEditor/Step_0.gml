@@ -1,3 +1,5 @@
+if (!enableUI) exit;
+
 var ui = global.UI;
 var uiOverlay = global.UI.Overlay;
 
