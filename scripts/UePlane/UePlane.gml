@@ -6,7 +6,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     self.isPlane = true;
     
     /// Sets plane from normal and a point on the plane
-    function setFromNormalAndPoint(_normal, point) {
+    static setFromNormalAndPoint = function(_normal, point) {
         gml_pragma("forceinline");
         self.normal.copy(_normal).normalize();
         self.constant = -self.normal.dot(point);
@@ -14,7 +14,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Sets plane from three non-collinear points (counter-clockwise winding)
-    function setFromPoints(p1, p2, p3) {
+    static setFromPoints = function(p1, p2, p3) {
         gml_pragma("forceinline");
         var u = p2.clone().sub(p1);
         var v = p3.clone().sub(p1);
@@ -24,32 +24,32 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Returns signed distance from point to the plane
-    function distanceToPoint(point) {
+    static distanceToPoint = function(point) {
         gml_pragma("forceinline");
         return self.normal.dot(point) + self.constant;
     }
     
     /// Projects a point onto the plane
-    function projectPoint(point) {
+    static projectPoint = function(point) {
         gml_pragma("forceinline");
         var dist = distanceToPoint(point);
         return point.clone().sub(self.normal.clone().multiplyScalar(dist));
     }
     
     /// Returns true if a point lies on the plane (within a small epsilon)
-    function isPointOnPlane(point, epsilon = UE_EPSILON) {
+    static isPointOnPlane = function(point, epsilon = UE_EPSILON) {
         gml_pragma("forceinline");
         return abs(distanceToPoint(point)) < epsilon;
     }
     
     /// Clones the current plane
-    function clone() {
+    static clone = function() {
         gml_pragma("forceinline");
         return variable_clone(self);
     }
     
     /// Copies another plane into this one
-    function copy(plane) {
+    static copy = function(plane) {
         gml_pragma("forceinline");
         self.normal.copy(plane.normal);
         self.constant = plane.constant;
@@ -57,7 +57,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Flips the normal and distance (i.e. inverts the plane)
-    function flip() {
+    static flip = function() {
         gml_pragma("forceinline");
         self.normal.multiplyScalar(-1);
         self.constant = -self.constant;
@@ -65,7 +65,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Apply a Matrix4 to the plane. The matrix must be an affine, homogeneous transform
-    function applyMatrix4(matrix, optionalNormalMatrix = undefined) {
+    static applyMatrix4 = function(matrix, optionalNormalMatrix = undefined) {
         gml_pragma("forceinline");
         var normalMatrix = optionalNormalMatrix ?? new UeMatrix3().getNormalMatrix(matrix);
         
@@ -79,25 +79,25 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Returns a Vector3 coplanar to the plane, by calculating the projection of the normal vector at the origin onto the plane
-    function coplanarPoint() {
+    static coplanarPoint = function() {
         gml_pragma("forceinline");
         return self.normal.clone().multiplyScalar(-self.constant);
     }
     
     /// Returns the signed distance from the sphere to the plane
-    function distanceToSphere(sphere) {
+    static distanceToSphere = function(sphere) {
         gml_pragma("forceinline");
         return distanceToPoint(sphere.center) - sphere.radius;
     }
     
     /// Checks to see if two planes are equal (their normal and constant properties match)
-    function equals(plane) {
+    static equals = function(plane) {
         gml_pragma("forceinline");
         return plane.normal.equals(self.normal) && (abs(plane.constant - self.constant) < 0.0001);
     }
     
     /// Returns the intersection point of the passed line and the plane. Returns undefined if the line does not intersect
-    function intersectLine(line) {
+    static intersectLine = function(line) {
         gml_pragma("forceinline");
         var dir = line.delta();
         var denominator = self.normal.dot(dir);
@@ -124,7 +124,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Determines whether or not this plane intersects box
-    function intersectsBox(box) {
+    static intersectsBox = function(box) {
         gml_pragma("forceinline");
         // Get the positive and negative vertices of the box relative to the plane normal
         var _min = box.min;
@@ -151,7 +151,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     
     /// Tests whether a line segment intersects with (passes through) the plane
     /// @todo Needs to implement the Line3 math class first.
-    //function intersectsLine(line) {
+    //static intersectsLine = function(line) {
         //var startDistance = distanceToPoint(line._start);
         //var endDistance = distanceToPoint(line._end);
         //
@@ -160,13 +160,13 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     //}
     
     /// Determines whether or not this plane intersects sphere
-    function intersectsSphere(sphere) {
+    static intersectsSphere = function(sphere) {
         gml_pragma("forceinline");
         return abs(distanceToPoint(sphere.center)) <= sphere.radius;
     }
     
     /// Negates both the normal vector and the constant
-    function negate() {
+    static negate = function() {
         gml_pragma("forceinline");
         self.normal.scale(-1);
         self.constant = -self.constant;
@@ -174,7 +174,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Normalizes the normal vector, and adjusts the constant value accordingly
-    function normalize() {
+    static normalize = function() {
         gml_pragma("forceinline");
         var normalLength = self.normal.length();
         self.normal.normalize();
@@ -183,7 +183,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Sets this plane's normal and constant properties by copying the values from the given normal
-    function set(_normal, constant) {
+    static set = function(_normal, constant) {
         gml_pragma("forceinline");
         self.normal.copy(_normal);
         self.constant = constant;
@@ -191,7 +191,7 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Set the individual components that define the plane
-    function setComponents(x, y, z, w) {
+    static setComponents = function(x, y, z, w) {
         gml_pragma("forceinline");
         self.normal.set(x, y, z);
         self.constant = w;
@@ -199,19 +199,19 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     }
     
     /// Sets the plane's properties as defined by a normal and an arbitrary coplanar point
-    function setFromNormalAndCoplanarPoint(_normal, point) {
+    static setFromNormalAndCoplanarPoint = function(_normal, point) {
         gml_pragma("forceinline");
         return setFromNormalAndPoint(_normal, point);
     }
     
     /// Alias for setFromPoints - Defines the plane based on the 3 provided points
-    function setFromCoplanarPoints(a, b, c) {
+    static setFromCoplanarPoints = function(a, b, c) {
         gml_pragma("forceinline");
         return setFromPoints(a, b, c);
     }
     
     /// Translates the plane by the distance defined by the offset vector
-    function translate(offset) {
+    static translate = function(offset) {
         gml_pragma("forceinline");
         self.constant = self.constant - offset.dot(self.normal);
         return self;

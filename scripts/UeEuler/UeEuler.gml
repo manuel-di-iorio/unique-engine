@@ -7,7 +7,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
     self.z = _z;
     self.order = _order;
 
-    function set(x, y, z, order = "XYZ") {
+    static set = function(x, y, z, order = "XYZ") {
         gml_pragma("forceinline");
         self.x = x;
         self.y = y;
@@ -16,12 +16,12 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
         return self;
     }
 
-    function clone() {
+    static clone = function() {
         gml_pragma("forceinline");
         return variable_clone(self);
     }
 
-    function copy(euler) {
+    static copy = function(euler) {
         gml_pragma("forceinline");
         self.x = euler.x;
         self.y = euler.y;
@@ -30,7 +30,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
         return self;
     }
 
-    function equals(euler) {
+    static equals = function(euler) {
         gml_pragma("forceinline");
         return (self.x == euler.x) &&
                (self.y == euler.y) &&
@@ -38,7 +38,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
                (self.order == euler.order);
     }
 
-    function fromArray(arr) {
+    static fromArray = function(arr) {
         gml_pragma("forceinline");
         self.x = arr[0];
         self.y = arr[1];
@@ -47,7 +47,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
         return self;
     }
 
-    function toArray(arr = array_create(4), offset = 0) {
+    static toArray = function(arr = array_create(4), offset = 0) {
         gml_pragma("forceinline");
         arr[offset]     = self.x;
         arr[offset + 1] = self.y;
@@ -56,7 +56,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
         return arr;
     }
 
-    function setFromVector3(v, order = undefined) {
+    static setFromVector3 = function(v, order = undefined) {
         gml_pragma("forceinline");
         self.x = v.x;
         self.y = v.y;
@@ -65,21 +65,21 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
         return self;
     }
 
-    function reorder(newOrder) {
+    static reorder = function(newOrder) {
         gml_pragma("forceinline");
         var q = new UeQuaternion();
         q.setFromEuler(self.x, self.y, self.z);
         return self.setFromQuaternion(q, newOrder);
     }
     
-    function setFromQuaternion(q, order = undefined) {
+    static setFromQuaternion = function(q, order = undefined) {
         gml_pragma("forceinline");
         order ??= self.order;
         global.UE_DUMMY_MATRIX4.makeRotationFromQuaternion(q);
         return self.setFromRotationMatrix(global.UE_DUMMY_MATRIX4, order);
     }
     
-    function setFromRotationMatrix(m, order) {
+    static setFromRotationMatrix = function(m, order) {
         gml_pragma("forceinline");
         order ??= self.order;
     

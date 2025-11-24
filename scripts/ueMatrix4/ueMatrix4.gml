@@ -3,41 +3,41 @@ function UeMatrix4(_data = undefined) constructor {
     data = _data ?? matrix_build_identity();
 
     /// Creates a deep copy of this matrix
-    function clone() {
+    static clone = function() {
         gml_pragma("forceinline");
         return variable_clone(self);
     }
     
     /// Multiplies this matrix by another (result = self * m)
-    function multiply(m) {
+    static multiply = function(m) {
         gml_pragma("forceinline");
         matrix_multiply(m.data, self.data, data);
         return self;
     }
 
     /// Multiplies two matrices: result = a * b
-    function multiplyMatrices(a, b) {
+    static multiplyMatrices = function(a, b) {
         gml_pragma("forceinline");
         matrix_multiply(b.data, a.data, data);
         return self;
     }
 
     /// Pre-multiplies this matrix: result = m * self
-    function premultiply(m) {
+    static premultiply = function(m) {
         gml_pragma("forceinline");
         matrix_multiply(self.data, m.data, data);
         return self;
     }
 
     /// Multiplies every component by a scalar
-    function multiplyScalar(s) {
+    static multiplyScalar = function(s) {
         gml_pragma("forceinline");
         for (var i = 0; i < 16; i++) data[i] *= s;
         return self;
     }
 
     /// Builds a matrix from position, quaternion rotation, and scale
-    function compose(pos, rot, scl) {
+    static compose = function(pos, rot, scl) {
         gml_pragma("forceinline");
         rot.normalize();
 
@@ -67,7 +67,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Decomposes matrix into position, quaternion, and scale
-    function decompose(position, quaternion, scale) {
+    static decompose = function(position, quaternion, scale) {
         gml_pragma("forceinline");
         var te = data;
         position.set(te[12], te[13], te[14]);
@@ -87,14 +87,14 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Copies all values from another matrix
-    function copy(m) {
+    static copy = function(m) {
         gml_pragma("forceinline");
         array_copy(data, 0, m.data, 0, 16);
         return self;
     }
 
     /// Copies only the translation component from another matrix
-    function copyPosition(m) {
+    static copyPosition = function(m) {
         gml_pragma("forceinline");
         data[12] = m.data[12];
         data[13] = m.data[13];
@@ -103,7 +103,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Returns the determinant of the matrix
-    function determinant() {
+    static determinant = function() {
         gml_pragma("forceinline");
         var a00 = data[ 0], a01 = data[ 4], a02 = data[ 8],  a03 = data[12];
         var a10 = data[ 1], a11 = data[ 5], a12 = data[ 9],  a13 = data[13];
@@ -119,14 +119,14 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Inverts the matrix
-    function invert() {
+    static invert = function() {
         gml_pragma("forceinline");
         matrix_inverse(self.data, self.data);
         return self;
     }
 
     /// Checks if this matrix equals another
-    function equals(m) {
+    static equals = function(m) {
         gml_pragma("forceinline");
         for (var i = 0; i < 16; i++)
             if (data[i] != m.data[i]) return false;
@@ -134,7 +134,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Extracts the three basis axes (X, Y, Z) from matrix
-    function extractBasis(xAxis, yAxis, zAxis) {
+    static extractBasis = function(xAxis, yAxis, zAxis) {
         gml_pragma("forceinline");
         xAxis.set(data[0], data[1], data[2]);
         yAxis.set(data[4], data[5], data[6]);
@@ -143,7 +143,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Removes scaling and isolates rotation from a matrix
-    function extractRotation(m) {
+    static extractRotation = function(m) {
         gml_pragma("forceinline");
         self.copy(m);
         var scale = new UeVector3();
@@ -152,35 +152,35 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Resets the matrix to identity
-    function identity() {
+    static identity = function() {
         gml_pragma("forceinline");
         data = matrix_build_identity();
         return self;
     }
 
     /// Builds a lookAt matrix from eye, target and up vectors
-    function lookAt(eye, target, up) {
+    static lookAt = function(eye, target, up) {
         gml_pragma("forceinline");
         matrix_build_lookat(eye.x, eye.y, eye.z, target.x, target.y, target.z, up.x, up.y, up.z, self.data);
         return self;
     }
 
     /// Builds a rotation matrix from axis and angle
-    function makeRotationAxis(axis, theta) {
+    static makeRotationAxis = function(axis, theta) {
         gml_pragma("forceinline");
         var q = new UeQuaternion().setFromAxisAngle(axis, theta);
         return self.makeRotationFromQuaternion(q);
     }
 
     /// Builds a rotation matrix from quaternion
-    function makeRotationFromQuaternion(q) {
+    static makeRotationFromQuaternion = function(q) {
         gml_pragma("forceinline");
         self.compose(new UeVector3(), q, new UeVector3(1,1,1));
         return self;
     }
 
     /// Builds a scaling matrix
-    function makeScale(x, y, z) {
+    static makeScale = function(x, y, z) {
         gml_pragma("forceinline");
         data = [
             x, 0, 0, 0,
@@ -192,7 +192,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a translation matrix
-    function makeTranslation(x, y, z) {
+    static makeTranslation = function(x, y, z) {
         gml_pragma("forceinline");
         data = [
             1, 0, 0, 0,
@@ -204,7 +204,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a perspective projection matrix
-    function makePerspective(left, right, top, bottom, near, far) {
+    static makePerspective = function(left, right, top, bottom, near, far) {
         gml_pragma("forceinline");
         var width  = right - left;
         var height = top - bottom;
@@ -215,7 +215,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds an orthographic projection matrix
-    function makeOrthographic(left, right, top, bottom, near, far) {
+    static makeOrthographic = function(left, right, top, bottom, near, far) {
         gml_pragma("forceinline");
         var width  = right - left;
         var height = top - bottom;
@@ -224,21 +224,21 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Sets values from a column-major array
-    function fromArray(arr, offset = 0) {
+    static fromArray = function(arr, offset = 0) {
         gml_pragma("forceinline");
         array_copy(data, 0, arr, offset, 16-offset);
         return self;
     }
 
     /// Writes values into a column-major array
-    function toArray(arr = [], offset = 0) {
+    static toArray = function(arr = [], offset = 0) {
         gml_pragma("forceinline");
         array_copy(arr, offset, data, 0, 16-offset);
         return arr;
     }
 
     /// Transposes the matrix
-    function transpose() {
+    static transpose = function() {
         gml_pragma("forceinline");
         data = [
             data[0], data[4], data[8],  data[12],
@@ -250,7 +250,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Returns the maximum scale along any axis
-    function getMaxScaleOnAxis() {
+    static getMaxScaleOnAxis = function() {
         gml_pragma("forceinline");
         var sx = new UeVector3(data[0], data[1], data[2]).length();
         var sy = new UeVector3(data[4], data[5], data[6]).length();
@@ -259,7 +259,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Applies matrix transform to a Vector3 (as a position, w = 1)
-    function applyToVector3(vec) {
+    static applyToVector3 = function(vec) {
         gml_pragma("forceinline");
         var e = data;
         var xx = vec.x, yy = vec.y, zz = vec.z;
@@ -274,7 +274,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Scales this matrix by a vector (column-wise)
-    function scale(v) {
+    static scale = function(v) {
         gml_pragma("forceinline");
         data[0] *= v.x; data[1] *= v.x; data[2] *= v.x; data[3] *= v.x;
         data[4] *= v.y; data[5] *= v.y; data[6] *= v.y; data[7] *= v.y;
@@ -283,7 +283,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
     
     /// Scales this matrix by the XYZ components (column-wise)
-    function scaleXYZ(x, y, z) {
+    static scaleXYZ = function(x, y, z) {
         gml_pragma("forceinline");
         data[0] *= x; data[1] *= x; data[2] *= x; data[3] *= x;
         data[4] *= y; data[5] *= y; data[6] *= y; data[7] *= y;
@@ -292,7 +292,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Sets matrix values using row-major arguments (converted to column-major)
-    function set(n11, n12, n13, n14,
+    static set = function(n11, n12, n13, n14,
                  n21, n22, n23, n24,
                  n31, n32, n33, n34,
                  n41, n42, n43, n44) {
@@ -305,7 +305,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Sets only the translation component of the matrix
-    function setPosition(v) {
+    static setPosition = function(v) {
         gml_pragma("forceinline");
         data[12] = v.x;
         data[13] = v.y;
@@ -314,7 +314,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Sets translation from X, Y, Z values
-    function setPositionXYZ(x, y, z) {
+    static setPositionXYZ = function(x, y, z) {
         gml_pragma("forceinline");
         data[12] = x;
         data[13] = y;
@@ -323,7 +323,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a matrix from 3 orthogonal basis vectors
-    function makeBasis(xAxis, yAxis, zAxis) {
+    static makeBasis = function(xAxis, yAxis, zAxis) {
         gml_pragma("forceinline");
         data = [
             xAxis.x, yAxis.x, zAxis.x, 0,
@@ -335,7 +335,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a rotation matrix from Euler angles in degrees (XYZ order)
-    function makeRotationFromEuler(x_deg, y_deg, z_deg) {
+    static makeRotationFromEuler = function(x_deg, y_deg, z_deg) {
         gml_pragma("forceinline");
         var c1 = dcos(x_deg);
         var c2 = dcos(y_deg);
@@ -367,7 +367,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a rotation matrix around X axis
-    function makeRotationX(theta) {
+    static makeRotationX = function(theta) {
         gml_pragma("forceinline");
         var c = dcos(theta);
         var s = dsin(theta);
@@ -381,7 +381,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a rotation matrix around Y axis
-    function makeRotationY(theta) {
+    static makeRotationY = function(theta) {
         gml_pragma("forceinline");
         var c = dcos(theta);
         var s = dsin(theta);
@@ -395,7 +395,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a rotation matrix around Z axis
-    function makeRotationZ(theta) {
+    static makeRotationZ = function(theta) {
         gml_pragma("forceinline");
         var c = dcos(theta);
         var s = dsin(theta);
@@ -409,7 +409,7 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a shear (skew) matrix
-    function makeShear(xy, xz, yx, yz, zx, zy) {
+    static makeShear = function(xy, xz, yx, yz, zx, zy) {
         gml_pragma("forceinline");
         data = [
             1,  yx, zx, 0,

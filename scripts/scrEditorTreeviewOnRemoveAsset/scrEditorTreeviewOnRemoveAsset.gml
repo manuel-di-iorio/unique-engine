@@ -76,6 +76,22 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         // Track the deletion
         assetManager.__trackChange("delete", asset);
     }
+
+    // Folder: rimuovere ricorsivamente tutti i figli
+    else if (assetType == "Folder") {
+        // Itera sui figli del treeview item per pulire i loro asset
+        if (treeviewItem.Items != undefined && treeviewItem.Items.children != undefined) {
+            var children = treeviewItem.Items.children;
+            for (var i = 0; i < array_length(children); i++) {
+                var childItem = children[i];
+                // Ricorsione: pulisci l'asset del figlio
+                editorTreeviewOnRemoveAsset(childItem, false);
+            }
+        }
+        
+        // Rimuovi la cartella dall'AssetManager
+        assetManager.removeAsset("Folder", asset);
+    }
 }
 
 // === HELPER FUNCTIONS ===

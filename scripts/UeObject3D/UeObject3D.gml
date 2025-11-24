@@ -1,6 +1,9 @@
 /**
  * Object3D
  */
+
+// @todo add static
+// Ctrl+H function\s+(\w+)\((?!.*\)\s*constructor) static $1 = function(
 function UeObject3D(data = {}): UeTransform(data) constructor {
     isObject3D = true;
     type = "Object3D";

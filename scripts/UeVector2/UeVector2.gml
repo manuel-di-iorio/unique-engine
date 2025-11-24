@@ -2,63 +2,63 @@ function UeVector2(_x = 0, _y = 0) constructor {
     self.x = _x;
     self.y = _y;
 
-    function set(_x, _y) {
+    static set = function(_x, _y) {
         gml_pragma("forceinline");
         self.x = _x;
         self.y = _y;
         return self;
     }
     
-    function clone() {
+    static clone = function() {
         gml_pragma("forceinline");
         return variable_clone(self);
     }
 
-    function copy(vec) {
+    static copy = function(vec) {
         gml_pragma("forceinline");
         self.x = vec.x;
         self.y = vec.y;
         return self;
     }
 
-    function add(vec) {
+    static add = function(vec) {
         gml_pragma("forceinline");
         self.x += vec.x;
         self.y += vec.y;
         return self;
     }
 
-    function sub(vec) {
+    static sub = function(vec) {
         gml_pragma("forceinline");
         self.x -= vec.x;
         self.y -= vec.y;
         return self;
     }
 
-    function multiply(vec) {
+    static multiply = function(vec) {
         gml_pragma("forceinline");
         self.x *= vec.x;
         self.y *= vec.y;
         return self;
     }
 
-    function scale(s) {
+    static scale = function(s) {
         gml_pragma("forceinline");
         self.x *= s;
         self.y *= s;
         return self;
     }
 
-    function dot(vec) {
+    static dot = function(vec) {
         gml_pragma("forceinline");
         return self.x * vec.x + self.y * vec.y;
     }
 
-    function length() {
+    static length = function() {
         return sqrt(self.x * self.x + self.y * self.y);
     }
 
-    function normalize() {
+    static normalize = function() {
         gml_pragma("forceinline");
         var len = length();
         if (len > 0) {
@@ -69,19 +69,19 @@ function UeVector2(_x = 0, _y = 0) constructor {
         return self;
     }
 
-    function equals(vec) {
+    static equals = function(vec) {
         gml_pragma("forceinline");
         return self.x == vec.x && self.y == vec.y;
     }
 
-    function lerp(vec, t) {
+    static lerp = function(vec, t) {
         gml_pragma("forceinline");
         self.x += (vec.x - self.x) * t;
         self.y += (vec.y - self.y) * t;
         return self;
     }
 
-    function angleTo(vec) {
+    static angleTo = function(vec) {
         gml_pragma("forceinline");
         var dot = self.dot(vec);
         var len1 = self.length();
@@ -93,19 +93,19 @@ function UeVector2(_x = 0, _y = 0) constructor {
         return darccos(cos_theta);
     }
 
-    function distanceTo(vec) {
+    static distanceTo = function(vec) {
         gml_pragma("forceinline");
         var dx = self.x - vec.x;
         var dy = self.y - vec.y;
         return sqrt(dx * dx + dy * dy);
     }
 
-    function perp() {
+    static perp = function() {
         gml_pragma("forceinline");
         return new UeVector2(-self.y, self.x);
     }
 
-    function rotate(angle) {
+    static rotate = function(angle) {
         gml_pragma("forceinline");
         var cosA = dcos(angle);
         var sinA = dsin(angle);

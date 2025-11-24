@@ -1,6 +1,6 @@
 function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     
-    function set(x, y, z, w) {
+    static set = function(x, y, z, w) {
         gml_pragma("forceinline");
         self.x = x;
         self.y = y;
@@ -10,13 +10,13 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     /// Clone the quaternion
-    function clone() {
+    static clone = function() {
         gml_pragma("forceinline");
         return variable_clone(self);
     }
 
     /// Copy from another quaternion
-    function copy(q) {
+    static copy = function(q) {
         gml_pragma("forceinline");
         self.x = q.x;
         self.y = q.y;
@@ -26,7 +26,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     /// Set quaternion from Euler angles (in degrees)
-    function setFromEuler(rx, ry, rz) {
+    static setFromEuler = function(rx, ry, rz) {
         gml_pragma("forceinline");
         var cx = dcos(rx * 0.5);
         var sx = dsin(rx * 0.5);
@@ -43,7 +43,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     /// Normalize quaternion
-    function normalize() {
+    static normalize = function() {
         gml_pragma("forceinline");
         var len = sqrt(self.x*self.x + self.y*self.y + self.z*self.z + self.w*self.w);
         if (len > 0) {
@@ -57,7 +57,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     /// Multiply (combine) with another quaternion
-    function multiply(q) {
+    static multiply = function(q) {
         gml_pragma("forceinline");
         var _x = self.x, _y = self.y, _z = self.z, _w = self.w;
 
@@ -70,7 +70,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     /// Set rotation from axis and angle
-    function setFromAxisAngle(axis, angle) {
+    static setFromAxisAngle = function(axis, angle) {
         gml_pragma("forceinline");
         var half = angle * 0.5;
         var s = dsin(half);
@@ -82,7 +82,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     /// Spherical linear interpolation
-    function slerp(q, t) {
+    static slerp = function(q, t) {
         gml_pragma("forceinline");
         var _x = self.x, _y = self.y, _z = self.z, _w = self.w;
 
@@ -122,7 +122,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     /// @desc Rotate the quaternion axis by the specified degrees
     /// @param {any*} axis
     /// @param {real} angle in deegres    
-    function rotate(axis, angle) {
+    static rotate = function(axis, angle) {
         gml_pragma("forceinline");
         var q = new UeQuaternion().setFromAxisAngle(axis, angle);
         multiply(q);
@@ -130,27 +130,27 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     // Rotate around X axis
-    function rotateX(angle) {
+    static rotateX = function(angle) {
         gml_pragma("forceinline");
         rotate(new UeVector3(1, 0, 0), angle);
         return self;
     };
 
     // Rotate around Y axis
-    function rotateY(angle) {
+    static rotateY = function(angle) {
         gml_pragma("forceinline");
         rotate(new UeVector3(0, 1, 0), angle);
         return self;
     };
 
     // Rotate around Z axis
-    function rotateZ(angle) {
+    static rotateZ = function(angle) {
         gml_pragma("forceinline");
         rotate(new UeVector3(0, 0, 1), angle);
         return self;
     };
     
-    function toMat3() {
+    static toMat3 = function() {
         gml_pragma("forceinline");
         var xx = self.x * self.x;
         var yy = self.y * self.y;
@@ -169,7 +169,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         ]);
     }
     
-    function setFromRotationMatrix(m) {
+    static setFromRotationMatrix = function(m) {
         gml_pragma("forceinline");
         var te = m.data;
 
@@ -214,7 +214,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     /// Set quaternion that rotates from vFrom to vTo (both must be unit vectors)
-    function setFromUnitVectors(vFrom, vTo) {
+    static setFromUnitVectors = function(vFrom, vTo) {
         gml_pragma("forceinline");
         var r = vFrom.dot(vTo);
     
@@ -243,7 +243,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         return self.normalize();
     }
     
-    function identity() {
+    static identity = function() {
         self.x = 0;
         self.y = 0;
         self.z = 0;
@@ -252,7 +252,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
         
     /// Rotates this quaternion toward q by a maximum of `step` radians
-    function rotateTowards(q, step) {
+    static rotateTowards = function(q, step) {
         gml_pragma("forceinline");
     
         if (step <= 0) return self;
@@ -278,7 +278,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     /// Rotational conjugate of this quaternion
-    function conjugate() {
+    static conjugate = function() {
         gml_pragma("forceinline");
         self.x = -self.x;
         self.y = -self.y;
@@ -288,7 +288,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     /// Invert (conjugate) the quaternion
-    function invert() {
+    static invert = function() {
         gml_pragma("forceinline");
         var norm = self.lengthSq();
         if (norm > 0) {
@@ -302,32 +302,32 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     }
     
     /// Returns the squared length of the quaternion (avoids sqrt for performance)
-    function lengthSq() {
+    static lengthSq = function() {
         gml_pragma("forceinline");
         return self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w;
     }
 
     
     /// Return the quaternion length (magnitude)
-    function length() {
+    static length = function() {
         gml_pragma("forceinline");
         return sqrt(self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w);
     }
     
-    function dot(q) {
+    static dot = function(q) {
         gml_pragma("forceinline");
         return self.x * q.x + self.y * q.y + self.z * q.z + self.w * q.w;
     }
     
     // Returns the angle in degrees between this quaternion and q. Clamped for stability. Always returns a value in [0, 180°].
-    function angleTo(q) {
+    static angleTo = function(q) {
         gml_pragma("forceinline");
         var d = clamp(self.dot(q), -1, 1);
         return radtodeg(2 * arccos(abs(d)));
     }
 
     
-    function multiplyQuaternions(a, b) {
+    static multiplyQuaternions = function(a, b) {
         gml_pragma("forceinline");
     
         var ax = a.x, ay = a.y, az = a.z, aw = a.w;
@@ -341,7 +341,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    function equals(q) {
+    static equals = function(q) {
         gml_pragma("forceinline");
         return (
             abs(self.x - q.x) < UE_EPSILON &&
@@ -351,7 +351,7 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
         );
     }
     
-    function toArray() {
+    static toArray = function() {
         gml_pragma("forceinline");
         return [self.x, self.y, self.z, self.w];
     }

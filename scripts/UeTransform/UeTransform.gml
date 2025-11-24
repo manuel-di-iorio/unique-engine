@@ -23,7 +23,7 @@ function UeTransform(_data = undefined) constructor {
     __intersectionSphere = undefined;
     
     /// Rebuild local matrix from position/rotation/scale
-    function updateMatrix() {
+    static updateMatrix = function() {
         gml_pragma("forceinline");
         matrix.compose(position, rotation, scale);
         matrixWorldNeedsUpdate = true;
@@ -31,7 +31,7 @@ function UeTransform(_data = undefined) constructor {
     }
 
     // Update local matrix and matrix world, also on children
-    function updateMatrixWorld(force = false) {
+    static updateMatrixWorld = function(force = false) {
         gml_pragma("forceinline");
         if (matrixAutoUpdate) {
             updateMatrix();
@@ -76,7 +76,7 @@ function UeTransform(_data = undefined) constructor {
      *  - `matrixWorldNeedsUpdate` is reset to false after the update.
      *  - This method should be called if the object or its hierarchy has changed (e.g., after transformations or re-parenting).
      */
-    function updateWorldMatrix(updateParents = false, updateChildren = false) {
+    static updateWorldMatrix = function(updateParents = false, updateChildren = false) {
         gml_pragma("forceinline");
         if (updateParents && parent != undefined) {
             parent.updateWorldMatrix(true, false);
@@ -104,45 +104,45 @@ function UeTransform(_data = undefined) constructor {
 
     // --- Translation methods ---
     
-    function setPosition(x, y, z) {
+    static setPosition = function(x, y, z) {
         gml_pragma("forceinline");
         position.set(x, y, z);
         return self;    
     }
     
     // Translate an object by distance along an axis in object space. The axis is assumed to be normalized.
-    function translateOnAxis(axis, distance) {
+    static translateOnAxis = function(axis, distance) {
         gml_pragma("forceinline");
         var v = axis.clone().applyQuaternion(rotation);
         position.add(v.multiplyScalar(distance));
         return self;
     }
     
-    function translate(x, y, z) {
+    static translate = function(x, y, z) {
         gml_pragma("forceinline");
         position.add(new UeVector3(x, y, z));
         return self;    
     }
     
-    function translateX(value) {
+    static translateX = function(value) {
         gml_pragma("forceinline");
         position.x += value;
         return self;
     }
 
-    function translateY(value) {
+    static translateY = function(value) {
         position.y += value;
         return self;
     }
 
-    function translateZ(value) {
+    static translateZ = function(value) {
         gml_pragma("forceinline");
         position.z += value;
         return self;
     }
 
     // --- Rotation methods ---
-    function lookAtVec(target) {
+    static lookAtVec = function(target) {
         gml_pragma("forceinline");
         var m = global.UE_DUMMY_MATRIX4;
         m.lookAt(position, target, up);
@@ -150,12 +150,12 @@ function UeTransform(_data = undefined) constructor {
         return self;     
     }
     
-    function lookAt(x, y, z) {
+    static lookAt = function(x, y, z) {
         gml_pragma("forceinline");
         return lookAtVec(new UeVector3(x, y, z));
     }
     
-    function setRotation(x, y, z) {
+    static setRotation = function(x, y, z) {
         gml_pragma("forceinline");
         rotation.setFromEuler(x, y, z);
         return self;
@@ -163,48 +163,48 @@ function UeTransform(_data = undefined) constructor {
     
     // Calls setFromRotationMatrix(m) on the rotation's quaternion
     // Assumes the upper 3x3 of m is a pure rotation matrix (i.e. unscaled).
-    function setRotationFromMatrix(mat) {
+    static setRotationFromMatrix = function(mat) {
         gml_pragma("forceinline");
         rotation.setFromRotationMatrix(mat);
         return self;
     }
     
     // Copy the given quaternion into the rotation.
-    function setRotationFromQuaternion(quat) {
+    static setRotationFromQuaternion = function(quat) {
         gml_pragma("forceinline");
         rotation.copy(quat);
         return self;
     }
     
-    function rotate(x, y, z) {
+    static rotate = function(x, y, z) {
         gml_pragma("forceinline");
         rotation.multiply(new UeQuaternion(x, y, z));
         return self;
     }
     
     // Rotates the object around x axis in local space. value in degrees
-    function rotateX(value) {
+    static rotateX = function(value) {
         gml_pragma("forceinline");
         rotation.rotateX(value);
         return self;
     }
 
     // Rotates the object around y axis in local space. value in degrees
-    function rotateY(value) {
+    static rotateY = function(value) {
         gml_pragma("forceinline");
         rotation.rotateY(value);
         return self;
     }
 
     // Rotates the object around z axis in local space. value in degrees
-    function rotateZ(value) {
+    static rotateZ = function(value) {
         gml_pragma("forceinline");
         rotation.rotateZ(value);
         return self;
     }
     
     // Rotate an object along an axis in object space. The axis is assumed to be normalized
-    function rotateOnAxis(axis, angle) {
+    static rotateOnAxis = function(axis, angle) {
         gml_pragma("forceinline");
         var q = new UeQuaternion();
         q.setFromAxisAngle(axis, angle);
@@ -214,7 +214,7 @@ function UeTransform(_data = undefined) constructor {
     
     // Rotate an object along an axis in world space. The axis is assumed to be normalized.
     // Assumes no rotated parent.
-    function rotateOnWorldAxis(axis, angle) {
+    static rotateOnWorldAxis = function(axis, angle) {
         gml_pragma("forceinline");
         var q = new UeQuaternion();
         q.setFromAxisAngle(axis, angle);
@@ -223,32 +223,32 @@ function UeTransform(_data = undefined) constructor {
     }
 
     // --- Scaling methods ---
-    function setScale(x, y, z) {
+    static setScale = function(x, y, z) {
         gml_pragma("forceinline");
         scale.set(x, y, z);
         return self;
     }
     
-    function scaleX(value) {
+    static scaleX = function(value) {
         gml_pragma("forceinline");
         scale.x += value;
         return self;
     }
 
-    function scaleY(value) {
+    static scaleY = function(value) {
         gml_pragma("forceinline");
         scale.y += value;
         return self;
     }
 
-    function scaleZ(value) {
+    static scaleZ = function(value) {
         gml_pragma("forceinline");
         scale.z += value;
         return self;
     }
     
     // Applies the matrix transform to the object and updates the object's position, rotation and scale.
-    function applyMatrix4(mat4) {
+    static applyMatrix4 = function(mat4) {
         gml_pragma("forceinline");
         matrix.multiply(mat4);
         matrix.decompose(position, rotation, scale);
@@ -256,45 +256,46 @@ function UeTransform(_data = undefined) constructor {
     }
     
     // Applies the rotation represented by the quaternion to the object.
-    function applyQuaternion(quat) {
+    static applyQuaternion = function(quat) {
         gml_pragma("forceinline");
         rotation.multiply(quat);
         return self;
     }
     
     // Returns a vector representing the position of the object in world space.
-    function getWorldPosition(target) {
+    static getWorldPosition = function(target) {
         return target.setFromMatrixPosition(matrixWorld);
     }
     
     // Returns a quaternion representing the rotation of the object in world space.
-    function getWorldQuaternion(target) {
+    static getWorldQuaternion = function(target) {
         gml_pragma("forceinline");
         matrixWorld.decompose(global.UE_DUMMY_VECTOR3, target, global.UE_DUMMY_VECTOR3);
         return target;
     }
     
     // Returns a vector of the scaling factors applied to the object for each axis in world space.
-    function getWorldScale(target) {
+    static getWorldScale = function(target) {
         gml_pragma("forceinline");
         matrixWorld.decompose(global.UE_DUMMY_VECTOR3, global.UE_DUMMY_QUATERNION, target);
         return target;
     }
     
     // Returns a vector representing the direction of object's positive Y axis in world space.
-    function getWorldDirection(target = new UeVector3()) {
+    static getWorldDirection = function(target = undefined) {
         gml_pragma("forceinline");
+        if (target == undefined) target = new UeVector3();
         return target.copy(up.clone().transformDirection(matrixWorld));
     }
     
     // Converts the vector from this object's local space to world space.
-    function localToWorld(vec) {
+    static localToWorld = function(vec) {
         gml_pragma("forceinline");
         return vec.applyMatrix4(matrixWorld);
     }
     
     // Converts the vector from world space to this object's local space.
-    function worldToLocal(vec) {
+    static worldToLocal = function(vec) {
         gml_pragma("forceinline");
         return vec.applyMatrix4(matrixWorld.clone().invert());
     }

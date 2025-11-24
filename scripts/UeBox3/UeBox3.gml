@@ -4,7 +4,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     self.sizeMax = _max ?? new UeVector3(-infinity, -infinity, -infinity);
 
     /// Sets the min and max corners of the box.
-    function set(_min, _max) {
+    static set = function(_min, _max) {
         gml_pragma("forceinline");
         self.sizeMin.copy(_min);
         self.sizeMax.copy(_max);
@@ -12,7 +12,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Sets the box bounds from a flat array of coordinates [x0, y0, z0, x1, y1, z1, ...].
-    function setFromArray(arr) {
+    static setFromArray = function(arr) {
         gml_pragma("forceinline");
         makeEmpty();
         for (var i = 0, n = array_length(arr); i < n; i += 3) {
@@ -25,7 +25,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Sets the box from a center point (UeVector3) and size (UeVector3).
-    function setFromCenterAndSize(center, size) {
+    static setFromCenterAndSize = function(center, size) {
         gml_pragma("forceinline");
         var halfSize = size.clone().scale(0.5);
         self.sizeMin.copy(center).sub(halfSize);
@@ -34,7 +34,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Sets the box to enclose an array of points (UeVector3).
-    function setFromPoints(points) {
+    static setFromPoints = function(points) {
         gml_pragma("forceinline");
         makeEmpty();
         for (var i = 0, n = array_length(points); i < n; i++) {
@@ -44,7 +44,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Sets the box to enclose an object and its children, optionally with precise geometry.
-    function setFromObject(object, precise = false) {
+    static setFromObject = function(object, precise = false) {
         gml_pragma("forceinline");
         makeEmpty(); 
         expandByObject(object, precise);
@@ -52,13 +52,13 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Creates and returns a clone of this box.
-    function clone() {
+    static clone = function() {
         gml_pragma("forceinline");
         return variable_clone(self);
     }
 
     /// Copies the min and max corners from another box.
-    function copy(box) {
+    static copy = function(box) {
         gml_pragma("forceinline");
         self.sizeMin.copy(box.sizeMin);
         self.sizeMax.copy(box.sizeMax);
@@ -66,7 +66,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Empties the box (min at +inf, max at -inf).
-    function makeEmpty() {
+    static makeEmpty = function() {
         gml_pragma("forceinline");
         self.sizeMin.set(infinity, infinity, infinity);
         self.sizeMax.set(-infinity, -infinity, -infinity);
@@ -74,7 +74,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Returns true if the box is empty (no volume).
-    function isEmpty() {
+    static isEmpty = function() {
         gml_pragma("forceinline");
         return (
             self.sizeMax.x < self.sizeMin.x ||
@@ -84,7 +84,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Expands the box to include a given point.
-    function expandByPoint(point) {
+    static expandByPoint = function(point) {
         gml_pragma("forceinline");
         self.sizeMin.x = min(self.sizeMin.x, point.x);
         self.sizeMin.y = min(self.sizeMin.y, point.y);
@@ -98,7 +98,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Expands the box by a scalar amount in all directions.
-    function expandByScalar(scalar) {
+    static expandByScalar = function(scalar) {
         gml_pragma("forceinline");
         self.sizeMin.subScalar(scalar);
         self.sizeMax.addScalar(scalar);
@@ -106,7 +106,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Expands the box by a vector in all directions.
-    function expandByVector(vec) {
+    static expandByVector = function(vec) {
         gml_pragma("forceinline");
         self.sizeMin.sub(vec);
         self.sizeMax.add(vec);
@@ -115,7 +115,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
 
     /// Expands the box to include the bounding box of an object and its children.
     /// If `precise` is true, uses geometry vertices; otherwise uses cached bounding box.
-    function expandByObject(object, precise = false) {
+    static expandByObject = function(object, precise = false) {
         gml_pragma("forceinline");
         var box = undefined;
         var geometry = object[$ "geometry"];
@@ -141,7 +141,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Returns true if the box contains the given point.
-    function containsPoint(point) {
+    static containsPoint = function(point) {
         gml_pragma("forceinline");
         return (
             point.x >= self.sizeMin.x && point.x <= self.sizeMax.x &&
@@ -151,7 +151,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Returns true if the given box is fully contained within this box.
-    function containsBox(box) {
+    static containsBox = function(box) {
         gml_pragma("forceinline");
         return (
             self.sizeMin.x <= box.sizeMin.x && box.sizeMax.x <= self.sizeMax.x &&
@@ -161,7 +161,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Updates this box to the intersection of itself and another box.
-    function intersect(box) {
+    static intersect = function(box) {
         gml_pragma("forceinline");
         self.sizeMin.x = max(self.sizeMin.x, box.sizeMin.x);
         self.sizeMin.y = max(self.sizeMin.y, box.sizeMin.y);
@@ -176,7 +176,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Returns true if this box intersects another box.
-    function intersectsBox(box) {
+    static intersectsBox = function(box) {
         gml_pragma("forceinline");
         return !(
             box.sizeMax.x < self.sizeMin.x || box.sizeMin.x > self.sizeMax.x ||
@@ -186,7 +186,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Returns true if this box intersects a plane.
-    function intersectsPlane(plane) {
+    static intersectsPlane = function(plane) {
         gml_pragma("forceinline");
         var _min = self.sizeMin;
         var _max = self.sizeMax;
@@ -211,19 +211,19 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Returns the center point of the box.
-    function getCenter(target = new UeVector3()) {
+    static getCenter = function(target = new UeVector3()) {
         gml_pragma("forceinline");
         return target.copy(self.sizeMin).add(self.sizeMax).scale(0.5);
     }
 
     /// Returns the size (width, height, depth) of the box.
-    function getSize(target = new UeVector3()) {
+    static getSize = function(target = new UeVector3()) {
         gml_pragma("forceinline");
         return target.copy(self.sizeMax).sub(self.sizeMin);
     }
 
     /// Returns normalized coordinates (0..1) of a point relative to the box bounds.
-    function getParameter(point, target = new UeVector3()) {
+    static getParameter = function(point, target = new UeVector3()) {
         gml_pragma("forceinline");
         target.x = (point.x - self.sizeMin.x) / (self.sizeMax.x - self.sizeMin.x);
         target.y = (point.y - self.sizeMin.y) / (self.sizeMax.y - self.sizeMin.y);
@@ -232,7 +232,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Applies a 4x4 transformation matrix to the box and updates its bounds.
-    function applyMatrix4(matrix) {
+    static applyMatrix4 = function(matrix) {
         gml_pragma("forceinline");
         var points = [
             new UeVector3(self.sizeMin.x, self.sizeMin.y, self.sizeMin.z),
@@ -255,7 +255,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Moves (translates) the box by a given offset vector.
-    function translate(offset) {
+    static translate = function(offset) {
         gml_pragma("forceinline");
         self.sizeMin.add(offset);
         self.sizeMax.add(offset);
@@ -263,13 +263,13 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Returns true if this box equals another box.
-    function equals(box) {
+    static equals = function(box) {
         gml_pragma("forceinline");
         return self.sizeMin.equals(box.sizeMin) && self.sizeMax.equals(box.sizeMax);
     }
 
     /// Clamps a point to stay within the bounds of the box.
-    function clampPoint(point, target = new UeVector3()) {
+    static clampPoint = function(point, target = new UeVector3()) {
         gml_pragma("forceinline");
         target.x = clamp(point.x, self.sizeMin.x, self.sizeMax.x);
         target.y = clamp(point.y, self.sizeMin.y, self.sizeMax.y);
@@ -278,7 +278,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Returns the distance from a point to the box (0 if the point is inside).
-    function distanceToPoint(point) {
+    static distanceToPoint = function(point) {
         gml_pragma("forceinline");
         var clamped = clampPoint(point);
         return clamped.distanceTo(point);
@@ -286,7 +286,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
 
     /// Calculates the bounding sphere that encloses the box.
     /// The `target` must have `.center` (UeVector3) and `.radius` (number) properties.
-    function getBoundingSphere(target) {
+    static getBoundingSphere = function(target) {
         gml_pragma("forceinline");
         var center = getCenter();
         var radius = center.distanceTo(self.sizeMax);
@@ -296,7 +296,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
     }
 
     /// Expands this box to include another box.
-    function union(box) {
+    static union = function(box) {
         gml_pragma("forceinline");
         self.sizeMin.x = min(self.sizeMin.x, box.sizeMin.x);
         self.sizeMin.y = min(self.sizeMin.y, box.sizeMin.y);
@@ -308,7 +308,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
 
         return self;
     }
-    function toJSON() {
+    static toJSON = function() {
         gml_pragma("forceinline");
         return {
             min: { x: sizeMin.x, y: sizeMin.y, z: sizeMin.z },
@@ -316,7 +316,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
         };
     }
 
-    function fromJSON(data) {
+    static fromJSON = function(data) {
         gml_pragma("forceinline");
         sizeMin.set(data.min.x, data.min.y, data.min.z);
         sizeMax.set(data.max.x, data.max.y, data.max.z);

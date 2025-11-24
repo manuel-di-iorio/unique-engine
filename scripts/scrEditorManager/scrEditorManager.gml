@@ -43,6 +43,7 @@ function EditorManager() constructor {
                 // Scene selected directly
                 self.activeScene = asset;
             } else if (asset.type == "Mesh" || asset.type == "ModelInstance") {
+                // Update the box helper
                 sm.boxHelper.object = asset;
                 call_later(1, time_source_units_frames, method({ asset }, function() { 
                     oSceneEditor.sceneManager.boxHelper.update();
