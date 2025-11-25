@@ -28,11 +28,10 @@ function ProjectManager() constructor {
      * Update window caption with unsaved changes indicator
      */
     function updateWindowCaption() {
-        var caption = self.projectName;
+        var caption = self.projectName + " - Unique Engine";
         if (self.hasUnsavedChanges) {
             caption += "*";
         }
-        caption += " - Unique Engine";
         window_set_caption(caption);
     }
     

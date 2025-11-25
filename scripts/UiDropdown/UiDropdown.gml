@@ -206,7 +206,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
             }
             
             // Create the items container
-            self.Items = new UiNode({ height: "100%" });
+            self.Items = new UiNode({ height: "100%", maxHeight: 450 });
             self.add(self.Items);
             
             // Create the initial items
