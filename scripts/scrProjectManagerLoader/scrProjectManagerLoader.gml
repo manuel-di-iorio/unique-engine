@@ -80,9 +80,18 @@ function ProjectLoader() constructor {
     // 3. Load Assets and place them in the correct folders
     var assetsList = assetsData.assets;
     for (var i = 0; i < array_length(assetsList); i++) {
-        var assetNode = assetsList[i];
-        var asset = __createAssetFromNode(projectDir, assetNode);
-        
+        var assetUuid = assetsList[i];
+
+        // Each asset entry is now a UUID; read its metadata.json to determine type/name
+        var metadataPath = projectDir + "assets/" + assetUuid + "/metadata.json";
+        if (!file_exists(metadataPath)) continue;
+
+        var node = __readJson(metadataPath);
+        // Ensure uuid is present on the node
+        node.uuid = assetUuid;
+
+        var asset = __createAssetFromNode(projectDir, node);
+
         if (asset != undefined) {
             var icon = __iconForType(asset.type);
             var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
@@ -92,20 +101,20 @@ function ProjectLoader() constructor {
                 icon,
                 asset
             });
-            
+
             treeviewItemsByUUID[$ asset.uuid] = tvItem;
             oSceneEditor.assetManager.addAsset(asset.type, asset);
-            
+
             // Place in folder if metadata says so
             var parentUUID = undefined;
             if (asset[$ "__metadata"] != undefined && asset.__metadata[$ "folder"] != undefined) {
                 parentUUID = asset.__metadata.folder;
             }
-            
+
             if (parentUUID != undefined && treeviewItemsByUUID[$ parentUUID] != undefined) {
                 var parentItem = treeviewItemsByUUID[$ parentUUID];
                 parentItem.addChild(tvItem);
-                
+
                 // Add to parent asset
                 var parentAsset = parentItem.asset;
                 if (parentAsset.type == "Folder") {

@@ -55,11 +55,17 @@ function UeProjectLoader(data = {}) constructor {
         // Load all assets by UUID
         self.jsonAssets = self.__readJson(self.__projectPath + "/assets.json");
 
-        // Build name->entry map
+        // Build maps from the UUID-only assets list. For each UUID read its metadata
         for (var i = 0, il = array_length(self.jsonAssets.assets); i < il; i++) {
-            var entry = self.jsonAssets.assets[i];
-            self.assetsByUuid[$ entry.uuid] = entry;    
-            self.assetsByName[$ entry.name] = entry;
+            var uuid = self.jsonAssets.assets[i];
+            var metadataPath = self.__projectPath + "/assets/" + uuid + "/metadata.json";
+            if (!file_exists(metadataPath)) continue;
+            var entry = self.__readJson(metadataPath);
+            entry.uuid = uuid;
+            self.assetsByUuid[$ uuid] = entry;
+            if (entry.name != undefined && entry.name != "") {
+                self.assetsByName[$ entry.name] = entry;
+            }
         }
 
         if (self.autoLoad) {
@@ -101,7 +107,9 @@ function UeProjectLoader(data = {}) constructor {
         if (array_length(assetNames) == 0) {
             var assetList = self.jsonAssets.assets;
             for (var i = 0; i < array_length(assetList); i++) {
-                array_push(assetNames, assetList[i].name);
+                var uuid = assetList[i];
+                var entry = self.assetsByUuid[$ uuid];
+                if (entry != undefined && entry.name != undefined) array_push(assetNames, entry.name);
             }
         }
         
@@ -110,11 +118,11 @@ function UeProjectLoader(data = {}) constructor {
         for (var i = 0; i < array_length(assetNames); i++) {
             var assetName = assetNames[i];
             var entry = self.assetsByName[$ assetName];
-            
+
             if (entry == undefined) {
                 continue;
             }
-            
+
             array_push(uuidsToLoad, entry.uuid);
         }
         
@@ -156,7 +164,7 @@ function UeProjectLoader(data = {}) constructor {
         if (array_length(uuidsToLoad) == 0) {
             var assetList = self.jsonAssets.assets;
             for (var i = 0; i < array_length(assetList); i++) {
-                array_push(uuidsToLoad, assetList[i].uuid);
+                array_push(uuidsToLoad, assetList[i]);
             }
         }
         

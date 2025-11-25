@@ -64,7 +64,7 @@ function ProjectSaver() constructor {
         if (!directory_exists(projectDir)) directory_create(projectDir);
         if (!directory_exists(assetsDir)) directory_create(assetsDir);
 
-        var assets = []; // List of assets to save in assets.json
+        var assets = []; // List of asset UUIDs to save in assets.json
         
         // Project structure to save in project.json
         var project = {
@@ -82,8 +82,8 @@ function ProjectSaver() constructor {
             // Skip folders (they're saved separately in project.json)
             if (asset[$ "type"] == "Folder") continue;
             
-            // Add to assets.json list
-            array_push(assets, { uuid: asset.uuid, type: asset.type, name: asset.name });
+            // Add UUID to assets.json list (we store only UUIDs now)
+            array_push(assets, asset.uuid);
             
             // Save asset metadata and resources
             var assetPath = assetsDir + asset.uuid;
@@ -102,7 +102,7 @@ function ProjectSaver() constructor {
 
             // Save folder UUID if asset is in a folder
             if (asset[$ "__folder"] != undefined) {
-                metadata.folder = asset.__folder;
+                metadata.__folder = asset.__folder;
             }
             
             self.__writeJson(assetPath + "/metadata.json", metadata);
@@ -172,22 +172,16 @@ function ProjectSaver() constructor {
                         break;
                     }
 
-                    // Update or add to assets.json
+                    // Update or add to assets.json (store only UUIDs)
                     var assetIndex = -1;
                     for (var j = 0; j < array_length(assets); j++) {
-                        if (assets[j].uuid == uuid) {
+                        if (assets[j] == uuid) {
                             assetIndex = j;
                             break;
                         }
                     }
-                    
                     if (assetIndex == -1) {
-                        // Add new asset
-                        array_push(assets, { uuid: uuid, type: asset.type, name: asset.name });
-                    } else {
-                        // Update existing
-                        assets[assetIndex].name = asset.name;
-                        assets[assetIndex].type = asset.type;
+                        array_push(assets, uuid);
                     }
                     
                     var assetPath = assetsDir + uuid;
@@ -238,9 +232,9 @@ function ProjectSaver() constructor {
                         break;
                     }
 
-                    // Remove from assets.json
+                    // Remove from assets.json (UUID list)
                     for (var j = array_length(assets) - 1; j >= 0; j--) {
-                        if (assets[j].uuid == uuid) {
+                        if (assets[j] == uuid) {
                             array_delete(assets, j, 1);
                             break;
                         }
@@ -309,11 +303,11 @@ function ProjectSaver() constructor {
                 var assetUuid = asset.uuid;
                 var assetType = asset.type;
 
-                if (assetType != "Folder" && assetType != "ModelInstance") {
-                    // If this treeview item is not a folder, push it into assets.json
+                    if (assetType != "Folder" && assetType != "ModelInstance") {
+                    // If this treeview item is not a folder, push its UUID into assets.json
                     if (assetsMap[$ assetUuid] == undefined){
                         assetsMap[$ assetUuid] = true;
-                        array_push(assets, { uuid: assetUuid, type: assetType, name: asset.name } );
+                        array_push(assets, assetUuid);
                     }
 
                     // Export asset metadata into the assets folder, along with the resource file if needed
