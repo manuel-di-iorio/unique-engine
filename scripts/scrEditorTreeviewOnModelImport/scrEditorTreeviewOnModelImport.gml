@@ -117,6 +117,11 @@ function editorTreeviewOnModelImport(modelAsset) {
 
     model.traverse(function(node) {
         node.__rotationEuler = new UeEuler();
+
+        if (node[$ "geometry"] != undefined && node.geometry[$ "vb"] != undefined) {
+          node.geometry.__vbClone = node.geometry.cloneVb();
+          node.geometry.freeze();
+        }
     });
     
     // Create main model treeview item inside folder (must be done before addAsset)
@@ -151,8 +156,6 @@ function __editorTreeview_addModelChildrenRecursive(parentAsset, parentTreeviewI
         // Add to AssetManager
         // Use child.type if available, otherwise default to "Mesh"
         var type = child[$ "type"] ?? "Mesh";
-        oSceneEditor.assetManager.addAsset(type, child);
-        
         // Create Treeview Item
         var childTreeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
@@ -165,6 +168,9 @@ function __editorTreeview_addModelChildrenRecursive(parentAsset, parentTreeviewI
             asset: child
         });
         parentTreeviewItem.addChild(childTreeviewItem);
+        
+        // Add to AssetManager (now it can detect parent from __treeviewItem)
+        oSceneEditor.assetManager.addAsset(type, child);
         
         // Recurse
         __editorTreeview_addModelChildrenRecursive(child, childTreeviewItem);

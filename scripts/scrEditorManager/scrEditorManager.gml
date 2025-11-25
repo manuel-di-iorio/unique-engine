@@ -14,7 +14,8 @@ function EditorManager() constructor {
     // Selection state
     self.selectedTreeviewItem = undefined;
     
-    self.gizmoTarget = undefined; // Store the target for the gizmo
+    self.gizmoTarget = undefined; // Store the target for the gizmo (The ORIGINAL asset)
+    self.renderClone = undefined; // The root clone being rendered
 
     /**
      * Set the currently active asset
@@ -43,14 +44,7 @@ function EditorManager() constructor {
                 // Scene selected directly
                 self.activeScene = asset;
             } else if (asset.type == "Mesh" || asset.type == "ModelInstance") {
-                // Update the box helper
-                sm.boxHelper.object = asset;
-                call_later(1, time_source_units_frames, method({ asset }, function() { 
-                    oSceneEditor.sceneManager.boxHelper.update();
-                }));
-                
                 // Mesh/instance selected - find parent scene via treeview
-                // @todo ma controlla solo un livello di parent??
                 var foundScene = undefined;
                 if (treeviewItem != undefined && treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
                     var parentTreeItem = treeviewItem.parent.parent;
@@ -68,19 +62,35 @@ function EditorManager() constructor {
         }
         
         // Add to objects for rendering only if the asset is changed
-        if (assetChanged && oSceneEditor.sceneManager.objects != undefined) {
-            oSceneEditor.sceneManager.objects.children = [];
+        if (assetChanged) {
+            sm.objects.clear();
+            self.renderClone = undefined;
             
+            var objectToRender = undefined;
             if (self.activeScene != undefined) {
-                oSceneEditor.sceneManager.objects.add(self.activeScene);
+                objectToRender = self.activeScene;
             } else if (asset != undefined) {
-                oSceneEditor.sceneManager.objects.add(asset);
+                objectToRender = asset;
+            }
+            
+            if (objectToRender != undefined) {
+                sm.objects.add(objectToRender);
             }
         }
         
         // Attach transform controls if applicable
-        // Use gizmoTarget if provided, otherwise use asset
-        self.gizmoTarget = gizmoTarget != undefined ? gizmoTarget : asset;
+        // Use gizmoTarget if provided, otherwise use asset. TARGET IS THE ORIGINAL.
+        self.gizmoTarget = newGizmoTarget;
+        
+        // Update the box helper based on the final gizmo target
+        if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
+            if (self.gizmoTarget[$ "geometry"] != undefined && self.gizmoTarget.geometry[$ "vb"] != undefined) {
+                call_later(1, time_source_units_frames, method({ sm, target: self.gizmoTarget }, function() { 
+                    sm.boxHelper.object = target;
+                    sm.boxHelper.update();
+                }));
+            }
+        }
         
         if (oSceneEditor.sceneManager.transformControls != undefined && self.gizmoTarget != undefined) {
             if (self.activeTool != "view" && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
@@ -88,6 +98,16 @@ function EditorManager() constructor {
             } else {
                 oSceneEditor.sceneManager.transformControls.detach();
             }
+        }
+    }
+
+    function __freezeGeometry(object) {
+        if (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined) {
+            object.geometry.freeze();
+        }
+        
+        for (var i = 0, il = array_length(object.children); i < il; i++) {
+            __freezeGeometry(object.children[i]);
         }
     }
     
@@ -112,9 +132,10 @@ function EditorManager() constructor {
         self.activeAsset = undefined;
         self.gizmoTarget = undefined;
         self.selectedTreeviewItem = undefined;
+        self.renderClone = undefined;
         
         if (sceneToKeep == undefined) {
-            oSceneEditor.sceneManager.objects.children = [];
+            oSceneEditor.sceneManager.objects.clear();
             self.activeScene = undefined;
             oSceneEditor.sceneManager.transformControls.detach();
             self.inspector.close();

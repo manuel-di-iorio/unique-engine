@@ -72,6 +72,8 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           geometry.boundingSphere = new UeSphere(new UeVector3(0, 0, 0), size * 0.866); // sqrt(3)/2 ≈ 0.866
           
           asset = new UeMesh(geometry);
+          asset.geometry.__vbClone = geometry.cloneVb();
+          geometry.freeze();
           asset.material = undefined;
           asset.__rotationEuler = new UeEuler();
           assetId = global.UI_ASSETS_MODELS_ID++;

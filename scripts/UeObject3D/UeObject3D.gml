@@ -188,6 +188,13 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         renderOrder = source.renderOrder;
         layers = variable_clone(source.layers);
         userData = variable_clone(source.userData);
+        frustumCulled = source.frustumCulled;
+        geometry = source.geometry.clone();
+        material = source.material.clone();
+
+        // object = source.object;
+        // isInstance = source.isInstance;
+        // instances = source.instances.clone();
 
         position.copy(source.position);
         rotation.copy(source.rotation);

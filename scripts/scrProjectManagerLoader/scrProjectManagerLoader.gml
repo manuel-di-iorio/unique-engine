@@ -360,8 +360,10 @@ function ProjectLoader() constructor {
         // Load geometry if it exists
         var geometryPath = projectDir + "assets/" + node.uuid + "/geometry.buf";
         if (file_exists(geometryPath)) {
-          var geometry = new UeBufferGeometry();
+          var geometry = new UeBufferGeometry({ canFreeze: true });
           geometry.import(geometryPath);
+          geometry.__vbClone = geometry.cloneVb();
+          geometry.freeze();
           asset.geometry = geometry;
         }
       }

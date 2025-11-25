@@ -7,7 +7,7 @@ function UeBufferGeometry(data = {}) constructor {
     index = data[$ "index"] ?? undefined;         // Optional index array for indexed geometry
     format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT; // Vertex format description
     vb = undefined;                               // Vertex buffer handle (created on build)
-    canFreeze = data[$ "canFreeze"] ?? true;      // Flag whether vertex buffer can be frozen (optimized)
+    canFreeze = data[$ "canFreeze"] ?? true;      // Flag whether vertex buffer can be frozen (optimization)
 
     // Axis-aligned bounding box for the geometry
     boundingBox = data[$ "boundingBox"] ?? undefined;
@@ -194,6 +194,18 @@ function UeBufferGeometry(data = {}) constructor {
         vb = vertex_create_buffer_from_buffer(buf, format.vf);
         buffer_delete(buf);
         return self;
+    }
+
+    /**
+     * Create a clone of the vertex buffer
+     */
+    function cloneVb() {
+        gml_pragma("forceinline");
+        if (vb == undefined) return self;
+        var tmpBuf = buffer_create_from_vertex_buffer(vb, buffer_fast, 1);
+        var cloneVb = vertex_create_buffer_from_buffer(tmpBuf, format.vf);
+        buffer_delete(tmpBuf);
+        return cloneVb;
     }
     
     // Auto-build vertex buffer if vertices are provided

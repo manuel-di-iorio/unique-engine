@@ -83,12 +83,13 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     // (this would create a cycle in the hierarchy)
     if (dropAction == "reparent" && draggedItem.asset != undefined && targetItem.asset != undefined) {
         // Check if the targetItem is a descendant of the draggedItem
-        var currentParent = targetItem.asset.parent;
+        // Check if the targetItem is a descendant of the draggedItem
+        var currentParent = targetItem.asset[$ "parent"];
         while (currentParent != undefined) {
             if (currentParent == draggedItem.asset) {
                 return false;
             }
-            currentParent = currentParent.parent;
+            currentParent = currentParent[$ "parent"];
         }
         
         // Also check in the UI hierarchy of the treeview
@@ -159,6 +160,9 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                 // Add to the new parent (only if target asset exists)
                 if (targetItem.asset != undefined) {
                     targetItem.asset.add(draggedItem.asset);
+                    
+                    // Update __parentUI for saving hierarchy
+                    draggedItem.asset.__parentUI = targetItem.asset.uuid;
                     
                     // Track change on new parent
                     oSceneEditor.assetManager.editAsset(targetItem.asset);

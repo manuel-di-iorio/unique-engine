@@ -41,4 +41,9 @@ function UeInstanceList(object) constructor {
         gml_pragma("forceinline");
         return array_length(list);
     }
+
+    function clone() {
+        gml_pragma("forceinline");
+        return variable_clone(self);
+    }
 }

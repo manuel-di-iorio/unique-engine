@@ -59,7 +59,7 @@ function ProjectSaver() constructor {
         call_later(self.__debounceDelay, time_source_units_frames, method({ 
             projectManager,
             scheduledTime: currentTime,
-            _this,
+            _this, 
         }, function() {
             // Only save if no new calls were made during the debounce period
             if (current_time - _this.__lastCallTime >= _this.__debounceDelay - 50) { // 50ms tolerance
@@ -333,7 +333,10 @@ function ProjectSaver() constructor {
                             var assetGeometry = asset[$ "geometry"];
                             if (assetGeometry != undefined) {
                                 show_debug_message("[SAVE] Exporting mesh geometry: " + asset.name);
+                                var originalVb = assetGeometry.vb;
+                                assetGeometry.vb = assetGeometry.__vbClone; // Use unfrozen VB for export
                                 assetGeometry.export(assetPath + "/geometry.buf");
+                                assetGeometry.vb = originalVb; // Restore original VB
                             }
                             break;
                     }
@@ -414,34 +417,6 @@ function ProjectSaver() constructor {
     }
 
     function __writeJson(path, data) {
-        // LOOP PROTECTION: Track how many times we're writing to the same file
-        static writeCallCount = 0;
-        static lastWritePath = "";
-        static lastWriteTime = 0;
-        
-        var currentTime = current_time;
-        
-        // Reset counter if it's been more than 1 second since last write
-        if (currentTime - lastWriteTime > 1000) {
-            writeCallCount = 0;
-            lastWritePath = "";
-        }
-        
-        // Increment counter
-        writeCallCount++;
-        
-        // Check if we're writing to the same file repeatedly
-        if (path == lastWritePath) {
-            show_debug_message("[SAVE] WARNING: Writing to same file again: " + path + " (call #" + string(writeCallCount) + ")");
-            if (writeCallCount > 10) {
-                show_debug_message("[SAVE ERROR] LOOP DETECTED in __writeJson! Same file written " + string(writeCallCount) + " times: " + path);
-                return;
-            }
-        }
-        
-        lastWritePath = path;
-        lastWriteTime = currentTime;
-        
         show_debug_message("[SAVE] Writing JSON to: " + path);
         var jsonString = json_stringify(data, true);
         var buf = buffer_create(string_byte_length(jsonString), buffer_fixed, 1);
