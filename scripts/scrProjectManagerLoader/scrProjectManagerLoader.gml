@@ -89,6 +89,9 @@ function ProjectLoader() constructor {
         var node = __readJson(metadataPath);
         // Ensure uuid is present on the node
         node.uuid = assetUuid;
+        
+        // Safety check: ModelInstance should not be in assets.json (they are part of Scene)
+        if (node[$ "type"] == "ModelInstance") continue;
 
         var asset = __createAssetFromNode(projectDir, node);
 
@@ -252,7 +255,7 @@ function ProjectLoader() constructor {
             delete mesh.__metadata;
         }
         
-        // Force update matrix
+        // Initial matrix update
         mesh.updateMatrix();
         mesh.updateMatrixWorld(true);
     }

@@ -166,8 +166,37 @@ function AssetManager() constructor {
             show_debug_message("[TRACK] WARNING: Attempted to track Object3D (should not be saved). UUID: " + asset.uuid + ", Name: " + (asset[$ "name"] ?? "no-name") + ", Action: " + action);
             return;
         }
+
+        // ModelInstance objects belong to Scenes: instead of tracking the instance itself,
+        // track the parent Scene as edited so scene changes (rename/move instance) are saved.
+        if (asset[$ "type"] == "ModelInstance") {
+            // Find nearest ancestor Scene
+            var scene = asset[$ "parent"];
+            while (scene != undefined && ((scene[$ "type"] ?? scene[$ "assetType"]) != "Scene")) {
+                scene = scene[$ "parent"];
+            }
+
+            if (scene != undefined) {
+                var sceneUuid = scene[$ "uuid"] ?? scene[$ "uuid"];
+                show_debug_message("[TRACK] ModelInstance change will track parent Scene as edit. Scene UUID: " + (sceneUuid ?? "no-uuid") + ", Instance: " + (asset[$ "name"] ?? "no-name") + ", Action: " + action);
+
+                // If the scene is not already tracked, mark it as edited
+                var existingSceneChange = projectManager.changes[$ sceneUuid];
+                if (existingSceneChange == undefined) {
+                    projectManager.changes[$ sceneUuid] = {
+                        action: "edit",
+                        asset: scene
+                    };
+                    projectManager.markAsUnsaved();
+                }
+                return;
+            } else {
+                show_debug_message("[TRACK] WARNING: ModelInstance has no parent Scene, skipping tracking. Instance UUID: " + (asset[$ "uuid"] ?? "no-uuid"));
+                return;
+            }
+        }
         
-        show_debug_message("[TRACK] Tracking change: " + action + " for asset '" + asset.name + "' (type: " + asset.type + ", UUID: " + asset.uuid + ")");
+        show_debug_message("[TRACK] Tracking change: " + action + " for asset '" + (asset[$ "name"] ?? "no-name") + "' (type: " + (asset[$ "type"] ?? "unknown") + ", UUID: " + (asset[$ "uuid"] ?? "no-uuid") + ")");
         
         var uuid = asset.uuid;
         var existing = projectManager.changes[$ uuid];

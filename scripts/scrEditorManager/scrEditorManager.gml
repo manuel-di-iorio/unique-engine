@@ -61,12 +61,6 @@ function EditorManager() constructor {
             self.activeScene = undefined;
         }
 
-        // Update the matrix of the asset if it is a mesh/scene/model instance
-        // if (asset != undefined && (asset.type == "Mesh" || asset.type == "ModelInstance" || asset.type == "Scene")) {
-        //     asset.updateMatrix();
-        //     asset.updateMatrixWorld(true);
-        // }
-        
         // Add to objects for rendering only if the asset is changed
         if (assetChanged) {
             sm.objects.children = []; // Clear children without calling clear() to avoid parent issues
@@ -93,9 +87,7 @@ function EditorManager() constructor {
         if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
             if (self.gizmoTarget[$ "geometry"] != undefined && self.gizmoTarget.geometry[$ "vb"] != undefined) {
                 call_later(1, time_source_units_frames, method({ sm, target: self.gizmoTarget }, function() { 
-                        sm.boxHelper.object = target;
-                        sm.boxHelper.update();
-                        oSceneEditor.assetManager.updateAssetMatrix(target);
+                    oSceneEditor.assetManager.updateAssetMatrix(target);
                 }));
             }
         }
