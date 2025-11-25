@@ -7,9 +7,9 @@ function UiInspectorTransformXYZ(style = {}, props = {}): UiNode(style, props) c
     };
     
     var _textStyle = { width: "29%", height: 25 };
-    self.X = new UiTextbox(_textStyle, { label: "X", format: "float", onBlur: _onBlur });
-    self.Y = new UiTextbox(_textStyle, { label: "Y", format: "float", onBlur: _onBlur });
-    self.Z = new UiTextbox(_textStyle, { label: "Z", format: "float", onBlur: _onBlur });
+    self.X = new UiTextbox(_textStyle, { label: "X", format: "float", onBlur: _onBlur, negative: true });
+    self.Y = new UiTextbox(_textStyle, { label: "Y", format: "float", onBlur: _onBlur, negative: true });
+    self.Z = new UiTextbox(_textStyle, { label: "Z", format: "float", onBlur: _onBlur, negative: true });
     
     self.add(self.X, self.Y, self.Z);
     

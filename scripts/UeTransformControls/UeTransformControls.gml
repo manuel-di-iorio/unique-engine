@@ -231,7 +231,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self._root.position.copy(_wp);
 
         // Calculate distance-based scale to maintain consistent apparent size (billboard-like behavior)
-        var distance = self.camera.position.distanceTo(self.object.position);
+        var distance = self.camera.position.distanceTo(_wp);
         
         // Use a perspective-correct scaling formula
         // The scale should be proportional to distance to maintain constant apparent size
@@ -378,8 +378,14 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             }
         }
         
+        // Save the initial transform state before dragging begins for delta calculations
+        self._positionStart.copy(self.object.position);
+        self._rotationStart.copy(self.object.rotation);
+        self._scaleStart.copy(self.object.scale);
+        self.object.getWorldPosition(self._positionStartWorld);
+
         // Create the drag plane using the calculated normal and object position
-        self._plane.setFromNormalAndCoplanarPoint(_planeNormal, self.object.position);
+        self._plane.setFromNormalAndCoplanarPoint(_planeNormal, self._positionStartWorld);
 
         // Calculate initial intersection point where mouse ray meets the drag plane
         var intersectionPoint = self._raycaster.ray.intersectPlane(self._plane);
@@ -391,12 +397,6 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             return;
         }
         self.pointStart.copy(intersectionPoint);
-
-        // Save the initial transform state before dragging begins for delta calculations
-        self._positionStart.copy(self.object.position);
-        self._rotationStart.copy(self.object.rotation);
-        self._scaleStart.copy(self.object.scale);
-        self.object.getWorldPosition(self._positionStartWorld);
     }
 
     /**

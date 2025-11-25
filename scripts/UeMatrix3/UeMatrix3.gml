@@ -165,7 +165,7 @@ function UeMatrix3(_data = undefined) constructor {
     /// Sets this matrix as the product of matrices a and b.
     static multiplyMatrices = function(a, b) {
         gml_pragma("forceinline");
-        data = a.clone().multiply(b).data;
+        matrix_multiply(b.data, a.data, data);
         return self;
     }
 

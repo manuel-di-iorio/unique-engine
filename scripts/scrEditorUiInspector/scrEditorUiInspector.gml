@@ -368,11 +368,11 @@ function EditorUiInspector(ui) constructor {
                 label: "Static", 
                 type: "checkbox",
                 tooltip: "Mark object as static (disable automatic matrix updates)",
-                onValue: function(value) {
-                    return !value;
+                valueGetter: function() {
+                    return !self.asset.__matrixAutoUpdate;
                 },
                 onChange: function(value) {
-                    self.__matrixAutoUpdate = !value;
+                    self.asset.__matrixAutoUpdate = !value;
                
                     // Track the change in asset manager
                     oSceneEditor.assetManager.editAsset(self.asset);

@@ -25,7 +25,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             if (array_find_index(self.focusableElements, method({ element }, function(item) {
                 return item == element;
             })) == -1) {
-                array_push(self.focusableElements, element);
+                array_insert(self.focusableElements, 0, element);
             }
         },
         
