@@ -23,7 +23,7 @@
     {"name":"Shaders","order":4,"path":"folders/Unique Engine/Shaders.yy",},
     {"name":"Utils","order":10,"path":"folders/Unique Engine/Utils.yy",},
     {"name":"UniqueMath","order":3,"path":"folders/UniqueMath.yy",},
-    {"name":"UniqueUI","order":2,"path":"folders/UniqueUI.yy",},
+    {"name":"Unique UI","order":2,"path":"folders/Unique UI.yy",},
   ],
   "ResourceOrderSettings":[
     {"name":"assimp_extension","order":4,"path":"extensions/assimp_extension/assimp_extension.yy",},

@@ -104,15 +104,31 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     // Perform the drop action
     if (isValidDrop) {
         if (dropAction == "move_to_folder") {
-            // Move any asset into a folder (folders don't have 3D assets, only UI organization)
-            // Just update the treeview UI
+            // Move any asset into a folder
+            if (draggedItem.asset != undefined) {
+                // 1. Remove from old parent
+                __removeFromParent(draggedItem.asset);
+                
+                // 2. Add to new Folder parent
+                var newParent = targetItem.asset;
+                draggedItem.asset.parent = newParent;
+                if (newParent[$ "children"] == undefined) newParent.children = [];
+                array_push(newParent.children, draggedItem.asset);
+                
+                // Track change on the dragged asset (metadata 'folder' changed)
+                oSceneEditor.assetManager.editAsset(draggedItem.asset);
+            }
+
+            // Update the treeview UI
             draggedItem.moveItemTo(targetItem);
         }
         else if (dropAction == "unparent") {
             // Remove from current asset parent
-            if (draggedItem.asset.parent != undefined) {
-                draggedItem.asset.parent.remove(draggedItem.asset);
-                draggedItem.asset.parent = undefined;
+            if (draggedItem.asset != undefined) {
+                __removeFromParent(draggedItem.asset);
+                
+                // Track change on the dragged asset (metadata 'folder' removed if it was in one)
+                oSceneEditor.assetManager.editAsset(draggedItem.asset);
             }
             
             // Update the treeview UI using the new helper
@@ -121,21 +137,20 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         else if (dropAction == "reparent") {
             // Reparenting: move the asset within the hierarchy
 
-            // Remove from the previous asset parent (only if asset exists)
-            if (draggedItem.asset != undefined && draggedItem.asset.parent != undefined) {
-                var oldParent = draggedItem.asset.parent;
-                draggedItem.asset.parent.remove(draggedItem.asset);
+            if (draggedItem.asset != undefined) {
+                // Remove from the previous asset parent
+                __removeFromParent(draggedItem.asset);
                 
-                // Track change on old parent
-                oSceneEditor.assetManager.editAsset(oldParent);
-            }
-            
-            // Add to the new parent (only if both assets exist)
-            if (draggedItem.asset != undefined && targetItem.asset != undefined) {
-                targetItem.asset.add(draggedItem.asset);
+                // Add to the new parent (only if target asset exists)
+                if (targetItem.asset != undefined) {
+                    targetItem.asset.add(draggedItem.asset);
+                    
+                    // Track change on new parent
+                    oSceneEditor.assetManager.editAsset(targetItem.asset);
+                }
                 
-                // Track change on new parent
-                oSceneEditor.assetManager.editAsset(targetItem.asset);
+                // Track change on dragged asset too (parent changed)
+                oSceneEditor.assetManager.editAsset(draggedItem.asset);
             }
             
             // Update the treeview UI using the new helper
@@ -214,4 +229,32 @@ function __editorTreeview_createTreeviewItemsForChildren(asset, treeviewItem, ic
         var childTreeviewItem = __editorTreeview_createTreeviewItem(child, treeviewItem, icon);
         __editorTreeview_createTreeviewItemsForChildren(child, childTreeviewItem, icon);
     }
+}
+
+/**
+ * Helper to remove an asset from its parent (Folder or Object3D)
+ */
+function __removeFromParent(asset) {
+    if (asset == undefined) return;
+    if (asset[$ "parent"] == undefined) return;
+    if (asset.parent == undefined) return;
+    
+    var parent = asset.parent;
+    
+    if (parent[$ "type"] == "Folder") {
+        if (parent[$ "children"] != undefined) {
+            for (var i = array_length(parent.children) - 1; i >= 0; i--) {
+                if (parent.children[i] == asset) {
+                    array_delete(parent.children, i, 1);
+                    break;
+                }
+            }
+        }
+    } else if (parent[$ "remove"] != undefined) {
+        parent.remove(asset);
+        // Track change on Object3D parent
+        oSceneEditor.assetManager.editAsset(parent);
+    }
+    
+    asset.parent = undefined;
 }

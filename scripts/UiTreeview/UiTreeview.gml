@@ -15,6 +15,15 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.Items = new UiNode({ name: "UiTreeview.Items", marginTop: 5, paddingBottom: 5 });
     self.add(self.Items);
     
+    // Handle delete shortcut
+    self.onStep(method(self, function() {
+        if (keyboard_check_pressed(vk_delete)) {
+            if (self.selectedItem != undefined && !global.UI.focusManager.hasAnyFocus()) {
+                self.selectedItem.__removeItem();
+            }
+        }
+    }));
+    
     /**
      * Select a treeview item
      */
@@ -156,7 +165,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             
             // Draw the icon
             var xx = node.x1 + 30;
-            var meanY = (node.y1 + node.y2) div 2;
+            var meanY = (node.y1 + node.y2) / 2;
             if (item.icon) {
                 draw_sprite(item.icon, 0, xx + 10, meanY);
                 xx += 25;

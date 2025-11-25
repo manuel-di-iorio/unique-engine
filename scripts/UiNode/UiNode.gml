@@ -455,7 +455,9 @@ function UiNode(style = {}, props = {}) constructor {
     
     function disableScrollbar() {
         gml_pragma("forceinline");
-        self.__UiScrollbar.destroy();
+        if (self.__UiScrollbar != undefined) {
+            self.__UiScrollbar.destroy();
+        }
         self.__UiScrollbar = undefined;
     }
     

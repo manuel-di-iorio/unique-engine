@@ -2,16 +2,18 @@ function ProjectLoader() constructor {
   treeviewItemsByUUID = {};
 
   /**
-   * Load project from project.json
+   * Load project from project.json and assets.json
    * @param {Struct} projectManager - The project manager instance
    */
   function load(projectManager) {
     var projectDir = projectManager.projectDatafiles + "/Unique Project/";
     var projectJsonPath = projectDir + "project.json";
+    var assetsJsonPath = projectDir + "assets.json";
 
-    if (!file_exists(projectJsonPath)) return;
+    if (!file_exists(projectJsonPath) || !file_exists(assetsJsonPath)) return;
 
     var projectData = __readJson(projectJsonPath);
+    var assetsData = __readJson(assetsJsonPath);
     
     // Apply settings
     if (projectData[$ "settings"] != undefined) {
@@ -19,14 +21,113 @@ function ProjectLoader() constructor {
     }
 
     var treeview = global.UI.Main.Assets.Treeview;
-    __recurseNodes(projectDir, treeview, projectData.assets, undefined, undefined);
+    treeviewItemsByUUID = {};
+    
+    // 1. Create all Folders first (flat list from project.json)
+    var foldersMap = projectData[$ "folders"] ?? {};
+    var folderUUIDs = variable_struct_get_names(foldersMap);
+    
+    for (var i = 0; i < array_length(folderUUIDs); i++) {
+        var uuid = folderUUIDs[i];
+        var folderData = foldersMap[$ uuid];
+        
+        // Create Folder Asset
+        var folder = {
+            type: "Folder",
+            name: folderData.name,
+            uuid: uuid,
+            children: []
+        };
+        
+        // Create Treeview Item
+        var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
+            treeview,
+            assetType: "Folder",
+            type: "Folder",
+            icon: sprUiFolder,
+            asset: folder
+        });
+        
+        treeviewItemsByUUID[$ uuid] = tvItem;
+        oSceneEditor.assetManager.addAsset("Folder", folder);
+    }
+    
+    // 2. Link Folders to their parents (reconstruct folder hierarchy)
+    for (var i = 0; i < array_length(folderUUIDs); i++) {
+        var uuid = folderUUIDs[i];
+        var folderData = foldersMap[$ uuid];
+        var tvItem = treeviewItemsByUUID[$ uuid];
+        var folder = tvItem.asset;
+        
+        var parentUUID = folderData[$ "parent"];
+        
+        if (parentUUID != undefined && treeviewItemsByUUID[$ parentUUID] != undefined) {
+            var parentItem = treeviewItemsByUUID[$ parentUUID];
+            parentItem.addChild(tvItem);
+            
+            // Add to parent asset children
+            var parentAsset = parentItem.asset;
+            if (parentAsset[$ "children"] != undefined) {
+                array_push(parentAsset.children, folder);
+            }
+            folder.parent = parentAsset;
+        } else {
+            // Root folder
+            treeview.Items.add(tvItem);
+        }
+    }
+    
+    // 3. Load Assets and place them in the correct folders
+    var assetsList = assetsData.assets;
+    for (var i = 0; i < array_length(assetsList); i++) {
+        var assetNode = assetsList[i];
+        var asset = __createAssetFromNode(projectDir, assetNode);
+        
+        if (asset != undefined) {
+            var icon = __iconForType(asset.type);
+            var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
+                treeview,
+                assetType: asset.type,
+                type: asset.type,
+                icon,
+                asset
+            });
+            
+            treeviewItemsByUUID[$ asset.uuid] = tvItem;
+            oSceneEditor.assetManager.addAsset(asset.type, asset);
+            
+            // Place in folder if metadata says so
+            var parentUUID = undefined;
+            if (asset[$ "__metadata"] != undefined && asset.__metadata[$ "folder"] != undefined) {
+                parentUUID = asset.__metadata.folder;
+            }
+            
+            if (parentUUID != undefined && treeviewItemsByUUID[$ parentUUID] != undefined) {
+                var parentItem = treeviewItemsByUUID[$ parentUUID];
+                parentItem.addChild(tvItem);
+                
+                // Add to parent asset
+                var parentAsset = parentItem.asset;
+                if (parentAsset.type == "Folder") {
+                    array_push(parentAsset.children, asset);
+                } else {
+                    if (parentAsset[$ "add"] != undefined) parentAsset.add(asset);
+                }
+                asset.parent = parentAsset;
+            } else {
+                // Root asset
+                treeview.Items.add(tvItem);
+            }
+        }
+    }
+
+    // 4. Link asset references (Materials <-> Meshes, etc.)
     __linkNodes();
     
     // Clear the cache
     treeviewItemsByUUID = {};
     
     projectManager.markAsSaved();
-    show_debug_message("Project loaded successfully!");
   }
   
   function __applyProjectSettings(settings) {
@@ -98,7 +199,7 @@ function ProjectLoader() constructor {
     var texturesByUUID = {};
     var objectsByUUID = {};
     
-    var textures = assetManager.getAllAssetsByType("Texture");
+    var textures = assetManager.getAssetsByType("Texture");
     for (var i = 0; i < array_length(textures); i++) {
         var texture = textures[i];
         texturesByUUID[$ texture.uuid] = texture;
@@ -109,7 +210,7 @@ function ProjectLoader() constructor {
         }
     }
     
-    var meshes = assetManager.getAllAssetsByType("Mesh");
+    var meshes = assetManager.getAssetsByType("Mesh");
     for (var i = 0; i < array_length(meshes); i++) {
         var mesh = meshes[i];
         objectsByUUID[$ mesh.uuid] = mesh;
@@ -120,7 +221,7 @@ function ProjectLoader() constructor {
     }
     
     // 2. Link Materials (Textures)
-    var materials = assetManager.getAllAssetsByType("Material");
+    var materials = assetManager.getAssetsByType("Material");
     var materialsByUUID = {};
     for (var i = 0; i < array_length(materials); i++) {
         var material = materials[i];
@@ -144,7 +245,7 @@ function ProjectLoader() constructor {
     }
     
     // 3. Link Scenes (ModelInstances)
-    var scenes = assetManager.getAllAssetsByType("Scene");
+    var scenes = assetManager.getAssetsByType("Scene");
     for (var i = 0; i < array_length(scenes); i++) {
         var scene = scenes[i];
         if (scene[$ "__metadata"] != undefined) {
@@ -268,48 +369,6 @@ function ProjectLoader() constructor {
     }
 
     return asset;
-  }
-
-  // Recursive: rebuild treeview and asset manager
-  function __recurseNodes(projectDir, treeview, nodes, parentTreeviewItem, parentAsset) {
-    for (var i = 0; i < array_length(nodes); i++) {
-      var node = nodes[i];
-
-      // Create asset or folder
-      var asset = __createAssetFromNode(projectDir, node);
-
-      // Create UiTreeviewItem
-      var icon = __iconForType(node.type);
-      var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
-        treeview,
-        assetType: node.type,
-        type: node.type,
-        icon,
-        asset
-      });
-      
-      if (node[$ "uuid"] != undefined) {
-        treeviewItemsByUUID[$ node.uuid] = tvItem;
-      }
-
-      // Attach to UI
-      if (parentTreeviewItem != undefined) {
-        parentTreeviewItem.addChild(tvItem);
-      } else {
-        treeview.Items.add(tvItem);
-      }
-
-      // Add to AssetManager
-      if (asset != undefined) {
-        oSceneEditor.assetManager.addAsset(node.type, asset, parentAsset);
-      }
-
-      // Recurse children
-      if (node[$ "children"] != undefined && array_length(node.children) > 0) {
-        var childParentAsset = asset != undefined ? asset : parentAsset;
-        __recurseNodes(projectDir, treeview, node.children, tvItem, childParentAsset);
-      }
-    }
   }
 
   function __readJson(filePath) {

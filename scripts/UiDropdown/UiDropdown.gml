@@ -86,7 +86,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
     self.createList = function() { 
         var _Dropdown = self;
         var _Input = self.Input;
-        self.List = new UiNode({ 
+        self.List = new UiNode({
             name: "UiDropdown.List", position: "absolute", padding: 5, maxHeight: 500, 
             left: -9999, top: -9999
         });

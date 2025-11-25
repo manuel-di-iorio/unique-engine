@@ -17,11 +17,9 @@ function ProjectSaver() constructor {
         
         if (isFirstSave) {
             // Full save
-            show_debug_message("Performing FULL save...");
             __performFullSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath);
         } else {
             // Incremental save
-            show_debug_message("Performing INCREMENTAL save...");
             __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath);
         }
 
@@ -66,20 +64,71 @@ function ProjectSaver() constructor {
         if (!directory_exists(projectDir)) directory_create(projectDir);
         if (!directory_exists(assetsDir)) directory_create(assetsDir);
 
-        // Get reference to treeview root
-        var treeview = global.UI.Main.Assets.Treeview;
-
-        var assetsMap = {}; // Unique map of assets UUIDs
         var assets = []; // List of assets to save in assets.json
+        
         // Project structure to save in project.json
         var project = {
             settings: self.__getProjectSettings(),
-            version: global.UE_VERSION,
-            assets: []
+            folders: {} // Folders map
         }
 
-        // Build project.json structure from root Items
-        self.__traverseTreeview(assetsDir, assetsMap, assets, treeview.Items.children, project.assets);        
+        // Get all assets from AssetManager (now a flat array)
+        var am = oSceneEditor.assetManager;
+        var allAssets = am.assets;
+        
+        for (var i = 0; i < array_length(allAssets); i++) {
+            var asset = allAssets[i];
+            
+            // Skip folders (they're saved separately in project.json)
+            if (asset[$ "type"] == "Folder") continue;
+            
+            // Add to assets.json list
+            array_push(assets, { uuid: asset.uuid, type: asset.type, name: asset.name });
+            
+            // Save asset metadata and resources
+            var assetPath = assetsDir + asset.uuid;
+            if (!directory_exists(assetPath)) directory_create(assetPath);
+            
+            var assetToJSON = asset[$ "toJSON"];
+            var metadata = is_callable(assetToJSON) ? assetToJSON() : asset;
+            
+            // Add Euler rotation to metadata if it exists (editor-only data)
+            if (asset[$ "__rotationEuler"] != undefined) {
+                metadata.ex = asset.__rotationEuler.x;
+                metadata.ey = asset.__rotationEuler.y;
+                metadata.ez = asset.__rotationEuler.z;
+                metadata.eo = asset.__rotationEuler.order;
+            }
+
+            // Save folder UUID if asset is in a folder
+            if (asset[$ "__folder"] != undefined) {
+                metadata.folder = asset.__folder;
+            }
+            
+            self.__writeJson(assetPath + "/metadata.json", metadata);
+            
+            // Export binary resources
+            switch (asset.type) {
+                case "Texture":
+                    asset.export(assetPath + "/texture.png");
+                    break;
+                case "Mesh":  
+                    var assetGeometry = asset[$ "geometry"];
+                    if (assetGeometry != undefined) assetGeometry.export(assetPath + "/geometry.buf");
+                    break;
+            }
+        }
+
+        // Collect folders
+        var allFolders = oSceneEditor.assetManager.getAssetsByType("Folder");
+        for (var i = 0; i < array_length(allFolders); i++) {
+            var folder = allFolders[i];
+            project.folders[$ folder.uuid] = {
+                uuid: folder.uuid,
+                name: folder.name,
+                parent: (folder[$ "parent"] != undefined && folder.parent[$ "type"] == "Folder") ? folder.parent.uuid : undefined
+            };
+        }
 
         // Write assets.json and project.json
         self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
@@ -91,27 +140,37 @@ function ProjectSaver() constructor {
      */
     function __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath) {
         var changes = projectManager.changes;
-        var changeUUIDs = struct_get_names(changes);
-        
-        show_debug_message($"Processing {array_length(changeUUIDs)} changes");
+        var changeIds = struct_get_names(changes);
         
         // Load existing assets.json
         var assetsJson = json_parse(self.__readFile(assetsJsonPath));
         var assets = assetsJson.assets;
         
-        for (var i = 0; i < array_length(changeUUIDs); i++) {
-            var uuid = changeUUIDs[i];
+        // Load existing project.json
+        var projectJson = {};
+        if (file_exists(projectJsonPath)) {
+            projectJson = json_parse(self.__readFile(projectJsonPath));
+        }
+        var foldersMap = projectJson[$ "folders"] ?? {};
+        
+        for (var i = 0; i < array_length(changeIds); i++) {
+            var uuid = changeIds[i];
             var change = changes[$ uuid];
             var action = change.action;
             var asset = change.asset;
             
-            show_debug_message($"  {action}: {asset.name} ({uuid})");
-            
             switch (action) {
                 case "create":
                 case "edit":
-                    // Skip folders (they are only saved in project.json structure)
-                    if (asset.type == "Folder") break;
+                    // Handle Folder updates
+                    if (asset.type == "Folder") {
+                        foldersMap[$ asset.uuid] = {
+                            uuid: asset.uuid,
+                            name: asset.name,
+                            parent: (asset[$ "parent"] != undefined && asset.parent[$ "type"] == "Folder") ? asset.parent.uuid : undefined
+                        };
+                        break;
+                    }
 
                     // Update or add to assets.json
                     var assetIndex = -1;
@@ -131,9 +190,17 @@ function ProjectSaver() constructor {
                         assets[assetIndex].type = asset.type;
                     }
                     
-                    // Save asset metadata and resources
                     var assetPath = assetsDir + uuid;
                     if (!directory_exists(assetPath)) directory_create(assetPath);
+                    
+                    // Check if asset is in a folder using __treeviewItem
+                    var folderUUID = undefined;
+                    if (asset[$ "__treeviewItem"] != undefined && asset.__treeviewItem[$ "parent"] != undefined) {
+                        var parentItem = asset.__treeviewItem.parent;
+                        if (parentItem[$ "asset"] != undefined && parentItem.asset[$ "type"] == "Folder") {
+                            folderUUID = parentItem.asset.uuid;
+                        }
+                    }
                     
                     var assetToJSON = asset[$ "toJSON"];
                     var metadata = is_callable(assetToJSON) ? assetToJSON() : asset;
@@ -144,6 +211,11 @@ function ProjectSaver() constructor {
                         metadata.ey = asset.__rotationEuler.y;
                         metadata.ez = asset.__rotationEuler.z;
                         metadata.eo = asset.__rotationEuler.order;
+                    }
+
+                    // Save folder UUID if we found one
+                    if (folderUUID != undefined) {
+                        metadata.folder = folderUUID;
                     }
                     
                     self.__writeJson(assetPath + "/metadata.json", metadata);
@@ -161,6 +233,11 @@ function ProjectSaver() constructor {
                     break;
                     
                 case "delete":
+                    if (asset.type == "Folder") {
+                        variable_struct_remove(foldersMap, asset.uuid);
+                        break;
+                    }
+
                     // Remove from assets.json
                     for (var j = array_length(assets) - 1; j >= 0; j--) {
                         if (assets[j].uuid == uuid) {
@@ -181,19 +258,9 @@ function ProjectSaver() constructor {
         // Write updated assets.json
         self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
         
-        // Rebuild and update project.json structure from treeview
-        var treeview = global.UI.Main.Assets.Treeview;
-        var project = {
-            settings: self.__getProjectSettings(),
-            version: global.UE_VERSION,
-            assets: []
-        };
-        
-        // Rebuild the project structure from the current treeview state
-        var assetsMap = {}; // Not used here but required by __traverseTreeview
-        self.__traverseTreeview(assetsDir, assetsMap, assets, treeview.Items.children, project.assets);
-        
-        self.__writeJson(projectJsonPath, project);
+        // Update project.json with new folders map
+        projectJson.folders = foldersMap;
+        self.__writeJson(projectJsonPath, projectJson);
     }
 
     function __getProjectSettings() {
@@ -232,12 +299,11 @@ function ProjectSaver() constructor {
         };
     }
 
-    function __traverseTreeview(assetsDir, assetsMap, assets, treeviewChildren, projectAssets) {
+    function __traverseTreeview(assetsDir, assetsMap, assets, treeviewChildren, parentTreeviewItem) {
         for (var i = 0, il = array_length(treeviewChildren); i < il; i++) {
             var treeviewChild = treeviewChildren[i];
 
             var asset = treeviewChild[$ "asset"];
-            var assetNode = undefined;
 
             if (asset != undefined) {
                 var assetUuid = asset.uuid;
@@ -254,6 +320,15 @@ function ProjectSaver() constructor {
                     var assetPath = assetsDir + assetUuid;
                     if (!directory_exists(assetPath)) directory_create(assetPath);
 
+                    // Check if parent treeview item is a Folder (UI organization, not 3D hierarchy)
+                    var folderUUID = undefined;
+                    if (parentTreeviewItem != undefined && parentTreeviewItem[$ "asset"] != undefined) {
+                        var parentAsset = parentTreeviewItem.asset;
+                        if (parentAsset[$ "type"] == "Folder") {
+                            folderUUID = parentAsset.uuid;
+                        }
+                    }
+                    
                     var assetToJSON = asset[$ "toJSON"];
                     var metadata = is_callable(assetToJSON) ? assetToJSON() : asset;
                     
@@ -263,6 +338,11 @@ function ProjectSaver() constructor {
                         metadata.ey = asset.__rotationEuler.y;
                         metadata.ez = asset.__rotationEuler.z;
                         metadata.eo = asset.__rotationEuler.order;
+                    }
+
+                    // Save folder UUID if we found one
+                    if (folderUUID != undefined) {
+                        metadata.folder = folderUUID;
                     }
                     
                     self.__writeJson(assetPath + "/metadata.json", metadata);
@@ -276,25 +356,10 @@ function ProjectSaver() constructor {
                             if (assetGeometry != undefined) assetGeometry.export(assetPath + "/geometry.buf");
                     }
                 }
-
-                // Push child into project.json structure (skip ModelInstance as they're in scene metadata)
-                if (assetType != "ModelInstance") {
-                    assetNode = { 
-                        uuid: asset.uuid,
-                        type: asset.type, 
-                        name: asset.name,
-                        children: []
-                    };
-
-                    array_push(projectAssets, assetNode);
-                }
             }
 
-            var childProjectAssets = projectAssets;
-            if (assetNode != undefined) childProjectAssets = assetNode.children;
-
             if (array_length(treeviewChild.children)) {                
-                self.__traverseTreeview(assetsDir, assetsMap, assets, treeviewChild.children, childProjectAssets);
+                self.__traverseTreeview(assetsDir, assetsMap, assets, treeviewChild.children, treeviewChild);
             }
         }
     }

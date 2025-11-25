@@ -14,7 +14,7 @@
  * loader.loadAssets(["MyTexture", "MyMaterial"]);
  * 
  * // Load specific assets by UUID
- * loader.loadAssets(undefined, ["uuid-1", "uuid-2"]);
+ * loader.loadAssetsByUuid(["uuid-1", "uuid-2"]);
  * 
  * // Populate a scene
  * loader.setScene("MainScene");
@@ -112,7 +112,6 @@ function UeProjectLoader(data = {}) constructor {
             var entry = self.assetsByName[$ assetName];
             
             if (entry == undefined) {
-                show_debug_message("[UeProjectLoader] Asset not found: " + assetName);
                 continue;
             }
             
@@ -231,8 +230,6 @@ function UeProjectLoader(data = {}) constructor {
      * renderer.render(loader.scene, camera);
      */
     self.setScene = function(sceneName = undefined) {
-        show_debug_message("[UeProjectLoader] setScene called for: " + string(sceneName));
-        
         // Get scene asset
         var sceneAsset = self.assetsByName[$ sceneName];
         if (sceneAsset == undefined || sceneAsset[$ "type"] != "Scene") {
@@ -240,25 +237,19 @@ function UeProjectLoader(data = {}) constructor {
             return;
         }
         
-        show_debug_message("[UeProjectLoader] Scene asset found: " + sceneAsset.uuid);
-
         // Clear existing scene
         self.scene.clear();
         
         // Get scene metadata for ModelInstances
         if (sceneAsset[$ "__metadata"] == undefined) {
-            show_debug_message("[UeProjectLoader] No metadata found for scene");
             return;
         }
         
         var children = sceneAsset.__metadata[$ "children"];
         if (children == undefined) {
-            show_debug_message("[UeProjectLoader] No children found in scene metadata");
             return;
         }
         
-        show_debug_message("[UeProjectLoader] Found " + string(array_length(children)) + " children in scene");
-
         // Create instances
         for (var i = 0; i < array_length(children); i++) {
             var child = children[i];
@@ -267,7 +258,6 @@ function UeProjectLoader(data = {}) constructor {
                 var model = self.assetsByUuid[$ modelUUID];
                 
                 if (model != undefined && model[$ "isMesh"] == true) {
-                    show_debug_message("[UeProjectLoader] Creating instance for model: " + modelUUID);
                     var instance = model.createInstance();
                     instance.type = "ModelInstance";
                     
@@ -285,20 +275,10 @@ function UeProjectLoader(data = {}) constructor {
                         instance.scale.set(scl[0], scl[1], scl[2]);
                     }
                     
-                    show_debug_message("[UeProjectLoader] Instance Transform for " + string(modelUUID) + ":");
-                    show_debug_message("  Pos: " + string(instance.position.x) + ", " + string(instance.position.y) + ", " + string(instance.position.z));
-                    show_debug_message("  Rot (Quat): " + string(instance.rotation.x) + ", " + string(instance.rotation.y) + ", " + string(instance.rotation.z) + ", " + string(instance.rotation.w));
-                    show_debug_message("  Scale: " + string(instance.scale.x) + ", " + string(instance.scale.y) + ", " + string(instance.scale.z));
-                    
                     self.scene.add(instance);
-                    show_debug_message("[UeProjectLoader] Instance added to scene");
-                } else {
-                    show_debug_message("[UeProjectLoader] Model not found or invalid for UUID: " + string(modelUUID));
                 }
             }
         }
-        
-        show_debug_message("[UeProjectLoader] Scene population complete. Total children: " + string(array_length(self.scene.children)));
     };
 
     self.__createAsset = function(metadata, uuid) {

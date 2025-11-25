@@ -61,16 +61,7 @@ function editorTreeviewOnModelImport(modelAsset) {
             tex.name = "Texture" + string(textureId);
         }
         
-        // Set parent folder
-        tex.parent = folder;
-        
-        // Add to asset manager (with folder as parent)
-        oSceneEditor.assetManager.addAsset("Texture", tex, folder);
-        
-        // Add to folder children
-        array_push(folder.children, tex);
-        
-        // Add to treeview inside folder
+        // Add to treeview inside folder (must be done before addAsset)
         var textureTreeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
             paddingVertical: 2.5
@@ -82,6 +73,9 @@ function editorTreeviewOnModelImport(modelAsset) {
             asset: tex
         });
         folderItem.addChild(textureTreeviewItem);
+        
+        // Add to asset manager (will auto-detect folder from __treeviewItem)
+        oSceneEditor.assetManager.addAsset("Texture", tex);
     }
     
     // 2. Add materials to project and treeview (inside folder)
@@ -96,16 +90,7 @@ function editorTreeviewOnModelImport(modelAsset) {
             mat.name = "Material" + string(materialId);
         }
         
-        // Set parent folder
-        mat.parent = folder;
-        
-        // Add to asset manager (with folder as parent)
-        oSceneEditor.assetManager.addAsset("Material", mat, folder);
-        
-        // Add to folder children
-        array_push(folder.children, mat);
-        
-        // Add to treeview inside folder
+        // Add to treeview inside folder (must be done before addAsset)
         var materialTreeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
             paddingVertical: 2.5
@@ -117,6 +102,9 @@ function editorTreeviewOnModelImport(modelAsset) {
             asset: mat
         });
         folderItem.addChild(materialTreeviewItem);
+        
+        // Add to asset manager (will auto-detect folder from __treeviewItem)
+        oSceneEditor.assetManager.addAsset("Material", mat);
     }
     
     // 3. Add model to project and treeview (with hierarchy, inside folder)
@@ -131,16 +119,7 @@ function editorTreeviewOnModelImport(modelAsset) {
         node.__rotationEuler = new UeEuler();
     });
     
-    // Set parent folder
-    model.parent = folder;
-    
-    // Add to asset manager (with folder as parent)
-    oSceneEditor.assetManager.addAsset("Mesh", model, folder);
-    
-    // Add to folder children
-    array_push(folder.children, model);
-    
-    // Create main model treeview item inside folder
+    // Create main model treeview item inside folder (must be done before addAsset)
     var modelTreeviewItem = new UiTreeviewItem({
         name: "UiTreeview.Item",
         paddingVertical: 2.5
@@ -152,6 +131,9 @@ function editorTreeviewOnModelImport(modelAsset) {
         asset: model
     });
     folderItem.addChild(modelTreeviewItem);
+    
+    // Add to asset manager (will auto-detect folder from __treeviewItem)
+    oSceneEditor.assetManager.addAsset("Mesh", model);
     
     // 4. Add submeshes recursively with proper hierarchy
     __editorTreeview_createTreeviewItemsForChildren(model, modelTreeviewItem, sprUiObject);

@@ -110,7 +110,7 @@ function EditorUiInspector(ui) constructor {
                 search: "Search texture..",
                 subKey: "map",
                 itemsGetter: function(searchValue) {
-                    var allTextures = oSceneEditor.assetManager.getAllAssetsByType("Texture");
+                    var allTextures = oSceneEditor.assetManager.getAssetsByType("Texture");
                     
                     var uniqueTextures = [];
                     var seen = {};
@@ -393,7 +393,7 @@ function EditorUiInspector(ui) constructor {
                 tooltip: "Material that controls the visual appearance of this object",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
-                    var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
+                    var allMaterials = oSceneEditor.assetManager.getAssetsByType("Material");
                     
                     var uniqueMaterials = [];
                     var seen = {};
@@ -536,7 +536,7 @@ function EditorUiInspector(ui) constructor {
                 tooltip: "Material that controls the visual appearance of this instance",
                 search: "Search material..",
                 itemsGetter: function(searchValue) {
-                    var allMaterials = oSceneEditor.assetManager.getAllAssetsByType("Material");
+                    var allMaterials = oSceneEditor.assetManager.getAssetsByType("Material");
                     var items = array_filter(allMaterials, method({ searchValue }, function(item) {
                         if (searchValue == "") return true;
                         return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
@@ -833,13 +833,6 @@ function EditorUiInspector(ui) constructor {
      * @return {Bool} True if valid, false otherwise
      */
     function __validateAssetName(asset, newName, input) {
-        // Check for invalid character /
-        if (string_pos("/", newName) > 0) {
-            show_message("Invalid character '/'. Please use a different name.");
-            input.value = asset.name;
-            return false;
-        }
-        
         // Check for duplicate names at the same level (siblings only)
         var assetManager = oSceneEditor.assetManager;
         var isDuplicate = false;

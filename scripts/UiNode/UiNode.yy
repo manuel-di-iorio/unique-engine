@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UiNode",
   "parent":{
-    "name":"UniqueUI",
-    "path":"folders/UniqueUI.yy",
+    "name":"Unique UI",
+    "path":"folders/Unique UI.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

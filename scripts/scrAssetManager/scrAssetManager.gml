@@ -1,14 +1,8 @@
 /// @description Asset Manager - Manages all assets with hierarchical structure
 
 function AssetManager() constructor {
-    // Root containers for different asset types
-    self.textures = [];      // Array of texture assets
-    self.materials = [];     // Array of material assets
-    self.models = [];        // Array of model assets (with hierarchy)
-    self.scenes = [];        // Array of scene assets (with instances)
-    self.lights = [];        // Array of light assets
-    self.cameras = [];       // Array of camera assets
-    self.folders = [];       // Array of folder structures (for UI organization)
+    // Flat array of all assets
+    self.assets = [];
     
     // Asset lookup by name for quick access
     self.assetsByName = {};
@@ -20,49 +14,37 @@ function AssetManager() constructor {
      * @param {Struct} parent - Optional parent asset for hierarchical assets
      */
     function addAsset(type, asset, parent = undefined) {
-        // Add to the appropriate array if it's a root asset
-        if (parent == undefined) {
-            switch (type) {
-                case "Texture":
-                    array_push(self.textures, asset);
-                    break;
-                case "Material":
-                    array_push(self.materials, asset);
-                    break;
-                case "Mesh":
-                    array_push(self.models, asset);
-                    break;
-                case "Scene":
-                    array_push(self.scenes, asset);
-                    break;
-                case "Light":
-                    array_push(self.lights, asset);
-                    break;
-                case "Camera":
-                    array_push(self.cameras, asset);
-                    break;
-                case "Folder":
-                    array_push(self.folders, asset);
-                    break;
+        // Always add to flat assets array
+        array_push(self.assets, asset);
+        
+        // Set __folder if asset is in a folder (from treeview)
+        if (asset[$ "__treeviewItem"] != undefined) {
+            var treeviewItem = asset.__treeviewItem;
+            
+            // The parent of a treeview item is the "Items" container
+            // The parent of "Items" is the actual parent treeview item
+            if (treeviewItem[$ "parent"] != undefined && treeviewItem.parent[$ "parent"] != undefined) {
+                var parentTreeviewItem = treeviewItem.parent.parent;
+                
+                // Check if parent item has an asset
+                if (parentTreeviewItem[$ "asset"] != undefined) {
+                    if (parentTreeviewItem.asset[$ "type"] == "Folder") {
+                        asset.__folder = parentTreeviewItem.asset.uuid;
+                    }
+                }
             }
-        } else {
-            // Add to parent's hierarchy
-            // If parent is a Folder struct, push into its children array
-            if (parent[$ "type"] != undefined && parent[$ "type"] == "Folder") {
-                asset.parent = parent;
-                if (parent[$ "children"] == undefined) parent.children = [];
-                array_push(parent.children, asset);
-            }
-            // If parent is an Object3D-like object with add(), use that
-            else if (parent[$ "add"] != undefined) {
+        }
+        
+        // Handle 3D hierarchy parent (not folder)
+        if (parent != undefined) {
+            // If parent has add() method, use it (Object3D hierarchy)
+            if (parent[$ "add"] != undefined) {
                 parent.add(asset);
-                asset.parent = parent;
-            }
-            // Fallback: if parent has a children array, push into it
-            else if (parent[$ "children"] != undefined) {
-                asset.parent = parent;
+            } else {
+                // Add to parent children array
                 array_push(parent.children, asset);
             }
+            asset.parent = parent;
         }
         
         // Add to lookup map
@@ -80,32 +62,28 @@ function AssetManager() constructor {
      * @param {Struct} asset - The asset to remove
      */
     function removeAsset(type, asset) {
-        var list = undefined;
+        // Remove from flat assets array
+        var index = array_find_index(self.assets, method({ asset }, function(item) {
+            return item == asset;
+        }));
         
-        switch (type) {
-            case "Texture": list = self.textures; break;
-            case "Material": list = self.materials; break;
-            case "Mesh": list = self.models; break;
-            case "Scene": list = self.scenes; break;
-            case "Light": list = self.lights; break;
-            case "Camera": list = self.cameras; break;
-            case "Folder": list = self.folders; break;
+        if (index != -1) {
+            array_delete(self.assets, index, 1);
         }
         
-        if (list != undefined) {
-            var index = array_find_index(list, method({ asset }, function(item) {
-                return item == asset;
-            }));
-            
-            if (index != -1) {
-                array_delete(list, index, 1);
-            }
+        // Clear __folder if it was in a folder
+        if (asset[$ "__folder"] != undefined) {
+            asset.__folder = undefined;
         }
         
-        // Remove from parent if it has one
+        // Remove from 3D parent if it has one
         if (asset[$ "parent"] != undefined && asset.parent != undefined) {
-            // If parent is Folder struct, remove from children array
-            if (asset.parent[$ "type"] != undefined && asset.parent[$ "type"] == "Folder") {
+            // If parent has remove() method, call it (Object3D hierarchy)
+            if (asset.parent[$ "remove"] != undefined) {
+                asset.parent.remove(asset);
+            }
+            // Fallback: remove from parent's children array
+            else if (asset.parent[$ "children"] != undefined) {
                 var pchildren = asset.parent.children;
                 for (var i = array_length(pchildren) - 1; i >= 0; i--) {
                     if (pchildren[i] == asset) {
@@ -113,10 +91,6 @@ function AssetManager() constructor {
                         break;
                     }
                 }
-            }
-            // If parent has remove() method, call it
-            else if (asset.parent[$ "remove"] != undefined) {
-                asset.parent.remove(asset);
             }
         }
         
@@ -153,109 +127,26 @@ function AssetManager() constructor {
     }
     
     /**
-     * Get all assets of a specific type
+     * Get all assets of a specific type (root level only, not in folders)
      * @param {String} type - Asset type (case insensitive)
      * @return {Array} Array of assets
      */
     function getAssetsByType(type) {
-        switch (type) {
-            case "Texture": return self.textures;
-            case "Material": return self.materials;
-            case "Mesh": return self.models;
-            case "Scene": return self.scenes;
-            case "Light": return self.lights;
-            case "Camera": return self.cameras;
-            case "Folder": return self.folders;
-        }
-        return [];
-    }
-    
-    /**
-     * Get all assets of a type recursively (including those in folders)
-     * @param {String} type - Asset type (texture, material, model, etc)
-     * @returns {Array} All assets of the specified type
-     */
-    function getAllAssetsByType(type) {
         var result = [];
-        var rootAssets = getAssetsByType(type);
-        
-        // Add root assets
-        for (var i = 0; i < array_length(rootAssets); i++) {
-            array_push(result, rootAssets[i]);
-            
-            // If collecting meshes, also collect their children recursively
-            if (type == "Mesh" && rootAssets[i][$ "children"] != undefined) {
-                __collectMeshChildren(rootAssets[i], result);
+        for (var i = 0; i < array_length(self.assets); i++) {
+            var asset = self.assets[i];
+            if (asset[$ "type"] == type) {
+                array_push(result, asset);
             }
         }
-        
-        // Recursively collect from folders
-        __collectAssetsFromFolders(self.folders, type, result);
-        
         return result;
-    }
-    
-    /**
-     * Helper: recursively collect mesh children
-     */
-    function __collectMeshChildren(mesh, result) {
-        for (var i = 0; i < array_length(mesh.children); i++) {
-            var child = mesh.children[i];
-            if (child[$ "isMesh"] == true) {
-                array_push(result, child);
-                
-                // Recurse into this child's children
-                if (child[$ "children"] != undefined) {
-                    __collectMeshChildren(child, result);
-                }
-            }
-        }
-    }
-    
-    /**
-     * Helper: recursively collect assets from folders
-     */
-    function __collectAssetsFromFolders(folders, type, result) {
-        for (var i = 0, il = array_length(folders); i < il; i++) {
-            var folder = folders[i];
-            
-            if (folder[$ "children"] != undefined) {
-                var childFolders = [];
-                
-                for (var j = 0; j < array_length(folder.children); j++) {
-                    var child = folder.children[j];
-                    
-                    if (child[$ "type"] == "Folder") {
-                        array_push(childFolders, child);
-                    } else if (child[$ "type"] == type) {
-                        array_push(result, child);
-                        
-                        // If collecting meshes, also collect their children recursively
-                        if (type == "Mesh" && child[$ "children"] != undefined) {
-                            __collectMeshChildren(child, result);
-                        }
-                    }
-                }
-                
-                // Recurse into subfolders
-                if (array_length(childFolders) > 0) {
-                    __collectAssetsFromFolders(childFolders, type, result);
-                }
-            }
-        }
     }
     
     /**
      * Clear all assets
      */
     function clear() {
-        self.textures = [];
-        self.materials = [];
-        self.models = [];
-        self.scenes = [];
-        self.lights = [];
-        self.cameras = [];
-        self.folders = [];
+        self.assets = [];
         self.assetsByName = {};
     }
     
@@ -303,7 +194,6 @@ function AssetManager() constructor {
             // edit -> delete = delete (override edit with delete)
             if (existing.action == "edit" && action == "delete") {
                 existing.action = "delete";
-                projectManager.markAsUnsaved();
                 return;
             }
             

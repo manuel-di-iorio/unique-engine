@@ -29,21 +29,14 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       });
       
       // Add to root or parent
-      var parentAsset = undefined;
       if (treeviewItem != undefined) {
-          if (treeviewItem.asset != undefined) {
-              parentAsset = treeviewItem.asset;
-              if (parentAsset[$ "children"] != undefined) {
-                  array_push(parentAsset.children, folder);
-              }
-          }
           treeviewItem.addChild(folderItem);
       } else {
           treeview.Items.add(folderItem);
       }
       
-      // Add to AssetManager
-      oSceneEditor.assetManager.addAsset("Folder", folder, parentAsset);
+      // Add to AssetManager (no parent - folders are always root in asset manager)
+      oSceneEditor.assetManager.addAsset("Folder", folder);
       
       treeview.__onItemSelected(folderItem);
       return;
@@ -130,18 +123,12 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   if (_assetTypeName == "Mesh") _assetTypeName = "Object";
   asset.name = _assetTypeName + string(assetId);
   
-  // Determine the parent asset
+  // Determine the parent asset (only for 3D hierarchy, not folders)
   var parentAsset = undefined;
   if (treeviewItem != undefined && treeviewItem.asset != undefined) {
-      parentAsset = treeviewItem.asset;
-      
-      // Check if parent is a Folder (plain struct) or Object3D (has add method)
-      if (parentAsset.type == "Folder") {
-          // Folders use plain array for children
-          array_push(parentAsset.children, asset);
-      } else {
-          // Objects use the add() method
-          parentAsset.add(asset);
+      // Only set parent if it's NOT a folder (folders are UI organization only)
+      if (treeviewItem.asset[$ "type"] != "Folder") {
+          parentAsset = treeviewItem.asset;
       }
       
       treeviewItem.addChild(newTreeviewItem);
@@ -150,7 +137,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       treeview.Items.add(newTreeviewItem);
   }
   
-  // Add asset to asset manager
+  // Add asset to asset manager AFTER treeview parent is set (so __treeviewItem.parent is available)
   var typeKey = assetType;
   assetManager.addAsset(typeKey, asset, parentAsset);
   
