@@ -73,7 +73,17 @@ function UeScene(data = {}): UeObject3D(data) constructor {
                         var scl = child.scale;
                         instance.scale.set(scl[0], scl[1], scl[2]);
                     }
-                    if (child[$ "visible"] != undefined) instance.visible = child.visible;
+                    if (child[$ "visible"] != undefined) {
+                        instance.visible = child.visible;
+                    }
+
+                    if (child[$ "matrixAutoUpdate"] != undefined) {
+                        instance.matrixAutoUpdate = child.matrixAutoUpdate;
+                    }
+
+                    if (child[$ "frustumCulled"] != undefined) {
+                        instance.frustumCulled = child.frustumCulled;
+                    }
                     
                     add(instance);
                 }

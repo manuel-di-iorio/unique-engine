@@ -38,6 +38,8 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
             geometry: geometry ? geometry.toJSON() : undefined,
             material: material ? material.uuid : undefined,
             layers: layers.mask,
+            matrixAutoUpdate,
+            frustumCulled,
             
             px: position.x,
             py: position.y,
@@ -74,6 +76,9 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
         if (geometry != undefined && data[$ "geometry"] != undefined) {
             geometry.fromJSON(data.geometry);
         }
+
+        matrixAutoUpdate = data[$ "matrixAutoUpdate"];
+        frustumCulled = data[$ "frustumCulled"];
         
         return self;
     }

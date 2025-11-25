@@ -83,7 +83,6 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     // (this would create a cycle in the hierarchy)
     if (dropAction == "reparent" && draggedItem.asset != undefined && targetItem.asset != undefined) {
         // Check if the targetItem is a descendant of the draggedItem
-        // Check if the targetItem is a descendant of the draggedItem
         var currentParent = targetItem.asset[$ "parent"];
         while (currentParent != undefined) {
             if (currentParent == draggedItem.asset) {
@@ -110,21 +109,22 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                 show_debug_message("[DROP] Moving asset '" + draggedItem.asset.name + "' (type: " + draggedItem.asset.type + ") into folder '" + targetItem.asset.name + "' (UUID: " + targetItem.asset.uuid + ")");
                 
                 // 1. Remove from old parent
-                var oldParent = (draggedItem.asset[$ "parent"] != undefined) ? draggedItem.asset.parent : undefined;
-                show_debug_message("[DROP] Old parent: " + (oldParent != undefined ? oldParent.name : "none"));
                 __removeFromParent(draggedItem.asset);
                 
-                // 2. Add to new Folder parent
+                // 2. Add to new Folder parent (UI-only, not 3D hierarchy)
                 var newParent = targetItem.asset;
-                draggedItem.asset.parent = newParent;
-                if (newParent[$ "children"] == undefined) newParent.children = [];
-                array_push(newParent.children, draggedItem.asset);
                 
-                // 3. Update __parentUI for saving hierarchy
-                draggedItem.asset.__parentUI = newParent.uuid;
+                // For folders, set parent field (used in project.json)
+                // For other assets, set __parentUI (used in metadata.json)
+                if (draggedItem.asset.type == "Folder") {
+                    draggedItem.asset.parent = newParent;
+                    show_debug_message("[DROP] Set folder parent to: " + newParent.name);
+                } else {
+                    draggedItem.asset.__parentUI = newParent.uuid;
+                    show_debug_message("[DROP] Set __parentUI to: " + draggedItem.asset.__parentUI);
+                }
                 
-                show_debug_message("[DROP] New parent set: " + newParent.name + " (UUID: " + newParent.uuid + ")");
-                show_debug_message("[DROP] Set __parentUI to: " + draggedItem.asset.__parentUI);
+                show_debug_message("[DROP] New folder set: " + newParent.name + " (UUID: " + newParent.uuid + ")");
                 
                 // Track change on the dragged asset (metadata 'folder' changed)
                 oSceneEditor.assetManager.editAsset(draggedItem.asset);

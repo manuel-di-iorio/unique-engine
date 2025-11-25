@@ -136,8 +136,10 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         });
         
         self.onMouseDown(method({ item: treeviewItem }, function() {
-            // Left click - select item
-            item.treeview.__onItemSelected(item);
+            // Only select on left click, not right click (right click is for context menu)
+            if (mouse_lastbutton == mb_left) {
+                item.treeview.__onItemSelected(item);
+            }
             return false;
         }));
         
@@ -260,6 +262,16 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         
         // Remember if this item was selected before moving
         var wasSelected = (self.treeview.selectedItem == self);
+        
+        // If selected, deselect it first to clean up any gizmos/helpers
+        if (wasSelected) {
+            self.selected = false;
+            self.treeview.selectedItem = undefined;
+            // Notify the editor that selection was cleared
+            if (oSceneEditor != undefined && oSceneEditor.editorManager != undefined) {
+                oSceneEditor.editorManager.clearActiveAsset(true); // Keep scene active
+            }
+        }
         
         // Remove from current parent
         if (self.parent != undefined) {

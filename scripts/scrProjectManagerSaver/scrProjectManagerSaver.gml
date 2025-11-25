@@ -4,12 +4,6 @@ function ProjectSaver() constructor {
     self.__lastCallTime = 0;
     self.__pendingSave = false;
     self.__debounceDelay = 500; // milliseconds
-    
-    // Loop protection for __writeJson
-    self.__writeCallCount = 0;
-    self.__lastWritePath = "";
-    self.__lastWriteTime = 0;
-
 
     /**
      * Save the project.
@@ -158,6 +152,11 @@ function ProjectSaver() constructor {
                 metadata.ez = asset.__rotationEuler.z;
                 metadata.eo = asset.__rotationEuler.order;
             }
+            
+            // Add static field for meshes (used for export)
+            if (asset.type == "Mesh" && asset[$ "__matrixAutoUpdate"] != undefined) {
+                metadata.matrixAutoUpdate = asset.__matrixAutoUpdate;
+            }
 
             // Save folder UUID if asset is in a folder
             if (asset[$ "__parentUI"] != undefined) {
@@ -173,7 +172,12 @@ function ProjectSaver() constructor {
                     break;
                 case "Mesh":  
                     var assetGeometry = asset[$ "geometry"];
-                    if (assetGeometry != undefined) assetGeometry.export(assetPath + "/geometry.buf");
+                    if (assetGeometry == undefined) break;
+                    var assetGeometryVb = assetGeometry[$ "vb"];
+                    if (assetGeometryVb == undefined) break;
+                    assetGeometry.vb = assetGeometry.__vbClone; // Use unfrozen VB for export
+                    assetGeometry.export(assetPath + "/geometry.buf");
+                    assetGeometry.vb = assetGeometryVb; // Restore original VB
                     break;
             }
         }
@@ -203,11 +207,6 @@ function ProjectSaver() constructor {
         
         show_debug_message("[SAVE] Starting incremental save with " + string(array_length(changeIds)) + " changes");
         
-        // LOOP PROTECTION: Track iterations to prevent infinite loops
-        var maxIterations = 1000;
-        var iterationCount = 0;
-        var processedUuids = {}; // Track which UUIDs we've already processed
-        
         // Load existing assets.json
         var assetsJson = json_parse(self.__readFile(assetsJsonPath));
         var assets = assetsJson.assets;
@@ -224,21 +223,7 @@ function ProjectSaver() constructor {
         show_debug_message("[SAVE] Loaded project.json with " + string(struct_names_count(foldersMap)) + " folders");
         
         for (var i = 0; i < array_length(changeIds); i++) {
-            // LOOP PROTECTION: Check iteration count
-            iterationCount++;
-            if (iterationCount > maxIterations) {
-                show_debug_message("[SAVE ERROR] LOOP DETECTED! Exceeded " + string(maxIterations) + " iterations. Aborting save.");
-                return;
-            }
-            
             var uuid = changeIds[i];
-            
-            // LOOP PROTECTION: Check if we've already processed this UUID
-            if (processedUuids[$ uuid] != undefined) {
-                show_debug_message("[SAVE ERROR] UUID già processato: " + uuid + ". Possibile loop!");
-                continue; // Skip this duplicate
-            }
-            processedUuids[$ uuid] = true;
             
             var change = changes[$ uuid];
             var action = change.action;
@@ -312,6 +297,11 @@ function ProjectSaver() constructor {
                         metadata.eo = asset.__rotationEuler.order;
                     }
 
+                    // Add static field for meshes (used for export)
+                    if (asset.type == "Mesh" && asset[$ "__matrixAutoUpdate"] != undefined) {
+                        metadata.matrixAutoUpdate = asset.__matrixAutoUpdate;
+                    }
+
                     // Save parent UUID if asset has one (set by AssetManager)
                     if (asset[$ "__parentUI"] != undefined) {
                         show_debug_message("[SAVE] Asset " + asset.name + " has __parentUI: " + asset.__parentUI);
@@ -332,11 +322,14 @@ function ProjectSaver() constructor {
                         case "Mesh":  
                             var assetGeometry = asset[$ "geometry"];
                             if (assetGeometry != undefined) {
-                                show_debug_message("[SAVE] Exporting mesh geometry: " + asset.name);
-                                var originalVb = assetGeometry.vb;
-                                assetGeometry.vb = assetGeometry.__vbClone; // Use unfrozen VB for export
-                                assetGeometry.export(assetPath + "/geometry.buf");
-                                assetGeometry.vb = originalVb; // Restore original VB
+                                var assetGeometryVb = assetGeometry[$ "vb"];
+                                if (assetGeometryVb != undefined) {
+                                    show_debug_message("[SAVE] Exporting mesh geometry: " + asset.name);
+                                    var originalVb = assetGeometryVb;
+                                    assetGeometry.vb = assetGeometry.__vbClone; // Use unfrozen VB for export
+                                    assetGeometry.export(assetPath + "/geometry.buf");
+                                    assetGeometry.vb = originalVb; // Restore original VB
+                                }
                             }
                             break;
                     }

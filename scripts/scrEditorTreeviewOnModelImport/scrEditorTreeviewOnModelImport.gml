@@ -117,6 +117,8 @@ function editorTreeviewOnModelImport(modelAsset) {
 
     model.traverse(function(node) {
         node.__rotationEuler = new UeEuler();
+        node.matrixAutoUpdate = false; // Editor meshes don't auto-update for performance
+        node.__matrixAutoUpdate = false; // Internal field for export (false = static mesh)
 
         if (node[$ "geometry"] != undefined && node.geometry[$ "vb"] != undefined) {
           node.geometry.__vbClone = node.geometry.cloneVb();

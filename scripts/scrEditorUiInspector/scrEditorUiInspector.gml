@@ -364,7 +364,7 @@ function EditorUiInspector(ui) constructor {
            }, 
            { 
                 id: "static",
-                field: "matrixAutoUpdate",
+                field: "__matrixAutoUpdate",
                 label: "Static", 
                 type: "checkbox",
                 tooltip: "Mark object as static (disable automatic matrix updates)",
@@ -372,8 +372,8 @@ function EditorUiInspector(ui) constructor {
                     return !value;
                 },
                 onChange: function(value) {
-                    self.matrixAutoUpdate = !value;
-                    
+                    self.__matrixAutoUpdate = !value;
+               
                     // Track the change in asset manager
                     oSceneEditor.assetManager.editAsset(self.asset);
                 }
@@ -505,29 +505,29 @@ function EditorUiInspector(ui) constructor {
                 type: "checkbox",
                 tooltip: "Enable instance visibility",
            },
-           { 
-                id: "static",
-                field: "matrixAutoUpdate",
-                label: "Static", 
-                type: "checkbox", 
-                tooltip: "Mark object as static (disable automatic matrix updates)",
-                onValue: function(value) {
-                    return !value;
-                },
-                onChange: function(value) {
-                    self.matrixAutoUpdate = !value;
+        //    { 
+        //         id: "static",
+        //         field: "matrixAutoUpdate",
+        //         label: "Static", 
+        //         type: "checkbox", 
+        //         tooltip: "Mark object as static (disable automatic matrix updates)",
+        //         onValue: function(value) {
+        //             return !value;
+        //         },
+        //         onChange: function(value) {
+        //             self.matrixAutoUpdate = !value;
                     
-                    // Track the change in asset manager
-                    oSceneEditor.assetManager.editAsset(self.asset);
-                }
-           },
-           { 
-                id: "frustumCulled",
-                field: "frustumCulled",
-                label: "Frustum Culled", 
-                type: "checkbox",
-                tooltip: "Enable frustum culling (skip rendering when outside camera view)"
-           },           
+        //             // Track the change in asset manager
+        //             oSceneEditor.assetManager.editAsset(self.asset);
+        //         }
+        //    },
+        //    { 
+        //         id: "frustumCulled",
+        //         field: "frustumCulled",
+        //         label: "Frustum Culled", 
+        //         type: "checkbox",
+        //         tooltip: "Enable frustum culling (skip rendering when outside camera view)"
+        //    },           
            { 
                 id: "material",
                 field: "material",

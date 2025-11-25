@@ -21,15 +21,18 @@ function SceneManager() constructor {
     self.transformControls = new UeTransformControls(self.camera, {
         onDrag: function() {
             oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object);
+        },
+        onDragEnd: function() {
+            global.UI.needsRedraw = true;
         }
     });
 
-    self.boxHelper = new UeBoxHelper(undefined, c_yellow);
-    with (self.boxHelper) {
-        function onBeforeRender() {
-            if (self.needsUpdate) self.update();
-        }
-    }
+    self.boxHelper = new UeBoxHelper(undefined, c_yellow, { matrixAutoUpdate: false });
+    // with (self.boxHelper) {
+    //     function onBeforeRender() {
+    //         if (self.needsUpdate) self.update();
+    //     }
+    // }
     
     // Assimp loader
     self.assimp = new UeAssimpLoader();

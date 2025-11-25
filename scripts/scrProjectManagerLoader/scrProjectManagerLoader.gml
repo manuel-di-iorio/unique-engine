@@ -122,7 +122,7 @@ function ProjectLoader() constructor {
                 } else {
                     if (parentAsset[$ "add"] != undefined) parentAsset.add(asset);
                 }
-                asset.parent = parentAsset;
+                // asset.parent = parentAsset;
             } else {
                 // Root asset
                 treeview.Items.add(tvItem);
@@ -132,7 +132,7 @@ function ProjectLoader() constructor {
 
     // 4. Link asset references (Materials <-> Meshes, etc.)
     __linkNodes();
-    
+
     // Clear the cache
     treeviewItemsByUUID = {};
     
@@ -251,6 +251,10 @@ function ProjectLoader() constructor {
             }
             delete mesh.__metadata;
         }
+        
+        // Force update matrix
+        mesh.updateMatrix();
+        mesh.updateMatrixWorld(true);
     }
     
     // 3. Link Scenes (ModelInstances)
@@ -325,7 +329,7 @@ function ProjectLoader() constructor {
     switch (node.type) {
       case "Texture": asset = new UeTexture(); break;
       case "Material": asset = new UeMaterial(); break;
-      case "Mesh": asset = new UeMesh(); break;
+      case "Mesh": asset = new UeStaticMesh(); break;
       case "Scene": asset = new UeScene(); break;
       case "Light": asset = new UeLight(); break;
       case "Camera": asset = new UeObject3D(); asset.isCamera = true; asset.type = "Camera"; break;
@@ -343,7 +347,10 @@ function ProjectLoader() constructor {
       }
 
       // For meshes, add the rotation euler
-      if (asset.type == "Mesh") {
+      if (asset.type == "Mesh") {        
+        // Load __static field from metadata (used for export)
+        asset.__matrixAutoUpdate = meta[$ "matrixAutoUpdate"] ?? false;
+        
         // Load Euler rotation from metadata if available, otherwise create from quaternion
         if (meta[$ "ex"] != undefined && meta[$ "ey"] != undefined && meta[$ "ez"] != undefined) {
           asset.__rotationEuler = new UeEuler(
@@ -366,6 +373,11 @@ function ProjectLoader() constructor {
           geometry.freeze();
           asset.geometry = geometry;
         }
+      }
+      
+      // Load __parentUI from metadata (for treeview organization)
+      if (asset.__metadata != undefined && asset.__metadata[$ "__parentUI"] != undefined) {
+        asset.__parentUI = asset.__metadata.__parentUI;
       }
 
       // Attempt to import binary resources (textures) if import() exists

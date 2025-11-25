@@ -81,6 +81,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function attach(object) {
         gml_pragma("forceinline");
         self.object = object;
+        
         // Ensure object's world matrix is up-to-date so gizmo uses correct world transforms
         if (object.updateWorldMatrix != undefined) {
             object.updateWorldMatrix(true, false);

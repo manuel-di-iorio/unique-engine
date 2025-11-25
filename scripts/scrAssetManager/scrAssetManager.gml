@@ -133,11 +133,11 @@ function AssetManager() constructor {
      * @param {Struct} asset - The asset that was modified
      */
     function editAsset(asset) {
-        __trackChange("edit", asset);
+        self.__trackChange("edit", asset);
         
         // Rebuild the box in the next frame in order to wait first for the matrix updates
         if (asset.type == "Mesh" || asset.type == "ModelInstance") {
-            oSceneEditor.sceneManager.boxHelper.needsUpdate = true;
+            self.updateAssetMatrix(asset);
         }
     }
     
@@ -207,6 +207,20 @@ function AssetManager() constructor {
             };
             projectManager.markAsUnsaved();
         }
+    }
+
+    /**
+     * Update the matrix of an asset and of the box helper
+     * The update is scheduled in the next frame in order to wait for box helper update
+     */
+    function updateAssetMatrix(asset) {
+        call_later(1, time_source_units_frames, method({asset}, function() {
+            asset.updateMatrix();
+            asset.updateMatrixWorld(true);
+            
+            // Update the box helper to match the new transform
+            oSceneEditor.sceneManager.boxHelper.update();
+        }));
     }
     
     /**

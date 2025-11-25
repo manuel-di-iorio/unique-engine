@@ -60,11 +60,16 @@ function EditorManager() constructor {
         } else {
             self.activeScene = undefined;
         }
+
+        // Update the matrix of the asset if it is a mesh/scene/model instance
+        // if (asset != undefined && (asset.type == "Mesh" || asset.type == "ModelInstance" || asset.type == "Scene")) {
+        //     asset.updateMatrix();
+        //     asset.updateMatrixWorld(true);
+        // }
         
         // Add to objects for rendering only if the asset is changed
         if (assetChanged) {
-            sm.objects.clear();
-            self.renderClone = undefined;
+            sm.objects.children = []; // Clear children without calling clear() to avoid parent issues
             
             var objectToRender = undefined;
             if (self.activeScene != undefined) {
@@ -74,7 +79,9 @@ function EditorManager() constructor {
             }
             
             if (objectToRender != undefined) {
-                sm.objects.add(objectToRender);
+                // Don't use add() because it calls removeFromParent() which breaks the hierarchy
+                // Just add to children array directly for rendering purposes
+                array_push(sm.objects.children, objectToRender);
             }
         }
         
@@ -86,8 +93,9 @@ function EditorManager() constructor {
         if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
             if (self.gizmoTarget[$ "geometry"] != undefined && self.gizmoTarget.geometry[$ "vb"] != undefined) {
                 call_later(1, time_source_units_frames, method({ sm, target: self.gizmoTarget }, function() { 
-                    sm.boxHelper.object = target;
-                    sm.boxHelper.update();
+                        sm.boxHelper.object = target;
+                        sm.boxHelper.update();
+                        oSceneEditor.assetManager.updateAssetMatrix(target);
                 }));
             }
         }
@@ -101,16 +109,6 @@ function EditorManager() constructor {
         }
     }
 
-    function __freezeGeometry(object) {
-        if (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined) {
-            object.geometry.freeze();
-        }
-        
-        for (var i = 0, il = array_length(object.children); i < il; i++) {
-            __freezeGeometry(object.children[i]);
-        }
-    }
-    
     /**
      * Clear the active asset selection
      */
