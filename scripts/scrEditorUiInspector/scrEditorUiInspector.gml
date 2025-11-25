@@ -727,14 +727,6 @@ function EditorUiInspector(ui) constructor {
                                 return;
                             }
                             
-                            // Special validation for name field
-                            if (self.assetField.field == "name") {
-                                var inspector = oSceneEditor.editorManager.inspector;
-                                if (!inspector.__validateAssetName(self.asset, value, input)) {
-                                    return;
-                                }
-                            }
-                            
                             self.asset[$ self.assetField.field] = value;
                             
                             // Track the change in asset manager
@@ -823,62 +815,5 @@ function EditorUiInspector(ui) constructor {
     
     function close() {
         self.ui.Inspector.Content.Items.destroyChildren();
-    }
-    
-    /**
-     * Validate asset name changes
-     * @param {Struct} asset - The asset being renamed
-     * @param {String} newName - The new name to validate
-     * @param {Struct} input - The textbox input for error recovery
-     * @return {Bool} True if valid, false otherwise
-     */
-    function __validateAssetName(asset, newName, input) {
-        // Check for duplicate names at the same level (siblings only)
-        var assetManager = oSceneEditor.assetManager;
-        var isDuplicate = false;
-        var siblings = [];
-        
-        if (asset[$ "type"] == "Folder") {
-            // For folders, get siblings
-            if (asset[$ "parent"] != undefined) {
-                // Has parent: check parent's children
-                siblings = asset.parent.children;
-            } else {
-                // Root level: check root folders
-                siblings = assetManager.folders;
-            }
-        } else {
-            // For other assets, check siblings at same level
-            if (asset[$ "parent"] != undefined) {
-                // Has parent: check parent's children
-                siblings = asset.parent.children;
-            } else {
-                // Root level: check all root assets of the same type
-                siblings = assetManager.getAssetsByType(asset[$ "type"]);
-            }
-        }
-        
-        // Check if any sibling has the same name
-        for (var i = 0; i < array_length(siblings); i++) {
-            var sibling = siblings[i];
-            if (sibling != asset && sibling.name == newName) {
-                isDuplicate = true;
-                break;
-            }
-        }
-        
-        if (isDuplicate) {
-            show_message("An asset with this name already exists at this level. Please use a different name.");
-            input.value = asset.name;
-            return false;
-        }
-        
-        // Update name in lookup map
-        if (assetManager.assetsByName[$ asset.name] != undefined) {
-            delete assetManager.assetsByName[$ asset.name];
-        }
-        assetManager.assetsByName[$ newName] = asset;
-        
-        return true;
     }
 }

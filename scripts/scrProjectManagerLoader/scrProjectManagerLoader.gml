@@ -107,8 +107,8 @@ function ProjectLoader() constructor {
 
             // Place in folder if metadata says so
             var parentUUID = undefined;
-            if (asset[$ "__metadata"] != undefined && asset.__metadata[$ "folder"] != undefined) {
-                parentUUID = asset.__metadata.folder;
+            if (asset[$ "__metadata"] != undefined && asset.__metadata[$ "__folder"] != undefined) {
+                parentUUID = asset.__metadata.__folder;
             }
 
             if (parentUUID != undefined && treeviewItemsByUUID[$ parentUUID] != undefined) {

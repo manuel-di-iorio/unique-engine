@@ -2,7 +2,7 @@
   "$GMProject":"v1",
   "%Name":"Unique Engine",
   "AudioGroups":[
-    {"$GMAudioGroup":"","%Name":"audiogroup_default","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
+    {"$GMAudioGroup":"v1","%Name":"audiogroup_default","exportDir":"","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
   ],
   "configs":{
     "children":[],
@@ -74,7 +74,6 @@
     {"$GMIncludedFile":"","%Name":"upload-desktop-svgrepo-com.svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"upload-desktop-svgrepo-com.svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"view-simple-815-svgrepo-com.svg","CopyToMask":-1,"filePath":"datafiles/Icons","name":"view-simple-815-svgrepo-com.svg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"assets.json","CopyToMask":-1,"filePath":"datafiles/Unique Project","name":"assets.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"metadata.json","CopyToMask":-1,"filePath":"datafiles/Unique Project/assets/da91c8ed-3bbe-4e8e-89e4-b99d4de03eae","name":"metadata.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"project.json","CopyToMask":-1,"filePath":"datafiles/Unique Project","name":"project.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
   ],
   "isEcma":false,

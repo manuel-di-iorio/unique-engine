@@ -8,7 +8,7 @@ function SceneManager() constructor {
             return global.UI.Main.Scene.hovered;
         },
         onChange: function() {
-            oSceneEditor.projectManager.saver.saveCameraPosition(oSceneEditor.projectManager);
+            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
         }
     });
     self.scene = new UeScene();

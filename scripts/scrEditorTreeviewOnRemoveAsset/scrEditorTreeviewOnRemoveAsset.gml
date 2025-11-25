@@ -160,7 +160,7 @@ function __editorTreeview_findAndRemoveTreeviewItem(container, asset) {
  * Rimuove una texture da tutti i material che la usano
  */
 function __editorTreeview_removeTextureFromMaterials(targetTexture) {
-    var materials = oSceneEditor.assetManager.materials;
+    var materials = oSceneEditor.assetManager.getAssetsByType("Material");
     
     for (var i = 0; i < array_length(materials); i++) {
         var material = materials[i];
@@ -189,13 +189,13 @@ function __editorTreeview_removeTextureFromMaterials(targetTexture) {
  */
 function __editorTreeview_removeMaterialFromObjects(targetMaterial) {
     // Rimuovi dai modelli
-    var models = oSceneEditor.assetManager.models;
+    var models = oSceneEditor.assetManager.getAssetsByType("Mesh");
     for (var i = 0; i < array_length(models); i++) {
         __editorTreeview_unsetMaterialRecursive(models[i], targetMaterial);
     }
     
     // Rimuovi dalle scene e dai loro figli
-    var scenes = oSceneEditor.assetManager.scenes;
+    var scenes = oSceneEditor.assetManager.getAssetsByType("Scene");
     for (var i = 0; i < array_length(scenes); i++) {
         __editorTreeview_unsetMaterialRecursive(scenes[i], targetMaterial);
     }

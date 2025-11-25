@@ -41,7 +41,6 @@ if (!uiHasFocus) {
                
                if (array_length(objectsToTest) > 0) {
                    var hits = sceneManager.raycaster.intersectObjects(objectsToTest, false, true);
-                   
                    if (array_length(hits) > 0) {
                        var hitObject = hits[0].object;
                        
@@ -105,14 +104,14 @@ if (!uiHasFocus) {
        tool = "move";
        editorManager.sceneTools.updateToolButtons();
    }
-    if (keyboard_check_pressed(ord("E"))) {
-      editorManager.setTool("rotate");
-      tool = "rotate";
-      editorManager.sceneTools.updateToolButtons();
-    }
-    if (keyboard_check_pressed(ord("R"))) {
-     editorManager.setTool("scale");
-     tool = "scale";
-     editorManager.sceneTools.updateToolButtons();
-    }
+//    if (keyboard_check_pressed(ord("E"))) {
+//       editorManager.setTool("rotate");
+//       tool = "rotate";
+//       editorManager.sceneTools.updateToolButtons();
+//    }
+//    if (keyboard_check_pressed(ord("R"))) {
+//      editorManager.setTool("scale");
+//      tool = "scale";
+//      editorManager.sceneTools.updateToolButtons();
+//    }
 }

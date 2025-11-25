@@ -27,10 +27,10 @@ function ProjectSaver() constructor {
     }
     
     /**
-     * Save only the camera position and target to project.json
-     * This is called frequently (e.g., on camera movement) and doesn't mark the project as unsaved
+     * Save editor settings (camera easing, grid, box colliders) to project.json
+     * This is called when toggling these settings and doesn't mark the project as unsaved
      */
-    function saveCameraPosition(projectManager) {
+    function saveEditorSettings(projectManager) {
         var projectDir = projectManager.projectDatafiles + "/Unique Project/";
         var projectJsonPath = projectDir + "project.json";
         
@@ -40,15 +40,28 @@ function ProjectSaver() constructor {
         // Load existing project.json
         var projectJson = json_parse(self.__readFile(projectJsonPath));
         
-        // Update only camera settings
+        // Update editor settings
         var sm = oSceneEditor.sceneManager;
-        var cameraSettings = {
-            position: [sm.camera.position.x, sm.camera.position.y, sm.camera.position.z],
-            target: [sm.orbit.target.x, sm.orbit.target.y, sm.orbit.target.z],
-            dampingFactor: sm.orbit.dampingFactor
-        };
+
+        // Update camera position and target
+        if (projectJson.settings[$ "camera"] != undefined && sm.orbit != undefined) {
+            projectJson.settings.camera.position = [sm.camera.position.x, sm.camera.position.y, sm.camera.position.z];
+            projectJson.settings.camera.target = [sm.orbit.target.x, sm.orbit.target.y, sm.orbit.target.z];
+        }
         
-        projectJson.settings.camera = cameraSettings;
+        // Update camera damping factor
+        if (projectJson.settings[$ "camera"] != undefined && sm.orbit != undefined) {
+            projectJson.settings.camera.dampingFactor = sm.orbit.dampingFactor;
+        }
+        
+        // Update grid visibility
+        projectJson.settings.gridEnabled = sm.gridEnabled;
+        
+        // Update box colliders visibility
+        if (projectJson.settings[$ "gizmos"] == undefined) {
+            projectJson.settings.gizmos = {};
+        }
+        projectJson.settings.gizmos.showBoxColliders = sm.showBoxColliders;
         
         // Write back to file
         self.__writeJson(projectJsonPath, projectJson);
@@ -187,11 +200,12 @@ function ProjectSaver() constructor {
                     var assetPath = assetsDir + uuid;
                     if (!directory_exists(assetPath)) directory_create(assetPath);
                     
-                    // Check if asset is in a folder using __treeviewItem
+                    // Check if asset is in a folder or has a parent using __treeviewItem
                     var folderUUID = undefined;
-                    if (asset[$ "__treeviewItem"] != undefined && asset.__treeviewItem[$ "parent"] != undefined) {
+                    if (asset[$ "__treeviewItem"] != undefined) {
                         var parentItem = asset.__treeviewItem.parent;
-                        if (parentItem[$ "asset"] != undefined && parentItem.asset[$ "type"] == "Folder") {
+                        // Use immediate parent if it has an asset (Mesh, Folder, etc.)
+                        if (parentItem != undefined && parentItem[$ "asset"] != undefined) {
                             folderUUID = parentItem.asset.uuid;
                         }
                     }
@@ -209,7 +223,7 @@ function ProjectSaver() constructor {
 
                     // Save folder UUID if we found one
                     if (folderUUID != undefined) {
-                        metadata.folder = folderUUID;
+                        metadata.__folder = folderUUID;
                     }
                     
                     self.__writeJson(assetPath + "/metadata.json", metadata);
@@ -314,13 +328,10 @@ function ProjectSaver() constructor {
                     var assetPath = assetsDir + assetUuid;
                     if (!directory_exists(assetPath)) directory_create(assetPath);
 
-                    // Check if parent treeview item is a Folder (UI organization, not 3D hierarchy)
+                    // Check if parent treeview item has an asset (Folder or Mesh)
                     var folderUUID = undefined;
                     if (parentTreeviewItem != undefined && parentTreeviewItem[$ "asset"] != undefined) {
-                        var parentAsset = parentTreeviewItem.asset;
-                        if (parentAsset[$ "type"] == "Folder") {
-                            folderUUID = parentAsset.uuid;
-                        }
+                        folderUUID = parentTreeviewItem.asset.uuid;
                     }
                     
                     var assetToJSON = asset[$ "toJSON"];
@@ -336,7 +347,7 @@ function ProjectSaver() constructor {
 
                     // Save folder UUID if we found one
                     if (folderUUID != undefined) {
-                        metadata.folder = folderUUID;
+                        metadata.__folder = folderUUID;
                     }
                     
                     self.__writeJson(assetPath + "/metadata.json", metadata);

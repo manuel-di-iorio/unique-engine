@@ -21,7 +21,7 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     
     self.ripples = [];
     
-    self.onMouseDown(function() {
+    self.onClick(function() {
         if (!self.enableRipple) return;
         
         var mx = window_mouse_get_x();
@@ -73,11 +73,15 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     }
     
     function onDraw() {
-        if (self.hovered) {
-            draw_set_color(global.UI_COL_BTN_HOVER);
+        if (self.selected && self.hovered) {
+            draw_set_color(global.UI_COL_SELECTED_HOVER);
             draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, false);
         } else if (self.selected) {
             draw_set_color(global.UI_COL_SELECTED);
+            draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, false);
+        }
+        else if (self.hovered) {
+            draw_set_color(global.UI_COL_BTN_HOVER);
             draw_rectangle(self.xp1, self.yp1, self.xp2, self.yp2, false);
         }
         

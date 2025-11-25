@@ -4,9 +4,6 @@ function AssetManager() constructor {
     // Flat array of all assets
     self.assets = [];
     
-    // Asset lookup by name for quick access
-    self.assetsByName = {};
-    
     /**
      * Add an asset to the manager
      * @param {String} type - Asset type: "Texture", "Material", "Mesh", "Scene", "Light", "Camera", "Folder"
@@ -28,9 +25,9 @@ function AssetManager() constructor {
                 
                 // Check if parent item has an asset
                 if (parentTreeviewItem[$ "asset"] != undefined) {
-                    if (parentTreeviewItem.asset[$ "type"] == "Folder") {
-                        asset.__folder = parentTreeviewItem.asset.uuid;
-                    }
+                    // Store parent UUID in __folder (used for saving hierarchy)
+                    // This works for both Folders and other assets (like Meshes acting as parents)
+                    asset.__folder = parentTreeviewItem.asset.uuid;
                 }
             }
         }
@@ -45,11 +42,6 @@ function AssetManager() constructor {
                 array_push(parent.children, asset);
             }
             asset.parent = parent;
-        }
-        
-        // Add to lookup map
-        if (asset[$ "name"] != undefined) {
-            self.assetsByName[$ asset.name] = asset;
         }
         
         // Track creation
@@ -94,11 +86,6 @@ function AssetManager() constructor {
             }
         }
         
-        // Remove from lookup map
-        if (asset[$ "name"] != undefined) {
-            variable_struct_remove(self.assetsByName, asset.name);
-        }
-        
         // Clean up instances if this is a model
         if (asset[$ "instances"] != undefined) {
             asset.instances.clear();
@@ -106,24 +93,6 @@ function AssetManager() constructor {
         
         // Track removal
         __trackChange("delete", asset);
-    }
-    
-    /**
-     * Get an asset by name
-     * @param {String} name - Asset name
-     * @return {Struct|undefined} The asset or undefined if not found
-     */
-    function getAssetByName(name) {
-        return self.assetsByName[$ name];
-    }
-    
-    /**
-     * Check if an asset name is available
-     * @param {String} name - Name to check
-     * @return {Bool} True if available
-     */
-    function isNameAvailable(name) {
-        return self.assetsByName[$ name] == undefined;
     }
     
     /**
@@ -147,7 +116,6 @@ function AssetManager() constructor {
      */
     function clear() {
         self.assets = [];
-        self.assetsByName = {};
     }
     
     /**

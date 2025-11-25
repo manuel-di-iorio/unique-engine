@@ -136,8 +136,37 @@ function editorTreeviewOnModelImport(modelAsset) {
     oSceneEditor.assetManager.addAsset("Mesh", model);
     
     // 4. Add submeshes recursively with proper hierarchy
-    __editorTreeview_createTreeviewItemsForChildren(model, modelTreeviewItem, sprUiObject);
+    __editorTreeview_addModelChildrenRecursive(model, modelTreeviewItem);
     
     // 5. Select the imported model
     treeview.__onItemSelected(modelTreeviewItem);
+}
+
+function __editorTreeview_addModelChildrenRecursive(parentAsset, parentTreeviewItem) {
+    if (parentAsset.children == undefined) return;
+    
+    for (var i = 0; i < array_length(parentAsset.children); i++) {
+        var child = parentAsset.children[i];
+        
+        // Add to AssetManager
+        // Use child.type if available, otherwise default to "Mesh"
+        var type = child[$ "type"] ?? "Mesh";
+        oSceneEditor.assetManager.addAsset(type, child);
+        
+        // Create Treeview Item
+        var childTreeviewItem = new UiTreeviewItem({
+            name: "UiTreeview.Item",
+            paddingVertical: 2.5
+        }, {
+            treeview: parentTreeviewItem.treeview,
+            assetType: type,
+            type: type,
+            icon: sprUiObject,
+            asset: child
+        });
+        parentTreeviewItem.addChild(childTreeviewItem);
+        
+        // Recurse
+        __editorTreeview_addModelChildrenRecursive(child, childTreeviewItem);
+    }
 }

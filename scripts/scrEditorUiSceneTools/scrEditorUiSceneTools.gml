@@ -102,7 +102,7 @@ function EditorUiSceneTools(ui) constructor {
                 self.selected = (sm.orbit.dampingFactor < 1.0);
                 sm.orbit.enableDamping = self.selected;
                 global.UI.needsRedraw = true;
-                oSceneEditor.projectManager.markAsUnsaved();
+                oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
             }
         });
     }
@@ -129,7 +129,7 @@ function EditorUiSceneTools(ui) constructor {
                 sm.orbit.target.set(0, 0, 0);
                 sm.orbit.reset(); 
             }
-            oSceneEditor.projectManager.saver.saveCameraPosition(oSceneEditor.projectManager);
+            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
         }
     });
 
@@ -143,7 +143,7 @@ function EditorUiSceneTools(ui) constructor {
             sm.gridEnabled = sm.grid.visible;
             self.selected = sm.grid.visible;
             global.UI.needsRedraw = true;
-            oSceneEditor.projectManager.markAsUnsaved();
+            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
         });
     }
     
@@ -160,14 +160,14 @@ function EditorUiSceneTools(ui) constructor {
             sm.boxHelper.visible = sm.showBoxColliders;
             self.selected = sm.showBoxColliders;
             global.UI.needsRedraw = true;
-            oSceneEditor.projectManager.markAsUnsaved();
+            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
         });
     }
     
     // Set initial state
     ui.SceneTools.BtnBoxColliders.selected = oSceneEditor.sceneManager.showBoxColliders;
 
-    ui.SceneTools.Right.add(ui.SceneTools.BtnCamAccel, ui.SceneTools.BtnResetCam, ui.SceneTools.BtnGrid, ui.SceneTools.BtnBoxColliders);
+    ui.SceneTools.Right.add(ui.SceneTools.BtnResetCam, ui.SceneTools.BtnCamAccel, ui.SceneTools.BtnGrid, ui.SceneTools.BtnBoxColliders);
 
     self.updateGridButton = function() {
         ui.SceneTools.BtnGrid.selected = oSceneEditor.sceneManager.grid.visible;
