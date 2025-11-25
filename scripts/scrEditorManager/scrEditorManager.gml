@@ -87,6 +87,7 @@ function EditorManager() constructor {
         if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
             if (self.gizmoTarget[$ "geometry"] != undefined && self.gizmoTarget.geometry[$ "vb"] != undefined) {
                 call_later(1, time_source_units_frames, method({ sm, target: self.gizmoTarget }, function() { 
+                    sm.boxHelper.object = target;
                     oSceneEditor.assetManager.updateAssetMatrix(target);
                 }));
             }
