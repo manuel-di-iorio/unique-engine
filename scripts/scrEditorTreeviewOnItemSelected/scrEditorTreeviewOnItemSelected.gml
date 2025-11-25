@@ -8,15 +8,8 @@ function editorTreeviewOnItemSelected(treeviewItem) {
             // Find the root for rendering (Scene or top-level Mesh)
             var rootAsset = currentAsset;
             var curr = currentAsset;
-            var safetyCounter = 0;
             
             while (curr.parent != undefined) {
-                safetyCounter++;
-                if (safetyCounter > 1000) {
-                    show_debug_message("ERROR: Loop detected in hierarchy traversal for asset: " + string(currentAsset));
-                    break;
-                }
-                
                 var parentType = curr.parent[$ "type"];
                 
                 if (parentType == "Scene") {

@@ -51,6 +51,74 @@ function SceneManager() constructor {
     self.raycaster = new UeRaycaster();
     self.raycaster.setFromCamera(self.camera);
     
+    /**
+     * Handle mesh picking with mouse raycast
+     * Performs contextual selection based on currently selected asset
+     * @returns {bool} True if a mesh was selected, false otherwise
+     */
+    function handleMeshPicking() {
+        self.raycaster.setFromCamera(self.camera);
+        
+        var objectsToTest = [];
+        var recursive = false; // Default: don't check children recursively
+        
+        // Check if we have a Mesh selected - if so, only raycast against that mesh and its submeshes
+        var selectedItem = global.UI.Main.Assets.Treeview.selectedItem;
+        if (selectedItem != undefined && selectedItem.asset != undefined && 
+            (selectedItem.assetType == "Mesh")) {
+            // Find the root mesh by traversing up the parent hierarchy
+            var rootMesh = selectedItem.asset;
+            var curr = selectedItem.asset;
+            var safetyCounter = 0;
+            
+            // Traverse up to find the top-level mesh (the one without a Mesh parent)
+            while (curr.parent != undefined && safetyCounter < 1000) {
+                safetyCounter++;
+                var parentType = curr.parent[$ "type"];
+                
+                // Stop if parent is a Folder (not a Mesh)
+                if (parentType == "Folder" || parentType == undefined) {
+                    break;
+                }
+                
+                // If parent is also a Mesh, continue traversing up
+                if (parentType == "Mesh") {
+                    rootMesh = curr.parent;
+                    curr = curr.parent;
+                } else {
+                    break;
+                }
+            }
+            
+            // Contextual selection: only check the root mesh and its children (submeshes)
+            objectsToTest = [rootMesh];
+            recursive = true; // Enable recursive checking to find submeshes
+        } else {
+            // Default behavior: check all objects in the scene or root
+            if (oSceneEditor.editorManager.activeScene != undefined) {
+                objectsToTest = oSceneEditor.editorManager.activeScene.children;
+            } else {
+                objectsToTest = self.objects.children;
+            }
+        }
+        
+        if (array_length(objectsToTest) > 0) {
+            var hits = self.raycaster.intersectObjects(objectsToTest, recursive, true);
+            if (array_length(hits) > 0) {
+                var hitObject = hits[0].object;
+                
+                // Use the back-reference to get the treeview item directly
+                if (hitObject[$ "__treeviewItem"] != undefined) {
+                    var treeview = global.UI.Main.Assets.Treeview;
+                    treeview.__onItemSelected(hitObject.__treeviewItem);
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
     function clear() {
         self.objects.children = [];
         self.transformControls.detach();

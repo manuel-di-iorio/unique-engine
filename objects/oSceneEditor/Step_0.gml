@@ -1,6 +1,8 @@
 if (!enableUI) exit;
 
 var ui = global.UI;
+var uiMain = global.UI.Main;
+var uiScene = global.UI.Main.Scene;
 var uiOverlay = global.UI.Overlay;
 
 // Correctly resize the application surface to match the new window size
@@ -29,28 +31,8 @@ if (!uiHasFocus) {
            sceneManager.orbit.update(winMouseX, winMouseY);
            
            // Handle mesh picking
-           if (mouse_check_button_pressed(mb_left) && ui.Main.Scene.hovered) {
-               sceneManager.raycaster.setFromCamera(sceneManager.camera);
-               
-               var objectsToTest = [];
-               if (editorManager.activeScene != undefined) {
-                   objectsToTest = editorManager.activeScene.children;
-               } else {
-                   objectsToTest = sceneManager.objects.children;
-               }
-               
-               if (array_length(objectsToTest) > 0) {
-                   var hits = sceneManager.raycaster.intersectObjects(objectsToTest, false, true);
-                   if (array_length(hits) > 0) {
-                       var hitObject = hits[0].object;
-                       
-                       // Use the back-reference to get the treeview item directly
-                       if (hitObject[$ "__treeviewItem"] != undefined) {
-                           var treeview = ui.Main.Assets.Treeview;
-                           treeview.__onItemSelected(hitObject.__treeviewItem);
-                       }
-                   }
-               }
+           if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
+               sceneManager.handleMeshPicking();
            }
        break;
        case "move":
@@ -60,6 +42,11 @@ if (!uiHasFocus) {
 
            if (!sceneManager.transformControls.dragging) {
                sceneManager.orbit.update(winMouseX, winMouseY);
+               
+               // Handle mesh picking when not dragging
+               if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
+                   sceneManager.handleMeshPicking();
+               }
            }
        break;
    }
