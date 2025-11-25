@@ -1,4 +1,15 @@
 function ProjectSaver() constructor {
+    
+    // Debounce tracking for saveEditorSettings
+    self.__lastCallTime = 0;
+    self.__pendingSave = false;
+    self.__debounceDelay = 500; // milliseconds
+    
+    // Loop protection for __writeJson
+    self.__writeCallCount = 0;
+    self.__lastWritePath = "";
+    self.__lastWriteTime = 0;
+
 
     /**
      * Save the project.
@@ -31,6 +42,41 @@ function ProjectSaver() constructor {
      * This is called when toggling these settings and doesn't mark the project as unsaved
      */
     function saveEditorSettings(projectManager) {
+        // DEBOUNCE: Track last call time to prevent excessive saves
+        var currentTime = current_time;
+        self.__lastCallTime = currentTime;
+        
+        // If there's already a pending save, it will be handled by the scheduled call
+        if (self.__pendingSave) {
+            return;
+        }
+        
+        // Mark that we have a pending save
+        self.__pendingSave = true;
+        
+        // Schedule the actual save after the debounce delay
+        var _this = self;
+        call_later(self.__debounceDelay, time_source_units_frames, method({ 
+            projectManager,
+            scheduledTime: currentTime,
+            _this,
+        }, function() {
+            // Only save if no new calls were made during the debounce period
+            if (current_time - _this.__lastCallTime >= _this.__debounceDelay - 50) { // 50ms tolerance
+                _this.__performSaveEditorSettings(projectManager);
+                _this.__pendingSave = false;
+            } else {
+                // Reschedule if there were new calls
+                _this.__pendingSave = false;
+                projectManager.saver.saveEditorSettings(projectManager);
+            }
+        }));
+    }
+    
+    /**
+     * Internal function that actually performs the save
+     */
+    function __performSaveEditorSettings(projectManager) {
         var projectDir = projectManager.projectDatafiles + "/Unique Project/";
         var projectJsonPath = projectDir + "project.json";
         
@@ -114,8 +160,8 @@ function ProjectSaver() constructor {
             }
 
             // Save folder UUID if asset is in a folder
-            if (asset[$ "__folder"] != undefined) {
-                metadata.__folder = asset.__folder;
+            if (asset[$ "__parentUI"] != undefined) {
+                metadata.__parentUI = asset.__parentUI;
             }
             
             self.__writeJson(assetPath + "/metadata.json", metadata);
@@ -155,9 +201,18 @@ function ProjectSaver() constructor {
         var changes = projectManager.changes;
         var changeIds = struct_get_names(changes);
         
+        show_debug_message("[SAVE] Starting incremental save with " + string(array_length(changeIds)) + " changes");
+        
+        // LOOP PROTECTION: Track iterations to prevent infinite loops
+        var maxIterations = 1000;
+        var iterationCount = 0;
+        var processedUuids = {}; // Track which UUIDs we've already processed
+        
         // Load existing assets.json
         var assetsJson = json_parse(self.__readFile(assetsJsonPath));
         var assets = assetsJson.assets;
+        
+        show_debug_message("[SAVE] Loaded assets.json with " + string(array_length(assets)) + " assets");
         
         // Load existing project.json
         var projectJson = {};
@@ -166,21 +221,60 @@ function ProjectSaver() constructor {
         }
         var foldersMap = projectJson[$ "folders"] ?? {};
         
+        show_debug_message("[SAVE] Loaded project.json with " + string(struct_names_count(foldersMap)) + " folders");
+        
         for (var i = 0; i < array_length(changeIds); i++) {
+            // LOOP PROTECTION: Check iteration count
+            iterationCount++;
+            if (iterationCount > maxIterations) {
+                show_debug_message("[SAVE ERROR] LOOP DETECTED! Exceeded " + string(maxIterations) + " iterations. Aborting save.");
+                return;
+            }
+            
             var uuid = changeIds[i];
+            
+            // LOOP PROTECTION: Check if we've already processed this UUID
+            if (processedUuids[$ uuid] != undefined) {
+                show_debug_message("[SAVE ERROR] UUID già processato: " + uuid + ". Possibile loop!");
+                continue; // Skip this duplicate
+            }
+            processedUuids[$ uuid] = true;
+            
             var change = changes[$ uuid];
             var action = change.action;
             var asset = change.asset;
+            
+            // VALIDATION: Skip invalid assets
+            if (asset == undefined) {
+                show_debug_message("[SAVE] WARNING: Skipping undefined asset with UUID: " + uuid);
+                continue;
+            }
+            
+            // VALIDATION: Skip assets without a name (except for delete action)
+            if (action != "delete" && (asset[$ "name"] == undefined || asset.name == "")) {
+                show_debug_message("[SAVE] WARNING: Skipping asset with empty name. UUID: " + uuid + ", Type: " + (asset[$ "type"] ?? "undefined"));
+                continue;
+            }
+            
+            // VALIDATION: Skip generic Object3D types (these should not be saved directly)
+            if (action != "delete" && asset[$ "type"] == "Object3D") {
+                show_debug_message("[SAVE] WARNING: Skipping Object3D asset (should not be saved directly). UUID: " + uuid + ", Name: " + (asset[$ "name"] ?? ""));
+                continue;
+            }
+            
+            show_debug_message("[SAVE] Processing change #" + string(i) + ": UUID=" + uuid + ", Action=" + action + ", Type=" + asset.type + ", Name=" + asset.name);
             
             switch (action) {
                 case "create":
                 case "edit":
                     // Handle Folder updates
                     if (asset.type == "Folder") {
+                        var folderParentUuid = (asset[$ "parent"] != undefined && asset.parent[$ "type"] == "Folder") ? asset.parent.uuid : undefined;
+                        show_debug_message("[SAVE] Updating folder: " + asset.name + " (parent: " + (folderParentUuid ?? "none") + ")");
                         foldersMap[$ asset.uuid] = {
                             uuid: asset.uuid,
                             name: asset.name,
-                            parent: (asset[$ "parent"] != undefined && asset.parent[$ "type"] == "Folder") ? asset.parent.uuid : undefined
+                            parent: folderParentUuid
                         };
                         break;
                     }
@@ -194,20 +288,17 @@ function ProjectSaver() constructor {
                         }
                     }
                     if (assetIndex == -1) {
+                        show_debug_message("[SAVE] Adding new asset to assets.json: " + asset.name);
                         array_push(assets, uuid);
+                    } else {
+                        show_debug_message("[SAVE] Asset already in assets.json: " + asset.name);
                     }
                     
                     var assetPath = assetsDir + uuid;
-                    if (!directory_exists(assetPath)) directory_create(assetPath);
-                    
-                    // Check if asset is in a folder or has a parent using __treeviewItem
-                    var folderUUID = undefined;
-                    if (asset[$ "__treeviewItem"] != undefined) {
-                        var parentItem = asset.__treeviewItem.parent;
-                        // Use immediate parent if it has an asset (Mesh, Folder, etc.)
-                        if (parentItem != undefined && parentItem[$ "asset"] != undefined) {
-                            folderUUID = parentItem.asset.uuid;
-                        }
+                    show_debug_message("[SAVE] Creating/checking asset directory: " + assetPath);
+                    if (!directory_exists(assetPath)) {
+                        directory_create(assetPath);
+                        show_debug_message("[SAVE] Created directory: " + assetPath);
                     }
                     
                     var assetToJSON = asset[$ "toJSON"];
@@ -221,26 +312,35 @@ function ProjectSaver() constructor {
                         metadata.eo = asset.__rotationEuler.order;
                     }
 
-                    // Save folder UUID if we found one
-                    if (folderUUID != undefined) {
-                        metadata.__folder = folderUUID;
+                    // Save parent UUID if asset has one (set by AssetManager)
+                    if (asset[$ "__parentUI"] != undefined) {
+                        show_debug_message("[SAVE] Asset " + asset.name + " has __parentUI: " + asset.__parentUI);
+                        metadata.__parentUI = asset.__parentUI;
+                    } else {
+                        show_debug_message("[SAVE] Asset " + asset.name + " has no __parentUI");
                     }
                     
+                    show_debug_message("[SAVE] Writing metadata.json for: " + asset.name);
                     self.__writeJson(assetPath + "/metadata.json", metadata);
                     
                     // Export binary resources
                     switch (asset.type) {
                         case "Texture":
+                            show_debug_message("[SAVE] Exporting texture: " + asset.name);
                             asset.export(assetPath + "/texture.png");
                             break;
                         case "Mesh":  
                             var assetGeometry = asset[$ "geometry"];
-                            if (assetGeometry != undefined) assetGeometry.export(assetPath + "/geometry.buf");
+                            if (assetGeometry != undefined) {
+                                show_debug_message("[SAVE] Exporting mesh geometry: " + asset.name);
+                                assetGeometry.export(assetPath + "/geometry.buf");
+                            }
                             break;
                     }
                     break;
                     
                 case "delete":
+                    show_debug_message("[SAVE] Deleting asset: " + asset.name + " (" + asset.type + ")");
                     if (asset.type == "Folder") {
                         variable_struct_remove(foldersMap, asset.uuid);
                         break;
@@ -257,18 +357,24 @@ function ProjectSaver() constructor {
                     // Delete asset directory
                     var assetPath = assetsDir + uuid;
                     if (directory_exists(assetPath)) {
+                        show_debug_message("[SAVE] Deleting directory: " + assetPath);
                         directory_destroy(assetPath);
                     }
                     break;
             }
         }
         
+        show_debug_message("[SAVE] Writing assets.json with " + string(array_length(assets)) + " assets");
         // Write updated assets.json
         self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
         
-        // Update project.json with new folders map
+        show_debug_message("[SAVE] Writing project.json with " + string(struct_names_count(foldersMap)) + " folders");
+        // Update project.json with new folders map and settings
         projectJson.folders = foldersMap;
+        projectJson.settings = self.__getProjectSettings();
+        
         self.__writeJson(projectJsonPath, projectJson);
+        show_debug_message("[SAVE] Incremental save completed successfully");
     }
 
     function __getProjectSettings() {
@@ -299,7 +405,7 @@ function ProjectSaver() constructor {
 
         return {
             camera: cameraSettings,
-            counters: counters,
+            counters,
             gridEnabled: sm.gridEnabled,
             gizmos: {
                 showBoxColliders: sm.showBoxColliders
@@ -307,74 +413,42 @@ function ProjectSaver() constructor {
         };
     }
 
-    function __traverseTreeview(assetsDir, assetsMap, assets, treeviewChildren, parentTreeviewItem) {
-        for (var i = 0, il = array_length(treeviewChildren); i < il; i++) {
-            var treeviewChild = treeviewChildren[i];
-
-            var asset = treeviewChild[$ "asset"];
-
-            if (asset != undefined) {
-                var assetUuid = asset.uuid;
-                var assetType = asset.type;
-
-                    if (assetType != "Folder" && assetType != "ModelInstance") {
-                    // If this treeview item is not a folder, push its UUID into assets.json
-                    if (assetsMap[$ assetUuid] == undefined){
-                        assetsMap[$ assetUuid] = true;
-                        array_push(assets, assetUuid);
-                    }
-
-                    // Export asset metadata into the assets folder, along with the resource file if needed
-                    var assetPath = assetsDir + assetUuid;
-                    if (!directory_exists(assetPath)) directory_create(assetPath);
-
-                    // Check if parent treeview item has an asset (Folder or Mesh)
-                    var folderUUID = undefined;
-                    if (parentTreeviewItem != undefined && parentTreeviewItem[$ "asset"] != undefined) {
-                        folderUUID = parentTreeviewItem.asset.uuid;
-                    }
-                    
-                    var assetToJSON = asset[$ "toJSON"];
-                    var metadata = is_callable(assetToJSON) ? assetToJSON() : asset;
-                    
-                    // Add Euler rotation to metadata if it exists (editor-only data)
-                    if (asset[$ "__rotationEuler"] != undefined) {
-                        metadata.ex = asset.__rotationEuler.x;
-                        metadata.ey = asset.__rotationEuler.y;
-                        metadata.ez = asset.__rotationEuler.z;
-                        metadata.eo = asset.__rotationEuler.order;
-                    }
-
-                    // Save folder UUID if we found one
-                    if (folderUUID != undefined) {
-                        metadata.__folder = folderUUID;
-                    }
-                    
-                    self.__writeJson(assetPath + "/metadata.json", metadata);
-                    
-                    switch (assetType) {
-                        case "Texture":
-                            asset.export(assetPath + "/texture.png");
-                            break;
-                        case "Mesh":  
-                            var assetGeometry = asset[$ "geometry"];
-                            if (assetGeometry != undefined) assetGeometry.export(assetPath + "/geometry.buf");
-                    }
-                }
-            }
-
-            if (array_length(treeviewChild.children)) {                
-                self.__traverseTreeview(assetsDir, assetsMap, assets, treeviewChild.children, treeviewChild);
+    function __writeJson(path, data) {
+        // LOOP PROTECTION: Track how many times we're writing to the same file
+        static writeCallCount = 0;
+        static lastWritePath = "";
+        static lastWriteTime = 0;
+        
+        var currentTime = current_time;
+        
+        // Reset counter if it's been more than 1 second since last write
+        if (currentTime - lastWriteTime > 1000) {
+            writeCallCount = 0;
+            lastWritePath = "";
+        }
+        
+        // Increment counter
+        writeCallCount++;
+        
+        // Check if we're writing to the same file repeatedly
+        if (path == lastWritePath) {
+            show_debug_message("[SAVE] WARNING: Writing to same file again: " + path + " (call #" + string(writeCallCount) + ")");
+            if (writeCallCount > 10) {
+                show_debug_message("[SAVE ERROR] LOOP DETECTED in __writeJson! Same file written " + string(writeCallCount) + " times: " + path);
+                return;
             }
         }
-    }
-
-    function __writeJson(path, data) {
+        
+        lastWritePath = path;
+        lastWriteTime = currentTime;
+        
+        show_debug_message("[SAVE] Writing JSON to: " + path);
         var jsonString = json_stringify(data, true);
         var buf = buffer_create(string_byte_length(jsonString), buffer_fixed, 1);
         buffer_write(buf, buffer_text, jsonString);
         buffer_save(buf, path);
         buffer_delete(buf);
+        show_debug_message("[SAVE] Successfully wrote JSON to: " + path);
     }
     
     function __readFile(path) {

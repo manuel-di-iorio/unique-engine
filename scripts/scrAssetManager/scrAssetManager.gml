@@ -14,7 +14,9 @@ function AssetManager() constructor {
         // Always add to flat assets array
         array_push(self.assets, asset);
         
-        // Set __folder if asset is in a folder (from treeview)
+        show_debug_message("[ASSET] Adding asset: " + asset.name + " (type: " + asset.type + ")");
+        
+        // Set __parentUI if asset is in a folder (from treeview)
         if (asset[$ "__treeviewItem"] != undefined) {
             var treeviewItem = asset.__treeviewItem;
             
@@ -25,15 +27,23 @@ function AssetManager() constructor {
                 
                 // Check if parent item has an asset
                 if (parentTreeviewItem[$ "asset"] != undefined) {
-                    // Store parent UUID in __folder (used for saving hierarchy)
+                    // Store parent UUID in __parentUI (used for saving hierarchy)
                     // This works for both Folders and other assets (like Meshes acting as parents)
-                    asset.__folder = parentTreeviewItem.asset.uuid;
+                    asset.__parentUI = parentTreeviewItem.asset.uuid;
+                    show_debug_message("[ASSET] Set __parentUI for '" + asset.name + "' to: " + parentTreeviewItem.asset.name + " (UUID: " + asset.__parentUI + ")");
+                } else {
+                    show_debug_message("[ASSET] Parent treeview item has no asset for: " + asset.name);
                 }
+            } else {
+                show_debug_message("[ASSET] No parent treeview item for: " + asset.name);
             }
+        } else {
+            show_debug_message("[ASSET] No treeview item for: " + asset.name);
         }
         
         // Handle 3D hierarchy parent (not folder)
         if (parent != undefined) {
+            show_debug_message("[ASSET] Setting 3D parent for '" + asset.name + "' to: " + parent.name);
             // If parent has add() method, use it (Object3D hierarchy)
             if (parent[$ "add"] != undefined) {
                 parent.add(asset);
@@ -63,9 +73,9 @@ function AssetManager() constructor {
             array_delete(self.assets, index, 1);
         }
         
-        // Clear __folder if it was in a folder
-        if (asset[$ "__folder"] != undefined) {
-            asset.__folder = undefined;
+        // Clear __parentUI if it was in a folder
+        if (asset[$ "__parentUI"] != undefined) {
+            asset.__parentUI = undefined;
         }
         
         // Remove from 3D parent if it has one
@@ -138,6 +148,26 @@ function AssetManager() constructor {
      */
     function __trackChange(action, asset) {
         var projectManager = oSceneEditor.projectManager;
+        
+        // VALIDATION: Don't track invalid assets
+        if (asset == undefined) {
+            show_debug_message("[TRACK] WARNING: Attempted to track undefined asset. Action: " + action);
+            return;
+        }
+        
+        // VALIDATION: Don't track assets without names (except delete)
+        if (action != "delete" && (asset[$ "name"] == undefined || asset.name == "")) {
+            show_debug_message("[TRACK] WARNING: Attempted to track asset with empty name. UUID: " + (asset[$ "uuid"] ?? "no-uuid") + ", Type: " + (asset[$ "type"] ?? "undefined") + ", Action: " + action);
+            return;
+        }
+        
+        // VALIDATION: Don't track generic Object3D types (these should not be saved)
+        if (action != "delete" && asset[$ "type"] == "Object3D") {
+            show_debug_message("[TRACK] WARNING: Attempted to track Object3D (should not be saved). UUID: " + asset.uuid + ", Name: " + (asset[$ "name"] ?? "no-name") + ", Action: " + action);
+            return;
+        }
+        
+        show_debug_message("[TRACK] Tracking change: " + action + " for asset '" + asset.name + "' (type: " + asset.type + ", UUID: " + asset.uuid + ")");
         
         var uuid = asset.uuid;
         var existing = projectManager.changes[$ uuid];

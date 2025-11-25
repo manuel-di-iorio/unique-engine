@@ -106,7 +106,11 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         if (dropAction == "move_to_folder") {
             // Move any asset into a folder
             if (draggedItem.asset != undefined) {
+                show_debug_message("[DROP] Moving asset '" + draggedItem.asset.name + "' (type: " + draggedItem.asset.type + ") into folder '" + targetItem.asset.name + "' (UUID: " + targetItem.asset.uuid + ")");
+                
                 // 1. Remove from old parent
+                var oldParent = (draggedItem.asset[$ "parent"] != undefined) ? draggedItem.asset.parent : undefined;
+                show_debug_message("[DROP] Old parent: " + (oldParent != undefined ? oldParent.name : "none"));
                 __removeFromParent(draggedItem.asset);
                 
                 // 2. Add to new Folder parent
@@ -115,17 +119,28 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                 if (newParent[$ "children"] == undefined) newParent.children = [];
                 array_push(newParent.children, draggedItem.asset);
                 
+                // 3. Update __parentUI for saving hierarchy
+                draggedItem.asset.__parentUI = newParent.uuid;
+                
+                show_debug_message("[DROP] New parent set: " + newParent.name + " (UUID: " + newParent.uuid + ")");
+                show_debug_message("[DROP] Set __parentUI to: " + draggedItem.asset.__parentUI);
+                
                 // Track change on the dragged asset (metadata 'folder' changed)
                 oSceneEditor.assetManager.editAsset(draggedItem.asset);
+                show_debug_message("[DROP] Tracked change for asset: " + draggedItem.asset.name);
             }
 
             // Update the treeview UI
             draggedItem.moveItemTo(targetItem);
+            show_debug_message("[DROP] Treeview UI updated");
         }
         else if (dropAction == "unparent") {
             // Remove from current asset parent
             if (draggedItem.asset != undefined) {
                 __removeFromParent(draggedItem.asset);
+                
+                // Clear __parentUI since we're removing from folder
+                draggedItem.asset.__parentUI = undefined;
                 
                 // Track change on the dragged asset (metadata 'folder' removed if it was in one)
                 oSceneEditor.assetManager.editAsset(draggedItem.asset);

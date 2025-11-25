@@ -258,6 +258,9 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             oldParent = self.parent.parent;
         }
         
+        // Remember if this item was selected before moving
+        var wasSelected = (self.treeview.selectedItem == self);
+        
         // Remove from current parent
         if (self.parent != undefined) {
             self.parent.remove(self);
@@ -277,6 +280,11 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         }
         if (shouldExpand && targetParent.collapsed) {
             targetParent.expandItem();
+        }
+        
+        // Restore selection if it was selected before
+        if (wasSelected) {
+            self.treeview.__onItemSelected(self);
         }
     }
     

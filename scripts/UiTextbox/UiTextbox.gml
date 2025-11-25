@@ -575,6 +575,12 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                 }
             }
             
+            // Enter key to save and blur
+            if (keyboard_check_pressed(vk_enter)) {
+                self.blur();
+                return;
+            }
+            
             // Character input
             var inputChar = keyboard_lastchar;
             if (inputChar != "" && ord(inputChar) >= 32 && ord(inputChar) <= 126) {

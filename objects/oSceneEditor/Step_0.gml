@@ -57,6 +57,10 @@ if (!uiHasFocus) {
        case "rotate":
        case "scale":
            sceneManager.transformControls.update();
+
+           if (!sceneManager.transformControls.dragging) {
+               sceneManager.orbit.update(winMouseX, winMouseY);
+           }
        break;
    }
 
