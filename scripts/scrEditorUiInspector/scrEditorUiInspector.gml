@@ -811,8 +811,8 @@ function EditorUiInspector(ui) constructor {
 
                 // Apply the focus on the first input added to the inspector
                 if (!_focused && assetField.type == "text") {
-                    call_later(1, time_source_units_frames, input.Input.focus);
                     _focused = true;
+                    call_later(1, time_source_units_frames, input.Input.focus);
                 }
             }
             

@@ -44,43 +44,6 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         }
     }
     
-    // Set focus to a specific element
-    // function focus(element) {
-    //     if (self.focusedElement != undefined && self.focusedElement != element) {
-    //         self.blur();
-    //     }
-        
-    //     self.focusedElement = element;
-        
-    //     if (element[$ "onFocus"] != undefined) {
-    //         element.onFocus();
-    //     }
-        
-    //     global.UI.needsRedraw = true;
-    // }
-    
-    // // Remove focus from the currently focused element
-    // function blur() {
-    //     if (self.focusedElement != undefined) {
-    //         if (self.focusedElement[$ "onBlur"] != undefined) {
-    //             self.focusedElement.onBlur();
-    //         }
-            
-    //         self.focusedElement = undefined;
-    //         global.UI.needsRedraw = true;
-    //     }
-    // }
-    
-    // // Check if a specific element has focus
-    // function hasFocus(element) {
-    //     return self.focusedElement == element;
-    // }
-    
-    // // Get the currently focused element
-    // function getFocused() {
-    //     return self.focusedElement;
-    // }
-    
     // Check if any element is currently focused
     function hasAnyFocus() {
         return self.focusedElement != undefined;
@@ -109,7 +72,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         }
         
         if (nextElement[$ "visible"] != false && nextElement[$ "disabled"] != true) {
-            self.focus(nextElement);
+            nextElement.focus();
         }
     }
     
@@ -139,7 +102,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         }
         
         if (prevElement[$ "visible"] != false && prevElement[$ "disabled"] != true) {
-            self.focus(prevElement);
+            prevElement.focus();
         }
     }
     

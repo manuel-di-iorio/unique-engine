@@ -1,5 +1,4 @@
 {
-  "version":"2025.11.26.0",
   "assets":[
     {
       "id":"f4485e71-90a3-4771-b107-98c7347ec348",
@@ -41,5 +40,6 @@
       "name":"oPresentACube__Top",
       "type":"Mesh"
     }
-  ]
+  ],
+  "version":"2025.11.26.0"
 }
