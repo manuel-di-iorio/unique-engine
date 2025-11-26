@@ -9,9 +9,9 @@ if (display_aa >= 8) {
 }
 
 // Maximize the window
-call_later(12, time_source_units_frames, function() {
+runLater(function() {
     window_command_run(window_command_maximize);
-});
+}, 12);
 
 // Asset ID counters (for naming new assets)
 global.UI_ASSETS_TEXTURES_ID = 0;

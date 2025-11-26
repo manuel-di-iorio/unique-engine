@@ -340,8 +340,10 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             if (layoutUpdated && !hasRun.value) {
                 hasRun.value = true;
                 items.visible = true;
+                
                 // Defer removal to next frame to avoid modifying array during iteration
-                call_later(1, time_source_units_frames, method(items, function() {
+                // @todo this is weird, the removal method always delete the items last to first, debug more
+                runLater(method(items, function() {
                     __removeStepHandler();
                 }));
             }

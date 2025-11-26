@@ -1,0 +1,1 @@
+time_source_destroy(time_source_global, true);

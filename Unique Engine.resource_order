@@ -44,6 +44,7 @@
     {"name":"assimp_config","order":1,"path":"scripts/assimp_config/assimp_config.yy",},
     {"name":"assimp_enums","order":2,"path":"scripts/assimp_enums/assimp_enums.yy",},
     {"name":"log","order":37,"path":"scripts/log/log.yy",},
+    {"name":"runLater","order":38,"path":"scripts/runLater/runLater.yy",},
     {"name":"scrAssetManager","order":3,"path":"scripts/scrAssetManager/scrAssetManager.yy",},
     {"name":"scrDemoDrawSelector","order":6,"path":"scripts/scrDemoDrawSelector/scrDemoDrawSelector.yy",},
     {"name":"scrEditorLoadProject","order":1,"path":"scripts/scrEditorLoadProject/scrEditorLoadProject.yy",},

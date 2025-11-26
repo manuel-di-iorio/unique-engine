@@ -73,7 +73,7 @@ function EditorManager() constructor {
             }
             
             if (objectToRender != undefined) {
-                // Don't use add() because it calls removeFromParent() which breaks the hierarchy
+                // Not using add() because it calls removeFromParent() which breaks the hierarchy
                 // Just add to children array directly for rendering purposes
                 array_push(sm.objects.children, objectToRender);
             }
@@ -90,7 +90,7 @@ function EditorManager() constructor {
             var hasChildren = array_length(self.gizmoTarget.children) > 0;
             
             if (hasGeometry || hasChildren) {
-                call_later(1, time_source_units_frames, method({ sm, target: self.gizmoTarget }, function() { 
+                runLater(method({ sm, target: self.gizmoTarget }, function() { 
                     sm.boxHelper.object = target;
                     oSceneEditor.assetManager.updateAssetMatrix(target);
                 }));

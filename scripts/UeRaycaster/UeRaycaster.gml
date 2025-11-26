@@ -102,7 +102,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         gml_pragma("forceinline");
         hits ??= [];
         for (var i = 0, n = array_length(objects); i < n; i++) {
-            intersectObject(objects[i], recursive, sort, hits);
+            intersectObject(objects[i], recursive, false, hits);
         }
 
         // Sort intersections by distance ascending

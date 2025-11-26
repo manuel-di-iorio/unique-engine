@@ -243,7 +243,7 @@ function AssetManager() constructor {
      * The update is scheduled in the next frame in order to wait for box helper update
      */
     function updateAssetMatrix(asset) {
-        call_later(1, time_source_units_frames, method({ asset }, function() {
+        runLater(method({ asset }, function() {
             asset.updateMatrix();
             asset.updateMatrixWorld(true);
             

@@ -1,44 +1,44 @@
 {
   "settings":{
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true,
-    "camera":{
-      "target":[
-        26.992626480320471,
-        -26.009456787220316,
-        0.0
-      ],
-      "damping":true,
-      "position":[
-        -148.19111887149327,
-        -217.17187805019927,
-        194.08138514908185
-      ],
-      "dampingFactor":0.29999999999999999
-    },
     "counters":{
+      "lights":0.0,
       "scenes":1.0,
       "models":3.0,
       "folders":1.0,
       "cameras":0.0,
       "textures":1.0,
       "instances":10.0,
-      "materials":3.0,
-      "lights":0.0
+      "materials":3.0
+    },
+    "gizmos":{
+      "showBoxColliders":true
+    },
+    "gridEnabled":true,
+    "camera":{
+      "dampingFactor":0.29999999999999999,
+      "target":[
+        73.091131993914331,
+        32.227187600811988,
+        0.0
+      ],
+      "position":[
+        -28.059922919030811,
+        -271.68822350981691,
+        138.2860141885557
+      ],
+      "damping":true
     }
   },
   "folders":{
     "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
+      "parent":null,
       "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
-      "name":"Project",
-      "parent":null
+      "name":"Project"
     },
     "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
+      "parent":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
       "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "name":"Objects",
-      "parent":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0"
+      "name":"Objects"
     }
   }
 }

@@ -50,7 +50,7 @@ function ProjectSaver() constructor {
         
         // Schedule the actual save after the debounce delay
         var _this = self;
-        call_later(self.__debounceDelay, time_source_units_frames, method({ 
+        runLater(method({ 
             projectManager,
             scheduledTime: currentTime,
             _this, 
@@ -64,7 +64,7 @@ function ProjectSaver() constructor {
                 _this.__pendingSave = false;
                 projectManager.saver.saveEditorSettings(projectManager);
             }
-        }));
+        }), self.__debounceDelay);
     }
     
     /**
