@@ -80,7 +80,10 @@ function ProjectLoader() constructor {
     // 3. Load Assets and place them in the correct folders
     var assetsList = assetsData.assets;
     for (var i = 0; i < array_length(assetsList); i++) {
-        var assetUuid = assetsList[i];
+        var assetEntry = assetsList[i];
+        
+        // Handle both old format (UUID string) and new format (object with id, name, type)
+        var assetUuid = is_string(assetEntry) ? assetEntry : assetEntry.id;
 
         // Each asset entry is now a UUID; read its metadata.json to determine type/name
         var metadataPath = projectDir + "assets/" + assetUuid + "/metadata.json";
@@ -274,24 +277,11 @@ function ProjectLoader() constructor {
             if (treeviewItemsByUUID[$ scene.uuid] != undefined) {
                 var sceneTreeItem = treeviewItemsByUUID[$ scene.uuid];
                 
-                // We need to find which children were added as instances
+                // Process all top-level instances in the scene
                 for (var j = 0; j < array_length(scene.children); j++) {
                     var child = scene.children[j];
                     if (child.type == "ModelInstance") {
-                        // Initialize rotation euler for inspector
-                        child.__rotationEuler = new UeEuler();
-                        child.__rotationEuler.setFromQuaternion(child.rotation);
-                        
-                        // Create TreeView item for the instance
-                        var icon = __iconForType("ModelInstance");
-                        var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
-                            treeview: sceneTreeItem.treeview,
-                            assetType: "ModelInstance",
-                            type: "ModelInstance",
-                            icon,
-                            asset: child
-                        });
-                        sceneTreeItem.addChild(tvItem);
+                        __createInstanceTreeItems(child, sceneTreeItem);
                     }
                 }
             }
@@ -299,6 +289,37 @@ function ProjectLoader() constructor {
     }
   }
 
+  /**
+   * Private helper: Recursively create treeview items for ModelInstance and its children
+   */
+  function __createInstanceTreeItems(instance, parentTreeItem) {
+      // Initialize rotation euler for inspector
+      instance.__rotationEuler = new UeEuler();
+      instance.__rotationEuler.setFromQuaternion(instance.rotation);
+      
+      // Create TreeView item for the instance
+      var icon = __iconForType("ModelInstance");
+      var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
+          treeview: parentTreeItem.treeview,
+          assetType: "ModelInstance",
+          type: "ModelInstance",
+          icon,
+          asset: instance
+      });
+      
+      // Add back-reference for mesh picking
+      instance.__treeviewItem = tvItem;
+      
+      parentTreeItem.addChild(tvItem);
+      
+      // Recursively create treeview items for children (submeshes)
+      for (var k = 0; k < array_length(instance.children); k++) {
+          var childInstance = instance.children[k];
+          if (childInstance.type == "ModelInstance") {
+              __createInstanceTreeItems(childInstance, tvItem);
+          }
+      }
+  }
 
   // Helper: map type -> icon
   function __iconForType(type) {

@@ -117,7 +117,7 @@ function ProjectSaver() constructor {
         if (!directory_exists(projectDir)) directory_create(projectDir);
         if (!directory_exists(assetsDir)) directory_create(assetsDir);
 
-        var assets = []; // List of asset UUIDs to save in assets.json
+        var assets = []; // List of asset objects to save in assets.json
         
         // Project structure to save in project.json
         var project = {
@@ -135,8 +135,15 @@ function ProjectSaver() constructor {
             // Skip folders (they're saved separately in project.json)
             if (asset[$ "type"] == "Folder") continue;
             
-            // Add UUID to assets.json list (we store only UUIDs now)
-            array_push(assets, asset.uuid);
+            // Skip ModelInstance (they're saved in Scene metadata)
+            if (asset[$ "type"] == "ModelInstance") continue;
+            
+            // Add asset object to assets.json list
+            array_push(assets, {
+                id: asset.uuid,
+                name: asset.name,
+                type: asset.type
+            });
             
             // Save asset metadata and resources
             var assetPath = assetsDir + asset.uuid;
@@ -263,20 +270,36 @@ function ProjectSaver() constructor {
                         };
                         break;
                     }
+                    
+                    // Skip ModelInstance (they're saved in Scene metadata)
+                    if (asset.type == "ModelInstance") {
+                        show_debug_message("[SAVE] Skipping ModelInstance (saved in Scene): " + asset.name);
+                        break;
+                    }
 
-                    // Update or add to assets.json (store only UUIDs)
+                    // Update or add to assets.json (store objects with id, name, type)
                     var assetIndex = -1;
                     for (var j = 0; j < array_length(assets); j++) {
-                        if (assets[j] == uuid) {
+                        if (assets[j].id == uuid) {
                             assetIndex = j;
                             break;
                         }
                     }
                     if (assetIndex == -1) {
                         show_debug_message("[SAVE] Adding new asset to assets.json: " + asset.name);
-                        array_push(assets, uuid);
+                        array_push(assets, {
+                            id: asset.uuid,
+                            name: asset.name,
+                            type: asset.type
+                        });
                     } else {
                         show_debug_message("[SAVE] Asset already in assets.json: " + asset.name);
+                        // Update existing entry in case name or type changed
+                        assets[assetIndex] = {
+                            id: asset.uuid,
+                            name: asset.name,
+                            type: asset.type
+                        };
                     }
                     
                     var assetPath = assetsDir + uuid;
@@ -341,10 +364,16 @@ function ProjectSaver() constructor {
                         variable_struct_remove(foldersMap, asset.uuid);
                         break;
                     }
+                    
+                    // Skip ModelInstance (they're managed in Scene metadata)
+                    if (asset.type == "ModelInstance") {
+                        show_debug_message("[SAVE] Skipping ModelInstance deletion (managed in Scene): " + asset.name);
+                        break;
+                    }
 
-                    // Remove from assets.json (UUID list)
+                    // Remove from assets.json (object list)
                     for (var j = array_length(assets) - 1; j >= 0; j--) {
-                        if (assets[j] == uuid) {
+                        if (assets[j].id == uuid) {
                             array_delete(assets, j, 1);
                             break;
                         }

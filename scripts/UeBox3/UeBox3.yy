@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UeBox3",
   "parent":{
-    "name":"UniqueMath",
-    "path":"folders/UniqueMath.yy",
+    "name":"Unique Math",
+    "path":"folders/Unique Math.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

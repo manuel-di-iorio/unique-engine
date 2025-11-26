@@ -3,6 +3,35 @@ function UeScene(data = {}): UeObject3D(data) constructor {
     type = "Scene";
     
     /**
+     * Helper function to serialize a ModelInstance recursively
+     */
+    function __serializeInstance(instance) {
+        var data = {
+            uuid: instance.uuid,
+            type: "ModelInstance",
+            name: instance.name,
+            model: instance.object != undefined ? instance.object.uuid : undefined,
+            position: instance.position.toArray(),
+            rotation: instance.rotation.toArray(),
+            scale: instance.scale.toArray(),
+            visible: instance.visible
+        };
+        
+        // Recursively serialize children (submeshes)
+        if (array_length(instance.children) > 0) {
+            data.children = array_map(instance.children, function(child) {
+                if (child[$ "type"] == "ModelInstance") {
+                    return __serializeInstance(child);
+                }
+                // For non-instance children, just save UUID
+                return child[$ "uuid"];
+            });
+        }
+        
+        return data;
+    }
+    
+    /**
      * Write the scene data to a JSON object
      */
     function toJSON() {
@@ -12,23 +41,81 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             type,
             name,
             children: array_map(children, function(child) { 
-                // For instances, save full metadata including transform
+                // For instances, save full metadata including transform and children
                 if (child[$ "type"] == "ModelInstance") {
-                    return {
-                        uuid: child.uuid,
-                        type: "ModelInstance",
-                        name: child.name,
-                        model: child.object != undefined ? child.object.uuid : undefined,
-                        position: child.position.toArray(),
-                        rotation: child.rotation.toArray(),
-                        scale: child.scale.toArray(),
-                        visible: child.visible,
-                    };
+                    return __serializeInstance(child);
                 }
                 // For other children, just save UUID
                 return child[$ "uuid"];
-            }),
+            })
         };
+    }
+    
+    /**
+     * Helper function to deserialize a ModelInstance recursively
+     */
+    function __deserializeInstance(data, objectsByUUID, parent) {
+        var modelUUID = data[$ "model"];
+        
+        if (modelUUID == undefined || objectsByUUID[$ modelUUID] == undefined) {
+            return undefined;
+        }
+        
+        var model = objectsByUUID[$ modelUUID];
+        
+        // Create new instance with same geometry and material
+        var instance = new UeMesh(model.geometry, model.material);
+        instance.uuid = data[$ "uuid"];
+        instance.name = data[$ "name"];
+        instance.type = "ModelInstance";
+        instance.object = model;
+        instance.isInstance = true;
+        
+        // Apply transform
+        if (data[$ "position"] != undefined) {
+            var pos = data.position;
+            instance.position.set(pos[0], pos[1], pos[2]);
+        }
+        if (data[$ "rotation"] != undefined) {
+            var rot = data.rotation;
+            instance.rotation.set(rot[0], rot[1], rot[2], rot[3]);
+        }
+        if (data[$ "scale"] != undefined) {
+            var scl = data.scale;
+            instance.scale.set(scl[0], scl[1], scl[2]);
+        }
+        if (data[$ "visible"] != undefined) {
+            instance.visible = data.visible;
+        }
+        if (data[$ "matrixAutoUpdate"] != undefined) {
+            instance.matrixAutoUpdate = data.matrixAutoUpdate;
+        }
+        if (data[$ "frustumCulled"] != undefined) {
+            instance.frustumCulled = data.frustumCulled;
+        }
+        
+        // Recursively load children (submeshes)
+        if (data[$ "children"] != undefined && array_length(data.children) > 0) {
+            for (var i = 0; i < array_length(data.children); i++) {
+                var childData = data.children[i];
+                
+                if (is_struct(childData)) {
+                    // Recursive ModelInstance
+                    var childInstance = __deserializeInstance(childData, objectsByUUID, instance);
+                    if (childInstance != undefined) {
+                        instance.add(childInstance);
+                    }
+                } else {
+                    // UUID reference
+                    var childUUID = childData;
+                    if (objectsByUUID[$ childUUID] != undefined) {
+                        instance.add(objectsByUUID[$ childUUID]);
+                    }
+                }
+            }
+        }
+        
+        return instance;
     }
 
     /*
@@ -46,45 +133,9 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             
             // Check if child is a struct (ModelInstance with metadata) or just a UUID string
             if (is_struct(child)) {
-                // ModelInstance: create instance from model and apply transform
-                var modelUUID = child[$ "model"];
-                
-                if (modelUUID != undefined && objectsByUUID[$ modelUUID] != undefined) {
-                    var model = objectsByUUID[$ modelUUID];
-                    
-                    // Create new instance with same geometry and material
-                    var instance = new UeMesh(model.geometry, model.material);
-                    instance.uuid = child[$ "uuid"];
-                    instance.name = child[$ "name"];
-                    instance.type = "ModelInstance";
-                    instance.object = model;
-                    instance.isInstance = true;
-                    
-                    // Apply transform
-                    if (child[$ "position"] != undefined) {
-                        var pos = child.position;
-                        instance.position.set(pos[0], pos[1], pos[2]);
-                    }
-                    if (child[$ "rotation"] != undefined) {
-                        var rot = child.rotation;
-                        instance.rotation.set(rot[0], rot[1], rot[2], rot[3]);
-                    }
-                    if (child[$ "scale"] != undefined) {
-                        var scl = child.scale;
-                        instance.scale.set(scl[0], scl[1], scl[2]);
-                    }
-                    if (child[$ "visible"] != undefined) {
-                        instance.visible = child.visible;
-                    }
-
-                    if (child[$ "matrixAutoUpdate"] != undefined) {
-                        instance.matrixAutoUpdate = child.matrixAutoUpdate;
-                    }
-
-                    if (child[$ "frustumCulled"] != undefined) {
-                        instance.frustumCulled = child.frustumCulled;
-                    }
-                    
+                // ModelInstance: create instance from model and apply transform recursively
+                var instance = __deserializeInstance(child, objectsByUUID, self);
+                if (instance != undefined) {
                     add(instance);
                 }
             } else {

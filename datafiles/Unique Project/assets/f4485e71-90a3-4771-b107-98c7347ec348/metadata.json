@@ -1,0 +1,31 @@
+{
+  "wrapT":1,
+  "userData":{
+  },
+  "uuid":"f4485e71-90a3-4771-b107-98c7347ec348",
+  "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
+  "center":[
+    0.0,
+    0.0
+  ],
+  "spriteBuffSize":0.0,
+  "rotation":0.0,
+  "filter":true,
+  "generateMipmaps":true,
+  "repeat":[
+    1.0,
+    1.0
+  ],
+  "name":"tStandard",
+  "type":"Texture",
+  "offset":[
+    0.0,
+    {
+      "x":0.0,
+      "y":0.0
+    }
+  ],
+  "flipX":false,
+  "flipY":false,
+  "wrapS":1
+}
