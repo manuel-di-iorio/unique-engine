@@ -2,29 +2,29 @@
   "settings":{
     "counters":{
       "lights":0.0,
-      "scenes":1.0,
-      "models":18.0,
-      "folders":3.0,
+      "scenes":2.0,
+      "models":21.0,
+      "folders":4.0,
       "cameras":0.0,
       "textures":2.0,
       "instances":16.0,
-      "materials":17.0
+      "materials":20.0
     },
     "gizmos":{
-      "showBoxColliders":true
+      "showBoxColliders":false
     },
     "gridEnabled":true,
     "camera":{
       "dampingFactor":0.29999999999999999,
       "target":[
-        0.0,
-        0.0,
+        42.283417188465876,
+        71.184489226675282,
         0.0
       ],
       "position":[
-        -137.03360264493753,
-        -423.25239698463827,
-        163.22992567883318
+        -262.29499255503066,
+        9.7502468336558152,
+        218.76431651372775
       ],
       "damping":true
     }

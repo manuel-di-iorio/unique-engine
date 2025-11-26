@@ -70,6 +70,26 @@
       "id":"b636ff8e-6a96-4d77-95f6-4e6dc13fa6d8",
       "name":"oSnowBunker",
       "type":"Mesh"
+    },
+    {
+      "id":"87255f18-afaf-46aa-99ce-a53c453a7466",
+      "name":"oLightsColored",
+      "type":"Mesh"
+    },
+    {
+      "id":"b84aacb1-03b4-46f7-b7ba-f36523ba7f7a",
+      "name":"oTree",
+      "type":"Mesh"
+    },
+    {
+      "id":"66159d48-ba1f-412f-9fcb-a7ec849ee37e",
+      "name":"oReindeer",
+      "type":"Mesh"
+    },
+    {
+      "id":"5a597e90-a516-477e-9ba6-f2f5711952e3",
+      "name":"sDemo",
+      "type":"Scene"
     }
   ]
 }
