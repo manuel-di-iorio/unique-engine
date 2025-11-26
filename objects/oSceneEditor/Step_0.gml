@@ -22,59 +22,59 @@ var winMouseY = window_mouse_get_y();
 
 var uiHasFocus = global.UI.hasAnyFocus();
 
+// Update transform controls based on current tool
+var currentTool = editorManager.activeTool;
+switch (currentTool) {
+    case "view": 
+        sceneManager.transformControls.updateGizmo();
+        sceneManager.orbit.update(winMouseX, winMouseY);
+        
+        if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
+            sceneManager.handleMeshPicking();
+        }
+    break;
+    case "move":
+    case "rotate":
+    case "scale":
+        sceneManager.transformControls.update();
+
+        if (!sceneManager.transformControls.dragging) {
+            sceneManager.orbit.update(winMouseX, winMouseY);
+            
+            if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
+                sceneManager.handleMeshPicking();
+            }
+        }
+    break;
+}
+
+// Wrap the mouse coords when out of bounds
+if (mouse_button != mb_none && sceneManager.orbit.transforming) {
+    var fixMousePos = false;
+
+    if (winMouseX < 1) {
+        winMouseX = winW - 2;
+        fixMousePos = true;
+    } else if (winMouseY < 1) {
+        winMouseY = winH - 2;
+        fixMousePos = true;
+    } else if (winMouseX > winW - 2) {
+        winMouseX = 2;
+        fixMousePos = true;
+    } else if (winMouseY > winH - 1) {
+        winMouseY = 2;
+        fixMousePos = true;
+    }
+
+    if (fixMousePos) {
+        window_mouse_set(winMouseX, winMouseY); 
+        
+        sceneManager.orbit._prevMouseX = winMouseX;
+        sceneManager.orbit._prevMouseY = winMouseY;
+    }
+}
+
 if (!uiHasFocus) {
-   // Update transform controls based on current tool
-   var currentTool = editorManager.activeTool;
-   switch (currentTool) {
-       case "view": 
-           sceneManager.transformControls.updateGizmo();
-           sceneManager.orbit.update(winMouseX, winMouseY);
-           
-           if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
-               sceneManager.handleMeshPicking();
-           }
-       break;
-       case "move":
-       case "rotate":
-       case "scale":
-           sceneManager.transformControls.update();
-
-           if (!sceneManager.transformControls.dragging) {
-               sceneManager.orbit.update(winMouseX, winMouseY);
-               
-               if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
-                   sceneManager.handleMeshPicking();
-               }
-           }
-       break;
-   }
-
-   // Wrap the mouse coords when out of bounds
-   if (mouse_button != mb_none && sceneManager.orbit.transforming) {
-       var fixMousePos = false;
-   
-       if (winMouseX < 1) {
-           winMouseX = winW - 2;
-           fixMousePos = true;
-       } else if (winMouseY < 1) {
-           winMouseY = winH - 2;
-           fixMousePos = true;
-       } else if (winMouseX > winW - 2) {
-           winMouseX = 2;
-           fixMousePos = true;
-       } else if (winMouseY > winH - 1) {
-           winMouseY = 2;
-           fixMousePos = true;
-       }
-   
-       if (fixMousePos) {
-           window_mouse_set(winMouseX, winMouseY); 
-           
-           sceneManager.orbit._prevMouseX = winMouseX;
-           sceneManager.orbit._prevMouseY = winMouseY;
-       }
-   }
-
    // Save project
    if (keyboard_check(vk_control) && keyboard_check_pressed(ord("S"))) {
        if (projectManager.hasUnsavedChanges) {

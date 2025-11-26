@@ -125,14 +125,15 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
                 box = new UeBox3().setFromPoints(geometry.vertices);
             } else {
                 var geometryBox = geometry[$ "boundingBox"];
-                if (geometryBox == undefined) return self;
-                box = geometryBox.clone();
+                if (geometryBox != undefined) {
+                    box = geometryBox.clone();
+                    box.applyMatrix4(object.matrixWorld);
+                    union(box);
+                }
             }
-
-            box.applyMatrix4(object.matrixWorld);
-            union(box);
         }
 
+        // Always expand by children, even if this object has no geometry
         for (var i = 0, n = array_length(object.children); i < n; i++) {
             expandByObject(object.children[i], precise);
         }

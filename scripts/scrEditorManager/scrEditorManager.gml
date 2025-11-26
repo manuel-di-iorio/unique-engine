@@ -80,12 +80,16 @@ function EditorManager() constructor {
         }
         
         // Attach transform controls if applicable
-        // Use gizmoTarget if provided, otherwise use asset. TARGET IS THE ORIGINAL.
+        // Use gizmoTarget if provided, otherwise use asset. Target is the original asset.
         self.gizmoTarget = newGizmoTarget;
         
         // Update the box helper based on the final gizmo target
         if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
-            if (self.gizmoTarget[$ "geometry"] != undefined && self.gizmoTarget.geometry[$ "vb"] != undefined) {
+            // Show box helper if the mesh has geometry OR if it has children (to show expanded bbox)
+            var hasGeometry = self.gizmoTarget[$ "geometry"] != undefined && self.gizmoTarget.geometry[$ "vb"] != undefined;
+            var hasChildren = array_length(self.gizmoTarget.children) > 0;
+            
+            if (hasGeometry || hasChildren) {
                 call_later(1, time_source_units_frames, method({ sm, target: self.gizmoTarget }, function() { 
                     sm.boxHelper.object = target;
                     oSceneEditor.assetManager.updateAssetMatrix(target);

@@ -1,31 +1,28 @@
 {
-  "frustumCulled":true,
-  "ex":90.0,
-  "ey":0.0,
-  "ez":0.0,
   "geometry":{
     "uuid":"f7f74371-1d05-436e-9493-dc1db65b4917",
     "boundingBox":{
       "min":{
-        "z":-59.500003814697266,
         "x":-59.500003814697266,
-        "y":0.0
+        "y":0.0,
+        "z":-59.500003814697266
       },
       "max":{
-        "z":59.500003814697266,
         "x":59.500003814697266,
-        "y":192.04512023925781
-      }
-    },
-    "boundingSphere":{
-      "radius":127.6747154288026,
-      "center":{
-        "z":0.0,
-        "x":0.0,
-        "y":96.022560119628906
+        "y":192.04512023925781,
+        "z":59.500003814697266
       }
     },
     "name":null,
+    "type":"BufferGeometry",
+    "boundingSphere":{
+      "radius":127.6747154288026,
+      "center":{
+        "x":0.0,
+        "y":96.022560119628906,
+        "z":0.0
+      }
+    },
     "format":{
       "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
       "name":"",
@@ -44,33 +41,36 @@
           "kind":3.0
         }
       ]
-    },
-    "type":"BufferGeometry"
+    }
   },
-  "eo":"XYZ",
+  "ex":90.0,
+  "ey":0.0,
+  "frustumCulled":true,
+  "ez":0.0,
   "visible":true,
+  "eo":"XYZ",
+  "name":"oTreeSnowA",
+  "type":"Mesh",
+  "parent":null,
+  "uuid":"be5c0cf1-034e-4831-9ef1-36528dbe39d2",
+  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
   "renderOrder":0.0,
+  "matrixAutoUpdate":false,
   "layers":1.0,
+  "children":[
+  ],
   "pz":0.0,
   "py":0.0,
-  "name":"oTreeSnowA",
   "px":0.0,
-  "type":"Mesh",
   "rw":0.70710678118654757,
   "rz":0.0,
   "ry":0.0,
   "rx":0.70710678118654757,
-  "parent":null,
   "sz":1.0,
   "sy":1.0,
-  "uuid":"be5c0cf1-034e-4831-9ef1-36528dbe39d2",
-  "matrixAutoUpdate":false,
   "sx":1.0,
   "uz":-1.0,
-  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
   "uy":0.0,
   "ux":0.0,
-  "children":[
-  ],
   "material":"38fc4d25-b5be-47c0-9f53-2d3f62db5e03"
 }

@@ -20,7 +20,7 @@ function UeTransform(_data = undefined) constructor {
     matrixWorldNeedsUpdate = false;      // Tells to update the world matrix for this frame
     
     // Internals
-    __intersectionSphere = undefined;
+    __intersectionSphere = new UeSphere();
     
     /// Rebuild local matrix from position/rotation/scale
     function updateMatrix() {
@@ -50,6 +50,18 @@ function UeTransform(_data = undefined) constructor {
             matrixWorldNeedsUpdate = false; 
 			force = true;
         } 
+        
+        // For frustum culling, update the intersection sphere (if available) to world space
+        // Only for root meshes
+        if (self[$ "isMesh"] && parent == undefined) {
+            var geometry = self[$ "geometry"];
+            if (geometry != undefined) {
+                var boundingSphere = geometry[$ "boundingSphere"];
+                if (boundingSphere != undefined) {
+                    __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
+                }
+            }
+        }
         
         for (var i = 0, len = array_length(children); i < len; i++) {
             children[i].updateMatrixWorld(force);

@@ -3,25 +3,26 @@
     "uuid":"371caf87-b542-4cdc-b64e-d710457ec907",
     "boundingBox":{
       "min":{
-        "z":-20.0,
         "x":-20.0,
-        "y":0.0
+        "y":0.0,
+        "z":-20.0
       },
       "max":{
-        "z":20.0,
         "x":20.0,
-        "y":30.000001907348633
-      }
-    },
-    "boundingSphere":{
-      "radius":32.01562163398097,
-      "center":{
-        "z":0.0,
-        "x":0.0,
-        "y":15.000000953674316
+        "y":30.000001907348633,
+        "z":20.0
       }
     },
     "name":null,
+    "type":"BufferGeometry",
+    "boundingSphere":{
+      "radius":32.01562163398097,
+      "center":{
+        "x":0.0,
+        "y":15.000000953674316,
+        "z":0.0
+      }
+    },
     "format":{
       "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
       "name":"",
@@ -40,25 +41,24 @@
           "kind":3.0
         }
       ]
-    },
-    "type":"BufferGeometry"
+    }
   },
   "ex":0.0,
   "ey":0.0,
-  "ez":0.0,
-  "eo":"XYZ",
-  "visible":true,
   "frustumCulled":true,
+  "ez":0.0,
+  "visible":true,
+  "eo":"XYZ",
   "name":"oPresentACube__Base",
   "type":"Mesh",
   "parent":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
   "uuid":"a1c40aa9-5773-4bd5-9597-b2951f19a749",
-  "matrixAutoUpdate":false,
   "__parentUI":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
+  "renderOrder":0.0,
+  "matrixAutoUpdate":false,
+  "layers":1.0,
   "children":[
   ],
-  "renderOrder":0.0,
-  "layers":1.0,
   "pz":0.0,
   "py":0.0,
   "px":0.0,

@@ -364,16 +364,12 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                 global.UI_CLICK_START = self.deepestTarget;
                 global.UI.dispatchEvent(UI_EVENT.mousedown, self.deepestTarget);
 
+                // We check for any button press (left, right, middle) to ensure focus is lost when clicking outside
+                if (self.focusedElement != undefined && (self.deepestTarget == undefined || !self.deepestTarget.focusable)) {
+                    self.focusedElement.blur();
+                }
+
                 if (mouse_check_button_pressed(mb_left)) {
-                    // Handle focus management: blur current element if clicking on a non-focusable element
-                    if (self.focusedElement != undefined) {
-                        if (self.deepestTarget == undefined || !self.deepestTarget.focusable) {
-                            self.focusedElement.blur();
-                        } else if (self.deepestTarget.focusable && self.deepestTarget != self.focusedElement) {
-                            // Will be handled by the element's focus() method
-                        }
-                    }
-                    
                     if (self.deepestTarget.draggable) {
                         self.potentialDraggedElement = self.deepestTarget;
                         self.potentialDraggedElement.dragStartX = self.mouseX;

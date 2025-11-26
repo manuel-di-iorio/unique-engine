@@ -98,14 +98,20 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         
         // Allow interactions only if they have been allowed from the user
         var allowInteractions = shouldHandleInput();
-        if (mouse_check_button_pressed(mb_any) && allowInteractions) {
-            __canInteract = true;
-        }
         
+        if (mouse_check_button_pressed(mb_any)) {
+            // Update previous mouse position to current position to prevent camera jump
+            self._prevMouseX = mx;
+            self._prevMouseY = my;
+
+            if (allowInteractions) {
+                __canInteract = true;
+            }
+        }
         if (mouse_check_button_released(mb_any)) {
             __canInteract = false;
         }
-        
+
         var isRotatingNow = __canInteract && mouse_check_button(self.mouseButtonRotate) && self.enableRotate;
         var isPanningNow = __canInteract && mouse_check_button(self.mouseButtonPan) && self.enablePan;
         var isZoomingNow = __canInteract && mouse_check_button(self.mouseButtonZoom) && self.enableZoom;
@@ -200,7 +206,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var camTarget = self.target;
         var camDir = camTarget.clone().sub(camPos).normalize();
 
-        if (allowInteractions) {
+        if (allowInteractions && !global.UI.hasAnyFocus()) {
             if (!shiftPressed) {
                 if (self.screenSpacePanning) {
                     // Pan aligned to camera screen space
