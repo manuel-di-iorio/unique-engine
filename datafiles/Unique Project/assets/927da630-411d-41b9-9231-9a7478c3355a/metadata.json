@@ -1,25 +1,25 @@
 {
   "geometry":{
-    "uuid":"371caf87-b542-4cdc-b64e-d710457ec907",
+    "uuid":"ce1c2903-eaf4-4ccd-b567-6b4f142d9110",
     "boundingBox":{
       "min":{
-        "x":-20.0,
+        "x":-26.259746551513672,
         "y":0.0,
-        "z":-20.0
+        "z":-22.741558074951172
       },
       "max":{
-        "x":20.0,
-        "y":30.000001907348633,
-        "z":20.0
+        "x":26.259746551513672,
+        "y":173.72793579101562,
+        "z":22.741558074951172
       }
     },
     "name":null,
     "type":"BufferGeometry",
     "boundingSphere":{
-      "radius":32.01562163398097,
+      "radius":93.552667899840912,
       "center":{
         "x":0.0,
-        "y":15.000000953674316,
+        "y":86.863967895507812,
         "z":0.0
       }
     },
@@ -29,31 +29,31 @@
       "type":"VertexFormat",
       "attrs":[
         {
-          "kind":0.0
+          "kind":0
         },
         {
-          "kind":1.0
+          "kind":1
         },
         {
-          "kind":2.0
+          "kind":2
         },
         {
-          "kind":3.0
+          "kind":3
         }
       ]
     }
   },
-  "ex":0.0,
+  "ex":90.0,
+  "visible":true,
   "ey":0.0,
   "frustumCulled":true,
   "ez":0.0,
-  "visible":true,
   "eo":"XYZ",
-  "name":"oPresentACube__Base",
+  "name":"oLantern",
   "type":"Mesh",
-  "parent":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
-  "uuid":"a1c40aa9-5773-4bd5-9597-b2951f19a749",
-  "__parentUI":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
+  "parent":null,
+  "uuid":"927da630-411d-41b9-9231-9a7478c3355a",
+  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
   "renderOrder":0.0,
   "matrixAutoUpdate":false,
   "layers":1.0,
@@ -62,10 +62,10 @@
   "pz":0.0,
   "py":0.0,
   "px":0.0,
-  "rw":1.0,
+  "rw":0.70710678118654757,
   "rz":0.0,
   "ry":0.0,
-  "rx":0.0,
+  "rx":0.70710678118654757,
   "sz":1.0,
   "sy":1.0,
   "sx":1.0,

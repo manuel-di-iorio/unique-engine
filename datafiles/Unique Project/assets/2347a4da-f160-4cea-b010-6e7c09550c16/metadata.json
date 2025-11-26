@@ -29,16 +29,16 @@
       "type":"VertexFormat",
       "attrs":[
         {
-          "kind":0
+          "kind":0.0
         },
         {
-          "kind":1
+          "kind":1.0
         },
         {
-          "kind":2
+          "kind":2.0
         },
         {
-          "kind":3
+          "kind":3.0
         }
       ]
     }
@@ -53,7 +53,7 @@
   "type":"Mesh",
   "parent":null,
   "uuid":"2347a4da-f160-4cea-b010-6e7c09550c16",
-  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+  "__parentUI":"9ff898e0-953e-4435-99b5-d5e825905d60",
   "renderOrder":0.0,
   "matrixAutoUpdate":false,
   "layers":1.0,

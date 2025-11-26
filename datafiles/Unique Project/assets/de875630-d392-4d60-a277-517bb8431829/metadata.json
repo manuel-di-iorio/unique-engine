@@ -1,25 +1,25 @@
 {
   "geometry":{
-    "uuid":"9f10f98b-1593-45b9-a64b-afc0d9d56ea5",
+    "uuid":"931f4a55-af0d-4f76-96a5-898714730a0f",
     "boundingBox":{
       "min":{
-        "x":-22.5,
+        "x":-92.835670471191406,
         "y":0.0,
-        "z":-22.5
+        "z":-72.39825439453125
       },
       "max":{
-        "x":22.5,
-        "y":27.071067810058594,
-        "z":22.5
+        "x":92.835670471191406,
+        "y":10.0,
+        "z":72.39825439453125
       }
     },
     "name":null,
     "type":"BufferGeometry",
     "boundingSphere":{
-      "radius":34.579049699119807,
+      "radius":117.83449813705197,
       "center":{
         "x":0.0,
-        "y":13.535533905029297,
+        "y":5.0,
         "z":0.0
       }
     },
@@ -43,29 +43,29 @@
       ]
     }
   },
-  "ex":0.0,
+  "ex":90.0,
   "visible":true,
   "ey":0.0,
   "frustumCulled":true,
   "ez":0.0,
   "eo":"XYZ",
-  "name":"oPresentACube__Top",
+  "name":"oSnowFlat",
   "type":"Mesh",
-  "parent":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
-  "uuid":"cc6f4818-6f13-483a-b88c-344db3396fc4",
-  "__parentUI":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
+  "parent":null,
+  "uuid":"de875630-d392-4d60-a277-517bb8431829",
+  "__parentUI":"9ff898e0-953e-4435-99b5-d5e825905d60",
   "renderOrder":0.0,
   "matrixAutoUpdate":false,
   "layers":1.0,
   "children":[
   ],
   "pz":0.0,
-  "py":30.0,
+  "py":0.0,
   "px":0.0,
-  "rw":1.0,
+  "rw":0.70710678118654757,
   "rz":0.0,
   "ry":0.0,
-  "rx":0.0,
+  "rx":0.70710678118654757,
   "sz":1.0,
   "sy":1.0,
   "sx":1.0,

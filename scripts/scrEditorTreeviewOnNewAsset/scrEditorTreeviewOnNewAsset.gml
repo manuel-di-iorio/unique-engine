@@ -31,6 +31,15 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       // Add to root or parent
       if (treeviewItem != undefined) {
           treeviewItem.addChild(folderItem);
+          
+          // If parent is a folder, set parent reference
+          if (treeviewItem.assetType == "Folder") {
+              folder.parent = treeviewItem.asset;
+              // Also add to parent's children array
+              if (treeviewItem.asset[$ "children"] != undefined) {
+                  array_push(treeviewItem.asset.children, folder);
+              }
+          }
       } else {
           treeview.Items.add(folderItem);
       }
@@ -38,7 +47,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       // Add to AssetManager (no parent - folders are always root in asset manager)
       oSceneEditor.assetManager.addAsset("Folder", folder);
       
-      treeview.__onItemSelected(folderItem);
+      treeview.__onItemSelected(folderItem, true);
       return;
   }
   

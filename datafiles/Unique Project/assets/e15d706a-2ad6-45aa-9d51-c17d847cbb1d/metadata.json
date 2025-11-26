@@ -1,25 +1,25 @@
 {
   "geometry":{
-    "uuid":"6c1da7a4-2859-4855-8a0f-7371faabdf78",
+    "uuid":"15bdb856-2a70-4500-adac-672af5b5c661",
     "boundingBox":{
       "min":{
-        "x":-49.665470123291016,
+        "x":-53.882278442382812,
         "y":0.0,
-        "z":-55.683612823486328
+        "z":-34.409744262695312
       },
       "max":{
-        "x":49.665470123291016,
-        "y":20.0,
-        "z":55.683612823486328
+        "x":53.882278442382812,
+        "y":136.46652221679688,
+        "z":34.409744262695312
       }
     },
     "name":null,
     "type":"BufferGeometry",
     "boundingSphere":{
-      "radius":75.281628965129627,
+      "radius":93.504590004199486,
       "center":{
         "x":0.0,
-        "y":10.0,
+        "y":68.233261108398438,
         "z":0.0
       }
     },
@@ -29,16 +29,16 @@
       "type":"VertexFormat",
       "attrs":[
         {
-          "kind":0.0
+          "kind":0
         },
         {
-          "kind":1.0
+          "kind":1
         },
         {
-          "kind":2.0
+          "kind":2
         },
         {
-          "kind":3.0
+          "kind":3
         }
       ]
     }
@@ -49,11 +49,11 @@
   "frustumCulled":true,
   "ez":0.0,
   "eo":"XYZ",
-  "name":"oSnowPile",
+  "name":"oSnowmanHat",
   "type":"Mesh",
   "parent":null,
-  "uuid":"c3826f9b-df58-4d21-813c-6886fed45bfc",
-  "__parentUI":"9ff898e0-953e-4435-99b5-d5e825905d60",
+  "uuid":"e15d706a-2ad6-45aa-9d51-c17d847cbb1d",
+  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
   "renderOrder":0.0,
   "matrixAutoUpdate":false,
   "layers":1.0,

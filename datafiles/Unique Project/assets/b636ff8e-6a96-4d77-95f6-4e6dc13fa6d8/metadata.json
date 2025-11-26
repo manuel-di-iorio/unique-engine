@@ -1,25 +1,25 @@
 {
   "geometry":{
-    "uuid":"6c1da7a4-2859-4855-8a0f-7371faabdf78",
+    "uuid":"2c3c057a-dead-428a-9d07-651a84115c9e",
     "boundingBox":{
       "min":{
-        "x":-49.665470123291016,
+        "x":-103.14136505126953,
         "y":0.0,
-        "z":-55.683612823486328
+        "z":-67.342002868652344
       },
       "max":{
-        "x":49.665470123291016,
-        "y":20.0,
-        "z":55.683612823486328
+        "x":90.836189270019531,
+        "y":41.364200592041016,
+        "z":67.342002868652344
       }
     },
     "name":null,
     "type":"BufferGeometry",
     "boundingSphere":{
-      "radius":75.281628965129627,
+      "radius":119.87292237254164,
       "center":{
-        "x":0.0,
-        "y":10.0,
+        "x":-6.152587890625,
+        "y":20.682100296020508,
         "z":0.0
       }
     },
@@ -29,16 +29,16 @@
       "type":"VertexFormat",
       "attrs":[
         {
-          "kind":0.0
+          "kind":0
         },
         {
-          "kind":1.0
+          "kind":1
         },
         {
-          "kind":2.0
+          "kind":2
         },
         {
-          "kind":3.0
+          "kind":3
         }
       ]
     }
@@ -49,10 +49,10 @@
   "frustumCulled":true,
   "ez":0.0,
   "eo":"XYZ",
-  "name":"oSnowPile",
+  "name":"oSnowBunker",
   "type":"Mesh",
   "parent":null,
-  "uuid":"c3826f9b-df58-4d21-813c-6886fed45bfc",
+  "uuid":"b636ff8e-6a96-4d77-95f6-4e6dc13fa6d8",
   "__parentUI":"9ff898e0-953e-4435-99b5-d5e825905d60",
   "renderOrder":0.0,
   "matrixAutoUpdate":false,

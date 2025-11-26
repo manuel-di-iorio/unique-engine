@@ -22,21 +22,6 @@
       "type":"Mesh"
     },
     {
-      "id":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
-      "name":"oPresentACube",
-      "type":"Mesh"
-    },
-    {
-      "id":"a1c40aa9-5773-4bd5-9597-b2951f19a749",
-      "name":"oPresentACube__Base",
-      "type":"Mesh"
-    },
-    {
-      "id":"cc6f4818-6f13-483a-b88c-344db3396fc4",
-      "name":"oPresentACube__Top",
-      "type":"Mesh"
-    },
-    {
       "id":"8612d488-8962-4d4e-99a0-b322390bbe30",
       "name":"oTreeDecoratedSnow",
       "type":"Mesh"
@@ -64,6 +49,26 @@
     {
       "id":"138238bd-2637-4b0d-a4ff-5f6e78f9f4fb",
       "name":"oSled",
+      "type":"Mesh"
+    },
+    {
+      "id":"927da630-411d-41b9-9231-9a7478c3355a",
+      "name":"oLantern",
+      "type":"Mesh"
+    },
+    {
+      "id":"de875630-d392-4d60-a277-517bb8431829",
+      "name":"oSnowFlat",
+      "type":"Mesh"
+    },
+    {
+      "id":"e15d706a-2ad6-45aa-9d51-c17d847cbb1d",
+      "name":"oSnowmanHat",
+      "type":"Mesh"
+    },
+    {
+      "id":"b636ff8e-6a96-4d77-95f6-4e6dc13fa6d8",
+      "name":"oSnowBunker",
       "type":"Mesh"
     }
   ]

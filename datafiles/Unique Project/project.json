@@ -3,12 +3,12 @@
     "counters":{
       "lights":0.0,
       "scenes":1.0,
-      "models":13.0,
-      "folders":1.0,
+      "models":18.0,
+      "folders":3.0,
       "cameras":0.0,
-      "textures":1.0,
+      "textures":2.0,
       "instances":16.0,
-      "materials":13.0
+      "materials":17.0
     },
     "gizmos":{
       "showBoxColliders":true
@@ -17,19 +17,29 @@
     "camera":{
       "dampingFactor":0.29999999999999999,
       "target":[
-        20.390070999733751,
-        39.918938123225338,
+        0.0,
+        0.0,
         0.0
       ],
       "position":[
-        233.83579081777839,
-        -440.25016001911519,
-        299.83922672080143
+        -137.03360264493753,
+        -423.25239698463827,
+        163.22992567883318
       ],
       "damping":true
     }
   },
   "folders":{
+    "9ff898e0-953e-4435-99b5-d5e825905d60":{
+      "parent":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60",
+      "name":"Snow"
+    },
+    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
+      "parent":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d",
+      "name":"Rocks"
+    },
     "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
       "parent":null,
       "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
