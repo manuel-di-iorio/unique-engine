@@ -1,14 +1,10 @@
 {
+  "version":"2025.11.26.0",
   "assets":[
     {
       "id":"f4485e71-90a3-4771-b107-98c7347ec348",
       "name":"tStandard",
       "type":"Texture"
-    },
-    {
-      "id":"5bf33abb-a744-40f4-9158-af63a0aa4a96",
-      "name":"sDemo",
-      "type":"Scene"
     },
     {
       "id":"38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
@@ -39,7 +35,36 @@
       "id":"cc6f4818-6f13-483a-b88c-344db3396fc4",
       "name":"oPresentACube__Top",
       "type":"Mesh"
+    },
+    {
+      "id":"8612d488-8962-4d4e-99a0-b322390bbe30",
+      "name":"oTreeDecoratedSnow",
+      "type":"Mesh"
+    },
+    {
+      "id":"c3826f9b-df58-4d21-813c-6886fed45bfc",
+      "name":"oSnowPile",
+      "type":"Mesh"
+    },
+    {
+      "id":"7e0b3d0e-5c39-4eea-b536-585e49120572",
+      "name":"oRocksLarge",
+      "type":"Mesh"
+    },
+    {
+      "id":"2347a4da-f160-4cea-b010-6e7c09550c16",
+      "name":"oSnowFlatLarge",
+      "type":"Mesh"
+    },
+    {
+      "id":"a1b29549-dcb5-4124-b948-5f85147f4900",
+      "name":"oRocksMedium",
+      "type":"Mesh"
+    },
+    {
+      "id":"138238bd-2637-4b0d-a4ff-5f6e78f9f4fb",
+      "name":"oSled",
+      "type":"Mesh"
     }
-  ],
-  "version":"2025.11.26.0"
+  ]
 }

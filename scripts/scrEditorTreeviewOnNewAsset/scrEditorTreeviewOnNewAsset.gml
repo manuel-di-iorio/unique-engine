@@ -145,5 +145,5 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   assetManager.addAsset(typeKey, asset, parentAsset);
   
   // Select the new item
-  treeview.__onItemSelected(newTreeviewItem);
+  treeview.__onItemSelected(newTreeviewItem, true);
 };

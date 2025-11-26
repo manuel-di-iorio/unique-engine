@@ -44,10 +44,10 @@
     }
   },
   "ex":90.0,
+  "visible":true,
   "ey":0.0,
   "frustumCulled":true,
   "ez":0.0,
-  "visible":true,
   "eo":"XYZ",
   "name":"oTreeSnowA",
   "type":"Mesh",

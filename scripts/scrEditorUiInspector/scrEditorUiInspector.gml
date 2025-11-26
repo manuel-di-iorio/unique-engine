@@ -636,7 +636,7 @@ function EditorUiInspector(ui) constructor {
     /**
      * Dynamically create the inspector fields
      */
-    function inspect(asset) {
+    function inspect(asset, focusFirst = false) {
         self.ui.Inspector.Close.show();
 
         var assetType = asset.type;
@@ -810,7 +810,7 @@ function EditorUiInspector(ui) constructor {
                 _Container.add(input);
 
                 // Apply the focus on the first input added to the inspector
-                if (!_focused && assetField.type == "text") {
+                if (focusFirst && !_focused && assetField.type == "text") {
                     _focused = true;
                     runLater(input.Input.focus);
                 }

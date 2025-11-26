@@ -1,4 +1,4 @@
-function editorTreeviewOnItemSelected(treeviewItem) {
+function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
     var editorManager = oSceneEditor.editorManager;
     
     switch (treeviewItem.asset.type) {
@@ -43,6 +43,6 @@ function editorTreeviewOnItemSelected(treeviewItem) {
 
     // Inspect the asset
     if (editorManager.inspector != undefined) {
-        editorManager.inspector.inspect(treeviewItem.asset);
+        editorManager.inspector.inspect(treeviewItem.asset, focus);
     }
 };

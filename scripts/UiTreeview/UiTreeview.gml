@@ -27,13 +27,13 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     /**
      * Select a treeview item
      */
-    function __onItemSelected(treeviewItem) {
+    function __onItemSelected(treeviewItem, focus = false) {
         if (self.selectedItem == treeviewItem) return;
         self.selectedItem = treeviewItem;
         self.Items.traverseChildren(method({ treeviewItem }, function(child) {
             child.selected = child == self.treeviewItem;
         }));
-        if (self.onItemSelected != undefined) self.onItemSelected(treeviewItem);
+        if (self.onItemSelected != undefined) self.onItemSelected(treeviewItem, focus);
     }
     
     /**
@@ -231,10 +231,15 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.treeview.__onItemSelected(child);
     }
     
-    function addChild(childItem) {
+    function addChild(childItem, expand = true) {
         self.Items.add(childItem);
         self.__updateArrowVisibility();
-        self.expandItem();
+        
+        if (expand) {
+            self.expandItem();
+        } else {
+            self.collapseItem();
+        }
     }
     
     function removeChild(childItem) {

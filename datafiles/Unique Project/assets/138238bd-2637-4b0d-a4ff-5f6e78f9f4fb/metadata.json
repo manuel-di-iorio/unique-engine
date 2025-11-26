@@ -1,25 +1,25 @@
 {
   "geometry":{
-    "uuid":"9f10f98b-1593-45b9-a64b-afc0d9d56ea5",
+    "uuid":"cdf65913-4d85-4776-9597-5fad3e10d2ed",
     "boundingBox":{
       "min":{
-        "x":-22.5,
-        "y":0.0,
-        "z":-22.5
+        "x":-31.250005722045898,
+        "y":-3.10949081424889e-14,
+        "z":-50.000007629394531
       },
       "max":{
-        "x":22.5,
-        "y":27.071067810058594,
-        "z":22.5
+        "x":31.250005722045898,
+        "y":37.533500671386719,
+        "z":50.000007629394531
       }
     },
     "name":null,
     "type":"BufferGeometry",
     "boundingSphere":{
-      "radius":34.579049699119807,
+      "radius":61.876930585878775,
       "center":{
         "x":0.0,
-        "y":13.535533905029297,
+        "y":18.766750335693345,
         "z":0.0
       }
     },
@@ -29,43 +29,43 @@
       "type":"VertexFormat",
       "attrs":[
         {
-          "kind":0.0
+          "kind":0
         },
         {
-          "kind":1.0
+          "kind":1
         },
         {
-          "kind":2.0
+          "kind":2
         },
         {
-          "kind":3.0
+          "kind":3
         }
       ]
     }
   },
-  "ex":0.0,
+  "ex":90.0,
   "visible":true,
   "ey":0.0,
   "frustumCulled":true,
   "ez":0.0,
   "eo":"XYZ",
-  "name":"oPresentACube__Top",
+  "name":"oSled",
   "type":"Mesh",
-  "parent":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
-  "uuid":"cc6f4818-6f13-483a-b88c-344db3396fc4",
-  "__parentUI":"32e8ffdb-37d1-49c6-bac3-8a3212600cab",
+  "parent":null,
+  "uuid":"138238bd-2637-4b0d-a4ff-5f6e78f9f4fb",
+  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
   "renderOrder":0.0,
   "matrixAutoUpdate":false,
   "layers":1.0,
   "children":[
   ],
   "pz":0.0,
-  "py":30.0,
+  "py":0.0,
   "px":0.0,
-  "rw":1.0,
+  "rw":0.70710678118654757,
   "rz":0.0,
   "ry":0.0,
-  "rx":0.0,
+  "rx":0.70710678118654757,
   "sz":1.0,
   "sy":1.0,
   "sx":1.0,

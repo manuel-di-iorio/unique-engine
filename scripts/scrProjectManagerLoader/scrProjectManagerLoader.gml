@@ -63,7 +63,7 @@ function ProjectLoader() constructor {
         
         if (parentUUID != undefined && treeviewItemsByUUID[$ parentUUID] != undefined) {
             var parentItem = treeviewItemsByUUID[$ parentUUID];
-            parentItem.addChild(tvItem);
+            parentItem.addChild(tvItem, false);
             
             // Add to parent asset children
             var parentAsset = parentItem.asset;
@@ -119,7 +119,7 @@ function ProjectLoader() constructor {
 
             if (parentUUID != undefined && treeviewItemsByUUID[$ parentUUID] != undefined) {
                 var parentItem = treeviewItemsByUUID[$ parentUUID];
-                parentItem.addChild(tvItem);
+                parentItem.addChild(tvItem, false);
 
                 // Add to parent asset
                 var parentAsset = parentItem.asset;
@@ -310,7 +310,7 @@ function ProjectLoader() constructor {
       // Add back-reference for mesh picking
       instance.__treeviewItem = tvItem;
       
-      parentTreeItem.addChild(tvItem);
+      parentTreeItem.addChild(tvItem, false);
       
       // Recursively create treeview items for children (submeshes)
       for (var k = 0; k < array_length(instance.children); k++) {
