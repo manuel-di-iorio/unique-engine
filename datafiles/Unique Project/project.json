@@ -11,7 +11,7 @@
       "materials":20.0
     },
     "gizmos":{
-      "showBoxColliders":false
+      "showBoxColliders":true
     },
     "gridEnabled":true,
     "camera":{
@@ -22,9 +22,9 @@
         0.0
       ],
       "position":[
-        -262.29499255503066,
-        9.7502468336558152,
-        218.76431651372775
+        -173.66093203468057,
+        -189.01365359241743,
+        173.39251573261984
       ],
       "damping":true
     }
