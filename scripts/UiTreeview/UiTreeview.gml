@@ -18,7 +18,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     // Handle delete shortcut
     self.onStep(method(self, function() {
         if (keyboard_check_pressed(vk_delete)) {
-            if (self.selectedItem != undefined && !global.UI.focusManager.hasAnyFocus()) {
+            if (self.selectedItem != undefined && !global.UI.hasAnyFocus()) {
                 self.selectedItem.__removeItem();
             }
         }

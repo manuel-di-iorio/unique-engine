@@ -656,6 +656,7 @@ function EditorUiInspector(ui) constructor {
         }
         
         // Second pass: add the labels and inputs
+        var _focused = false;
         for (var i = 0, l = array_length(assetFields); i < l; i++) {
             var assetField = assetFields[i];
             var input = undefined;
@@ -807,6 +808,12 @@ function EditorUiInspector(ui) constructor {
             
             if (input != undefined) {
                 _Container.add(input);
+
+                // Apply the focus on the first input added to the inspector
+                if (!_focused && assetField.type == "text") {
+                    call_later(1, time_source_units_frames, input.Input.focus);
+                    _focused = true;
+                }
             }
             
             _Items.add(_Container);

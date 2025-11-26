@@ -12,6 +12,10 @@
     }
   },
   "settings":{
+    "gizmos":{
+      "showBoxColliders":true
+    },
+    "gridEnabled":true,
     "camera":{
       "target":[
         74.88222822006513,
@@ -21,24 +25,20 @@
       "damping":true,
       "dampingFactor":0.29999999999999999,
       "position":[
-        -39.843123036387297,
-        -263.75271011419045,
-        96.074786962336674
+        -39.843122583131759,
+        -263.75270886905361,
+        96.074791588100425
       ]
     },
     "counters":{
       "scenes":1.0,
-      "folders":1.0,
       "models":3.0,
+      "folders":1.0,
       "cameras":0.0,
       "textures":1.0,
       "materials":3.0,
       "instances":10.0,
       "lights":0.0
-    },
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true
+    }
   }
 }

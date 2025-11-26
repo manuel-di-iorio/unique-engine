@@ -261,16 +261,6 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             self.lastClickTime = now;
             self.lastClickPos = clickPos;
         }); 
-         
-        // Set focus to textbox (simplified - delegates to focus manager)
-        self.focus = function() {
-            global.UI.focusManager.setFocus(self);
-        };
-        
-        // Remove focus from textbox (simplified - delegates to focus manager)
-        self.blur = function() {
-            global.UI.focusManager.blur();
-        };
         
         // Update horizontal scroll based on cursor position
         self.updateScrollOffset = function() {

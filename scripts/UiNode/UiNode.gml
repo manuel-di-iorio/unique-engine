@@ -152,7 +152,7 @@ function UiNode(style = {}, props = {}) constructor {
         
         // Unregister from focus manager if focusable
         if (self.focusable && !self.root) {
-            global.UI.focusManager.unregister(self);
+            global.UI.__unregisterFocus(self);
         }
         
         for (var i = self.childrenLength - 1; i >= 0; i--) {
@@ -250,6 +250,51 @@ function UiNode(style = {}, props = {}) constructor {
         return self;
     }
     
+    /** Focus management methods */
+    
+    // Set focus to this element
+    function focus() {
+        if (global.UI.focusedElement != undefined && global.UI.focusedElement != self) {
+            // Blur the currently focused element first
+            if (global.UI.focusedElement[$ "onBlur"] != undefined) {
+                global.UI.focusedElement.onBlur();
+            }
+        }
+        
+        global.UI.focusedElement = self;
+        
+        if (self[$ "onFocus"] != undefined) {
+            self.onFocus();
+        }
+        
+        global.UI.needsRedraw = true;
+        return self;
+    }
+    
+    // Remove focus from this element
+    function blur() {
+        if (global.UI.focusedElement == self) {
+            if (self[$ "onBlur"] != undefined) {
+                self.onBlur();
+            }
+            
+            global.UI.focusedElement = undefined;
+            global.UI.needsRedraw = true;
+        }
+        return self;
+    }
+    
+    // Check if this element has focus
+    function hasFocus() {
+        return global.UI.focusedElement == self;
+    }
+    
+    // Get the currently focused element
+    function getFocused() {
+        return global.UI.focusedElement;
+    }
+    
+    /** Traversal methods */
     function reduceChildren(cb, acc, recursive = true) {
         gml_pragma("forceinline");
 

@@ -20,7 +20,7 @@ if (!projectManager.loaded) exit;
 var winMouseX = window_mouse_get_x();
 var winMouseY = window_mouse_get_y();
 
-var uiHasFocus = global.UI.focusManager.hasAnyFocus();
+var uiHasFocus = global.UI.hasAnyFocus();
 
 if (!uiHasFocus) {
    // Update transform controls based on current tool
