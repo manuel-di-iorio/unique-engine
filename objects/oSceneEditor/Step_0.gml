@@ -30,7 +30,6 @@ if (!uiHasFocus) {
            sceneManager.transformControls.updateGizmo();
            sceneManager.orbit.update(winMouseX, winMouseY);
            
-           // Handle mesh picking
            if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
                sceneManager.handleMeshPicking();
            }
@@ -43,7 +42,6 @@ if (!uiHasFocus) {
            if (!sceneManager.transformControls.dragging) {
                sceneManager.orbit.update(winMouseX, winMouseY);
                
-               // Handle mesh picking when not dragging
                if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
                    sceneManager.handleMeshPicking();
                }

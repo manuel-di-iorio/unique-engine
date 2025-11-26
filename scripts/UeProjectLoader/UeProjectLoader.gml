@@ -57,7 +57,8 @@ function UeProjectLoader(data = {}) constructor {
 
         // Build maps from the UUID-only assets list. For each UUID read its metadata
         for (var i = 0, il = array_length(self.jsonAssets.assets); i < il; i++) {
-            var uuid = self.jsonAssets.assets[i];
+            var assetEntry = self.jsonAssets.assets[i];
+            var uuid = is_string(assetEntry) ? assetEntry : assetEntry.id;
             var metadataPath = self.__projectPath + "/assets/" + uuid + "/metadata.json";
             if (!file_exists(metadataPath)) continue;
             var entry = self.__readJson(metadataPath);
@@ -107,7 +108,8 @@ function UeProjectLoader(data = {}) constructor {
         if (array_length(assetNames) == 0) {
             var assetList = self.jsonAssets.assets;
             for (var i = 0; i < array_length(assetList); i++) {
-                var uuid = assetList[i];
+                var assetEntry = assetList[i];
+                var uuid = is_string(assetEntry) ? assetEntry : assetEntry.id;
                 var entry = self.assetsByUuid[$ uuid];
                 if (entry != undefined && entry.name != undefined) array_push(assetNames, entry.name);
             }
@@ -164,7 +166,9 @@ function UeProjectLoader(data = {}) constructor {
         if (array_length(uuidsToLoad) == 0) {
             var assetList = self.jsonAssets.assets;
             for (var i = 0; i < array_length(assetList); i++) {
-                array_push(uuidsToLoad, assetList[i]);
+                var assetEntry = assetList[i];
+                var uuid = is_string(assetEntry) ? assetEntry : assetEntry.id;
+                array_push(uuidsToLoad, uuid);
             }
         }
         
@@ -259,7 +263,7 @@ function UeProjectLoader(data = {}) constructor {
         }
         
         // Create instances
-        for (var i = 0; i < array_length(children); i++) {
+        for (var i = 0, il = array_length(children); i < il; i++) {
             var child = children[i];
             if (is_struct(child) && child[$ "type"] == "ModelInstance") {
                 var modelUUID = child[$ "model"];
@@ -347,7 +351,7 @@ function UeProjectLoader(data = {}) constructor {
         
         // Build texture map
         var texturesByUUID = {};
-        for (var i = 0; i < array_length(assetUUIDs); i++) {
+        for (var i = 0, il = array_length(assetUUIDs); i < il; i++) {
             var asset = self.assetsByUuid[$ assetUUIDs[i]];
             if (asset[$ "type"] == "Texture") {
                 texturesByUUID[$ asset.uuid] = asset;
@@ -356,7 +360,7 @@ function UeProjectLoader(data = {}) constructor {
         
         // Link materials to textures
         var materialsByUUID = {};
-        for (var i = 0; i < array_length(assetUUIDs); i++) {
+        for (var i = 0, il = array_length(assetUUIDs); i < il; i++) {
             var asset = self.assetsByUuid[$ assetUUIDs[i]];
             if (asset[$ "type"] == "Material") {
                 materialsByUUID[$ asset.uuid] = asset;
@@ -367,14 +371,28 @@ function UeProjectLoader(data = {}) constructor {
             }
         }
         
-        // Link meshes to materials
-        for (var i = 0; i < array_length(assetUUIDs); i++) {
+        // Link meshes to materials and children
+        for (var i = 0, il = array_length(assetUUIDs); i < il; i++) {
             var asset = self.assetsByUuid[$ assetUUIDs[i]];
             if (asset[$ "type"] == "Mesh" && asset[$ "__metadata"] != undefined) {
+                // Link Material
                 var materialUUID = asset.__metadata[$ "material"];
                 if (materialUUID != undefined && materialsByUUID[$ materialUUID] != undefined) {
                     asset.material = materialsByUUID[$ materialUUID];
                 }
+                
+                // Link Children
+                var childrenUUIDs = asset.__metadata[$ "children"];
+                if (childrenUUIDs != undefined && is_array(childrenUUIDs)) {
+                    for (var j = 0, jl = array_length(childrenUUIDs); j < jl; j++) {
+                        var childUUID = childrenUUIDs[j];
+                        var childAsset = self.assetsByUuid[$ childUUID];
+                        if (childAsset != undefined && childAsset[$ "isObject3D"] == true) {
+                            asset.add(childAsset);
+                        }
+                    }
+                }
+
                 delete asset.__metadata;
             }
         }
