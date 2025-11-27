@@ -131,16 +131,6 @@
       "type":"Mesh"
     },
     {
-      "id":"a71b76e3-365b-4816-8551-4a9d0aff1e61",
-      "name":"Scene",
-      "type":"Mesh"
-    },
-    {
-      "id":"df417c2e-3819-411a-9fb9-66f62e1351b4",
-      "name":"Scene",
-      "type":"Mesh"
-    },
-    {
       "id":"e07d4ed0-94d7-4aa7-8d56-1b5c54278468",
       "name":"oPresentBRectangle",
       "type":"Mesh"
