@@ -212,13 +212,9 @@ function ProjectSaver() constructor {
         var changes = projectManager.changes;
         var changeIds = struct_get_names(changes);
         
-        show_debug_message("[SAVE] Starting incremental save with " + string(array_length(changeIds)) + " changes");
-        
         // Load existing assets.json
         var assetsJson = json_parse(self.__readFile(assetsJsonPath));
         var assets = assetsJson.assets;
-        
-        show_debug_message("[SAVE] Loaded assets.json with " + string(array_length(assets)) + " assets");
         
         // Load existing project.json
         var projectJson = {};
@@ -226,8 +222,6 @@ function ProjectSaver() constructor {
             projectJson = json_parse(self.__readFile(projectJsonPath));
         }
         var foldersMap = projectJson[$ "folders"] ?? {};
-        
-        show_debug_message("[SAVE] Loaded project.json with " + string(struct_names_count(foldersMap)) + " folders");
         
         for (var i = 0; i < array_length(changeIds); i++) {
             var uuid = changeIds[i];
@@ -238,23 +232,18 @@ function ProjectSaver() constructor {
             
             // VALIDATION: Skip invalid assets
             if (asset == undefined) {
-                show_debug_message("[SAVE] WARNING: Skipping undefined asset with UUID: " + uuid);
                 continue;
             }
             
             // VALIDATION: Skip assets without a name (except for delete action)
             if (action != "delete" && (asset[$ "name"] == undefined || asset.name == "")) {
-                show_debug_message("[SAVE] WARNING: Skipping asset with empty name. UUID: " + uuid + ", Type: " + (asset[$ "type"] ?? "undefined"));
                 continue;
             }
             
             // VALIDATION: Skip generic Object3D types (these should not be saved directly)
             if (action != "delete" && asset[$ "type"] == "Object3D") {
-                show_debug_message("[SAVE] WARNING: Skipping Object3D asset (should not be saved directly). UUID: " + uuid + ", Name: " + (asset[$ "name"] ?? ""));
                 continue;
             }
-            
-            show_debug_message("[SAVE] Processing change #" + string(i) + ": UUID=" + uuid + ", Action=" + action + ", Type=" + asset.type + ", Name=" + asset.name);
             
             switch (action) {
                 case "create":
@@ -262,7 +251,7 @@ function ProjectSaver() constructor {
                     // Handle Folder updates
                     if (asset.type == "Folder") {
                         var folderParentUuid = (asset[$ "parent"] != undefined && asset.parent[$ "type"] == "Folder") ? asset.parent.uuid : undefined;
-                        show_debug_message("[SAVE] Updating folder: " + asset.name + " (parent: " + (folderParentUuid ?? "none") + ")");
+
                         foldersMap[$ asset.uuid] = {
                             uuid: asset.uuid,
                             name: asset.name,
@@ -273,7 +262,6 @@ function ProjectSaver() constructor {
                     
                     // Skip ModelInstance (they're saved in Scene metadata)
                     if (asset.type == "ModelInstance") {
-                        show_debug_message("[SAVE] Skipping ModelInstance (saved in Scene): " + asset.name);
                         break;
                     }
 
@@ -286,14 +274,12 @@ function ProjectSaver() constructor {
                         }
                     }
                     if (assetIndex == -1) {
-                        show_debug_message("[SAVE] Adding new asset to assets.json: " + asset.name);
                         array_push(assets, {
                             id: asset.uuid,
                             name: asset.name,
                             type: asset.type
                         });
                     } else {
-                        show_debug_message("[SAVE] Asset already in assets.json: " + asset.name);
                         // Update existing entry in case name or type changed
                         assets[assetIndex] = {
                             id: asset.uuid,
@@ -303,10 +289,8 @@ function ProjectSaver() constructor {
                     }
                     
                     var assetPath = assetsDir + uuid;
-                    show_debug_message("[SAVE] Creating/checking asset directory: " + assetPath);
                     if (!directory_exists(assetPath)) {
                         directory_create(assetPath);
-                        show_debug_message("[SAVE] Created directory: " + assetPath);
                     }
                     
                     var assetToJSON = asset[$ "toJSON"];
@@ -327,19 +311,14 @@ function ProjectSaver() constructor {
 
                     // Save parent UUID if asset has one (set by AssetManager)
                     if (asset[$ "__parentUI"] != undefined) {
-                        show_debug_message("[SAVE] Asset " + asset.name + " has __parentUI: " + asset.__parentUI);
                         metadata.__parentUI = asset.__parentUI;
-                    } else {
-                        show_debug_message("[SAVE] Asset " + asset.name + " has no __parentUI");
                     }
                     
-                    show_debug_message("[SAVE] Writing metadata.json for: " + asset.name);
                     self.__writeJson(assetPath + "/metadata.json", metadata);
                     
                     // Export binary resources
                     switch (asset.type) {
                         case "Texture":
-                            show_debug_message("[SAVE] Exporting texture: " + asset.name);
                             asset.export(assetPath + "/texture.png");
                             break;
                         case "Mesh":  
@@ -347,7 +326,6 @@ function ProjectSaver() constructor {
                             if (assetGeometry != undefined) {
                                 var assetGeometryVb = assetGeometry[$ "vb"];
                                 if (assetGeometryVb != undefined) {
-                                    show_debug_message("[SAVE] Exporting mesh geometry: " + asset.name);
                                     var originalVb = assetGeometryVb;
                                     assetGeometry.vb = assetGeometry.__vbClone; // Use unfrozen VB for export
                                     assetGeometry.export(assetPath + "/geometry.buf");
@@ -359,7 +337,6 @@ function ProjectSaver() constructor {
                     break;
                     
                 case "delete":
-                    show_debug_message("[SAVE] Deleting asset: " + asset.name + " (" + asset.type + ")");
                     if (asset.type == "Folder") {
                         variable_struct_remove(foldersMap, asset.uuid);
                         break;
@@ -367,7 +344,6 @@ function ProjectSaver() constructor {
                     
                     // Skip ModelInstance (they're managed in Scene metadata)
                     if (asset.type == "ModelInstance") {
-                        show_debug_message("[SAVE] Skipping ModelInstance deletion (managed in Scene): " + asset.name);
                         break;
                     }
 
@@ -382,24 +358,19 @@ function ProjectSaver() constructor {
                     // Delete asset directory
                     var assetPath = assetsDir + uuid;
                     if (directory_exists(assetPath)) {
-                        show_debug_message("[SAVE] Deleting directory: " + assetPath);
                         directory_destroy(assetPath);
                     }
                     break;
             }
         }
         
-        show_debug_message("[SAVE] Writing assets.json with " + string(array_length(assets)) + " assets");
-        // Write updated assets.json
         self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
         
-        show_debug_message("[SAVE] Writing project.json with " + string(struct_names_count(foldersMap)) + " folders");
         // Update project.json with new folders map and settings
         projectJson.folders = foldersMap;
         projectJson.settings = self.__getProjectSettings();
         
         self.__writeJson(projectJsonPath, projectJson);
-        show_debug_message("[SAVE] Incremental save completed successfully");
     }
 
     function __getProjectSettings() {
@@ -439,13 +410,11 @@ function ProjectSaver() constructor {
     }
 
     function __writeJson(path, data) {
-        show_debug_message("[SAVE] Writing JSON to: " + path);
         var jsonString = json_stringify(data, true);
         var buf = buffer_create(string_byte_length(jsonString), buffer_fixed, 1);
         buffer_write(buf, buffer_text, jsonString);
         buffer_save(buf, path);
         buffer_delete(buf);
-        show_debug_message("[SAVE] Successfully wrote JSON to: " + path);
     }
     
     function __readFile(path) {

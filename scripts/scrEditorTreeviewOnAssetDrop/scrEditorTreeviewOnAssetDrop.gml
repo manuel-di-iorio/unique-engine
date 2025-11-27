@@ -11,7 +11,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     // Allow dropping anything into a Folder
     if (targetItem.assetType == "Folder") {
         isValidDrop = true;
-        dropAction = "move_to_folder";
+        dropAction = "moveToFolder";
     }
     // Texture and Material are not draggable
     else if (draggedItem.assetType == "Texture" || draggedItem.assetType == "Material") {
@@ -103,11 +103,9 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     
     // Perform the drop action
     if (isValidDrop) {
-        if (dropAction == "move_to_folder") {
+        if (dropAction == "moveToFolder") {
             // Move any asset into a folder
             if (draggedItem.asset != undefined) {
-                show_debug_message("[DROP] Moving asset '" + draggedItem.asset.name + "' (type: " + draggedItem.asset.type + ") into folder '" + targetItem.asset.name + "' (UUID: " + targetItem.asset.uuid + ")");
-                
                 // 1. Remove from old parent
                 __removeFromParent(draggedItem.asset);
                 
@@ -118,22 +116,16 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                 // For other assets, set __parentUI (used in metadata.json)
                 if (draggedItem.asset.type == "Folder") {
                     draggedItem.asset.parent = newParent;
-                    show_debug_message("[DROP] Set folder parent to: " + newParent.name);
                 } else {
                     draggedItem.asset.__parentUI = newParent.uuid;
-                    show_debug_message("[DROP] Set __parentUI to: " + draggedItem.asset.__parentUI);
                 }
-                
-                show_debug_message("[DROP] New folder set: " + newParent.name + " (UUID: " + newParent.uuid + ")");
                 
                 // Track change on the dragged asset (metadata 'folder' changed)
                 oSceneEditor.assetManager.editAsset(draggedItem.asset);
-                show_debug_message("[DROP] Tracked change for asset: " + draggedItem.asset.name);
             }
 
             // Update the treeview UI
             draggedItem.moveItemTo(targetItem);
-            show_debug_message("[DROP] Treeview UI updated");
         }
         else if (dropAction == "unparent") {
             // Remove from current asset parent
@@ -256,7 +248,6 @@ function __editorTreeview_createTreeviewItemsForChildren(asset, treeviewItem, ic
 function __removeFromParent(asset) {
     if (asset == undefined) return;
     if (asset[$ "parent"] == undefined) return;
-    if (asset.parent == undefined) return;
     
     var parent = asset.parent;
     

@@ -14,8 +14,6 @@ function AssetManager() constructor {
         // Always add to flat assets array
         array_push(self.assets, asset);
         
-        show_debug_message("[ASSET] Adding asset: " + asset.name + " (type: " + asset.type + ")");
-        
         // Set __parentUI if asset is in a folder (from treeview)
         if (asset[$ "__treeviewItem"] != undefined) {
             var treeviewItem = asset.__treeviewItem;
@@ -30,20 +28,12 @@ function AssetManager() constructor {
                     // Store parent UUID in __parentUI (used for saving hierarchy)
                     // This works for both Folders and other assets (like Meshes acting as parents)
                     asset.__parentUI = parentTreeviewItem.asset.uuid;
-                    show_debug_message("[ASSET] Set __parentUI for '" + asset.name + "' to: " + parentTreeviewItem.asset.name + " (UUID: " + asset.__parentUI + ")");
-                } else {
-                    show_debug_message("[ASSET] Parent treeview item has no asset for: " + asset.name);
                 }
-            } else {
-                show_debug_message("[ASSET] No parent treeview item for: " + asset.name);
             }
-        } else {
-            show_debug_message("[ASSET] No treeview item for: " + asset.name);
         }
         
         // Handle 3D hierarchy parent (not folder)
         if (parent != undefined) {
-            show_debug_message("[ASSET] Setting 3D parent for '" + asset.name + "' to: " + parent.name);
             // If parent has add() method, use it (Object3D hierarchy)
             if (parent[$ "add"] != undefined) {
                 parent.add(asset);
@@ -151,19 +141,16 @@ function AssetManager() constructor {
         
         // VALIDATION: Don't track invalid assets
         if (asset == undefined) {
-            show_debug_message("[TRACK] WARNING: Attempted to track undefined asset. Action: " + action);
             return;
         }
         
         // VALIDATION: Don't track assets without names (except delete)
         if (action != "delete" && (asset[$ "name"] == undefined || asset.name == "")) {
-            show_debug_message("[TRACK] WARNING: Attempted to track asset with empty name. UUID: " + (asset[$ "uuid"] ?? "no-uuid") + ", Type: " + (asset[$ "type"] ?? "undefined") + ", Action: " + action);
             return;
         }
         
         // VALIDATION: Don't track generic Object3D types (these should not be saved)
         if (action != "delete" && asset[$ "type"] == "Object3D") {
-            show_debug_message("[TRACK] WARNING: Attempted to track Object3D (should not be saved). UUID: " + asset.uuid + ", Name: " + (asset[$ "name"] ?? "no-name") + ", Action: " + action);
             return;
         }
 
@@ -178,7 +165,6 @@ function AssetManager() constructor {
 
             if (scene != undefined) {
                 var sceneUuid = scene[$ "uuid"] ?? scene[$ "uuid"];
-                show_debug_message("[TRACK] ModelInstance change will track parent Scene as edit. Scene UUID: " + (sceneUuid ?? "no-uuid") + ", Instance: " + (asset[$ "name"] ?? "no-name") + ", Action: " + action);
 
                 // If the scene is not already tracked, mark it as edited
                 var existingSceneChange = projectManager.changes[$ sceneUuid];
@@ -189,14 +175,10 @@ function AssetManager() constructor {
                     };
                     projectManager.markAsUnsaved();
                 }
-                return;
-            } else {
-                show_debug_message("[TRACK] WARNING: ModelInstance has no parent Scene, skipping tracking. Instance UUID: " + (asset[$ "uuid"] ?? "no-uuid"));
-                return;
             }
+
+            return;
         }
-        
-        show_debug_message("[TRACK] Tracking change: " + action + " for asset '" + (asset[$ "name"] ?? "no-name") + "' (type: " + (asset[$ "type"] ?? "unknown") + ", UUID: " + (asset[$ "uuid"] ?? "no-uuid") + ")");
         
         var uuid = asset.uuid;
         var existing = projectManager.changes[$ uuid];

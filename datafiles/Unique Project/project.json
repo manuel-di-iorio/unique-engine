@@ -1,45 +1,5 @@
 {
-  "settings":{
-    "counters":{
-      "lights":0.0,
-      "scenes":2.0,
-      "models":21.0,
-      "folders":4.0,
-      "cameras":0.0,
-      "textures":2.0,
-      "instances":16.0,
-      "materials":20.0
-    },
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true,
-    "camera":{
-      "dampingFactor":0.29999999999999999,
-      "target":[
-        42.283417188465876,
-        71.184489226675282,
-        0.0
-      ],
-      "position":[
-        -173.66093203468057,
-        -189.01365359241743,
-        173.39251573261984
-      ],
-      "damping":true
-    }
-  },
   "folders":{
-    "9ff898e0-953e-4435-99b5-d5e825905d60":{
-      "parent":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60",
-      "name":"Snow"
-    },
-    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
-      "parent":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d",
-      "name":"Rocks"
-    },
     "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
       "parent":null,
       "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
@@ -49,6 +9,46 @@
       "parent":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
       "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "name":"Objects"
+    },
+    "9ff898e0-953e-4435-99b5-d5e825905d60":{
+      "parent":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60",
+      "name":"Snow"
+    },
+    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
+      "parent":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d",
+      "name":"Rocks"
+    }
+  },
+  "settings":{
+    "gizmos":{
+      "showBoxColliders":true
+    },
+    "gridEnabled":true,
+    "camera":{
+      "damping":true,
+      "dampingFactor":0.29999999999999999,
+      "target":[
+        42.283417188465876,
+        71.184489226675282,
+        0.0
+      ],
+      "position":[
+        -18.216660362491517,
+        -263.30026705815868,
+        169.88139518323752
+      ]
+    },
+    "counters":{
+      "textures":2.0,
+      "materials":20.0,
+      "scenes":2.0,
+      "lights":0.0,
+      "models":21.0,
+      "folders":4.0,
+      "instances":16.0,
+      "cameras":0.0
     }
   }
 }
