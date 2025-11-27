@@ -104,6 +104,11 @@
       "id":"7b3befe6-3dc9-486b-a640-f1a679a88190",
       "name":"oPresentACube__Top",
       "type":"Mesh"
+    },
+    {
+      "id":"cf30cd7d-acea-4fca-9e63-d0ac3c573699",
+      "name":"oRocksSmall",
+      "type":"Mesh"
     }
   ],
   "version":"2025.11.26.0"

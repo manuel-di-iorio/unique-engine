@@ -11,7 +11,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     self.selectedAxis = undefined;    // Currently selected axis object
     self.axis = undefined;            // Currently selected axis object name (X, Y, Z, etc..)
     self.dragging = false;            // Flag to indicate if dragging is in progress
-    self.size = 1;                    // Gizmo visual size multiplier
+    self.size = 1.3;                  // Gizmo visual size multiplier
     self.mode = "move";               // Current transform mode: "move", "rotate", or "scale"
     self.space = "world";             // Transform space: "world" or "local"
 
@@ -22,6 +22,9 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     self.translationSnap = undefined; // Increment step for translation snapping
     self.rotationSnap = undefined;    // Increment step for rotation snapping (radians)
     self.scaleSnap = undefined;       // Increment step for scale snapping
+    
+    self.gizmoMinScale = undefined;   // Minimum scale for the gizmo
+    self.gizmoMaxScale = undefined;   // Maximum scale for the gizmo
 
     // === AXIS VISIBILITY ===
     self.showX = true;                // Show X axis gizmo line
@@ -60,20 +63,6 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     });
     
     /**
-     * Computes the visual dimensions of the gizmo axes based on the current size setting.
-     * These calculations determine the proportions of arrows, planes, and interactive elements.
-     */
-    function __computeAxesSize() {
-        __axisLength = self.size * 0.8;          // Total length of each axis arrow
-        __axisLengthHalf = __axisLength * .5;    // Half the axis length for positioning
-        __axisLineWidth = .3;                    // Width/thickness of axis lines (reduced from 0.7)
-        __axisOffset = 1;                        // Offset from origin for axis positioning
-        __planeOpacity = 0.3;                    // Transparency level for plane handles
-        __planeDepth = .2;                       // Thickness of plane interaction handles
-        __planeSize = __axisLength * 0.3;        // Size of square plane handles
-    }
-    
-    /**
      * Attaches the transform controls to a 3D object, enabling manipulation.
      * @param {UeObject3D} object - The target object to control.
      * @returns {self}
@@ -87,21 +76,17 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             object.updateWorldMatrix(true, false);
         }
 
-        // Auto-scale gizmo based on object's bounding sphere radius for better visual proportion
-        var objectBox = object[$ "geometry"] != undefined ? object.geometry[$ "boundingBox"] : undefined;
-        if (objectBox != undefined) {
-            // Use bounding sphere radius for more accurate sizing
-            // This gives us the distance from center to furthest corner
-            var center = objectBox.getCenter();
-            var size = objectBox.getSize();
-            // Calculate radius as half the diagonal (distance from center to corner)
-            var radius = size.length() * 0.5;
-            self.size = radius * 0.5; // Use half the radius so gizmo doesn't overwhelm the object
-        } else {
-            // Default size if bounding box not available
-            self.size = 8;
-        }
-        __computeAxesSize();
+        /**
+         * Computes the visual dimensions of the gizmo axes based on the current size setting.
+         * These calculations determine the proportions of arrows, planes, and interactive elements.
+         */
+        __axisLength = self.size * 10;           // Total length of each axis arrow
+        __axisLengthHalf = __axisLength * .5;    // Half the axis length for positioning
+        __axisLineWidth = self.size * 0.4;       // Width/thickness of axis lines
+        __axisOffset = self.size * 1.5;          // Offset from origin for axis positioning
+        __planeOpacity = 0.3;                    // Transparency level for plane handles
+        __planeDepth = self.size * 0.2;          // Thickness of plane interaction handles
+        __planeSize = __axisLength * 0.35;       // Size of square plane handles
             
         build();
         updateGizmo();
@@ -233,17 +218,15 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         // Calculate distance-based scale to maintain consistent apparent size (billboard-like behavior)
         var distance = self.camera.position.distanceTo(_wp);
         
-        // Use a perspective-correct scaling formula
-        // The scale should be proportional to distance to maintain constant apparent size
-        var baseScale = 0.12;  // Base size multiplier - increased for better visibility
-        var referenceDistance = 10;  // Reference distance for scaling
+        // Scale formula: distance * constant
+        var currentScale = distance * 0.008;
         
-        // Calculate scale that makes gizmo appear same size regardless of distance
-        // Scale increases with distance to compensate for perspective
-        var distanceScale = (distance / referenceDistance) * baseScale;
+        // Clamp scale if limits are defined
+        if (self.gizmoMinScale != undefined) currentScale = max(currentScale, self.gizmoMinScale);
+        if (self.gizmoMaxScale != undefined) currentScale = min(currentScale, self.gizmoMaxScale);
         
         // Apply the distance-based scale to the entire gizmo
-        self._root.scale.set(distanceScale, distanceScale, distanceScale);
+        self._root.scale.set(currentScale, currentScale, currentScale);
 
         if (self.space == "local") {
             // In local space, gizmo rotates with the object's world rotation
@@ -441,6 +424,9 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
      */
     function update() { 
         if (!self.object) return;
+        
+        // Update gizmo transform (scale/rotation) to match camera/object changes
+        updateGizmo();
             
         // Update which axis is hovered based on mouse position
         updateInteraction();

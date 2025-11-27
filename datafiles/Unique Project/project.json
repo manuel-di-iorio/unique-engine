@@ -7,29 +7,34 @@
     "camera":{
       "damping":true,
       "target":[
-        96.717960418486925,
-        68.30134171149372,
+        86.261078661955807,
+        -80.199185494540245,
         0.0
       ],
       "dampingFactor":0.29999999999999999,
       "position":[
-        -69.781564077936608,
-        -543.61955702050977,
-        293.71370949958481
+        49.124316732426848,
+        -426.12227199159065,
+        136.91730578399162
       ]
     },
     "counters":{
-      "scenes":3.0,
+      "materials":23.0,
       "cameras":0.0,
       "lights":0.0,
-      "instances":16.0,
-      "models":22.0,
+      "instances":30.0,
+      "models":23.0,
       "folders":6.0,
       "textures":2.0,
-      "materials":22.0
+      "scenes":3.0
     }
   },
   "folders":{
+    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
+      "name":"Rocks",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
+    },
     "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
       "name":"Project",
       "__parentUI":null,
@@ -44,11 +49,6 @@
       "name":"Snow",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
-    },
-    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
-      "name":"Rocks",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
     }
   }
 }
