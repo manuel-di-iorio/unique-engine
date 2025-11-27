@@ -2,29 +2,29 @@
   "settings":{
     "gridEnabled":true,
     "gizmos":{
-      "showBoxColliders":true
+      "showBoxColliders":false
     },
     "camera":{
       "damping":true,
       "target":[
-        86.261078661955807,
-        -80.199185494540245,
+        318.18612554284556,
+        217.60064710721778,
         0.0
       ],
       "dampingFactor":0.29999999999999999,
       "position":[
-        49.124316732426848,
-        -426.12227199159065,
-        136.91730578399162
+        729.60951107301969,
+        -559.32162307266083,
+        284.04545008549832
       ]
     },
     "counters":{
-      "materials":23.0,
+      "materials":28.0,
       "cameras":0.0,
       "lights":0.0,
-      "instances":30.0,
-      "models":23.0,
-      "folders":6.0,
+      "instances":42.0,
+      "models":28.0,
+      "folders":8.0,
       "textures":2.0,
       "scenes":3.0
     }
@@ -49,6 +49,16 @@
       "name":"Snow",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
+    },
+    "aa10cefd-094c-4394-8382-9f287bb05aca":{
+      "name":"Presents",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
+    },
+    "855426d7-7661-4e99-9915-d0980137709c":{
+      "name":"Trees",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"855426d7-7661-4e99-9915-d0980137709c"
     }
   }
 }

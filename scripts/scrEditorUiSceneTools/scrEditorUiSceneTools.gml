@@ -7,7 +7,7 @@ function EditorUiSceneTools(ui) constructor {
         position: "absolute",
         top: 65,
         left: "21%",
-        minWidth: 300,
+        minWidth: 330,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",

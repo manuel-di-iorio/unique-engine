@@ -1,50 +1,7 @@
 {
   "material":null,
   "visible":true,
-  "geometry":{
-    "boundingBox":{
-      "min":{
-        "x":0.0,
-        "z":0.0,
-        "y":15.000000953674316
-      },
-      "max":{
-        "x":22.5,
-        "z":22.5,
-        "y":30.000001907348633
-      }
-    },
-    "name":null,
-    "boundingSphere":{
-      "center":{
-        "x":0.0,
-        "z":0.0,
-        "y":15.000000953674316
-      },
-      "radius":35.178118605323824
-    },
-    "format":{
-      "name":"",
-      "attrs":[
-        {
-          "kind":0
-        },
-        {
-          "kind":1
-        },
-        {
-          "kind":2
-        },
-        {
-          "kind":3
-        }
-      ],
-      "type":"VertexFormat",
-      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250"
-    },
-    "uuid":"e44197a4-0f72-4974-8069-506724cbdb22",
-    "type":"BufferGeometry"
-  },
+  "geometry":null,
   "frustumCulled":true,
   "ex":90.0,
   "ey":0.0,
@@ -55,9 +12,9 @@
   "ez":0.0,
   "eo":"XYZ",
   "parent":null,
-  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-  "renderOrder":0.0,
+  "__parentUI":"aa10cefd-094c-4394-8382-9f287bb05aca",
   "matrixAutoUpdate":false,
+  "renderOrder":0.0,
   "layers":1.0,
   "type":"Mesh",
   "pz":0.0,
@@ -68,9 +25,9 @@
   "name":"oPresentACube",
   "ry":0.0,
   "rx":0.70710678118654757,
-  "uuid":"9d639333-4783-477b-9441-3408e9accca3",
   "sz":1.0,
   "sy":1.0,
+  "uuid":"9d639333-4783-477b-9441-3408e9accca3",
   "sx":1.0,
   "uz":-1.0,
   "uy":0.0,

@@ -22,7 +22,7 @@ var treeTrunkGeometry = new UeBoxGeometry(20, 20, 50, { color: #600000 });
 var treeTrunk = new UeStaticMesh(treeTrunkGeometry, material);
 
 var treeTopGeometry = new UeSphereGeometry(40, { color: #11aa11, lats: 40, lons: 40 });
-var treeTop = new UeStaticMesh(treeTopGeometry, undefined, { z: 55 });
+var treeTop = new UeStaticMesh(treeTopGeometry, material, { z: 55 });
 
 treeGroup.add(treeShadow, treeTrunk, treeTop);
 

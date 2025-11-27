@@ -109,6 +109,66 @@
       "id":"cf30cd7d-acea-4fca-9e63-d0ac3c573699",
       "name":"oRocksSmall",
       "type":"Mesh"
+    },
+    {
+      "id":"810fb466-6c69-4c04-8815-61b4e6cf382a",
+      "name":"oTreeSnowB",
+      "type":"Mesh"
+    },
+    {
+      "id":"897074dc-956f-4abf-a5c0-8f2c5f550631",
+      "name":"oPresentARound",
+      "type":"Mesh"
+    },
+    {
+      "id":"0f31065c-8e7c-4bbb-bdab-8579184a9512",
+      "name":"oPresentARound__Base",
+      "type":"Mesh"
+    },
+    {
+      "id":"0b27c7d5-1788-4ca8-8790-a677cd216fc7",
+      "name":"oPresentARound__Top",
+      "type":"Mesh"
+    },
+    {
+      "id":"a71b76e3-365b-4816-8551-4a9d0aff1e61",
+      "name":"Scene",
+      "type":"Mesh"
+    },
+    {
+      "id":"df417c2e-3819-411a-9fb9-66f62e1351b4",
+      "name":"Scene",
+      "type":"Mesh"
+    },
+    {
+      "id":"e07d4ed0-94d7-4aa7-8d56-1b5c54278468",
+      "name":"oPresentBRectangle",
+      "type":"Mesh"
+    },
+    {
+      "id":"82ec2814-fcf9-49cd-aac0-3741452e0715",
+      "name":"oPresentBRectangle__Base",
+      "type":"Mesh"
+    },
+    {
+      "id":"d5936b47-954e-408e-95b3-ac331e77fabf",
+      "name":"oPresentBRectangle__Top",
+      "type":"Mesh"
+    },
+    {
+      "id":"3157358e-90c0-46a4-82da-46158d75bee5",
+      "name":"oPresentBCube",
+      "type":"Mesh"
+    },
+    {
+      "id":"1f33ceb8-dacd-4435-91c8-be3f1739fea0",
+      "name":"oPresentBCube__Base",
+      "type":"Mesh"
+    },
+    {
+      "id":"a510bad6-d777-4064-921f-58860cfd2fb4",
+      "name":"oPresentBCube__Top",
+      "type":"Mesh"
     }
   ],
   "version":"2025.11.26.0"

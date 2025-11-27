@@ -5,55 +5,55 @@
     "boundingSphere":{
       "center":{
         "x":0.0,
-        "y":96.022560119628906,
+        "y":15.000000953674316,
         "z":0.0
       },
-      "radius":127.6747154288026
+      "radius":38.333806703235325
     },
     "name":null,
     "format":{
       "name":"",
       "attrs":[
         {
-          "kind":0.0
+          "kind":0
         },
         {
-          "kind":1.0
+          "kind":1
         },
         {
-          "kind":2.0
+          "kind":2
         },
         {
-          "kind":3.0
+          "kind":3
         }
       ],
       "type":"VertexFormat",
       "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250"
     },
-    "uuid":"f7f74371-1d05-436e-9493-dc1db65b4917",
+    "uuid":"863cb9aa-5b59-4dd3-9bed-c508984e9488",
     "type":"BufferGeometry",
     "boundingBox":{
       "min":{
-        "x":-59.500003814697266,
+        "x":-24.944746017456055,
         "y":0.0,
-        "z":-59.500003814697266
+        "z":-24.944746017456055
       },
       "max":{
-        "x":59.500003814697266,
-        "y":192.04512023925781,
-        "z":59.500003814697266
+        "x":24.944746017456055,
+        "y":30.000001907348633,
+        "z":24.944746017456055
       }
     }
   },
   "frustumCulled":true,
-  "ex":90.0,
+  "ex":0.0,
   "ey":0.0,
   "children":[
   ],
   "ez":0.0,
   "eo":"XYZ",
-  "parent":null,
-  "__parentUI":"855426d7-7661-4e99-9915-d0980137709c",
+  "parent":"897074dc-956f-4abf-a5c0-8f2c5f550631",
+  "__parentUI":"897074dc-956f-4abf-a5c0-8f2c5f550631",
   "matrixAutoUpdate":false,
   "renderOrder":0.0,
   "layers":1.0,
@@ -61,14 +61,14 @@
   "pz":0.0,
   "py":0.0,
   "px":0.0,
-  "rw":0.70710678118654757,
+  "rw":1.0,
   "rz":0.0,
-  "name":"oTreeSnowA",
+  "name":"oPresentARound__Base",
   "ry":0.0,
-  "rx":0.70710678118654757,
+  "rx":0.0,
   "sz":1.0,
   "sy":1.0,
-  "uuid":"be5c0cf1-034e-4831-9ef1-36528dbe39d2",
+  "uuid":"0f31065c-8e7c-4bbb-bdab-8579184a9512",
   "sx":1.0,
   "uz":-1.0,
   "uy":0.0,

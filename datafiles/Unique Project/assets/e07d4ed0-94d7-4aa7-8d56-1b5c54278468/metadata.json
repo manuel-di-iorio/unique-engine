@@ -1,47 +1,47 @@
 {
-  "material":"38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
+  "material":null,
   "visible":true,
   "geometry":{
     "boundingSphere":{
       "center":{
         "x":0.0,
-        "y":96.022560119628906,
+        "y":13.535533905029297,
         "z":0.0
       },
-      "radius":127.6747154288026
+      "radius":41.781702671075976
     },
     "name":null,
     "format":{
       "name":"",
       "attrs":[
         {
-          "kind":0.0
+          "kind":0
         },
         {
-          "kind":1.0
+          "kind":1
         },
         {
-          "kind":2.0
+          "kind":2
         },
         {
-          "kind":3.0
+          "kind":3
         }
       ],
       "type":"VertexFormat",
       "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250"
     },
-    "uuid":"f7f74371-1d05-436e-9493-dc1db65b4917",
+    "uuid":"59687af2-d4e5-4593-aedc-3d0a923146a7",
     "type":"BufferGeometry",
     "boundingBox":{
       "min":{
-        "x":-59.500003814697266,
-        "y":0.0,
-        "z":-59.500003814697266
+        "x":0.0,
+        "y":13.535533905029297,
+        "z":0.0
       },
       "max":{
-        "x":59.500003814697266,
-        "y":192.04512023925781,
-        "z":59.500003814697266
+        "x":32.5,
+        "y":27.071067810058594,
+        "z":22.5
       }
     }
   },
@@ -49,11 +49,13 @@
   "ex":90.0,
   "ey":0.0,
   "children":[
+    "82ec2814-fcf9-49cd-aac0-3741452e0715",
+    "d5936b47-954e-408e-95b3-ac331e77fabf"
   ],
   "ez":0.0,
   "eo":"XYZ",
   "parent":null,
-  "__parentUI":"855426d7-7661-4e99-9915-d0980137709c",
+  "__parentUI":"aa10cefd-094c-4394-8382-9f287bb05aca",
   "matrixAutoUpdate":false,
   "renderOrder":0.0,
   "layers":1.0,
@@ -63,12 +65,12 @@
   "px":0.0,
   "rw":0.70710678118654757,
   "rz":0.0,
-  "name":"oTreeSnowA",
+  "name":"oPresentBRectangle",
   "ry":0.0,
   "rx":0.70710678118654757,
   "sz":1.0,
   "sy":1.0,
-  "uuid":"be5c0cf1-034e-4831-9ef1-36528dbe39d2",
+  "uuid":"e07d4ed0-94d7-4aa7-8d56-1b5c54278468",
   "sx":1.0,
   "uz":-1.0,
   "uy":0.0,
