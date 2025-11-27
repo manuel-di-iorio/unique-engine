@@ -1,5 +1,4 @@
 {
-  "version":"2025.11.26.0",
   "assets":[
     {
       "id":"f4485e71-90a3-4771-b107-98c7347ec348",
@@ -90,6 +89,22 @@
       "id":"5a597e90-a516-477e-9ba6-f2f5711952e3",
       "name":"sDemo",
       "type":"Scene"
+    },
+    {
+      "id":"9d639333-4783-477b-9441-3408e9accca3",
+      "name":"oPresentACube",
+      "type":"Mesh"
+    },
+    {
+      "id":"ded835fe-0b58-4a5d-ade5-2c96eb44ee7d",
+      "name":"oPresentACube__Base",
+      "type":"Mesh"
+    },
+    {
+      "id":"7b3befe6-3dc9-486b-a640-f1a679a88190",
+      "name":"oPresentACube__Top",
+      "type":"Mesh"
     }
-  ]
+  ],
+  "version":"2025.11.26.0"
 }

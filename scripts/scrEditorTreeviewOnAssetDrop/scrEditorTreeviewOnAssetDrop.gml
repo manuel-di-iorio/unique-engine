@@ -104,40 +104,19 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     // Perform the drop action
     if (isValidDrop) {
         if (dropAction == "moveToFolder") {
-            // Move any asset into a folder
-            if (draggedItem.asset != undefined) {
-                // 1. Remove from old parent
-                __removeFromParent(draggedItem.asset);
-                
-                // 2. Add to new Folder parent (UI-only, not 3D hierarchy)
-                var newParent = targetItem.asset;
-                
-                // For folders, set parent field (used in project.json)
-                // For other assets, set __parentUI (used in metadata.json)
-                if (draggedItem.asset.type == "Folder") {
-                    draggedItem.asset.parent = newParent;
-                } else {
-                    draggedItem.asset.__parentUI = newParent.uuid;
-                }
-                
-                // Track change on the dragged asset (metadata 'folder' changed)
-                oSceneEditor.assetManager.editAsset(draggedItem.asset);
-            }
-
-            // Update the treeview UI
+            targetItem.asset.add(draggedItem.asset);
+            oSceneEditor.assetManager.editAsset(draggedItem.asset);
             draggedItem.moveItemTo(targetItem);
         }
         else if (dropAction == "unparent") {
             // Remove from current asset parent
-            if (draggedItem.asset != undefined) {
                 __removeFromParent(draggedItem.asset);
                 
                 // Clear __parentUI since we're removing from folder
-                draggedItem.asset.__parentUI = undefined;
+                draggedItem.asset.__parentUI.removeFromParent();
                 
                 // Track change on the dragged asset (metadata 'folder' removed if it was in one)
                 oSceneEditor.assetManager.editAsset(draggedItem.asset);
-            }
             
             // Update the treeview UI using the new helper
             draggedItem.moveItemTo(targetItem);
@@ -145,24 +124,22 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         else if (dropAction == "reparent") {
             // Reparenting: move the asset within the hierarchy
 
-            if (draggedItem.asset != undefined) {
-                // Remove from the previous asset parent
-                __removeFromParent(draggedItem.asset);
+            // Remove from the previous asset parent
+            __removeFromParent(draggedItem.asset);
+            
+            // Add to the new parent (only if target asset exists)
+            if (targetItem.asset != undefined) {
+                targetItem.asset.add(draggedItem.asset);
                 
-                // Add to the new parent (only if target asset exists)
-                if (targetItem.asset != undefined) {
-                    targetItem.asset.add(draggedItem.asset);
-                    
-                    // Update __parentUI for saving hierarchy
-                    draggedItem.asset.__parentUI = targetItem.asset.uuid;
-                    
-                    // Track change on new parent
-                    oSceneEditor.assetManager.editAsset(targetItem.asset);
-                }
+                // Update __parentUI for saving hierarchy
+                draggedItem.asset.__parentUI = targetItem.asset;
                 
-                // Track change on dragged asset too (parent changed)
-                oSceneEditor.assetManager.editAsset(draggedItem.asset);
+                // Track change on new parent
+                oSceneEditor.assetManager.editAsset(targetItem.asset);
             }
+            
+            // Track change on dragged asset too (parent changed)
+            oSceneEditor.assetManager.editAsset(draggedItem.asset);
             
             // Update the treeview UI using the new helper
             draggedItem.moveItemTo(targetItem);

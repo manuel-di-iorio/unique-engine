@@ -47,6 +47,7 @@
     {"name":"runLater","order":38,"path":"scripts/runLater/runLater.yy",},
     {"name":"scrAssetManager","order":3,"path":"scripts/scrAssetManager/scrAssetManager.yy",},
     {"name":"scrDemoDrawSelector","order":6,"path":"scripts/scrDemoDrawSelector/scrDemoDrawSelector.yy",},
+    {"name":"scrEditorFolder","order":4,"path":"scripts/scrEditorFolder/scrEditorFolder.yy",},
     {"name":"scrEditorLoadProject","order":1,"path":"scripts/scrEditorLoadProject/scrEditorLoadProject.yy",},
     {"name":"scrEditorManager","order":2,"path":"scripts/scrEditorManager/scrEditorManager.yy",},
     {"name":"scrEditorUiAssets","order":2,"path":"scripts/scrEditorUiAssets/scrEditorUiAssets.yy",},

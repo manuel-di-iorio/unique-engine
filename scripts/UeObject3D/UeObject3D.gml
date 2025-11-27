@@ -106,11 +106,14 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     }
     
     /// Remove all children
-    function clear() {
+    function clear(recursive = false) {
         gml_pragma("forceinline");
-        for (var i=0, len=array_length(children); i<len; i++) {
-            var child = children[i];
-            child.clear();
+
+        if (recursive) {
+            for (var i=0, len=array_length(children); i<len; i++) {
+                var child = children[i];
+                child.clear(true);
+            }
         }
         
         children = [];

@@ -46,8 +46,10 @@ function EditorManager() constructor {
             } else if (asset.type == "Mesh" || asset.type == "ModelInstance") {
                 // Mesh/instance selected - find parent scene via treeview
                 var foundScene = undefined;
+                
                 if (treeviewItem != undefined && treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
                     var parentTreeItem = treeviewItem.parent.parent;
+                    
                     if (parentTreeItem[$ "asset"] != undefined && parentTreeItem.asset.type == "Scene") {
                         foundScene = parentTreeItem.asset;
                     }
@@ -111,14 +113,12 @@ function EditorManager() constructor {
      */
     function clearActiveAsset(keepScene = false) {
         // Deselect treeview item visually (for all asset types)
-        if (global.UI.Main[$ "Assets"] != undefined && global.UI.Main.Assets[$ "Treeview"] != undefined) {
-            var treeview = global.UI.Main.Assets.Treeview;
-            
-            // Deselect the currently selected item in the treeview
-            if (treeview.selectedItem != undefined) {
-                treeview.selectedItem.selected = false;
-                treeview.selectedItem = undefined;
-            }
+        var treeview = global.UI.Main.Assets.Treeview;
+        
+        // Deselect the currently selected item in the treeview
+        if (treeview.selectedItem != undefined) {
+            treeview.selectedItem.selected = false;
+            treeview.selectedItem = undefined;
         }
         
         var sceneToKeep = keepScene ? self.activeScene : undefined;
@@ -130,7 +130,7 @@ function EditorManager() constructor {
         self.renderClone = undefined;
         
         if (sceneToKeep == undefined) {
-            oSceneEditor.sceneManager.objects.clear();
+            oSceneEditor.sceneManager.objects.clear(false);
             self.activeScene = undefined;
             oSceneEditor.sceneManager.transformControls.detach();
             self.inspector.close();

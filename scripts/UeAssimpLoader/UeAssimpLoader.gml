@@ -154,15 +154,17 @@ function UeAssimpLoader(data = {}) constructor {
     
     function _addMeshes(materials) {
         gml_pragma("forceinline");
-        var model = new UeMesh();
-        var meshes = [];
+        var model = new UeMesh(new UeBufferGeometry({ canFreeze: false }));
+
+        var meshesCount = ASSIMP_GetMeshNum();
+        var meshes = array_create(meshesCount);
         
-        for (var i = 0, n = ASSIMP_GetMeshNum(); i < n; i++) {
+        for (var i = 0; i < meshesCount; i++) {
 		    ASSIMP_BindMesh(i);
 			var mesh = _buildMesh();
 			mesh.material = materials[ASSIMP_GetMeshMaterialIndex()];
 			model.add(mesh);
-			array_push(meshes, mesh);
+			meshes[i] = mesh;
 		}
         
         // Calculate model's overall bounding box and sphere based on all meshes
@@ -240,7 +242,7 @@ function UeAssimpLoader(data = {}) constructor {
         var maxZ = firstGeometry.boundingBox.sizeMax.z;
 
         // Expand bounds for all other meshes
-        for (var i = 1; i < array_length(meshes); i++) {
+        for (var i = 1, il = array_length(meshes); i < il; i++) {
             var geometry = meshes[i].geometry;
             if (geometry.boundingBox == undefined) continue;
             
@@ -255,11 +257,6 @@ function UeAssimpLoader(data = {}) constructor {
         // Set model's overall bounding box
         var minV = new UeVector3(minX, minY, minZ);
         var maxV = new UeVector3(maxX, maxY, maxZ);
-        
-        // Create geometry for the model if it doesn't exist
-        if (!model.geometry) {
-            model.geometry = new UeBufferGeometry();
-        }
         
         model.geometry.boundingBox = new UeBox3(minV, maxV);
         

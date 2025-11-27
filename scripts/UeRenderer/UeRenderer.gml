@@ -30,8 +30,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 if (object[$ "isMesh"] && object.frustumCulled && object.parent == undefined) {
                     var _boundingSphere = object[$ "__intersectionSphere"];
                     var _position = object.position;
-                    if (_boundingSphere != undefined &&
-                        !sphere_is_visible(_position.x, _position.y, _position.z, _boundingSphere.radius)) continue;
+                    //if (_boundingSphere != undefined &&
+                        //!sphere_is_visible(_position.x, _position.y, _position.z, _boundingSphere.radius)) continue;
                 }
                 
                 // ** Precompute the sort hash **

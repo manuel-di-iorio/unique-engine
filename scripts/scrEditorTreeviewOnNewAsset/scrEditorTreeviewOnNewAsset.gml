@@ -9,12 +9,9 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       var folderId = global.UI_ASSETS_FOLDERS_ID++;
       
       // Create folder asset object
-      var folder = {
-          type: "Folder",
+      var folder = new EditorFolder({
           name: "Folder" + string(folderId),
-          uuid: ueUuid(),
-          children: []
-      };
+      });
       
       var folderItem = new UiTreeviewItem({ 
           name: "UiTreeview.Item", 
@@ -34,19 +31,13 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           
           // If parent is a folder, set parent reference
           if (treeviewItem.assetType == "Folder") {
-              folder.parent = treeviewItem.asset;
-              // Also add to parent's children array
-              if (treeviewItem.asset[$ "children"] != undefined) {
-                  array_push(treeviewItem.asset.children, folder);
-              }
+              treeviewItem.asset.add(folder);
           }
       } else {
           treeview.Items.add(folderItem);
       }
       
-      // Add to AssetManager (no parent - folders are always root in asset manager)
       oSceneEditor.assetManager.addAsset("Folder", folder);
-      
       treeview.__onItemSelected(folderItem, true);
       return;
   }

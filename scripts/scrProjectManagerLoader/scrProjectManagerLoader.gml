@@ -32,12 +32,10 @@ function ProjectLoader() constructor {
         var folderData = foldersMap[$ uuid];
         
         // Create Folder Asset
-        var folder = {
-            type: "Folder",
+        var folder = new EditorFolder({
             name: folderData.name,
-            uuid: uuid,
-            children: []
-        };
+            uuid
+        });
         
         // Create Treeview Item
         var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
@@ -59,7 +57,7 @@ function ProjectLoader() constructor {
         var tvItem = treeviewItemsByUUID[$ uuid];
         var folder = tvItem.asset;
         
-        var parentUUID = folderData[$ "parent"];
+        var parentUUID = folderData[$ "__parentUI"];
         
         if (parentUUID != undefined && treeviewItemsByUUID[$ parentUUID] != undefined) {
             var parentItem = treeviewItemsByUUID[$ parentUUID];
@@ -70,14 +68,30 @@ function ProjectLoader() constructor {
             if (parentAsset[$ "children"] != undefined) {
                 array_push(parentAsset.children, folder);
             }
-            folder.parent = parentAsset;
+            folder.__parentUI = parentAsset;
         } else {
             // Root folder
             treeview.Items.add(tvItem);
         }
     }
     
-    // 3. Load Assets and place them in the correct folders
+    // 3. Convert __parentUI UUIDs to object references for all folders
+    for (var i = 0; i < array_length(folderUUIDs); i++) {
+        var uuid = folderUUIDs[i];
+        var folder = treeviewItemsByUUID[$ uuid].asset;
+        
+        // If __parentUI is still a string (UUID), convert it to object reference
+        if (folder[$ "__parentUI"] != undefined && is_string(folder.__parentUI)) {
+            var parentUUID = folder.__parentUI;
+            if (treeviewItemsByUUID[$ parentUUID] != undefined) {
+                folder.__parentUI = treeviewItemsByUUID[$ parentUUID].asset;
+            } else {
+                folder.__parentUI = undefined;
+            }
+        }
+    }
+    
+    // 4. Load Assets and place them in the correct folders
     var assetsList = assetsData.assets;
     for (var i = 0; i < array_length(assetsList); i++) {
         var assetEntry = assetsList[i];
@@ -136,7 +150,26 @@ function ProjectLoader() constructor {
         }
     }
 
-    // 4. Link asset references (Materials <-> Meshes, etc.)
+    // 5. Convert __parentUI UUIDs to object references for all assets
+    var allAssets = oSceneEditor.assetManager.assets;
+    for (var i = 0; i < array_length(allAssets); i++) {
+        var asset = allAssets[i];
+        
+        // Skip folders (already processed)
+        if (asset.type == "Folder") continue;
+        
+        // If __parentUI is still a string (UUID), convert it to object reference
+        if (asset[$ "__parentUI"] != undefined && is_string(asset.__parentUI)) {
+            var parentUUID = asset.__parentUI;
+            if (treeviewItemsByUUID[$ parentUUID] != undefined) {
+                asset.__parentUI = treeviewItemsByUUID[$ parentUUID].asset;
+            } else {
+                asset.__parentUI = undefined;
+            }
+        }
+    }
+    
+    // 6. Link asset references (Materials <-> Meshes, etc.)
     __linkNodes();
 
     // Clear the cache
@@ -340,12 +373,10 @@ function ProjectLoader() constructor {
   // Helper: create asset instance from JSON or a plain Folder struct
   function __createAssetFromNode(projectDir,node) {
     if (node.type == "Folder") {
-      var folder = {
-        type: "Folder",
+      var folder = new EditorFolder({
         name: node.name,
         uuid: node.uuid,
-        children: []
-      };
+      });
       return folder;
     }
 

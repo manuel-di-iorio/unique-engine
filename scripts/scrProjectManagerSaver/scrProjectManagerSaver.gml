@@ -167,7 +167,7 @@ function ProjectSaver() constructor {
 
             // Save folder UUID if asset is in a folder
             if (asset[$ "__parentUI"] != undefined) {
-                metadata.__parentUI = asset.__parentUI;
+                metadata.__parentUI = asset.__parentUI.uuid;
             }
             
             self.__writeJson(assetPath + "/metadata.json", metadata);
@@ -196,7 +196,7 @@ function ProjectSaver() constructor {
             project.folders[$ folder.uuid] = {
                 uuid: folder.uuid,
                 name: folder.name,
-                parent: (folder[$ "parent"] != undefined && folder.parent[$ "type"] == "Folder") ? folder.parent.uuid : undefined
+                __parentUI: (folder[$ "__parentUI"] != undefined && folder.__parentUI[$ "type"] == "Folder") ? folder.__parentUI.uuid : undefined
             };
         }
 
@@ -250,12 +250,12 @@ function ProjectSaver() constructor {
                 case "edit":
                     // Handle Folder updates
                     if (asset.type == "Folder") {
-                        var folderParentUuid = (asset[$ "parent"] != undefined && asset.parent[$ "type"] == "Folder") ? asset.parent.uuid : undefined;
+                        var folderParentUuid = (asset[$ "__parentUI"] != undefined && asset.__parentUI[$ "type"] == "Folder") ? asset.__parentUI.uuid : undefined;
 
                         foldersMap[$ asset.uuid] = {
                             uuid: asset.uuid,
                             name: asset.name,
-                            parent: folderParentUuid
+                            __parentUI: folderParentUuid
                         };
                         break;
                     }
@@ -311,7 +311,7 @@ function ProjectSaver() constructor {
 
                     // Save parent UUID if asset has one (set by AssetManager)
                     if (asset[$ "__parentUI"] != undefined) {
-                        metadata.__parentUI = asset.__parentUI;
+                        metadata.__parentUI = asset.__parentUI.uuid;
                     }
                     
                     self.__writeJson(assetPath + "/metadata.json", metadata);

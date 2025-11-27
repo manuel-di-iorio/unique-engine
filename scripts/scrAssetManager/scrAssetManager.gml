@@ -25,23 +25,16 @@ function AssetManager() constructor {
                 
                 // Check if parent item has an asset
                 if (parentTreeviewItem[$ "asset"] != undefined) {
-                    // Store parent UUID in __parentUI (used for saving hierarchy)
+                    // Store parent UI asset in __parentUI (used for saving hierarchy)
                     // This works for both Folders and other assets (like Meshes acting as parents)
-                    asset.__parentUI = parentTreeviewItem.asset.uuid;
+                    asset.__parentUI = parentTreeviewItem.asset;
                 }
             }
         }
         
-        // Handle 3D hierarchy parent (not folder)
+        // Handle hierarchy parent
         if (parent != undefined) {
-            // If parent has add() method, use it (Object3D hierarchy)
-            if (parent[$ "add"] != undefined) {
-                parent.add(asset);
-            } else {
-                // Add to parent children array
-                array_push(parent.children, asset);
-            }
-            asset.parent = parent;
+            parent.add(asset);
         }
         
         // Track creation
@@ -68,22 +61,23 @@ function AssetManager() constructor {
             asset.__parentUI = undefined;
         }
         
-        // Remove from 3D parent if it has one
+        // Remove from parent if it has one
         if (asset[$ "parent"] != undefined && asset.parent != undefined) {
+            asset.parent.remove(asset);
             // If parent has remove() method, call it (Object3D hierarchy)
-            if (asset.parent[$ "remove"] != undefined) {
-                asset.parent.remove(asset);
-            }
-            // Fallback: remove from parent's children array
-            else if (asset.parent[$ "children"] != undefined) {
-                var pchildren = asset.parent.children;
-                for (var i = array_length(pchildren) - 1; i >= 0; i--) {
-                    if (pchildren[i] == asset) {
-                        array_delete(pchildren, i, 1);
-                        break;
-                    }
-                }
-            }
+            //if (asset.parent[$ "remove"] != undefined) {
+                //asset.parent.remove(asset);
+            //}
+            //// Fallback: remove from parent's children array
+            //else if (asset.parent[$ "children"] != undefined) {
+                //var pchildren = asset.parent.children;
+                //for (var i = array_length(pchildren) - 1; i >= 0; i--) {
+                    //if (pchildren[i] == asset) {
+                        //array_delete(pchildren, i, 1);
+                        //break;
+                    //}
+                //}
+            //}
         }
         
         // Clean up instances if this is a model
