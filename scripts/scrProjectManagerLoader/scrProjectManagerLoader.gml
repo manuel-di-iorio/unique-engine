@@ -104,6 +104,7 @@ function ProjectLoader() constructor {
         if (!file_exists(metadataPath)) continue;
 
         var node = __readJson(metadataPath);
+        
         // Ensure uuid is present on the node
         node.uuid = assetUuid;
         

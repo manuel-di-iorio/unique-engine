@@ -1,7 +1,7 @@
 function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
     var _this = self;
     setName(props[$ "name"] ?? "UiDropdown");
-    self.value = props[$ "value"] ?? false;
+    self.value = props[$ "value"];
     self.items = props[$ "items"] ?? [];
     self.itemsGetter = props[$ "itemsGetter"];
     self.label = props[$ "label"] ?? undefined;
@@ -18,7 +18,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
         // Check if current value is still valid
         if (self.value != undefined) {
             var found = false;
-            for (var i = 0; i < array_length(self.items); i++) {
+            for (var i = 0, l = array_length(self.items); i < l; i++) {
                 if (self.items[i].value == self.value) {
                     found = true;
                     break;
@@ -157,8 +157,10 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                         
                         self.onClick(function() {
                             var Dropdown = self.parent.parent.Dropdown;
-                            Dropdown.value = self.value;
-                            Dropdown.onChange(self.value);
+                            if (Dropdown.value != self.value) {
+                                Dropdown.value = self.value;
+                                Dropdown.onChange(self.value);
+                            }
                             Dropdown.closeList();
                         });
                         

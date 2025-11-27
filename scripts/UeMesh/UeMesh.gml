@@ -2,7 +2,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     self.isMesh = true;
     self.type = "Mesh";
     self.geometry = geometry;
-    self.material = material ?? new UeMeshStandardMaterial();
+    self.material = material;
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
     function render(renderSide = undefined) {

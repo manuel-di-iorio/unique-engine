@@ -92,9 +92,9 @@ function EditorManager() constructor {
             var hasChildren = array_length(self.gizmoTarget.children) > 0;
             
             if (hasGeometry || hasChildren) {
-                runLater(method({ sm, target: self.gizmoTarget }, function() { 
-                    sm.boxHelper.object = target;
-                    oSceneEditor.assetManager.updateAssetMatrix(target);
+                runLater(method({ sm, gizmoTarget: self.gizmoTarget }, function() { 
+                    sm.boxHelper.object = gizmoTarget;
+                    oSceneEditor.assetManager.updateAssetMatrix(gizmoTarget);
                 }));
             }
         }

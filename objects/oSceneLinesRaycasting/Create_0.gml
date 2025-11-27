@@ -6,7 +6,8 @@ camera = new UePerspectiveCamera({ x: -10, z: 50 });
 raycaster = new UeRaycaster();
 
 // Create the debug hit sphere
-hitSphere = new UeStaticMesh(new UeSphereGeometry(2, { color: c_yellow }), new UeMeshBasicMaterial(), { visible: false });
+var hitSphereGeom = new UeSphereGeometry(2, { color: c_yellow });
+hitSphere = new UeStaticMesh(hitSphereGeom, new UeMeshBasicMaterial(), { visible: false });
 scene.add(hitSphere);
 
 scene.add(new UeGridHelper(500));

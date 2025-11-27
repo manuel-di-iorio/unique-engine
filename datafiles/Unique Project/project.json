@@ -5,41 +5,31 @@
       "showBoxColliders":true
     },
     "camera":{
+      "damping":true,
       "target":[
-        34.349951345260678,
-        39.774168282661087,
+        96.717960418486925,
+        68.30134171149372,
         0.0
       ],
-      "damping":true,
       "dampingFactor":0.29999999999999999,
       "position":[
-        175.8738141186823,
-        -406.60342150303921,
-        286.33940746797924
+        -69.781564077936608,
+        -543.61955702050977,
+        293.71370949958481
       ]
     },
     "counters":{
-      "textures":2.0,
       "scenes":3.0,
       "cameras":0.0,
-      "materials":22.0,
       "lights":0.0,
       "instances":16.0,
       "models":22.0,
-      "folders":6.0
+      "folders":6.0,
+      "textures":2.0,
+      "materials":22.0
     }
   },
   "folders":{
-    "9ff898e0-953e-4435-99b5-d5e825905d60":{
-      "name":"Snow",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
-    },
-    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
-      "name":"Rocks",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
-    },
     "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
       "name":"Project",
       "__parentUI":null,
@@ -49,6 +39,16 @@
       "name":"Objects",
       "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
       "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
+    },
+    "9ff898e0-953e-4435-99b5-d5e825905d60":{
+      "name":"Snow",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
+    },
+    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
+      "name":"Rocks",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
     }
   }
 }

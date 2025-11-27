@@ -52,8 +52,7 @@ function UeTransform(_data = undefined) constructor {
         } 
         
         // For frustum culling, update the intersection sphere (if available) to world space
-        // Only for root meshes
-        if (self[$ "isMesh"] && parent == undefined) {
+        if (self[$ "isMesh"]) {
             var geometry = self[$ "geometry"];
             if (geometry != undefined) {
                 var boundingSphere = geometry[$ "boundingSphere"];
