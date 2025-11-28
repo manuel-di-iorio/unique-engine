@@ -120,16 +120,16 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
 
-    /// Returns the angle to another vector in radians.
+    /// Returns the angle to another vector in degrees.
     static angleTo = function(vec) {
         gml_pragma("forceinline");
-        var dot = dot(vec);
-        var len1 = length();
-        var len2 = vec.length();
-        var denom = len1 * len2;
-        if (denom == 0) return 0;
+        var _dot = dot(vec);
+        var _len1 = length();
+        var _len2 = vec.length();
+        var _denom = _len1 * _len2;
+        if (_denom == 0) return 0;
 
-        var cos_theta = clamp(dot / denom, -1, 1);
+        var cos_theta = clamp(_dot / _denom, -1, 1);
         return darccos(cos_theta);
     }
 
@@ -604,6 +604,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
+    // @todo
     static applyEuler = function(x, y, z) {
         
     }

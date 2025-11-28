@@ -9,7 +9,12 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
     // Raycaster layers. Objects being tested must share at least one layer with the raycaster
     self.layers = new UeLayers(); 
     
-    // @undocumented
+    /**
+     * Raycasting parameters for different object types
+     * @property {Struct} Mesh - Parameters for mesh intersection
+     * @property {Struct} Line - Parameters for line intersection (e.g. threshold)
+     * @property {Struct} Points - Parameters for points intersection (e.g. threshold)
+     */
     self.params = {
         Mesh: {},
         Line: { threshold: 4 },
