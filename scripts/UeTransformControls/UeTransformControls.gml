@@ -56,10 +56,11 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     self.onDragEnd = data[$ "onDragEnd"] ?? undefined;
     
     // Base material for all gizmo components with transparency and depth testing disabled
-    __matMesh = new UeMeshBasicMaterial({
+    __matMesh = new UeMeshStandardMaterial({
         depthTest: false,
         depthWrite: false,
-        transparent: true
+        transparent: true,
+        shader: sh_ue_gizmo
     });
     
     /**

@@ -118,6 +118,7 @@
     {"name":"UiTextbox","order":7,"path":"scripts/UiTextbox/UiTextbox.yy",},
     {"name":"UiTooltip","order":10,"path":"scripts/UiTooltip/UiTooltip.yy",},
     {"name":"UiTreeview","order":5,"path":"scripts/UiTreeview/UiTreeview.yy",},
+    {"name":"sh_ue_gizmo","order":4,"path":"shaders/sh_ue_gizmo/sh_ue_gizmo.yy",},
     {"name":"sh_ue_line","order":1,"path":"shaders/sh_ue_line/sh_ue_line.yy",},
     {"name":"sh_ue_sprite","order":3,"path":"shaders/sh_ue_sprite/sh_ue_sprite.yy",},
     {"name":"sh_ue_standard","order":2,"path":"shaders/sh_ue_standard/sh_ue_standard.yy",},
