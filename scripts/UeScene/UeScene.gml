@@ -94,6 +94,8 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             instance.frustumCulled = data.frustumCulled;
         }
         
+        instance.updateMatrix();
+        
         // Recursively load children (submeshes)
         if (data[$ "children"] != undefined && array_length(data.children) > 0) {
             for (var i = 0; i < array_length(data.children); i++) {

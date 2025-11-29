@@ -305,6 +305,13 @@ function ProjectLoader() constructor {
             scene.fromJSON(scene.__metadata, objectsByUUID);
             delete scene.__metadata;
             
+            scene.traverse(function(child) {
+               child.__matrixAutoUpdate = child.matrixAutoUpdate;
+               child.matrixAutoUpdate = false; 
+            });
+            
+            scene.updateWorldMatrix(false, true);
+            
             // 4. Update TreeView for new instances
             // The scene.fromJSON() created new ModelInstance objects and added them to the scene children
             // We need to create TreeView items for them
