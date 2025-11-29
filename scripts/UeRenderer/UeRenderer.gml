@@ -138,28 +138,34 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         gml_pragma("forceinline");
         
         for (var i = 0; i < __queueIdx; i++) {
-            var object = __queue[i];
-            var onBeforeRender = object[$ "onBeforeRender"];
-            var onAfterRender = object[$ "onAfterRender"];
-            var _material = object[$ "material"] ?? global.UE_DEFAULT_MATERIAL;
+            var _object = __queue[i];
+            var _onBeforeRender = _object[$ "onBeforeRender"];
+            var _onAfterRender = _object[$ "onAfterRender"];
+            var _material = _object[$ "material"] ?? global.UE_DEFAULT_MATERIAL;
+
+            // Wireframes material applies the default material
+            var _wireframe = _material.wireframe;
+            if (_wireframe) {
+                _material = global.UE_DEFAULT_MATERIAL;
+            }
 
             // Use the material
-            if (_material.visible && !_material.wireframe) {
+            if (_material.visible) {
                 if (_material != __boundMaterial) {
                     __boundMaterial = _material;
                     _material.use();
                 }
 
-                _material.useByMesh(object, _material.transparent && !_material.forceSinglePass);
+                _material.useByMesh(_object, _material.transparent && !_material.forceSinglePass);
             }
 
-            if (onBeforeRender != undefined) onBeforeRender();
+            if (_onBeforeRender != undefined) _onBeforeRender();
             
             // Render the mesh
-            matrix_set(matrix_world, object.matrixWorld.data);
-            vertex_submit(object.geometry.vb, _material.wireframe ? pr_linelist : object.primitive, -1); 
+            matrix_set(matrix_world, _object.matrixWorld.data);
+            vertex_submit(_object.geometry.vb, _wireframe ? pr_linelist : _object.primitive, -1); 
 
-            if (onAfterRender != undefined) onAfterRender(); 
+            if (_onAfterRender != undefined) _onAfterRender(); 
         }
     }
     
