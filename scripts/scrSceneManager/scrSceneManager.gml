@@ -52,11 +52,37 @@ function SceneManager() constructor {
      * @returns {bool} True if a mesh was selected, false otherwise
      */
     function handleMeshPicking() {
-        self.raycaster.setFromCamera(self.camera);
+        if (!mouse_check_button_pressed(mb_left) || !global.UI.Main.Scene.hovered) return;
+
+        var _mousePos = global.UE_MOUSE.get();
+        var _editorManager = oSceneEditor.editorManager;
+
+        /**
+         * Pick System: 
+         * - If there are no last hits, perform a new raycast
+         * - If there are last hits, cycle through them
+         */
+        if (_editorManager.pickLastHits != undefined && _mousePos.x != _editorManager.pickLastPos.x || _mousePos.y != _editorManager.pickLastPos.y) {
+            // Check if the mouse has moved
+            if (_mousePos.x != _editorManager.pickLastPos.x || _mousePos.y != _editorManager.pickLastPos.y) {
+                _editorManager.pickLastHits = undefined;
+                return;
+            }
+
+            // Cycle through hits
+            _editorManager.pickLastIndex = (_editorManager.pickLastIndex + 1) % array_length(_editorManager.pickLastHits);
+        } else {
+            // Perform a new raycast
+            self.raycaster.setFromCamera(self.camera);
+            
+            _editorManager.pickLastHits = self.raycaster.intersectObjects(self.objects.children, true, true);
+            _editorManager.pickLastIndex = 0;
+            _editorManager.pickLastPos = _mousePos;
+        }
         
-        var hits = self.raycaster.intersectObjects(self.objects.children, true, true);
-        if (array_length(hits) > 0) {
-            var hitObject = hits[0].object;
+        // Select the hit object (if available)
+        if (array_length(_editorManager.pickLastHits) > 0) {
+            var hitObject = _editorManager.pickLastHits[_editorManager.pickLastIndex].object;
             
             // Use the back-reference to get the treeview item directly
             if (hitObject[$ "__treeviewItem"] != undefined) {

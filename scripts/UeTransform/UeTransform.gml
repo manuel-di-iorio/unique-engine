@@ -43,24 +43,24 @@ function UeTransform(_data = undefined) constructor {
             } else {
                 var _parentMatrixWorld = parent[$ "matrixWorld"];
                 if (_parentMatrixWorld != undefined) {
-                    matrixWorld.multiplyMatrices(parent.matrixWorld, matrix);
+                    matrix_multiply(matrix.data, parent.matrixWorld.data, matrixWorld.data);
+                }
+            }
+
+            // For frustum culling, update the intersection sphere (if available) to world space
+            if (self[$ "isMesh"]) {
+                var geometry = self[$ "geometry"];
+                if (geometry != undefined) {
+                    var boundingSphere = geometry[$ "boundingSphere"];
+                    if (boundingSphere != undefined) {
+                        __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
+                    }
                 }
             }
             
             matrixWorldNeedsUpdate = false; 
 			force = true;
         } 
-        
-        // For frustum culling, update the intersection sphere (if available) to world space
-        if (self[$ "isMesh"]) {
-            var geometry = self[$ "geometry"];
-            if (geometry != undefined) {
-                var boundingSphere = geometry[$ "boundingSphere"];
-                if (boundingSphere != undefined) {
-                    __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
-                }
-            }
-        }
         
         for (var i = 0, len = array_length(children); i < len; i++) {
             children[i].updateMatrixWorld(force);

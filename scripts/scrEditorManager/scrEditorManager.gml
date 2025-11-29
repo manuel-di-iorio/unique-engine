@@ -13,6 +13,11 @@ function EditorManager() constructor {
     
     // Selection state
     self.selectedTreeviewItem = undefined;
+
+    // Pick system
+    self.pickLastHits = undefined;
+    self.pickLastIndex = 0;
+    self.pickLastPos = undefined;
     
     self.gizmoTarget = undefined; // Store the target for the gizmo (The ORIGINAL asset)
     self.renderClone = undefined; // The root clone being rendered

@@ -181,11 +181,6 @@ function UeMaterial(data = {}) constructor {
     function use() {
         gml_pragma("forceinline");
 
-        // if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) {
-        //     shader_reset();   
-        //     return self;
-        // }
-
         shader_set(shader);
         __setLightsUniforms();
         
@@ -219,20 +214,6 @@ function UeMaterial(data = {}) constructor {
             textureCached[0].__use(textureCached[1]);
         }
             
-        // Update the shader's model position uniform (for billboard sprites)
-        // if (mesh[$ "isSprite"] != undefined) {
-        //     var uniformsCache = global.UE_DUMMY_ARRAY3;
-        //     var meshPosition = mesh.position;
-        //     uniformsCache[0] = meshPosition.x;
-        //     uniformsCache[1] = meshPosition.y;
-        //     uniformsCache[2] = meshPosition.z;
-        //     shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
-        // }
-        
-        // Set the GPU state
-        // renderSide ??= side;
-        // gpu_set_cullmode(renderSide);
-    
         gpu_set_ztestenable(depthTest);
         gpu_set_zwriteenable(transparent ? false : depthWrite);
         gpu_set_zfunc(depthFunc);

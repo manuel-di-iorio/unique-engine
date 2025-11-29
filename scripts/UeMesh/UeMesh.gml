@@ -5,7 +5,7 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     self.material = material;
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
-    // @deprecated
+    // @todo @experimentalDeprecation
     // function render(_material) {
     //     gml_pragma("forceinline");
         

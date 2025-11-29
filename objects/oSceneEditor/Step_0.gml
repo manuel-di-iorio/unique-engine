@@ -28,10 +28,6 @@ switch (currentTool) {
     case "view": 
         sceneManager.transformControls.updateGizmo();
         sceneManager.orbit.update(winMouseX, winMouseY);
-        
-        if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
-            sceneManager.handleMeshPicking();
-        }
     break;
     case "move":
     case "rotate":
@@ -40,13 +36,12 @@ switch (currentTool) {
 
         if (!sceneManager.transformControls.dragging) {
             sceneManager.orbit.update(winMouseX, winMouseY);
-            
-            if (mouse_check_button_pressed(mb_left) && uiScene.hovered) {
-                sceneManager.handleMeshPicking();
-            }
         }
     break;
 }
+
+// Mesh picking
+sceneManager.handleMeshPicking();
 
 // Wrap the mouse coords when out of bounds
 if (mouse_button != mb_none && sceneManager.orbit.transforming) {
