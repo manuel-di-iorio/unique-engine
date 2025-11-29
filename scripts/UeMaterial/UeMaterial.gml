@@ -178,12 +178,13 @@ function UeMaterial(data = {}) constructor {
     }
      
     /// Apply material before drawing
-    function use(mesh, renderSide = undefined) {
+    function use() {
         gml_pragma("forceinline");
-        if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) {
-            shader_reset();   
-            return self;
-        }
+
+        // if (!visible || wireframe || shader == undefined || !shader_is_compiled(shader)) {
+        //     shader_reset();   
+        //     return self;
+        // }
 
         shader_set(shader);
         __setLightsUniforms();
@@ -219,18 +220,18 @@ function UeMaterial(data = {}) constructor {
         }
             
         // Update the shader's model position uniform (for billboard sprites)
-        if (mesh[$ "isSprite"] != undefined) {
-            var uniformsCache = global.UE_DUMMY_ARRAY3;
-            var meshPosition = mesh.position;
-            uniformsCache[0] = meshPosition.x;
-            uniformsCache[1] = meshPosition.y;
-            uniformsCache[2] = meshPosition.z;
-            shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
-        }
+        // if (mesh[$ "isSprite"] != undefined) {
+        //     var uniformsCache = global.UE_DUMMY_ARRAY3;
+        //     var meshPosition = mesh.position;
+        //     uniformsCache[0] = meshPosition.x;
+        //     uniformsCache[1] = meshPosition.y;
+        //     uniformsCache[2] = meshPosition.z;
+        //     shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
+        // }
         
         // Set the GPU state
-        renderSide ??= side;
-        gpu_set_cullmode(renderSide);
+        // renderSide ??= side;
+        // gpu_set_cullmode(renderSide);
     
         gpu_set_ztestenable(depthTest);
         gpu_set_zwriteenable(transparent ? false : depthWrite);
@@ -241,6 +242,27 @@ function UeMaterial(data = {}) constructor {
         gpu_set_blendenable(blending);
         gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
         gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha);
+
+        return self;
+    }
+
+    function useByMesh(mesh, renderSide = undefined) {
+        gml_pragma("forceinline");
+        
+        // Update the shader's model position uniform (for billboard sprites)
+        if (mesh[$ "isSprite"] != undefined) {
+            var uniformsCache = global.UE_DUMMY_ARRAY3;
+            var meshPosition = mesh.position;
+            uniformsCache[0] = meshPosition.x;
+            uniformsCache[1] = meshPosition.y;
+            uniformsCache[2] = meshPosition.z;
+            shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
+        }
+
+        // Set the culling mode (can be overwritten by argument for transparent objects)
+        gpu_set_cullmode(renderSide ?? side);
+
+        return self;
     }
     
     function clone() {

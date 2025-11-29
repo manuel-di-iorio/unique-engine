@@ -3,6 +3,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     type = "Renderer";
     sortObjects = data[$ "sortObjects"] ?? true;
     
+    __boundMaterial = undefined; // Material that is currently bound
     __lightIdx = 0;
     __queueIdx = 0;
     __lights = array_create(2);
@@ -25,13 +26,13 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 
             if (object.matrixWorldAutoUpdate) object.updateMatrixWorld();
             
-            if (object[$ "geometry"] != undefined && object.visible) {
+            if (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined && object.visible) {
                 // Test the frustum intersection, only for parent meshes
                 if (object[$ "isMesh"] && object.frustumCulled && object.parent == undefined) {
                     var _boundingSphere = object[$ "__intersectionSphere"];
                     var _position = object.position;
-                    //if (_boundingSphere != undefined &&
-                        //!sphere_is_visible(_position.x, _position.y, _position.z, _boundingSphere.radius)) continue;
+                    if (_boundingSphere != undefined &&
+                        !sphere_is_visible(_position.x, _position.y, _position.z, _boundingSphere.radius)) continue;
                 }
                 
                 // ** Precompute the sort hash **
@@ -140,20 +141,26 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             var object = __queue[i];
             var onBeforeRender = object[$ "onBeforeRender"];
             var onAfterRender = object[$ "onAfterRender"];
-            var material = object[$ "material"];
-            var transparent = material != undefined ? material.transparent : false;
+            var _material = object[$ "material"] ?? global.UE_DEFAULT_MATERIAL;
+
+            // Use the material
+            if (_material.visible && !_material.wireframe) {
+                if (_material != __boundMaterial) {
+                    __boundMaterial = _material;
+                    _material.use();
+                }
+
+                _material.useByMesh(object, _material.transparent && !_material.forceSinglePass);
+            }
 
             if (onBeforeRender != undefined) onBeforeRender();
             
-            // Render transparent objects with no culling to show both faces
-            if (transparent && (material == undefined || !material.forceSinglePass)) {
-                object.render(cull_noculling);
-            } else {
-                object.render();
-            }
-            
+            // Render the mesh
+            matrix_set(matrix_world, object.matrixWorld.data);
+            vertex_submit(object.geometry.vb, _material.wireframe ? pr_linelist : object.primitive, -1); 
+
             if (onAfterRender != undefined) onAfterRender(); 
-        } 
+        }
     }
     
     // Aggregate light data from scene lights
@@ -228,6 +235,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         __renderObjects();
         
         // Reset the world after rendering
+        __boundMaterial = undefined;
         shader_reset();  
         matrix_set(matrix_world, global.UE_MATRIX_IDENTITY);
         gpu_set_state(_gpuState);

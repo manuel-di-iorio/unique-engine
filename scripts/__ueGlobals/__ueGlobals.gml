@@ -4,6 +4,7 @@ global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().
 global.UE_TEXTURE_MAP = new UeTexture(sprUeMapTex);
 global.UE_TEXTURE_EMISSIVE = new UeTexture(sprUeEmissiveTex);
 global.UE_MOUSE = new UeMouse();
+global.UE_DEFAULT_MATERIAL = new UeMeshBasicMaterial();
 
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,

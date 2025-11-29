@@ -24,6 +24,15 @@ intersectedBox = undefined;
 meshGroup = new UeStaticMesh(undefined);
 scene.add(meshGroup);
 
+// Create the materials
+materialDefault = new UeMeshStandardMaterial();
+materialDefault.uniforms.ueEmissive.value = [0.8, 0.8, 0];
+materialDefault.uniforms.ueEmissiveIntensity.value = 0;
+
+materialSelected = new UeMeshStandardMaterial();
+materialSelected.uniforms.ueEmissive.value = [1, 1, 1];
+materialSelected.uniforms.ueEmissiveIntensity.value = 1;
+
 // Create the random boxes
 var maxDist = 500;
 var gap = 300;
@@ -33,10 +42,8 @@ for (var i = 0; i < 150; i++) {
     var size = random_range(30, 40);
     
     var geometry = new UeBoxGeometry(size, size, size, { color });
-    var material = new UeMeshStandardMaterial();
-    material.uniforms.ueEmissive.value = [0.8, 0.8, 0];
-    material.uniforms.ueEmissiveIntensity.value = 0;
-    var mesh = new UeStaticMesh(geometry, material);
+    
+    var mesh = new UeStaticMesh(geometry, materialDefault);
     mesh.layers.enable(1); // Only objects having layer 1 will be intersected
     meshGroup.add(mesh);
 

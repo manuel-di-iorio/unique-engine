@@ -4,13 +4,13 @@ var intersects = raycaster.intersectObjects(meshGroup.children, false);
 
 // Hide the previously selected bbox
 if (intersectedBox != undefined) {
-    intersectedBox.material.uniforms.ueEmissiveIntensity.value = 0;
+    intersectedBox.material = materialDefault;
 }
 
 // Show only the bbox of the closest intersected object
 if (array_length(intersects)) {
     intersectedBox = intersects[0].object;
-    intersectedBox.material.uniforms.ueEmissiveIntensity.value = 1;
+    intersectedBox.material = materialSelected;
 }
 
 // Update the orbit controls (at the end of the step event to avoid stale matrixes)
