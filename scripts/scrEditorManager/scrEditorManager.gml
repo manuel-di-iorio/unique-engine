@@ -15,7 +15,7 @@ function EditorManager() constructor {
     self.selectedTreeviewItem = undefined;
 
     // Pick system
-    self.pickLastHits = undefined;
+    self.pickLastHits = [];
     self.pickLastIndex = 0;
     self.pickLastPos = undefined;
     

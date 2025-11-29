@@ -62,19 +62,13 @@ function SceneManager() constructor {
          * - If there are no last hits, perform a new raycast
          * - If there are last hits, cycle through them
          */
-        if (_editorManager.pickLastHits != undefined && _mousePos.x != _editorManager.pickLastPos.x || _mousePos.y != _editorManager.pickLastPos.y) {
-            // Check if the mouse has moved
-            if (_mousePos.x != _editorManager.pickLastPos.x || _mousePos.y != _editorManager.pickLastPos.y) {
-                _editorManager.pickLastHits = undefined;
-                return;
-            }
-
+        var _prevHitsLength = array_length(_editorManager.pickLastHits);
+        if (_prevHitsLength && _mousePos.x == _editorManager.pickLastPos.x && _mousePos.y == _editorManager.pickLastPos.y) {
             // Cycle through hits
-            _editorManager.pickLastIndex = (_editorManager.pickLastIndex + 1) % array_length(_editorManager.pickLastHits);
+            _editorManager.pickLastIndex = (_editorManager.pickLastIndex + 1) % _prevHitsLength;
         } else {
             // Perform a new raycast
             self.raycaster.setFromCamera(self.camera);
-            
             _editorManager.pickLastHits = self.raycaster.intersectObjects(self.objects.children, true, true);
             _editorManager.pickLastIndex = 0;
             _editorManager.pickLastPos = _mousePos;

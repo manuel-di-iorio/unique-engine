@@ -2,16 +2,16 @@
   "settings":{
     "camera":{
       "target":[
-        252.66231805930721,
-        -18.727189302513509,
+        147.29047729514946,
+        -472.61186992979174,
         0.0
       ],
       "dampingFactor":0.29999999999999999,
       "damping":true,
       "position":[
-        228.4901173900864,
-        -110.52303760659358,
-        79.599931051025621
+        64.581769879347817,
+        -786.7047431134481,
+        272.36276488472009
       ]
     },
     "counters":{
@@ -30,11 +30,6 @@
     "gridEnabled":true
   },
   "folders":{
-    "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
-      "name":"Project",
-      "__parentUI":null,
-      "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0"
-    },
     "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
       "name":"Objects",
       "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
@@ -59,6 +54,11 @@
       "name":"Rocks",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
+    },
+    "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
+      "name":"Project",
+      "__parentUI":null,
+      "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0"
     }
   }
 }
