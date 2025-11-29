@@ -118,32 +118,32 @@ function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject
     }
 
     /**
-     * Creates an instance with proper master-instance relationship (Unity Prefab-style)
+     * Creates an instance with proper master-instance relationship
      */
     function createInstance() {
         gml_pragma("forceinline");
-        var instance = new UeMesh();
-        instance.position = self.position.clone();
-        instance.rotation = self.rotation.clone();
-        instance.scale = self.scale.clone();
-        instance.up = self.up.clone();
-        instance.name = self.name;
-        instance.visible = self.visible;
-        instance.renderOrder = self.renderOrder;
-        instance.layers = new UeLayers();
-        instance.layers.mask = self.layers.mask;
-        instance.frustumCulled = self.frustumCulled;  
-        instance.geometry = self[$ "geometry"]; // Shared reference
-        instance.material = self[$ "material"]; // Shared reference
+        var _this = self;
+        
+        var instance = new UeMesh(self.geometry, self.material, {
+            position: _this.position.clone(),
+            rotation: _this.rotation.clone(),
+            scale: _this.scale.clone(),
+            up: _this.up.clone(),
+            name: _this.name,
+            visible: _this.visible,
+            renderOrder: _this.renderOrder,
+            layers: _this.layers.clone(),
+            frustumCulled: _this.frustumCulled,
+            matrixAutoUpdate: _this.matrixAutoUpdate,
+        });
         instance.object = self; // Point to the master object
         instance.isInstance = true; // Mark as instance
-        
+                
         // Add to instances list
         self.instances.add(instance);
 
-        for (var i=0; i<array_length(self.children); i++) {
-            var child = self.children[i];
-            instance.add(child.createInstance());
+        for (var i=0, il = array_length(self.children); i < il; i++) {
+            instance.add(self.children[i].createInstance());
         }
         
         return instance;

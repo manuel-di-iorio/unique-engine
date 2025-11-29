@@ -183,6 +183,34 @@ function EditorManager() constructor {
         }
     }
 
+    function handleMouseWrap(winMouseX, winMouseY, winW, winH) {
+        var sceneManager = oSceneEditor.sceneManager;
+        if (mouse_button != mb_none && sceneManager.orbit.transforming) {
+            var fixMousePos = false;
+
+            if (winMouseX < 1) {
+                winMouseX = winW - 2;
+                fixMousePos = true;
+            } else if (winMouseY < 1) {
+                winMouseY = winH - 2;
+                fixMousePos = true;
+            } else if (winMouseX > winW - 2) {
+                winMouseX = 2;
+                fixMousePos = true;
+            } else if (winMouseY > winH - 1) {
+                winMouseY = 2;
+                fixMousePos = true;
+            }
+
+            if (fixMousePos) {
+                window_mouse_set(winMouseX, winMouseY); 
+                
+                sceneManager.orbit._prevMouseX = winMouseX;
+                sceneManager.orbit._prevMouseY = winMouseY;
+            }
+        }
+    }
+
     function clear() {
         self.clearActiveAsset();
     }

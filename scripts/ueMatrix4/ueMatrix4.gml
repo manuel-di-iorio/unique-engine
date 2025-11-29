@@ -48,20 +48,47 @@ function UeMatrix4(_data = undefined) constructor {
         var yy = y0 * y2, yz = y0 * z2, zz = z0 * z2;
         var wx = w0 * x2, wy = w0 * y2, wz = w0 * z2;
 
-        var m00 = 1 - (yy + zz), m01 = xy + wz,     m02 = xz - wy;
-        var m10 = xy - wz,       m11 = 1 - (xx + zz), m12 = yz + wx;
-        var m20 = xz + wy,       m21 = yz - wx,     m22 = 1 - (xx + yy);
+        //var m00 = 1 - (yy + zz), m01 = xy + wz,     m02 = xz - wy;
+        //var m10 = xy - wz,       m11 = 1 - (xx + zz), m12 = yz + wx;
+        //var m20 = xz + wy,       m21 = yz - wx,     m22 = 1 - (xx + yy);
+//
+        //m00 *= scl.x; m10 *= scl.x; m20 *= scl.x;
+        //m01 *= scl.y; m11 *= scl.y; m21 *= scl.y;
+        //m02 *= scl.z; m12 *= scl.z; m22 *= scl.z;
+//
+        //data = [
+            //m00, m01, m02, 0,
+            //m10, m11, m12, 0,
+            //m20, m21, m22, 0,
+            //pos.x, pos.y, pos.z, 1
+        //];
+        
+        // Experimental. There is also a fix in the scale calculation
+        var sx = scl.x, sy = scl.y, sz = scl.z;
 
-        m00 *= scl.x; m10 *= scl.x; m20 *= scl.x;
-        m01 *= scl.y; m11 *= scl.y; m21 *= scl.y;
-        m02 *= scl.z; m12 *= scl.z; m22 *= scl.z;
+        // Column 0 (X-axis) scaled by sx
+        data[0] = (1 - (yy + zz)) * sx;
+        data[1] = (xy + wz) * sx;
+        data[2] = (xz - wy) * sx;
+        data[3] = 0;
 
-        data = [
-            m00, m01, m02, 0,
-            m10, m11, m12, 0,
-            m20, m21, m22, 0,
-            pos.x, pos.y, pos.z, 1
-        ];
+        // Column 1 (Y-axis) scaled by sy
+        data[4] = (xy - wz) * sy;
+        data[5] = (1 - (xx + zz)) * sy;
+        data[6] = (yz + wx) * sy;
+        data[7] = 0;
+
+        // Column 2 (Z-axis) scaled by sz
+        data[8] = (xz + wy) * sz;
+        data[9] = (yz - wx) * sz;
+        data[10] = (1 - (xx + yy)) * sz;
+        data[11] = 0;
+
+        // Column 3 (Position)
+        data[12] = pos.x;
+        data[13] = pos.y;
+        data[14] = pos.z;
+        data[15] = 1;
 
         return self;
     }

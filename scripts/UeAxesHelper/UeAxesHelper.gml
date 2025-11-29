@@ -1,4 +1,4 @@
-function UeAxesHelper(size = 1): UeLineSegments() constructor {
+function UeAxesHelper(size = 1, data = {}): UeLineSegments(undefined, undefined, data) constructor {
     var colorX = c_red;
     var colorY = c_lime;
     var colorZ = c_blue;
@@ -7,7 +7,8 @@ function UeAxesHelper(size = 1): UeLineSegments() constructor {
     material.depthTest = false;
     material.forceSinglePass = true;
     material.side = cull_noculling;
-    matrixAutoUpdate = false;
+    matrixAutoUpdate = data[$ "matrixAutoUpdate"] ?? false;
+    name = data[$ "name"] ?? "UeAxesHelper";
 
     // Line segment positions for axes: [x1, y1, z1, x2, y2, z2]
     var positions = [

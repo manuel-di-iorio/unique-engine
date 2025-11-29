@@ -265,6 +265,7 @@ function UeProjectLoader(data = {}) constructor {
         // Create instances
         for (var i = 0, il = array_length(children); i < il; i++) {
             var child = children[i];
+            
             if (is_struct(child) && child[$ "type"] == "ModelInstance") {
                 var modelUUID = child[$ "model"];
                 var model = self.assetsByUuid[$ modelUUID];
@@ -287,10 +288,14 @@ function UeProjectLoader(data = {}) constructor {
                         instance.scale.set(scl[0], scl[1], scl[2]);
                     }
                     
+                    instance.updateMatrix();
                     self.scene.add(instance);
                 }
             }
         }
+        
+        // Update the world matrixes
+        self.scene.updateWorldMatrix(false, true);
     };
 
     self.__createAsset = function(metadata, uuid) {
@@ -317,6 +322,7 @@ function UeProjectLoader(data = {}) constructor {
             case "Mesh":
                 var mesh = new UeMesh();
                 mesh.fromJSON(metadata);
+            
                 // Load geometry
                 var geometryPath = self.__projectPath + "/assets/" + uuid + "/geometry.buf";
                 if (file_exists(geometryPath)) {

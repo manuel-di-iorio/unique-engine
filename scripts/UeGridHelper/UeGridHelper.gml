@@ -2,8 +2,9 @@ function UeGridHelper(
     size = 10,
     divisions = 10,
     colorCenterLine = #444444,
-    colorGrid = #888888
-): UeLineSegments() constructor {
+    colorGrid = #888888,
+    data = {}
+): UeLineSegments(data) constructor {
     
     var halfSize = size * 0.5;
     var step = size / divisions;
@@ -40,5 +41,6 @@ function UeGridHelper(
     geometry.setPositions(positions);
     geometry.setColors(colors);
     
-    matrixAutoUpdate = false;
+    matrixAutoUpdate = data[$ "matrixAutoUpdate"] ?? false;
+    name = data[$ "name"] ?? "UeGridHelper";
 }

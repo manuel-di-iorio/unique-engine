@@ -19,7 +19,6 @@ if (!projectManager.loaded) exit;
 
 var winMouseX = window_mouse_get_x();
 var winMouseY = window_mouse_get_y();
-
 var uiHasFocus = global.UI.hasAnyFocus();
 
 // Update transform controls based on current tool
@@ -44,30 +43,7 @@ switch (currentTool) {
 sceneManager.handleMeshPicking();
 
 // Wrap the mouse coords when out of bounds
-if (mouse_button != mb_none && sceneManager.orbit.transforming) {
-    var fixMousePos = false;
-
-    if (winMouseX < 1) {
-        winMouseX = winW - 2;
-        fixMousePos = true;
-    } else if (winMouseY < 1) {
-        winMouseY = winH - 2;
-        fixMousePos = true;
-    } else if (winMouseX > winW - 2) {
-        winMouseX = 2;
-        fixMousePos = true;
-    } else if (winMouseY > winH - 1) {
-        winMouseY = 2;
-        fixMousePos = true;
-    }
-
-    if (fixMousePos) {
-        window_mouse_set(winMouseX, winMouseY); 
-        
-        sceneManager.orbit._prevMouseX = winMouseX;
-        sceneManager.orbit._prevMouseY = winMouseY;
-    }
-}
+editorManager.handleMouseWrap(winMouseX, winMouseY, winW, winH);
 
 if (!uiHasFocus) {
    // Save project

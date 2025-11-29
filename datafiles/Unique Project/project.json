@@ -1,33 +1,33 @@
 {
   "settings":{
+    "gizmos":{
+      "showBoxColliders":false
+    },
+    "gridEnabled":true,
     "camera":{
+      "damping":true,
+      "dampingFactor":0.29999999999999999,
       "target":[
-        -34.283982093994901,
-        245.90100562393835,
+        227.74570312624488,
+        -6.6750672837976683,
         0.0
       ],
-      "dampingFactor":0.29999999999999999,
-      "damping":true,
       "position":[
-        -211.03524883423881,
-        -237.19116354938572,
-        254.4057648642181
+        -21.222120917559721,
+        -712.0832607326289,
+        623.58784983704697
       ]
     },
     "counters":{
       "scenes":3.0,
-      "textures":2.0,
-      "materials":28.0,
-      "cameras":0.0,
-      "lights":0.0,
-      "instances":48.0,
       "models":28.0,
-      "folders":8.0
-    },
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true
+      "folders":8.0,
+      "textures":2.0,
+      "instances":48.0,
+      "cameras":0.0,
+      "materials":28.0,
+      "lights":0.0
+    }
   },
   "folders":{
     "9ff898e0-953e-4435-99b5-d5e825905d60":{

@@ -3,6 +3,7 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
     primitive = pr_linestrip;
     self.geometry = geometry ?? new UeBufferGeometry();
     self.material = material ?? new UeLineBasicMaterial();
+    log(data,self)
     
     function raycast(raycaster, hits) {
         gml_pragma("forceinline");

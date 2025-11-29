@@ -15,8 +15,8 @@ function UeTransform(_data = undefined) constructor {
     parent = data[$ "parent"] ?? undefined;
 
     // Matrix update flags
-    matrixAutoUpdate = global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE; // Automatically update local matrix
-    matrixWorldAutoUpdate = global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE; // Automatically update world matrix
+    matrixAutoUpdate = data[$ "matrixAutoUpdate"] ?? global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE; // Automatically update local matrix
+    matrixWorldAutoUpdate = data[$ "matrixWorldAutoUpdate"] ?? global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE; // Automatically update world matrix
     matrixWorldNeedsUpdate = false;      // Tells to update the world matrix for this frame
     
     // Internals
@@ -91,14 +91,13 @@ function UeTransform(_data = undefined) constructor {
             if (parent == undefined) {
                 matrixWorld.copy(matrix);
             } else {
-                matrixWorld.multiplyMatrices(parent.matrixWorld, matrix);
+                matrix_multiply(matrix.data, parent.matrixWorld.data, matrixWorld.data);
             } 
         }
 
         if (updateChildren) {
             for (var i = 0, len = array_length(children); i < len; i++) {
-                var child = children[i];
-                child.updateWorldMatrix(false, true);
+                children[i].updateWorldMatrix(false, true);
             }
         }
     

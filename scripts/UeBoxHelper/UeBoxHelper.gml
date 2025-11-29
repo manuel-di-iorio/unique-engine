@@ -4,6 +4,8 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
     self.material = new UeLineBasicMaterial({ color });
     self.box = new UeBox3();
     self.needsUpdate = true;
+    self.name = data[$ "name"] ?? "UeBoxHelper";
+    self.matrixAutoUpdate = data[$ "matrixAutoUpdate"] ?? false;
 
     function update() {
         gml_pragma("forceinline");

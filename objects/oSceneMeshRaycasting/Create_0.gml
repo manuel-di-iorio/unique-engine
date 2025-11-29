@@ -30,7 +30,7 @@ materialDefault.uniforms.ueEmissive.value = [0.8, 0.8, 0];
 materialDefault.uniforms.ueEmissiveIntensity.value = 0;
 
 materialSelected = new UeMeshStandardMaterial();
-materialSelected.uniforms.ueEmissive.value = [1, 1, 1];
+materialSelected.uniforms.ueEmissive.value = [0.8, 0.8, 0];
 materialSelected.uniforms.ueEmissiveIntensity.value = 1;
 
 // Create the random boxes

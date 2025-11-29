@@ -14,7 +14,7 @@ scenes = [
     { name: "Assimp Loader", obj: oSceneAssimpLoader, bg: #147FCC }, // 5
     { name: "OBJ Loader", obj: oSceneObjLoader, bg: #147FCC }, // 6
     { name: "TransformControls", obj: oSceneTransformControls, bg: #333333 }, // 7
-    { name: "Project Loader", obj: oSceneProjectLoader, bg: #147FCC }, // 7
+    { name: "Project Loader", obj: oSceneProjectLoader, bg: #147FCC }, // 8
 ];
 
 setScene = function(idx) {

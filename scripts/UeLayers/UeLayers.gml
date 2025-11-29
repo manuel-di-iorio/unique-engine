@@ -58,4 +58,10 @@ function UeLayers() constructor {
         mask = 0;
         return self;
     }
+
+    /// Create a copy of this Layers object
+    function clone() {
+        gml_pragma("forceinline");
+        return new UeLayers().set(mask);
+    }
 }
