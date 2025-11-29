@@ -1,11 +1,11 @@
-function UeMesh(geometry = undefined, material = undefined, data = {}): UeObject3D(data) constructor {
+function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, data = {}): UeObject3D(data) constructor {
     self.isMesh = true;
     self.type = "Mesh";
     self.geometry = geometry;
     self.material = material;
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
-    // @todo @experimentalDeprecation
+    // @todo @experimentalDeprecation. May be undeprecated if the render method will be used as abstract in UeObject3D
     // function render(_material) {
     //     gml_pragma("forceinline");
         

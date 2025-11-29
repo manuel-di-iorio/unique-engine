@@ -42,11 +42,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 // Transparent objects must be rendered *after* opaque ones,
                 // and sorted back-to-front inside their own group.
                 var _material = object[$ "material"];
-                var _transparent = _material != undefined ? _material.transparent : false;
+                var _transparent = _material.transparent;
 
-                // Material ID (12-bit). If the object has no material, use 0xFF
-                // so that "missing material" is sorted consistently and safely.
-                var _materialId = _material != undefined ? _material.id : 0xFF;
+                // Material ID (12-bit)
+                var _materialId = _material.id;
 
                 // --- DEPTH QUANTIZATION (31 bits) -------------------------------------------
                 // We convert the object distance into a normalized value (0..1),
@@ -141,7 +140,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             var _object = __queue[i];
             var _onBeforeRender = _object[$ "onBeforeRender"];
             var _onAfterRender = _object[$ "onAfterRender"];
-            var _material = _object[$ "material"] ?? global.UE_DEFAULT_MATERIAL;
+            var _material = _object[$ "material"];
 
             // Wireframes material applies the default material
             var _wireframe = _material.wireframe;

@@ -418,7 +418,7 @@ function EditorUiInspector(ui) constructor {
                         };
                     });
                     
-                    array_insert(mapped, 0, { label: "<None>", value: undefined });
+                    array_insert(mapped, 0, { label: "Default", value: global.UE_DEFAULT_MATERIAL });
                     return mapped;
                 }
            },
