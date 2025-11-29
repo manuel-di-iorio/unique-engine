@@ -29,17 +29,39 @@ Each object computes the following:
 
 The `matrixWorld` is what the renderer uses for drawing and lighting.
 
+### Auto-Update & Dirty Flags
+
+Unique Engine uses a "dirty flag" system to minimize calculations.
+
+- **`matrixAutoUpdate`** (bool): If `true` (default), the local `matrix` is automatically recalculated from position/rotation/scale.
+- **`matrixWorldAutoUpdate`** (bool): If `true` (default), the `matrixWorld` is automatically recalculated based on the parent's world matrix.
+- **`matrixWorldNeedsUpdate`** (bool): An internal flag that indicates if the world matrix needs to be refreshed.
+
+The `UeRenderer` automatically calls `updateMatrixWorld()` on the scene graph before rendering, ensuring all matrices are up-to-date.
+
 ---
 
-## ⚡ Static Objects
+## ⚡ Manual Updates
 
-Unique Engine will skip matrix updates whenever they have the `matrixAutoUpdate` flag set to `false`. 
-This is useful to avoid doing calculations for objects that don't move. 
-You may still update their matrix calling `updateMatrix()` after modifying their properties
+Sometimes you may want to manually control when matrices are updated, for example to optimize static objects or when moving objects outside the normal render loop.
+
+### `updateMatrix()`
+Updates the local `matrix` based on current position, rotation, and scale. Sets `matrixWorldNeedsUpdate = true`.
+
+### `updateMatrixWorld(force)`
+Updates the global `matrixWorld` of the object and its children.
+- If `force` is true, it recalculates everything even if `matrixWorldNeedsUpdate` is false.
+- This is the method called by the renderer.
+
+### `updateWorldMatrix(updateParents, updateChildren)`
+A more granular control method:
+- `updateParents`: If true, recursively updates parents first.
+- `updateChildren`: If true, recursively updates children after.
 
 ---
 
 ## 🎮 Common Methods
+
 ```js
 // Move object directly
 object.setPosition(x, y, z);

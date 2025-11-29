@@ -8,25 +8,49 @@ Materials define how your 3D objects look — their color, texture, lighting, an
 
 ---
 
+## 🎨 UeRenderer & Sorting
+
+The `UeRenderer` is responsible for drawing the scene. To maximize performance, it sorts objects before rendering to minimize GPU state changes (like switching shaders or textures).
+
+The sorting logic works as follows:
+1. **Opaque Objects**: Sorted front-to-back (to take advantage of early Z-culling).
+2. **Transparent Objects**: Sorted back-to-front (painter's algorithm) to ensure correct blending.
+3. **Material Batching**: Objects sharing the same material ID are grouped together to reduce draw calls overhead.
+
+---
+
 ## 🎨 UeMaterial (base class)
 
 All materials inherit from `UeMaterial`, which provides the basic structure for working with shaders and uniforms.
 
-Each material:
-- References a shader
-- Manages its own uniforms
-- Automatically integrates lighting data when required
+### Properties
 
-In addition, each material applies GPU render state settings before drawing, including:
+Each material exposes several properties to control the GPU render state:
 
-- Backface culling: controlled via side, to render front, back, or both faces.
-- Depth testing: toggled with depthTest, to discard hidden fragments.
-- Depth writing: via depthWrite, to enable or disable writing to the depth buffer.
-- Alpha testing: using transparent and alphaTest, to discard transparent pixels below a threshold.
-- Color writing: you can control whether to write the color channels.
-- Blending: enabled via blending, with fine-grained control over blend equations and blend factors
+- **`visible`**: (bool) Whether the material is visible.
+- **`transparent`**: (bool) Enables transparency handling.
+- **`opacity`**: (float) Global opacity factor (0.0 to 1.0).
+- **`side`**: (const) Culling mode. Defaults to `cull_counterclockwise`. Can be `cull_clockwise`, `cull_counterclockwise`, or `cull_noculling`.
+- **`wireframe`**: (bool) If true, renders the object as a wireframe (using `pr_linelist`).
+- **`lights`**: (int) Number of lights this material supports (default: 2).
 
-These settings are applied using GameMaker's built-in gpu_* functions. This means that materials fully encapsulate how objects are rendered, not just how they look.
+**Depth & Stencil:**
+- **`depthTest`**: (bool) Enables depth testing (Z-buffer). Default `true`.
+- **`depthWrite`**: (bool) Enables writing to the depth buffer. Default `true` (automatically `false` if transparent).
+- **`depthFunc`**: (const) The depth comparison function (e.g., `cmpfunc_lessequal`).
+- **`alphaTest`**: (float) Threshold for discarding pixels based on alpha (alpha testing).
+- **`colorWrite`**: (bool) Enables writing to color channels.
+
+**Blending:**
+- **`blending`**: (bool) Enables blending.
+- **`blendSrc`**, **`blendDst`**: Source and destination blend factors.
+- **`blendEquation`**: The blending equation to use.
+
+### Methods
+
+- **`build()`**: Caches uniform and texture locations. **Must be called** after changing the shader or adding new uniforms/textures.
+- **`use()`**: Applies the material's state and uniforms to the GPU.
+- **`clone()`**: Creates a copy of the material.
 
 ---
 
@@ -54,7 +78,7 @@ It uses the shader `sh_ue_sprite` under the hood and does not support lighting.
 
 ### 🧪 Custom Materials
 
-You can assign the `shader` property or extend UeMaterial to create a full custom material.
+You can assign the `shader` property or extend `UeMaterial` to create a full custom material.
 
 ---
 
@@ -62,7 +86,7 @@ You can assign the `shader` property or extend UeMaterial to create a full custo
 
 Materials support custom uniforms, which are automatically passed to the shader when the material is applied.
 
-Uniforms are defined as a struct inside the material constructor via the uniforms field:
+Uniforms are defined as a struct inside the material constructor via the `uniforms` field:
 
 ```js
 uniforms: {
@@ -73,15 +97,17 @@ uniforms: {
 
 **Supported uniform types:**
 
-- "float" — single number
-- "vec2", "vec3", "vec4" — arrays of 2/3/4 numbers
-- "mat4" — matrix
-- "array" — float arrays (e.g. for positions, colors)
-- "buffer" — partial data from a float buffer with offset and count
+- `UE_UNIFORM_TYPE.FLOAT` ("float")
+- `UE_UNIFORM_TYPE.VEC2` ("vec2")
+- `UE_UNIFORM_TYPE.VEC3` ("vec3")
+- `UE_UNIFORM_TYPE.VEC4` ("vec4")
+- `UE_UNIFORM_TYPE.MAT4` ("mat4")
+- `UE_UNIFORM_TYPE.ARRAY` ("array")
+- `UE_UNIFORM_TYPE.BUFFER` ("buffer")
 
-All uniforms are automatically sent to the GPU, using the correct shader_set_uniform_* function depending on their type. 
+All uniforms are automatically sent to the GPU, using the correct `shader_set_uniform_*` function depending on their type. 
 
-Uniform locations are cached on material creation using build().
+Uniform locations are cached on material creation using `build()`.
 
 **Example of setting a custom value at runtime:**
 
