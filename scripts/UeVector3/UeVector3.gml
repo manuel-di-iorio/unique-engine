@@ -237,7 +237,7 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     }
 
     /// Rounds each component to the nearest integer.
-    static round = function() {
+    static roundVec = function() {
         gml_pragma("forceinline");
         self.x = round(self.x);
         self.y = round(self.y);
@@ -302,7 +302,9 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
     /// Sets all components to the given scalar.
     static setScalar = function(scalar) {
         gml_pragma("forceinline");
-        self.x = self.y = self.z = scalar;
+        self.x = scalar;
+        self.y = scalar;
+        self.z = scalar;
         return self;
     }
 
@@ -604,7 +606,6 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
-    // @todo
     static applyEuler = function(x, y, z) {
         
     }

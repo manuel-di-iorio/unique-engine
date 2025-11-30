@@ -166,9 +166,6 @@ function editorTreeviewOnModelImport(treeviewItem) {
     
     // 5. Select the imported model
     treeview.__onItemSelected(modelTreeviewItem);
-
-    log(modelTreeviewItem.asset);
-
 }
 
 function __editorTreeview_addModelChildrenRecursive(parentAsset, parentTreeviewItem) {

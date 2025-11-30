@@ -343,12 +343,9 @@ function UeQuaternion(_x = 0, _y = 0, _z = 0) constructor {
     
     static equals = function(q) {
         gml_pragma("forceinline");
-        return (
-            abs(self.x - q.x) < UE_EPSILON &&
-            abs(self.y - q.y) < UE_EPSILON &&
-            abs(self.z - q.z) < UE_EPSILON &&
-            abs(self.w - q.w) < UE_EPSILON
-        );
+        if (abs(self.x - q.x) <= UE_EPSILON && abs(self.y - q.y) <= UE_EPSILON && abs(self.z - q.z) <= UE_EPSILON && abs(self.w - q.w) <= UE_EPSILON) return true;
+        if (abs(self.x + q.x) <= UE_EPSILON && abs(self.y + q.y) <= UE_EPSILON && abs(self.z + q.z) <= UE_EPSILON && abs(self.w + q.w) <= UE_EPSILON) return true;
+        return false;
     }
     
     static toArray = function() {

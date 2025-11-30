@@ -1,4 +1,4 @@
-function UeTransform(_data = undefined) constructor {
+function UeTransform(_data = undefined): UeEventDispatcher() constructor {
     var data = _data ?? {};
     
     // Local transform components
@@ -13,6 +13,9 @@ function UeTransform(_data = undefined) constructor {
 
     // Parent (optional)
     parent = data[$ "parent"] ?? undefined;
+
+    // Children array for hierarchy management
+    children = data[$ "children"] ?? [];
 
     // Matrix update flags
     matrixAutoUpdate = data[$ "matrixAutoUpdate"] ?? global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE; // Automatically update local matrix
@@ -46,20 +49,20 @@ function UeTransform(_data = undefined) constructor {
                     matrix_multiply(matrix.data, parent.matrixWorld.data, matrixWorld.data);
                 }
             }
-
-            // For frustum culling, update the intersection sphere (if available) to world space
-            if (self[$ "isMesh"]) {
-                var geometry = self[$ "geometry"];
-                if (geometry != undefined) {
-                    var boundingSphere = geometry[$ "boundingSphere"];
-                    if (boundingSphere != undefined) {
-                        __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
-                    }
-                }
-            }
             
             matrixWorldNeedsUpdate = false; 
 			force = true;
+            
+            // For frustum culling, update the intersection sphere (if available) to world space
+           if (self[$ "isMesh"]) {
+               var geometry = self[$ "geometry"];
+               if (geometry != undefined) {
+                   var boundingSphere = geometry[$ "boundingSphere"];
+                   if (boundingSphere != undefined) {
+                       __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
+                   }
+               }
+           }
         } 
         
         for (var i = 0, len = array_length(children); i < len; i++) {
@@ -97,7 +100,8 @@ function UeTransform(_data = undefined) constructor {
 
         if (updateChildren) {
             for (var i = 0, len = array_length(children); i < len; i++) {
-                children[i].updateWorldMatrix(false, true);
+                var child = children[i];
+                child.updateWorldMatrix(false, true);
             }
         }
     
@@ -146,7 +150,7 @@ function UeTransform(_data = undefined) constructor {
     // --- Rotation methods ---
     function lookAtVec(target) {
         gml_pragma("forceinline");
-        var m = global.UE_DUMMY_MATRIX4;
+        var m = new UeMatrix4();
         m.lookAt(position, target, up);
         rotation.setFromRotationMatrix(m);
         return self;     
@@ -287,7 +291,10 @@ function UeTransform(_data = undefined) constructor {
     function getWorldDirection(target = undefined) {
         gml_pragma("forceinline");
         if (target == undefined) target = new UeVector3();
-        return target.copy(up.clone().transformDirection(matrixWorld));
+        var dir = up.clone();
+        dir.transformDirection(matrixWorld);
+        target.copy(dir);
+        return target;
     }
     
     // Converts the vector from this object's local space to world space.

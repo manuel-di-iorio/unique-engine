@@ -160,7 +160,7 @@ function UeSphere(center = undefined, radius = -1) constructor {
     static union = function(sphere) {
         gml_pragma("forceinline");
         if (self.isEmpty()) return copy(sphere);
-        if (sphere.isEmpty) return self;
+        if (sphere.isEmpty()) return self;
 
         var d = self.center.distanceTo(sphere.center);
 

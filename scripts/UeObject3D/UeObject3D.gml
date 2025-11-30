@@ -11,7 +11,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     name = data[$ "name"] ?? "";
     uuid = ueUuid();
     visible = data[$ "visible"] ?? true;
-    children = [];
     renderOrder = data[$ "renderOrder"] ?? 0;
     layers = new UeLayers();
     userData = {};
@@ -53,6 +52,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
                 self.removeFromParent(object);
                 object.parent = self;
                 array_push(self.children, object);
+                object.dispatch({ type: "added" });
+                self.dispatch({ type: "childAdded" });
             }
         }
         
@@ -92,7 +93,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         gml_pragma("forceinline");
         _object = _object ?? self;
         if (_object.parent == undefined) return;
-        var parentChildren = _object.parent.children;
+        var _parent = _object.parent;
+        var parentChildren = _parent.children;
         
         for (var i = array_length(parentChildren) - 1; i >= 0; i--) {
             if (parentChildren[i] == _object) {
@@ -101,6 +103,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             }
         }
         
+        _object.dispatch({ type: "removed" });
+        _parent.dispatch({ type: "childRemoved" });
         _object.parent = undefined;
         return self;
     }
@@ -109,15 +113,19 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     function clear(recursive = false) {
         gml_pragma("forceinline");
 
-        if (recursive) {
-            for (var i=0, len=array_length(children); i<len; i++) {
-                var child = children[i];
+        for (var i=0, len=array_length(children); i<len; i++) {
+            var child = children[i];
+            
+            if (recursive) {
                 child.clear(true);
             }
+            
+            child.dispatch({ type: "removed" });
+            self.dispatch({ type: "childRemoved" });
+            child.parent = undefined;
         }
         
         children = [];
-        parent = undefined; 
         return self;
     }
     

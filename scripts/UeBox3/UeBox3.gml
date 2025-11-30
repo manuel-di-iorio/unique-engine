@@ -291,6 +291,7 @@ function UeBox3(_min = undefined, _max = undefined) constructor {
         gml_pragma("forceinline");
         var center = getCenter();
         var radius = center.distanceTo(self.sizeMax);
+        target ??= new UeSphere();
         target.center.copy(center);
         target.radius = radius;
         return target;

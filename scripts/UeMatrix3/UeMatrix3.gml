@@ -165,7 +165,18 @@ function UeMatrix3(_data = undefined) constructor {
     /// Sets this matrix as the product of matrices a and b.
     static multiplyMatrices = function(a, b) {
         gml_pragma("forceinline");
-        matrix_multiply(b.data, a.data, data);
+        var r = [];
+        
+        for (var row = 0; row < 3; row++) {
+            for (var col = 0; col < 3; col++) {
+                var val = 0;
+                for (var k = 0; k < 3; k++) {
+                    val += a.data[k*3 + row] * b.data[col*3 + k];
+                }
+                r[col*3 + row] = val;
+            }
+        }
+        data = r;
         return self;
     }
 

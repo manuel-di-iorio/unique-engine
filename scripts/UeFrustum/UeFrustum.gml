@@ -1,9 +1,9 @@
 /// @description Frustum constructor - Creates a view frustum for culling calculations
 function UeFrustum() constructor {
     
-    // Array of 4 planes
-    planes = array_create(4);
-    for (var i=0; i<4; i++) {
+    // Array of 6 planes
+    planes = array_create(6);
+    for (var i=0; i<6; i++) {
         planes[i] = new UePlane();
     }
     
@@ -19,7 +19,7 @@ function UeFrustum() constructor {
     /// @return {bool}
     static containsPoint = function(_point) {
         gml_pragma("forceinline");
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i < 6; i++) {
             if (planes[i].distanceToPoint(_point) < 0) {
                 return false;
             }
@@ -32,7 +32,7 @@ function UeFrustum() constructor {
     /// @return {Struct}
     static copy = function(_frustum) {
         gml_pragma("forceinline");
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i < 6; i++) {
             planes[i].copy(_frustum.planes[i]);
         }
         return self;
@@ -43,7 +43,7 @@ function UeFrustum() constructor {
     /// @return {bool}
     static intersectsBox = function(_box) {
         gml_pragma("forceinline");
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i < 6; i++) {
             var plane = planes[i];
             
             // Get positive vertex (farthest in direction of plane normal)
@@ -78,7 +78,7 @@ function UeFrustum() constructor {
         var negRadius = -sphere.radius; 
         var sphereCenter = sphere.center;
         
-        for (var i = 0; i < 4; i++) { 
+        for (var i = 0; i < 6; i++) { 
             var dist = planes[i].distanceToPoint(sphere.center);
             if (planes[i].distanceToPoint(sphereCenter) < negRadius) {
                 return false;
@@ -155,16 +155,28 @@ function UeFrustum() constructor {
         p.constant = d * invLen;
     
         // Far
-        //nx = m3 - m2;
-        //ny = m7 - m6;
-        //nz = m11 - m10;
-        //d  = m15 - m14;
-        //invLen = 1 / sqrt(nx * nx + ny * ny + nz * nz);
-        //p = planes[2];
-        //p.normal.x = nx * invLen;
-        //p.normal.y = ny * invLen;
-        //p.normal.z = nz * invLen;
-        //p.constant = d * invLen;
+        nx = m3 - m2;
+        ny = m7 - m6;
+        nz = m11 - m10;
+        d  = m15 - m14;
+        invLen = 1 / sqrt(nx * nx + ny * ny + nz * nz);
+        p = planes[4];
+        p.normal.x = nx * invLen;
+        p.normal.y = ny * invLen;
+        p.normal.z = nz * invLen;
+        p.constant = d * invLen;
+
+        // Near
+        nx = m3 + m2;
+        ny = m7 + m6;
+        nz = m11 + m10;
+        d  = m15 + m14;
+        invLen = 1 / sqrt(nx * nx + ny * ny + nz * nz);
+        p = planes[5];
+        p.normal.x = nx * invLen;
+        p.normal.y = ny * invLen;
+        p.normal.z = nz * invLen;
+        p.constant = d * invLen;
     
         // Bottom
         nx = m3 + m1;

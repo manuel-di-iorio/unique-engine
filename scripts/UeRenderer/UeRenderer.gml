@@ -145,7 +145,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             // Wireframes material applies the default material
             var _wireframe = _material.wireframe;
             if (_wireframe) {
-                _material = global.UE_DEFAULT_MATERIAL;
+                _material = global.UE_DEFAULT_MATERIAL_WIREFRAME;
             }
 
             // Use the material

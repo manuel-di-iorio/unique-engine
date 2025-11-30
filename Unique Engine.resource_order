@@ -68,6 +68,7 @@
     {"name":"UeCylinderGeometry","order":8,"path":"scripts/UeCylinderGeometry/UeCylinderGeometry.yy",},
     {"name":"ueError","order":6,"path":"scripts/ueError/ueError.yy",},
     {"name":"UeEuler","order":12,"path":"scripts/UeEuler/UeEuler.yy",},
+    {"name":"UeEventDispatcher","order":12,"path":"scripts/UeEventDispatcher/UeEventDispatcher.yy",},
     {"name":"UeFrustum","order":11,"path":"scripts/UeFrustum/UeFrustum.yy",},
     {"name":"UeGridHelper","order":3,"path":"scripts/UeGridHelper/UeGridHelper.yy",},
     {"name":"UeInstanceList","order":11,"path":"scripts/UeInstanceList/UeInstanceList.yy",},

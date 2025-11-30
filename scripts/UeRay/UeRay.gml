@@ -53,6 +53,7 @@ function UeRay(_origin = undefined, _direction = undefined) constructor {
     /// Gets the point at distance t along the ray, writes into target Vector3
     static at = function(t, target) {
         gml_pragma("forceinline");
+        target ??= new UeVector3();
         target.copy(self.direction).scale(t).add(self.origin);
         return target;
     }
@@ -152,7 +153,7 @@ function UeRay(_origin = undefined, _direction = undefined) constructor {
     static distanceToPlane = function(plane) {
         gml_pragma("forceinline");
         var denom = plane.normal.dot(self.direction);
-        if (abs(denom) < 1000000) return undefined;
+        if (abs(denom) < UE_EPSILON) return undefined;
         var t = -(plane.normal.dot(self.origin) + plane.constant) / denom;
         return (t >= 0) ? t : undefined;
     }
@@ -200,6 +201,9 @@ function UeRay(_origin = undefined, _direction = undefined) constructor {
             if (tmax < tmin) return undefined;
         }
     
+        if (target == undefined) target = new UeVector3();
+        // If tmin is infinity (no intersection), return undefined
+        if (tmin == infinity) return undefined;
         self.at(tmin, target);
         return target;
     }

@@ -1,5 +1,5 @@
 /// @function UeEuler(x, y, z, order)
-/// @desc Costruttore Euler angles (in radianti).
+/// @desc Costruttore Euler angles
 function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
     self.isEuler = true;
     self.x = _x;
@@ -82,6 +82,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
     static setFromRotationMatrix = function(m, order) {
         gml_pragma("forceinline");
         order ??= self.order;
+        self.order = order;
     
         var te = m.data;
         var m11 = te[0],  m12 = te[4],  m13 = te[8];
@@ -90,7 +91,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
     
         switch (order) {
             case "XYZ":
-                self._y = darcsin(clamp(m13, -1, 1));
+                self.y = darcsin(clamp(m13, -1, 1));
                 if (abs(m13) < 0.9999999) {
                     self.x = darctan2(-m23, m33);
                     self.z = darctan2(-m12, m11);
@@ -101,7 +102,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
             break;
     
             case "YXZ":
-                self._x = darcsin(-clamp(m23, -1, 1));
+                self.x = darcsin(-clamp(m23, -1, 1));
                 if (abs(m23) < 0.9999999) {
                     self.y = darctan2(m13, m33);
                     self.z = darctan2(m21, m22);
@@ -112,7 +113,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
             break;
     
             case "ZXY":
-                self._x = darcsin(clamp(m32, -1, 1));
+                self.x = darcsin(clamp(m32, -1, 1));
                 if (abs(m32) < 0.9999999) {
                     self.y = darctan2(-m31, m33);
                     self.z = darctan2(-m12, m22);
@@ -123,7 +124,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
             break;
     
             case "ZYX":
-                self._y = darcsin(-clamp(m31, -1, 1));
+                self.y = darcsin(-clamp(m31, -1, 1));
                 if (abs(m31) < 0.9999999) {
                     self.x = darctan2(m32, m33);
                     self.z = darctan2(m21, m11);
@@ -134,7 +135,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
             break;
     
             case "YZX":
-                self._z = darcsin(clamp(m21, -1, 1));
+                self.z = darcsin(clamp(m21, -1, 1));
                 if (abs(m21) < 0.9999999) {
                     self.x = darctan2(-m23, m22);
                     self.y = darctan2(-m31, m11);
@@ -145,7 +146,7 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
             break;
     
             case "XZY":
-                self._z = darcsin(-clamp(m12, -1, 1));
+                self.z = darcsin(-clamp(m12, -1, 1));
                 if (abs(m12) < 0.9999999) {
                     self.x = darctan2(m32, m22);
                     self.y = darctan2(m13, m11);

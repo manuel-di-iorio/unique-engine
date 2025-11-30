@@ -5,6 +5,7 @@ global.UE_TEXTURE_MAP = new UeTexture(sprUeMapTex);
 global.UE_TEXTURE_EMISSIVE = new UeTexture(sprUeEmissiveTex);
 global.UE_MOUSE = new UeMouse();
 global.UE_DEFAULT_MATERIAL = new UeMeshBasicMaterial();
+global.UE_DEFAULT_MATERIAL_WIREFRAME = new UeMeshBasicMaterial();
 
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,

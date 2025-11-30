@@ -48,47 +48,20 @@ function UeMatrix4(_data = undefined) constructor {
         var yy = y0 * y2, yz = y0 * z2, zz = z0 * z2;
         var wx = w0 * x2, wy = w0 * y2, wz = w0 * z2;
 
-        //var m00 = 1 - (yy + zz), m01 = xy + wz,     m02 = xz - wy;
-        //var m10 = xy - wz,       m11 = 1 - (xx + zz), m12 = yz + wx;
-        //var m20 = xz + wy,       m21 = yz - wx,     m22 = 1 - (xx + yy);
-//
-        //m00 *= scl.x; m10 *= scl.x; m20 *= scl.x;
-        //m01 *= scl.y; m11 *= scl.y; m21 *= scl.y;
-        //m02 *= scl.z; m12 *= scl.z; m22 *= scl.z;
-//
-        //data = [
-            //m00, m01, m02, 0,
-            //m10, m11, m12, 0,
-            //m20, m21, m22, 0,
-            //pos.x, pos.y, pos.z, 1
-        //];
-        
-        // Experimental. There is also a fix in the scale calculation
-        var sx = scl.x, sy = scl.y, sz = scl.z;
+        var m00 = 1 - (yy + zz), m01 = xy + wz,     m02 = xz - wy;
+        var m10 = xy - wz,       m11 = 1 - (xx + zz), m12 = yz + wx;
+        var m20 = xz + wy,       m21 = yz - wx,     m22 = 1 - (xx + yy);
 
-        // Column 0 (X-axis) scaled by sx
-        data[0] = (1 - (yy + zz)) * sx;
-        data[1] = (xy + wz) * sx;
-        data[2] = (xz - wy) * sx;
-        data[3] = 0;
+        m00 *= scl.x; m10 *= scl.x; m20 *= scl.x;
+        m01 *= scl.y; m11 *= scl.y; m21 *= scl.y;
+        m02 *= scl.z; m12 *= scl.z; m22 *= scl.z;
 
-        // Column 1 (Y-axis) scaled by sy
-        data[4] = (xy - wz) * sy;
-        data[5] = (1 - (xx + zz)) * sy;
-        data[6] = (yz + wx) * sy;
-        data[7] = 0;
-
-        // Column 2 (Z-axis) scaled by sz
-        data[8] = (xz + wy) * sz;
-        data[9] = (yz - wx) * sz;
-        data[10] = (1 - (xx + yy)) * sz;
-        data[11] = 0;
-
-        // Column 3 (Position)
-        data[12] = pos.x;
-        data[13] = pos.y;
-        data[14] = pos.z;
-        data[15] = 1;
+        data = [
+            m00, m01, m02, 0,
+            m10, m11, m12, 0,
+            m20, m21, m22, 0,
+            pos.x, pos.y, pos.z, 1
+        ];
 
         return self;
     }
@@ -188,7 +161,43 @@ function UeMatrix4(_data = undefined) constructor {
     /// Builds a lookAt matrix from eye, target and up vectors
     static lookAt = function(eye, target, up) {
         gml_pragma("forceinline");
-        matrix_build_lookat(eye.x, eye.y, eye.z, target.x, target.y, target.z, up.x, up.y, up.z, self.data);
+        // Build an object/world matrix that points the object's +Y axis toward the target.
+        var yx = target.x - eye.x; var yy = target.y - eye.y; var yz = target.z - eye.z;
+        var len2 = yx*yx + yy*yy + yz*yz;
+        if (len2 == 0) return self.identity();
+        var invLen = 1 / sqrt(len2);
+        yx *= invLen; yy *= invLen; yz *= invLen;
+
+        // x = up × y
+        var ux = up.x, uy = up.y, uz = up.z;
+        var xx = uy * yz - uz * yy;
+        var xy = uz * yx - ux * yz;
+        var xz = ux * yy - uy * yx;
+        var xlen2 = xx*xx + xy*xy + xz*xz;
+        if (xlen2 == 0) {
+            // Choose an arbitrary orthogonal axis to up
+            if (abs(uz) == 1) { xx = 1; xy = 0; xz = 0; }
+            else { xx = 0; xy = 0; xz = 1; }
+            xlen2 = xx*xx + xy*xy + xz*xz;
+        }
+        var invXLen = 1 / sqrt(xlen2);
+        xx *= invXLen; xy *= invXLen; xz *= invXLen;
+
+        // z = x × y
+        var zx = xy * yz - xz * yy;
+        var zy = xz * yx - xx * yz;
+        var zz = xx * yy - xy * yx;
+        var zlen2 = zx*zx + zy*zy + zz*zz;
+        if (zlen2 != 0) {
+            var invZLen = 1 / sqrt(zlen2);
+            zx *= invZLen; zy *= invZLen; zz *= invZLen;
+        }
+
+        data[0] = xx; data[4] = yx; data[8]  = zx; data[12] = 0;
+        data[1] = xy; data[5] = yy; data[9]  = zy; data[13] = 0;
+        data[2] = xz; data[6] = yz; data[10] = zz; data[14] = 0;
+        data[3] = eye.x; data[7] = eye.y; data[11] = eye.z; data[15] = 1;
+
         return self;
     }
 
@@ -231,22 +240,31 @@ function UeMatrix4(_data = undefined) constructor {
     }
 
     /// Builds a perspective projection matrix
-    static makePerspective = function(left, right, top, bottom, near, far) {
+    static makePerspective = function(fov, aspect, near, far) {
         gml_pragma("forceinline");
-        var width  = right - left;
-        var height = top - bottom;
-        var aspect = width / height;
-        var fov_y_deg = radtodeg(2 * arctan(height * 0.5 / near));
-        matrix_build_projection_perspective(fov_y_deg, aspect, near, far, self.data);
+        var m = matrix_build_projection_perspective_fov(fov, aspect, near, far);
+        array_copy(self.data, 0, m, 0, 16);
         return self;
     }
 
     /// Builds an orthographic projection matrix
     static makeOrthographic = function(left, right, top, bottom, near, far) {
         gml_pragma("forceinline");
-        var width  = right - left;
-        var height = top - bottom;
-        matrix_build_projection_ortho(width, height, near, far, self.data);
+        var w = right - left;
+        var h = top - bottom;
+        var p = far - near;
+
+        var tx = -(right + left) / w;
+        var ty = -(top + bottom) / h;
+        var tz = -(far + near) / p;
+
+        data = [
+            2 / w, 0,     0,      0,
+            0,     2 / h, 0,      0,
+            0,     0,    -2 / p,  0,
+            tx,    ty,    tz,     1
+        ];
+
         return self;
     }
 
@@ -297,7 +315,10 @@ function UeMatrix4(_data = undefined) constructor {
         if (tw != 1 && tw != 0) {
             tx /= tw; ty /= tw; tz /= tw;
         }
-        return new UeVector3(tx, ty, tz);
+        vec.x = tx;
+        vec.y = ty;
+        vec.z = tz;
+        return vec;
     }
 
     /// Scales this matrix by a vector (column-wise)

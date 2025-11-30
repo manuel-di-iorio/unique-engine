@@ -1,5 +1,7 @@
 function UePlane(_normal = undefined, _constant = 0) constructor {
     self.normal = _normal ?? global.UE_OBJECT3D_DEFAULT_UP.clone();
+    // Ensure normal is unit length
+    if (self.normal != undefined) self.normal.normalize();
     self.constant = _constant;
     
     /// Read-only flag to check if a given object is of type Plane
@@ -39,7 +41,10 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     /// Returns true if a point lies on the plane (within a small epsilon)
     static isPointOnPlane = function(point, epsilon = UE_EPSILON) {
         gml_pragma("forceinline");
-        return abs(distanceToPoint(point)) < epsilon;
+        // Ensure normal is unit length for correct signed distance
+        var nLen = self.normal.length();
+        if (nLen == 0) return false;
+        return abs(distanceToPoint(point)) <= epsilon;
     }
     
     /// Clones the current plane
@@ -127,8 +132,8 @@ function UePlane(_normal = undefined, _constant = 0) constructor {
     static intersectsBox = function(box) {
         gml_pragma("forceinline");
         // Get the positive and negative vertices of the box relative to the plane normal
-        var _min = box.min;
-        var _max = box.max;
+        var _min = box.sizeMin;
+        var _max = box.sizeMax;
         
         var positive = new UeVector3(
             self.normal.x > 0 ? _max.x : _min.x,

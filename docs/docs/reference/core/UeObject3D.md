@@ -134,6 +134,13 @@ Executes the callback on all instances of this object.
 
 ---
 
+## Events
+The following events are automatically dispatched by `UeObject3D`:
+- `added` – emitted on a child when it is added to a parent via `.add(), .attach()`.
+- `childAdded` – emitted on the parent when a child is added via `.add()`, `.attach()`.
+- `removed` – emitted on a child when it is removed from its parent via `.clear(), .remove(), .removeFromParent()`.
+- `childRemoved` – emitted on the parent when a child is removed via `.clear(), .remove(), .removeFromParent()`.
+
 ## 🧠 Notes
 
 All 3D objects in the scene (meshes, groups, lights, etc.) extend `UeObject3D`
