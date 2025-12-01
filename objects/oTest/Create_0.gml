@@ -1,3 +1,10 @@
+// Anti-aliasing
+if (display_aa >= 8) {
+    display_reset(8, false);
+} else if (display_aa >= 4) {
+    display_reset(4, false);
+}
+
 currentDemo = undefined;
 bgLayer = layer_background_get_id("Background");
 selectorW = view_xport[0];
@@ -15,6 +22,7 @@ scenes = [
     { name: "OBJ Loader", obj: oSceneObjLoader, bg: #147FCC }, // 6
     { name: "TransformControls", obj: oSceneTransformControls, bg: #333333 }, // 7
     { name: "Project Loader", obj: oSceneProjectLoader, bg: #147FCC }, // 8
+    { name: "Shadow Mapping", obj: oSceneShadowMapping, bg: #147FCC }, // 9
 ];
 
 setScene = function(idx) {
@@ -30,4 +38,4 @@ setScene = function(idx) {
     layer_background_blend(bgLayer, currentDemo.bg);
 }
 
-setScene(0);
+setScene(9);

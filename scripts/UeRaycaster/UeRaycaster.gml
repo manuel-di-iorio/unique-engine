@@ -52,10 +52,11 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
                 .sub(camera.position)
                 .normalize();
         } else if (camera.isOrthographicCamera) {
-            // For orthographic camera, origin is unprojected NDC with depth, direction is fixed
+            // For orthographic camera, origin is unprojected NDC, direction is camera forward
             global.UE_DUMMY_VECTOR3.set(mouse.ndcX, mouse.ndcY, (camera.near + camera.far) / (camera.near - camera.far))
                 .unproject(camera);
-            global.UE_DUMMY_VECTOR3_B.copy(global.UE_OBJECT3D_DEFAULT_UP).transformDirection(camera.matrixWorld);
+            // Calculate camera forward direction (in orthographic projection, all rays are parallel)
+            global.UE_DUMMY_VECTOR3_B.set(0, 1, 0).transformDirection(camera.matrixWorld).normalize();
         }
 
         self.ray.set(global.UE_DUMMY_VECTOR3, global.UE_DUMMY_VECTOR3_B);

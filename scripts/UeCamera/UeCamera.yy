@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UePerspectiveCamera",
+  "%Name":"UeCamera",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UePerspectiveCamera",
+  "name":"UeCamera",
   "parent":{
     "name":"Cameras",
     "path":"folders/Unique Engine/Cameras.yy",

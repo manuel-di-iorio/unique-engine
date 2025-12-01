@@ -29,26 +29,38 @@ scene.add(myMesh);
 scene.add(myLight);
 ```
 
-## 🎥 PerspectiveCamera
-The camera defines how your 3D scene is projected to the 2D screen.
-Unique Engine includes a default perspective camera.
+## 🎥 Cameras
+Unique Engine provides two types of cameras to project your 3D scene to the 2D screen:
 
-You place the camera in 3D space like any other object:
+### Perspective Camera
+The most common camera type, mimicking how human eyes perceive depth. Objects farther away appear smaller.
 
 ```js
 camera = new UePerspectiveCamera();
 camera.setPosition(0, 5, 10);
 ```
-You don't need to manually handle GameMaker's view system, the engine integrates the camera automatically.
+
+### Orthographic Camera
+Objects maintain the same size regardless of distance. Perfect for 2D games, isometric views, or technical drawings.
+
+```js
+camera = new UeOrthographicCamera({
+  left: -400, right: 400,
+  top: 300, bottom: -300
+});
+camera.setPosition(0, 5, 10);
+```
+
+You don't need to manually handle GameMaker's view system - the engine integrates cameras automatically.
 
 ### Field of View & Clipping
-By default, the camera has:
+By default, the perspective camera has:
 
 - FOV: 60 degrees
 - Near plane: 0.1
-- Far plane: 32000
+- Far plane: 2000
 
-The camera is a UeObject3D, so you can move or rotate it like any other object.
+Cameras are `UeObject3D` instances, so you can move or rotate them like any other object.
 
 ## 🖌️ Renderer
 The renderer is responsible for drawing the scene. It does:
