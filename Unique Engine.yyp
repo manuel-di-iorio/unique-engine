@@ -132,7 +132,6 @@
     {"$GMIncludedFile":"","%Name":"metadata.json","CopyToMask":-1,"filePath":"datafiles/Unique Project/assets/e15d706a-2ad6-45aa-9d51-c17d847cbb1d","name":"metadata.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"metadata.json","CopyToMask":-1,"filePath":"datafiles/Unique Project/assets/f4485e71-90a3-4771-b107-98c7347ec348","name":"metadata.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"texture.png","CopyToMask":-1,"filePath":"datafiles/Unique Project/assets/f4485e71-90a3-4771-b107-98c7347ec348","name":"texture.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"project.json","CopyToMask":-1,"filePath":"datafiles/Unique Project","name":"project.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
   ],
   "isEcma":false,
   "LibraryEmitters":[],

@@ -2,29 +2,27 @@ function ProjectLoader() constructor {
   treeviewItemsByUUID = {};
 
   /**
-   * Load project from project.json and assets.json
+   * Load project from assets.json
    * @param {Struct} projectManager - The project manager instance
    */
   function load(projectManager) {
     var projectDir = projectManager.projectDatafiles + "/Unique Project/";
-    var projectJsonPath = projectDir + "project.json";
     var assetsJsonPath = projectDir + "assets.json";
 
-    if (!file_exists(projectJsonPath) || !file_exists(assetsJsonPath)) return;
+    if (!file_exists(assetsJsonPath)) return;
 
-    var projectData = __readJson(projectJsonPath);
     var assetsData = __readJson(assetsJsonPath);
     
     // Apply settings
-    if (projectData[$ "settings"] != undefined) {
-        self.__applyProjectSettings(projectData.settings);
+    if (assetsData[$ "settings"] != undefined) {
+        self.__applyProjectSettings(assetsData.settings);
     }
 
     var treeview = global.UI.Main.Assets.Treeview;
     treeviewItemsByUUID = {};
     
-    // 1. Create all Folders first (flat list from project.json)
-    var foldersMap = projectData[$ "folders"] ?? {};
+    // 1. Create all Folders first (flat list from assets.json)
+    var foldersMap = assetsData[$ "folders"] ?? {};
     var folderUUIDs = variable_struct_get_names(foldersMap);
     
     for (var i = 0; i < array_length(folderUUIDs); i++) {

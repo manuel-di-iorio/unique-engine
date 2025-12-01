@@ -14,25 +14,24 @@ function ProjectSaver() constructor {
         // Paths
         var projectDir = projectManager.projectDatafiles + "/Unique Project/";
         var assetsJsonPath = projectDir + "assets.json";
-        var projectJsonPath = projectDir + "project.json";
         var assetsDir = projectDir + "assets/";
 
         // Check if this is the first save (no existing project files)
-        var isFirstSave = !file_exists(projectJsonPath) || !file_exists(assetsJsonPath);
+        var isFirstSave = !file_exists(assetsJsonPath);
         
         if (isFirstSave) {
             // Full save
-            __performFullSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath);
+            __performFullSave(projectManager, projectDir, assetsDir, assetsJsonPath);
         } else {
             // Incremental save
-            __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath);
+            __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath);
         }
 
         projectManager.markAsSaved();
     }
     
     /**
-     * Save editor settings (camera easing, grid, box colliders) to project.json
+     * Save editor settings (camera easing, grid, box colliders) to assets.json
      * This is called when toggling these settings and doesn't mark the project as unsaved
      */
     function saveEditorSettings(projectManager) {
@@ -72,45 +71,50 @@ function ProjectSaver() constructor {
      */
     function __performSaveEditorSettings(projectManager) {
         var projectDir = projectManager.projectDatafiles + "/Unique Project/";
-        var projectJsonPath = projectDir + "project.json";
+        var assetsJsonPath = projectDir + "assets.json";
         
         // Exit if project file doesn't exist yet
-        if (!file_exists(projectJsonPath)) return;
+        if (!file_exists(assetsJsonPath)) return;
         
-        // Load existing project.json
-        var projectJson = json_parse(self.__readFile(projectJsonPath));
+        // Load existing assets.json
+        var assetsJson = json_parse(self.__readFile(assetsJsonPath));
         
         // Update editor settings
         var sm = oSceneEditor.sceneManager;
 
+        // Initialize settings if not present
+        if (assetsJson[$ "settings"] == undefined) {
+            assetsJson.settings = {};
+        }
+
         // Update camera position and target
-        if (projectJson.settings[$ "camera"] != undefined && sm.orbit != undefined) {
-            projectJson.settings.camera.position = [sm.camera.position.x, sm.camera.position.y, sm.camera.position.z];
-            projectJson.settings.camera.target = [sm.orbit.target.x, sm.orbit.target.y, sm.orbit.target.z];
+        if (assetsJson.settings[$ "camera"] != undefined && sm.orbit != undefined) {
+            assetsJson.settings.camera.position = [sm.camera.position.x, sm.camera.position.y, sm.camera.position.z];
+            assetsJson.settings.camera.target = [sm.orbit.target.x, sm.orbit.target.y, sm.orbit.target.z];
         }
         
         // Update camera damping factor
-        if (projectJson.settings[$ "camera"] != undefined && sm.orbit != undefined) {
-            projectJson.settings.camera.dampingFactor = sm.orbit.dampingFactor;
+        if (assetsJson.settings[$ "camera"] != undefined && sm.orbit != undefined) {
+            assetsJson.settings.camera.dampingFactor = sm.orbit.dampingFactor;
         }
         
         // Update grid visibility
-        projectJson.settings.gridEnabled = sm.gridEnabled;
+        assetsJson.settings.gridEnabled = sm.gridEnabled;
         
         // Update box colliders visibility
-        if (projectJson.settings[$ "gizmos"] == undefined) {
-            projectJson.settings.gizmos = {};
+        if (assetsJson.settings[$ "gizmos"] == undefined) {
+            assetsJson.settings.gizmos = {};
         }
-        projectJson.settings.gizmos.showBoxColliders = sm.showBoxColliders;
+        assetsJson.settings.gizmos.showBoxColliders = sm.showBoxColliders;
         
         // Write back to file
-        self.__writeJson(projectJsonPath, projectJson);
+        self.__writeJson(assetsJsonPath, assetsJson);
     }
     
     /**
      * Perform a full save of all assets
      */
-    function __performFullSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath) {
+    function __performFullSave(projectManager, projectDir, assetsDir, assetsJsonPath) {
         directory_destroy(projectDir);
 
         // Ensure project dirs exists
@@ -118,12 +122,7 @@ function ProjectSaver() constructor {
         if (!directory_exists(assetsDir)) directory_create(assetsDir);
 
         var assets = []; // List of asset objects to save in assets.json
-        
-        // Project structure to save in project.json
-        var project = {
-            settings: self.__getProjectSettings(),
-            folders: {} // Folders map
-        }
+        var folders = {}; // Folders map
 
         // Get all assets from AssetManager (now a flat array)
         var am = oSceneEditor.assetManager;
@@ -132,7 +131,7 @@ function ProjectSaver() constructor {
         for (var i = 0; i < array_length(allAssets); i++) {
             var asset = allAssets[i];
             
-            // Skip folders (they're saved separately in project.json)
+            // Skip folders (they're saved separately in folders map)
             if (asset[$ "type"] == "Folder") continue;
             
             // Skip ModelInstance (they're saved in Scene metadata)
@@ -193,35 +192,33 @@ function ProjectSaver() constructor {
         var allFolders = oSceneEditor.assetManager.getAssetsByType("Folder");
         for (var i = 0; i < array_length(allFolders); i++) {
             var folder = allFolders[i];
-            project.folders[$ folder.uuid] = {
+            folders[$ folder.uuid] = {
                 uuid: folder.uuid,
                 name: folder.name,
                 __parentUI: (folder[$ "__parentUI"] != undefined && folder.__parentUI[$ "type"] == "Folder") ? folder.__parentUI.uuid : undefined
             };
         }
 
-        // Write assets.json and project.json
-        self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
-        self.__writeJson(projectJsonPath, project);
+        // Write assets.json with all data
+        self.__writeJson(assetsJsonPath, { 
+            assets, 
+            folders,
+            settings: self.__getProjectSettings(),
+            version: global.UE_VERSION 
+        });
     }
     
     /**
      * Perform an incremental save of only changed assets
      */
-    function __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath, projectJsonPath) {
+    function __performIncrementalSave(projectManager, projectDir, assetsDir, assetsJsonPath) {
         var changes = projectManager.changes;
         var changeIds = struct_get_names(changes);
         
         // Load existing assets.json
         var assetsJson = json_parse(self.__readFile(assetsJsonPath));
         var assets = assetsJson.assets;
-        
-        // Load existing project.json
-        var projectJson = {};
-        if (file_exists(projectJsonPath)) {
-            projectJson = json_parse(self.__readFile(projectJsonPath));
-        }
-        var foldersMap = projectJson[$ "folders"] ?? {};
+        var foldersMap = assetsJson[$ "folders"] ?? {};
         
         for (var i = 0; i < array_length(changeIds); i++) {
             var uuid = changeIds[i];
@@ -364,13 +361,13 @@ function ProjectSaver() constructor {
             }
         }
         
-        self.__writeJson(assetsJsonPath, { assets, version: global.UE_VERSION });
-        
-        // Update project.json with new folders map and settings
-        projectJson.folders = foldersMap;
-        projectJson.settings = self.__getProjectSettings();
-        
-        self.__writeJson(projectJsonPath, projectJson);
+        // Write assets.json with all data
+        self.__writeJson(assetsJsonPath, { 
+            assets, 
+            folders: foldersMap,
+            settings: self.__getProjectSettings(),
+            version: global.UE_VERSION 
+        });
     }
 
     function __getProjectSettings() {
