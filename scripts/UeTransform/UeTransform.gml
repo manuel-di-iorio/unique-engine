@@ -54,15 +54,13 @@ function UeTransform(_data = undefined): UeEventDispatcher() constructor {
 			force = true;
             
             // For frustum culling, update the intersection sphere (if available) to world space
-           if (self[$ "isMesh"]) {
-               var geometry = self[$ "geometry"];
-               if (geometry != undefined) {
-                   var boundingSphere = geometry[$ "boundingSphere"];
-                   if (boundingSphere != undefined) {
-                       __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
-                   }
-               }
-           }
+            var geometry = self[$ "geometry"];
+            if (geometry != undefined) {
+                var boundingSphere = geometry[$ "boundingSphere"];
+                if (boundingSphere != undefined) {
+                    __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
+                }
+            }
         } 
         
         for (var i = 0, len = array_length(children); i < len; i++) {
@@ -100,8 +98,7 @@ function UeTransform(_data = undefined): UeEventDispatcher() constructor {
 
         if (updateChildren) {
             for (var i = 0, len = array_length(children); i < len; i++) {
-                var child = children[i];
-                child.updateWorldMatrix(false, true);
+                children[i].updateWorldMatrix(false, true);
             }
         }
     

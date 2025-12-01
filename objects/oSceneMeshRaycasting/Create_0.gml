@@ -69,3 +69,5 @@ for (var i = 0; i < 150; i++) {
     
     mesh.updateMatrix();
 }
+
+scene.updateWorldMatrix(false, true);

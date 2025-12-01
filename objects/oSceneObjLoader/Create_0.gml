@@ -32,3 +32,4 @@ objMesh.traverse(function(mesh) {
 });
 
 scene.add(objMesh);
+scene.updateWorldMatrix(false, true);

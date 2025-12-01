@@ -50,3 +50,4 @@ var ambientLight = new UeAmbientLight(#5A4628);
 var sunLight = new UeDirectionalLight(90, 45, { color: #FFFFC8, intensity: .7 });
 
 scene.add(ambientLight, sunLight, desert, pyramid0, pyramid1, pyramid2);
+scene.updateWorldMatrix(false, true);

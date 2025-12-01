@@ -1,1 +1,1 @@
-renderer.render(project.scene, camera);
+project.render(camera);

@@ -8,7 +8,7 @@ var materialStandard = new UeMeshStandardMaterial();
 var materialBasic = new UeMeshBasicMaterial();
 
 // Create the terrain
-var terrainGeometry = new UeCircleGeometry(500, { material: materialStandard, color: #226622 });
+var terrainGeometry = new UeCircleGeometry(500, { color: #226622 });
 var terrain = new UeStaticMesh(terrainGeometry, materialBasic, { z: -100 });
 
 /**
@@ -32,3 +32,4 @@ var ambientLight = new UeAmbientLight(#999966);
 
 // Add everything to the scene
 scene.add(ambientLight, terrain, treeGroup);
+scene.updateWorldMatrix(false, true);

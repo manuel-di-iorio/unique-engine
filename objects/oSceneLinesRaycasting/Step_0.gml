@@ -7,6 +7,5 @@ hitSphere.visible = false;
 if (array_length(intersects) > 0) {
     var hit = intersects[0].point;
     hitSphere.position.copy(hit);
-    hitSphere.updateMatrix();
     hitSphere.visible = true;
 }

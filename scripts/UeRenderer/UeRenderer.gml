@@ -24,84 +24,89 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 continue;
             }
                 
-            if (object.matrixWorldAutoUpdate) object.updateMatrixWorld();
+            // Update matrices for dynamic objects
+            if (object.matrixAutoUpdate && object.matrixWorldAutoUpdate) object.updateMatrixWorld();
             
-            if (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined && object.visible) {
-                // Test the frustum intersection, only for parent meshes
-                if (object[$ "isMesh"] && object.frustumCulled && object.parent == undefined) {
-                    var _boundingSphere = object[$ "__intersectionSphere"];
-                    var _position = object.position;
-                    if (_boundingSphere != undefined &&
-                        !sphere_is_visible(_position.x, _position.y, _position.z, _boundingSphere.radius)) continue;
-                }
-                
-                // ** Precompute the sort hash **
-
-                // --- MATERIAL & TRANSPARENCY -------------------------------------------------
-                // Determine whether the material is transparent.
-                // Transparent objects must be rendered *after* opaque ones,
-                // and sorted back-to-front inside their own group.
-                var _material = object[$ "material"];
-                var _transparent = _material.transparent;
-
-                // Material ID (12-bit)
-                var _materialId = _material.id;
-
-                // --- DEPTH QUANTIZATION (31 bits) -------------------------------------------
-                // We convert the object distance into a normalized value (0..1),
-                // then map it into a 31-bit integer range (0..2^31-1).
-                //
-                // Why quantize instead of using the raw float distance?
-                // - Floating-point precision becomes poor for large distances.
-                // - Sorting with floats introduces instability and z-fighting-like errors.
-                // - By converting to a 31-bit integer, we guarantee a stable and uniform
-                //   precision distribution across the whole range.
-                var _nd = clamp(object.position.distanceToSquared(cameraPos) / 32000, 0, 1);
-                var _quantDepth = floor(_nd * 0x7FFFFFFF);  // 31-bit integer depth value
-
-                // --- DEPTH INVERSION FOR TRANSPARENT OBJECTS --------------------------------
-                // Transparent objects must be sorted *back-to-front*, while opaque objects
-                // are sorted *front-to-back*.
-                //
-                // Instead of using two different sort passes, we invert the depth integer
-                // when the object is transparent.
-                //
-                // Bitwise trick:
-                //     _quantDepth ^= mask
-                //
-                // The mask is (0x7FFFFFFF) when the object is transparent,
-                // and (0) when opaque. This works because:
-                //
-                //     -_transparent  →  0xFFFFFFFF when true, 0x00000000 when false
-                //     & 0x7FFFFFFF   →  either full-mask or zero-mask
-                //
-                // Result: all 31 bits of depth are flipped only when needed.
-                _quantDepth ^= (-_transparent & 0x7FFFFFFF);
-
-                // --- SORT KEY COMPOSITION (52 bits) ------------------------------------------
-                // We pack all sorting criteria into a single integer key.
-                // Higher-order bits have higher sorting priority.
-                //
-                // Bit layout (from MSB → LSB):
-                //
-                //  [51]        : 1 bit   → transparency flag (opaque first, transparent later)
-                //  [50..43]    : 8 bits  → renderOrder (explicit user sorting)
-                //  [42..31]    : 12 bits → material ID (minimizes shader/material switches)
-                //  [30..0]     : 31 bits → quantized depth (front-to-back or inverted)
-                //
-                // The final 52-bit key ensures a single fast integer comparison for sorting.
-                var _sortKey = 0;
-                _sortKey |= (_transparent ? 1 : 0) << 51;      // 1 bit  transparency flag
-                _sortKey |= (object.renderOrder & 0xFF) << 43; // 8 bits renderOrder
-                _sortKey |= (_materialId & 0xFFF) << 31;       // 12 bits material ID
-                _sortKey |= _quantDepth;                       // 31 bits depth
-                object.__sortKey = _sortKey;
-
-                __queue[__queueIdx++] = object;
+            /* Frustum intersection && sort key calculation */
+            if (object.visible) {
+               if (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined) {
+                   // Test the frustum intersection, only for parent meshes
+                   if (object[$ "isMesh"] && object.frustumCulled && object.parent == undefined) {
+                       var _position = object.position;
+                       var _boundingSphere = object[$ "__intersectionSphere"];
+   
+                       if (_boundingSphere != undefined &&
+                           !sphere_is_visible(_position.x, _position.y, _position.z, _boundingSphere.radius)) continue;
+                   }
+                   
+                   // ** Precompute the sort hash **
+   
+                   // --- MATERIAL & TRANSPARENCY -------------------------------------------------
+                   // Determine whether the material is transparent.
+                   // Transparent objects must be rendered *after* opaque ones,
+                   // and sorted back-to-front inside their own group.
+                   var _material = object[$ "material"];
+                   var _transparent = _material.transparent;
+   
+                   // Material ID (12-bit)
+                   var _materialId = _material.id;
+   
+                   // --- DEPTH QUANTIZATION (31 bits) -------------------------------------------
+                   // We convert the object distance into a normalized value (0..1),
+                   // then map it into a 31-bit integer range (0..2^31-1).
+                   //
+                   // Why quantize instead of using the raw float distance?
+                   // - Floating-point precision becomes poor for large distances.
+                   // - Sorting with floats introduces instability and z-fighting-like errors.
+                   // - By converting to a 31-bit integer, we guarantee a stable and uniform
+                   //   precision distribution across the whole range.
+                   var _nd = clamp(object.position.distanceToSquared(cameraPos) / 32000, 0, 1);
+                   var _quantDepth = floor(_nd * 0x7FFFFFFF);  // 31-bit integer depth value
+   
+                   // --- DEPTH INVERSION FOR TRANSPARENT OBJECTS --------------------------------
+                   // Transparent objects must be sorted *back-to-front*, while opaque objects
+                   // are sorted *front-to-back*.
+                   //
+                   // Instead of using two different sort passes, we invert the depth integer
+                   // when the object is transparent.
+                   //
+                   // Bitwise trick:
+                   //     _quantDepth ^= mask
+                   //
+                   // The mask is (0x7FFFFFFF) when the object is transparent,
+                   // and (0) when opaque. This works because:
+                   //
+                   //     -_transparent  →  0xFFFFFFFF when true, 0x00000000 when false
+                   //     & 0x7FFFFFFF   →  either full-mask or zero-mask
+                   //
+                   // Result: all 31 bits of depth are flipped only when needed.
+                   _quantDepth ^= (-_transparent & 0x7FFFFFFF);
+   
+                   // --- SORT KEY COMPOSITION (52 bits) ------------------------------------------
+                   // We pack all sorting criteria into a single integer key.
+                   // Higher-order bits have higher sorting priority.
+                   //
+                   // Bit layout (from MSB → LSB):
+                   //
+                   //  [51]        : 1 bit   → transparency flag (opaque first, transparent later)
+                   //  [50..43]    : 8 bits  → renderOrder (explicit user sorting)
+                   //  [42..31]    : 12 bits → material ID (minimizes shader/material switches)
+                   //  [30..0]     : 31 bits → quantized depth (front-to-back or inverted)
+                   //
+                   // The final 52-bit key ensures a single fast integer comparison for sorting.
+                   var _sortKey = 0;
+                   _sortKey |= (_transparent ? 1 : 0) << 51;      // 1 bit  transparency flag
+                   _sortKey |= (object.renderOrder & 0xFF) << 43; // 8 bits renderOrder
+                   _sortKey |= (_materialId & 0xFFF) << 31;       // 12 bits material ID
+                   _sortKey |= _quantDepth;                       // 31 bits depth
+                   object.__sortKey = _sortKey;
+   
+                   __queue[__queueIdx++] = object;
+               }
+            
+              // Traverse child objects
+              __collectObjectQueues(object.children, camera);
             }
-            
-            // Traverse child objects
-            __collectObjectQueues(object.children, camera);
         } 
     }
 
@@ -112,18 +117,18 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         var array = __queue;
         var pivot = array[right].__sortKey;
         var i = left - 1;
-        // var tmp;
+        var tmp;
         
         for (var j = left; j < right; j++) {
             if (array[j].__sortKey < pivot) {
                 i++;
-                var tmp = array[i];
+                tmp = array[i];
                 array[i] = array[j];
                 array[j] = tmp;
             }
         }
         
-        var tmp = array[i + 1];
+        tmp = array[i + 1];
         array[i + 1] = array[right];
         array[right] = tmp;
         

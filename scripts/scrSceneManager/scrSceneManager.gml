@@ -27,11 +27,12 @@ function SceneManager() constructor {
     });
 
     self.boxHelper = new UeBoxHelper();
+    self.transformControlsHelper = self.transformControls.getHelper();
     
     // Assimp loader
     self.assimp = new UeAssimpLoader();
     
-    self.scene.add(self.transformControls.getHelper());
+    self.scene.add(self.transformControlsHelper);
     self.scene.add(self.grid, self.objects,  self.boxHelper);
     
     // Configure mouse

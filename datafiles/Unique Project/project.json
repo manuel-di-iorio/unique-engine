@@ -1,23 +1,5 @@
 {
   "settings":{
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true,
-    "camera":{
-      "damping":true,
-      "dampingFactor":0.29999999999999999,
-      "target":[
-        270.36036630525894,
-        71.666573762472538,
-        0.0
-      ],
-      "position":[
-        -804.43731499972102,
-        58.419779689667628,
-        328.24804403177222
-      ]
-    },
     "counters":{
       "scenes":3.0,
       "models":28.0,
@@ -27,24 +9,27 @@
       "cameras":0.0,
       "materials":28.0,
       "lights":0.0
+    },
+    "gizmos":{
+      "showBoxColliders":true
+    },
+    "gridEnabled":true,
+    "camera":{
+      "target":[
+        229.50267099955653,
+        40.812449592543324,
+        0.0
+      ],
+      "damping":true,
+      "dampingFactor":0.29999999999999999,
+      "position":[
+        -127.59341869595926,
+        -706.38213216933661,
+        409.56302748991027
+      ]
     }
   },
   "folders":{
-    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
-      "name":"Rocks",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
-    },
-    "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
-      "name":"Project",
-      "__parentUI":null,
-      "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0"
-    },
-    "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
-      "name":"Objects",
-      "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
-      "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
-    },
     "9ff898e0-953e-4435-99b5-d5e825905d60":{
       "name":"Snow",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
@@ -59,6 +44,21 @@
       "name":"Trees",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"855426d7-7661-4e99-9915-d0980137709c"
+    },
+    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
+      "name":"Rocks",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
+    },
+    "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
+      "name":"Project",
+      "__parentUI":null,
+      "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0"
+    },
+    "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
+      "name":"Objects",
+      "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
+      "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
     }
   }
 }

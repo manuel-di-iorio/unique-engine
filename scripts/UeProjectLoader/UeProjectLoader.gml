@@ -23,6 +23,7 @@
  * @param {Bool} data.autoLoad - If true, automatically loads all assets on construction (default: true)
  */
 function UeProjectLoader(data = {}) constructor {
+    self.renderer = data[$ "renderer"] ?? new UeRenderer();
     self.autoLoad = data[$ "autoLoad"] ?? true;
     
     /// @member {UeScene} scene - The active scene populated by setScene()
@@ -71,6 +72,19 @@ function UeProjectLoader(data = {}) constructor {
 
         if (self.autoLoad) {
             self.loadAssets();
+            
+            // If only one scene is loaded, set it automatically
+            var sceneNames = [];
+            var assetNames = struct_get_names(self.assetsByName);
+            for (var i = 0; i < array_length(assetNames); i++) {
+                var asset = self.assetsByName[$ assetNames[i]];
+                if (asset[$ "type"] == "Scene") {
+                    array_push(sceneNames, asset.name);
+                }
+            }
+            if (array_length(sceneNames) == 1) {
+                self.setScene(sceneNames[0]);
+            }
         }
     };
     
@@ -272,6 +286,7 @@ function UeProjectLoader(data = {}) constructor {
                 
                 if (model != undefined && model[$ "isMesh"] == true) {
                     var instance = model.createInstance();
+                    instance.name = child.name;
                     instance.type = "ModelInstance";
                     
                     // Apply transform
@@ -289,6 +304,7 @@ function UeProjectLoader(data = {}) constructor {
                     }
                     
                     instance.updateMatrix();
+                    log(instance.name)
                     self.scene.add(instance);
                 }
             }
@@ -410,6 +426,11 @@ function UeProjectLoader(data = {}) constructor {
         buffer_delete(bf);
         return json_parse(str);
     };
+    
+    function render(camera) {
+        self.renderer.render(self.scene, camera);
+        return self;
+    }
 
     self.load();
 }
