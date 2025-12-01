@@ -27,6 +27,11 @@ function SceneManager() constructor {
     });
 
     self.boxHelper = new UeBoxHelper();
+    with (self.boxHelper.material) {
+        transparent = true;
+        depthWrite = false;
+        depthTest = false;
+    }
     self.transformControlsHelper = self.transformControls.getHelper();
     
     // Assimp loader
@@ -53,6 +58,9 @@ function SceneManager() constructor {
      */
     function handleMeshPicking() {
         if (!mouse_check_button_pressed(mb_left) || !global.UI.Main.Scene.hovered) return;
+
+        // Don't pick objects if the user is interacting with the gizmo
+        if (self.transformControls.hoveredAxis != undefined || self.transformControls.dragging) return;
 
         var _mousePos = global.UE_MOUSE.get();
         var _editorManager = oSceneEditor.editorManager;
