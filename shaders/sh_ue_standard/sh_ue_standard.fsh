@@ -3,6 +3,7 @@ varying vec3 v_vWorldNormal;
 varying vec2 v_vTexcoord;
 varying vec4 v_vColour;
 varying vec3 v_vNormal;
+varying vec4 v_vLightSpacePos;
 
 uniform vec3 u_ueAmbient;
 
@@ -36,6 +37,14 @@ uniform float u_ueEmissiveIntensity;
 uniform sampler2D s_map;
 uniform sampler2D s_emissiveMap;
 
+// Shadow mapping - Directional Light
+uniform sampler2D s_shadowMap;               // Shadow depth texture
+uniform float u_ueShadowBias;                // Shadow bias to prevent acne
+uniform float u_ueShadowNormalBias;          // Normal bias - reduces acne on angled surfaces
+uniform float u_ueShadowMapSize;             // Shadow map resolution (width/height)
+uniform float u_ueShadowEnabled;             // 0.0 = disabled, 1.0 = enabled
+uniform float u_ueReceiveShadow;             // 1.0 = this object receives shadows, 0.0 = no shadows
+
 // Gamma correction (sRGB to Linear color space)
 #define GAMMA 2.2
 
@@ -49,8 +58,7 @@ vec3 LinearToSRGB(vec3 inputColor) {
 
 // Light functions
 vec3 calculateDirectionalLight(vec3 lightDir, vec3 lightColor, float intensity, vec3 normal) {
-    vec3 dir = -lightDir;
-    float diff = max(dot(normal, dir), 0.0);
+    float diff = max(dot(normal, lightDir), 0.0);
     return SRGBToLinear(lightColor) * diff * intensity;
 }
 
@@ -76,12 +84,18 @@ void main()
     vec3 lighting = u_ueAmbient;
 
     // === Directional Light ===
-    lighting += calculateDirectionalLight(u_ueDirLightDir0, u_ueDirLightColor0, u_ueDirLightIntensity0, normal);
-    lighting += calculateDirectionalLight(u_ueDirLightDir1, u_ueDirLightColor1, u_ueDirLightIntensity1, normal);
+    vec3 dirLight0 = calculateDirectionalLight(normalize(-u_ueDirLightDir0), u_ueDirLightColor0, u_ueDirLightIntensity0, normal);
+    vec3 dirLight1 = calculateDirectionalLight(u_ueDirLightDir1, u_ueDirLightColor1, u_ueDirLightIntensity1, normal);
+    
+    lighting += dirLight0;
+    lighting += dirLight1;
 
     // === Point Light ===
-    lighting += calculatePointLight(u_uePointLightPosition0, u_uePointLightColor0, u_uePointLightIntensity0, u_uePointLightRange0, normal, v_vWorldPosition);
-    lighting += calculatePointLight(u_uePointLightPosition1, u_uePointLightColor1, u_uePointLightIntensity1, u_uePointLightRange1, normal, v_vWorldPosition);
+    vec3 pointLight0 = calculatePointLight(u_uePointLightPosition0, u_uePointLightColor0, u_uePointLightIntensity0, u_uePointLightRange0, normal, v_vWorldPosition);
+    vec3 pointLight1 = calculatePointLight(u_uePointLightPosition1, u_uePointLightColor1, u_uePointLightIntensity1, u_uePointLightRange1, normal, v_vWorldPosition);
+    
+    lighting += pointLight0;
+    lighting += pointLight1;
 
     // === Final lit color ===
     vec3 litColor = baseColor.rgb * lighting;
@@ -97,6 +111,5 @@ void main()
     
     // === Back to sRGB color space ===
     vec3 finalColor = LinearToSRGB(clamp(litColor, 0.0, 1.0));
-    
     gl_FragColor = vec4(finalColor, baseColor.a);
 }

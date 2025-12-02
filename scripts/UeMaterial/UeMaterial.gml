@@ -239,7 +239,7 @@ function UeMaterial(data = {}) constructor {
             uniformsCache[2] = meshPosition.z;
             shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
         }
-
+        
         // Set the culling mode (can be overwritten by argument for transparent objects)
         gpu_set_cullmode(renderSide ?? side);
 

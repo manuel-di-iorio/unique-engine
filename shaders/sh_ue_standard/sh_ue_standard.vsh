@@ -7,6 +7,9 @@ varying vec3 v_vWorldPosition;
 varying vec3 v_vWorldNormal;
 varying vec2 v_vTexcoord;
 varying vec4 v_vColour;
+varying vec4 v_vLightSpacePos;               // Position in light space for shadow mapping
+
+uniform mat4 u_ueLightSpaceMatrix;           // Light projection * view matrix
 
 void main()
 {
@@ -16,6 +19,9 @@ void main()
     
     v_vColour = in_Colour;
     v_vTexcoord = in_TextureCoord;
+    
+    // Calculate position in light space for shadow mapping
+    v_vLightSpacePos = u_ueLightSpaceMatrix * worldPosition;
     
     gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(in_Position.xyz, 1.0);
 }

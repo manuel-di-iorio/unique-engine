@@ -1,5 +1,5 @@
 global.UE_OBJECT_ID = 0;
-global.UE_VERSION = "2025.12.1.0";
+global.UE_VERSION = "0.1.0";
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_TEXTURE_MAP = new UeTexture(sprUeMapTex);
 global.UE_TEXTURE_EMISSIVE = new UeTexture(sprUeEmissiveTex);
@@ -32,8 +32,6 @@ enum UE_TEXTURE_WRAP {
 }
 
 // Internal globals
-
-
 global.UE_RENDERER_STATE = array_create(1);
 enum UE_RENDERER_STATE_ENUM {
     CAMERA,
@@ -52,9 +50,3 @@ global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL] = array
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = 0;
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT] = array_create(2);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = 0;
-
-
-// Ue wagliòò
-function ue_waglio() { 
-    show_message(global.UE_VERSION);
-}

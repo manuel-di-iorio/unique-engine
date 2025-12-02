@@ -96,3 +96,28 @@ Lights are passed to the material shader through uniforms like:
 - ueDirLightDir0, ueDirLightColor0, ueDirLightIntensity0
 - uePointLightPosition0, uePointLightRange0, etc.
 
+## Shadow Properties
+
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| `castShadow` | `boolean` | `false` | Whether this light casts shadows. If `true`, the renderer will create and update a shadow controller associated to the light. |
+| `shadow` | `object` | `undefined` | Shadow controller object assigned when `castShadow` is enabled. For directional lights the controller is `UeDirectionalLightShadow`, for point lights the controller is `UePointLightShadow` (manages 6 faces). |
+
+### Usage Example
+
+```js
+// Directional light with shadows
+const sun = new UeDirectionalLight(0, 45, { color: c_white, intensity: 2 });
+sun.castShadow = true;
+sun.shadow.mapSize = 2048; // increase shadow resolution
+sun.shadow.bias = 0.0005;
+scene.add(sun);
+
+// Point light with omnidirectional shadows
+const lamp = new UePointLight(500, { color: c_yellow });
+lamp.castShadow = true;
+lamp.shadow.mapSize = 1024; // per-face resolution
+lamp.shadow.far = 600; // max distance stored in shadow maps
+scene.add(lamp);
+```
+

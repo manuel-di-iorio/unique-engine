@@ -27,20 +27,12 @@ function UeOrthographicCamera(data = {}): UeCamera(data) constructor {
      */
     function updateProjectionMatrix() {
         gml_pragma("forceinline");
-        var dx = (right - left) / (2 * zoom);
-        var dy = (top - bottom) / (2 * zoom);
-        var cx = (right + left) / 2;
-        var cy = (top + bottom) / 2;
-        
-        var _left = cx - dx;
-        var _right = cx + dx;
-        var _top = cy + dy;
-        var _bottom = cy - dy;
-        
-        matrix_build_projection_ortho(_left, _right, _bottom, _top, near, far, global.UE_DUMMY_ARRAY16);
+        var w = abs(right - left);
+        var h = abs(top - bottom);
+        matrix_build_projection_ortho(w, h, near, far, global.UE_DUMMY_ARRAY16);
         projectionMatrix.fromArray(global.UE_DUMMY_ARRAY16);
         projectionMatrixInverse.copy(projectionMatrix).invert();
-        camera_set_proj_mat(camera, projectionMatrix.data);
+    	camera_set_proj_mat(camera, projectionMatrix.data);
     }
     
     // Build the orthographic projection

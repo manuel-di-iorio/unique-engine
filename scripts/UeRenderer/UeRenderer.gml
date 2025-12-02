@@ -2,6 +2,12 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     isRenderer = true;
     type = "Renderer";
     sortObjects = data[$ "sortObjects"] ?? true;
+
+    // Shadow map configuration for the renderer
+    shadowMap = data[$ "shadowMap"] ?? {};
+    shadowMap.enabled = shadowMap[$ "enabled"] ?? false;
+    shadowMap.autoUpdate = shadowMap[$ "autoUpdate"] ?? true;
+    shadowMap.needsUpdate = shadowMap[$ "needsUpdate"] ?? false;
     
     __boundMaterial = undefined; // Material that is currently bound
     __lightIdx = 0;
@@ -166,8 +172,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             if (_onBeforeRender != undefined) _onBeforeRender();
             
             // Render the mesh
-            matrix_set(matrix_world, _object.matrixWorld.data);
-            vertex_submit(_object.geometry.vb, _wireframe ? pr_linelist : _object.primitive, -1); 
+            _object.render(_wireframe);
 
             if (_onAfterRender != undefined) _onAfterRender(); 
         }
@@ -203,10 +208,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 case "DirectionalLight":
                     directionalState[dIdx++] = l;
                     break;
-
-                case "PointLight":
-                    pointLightState[pIdx++] = l;
-                    break;
             }
         }
         
@@ -217,6 +218,26 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         ambientState[0] = clamp(ambientState[0], 0, 1);
         ambientState[1] = clamp(ambientState[1], 0, 1);
         ambientState[2] = clamp(ambientState[2], 0, 1);
+    }
+    
+    /**
+     * Renders shadow maps for all shadow-casting lights.
+     * This must be called before the main render pass.
+     * @param {Struct} scene - The scene to render
+     */
+    function __renderShadowMaps(scene, activeCamera) {
+        gml_pragma("forceinline");
+        
+        for (var i = 0; i < __lightIdx; i++) {
+            var light = __lights[i];
+            if (!light.castShadow) continue;
+            
+            switch (light.lightType) {
+                case "DirectionalLight":
+                    //__renderDirectionalLightShadow(light, scene, activeCamera);
+                    break;
+            }
+        }
     }
     
     /// Render the scene
@@ -230,18 +251,23 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
         __lightIdx = 0;
         __queueIdx = 0;
-        
         __collectObjectQueues(scene.children, camera);
+
+        // **STEP 1: Render shadow maps for shadow-casting lights**
+        if (shadowMap.enabled && (shadowMap.autoUpdate || shadowMap.needsUpdate)) {
+            __renderShadowMaps(scene, camera);
+            shadowMap.needsUpdate = false;
+        }
+
+        // Build the light state after shadow maps so matrices and textures are current
+        __buildLightState();
 
         // Sort both queues before rendering
         if (sortObjects) __quickSortObjects(0, __queueIdx - 1);
-        
-        // Build the light and render state
-        __buildLightState();
     
         global.UE_RENDERER_STATE[UE_RENDERER_STATE_ENUM.CAMERA] = camera;
         
-        // Render the objects
+        // **STEP 2: Render the main scene with shadows**
         __renderObjects();
         
         // Reset the world after rendering

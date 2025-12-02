@@ -304,7 +304,6 @@ function UeProjectLoader(data = {}) constructor {
                     }
                     
                     instance.updateMatrix();
-                    log(instance.name)
                     self.scene.add(instance);
                 }
             }

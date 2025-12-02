@@ -71,6 +71,8 @@ Inherited from `UeCamera`. Cleans up the camera resource.
 - Objects farther from the camera appear smaller, creating realistic depth perception
 - This is the most commonly used camera type for 3D games and applications
 
+- Perspective cameras are used internally for point-light shadow faces: six perspective cameras with `fov = 90` are created by `UePointLightShadow` to render omnidirectional shadow maps. Ensure `updateProjectionMatrix()` and `updateMatrixWorld()` are correctly called when the camera parameters change.
+
 ## Example
 ```js
 const camera = new UePerspectiveCamera({

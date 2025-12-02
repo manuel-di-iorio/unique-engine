@@ -81,3 +81,8 @@ Destroys the GameMaker camera instance and cleans up resources.
 - The camera uses `matrix_build_lookat()` to orient toward the target
 - The default up vector is `(0, 0, -1)`, which rotates the camera 90° downwards
 - The view matrix is automatically set on the associated viewport
+
+Shadow Camera Requirements
+
+- Shadow controllers rely on `updateProjectionMatrix()` and `updateMatrixWorld()` to compute light-space matrices used for shadow mapping. When extending or subclassing cameras, ensure these methods correctly update `projectionMatrix`, `matrixWorld`, and `matrixWorldInverse`.
+- For directional shadow cameras (orthographic), shadow stability benefits from texel snapping: aligning the orthographic projection to shadow map texel size reduces shimmering during camera movement. Use `shadow.fitToBox()` or call `shadow.updateMatrices()` after changing the light or scene bounds.

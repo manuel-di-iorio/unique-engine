@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeLight",
+  "%Name":"UePointLightShadow",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeLight",
+  "name":"UePointLightShadow",
   "parent":{
     "name":"Lights",
     "path":"folders/Unique Engine/Lights.yy",

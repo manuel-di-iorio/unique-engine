@@ -15,21 +15,21 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     layers = new UeLayers();
     userData = {};
     frustumCulled = true;
-
+    castShadow = data[$ "castShadow"] ?? false;
+    receiveShadow = data[$ "receiveShadow"] ?? false;
+    //animations = []; // @todo
+        
+    // Instances management
     object = undefined; // @doc
     instances = new UeInstanceList(self); // @doc    
     isInstance = false; // @doc
-    
-    //animations = []; // @todo
-    //castShadow = false; // @todo
-    //receiveShadow = false; // @todo
 
     // Abstract methods
     function render() {}
     function onBeforeRender() {}
     function onAfterRender() {}
-    //function onBeforeShadow() {} // @todo
-    //function onAfterShadow() {} // @todo
+    function onBeforeShadow() {}
+    function onAfterShadow() {}
     
     /**
      * Returns a clone of this object and optionally all descendants.

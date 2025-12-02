@@ -78,6 +78,11 @@ Inherited from `UeCamera`. Cleans up the camera resource.
 - The `zoom` property scales the frustum: higher values = zoomed in, lower values = zoomed out
 - Perfect for 2D games, isometric views, or technical/architectural visualizations
 
+Shadow Tips
+
+- When using an orthographic camera as a directional light shadow camera, prefer to call the shadow controller's `fitToBox()` method to compute tight bounds around the scene or caster objects. This reduces wasted shadow map space and improves resolution.
+- Texel snapping aligns the orthographic projection to the shadow map texel grid and reduces shimmering during camera or light movement. The engine's `UeDirectionalLightShadow` implements snapping via `updateMatrices()`.
+
 ## Orthographic vs Perspective
 
 | Feature                    | Orthographic                        | Perspective                           |

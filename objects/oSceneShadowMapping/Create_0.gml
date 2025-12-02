@@ -1,13 +1,20 @@
-renderer = new UeRenderer();
+renderer = new UeRenderer({ 
+    shadowMap: {
+        enabled: true,
+    }
+});
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 50, y: -100, z: 50 });
 orbit = new UeOrbitControls(camera);
 
 cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: #44EE88 });
-cubeMesh = new UeStaticMesh(cubeGeometry, new UeMeshStandardMaterial());
+cubeMesh = new UeMesh(cubeGeometry, new UeMeshStandardMaterial(), { castShadow: true, receiveShadow: true });
+
+terrain = new UeMesh(new UePlaneGeometry(1000, 1000), new UeMeshStandardMaterial(), { z: -25, receiveShadow: true });
 
 ambientLight = new UeAmbientLight(c_dkgray);
-lightHoriz = 100;
-dirLight = new UeDirectionalLight(lightHoriz, 60, { color: c_ltgray });
+dirLightHoriz = 100;
+dirLight = new UeDirectionalLight(dirLightHoriz, 30, { color: c_ltgray, castShadow: true });
 
-scene.add(cubeMesh, ambientLight, dirLight);
+scene.add(cubeMesh, ambientLight, dirLight, terrain);
+scene.updateWorldMatrix(false, true);

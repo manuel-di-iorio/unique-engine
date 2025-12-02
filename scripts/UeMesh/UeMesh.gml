@@ -5,16 +5,15 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
     self.material = material;
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     
-    // @todo @experimentalDeprecation. May be undeprecated if the render method will be used as abstract in UeObject3D
-    // function render(_material) {
-    //     gml_pragma("forceinline");
+     function render(wireframe = false) {
+         gml_pragma("forceinline");
         
-    //     // Set the world matrix
-    //     matrix_set(matrix_world, matrixWorld.data);
+         // Set the world matrix
+         matrix_set(matrix_world, matrixWorld.data);
 
-    //     // Submit the vertex buffer
-    //     vertex_submit(geometry.vb, _material.wireframe ? pr_linelist : primitive, -1); 
-    // }
+         // Submit the vertex buffer
+         vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, -1); 
+     }
     
     function toJSON() {
         gml_pragma("forceinline");
