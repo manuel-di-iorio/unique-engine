@@ -1,7 +1,7 @@
 {
   "$GMShader":"",
-  "%Name":"sh_ue_shadow_depth",
-  "name":"sh_ue_shadow_depth",
+  "%Name":"sh_ue_shadow_map",
+  "name":"sh_ue_shadow_map",
   "parent":{
     "name":"Shaders",
     "path":"folders/Unique Engine/Shaders.yy",

@@ -14,6 +14,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     __queueIdx = 0;
     __lights = array_create(2);
     __queue = array_create(512);
+    __shadowIdx = 0;
     
     // Recursively collect renderable objects and precompute their sort key
     function __collectObjectQueues(objects, camera) {
@@ -114,8 +115,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
               __collectObjectQueues(object.children, camera);
             }
         } 
-    }
-
+    }    
+   
     function __quickSortObjects(left, right) {
         gml_pragma("forceinline");
         if (left >= right) return;
@@ -144,43 +145,105 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         __quickSortObjects(pivotIndex + 1, right);
     }
     
-    function __renderObjects() {
+    function __renderDirectionalLightShadow(light, scene, camera) {
         gml_pragma("forceinline");
         
-        for (var i = 0; i < __queueIdx; i++) {
-            var _object = __queue[i];
-            var _onBeforeRender = _object[$ "onBeforeRender"];
-            var _onAfterRender = _object[$ "onAfterRender"];
-            var _material = _object[$ "material"];
+        var _shadow = light.shadow;
+        var _shadowCamera = _shadow.camera;
+        var _shadowMap = _shadow.map;
+        var _viewCamera = camera.camera;
+        
+        // Position shadow camera along light direction
+        // Light target is the direction vector
+        var _lightDir = light.target; // This is the direction the light points
+        var _distance = 200; // Distance from scene center
+        
+        // Position camera opposite to light direction
+        _shadowCamera.position.set(
+            -_lightDir.x * _distance,
+            -_lightDir.y * _distance,
+            -_lightDir.z * _distance
+        );
+        
+        // Look at scene center
+        _shadowCamera.target.set(0, 0, 0);
+        
+        _shadowCamera.updateMatrixWorld();
 
-            // Wireframes material applies the default material
-            var _wireframe = _material.wireframe;
-            if (_wireframe) {
-                _material = global.UE_DEFAULT_MATERIAL_WIREFRAME;
-            }
+        // Update shadow camera
+        // _shadow.updateForCamera(camera); // DISABLED FOR DEBUG
+        
+        // Set matrices
+        camera_set_view_mat(_viewCamera, _shadowCamera.matrixWorldInverse.data);
+        camera_set_proj_mat(_viewCamera, _shadowCamera.projectionMatrix.data);
+        camera_apply(_viewCamera);
+        
+        // Configure GPU state for shadow depth pass
+        var _prevCull = gpu_get_cullmode();
+        var _prevZTest = gpu_get_ztestenable();
+        var _prevZWrite = gpu_get_zwriteenable();
+        var _prevBlend = gpu_get_blendenable();
+        gpu_set_cullmode(cull_counterclockwise);
+        gpu_set_ztestenable(true);
+        gpu_set_zwriteenable(true);
+        gpu_set_blendenable(false);
+        
+        // Set render target
+        if (!surface_exists(_shadowMap.surface)) _shadowMap.create();
+        surface_set_target(_shadowMap.surface);
+        draw_clear(c_black);
+        
+        // Set shadow depth shader to write depth values to color buffer
+        shader_set(sh_ue_shadow_map);
 
-            // Use the material
-            if (_material.visible) {
-                if (_material != __boundMaterial) {
-                    __boundMaterial = _material;
-                    _material.use();
-                }
+        //shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_near"), camera.near);
+        //shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_far"), camera.far);
+        
+        // Render objects from the pre-collected shadow queue
+        for (var i = 0; i < __shadowIdx; i++) {
+            var object = __queue[i];
+            if (!object.castShadow) continue;
+            if (object.onBeforeShadow != undefined) object.onBeforeShadow();
+            object.render();
+            if (object.onAfterShadow != undefined) object.onAfterShadow();
+        }
 
-                _material.useByMesh(_object, _material.transparent && !_material.forceSinglePass);
-            }
+        // Restore previous GPU state
+        shader_reset();
+        surface_reset_target();
+        gpu_set_cullmode(_prevCull);
+        gpu_set_ztestenable(_prevZTest);
+        gpu_set_zwriteenable(_prevZWrite);
+        gpu_set_blendenable(_prevBlend);
+        camera_set_view_mat(_viewCamera, camera.matrixWorldInverse.data);
+        camera_set_proj_mat(_viewCamera, camera.projectionMatrix.data);
+        camera_apply(_viewCamera);
+    }
 
-            if (_onBeforeRender != undefined) _onBeforeRender();
+    /**
+     * Renders shadow maps for all shadow-casting lights.
+     * This must be called before the main render pass.
+     * @param {Struct} scene - The scene to render
+     */
+    function __renderShadowMaps(scene, camera) {
+        gml_pragma("forceinline");
+        
+        for (var i = 0; i < __lightIdx; i++) {
+            var light = __lights[i];
+            if (!light.castShadow) continue;
             
-            // Render the mesh
-            _object.render(_wireframe);
-
-            if (_onAfterRender != undefined) _onAfterRender(); 
+            switch (light.lightType) {
+                case "DirectionalLight":
+                    __renderDirectionalLightShadow(light, scene, camera);
+                    break;
+            }
         }
     }
-    
+
     // Aggregate light data from scene lights
     function __buildLightState() {
         gml_pragma("forceinline");
+
         var lights = __lights;
         var ambientState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT];
         ambientState[0] = 0;
@@ -219,24 +282,41 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         ambientState[1] = clamp(ambientState[1], 0, 1);
         ambientState[2] = clamp(ambientState[2], 0, 1);
     }
-    
+
     /**
-     * Renders shadow maps for all shadow-casting lights.
-     * This must be called before the main render pass.
-     * @param {Struct} scene - The scene to render
+     * Render the main scene
      */
-    function __renderShadowMaps(scene, activeCamera) {
+    function __renderObjects() {
         gml_pragma("forceinline");
         
-        for (var i = 0; i < __lightIdx; i++) {
-            var light = __lights[i];
-            if (!light.castShadow) continue;
-            
-            switch (light.lightType) {
-                case "DirectionalLight":
-                    //__renderDirectionalLightShadow(light, scene, activeCamera);
-                    break;
+        for (var i = 0; i < __queueIdx; i++) {
+            var _object = __queue[i];
+            var _onBeforeRender = _object[$ "onBeforeRender"];
+            var _onAfterRender = _object[$ "onAfterRender"];
+            var _material = _object[$ "material"];
+
+            // Wireframes material applies the default material
+            var _wireframe = _material.wireframe;
+            if (_wireframe) {
+                _material = global.UE_DEFAULT_MATERIAL_WIREFRAME;
             }
+
+            // Use the material
+            if (_material.visible) {
+                if (_material != __boundMaterial) {
+                    __boundMaterial = _material;
+                    _material.use();
+                }
+
+                _material.useByMesh(_object, _material.transparent && !_material.forceSinglePass);
+            }
+
+            if (_onBeforeRender != undefined) _onBeforeRender();
+            
+            // Render the mesh
+            _object.render(_wireframe);
+
+            if (_onAfterRender != undefined) _onAfterRender(); 
         }
     }
     
@@ -252,8 +332,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         __lightIdx = 0;
         __queueIdx = 0;
         __collectObjectQueues(scene.children, camera);
+        __shadowIdx = __queueIdx;
 
-        // **STEP 1: Render shadow maps for shadow-casting lights**
+        // **PASS 1: Render shadow maps for shadow-casting lights**
         if (shadowMap.enabled && (shadowMap.autoUpdate || shadowMap.needsUpdate)) {
             __renderShadowMaps(scene, camera);
             shadowMap.needsUpdate = false;
@@ -267,7 +348,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
         global.UE_RENDERER_STATE[UE_RENDERER_STATE_ENUM.CAMERA] = camera;
         
-        // **STEP 2: Render the main scene with shadows**
+        // **PASS 2: Render the main scene**
         __renderObjects();
         
         // Reset the world after rendering

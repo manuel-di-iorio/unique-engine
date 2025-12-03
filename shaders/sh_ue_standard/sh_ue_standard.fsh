@@ -37,13 +37,34 @@ uniform float u_ueEmissiveIntensity;
 uniform sampler2D s_map;
 uniform sampler2D s_emissiveMap;
 
-// Shadow mapping - Directional Light
-uniform sampler2D s_shadowMap;               // Shadow depth texture
-uniform float u_ueShadowBias;                // Shadow bias to prevent acne
-uniform float u_ueShadowNormalBias;          // Normal bias - reduces acne on angled surfaces
-uniform float u_ueShadowMapSize;             // Shadow map resolution (width/height)
-uniform float u_ueShadowEnabled;             // 0.0 = disabled, 1.0 = enabled
-uniform float u_ueReceiveShadow;             // 1.0 = this object receives shadows, 0.0 = no shadows
+// Shadow mapping - Directional Light (semplificato)
+uniform sampler2D s_shadowMap;
+uniform float u_ueShadowEnabled;
+uniform float u_ueReceiveShadow;
+
+/**
+ * Calculates a basic shadow factor.
+ * 
+ * @param fragPosLightSpace - Fragment position in light space
+ * @return 0.0 if fully in shadow, 1.0 if fully lit
+ */
+float calculateShadow(vec4 fragPosLightSpace) {
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords.xy = projCoords.xy * 0.5 + 0.5;
+
+    // Check if fragment is outside the light's frustum
+    if (projCoords.z > 1.0 || projCoords.z < 0.0 ||
+        projCoords.x < 0.0 || projCoords.x > 1.0 ||
+        projCoords.y < 0.0 || projCoords.y > 1.0) {
+        return 1.0; // Fully lit if outside shadow map
+    }
+
+    float currentDepth = projCoords.z;
+    float sampledDepth = texture2D(s_shadowMap, projCoords.xy).r;
+
+    // Simple depth comparison
+    return (currentDepth > sampledDepth) ? 0.0 : 1.0;
+}
 
 // Gamma correction (sRGB to Linear color space)
 #define GAMMA 2.2
@@ -83,12 +104,19 @@ void main()
     vec3 normal = normalize(v_vWorldNormal);
     vec3 lighting = u_ueAmbient;
 
-    // === Directional Light ===
+    // === Directional Light Shadow calculation ===
+    float dirShadow = 1.0; // 1.0 = fully lit, 0.0 = fully shadowed
+    if (u_ueShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
+        dirShadow = calculateShadow(v_vLightSpacePos);
+    }
+
+    // === Directional Light (with shadow support) ===
     vec3 dirLight0 = calculateDirectionalLight(normalize(-u_ueDirLightDir0), u_ueDirLightColor0, u_ueDirLightIntensity0, normal);
     vec3 dirLight1 = calculateDirectionalLight(u_ueDirLightDir1, u_ueDirLightColor1, u_ueDirLightIntensity1, normal);
     
-    lighting += dirLight0;
-    lighting += dirLight1;
+    // Apply shadow only to the first directional light (index 0)
+    lighting += dirLight0 * dirShadow;
+    lighting += dirLight1; // Second light not affected by shadows (for now)
 
     // === Point Light ===
     vec3 pointLight0 = calculatePointLight(u_uePointLightPosition0, u_uePointLightColor0, u_uePointLightIntensity0, u_uePointLightRange0, normal, v_vWorldPosition);
@@ -105,11 +133,8 @@ void main()
     vec3 emissive = SRGBToLinear(emissiveTex + u_ueEmissive) * u_ueEmissiveIntensity;
     litColor += emissive;
 
-    // === Tone mapping (reinhard) ===
-    // @todo Should be configurable
-    //litColor = litColor / (litColor + vec3(1.0));
-    
     // === Back to sRGB color space ===
     vec3 finalColor = LinearToSRGB(clamp(litColor, 0.0, 1.0));
+    
     gl_FragColor = vec4(finalColor, baseColor.a);
 }

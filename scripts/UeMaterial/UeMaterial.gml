@@ -37,6 +37,10 @@ function UeMaterial(data = {}) constructor {
     __texturesCachedCount = 0;
      
     __uniformModelPositionLoc = undefined;
+    __uniformLightSpaceMatrixLoc = undefined;
+    __uniformShadowEnabledLoc = undefined;
+    __uniformReceiveShadowLoc = undefined;
+    __samplerShadowMapIdx = undefined;
     
     // Light uniforms
     lights = data[$ "lights"] ?? 2;
@@ -63,6 +67,10 @@ function UeMaterial(data = {}) constructor {
         __uniformModelPositionLoc = shader_get_uniform(shader, "u_ueModelPosition");
         __uniformLightsAmbientLoc = shader_get_uniform(shader, "u_ueAmbient");
         __uniformEmissiveIntensityLoc = shader_get_uniform(shader, "u_ueEmissiveIntensity");
+        __uniformLightSpaceMatrixLoc = shader_get_uniform(shader, "u_ueLightSpaceMatrix");
+        __uniformShadowEnabledLoc = shader_get_uniform(shader, "u_ueShadowEnabled");
+        __uniformReceiveShadowLoc = shader_get_uniform(shader, "u_ueReceiveShadow");
+        __samplerShadowMapIdx = shader_get_sampler_index(shader, "s_shadowMap");
         
         __uniformLightsDir = array_create(lights);
         __uniformLightsPos = array_create(lights);
@@ -242,6 +250,26 @@ function UeMaterial(data = {}) constructor {
         
         // Set the culling mode (can be overwritten by argument for transparent objects)
         gpu_set_cullmode(renderSide ?? side);
+
+        var lightState = global.UE_RENDERER_LIGHT_STATE;
+        var dirCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT];
+        if (dirCount > 0) {
+            var light = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL][0];
+            var sh = light.shadow;
+            var tex = sh.map.getTexture();
+            var enabled = (light.castShadow && tex != -1) ? 1 : 0;
+            shader_set_uniform_f(__uniformShadowEnabledLoc, enabled);
+            shader_set_uniform_f(__uniformReceiveShadowLoc, mesh.receiveShadow ? 1 : 0);
+            if (enabled) {
+                matrix_set(matrix_world, sh.lightSpaceMatrix.data);
+                shader_set_uniform_matrix(__uniformLightSpaceMatrixLoc);
+                matrix_set(matrix_world, global.UE_MATRIX_IDENTITY);
+                if (tex != -1 && __samplerShadowMapIdx != undefined) texture_set_stage(__samplerShadowMapIdx, tex);
+            }
+        } else {
+            shader_set_uniform_f(__uniformShadowEnabledLoc, 0);
+            shader_set_uniform_f(__uniformReceiveShadowLoc, 0);
+        }
 
         return self;
     }

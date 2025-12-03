@@ -12,15 +12,13 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
     
     /**
      * Creates the shadow map surface.
-     * We use a standard RGBA surface which includes a depth buffer for proper Z-testing.
-     * The depth is written to the red channel by the depth shader.
      */
     function create() {
         gml_pragma("forceinline");
         if (surface_exists(self.surface)) {
             surface_free(self.surface);
         }
-        // Use standard RGBA surface for compatibility
+        
         self.surface = surface_create(width, height, surface_r32float);
         return self;
     }
@@ -43,10 +41,7 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
      */
     function getTexture() {
         gml_pragma("forceinline");
-        if (surface_exists(self.surface)) {
-            return surface_get_texture(self.surface);
-        }
-        return -1;
+        return surface_get_texture(self.surface);
     }
     
     create();
