@@ -28,3 +28,4 @@ scene.updateWorldMatrix(false, true);
 // Shadows
 _terrain.receiveShadow = true;
 _dirLight.castShadow = true;
+shadowMapViewer = new UeShadowMapViewer(_dirLight);

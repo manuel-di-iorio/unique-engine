@@ -20,8 +20,5 @@ void main()
     v_vColour = in_Colour;
     v_vTexcoord = in_TextureCoord;
     
-    // Calculate position in light space for shadow mapping
-    v_vLightSpacePos = u_ueLightSpaceMatrix * worldPosition;
-    
     gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(in_Position.xyz, 1.0);
 }

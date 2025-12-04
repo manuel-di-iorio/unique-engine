@@ -42,30 +42,6 @@ uniform sampler2D s_shadowMap;
 uniform float u_ueShadowEnabled;
 uniform float u_ueReceiveShadow;
 
-/**
- * Calculates a basic shadow factor.
- * 
- * @param fragPosLightSpace - Fragment position in light space
- * @return 0.0 if fully in shadow, 1.0 if fully lit
- */
-float calculateShadow(vec4 fragPosLightSpace) {
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    projCoords.xy = projCoords.xy * 0.5 + 0.5;
-
-    // Check if fragment is outside the light's frustum
-    if (projCoords.z > 1.0 || projCoords.z < 0.0 ||
-        projCoords.x < 0.0 || projCoords.x > 1.0 ||
-        projCoords.y < 0.0 || projCoords.y > 1.0) {
-        return 1.0; // Fully lit if outside shadow map
-    }
-
-    float currentDepth = projCoords.z;
-    float sampledDepth = texture2D(s_shadowMap, projCoords.xy).r;
-
-    // Simple depth comparison
-    return (currentDepth > sampledDepth) ? 0.0 : 1.0;
-}
-
 // Gamma correction (sRGB to Linear color space)
 #define GAMMA 2.2
 
@@ -104,19 +80,12 @@ void main()
     vec3 normal = normalize(v_vWorldNormal);
     vec3 lighting = u_ueAmbient;
 
-    // === Directional Light Shadow calculation ===
-    float dirShadow = 1.0; // 1.0 = fully lit, 0.0 = fully shadowed
-    if (u_ueShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
-        dirShadow = calculateShadow(v_vLightSpacePos);
-    }
-
-    // === Directional Light (with shadow support) ===
+    // === Directional Light ===
     vec3 dirLight0 = calculateDirectionalLight(normalize(-u_ueDirLightDir0), u_ueDirLightColor0, u_ueDirLightIntensity0, normal);
     vec3 dirLight1 = calculateDirectionalLight(u_ueDirLightDir1, u_ueDirLightColor1, u_ueDirLightIntensity1, normal);
     
-    // Apply shadow only to the first directional light (index 0)
-    lighting += dirLight0 * dirShadow;
-    lighting += dirLight1; // Second light not affected by shadows (for now)
+    lighting += dirLight0 ;
+    lighting += dirLight1;
 
     // === Point Light ===
     vec3 pointLight0 = calculatePointLight(u_uePointLightPosition0, u_uePointLightColor0, u_uePointLightIntensity0, u_uePointLightRange0, normal, v_vWorldPosition);

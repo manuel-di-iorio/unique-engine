@@ -173,6 +173,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         // Update shadow camera
         // _shadow.updateForCamera(camera); // DISABLED FOR DEBUG
         
+        // Update the light space matrix (projection * view)
+        _shadow.updateMatrices();
+        
         // Set matrices
         camera_set_view_mat(_viewCamera, _shadowCamera.matrixWorldInverse.data);
         camera_set_proj_mat(_viewCamera, _shadowCamera.projectionMatrix.data);
@@ -196,15 +199,24 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         // Set shadow depth shader to write depth values to color buffer
         shader_set(sh_ue_shadow_map);
 
-        //shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_near"), camera.near);
-        //shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_far"), camera.far);
+        shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_near"), camera.near);
+        shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_far"), camera.far);
         
         // Render objects from the pre-collected shadow queue
         for (var i = 0; i < __shadowIdx; i++) {
             var object = __queue[i];
             if (!object.castShadow) continue;
+            
+            // Set the world matrix for this object
+            matrix_set(matrix_world, object.matrixWorld.data);
+            
             if (object.onBeforeShadow != undefined) object.onBeforeShadow();
-            object.render();
+            
+            // Submit geometry directly without material (we're using shadow shader)
+            if (object.geometry != undefined && object.geometry.vb != undefined) {
+                vertex_submit(object.geometry.vb, pr_trianglelist, -1);
+            }
+            
             if (object.onAfterShadow != undefined) object.onAfterShadow();
         }
 
@@ -271,6 +283,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 case "DirectionalLight":
                     directionalState[dIdx++] = l;
                     break;
+                    
+                case "PointLight":
+                    pointLightState[pIdx++] = l;
+                    break;
             }
         }
         
@@ -312,10 +328,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             }
 
             if (_onBeforeRender != undefined) _onBeforeRender();
-            
-            // Render the mesh
             _object.render(_wireframe);
-
             if (_onAfterRender != undefined) _onAfterRender(); 
         }
     }
