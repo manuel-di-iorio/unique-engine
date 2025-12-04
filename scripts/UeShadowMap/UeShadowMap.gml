@@ -19,7 +19,7 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
             surface_free(self.surface);
         }
         
-        self.surface = surface_create(width, height)//, surface_rgba32float);
+        self.surface = surface_create(width, height, surface_r32float);
         return self;
     }
     

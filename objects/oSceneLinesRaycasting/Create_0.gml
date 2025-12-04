@@ -2,6 +2,7 @@ renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: -10, z: 50 });
 camera.matrixAutoUpdate = false;
+camera.use();
 
 // Create the raycaster
 raycaster = new UeRaycaster();

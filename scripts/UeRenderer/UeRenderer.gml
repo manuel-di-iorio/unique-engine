@@ -150,8 +150,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         
         var _shadow = light.shadow;
         var _shadowCamera = _shadow.camera;
+        var _shadowCameraView = _shadow.camera.camera;
         var _shadowMap = _shadow.map;
-        var _viewCamera = camera.camera;
         
         // Position shadow camera along light direction
         // Light target is the direction vector
@@ -177,19 +177,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         _shadow.updateMatrices();
         
         // Set matrices
-        camera_set_view_mat(_viewCamera, _shadowCamera.matrixWorldInverse.data);
-        camera_set_proj_mat(_viewCamera, _shadowCamera.projectionMatrix.data);
-        camera_apply(_viewCamera);
-        
-        // Configure GPU state for shadow depth pass
-        var _prevCull = gpu_get_cullmode();
-        var _prevZTest = gpu_get_ztestenable();
-        var _prevZWrite = gpu_get_zwriteenable();
-        var _prevBlend = gpu_get_blendenable();
-        gpu_set_cullmode(cull_counterclockwise);
-        gpu_set_ztestenable(true);
-        gpu_set_zwriteenable(true);
-        gpu_set_blendenable(false);
+        camera_set_view_mat(_shadowCameraView, _shadowCamera.matrixWorldInverse.data);
+        camera_set_proj_mat(_shadowCameraView, _shadowCamera.projectionMatrix.data);
+        camera_apply(_shadowCameraView);
         
         // Set render target
         if (!surface_exists(_shadowMap.surface)) _shadowMap.create();
@@ -199,10 +189,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         // Set shadow depth shader to write depth values to color buffer
         shader_set(sh_ue_shadow_map);
 
-        shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_near"), camera.near);
-        shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_far"), camera.far);
+        //shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_near"), camera.near);
+        //shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_far"), camera.far);
         
-        // Render objects from the pre-collected shadow queue
+        // Render objects from the pre-collected queue
         for (var i = 0; i < __shadowIdx; i++) {
             var object = __queue[i];
             if (!object.castShadow) continue;
@@ -218,18 +208,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             }
             
             if (object.onAfterShadow != undefined) object.onAfterShadow();
-        }
-
-        // Restore previous GPU state
-        shader_reset();
-        surface_reset_target();
-        gpu_set_cullmode(_prevCull);
-        gpu_set_ztestenable(_prevZTest);
-        gpu_set_zwriteenable(_prevZWrite);
-        gpu_set_blendenable(_prevBlend);
-        camera_set_view_mat(_viewCamera, camera.matrixWorldInverse.data);
-        camera_set_proj_mat(_viewCamera, camera.projectionMatrix.data);
-        camera_apply(_viewCamera);
+        } 
     }
 
     /**
@@ -239,6 +218,16 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
      */
     function __renderShadowMaps(scene, camera) {
         gml_pragma("forceinline");
+        
+        // Configure GPU state for shadow depth pass
+        var _prevCull = gpu_get_cullmode();
+        var _prevZTest = gpu_get_ztestenable();
+        var _prevZWrite = gpu_get_zwriteenable();
+        var _prevBlend = gpu_get_blendenable();
+        gpu_set_cullmode(cull_counterclockwise);
+        gpu_set_ztestenable(true);
+        gpu_set_zwriteenable(true);
+        gpu_set_blendenable(false);
         
         for (var i = 0; i < __lightIdx; i++) {
             var light = __lights[i];
@@ -250,6 +239,18 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                     break;
             }
         }
+        
+        // Restore previous GPU state
+        shader_reset();
+        surface_reset_target();
+        gpu_set_cullmode(_prevCull);
+        gpu_set_ztestenable(_prevZTest);
+        gpu_set_zwriteenable(_prevZWrite);
+        gpu_set_blendenable(_prevBlend);
+        
+        //camera_set_view_mat(camera, camera.matrixWorldInverse.data);
+        //camera_set_proj_mat(camera, camera.projectionMatrix.data);
+        camera_apply(camera.camera);
     }
 
     // Aggregate light data from scene lights
@@ -359,8 +360,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         // Sort both queues before rendering
         if (sortObjects) __quickSortObjects(0, __queueIdx - 1);
     
-        global.UE_RENDERER_STATE[UE_RENDERER_STATE_ENUM.CAMERA] = camera;
-        
         // **PASS 2: Render the main scene**
         __renderObjects();
         

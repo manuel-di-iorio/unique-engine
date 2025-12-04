@@ -71,6 +71,23 @@ vec3 calculatePointLight(vec3 lightPos, vec3 lightColor, float intensity, vec3 r
     return SRGBToLinear(lightColor) * diff * attenuation * intensity;
 }
 
+// Shadow calculation
+float calculateShadow(vec4 lightSpacePos) {
+    vec3 projCoords = lightSpacePos.xyz / lightSpacePos.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    
+    // Check if outside shadow map
+    if(projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) return 0.0;
+    
+    float closestDepth = texture2D(s_shadowMap, projCoords.xy).r; 
+    float currentDepth = projCoords.z;
+    
+    float bias = 0.0005;
+    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    
+    return shadow;
+}
+
 void main() 
 {
     // Base texture * vertex color
@@ -83,6 +100,12 @@ void main()
     // === Directional Light ===
     vec3 dirLight0 = calculateDirectionalLight(normalize(-u_ueDirLightDir0), u_ueDirLightColor0, u_ueDirLightIntensity0, normal);
     vec3 dirLight1 = calculateDirectionalLight(u_ueDirLightDir1, u_ueDirLightColor1, u_ueDirLightIntensity1, normal);
+    
+    // Apply shadow to the first directional light
+    if (u_ueShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
+        float shadow = calculateShadow(v_vLightSpacePos);
+        dirLight0 *= (1.0 - shadow);
+    }
     
     lighting += dirLight0 ;
     lighting += dirLight1;

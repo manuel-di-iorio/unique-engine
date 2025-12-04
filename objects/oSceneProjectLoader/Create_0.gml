@@ -1,7 +1,9 @@
 camera = new UePerspectiveCamera({ x: 100, y: -600, z: 300 });
+camera.use();
 orbit = new UeOrbitControls(camera, { xt: 150, zt: 50 });
 project = new UeProjectLoader();
 project.renderer.shadowMap.enabled = true;
+
 var scene = project.scene;
 
 // Get the main decorated tree

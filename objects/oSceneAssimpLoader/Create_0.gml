@@ -2,6 +2,7 @@ renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 400, y: 300, z: 300 });
 orbitControls = new UeOrbitControls(camera, { autoRotate: true });
+camera.use();
 
 // Lighting
 var ambientLight = new UeAmbientLight(c_dkgray);

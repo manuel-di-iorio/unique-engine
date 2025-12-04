@@ -2,6 +2,7 @@ renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 50, y: -100, z: 50 });
 camera.matrixAutoUpdate = false;
+camera.use();
 
 cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: c_fuchsia });
 cubeMesh = new UeStaticMesh(cubeGeometry, new UeMeshStandardMaterial());

@@ -2,6 +2,7 @@ renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 200, y: 70, z: 100 });
 orbitControls = new UeOrbitControls(camera);
+camera.use();
 
 // Textures
 var texPyramid   = new UeTexture(spr_tex_pyramid);

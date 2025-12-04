@@ -2,6 +2,7 @@ renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 150, y: 50, z: 50, xt: 10, yt: 0, zt: 30 });
 camera.matrixAutoUpdate = false;
+camera.use();
 
 // Create the default material
 var materialStandard = new UeMeshStandardMaterial();

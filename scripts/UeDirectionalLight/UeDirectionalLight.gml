@@ -4,7 +4,7 @@
 function UeDirectionalLight(horizontal = 0, vertical = 0, data = {}): UeLight(data) constructor {
     lightType = "DirectionalLight";
     target = new UeVector3();
-    //shadow = new UeDirectionalLightShadow(data[$ "shadow"] ?? {});
+    shadow = new UeDirectionalLightShadow(data[$ "shadow"] ?? {});
     
     /**
      * Sets the light direction using horizontal (yaw) and vertical (pitch) angles.

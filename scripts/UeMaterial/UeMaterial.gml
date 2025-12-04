@@ -68,6 +68,12 @@ function UeMaterial(data = {}) constructor {
         __uniformLightsAmbientLoc = shader_get_uniform(shader, "u_ueAmbient");
         __uniformEmissiveIntensityLoc = shader_get_uniform(shader, "u_ueEmissiveIntensity");
         
+        // Cache shadow uniforms
+        __uniformLightSpaceMatrixLoc = shader_get_uniform(shader, "u_ueLightSpaceMatrix");
+        __uniformShadowEnabledLoc = shader_get_uniform(shader, "u_ueShadowEnabled");
+        __uniformReceiveShadowLoc = shader_get_uniform(shader, "u_ueReceiveShadow");
+        __samplerShadowMapIdx = shader_get_sampler_index(shader, "s_shadowMap");
+        
         __uniformLightsDir = array_create(lights);
         __uniformLightsPos = array_create(lights);
         
@@ -158,6 +164,23 @@ function UeMaterial(data = {}) constructor {
             }
         }
         
+        // Set shadow uniforms (from the first shadow-casting directional light)
+        var shadowLight = undefined;
+        for(var i=0; i<directionalCount; i++) {
+            if (directionalState[i].castShadow) {
+                shadowLight = directionalState[i];
+                break;
+            }
+        }
+
+        if (shadowLight != undefined) {
+             shader_set_uniform_f(__uniformShadowEnabledLoc, 1.0);
+             shader_set_uniform_matrix_array(__uniformLightSpaceMatrixLoc, shadowLight.shadow.lightSpaceMatrix.data);
+             texture_set_stage(__samplerShadowMapIdx, shadowLight.shadow.map.getTexture());
+        } else {
+             shader_set_uniform_f(__uniformShadowEnabledLoc, 0.0);
+        }
+        
         // Set point lights
         var lightColor;
         for (var i = 0; i < lights; i++) {
@@ -242,6 +265,11 @@ function UeMaterial(data = {}) constructor {
             uniformsCache[1] = meshPosition.y;
             uniformsCache[2] = meshPosition.z;
             shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
+        }
+        
+        // Set receive shadow uniform
+        if (__uniformReceiveShadowLoc != -1) {
+            shader_set_uniform_f(__uniformReceiveShadowLoc, mesh.receiveShadow ? 1.0 : 0.0);
         }
         
         // Set the culling mode (can be overwritten by argument for transparent objects)

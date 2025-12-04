@@ -21,4 +21,7 @@ void main()
     v_vTexcoord = in_TextureCoord;
     
     gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(in_Position.xyz, 1.0);
+    
+    // Calculate light space position
+    v_vLightSpacePos = u_ueLightSpaceMatrix * worldPosition;
 }

@@ -1,10 +1,9 @@
 renderer = new UeRenderer({ 
-    shadowMap: {
-        enabled: true,
-    }
+    shadowMap: { enabled: true }
 });
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 50, y: -100, z: 50 });
+camera.use();
 orbit = new UeOrbitControls(camera);
 
 cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: #44EE88 });

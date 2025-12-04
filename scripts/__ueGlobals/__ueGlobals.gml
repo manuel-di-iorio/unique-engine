@@ -32,11 +32,6 @@ enum UE_TEXTURE_WRAP {
 }
 
 // Internal globals
-global.UE_RENDERER_STATE = array_create(1);
-enum UE_RENDERER_STATE_ENUM {
-    CAMERA,
-}
-
 global.UE_RENDERER_LIGHT_STATE = array_create(5);
 enum UE_RENDERER_LIGHT_STATE_ENUM {
     AMBIENT,
