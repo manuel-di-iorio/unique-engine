@@ -6,7 +6,7 @@ camera.use();
 
 // Lighting
 var ambientLight = new UeAmbientLight(c_dkgray);
-var sunLight = new UeDirectionalLight(90, 45, { color: #FFFFC8, intensity: .8 });
+var sunLight = new UeDirectionalLight({ x: 60, z: 185, color: #FFFFC8, intensity: .8 });
 scene.add(ambientLight, sunLight);
 
 objMesh = undefined;

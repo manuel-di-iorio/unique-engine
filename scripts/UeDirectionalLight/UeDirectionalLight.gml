@@ -1,43 +1,29 @@
-// yaw = horizontal degrees
-// pitch = vertical degrees
-// 0,0 = forward direction by default (0,1,0)
-function UeDirectionalLight(horizontal = 0, vertical = 0, data = {}): UeLight(data) constructor {
+/**
+ * Directional light - light that is emitted from a specific direction.
+ * Similar to the sun - rays are parallel and position doesn't affect the lighting,
+ * but it does affect shadow camera placement.
+ * 
+ * Follows Three.js pattern:
+ * - Has a position (where the light is)
+ * - Has a target Object3D (where it points to)
+ * - Direction is calculated as normalized vector from position to target.position
+ */
+function UeDirectionalLight(data = {}): UeLight(data) constructor {
     lightType = "DirectionalLight";
-    target = new UeVector3();
+    
+    // Target is an Object3D that the light points at (default: origin)
+    target = new UeObject3D();
+    
+    // Shadow configuration
     shadow = new UeDirectionalLightShadow(data[$ "shadow"] ?? {});
     
     /**
-     * Sets the light direction using horizontal (yaw) and vertical (pitch) angles.
-     * 
-     * The direction is calculated from a base forward vector (0, 1, 0) rotated by:
-     * 1. Pitch (vertical) - rotation around X axis
-     * 2. Yaw (horizontal) - rotation around Z axis
-     * 
-     * Note: The result is stored with Y and Z swapped to match the engine's coordinate system
-     * where Y is typically the depth axis and Z is up/down.
-     * 
-     * @param {number} horizontal - Yaw angle in degrees (0 = forward, 90 = right)
-     * @param {number} vertical - Pitch angle in degrees (0 = horizontal, 90 = up)
+     * Gets the current light direction (normalized vector from position to target).
+     * This is recalculated each time to reflect any changes in position or target.
+     * @returns {Struct.UeVector3} Normalized direction vector
      */
-    function setDirection(horizontal = 0, vertical = 0) {
-        // Base forward vector
-        var xx = 0;
-        var yy = 1;
-        var zz = 0;
-    
-        // First: rotate around X (pitch)
-        var y1 = yy * dcos(vertical) - zz * dsin(vertical);
-        var z1 = yy * dsin(vertical) + zz * dcos(vertical);
-        var x1 = xx;
-    
-        // Second: rotate around Z (yaw)
-        var x2 = x1 * dcos(horizontal) - y1 * dsin(horizontal);
-        var y2 = x1 * dsin(horizontal) + y1 * dcos(horizontal);
-        var z2 = z1;
-    
-        // Use engine coordinate ordering: x, y, z
-        target.set(x2, y2, z2);
+    function getDirection() {
+        gml_pragma("forceinline");
+        return global.UE_DUMMY_VECTOR3.copy(target.position).sub(position).normalize();
     }
-    
-    setDirection(horizontal, vertical);
 }

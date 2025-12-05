@@ -8,26 +8,28 @@ var scene = project.scene;
 
 // Get the main decorated tree
 var _tree = scene.getObjectByName("oTreeDecoratedSnow_16");
-var _treePos = _tree.position;
+treePos = _tree.position;
 
 // Create the terrain
 var _materialStandard = new UeMeshStandardMaterial();
 var _terrainGeometry = new UeCircleGeometry(1000, { color: #FFFFFF });
-var _terrain = new UeStaticMesh(_terrainGeometry, _materialStandard, { x: _treePos.x, y: _treePos.y });
+var _terrain = new UeStaticMesh(_terrainGeometry, _materialStandard, { x: treePos.x, y: treePos.y });
 
-// Add the objects to the current scene
 scene.traverse(function(child){
     child.castShadow = true;
     child.receiveShadow = true;
 });
 
 // Add directional light
-_dir = 30;
-_dirLight = new UeDirectionalLight(_dir, 60);
-scene.add(_terrain, new UeAmbientLight(c_dkgray), _dirLight);
+dirLight = new UeDirectionalLight({ z: 600, castShadow: true});
+dirLight.target = _tree;
+dirLightAngle = 0;
+
+// Add the terrain and lights to the scene
+scene.add(_terrain, new UeAmbientLight(c_dkgray), dirLight);
 scene.updateWorldMatrix(false, true);
 
 // Shadows
 _terrain.receiveShadow = true;
-_dirLight.castShadow = true;
-shadowMapViewer = new UeShadowMapViewer(_dirLight);
+dirLight.castShadow = true;
+shadowMapViewer = new UeShadowMapViewer(dirLight);

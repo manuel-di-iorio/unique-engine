@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UePointLightShadow",
   "parent":{
-    "name":"Lights",
-    "path":"folders/Unique Engine/Lights.yy",
+    "name":"Shadow",
+    "path":"folders/Unique Engine/Lights/Shadow.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

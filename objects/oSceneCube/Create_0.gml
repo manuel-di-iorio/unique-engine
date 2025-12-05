@@ -8,6 +8,6 @@ cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: c_fuchsia });
 cubeMesh = new UeStaticMesh(cubeGeometry, new UeMeshStandardMaterial());
 
 ambientLight = new UeAmbientLight(c_dkgray);
-dirLight = new UeDirectionalLight(75, 60, { color: c_ltgray });
+dirLight = new UeDirectionalLight({ x: 150, y: 80, z: -90, color: c_ltgray }); 
 
 scene.add(cubeMesh, ambientLight, dirLight);

@@ -6,7 +6,7 @@ camera.use();
 
 // Lighting
 var ambientLight = new UeAmbientLight(c_dkgray);
-var sunLight = new UeDirectionalLight(90, 45, { color: #FFFFC8, intensity: .8 });
+var sunLight = new UeDirectionalLight({ x: 90, y: 45, color: #FFFFC8, intensity: .8 });
 
 // Load the model
 assimpLoader = new UeAssimpLoader();
@@ -19,6 +19,8 @@ sprAirplane = sprite_add("airplane/11804_Airplane_diff.jpg", 1, false, false, 0,
 texAirplane = new UeTexture(sprAirplane);
 
 airplaneMesh.traverse(function(mesh) {
+    mesh.rotateZ(90);
+    mesh.updateMatrix();
     mesh.matrixAutoUpdate = false;
     
     var geometry = mesh[$ "geometry"];
@@ -37,5 +39,6 @@ airplaneBox.matrixAutoUpdate = false;
 
 
 scene.add(ambientLight, sunLight, airplaneMesh, airplaneBox);
+scene.updateWorldMatrix(false, true);
 
 showWireframe = false;

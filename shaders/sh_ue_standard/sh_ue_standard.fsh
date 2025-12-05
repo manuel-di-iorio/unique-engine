@@ -71,19 +71,52 @@ vec3 calculatePointLight(vec3 lightPos, vec3 lightColor, float intensity, vec3 r
     return SRGBToLinear(lightColor) * diff * attenuation * intensity;
 }
 
-// Shadow calculation
-float calculateShadow(vec4 lightSpacePos) {
+// Helper function to get Poisson disk sample (GLSL ES compatible)
+vec2 getPoissonSample(int index) {
+    // Poisson disk sampling pattern for soft shadows
+    if(index == 0) return vec2(-0.94201624, -0.39906216);
+    if(index == 1) return vec2(0.94558609, -0.76890725);
+    if(index == 2) return vec2(-0.094184101, -0.92938870);
+    if(index == 3) return vec2(0.34495938, 0.29387760);
+    if(index == 4) return vec2(-0.91588581, 0.45771432);
+    if(index == 5) return vec2(-0.81544232, -0.87912464);
+    if(index == 6) return vec2(-0.38277543, 0.27676845);
+    if(index == 7) return vec2(0.97484398, 0.75648379);
+    if(index == 8) return vec2(0.44323325, -0.97511554);
+    if(index == 9) return vec2(0.53742981, -0.47373420);
+    if(index == 10) return vec2(-0.26496911, -0.41893023);
+    if(index == 11) return vec2(0.79197514, 0.19090188);
+    if(index == 12) return vec2(-0.24188840, 0.99706507);
+    if(index == 13) return vec2(-0.81409955, 0.91437590);
+    if(index == 14) return vec2(0.19984126, 0.78641367);
+    return vec2(0.14383161, -0.14100790); // index 15 or default
+}
+
+// Shadow calculation with PCF (Percentage Closer Filtering)
+float calculateShadow(vec4 lightSpacePos, vec3 normal, vec3 lightDir) {
     vec3 projCoords = lightSpacePos.xyz / lightSpacePos.w;
     projCoords = projCoords * 0.5 + 0.5;
-    
+
     // Check if outside shadow map
     if(projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) return 0.0;
     
-    float closestDepth = texture2D(s_shadowMap, projCoords.xy).r; 
     float currentDepth = projCoords.z;
     
-    float bias = 0.0005;
-    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    // Dynamic bias based on surface angle (reduces shadow acne)
+    float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0005);
+    
+    // PCF with Poisson disk sampling for soft shadows
+    float shadow = 0.0;
+    float texelSize = 1.0 / 2048.0; // Assume 2048x2048 shadow map, adjust if needed
+    float shadowRadius = 1.5; // Controls shadow softness
+    
+    for(int i = 0; i < 16; i++) {
+        vec2 offset = getPoissonSample(i) * texelSize * shadowRadius;
+        float closestDepth = texture2D(s_shadowMap, projCoords.xy + offset).r;
+        shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    }
+    
+    shadow /= 16.0; // Average the samples
     
     return shadow;
 }
@@ -99,15 +132,16 @@ void main()
 
     // === Directional Light ===
     vec3 dirLight0 = calculateDirectionalLight(normalize(-u_ueDirLightDir0), u_ueDirLightColor0, u_ueDirLightIntensity0, normal);
-    vec3 dirLight1 = calculateDirectionalLight(u_ueDirLightDir1, u_ueDirLightColor1, u_ueDirLightIntensity1, normal);
+    vec3 dirLight1 = calculateDirectionalLight(normalize(-u_ueDirLightDir1), u_ueDirLightColor1, u_ueDirLightIntensity1, normal);
     
     // Apply shadow to the first directional light
     if (u_ueShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
-        float shadow = calculateShadow(v_vLightSpacePos);
+        vec3 lightDir = normalize(-u_ueDirLightDir0);
+        float shadow = calculateShadow(v_vLightSpacePos, normal, lightDir);
         dirLight0 *= (1.0 - shadow);
     }
     
-    lighting += dirLight0 ;
+    lighting += dirLight0;
     lighting += dirLight1;
 
     // === Point Light ===

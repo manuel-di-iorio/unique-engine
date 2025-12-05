@@ -1,3 +1,5 @@
 orbit.update();
-dirLightHoriz = (dirLightHoriz + 1) % 360;
-dirLight.setDirection(dirLightHoriz, 60);
+
+dirLightAngle = (dirLightAngle + .5) % 360;
+dirLight.position.x = lengthdir_x(1000, dirLightAngle);
+dirLight.position.y = lengthdir_y(1000, dirLightAngle);

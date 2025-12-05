@@ -7,16 +7,14 @@
 function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
     // Shadow camera (orthographic for directional light)
     camera = new UeOrthographicCamera({
-        left: -500,
-        right: 500,
-        top: 500,
-        bottom: -500,
-        near: 0.1,
-        far: 500
+        left: -1000,
+        right: 1000,
+        top: -1000,
+        bottom: 1000
     });
 
     // Shadow map / render target
-    map = new UeShadowMap(mapSize.width, mapSize.height);
+    map = new UeShadowMap(2048, 2048)//mapSize.width, mapSize.height);
 
     // Light space transformation matrix
     lightSpaceMatrix = new UeMatrix4();
@@ -29,20 +27,35 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
     function updateMapSize(width, height) {
         mapSize.width = width;
         mapSize.height = height;
-        map.dispose();
-        map = new UeShadowMap(width, height);
+        map.width = width;
+        map.height = height;
+        map.create();
         return self;
     }
     
     /**
-     * Updates the light space matrix based on the shadow camera's matrices.
-     * This matrix is used in shaders to transform world positions to light space.
+     * Updates the light space matrix and positions the shadow camera based on the light.
+     * 
+     * @param {Struct} light - The directional light that owns this shadow
      */
-    function updateMatrices() {
+    function updateMatrices(light) {
         gml_pragma("forceinline");
         
+        // Position shadow camera at the light's position
+        camera.position.copy(light.position);
+        
+        // Look at the light's target position
+        camera.target.copy(light.target.position);
+        
+        // Update camera matrices (recalculates view matrix)
+        camera.updateMatrixWorld();
+        
+        // Apply camera matrices to GameMaker camera
+        var _shadowCameraView = camera.camera; 
+        camera_apply(_shadowCameraView);
+        
         // Light space matrix = Projection * View
-        lightSpaceMatrix.copy(camera.projectionMatrix).multiply(camera.matrixWorldInverse);
+        matrix_multiply(camera.matrixWorldInverse.data, camera.projectionMatrix.data, lightSpaceMatrix.data)
         
         return self;
     }
@@ -51,8 +64,8 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
      * Disposes of shadow resources.
      */
     function dispose() {
-        map.dispose();
         camera.dispose();
+        map.dispose();
         return self;
     }
 }

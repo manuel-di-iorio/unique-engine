@@ -31,7 +31,7 @@ function UeOrthographicCamera(data = {}): UeCamera(data) constructor {
         var h = abs(top - bottom);
         matrix_build_projection_ortho(w, h, near, far, global.UE_DUMMY_ARRAY16);
         projectionMatrix.fromArray(global.UE_DUMMY_ARRAY16);
-        projectionMatrixInverse.copy(projectionMatrix).invert();
+        projectionMatrixInverse.copy(projectionMatrix);
     	camera_set_proj_mat(camera, projectionMatrix.data);
     }
     

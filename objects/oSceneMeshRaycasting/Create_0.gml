@@ -13,7 +13,7 @@ orbitControls = new UeOrbitControls(camera, {
 
 // Lightning
 ambientLight = new UeAmbientLight(#888888);
-dirLight = new UeDirectionalLight(90, 45, { color: #FFFFC8, intensity: .8 });
+dirLight = new UeDirectionalLight({ x: 90, y: 45, color: #FFFFC8, intensity: .8 });
 scene.add(ambientLight, dirLight);
 
 // Create the raycaster

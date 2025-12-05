@@ -143,73 +143,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         
         __quickSortObjects(left, pivotIndex - 1);
         __quickSortObjects(pivotIndex + 1, right);
-    }
-    
-    function __renderDirectionalLightShadow(light, scene, camera) {
-        gml_pragma("forceinline");
-        
-        var _shadow = light.shadow;
-        var _shadowCamera = _shadow.camera;
-        var _shadowCameraView = _shadow.camera.camera;
-        var _shadowMap = _shadow.map;
-        
-        // Position shadow camera along light direction
-        // Light target is the direction vector
-        var _lightDir = light.target; // This is the direction the light points
-        var _distance = 200; // Distance from scene center
-        
-        // Position camera opposite to light direction
-        _shadowCamera.position.set(
-            -_lightDir.x * _distance,
-            -_lightDir.y * _distance,
-            -_lightDir.z * _distance
-        );
-        
-        // Look at scene center
-        _shadowCamera.target.set(0, 0, 0);
-        
-        _shadowCamera.updateMatrixWorld();
-
-        // Update shadow camera
-        // _shadow.updateForCamera(camera); // DISABLED FOR DEBUG
-        
-        // Update the light space matrix (projection * view)
-        _shadow.updateMatrices();
-        
-        // Set matrices
-        camera_set_view_mat(_shadowCameraView, _shadowCamera.matrixWorldInverse.data);
-        camera_set_proj_mat(_shadowCameraView, _shadowCamera.projectionMatrix.data);
-        camera_apply(_shadowCameraView);
-        
-        // Set render target
-        if (!surface_exists(_shadowMap.surface)) _shadowMap.create();
-        surface_set_target(_shadowMap.surface);
-        draw_clear(c_black);
-        
-        // Set shadow depth shader to write depth values to color buffer
-        shader_set(sh_ue_shadow_map);
-
-        //shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_near"), camera.near);
-        //shader_set_uniform_f(shader_get_uniform(sh_ue_shadow_map, "u_far"), camera.far);
-        
-        // Render objects from the pre-collected queue
-        for (var i = 0; i < __shadowIdx; i++) {
-            var object = __queue[i];
-            if (!object.castShadow) continue;
-            
-            // Set the world matrix for this object
-            matrix_set(matrix_world, object.matrixWorld.data);
-            
-            if (object.onBeforeShadow != undefined) object.onBeforeShadow();
-            
-            // Submit geometry directly without material (we're using shadow shader)
-            if (object.geometry != undefined && object.geometry.vb != undefined) {
-                vertex_submit(object.geometry.vb, pr_trianglelist, -1);
-            }
-            
-            if (object.onAfterShadow != undefined) object.onAfterShadow();
-        } 
-    }
+    } 
 
     /**
      * Renders shadow maps for all shadow-casting lights.
@@ -228,6 +162,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         gpu_set_ztestenable(true);
         gpu_set_zwriteenable(true);
         gpu_set_blendenable(false);
+        var _resetSurf = false;
         
         for (var i = 0; i < __lightIdx; i++) {
             var light = __lights[i];
@@ -235,21 +170,19 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             
             switch (light.lightType) {
                 case "DirectionalLight":
-                    __renderDirectionalLightShadow(light, scene, camera);
+                    light.shadow.map.render(light, scene, camera, __queue, __shadowIdx);
+                    _resetSurf = true;
                     break;
             }
         }
         
         // Restore previous GPU state
-        shader_reset();
-        surface_reset_target();
+        if (_resetSurf) surface_reset_target();
+        shader_reset(); 
         gpu_set_cullmode(_prevCull);
         gpu_set_ztestenable(_prevZTest);
         gpu_set_zwriteenable(_prevZWrite);
         gpu_set_blendenable(_prevBlend);
-        
-        //camera_set_view_mat(camera, camera.matrixWorldInverse.data);
-        //camera_set_proj_mat(camera, camera.projectionMatrix.data);
         camera_apply(camera.camera);
     }
 

@@ -148,11 +148,13 @@ function UeMaterial(data = {}) constructor {
             
             if (i < directionalCount) {
                 var light = directionalState[i];
-                var lightTarget = light.target;
                 
-                uniformsCache[0] = lightTarget.x;
-                uniformsCache[1] = lightTarget.y;
-                uniformsCache[2] = lightTarget.z;
+                // Get light direction (from position to target)
+                var lightDirection = light.getDirection();
+                
+                uniformsCache[0] = lightDirection.x;
+                uniformsCache[1] = lightDirection.y;
+                uniformsCache[2] = lightDirection.z;
                 shader_set_uniform_f_array(lightLoc[0], uniformsCache);
                 
                 shader_set_uniform_f_array(lightLoc[1], light.color);

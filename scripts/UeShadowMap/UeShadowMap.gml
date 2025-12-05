@@ -23,6 +23,42 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
         return self;
     }
     
+    function render(light, scene, camera, __queue, __shadowIdx) {
+        gml_pragma("forceinline");
+        
+        var _shadow = light.shadow;
+        var _shadowCamera = _shadow.camera;
+        var _shadowCameraView = _shadow.camera.camera;
+        var _shadowMap = _shadow.map;
+
+        // Set render target
+        if (!surface_exists(_shadowMap.surface)) _shadowMap.create();
+        surface_set_target(_shadowMap.surface);
+       
+        // Update shadow camera position and light space matrix
+        // This positions the camera based on light direction and updates all matrices
+        _shadow.updateMatrices(light);
+        
+        // Clear to white (1.0) because it represents the farthest depth.
+        draw_clear(c_white);
+        
+        // Set shadow depth shader to write depth values to color buffer
+        shader_set(sh_ue_shadow_map);
+
+        // Render objects from the pre-collected queue
+        for (var i = 0; i < __shadowIdx; i++) {
+            var object = __queue[i];
+            if (!object.castShadow) continue;
+            var _onBeforeShadow = object[$ "onBeforeShadow"];
+            var _onAfterShadow = object[$ "onAfterShadow"];
+            
+            if (_onBeforeShadow != undefined) _onBeforeShadow();
+            object.render();
+            if (_onAfterShadow != undefined) _onAfterShadow();
+        } 
+        return self;
+    }
+    
     /**
      * Disposes of the shadow map surface.
      */
@@ -43,6 +79,6 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
         gml_pragma("forceinline");
         return surface_get_texture(self.surface);
     }
-    
+     
     create();
 }
