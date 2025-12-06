@@ -16,7 +16,7 @@ This class is automatically instantiated when creating a `UeDirectionalLight` an
 new UeDirectionalLightShadow(data = {})
 ```
 
-> Inherits from [UeLightShadow](/docs/reference/core/UeLightShadow)
+> Inherits from [UeLightShadow](/docs/reference/lights/shadows/UeLightShadow)
 
 ### Parameters
 
