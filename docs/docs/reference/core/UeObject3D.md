@@ -9,7 +9,7 @@ The base class for all 3D entities in Unique Engine. Inherits from `UeTransform`
 new UeObject3D(data = {})
 ```
 
-> Inherits from [UeTransform](/docs/reference/math/UeTransform)
+> Inherits from UeTransform
 
 ### Data parameters
 

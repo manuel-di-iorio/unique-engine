@@ -1,7 +1,7 @@
 /// @description Scene Manager - Manages 3D scene, camera, renderer, and controls
 function SceneManager() constructor {
     self.renderer = new UeRenderer();
-    self.camera = new UePerspectiveCamera({ x: 100, y: -300, z: 70, far: 10000, view: 1 });
+    self.camera = new UePerspectiveCamera({ x: 100, y: -300, z: 70, far: 10000, view: 1 }).use();
     self.orbit = new UeOrbitControls(self.camera, {
         shouldHandleInput: function() {
             return global.UI.Main.Scene.hovered;
