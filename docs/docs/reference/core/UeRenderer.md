@@ -11,14 +11,22 @@ The renderer recursively traverses the scene graph, extracts lights and meshes, 
 new UeRenderer(data = {})
 ```
 
+### Data Properties
+
+| Property              | Type      | Default | Description                                    |
+| --------------------- | --------- | ------- | ---------------------------------------------- |
+| `shadowMap.enabled`   | `boolean` | `false` | Enable shadow map rendering                    |
+| `shadowMap.autoUpdate`| `boolean` | `true`  | Automatically update shadows every frame       |
+
 ### Properties
 
-| Property     | Type      | Default    | Description                                 |
-| ------------ | --------- | -------    | -----------------------------------         |
-| `isRenderer` | `boolean` | `true`     | Identifies the object as a renderer         |
-| `type`       | `string`  | `Renderer` | Object type                                 |
-| `name`       | `string`  | `undefined`| Object name (optional)                      |
-| `sortObjects`| `boolean` | `true`     | Whether to sort the objects on render phase |
+| Property      | Type      | Default     | Description                                 |
+| ------------- | --------- | ----------- | ------------------------------------------- |
+| `isRenderer`  | `boolean` | `true`      | Identifies the object as a renderer         |
+| `type`        | `string`  | `Renderer`  | Object type                                 |
+| `name`        | `string`  | `undefined` | Object name (optional)                      |
+| `sortObjects` | `boolean` | `true`      | Whether to sort the objects on render phase |
+| `shadowMap`   | `struct`  | `{enabled: false, autoUpdate: true, needsUpdate: false}` | Shadow rendering configuration |
 
 ## 🔧 Internal Logic
 
@@ -124,21 +132,157 @@ Before rendering, the renderer collects all lights into a global light state:
 - Counts are updated in the global shared arrays.
 - Mesh shaders access this state via UE_RENDERER_LIGHT_STATE.
 
-**6️⃣ Render Flow**
+**6️⃣ Shadow Map Rendering**
+
+When `shadowMap.enabled` is true, the renderer performs shadow map rendering before the main scene pass:
+
+1. **Shadow Pass (for each shadow-casting light):**
+   - Sets shadow map surface as render target
+   - Positions shadow camera at light position/direction
+   - Updates light space transformation matrix
+   - Clears shadow map to white (maximum depth)
+   - Renders scene from light's perspective using `sh_ue_shadow_map` shader
+   - Stores depth values in `r32float` surface
+
+2. **Supported Shadow Types:**
+   - **DirectionalLight:** Uses orthographic shadow camera, single shadow map
+   - **PointLight:** Uses 6 perspective cameras (cube shadow map) - *planned*
+
+3. **Shadow Map Configuration:**
+   ```js
+   const renderer = new UeRenderer({
+       shadowMap: {
+           enabled: true,       // Enable shadow rendering
+           autoUpdate: true,    // Update every frame
+           needsUpdate: false   // Manual update trigger
+       }
+   });
+   ```
+
+4. **Object Shadow Properties:**
+   - `castShadow` - Object casts shadows (rendered in shadow pass)
+   - `receiveShadow` - Object receives shadows (shader samples shadow map)
+
+5. **Shadow Callbacks:**
+   - `onBeforeShadow()` - Called before object renders to shadow map
+   - `onAfterShadow()` - Called after object renders to shadow map
+
+**7️⃣ Render Flow**
 
 The `render(scene, camera)` method:
 
-- Validates the target view.
-- Updates camera world matrix.
-- Clears internal queues.
-- Collects objects and lights.
-- Sorts renderables.
-- Builds the light state.
-- Renders all objects in order.
-- Resets shader and world matrix.
-- Restores previous GPU state.
+1. Validates the target view.
+2. Updates camera world matrix.
+3. Clears internal queues.
+4. Collects objects and lights from scene graph.
+5. Sorts renderables by sort key.
+6. **Renders shadow maps** (if `shadowMap.enabled`).
+7. Builds the light state.
+8. Renders all objects in sorted order.
+9. Resets shader and world matrix.
+10. Restores previous GPU state.
+
+---
+
+## 🌑 Shadow Mapping System
+
+The renderer implements a complete shadow mapping pipeline for directional lights.
+
+### Enabling Shadows
+
+```js
+const renderer = new UeRenderer({
+    shadowMap: {
+        enabled: true,       // Enable shadow rendering
+        autoUpdate: true,    // Update shadows every frame
+        needsUpdate: false   // Manual trigger (when autoUpdate = false)
+    }
+});
+```
+
+### Shadow Rendering Pipeline
+
+**Phase 1: Shadow Map Generation**
+
+For each light with `castShadow = true`:
+
+1. Position shadow camera at light location
+2. Orient camera toward light target (directional) or in 6 directions (point)
+3. Calculate light space transformation matrix
+4. Set shadow map surface as render target
+5. Clear to white (max depth = 1.0)
+6. Render objects with `castShadow = true` using depth shader
+7. Store depth values in `r32float` surface
+
+**Phase 2: Main Scene Rendering**
+
+1. Shadow maps are bound as textures to material shaders
+2. Light space matrices are passed as uniforms
+3. Fragment shaders transform positions to light space
+4. Shadow map is sampled to determine visibility
+5. Lighting is modulated by shadow factor
+
+### Shadow Map Format
+
+- **Surface format:** `surface_r32float` (32-bit float, single channel)
+- **Clear value:** White (1.0) represents maximum depth
+- **Depth range:** 0.0 (near) to 1.0+ (far)
+- **Precision:** High precision minimizes depth artifacts
+
+### Object Shadow Configuration
+
+```js
+// Enable shadow casting and receiving
+const mesh = new UeMesh(geometry, material);
+mesh.castShadow = true;    // Rendered in shadow pass
+mesh.receiveShadow = true; // Shader samples shadow map
+scene.add(mesh);
+```
+
+### Light Shadow Configuration
+
+```js
+// Directional light shadows
+const sun = new UeDirectionalLight(c_white, 1.5);
+sun.castShadow = true;
+sun.shadow.updateMapSize(2048, 2048);  // Higher resolution
+sun.shadow.camera.left = -500;         // Shadow frustum bounds
+sun.shadow.camera.right = 500;
+scene.add(sun);
+```
+
+### Performance Optimization
+
+**Static Scenes:**
+```js
+renderer.shadowMap.autoUpdate = false;  // Don't update every frame
+renderer.shadowMap.needsUpdate = true;  // Trigger manual update
+renderer.render(scene, camera);
+renderer.shadowMap.needsUpdate = false; // Prevent further updates
+```
+
+**Selective Shadow Casting:**
+```js
+// Only important objects cast shadows
+importantMesh.castShadow = true;
+smallDetail.castShadow = false;  // Skip for performance
+```
+
+### Shadow Map Resolution Guidelines
+
+| Resolution | Use Case              | Memory per Map |
+| ---------- | --------------------- | -------------- |
+| 512×512    | Mobile/low-end        | ~1 MB          |
+| 1024×1024  | Default quality       | ~4 MB          |
+| 2048×2048  | High quality          | ~16 MB         |
+| 4096×4096  | Ultra quality/closeup | ~64 MB         |
+
+---
 
 ## 📘 Example
+
+### Basic Rendering
+
 ```js
 const scene = new UeScene();
 const camera = new UePerspectiveCamera();
@@ -146,3 +290,45 @@ const renderer = new UeRenderer();
 
 renderer.render(scene, camera);
 ```
+
+### With Shadow Mapping
+
+```js
+const scene = new UeScene();
+const camera = new UePerspectiveCamera();
+
+// Enable shadows in renderer
+const renderer = new UeRenderer({
+    shadowMap: {
+        enabled: true,
+        autoUpdate: true
+    }
+});
+
+// Create shadow-casting light
+const sun = new UeDirectionalLight(c_white, 1.5);
+sun.castShadow = true;
+sun.shadow.updateMapSize(2048, 2048);
+sun.position.set(100, 200, 150);
+scene.add(sun);
+
+// Create mesh with shadows
+const mesh = new UeMesh(geometry, material);
+mesh.castShadow = true;
+mesh.receiveShadow = true;
+scene.add(mesh);
+
+// Render with shadows
+renderer.render(scene, camera);
+```
+
+---
+
+## See Also
+
+- [UeScene](/docs/reference/core/UeScene) - Scene graph container
+- [UeCamera](/docs/reference/core/UeCamera) - Camera system
+- [UeLight](/docs/reference/core/UeLight) - Lighting system
+- [UeDirectionalLightShadow](/docs/reference/core/UeDirectionalLightShadow) - Directional shadows
+- [UeShadowMap](/docs/reference/core/UeShadowMap) - Shadow map container
+- [UeMaterial](/docs/reference/core/UeMaterial) - Material system

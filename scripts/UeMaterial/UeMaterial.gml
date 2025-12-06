@@ -48,6 +48,10 @@ function UeMaterial(data = {}) constructor {
     __uniformLightsDir = [];
     __uniformLightsPos = [];
     
+    // Shadow quality
+    shadowQuality = data[$ "shadowQuality"] ?? UE_SHADOW_QUALITY.HIGH;
+    __uniformShadowQualityLoc = undefined;
+    
     // Textures
     textures = {
        map: data[$ "map"] ?? global.UE_TEXTURE_MAP.clone(),
@@ -72,6 +76,8 @@ function UeMaterial(data = {}) constructor {
         __uniformLightSpaceMatrixLoc = shader_get_uniform(shader, "u_ueLightSpaceMatrix");
         __uniformShadowEnabledLoc = shader_get_uniform(shader, "u_ueShadowEnabled");
         __uniformReceiveShadowLoc = shader_get_uniform(shader, "u_ueReceiveShadow");
+        __uniformShadowQualityLoc = shader_get_uniform(shader, "u_ueShadowQuality");
+        __uniformShadowTexelSizeLoc = shader_get_uniform(shader, "u_ueShadowTexelSize");
         __samplerShadowMapIdx = shader_get_sampler_index(shader, "s_shadowMap");
         
         __uniformLightsDir = array_create(lights);
@@ -177,6 +183,13 @@ function UeMaterial(data = {}) constructor {
 
         if (shadowLight != undefined) {
              shader_set_uniform_f(__uniformShadowEnabledLoc, 1.0);
+             shader_set_uniform_f(__uniformShadowQualityLoc, shadowQuality);
+             
+             // Calculate texel size based on shadow map resolution
+             var shadowMapWidth = shadowLight.shadow.map.width;
+             var texelSize = 1.0 / shadowMapWidth;
+             shader_set_uniform_f(__uniformShadowTexelSizeLoc, texelSize);
+             
              shader_set_uniform_matrix_array(__uniformLightSpaceMatrixLoc, shadowLight.shadow.lightSpaceMatrix.data);
              texture_set_stage(__samplerShadowMapIdx, shadowLight.shadow.map.getTexture());
         } else {
@@ -278,6 +291,13 @@ function UeMaterial(data = {}) constructor {
         gpu_set_cullmode(renderSide ?? side);
 
         return self;
+    }
+    
+    /**
+     * Set the value of a cached uniform that will be passed to the shader in the next frame
+     */
+    function setUniform(name, value) {
+        uniforms[$ name] = value;
     }
     
     function clone() {

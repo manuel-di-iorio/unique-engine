@@ -69,5 +69,6 @@ function UeCamera(data = {}): UeObject3D(data) constructor {
     function use() {
         view_set_camera(view, camera);
         view_set_visible(view, true);
+        return self;
     }
 }

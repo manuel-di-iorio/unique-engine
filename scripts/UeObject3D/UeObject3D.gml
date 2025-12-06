@@ -20,9 +20,9 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     //animations = []; // @todo
         
     // Instances management
-    object = undefined; // @doc
-    instances = new UeInstanceList(self); // @doc    
-    isInstance = false; // @doc
+    object = undefined;
+    instances = new UeInstanceList(self);
+    isInstance = false;
 
     // Abstract methods
     function render() {}

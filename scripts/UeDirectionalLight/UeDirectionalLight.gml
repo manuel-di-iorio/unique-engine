@@ -3,13 +3,16 @@
  * Similar to the sun - rays are parallel and position doesn't affect the lighting,
  * but it does affect shadow camera placement.
  * 
- * Follows Three.js pattern:
+ * Notes:
  * - Has a position (where the light is)
  * - Has a target Object3D (where it points to)
  * - Direction is calculated as normalized vector from position to target.position
  */
-function UeDirectionalLight(data = {}): UeLight(data) constructor {
-    lightType = "DirectionalLight";
+function UeDirectionalLight(color = c_white, intensity = 1, data = {}): UeLight(data) constructor {
+    lightType = "DirectionalLight"; 
+    isDirectionalLight = true;
+    setColor(color);
+    self.intensity = intensity;
     
     // Target is an Object3D that the light points at (default: origin)
     target = new UeObject3D();

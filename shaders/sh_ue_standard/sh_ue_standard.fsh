@@ -41,6 +41,8 @@ uniform sampler2D s_emissiveMap;
 uniform sampler2D s_shadowMap;
 uniform float u_ueShadowEnabled;
 uniform float u_ueReceiveShadow;
+uniform float u_ueShadowQuality; // 0=LOW, 1=MEDIUM, 2=HIGH
+uniform float u_ueShadowTexelSize; // 1.0 / shadowMapWidth
 
 // Gamma correction (sRGB to Linear color space)
 #define GAMMA 2.2
@@ -92,7 +94,7 @@ vec2 getPoissonSample(int index) {
     return vec2(0.14383161, -0.14100790); // index 15 or default
 }
 
-// Shadow calculation with PCF (Percentage Closer Filtering)
+// Shadow calculation with quality-based PCF
 float calculateShadow(vec4 lightSpacePos, vec3 normal, vec3 lightDir) {
     vec3 projCoords = lightSpacePos.xyz / lightSpacePos.w;
     projCoords = projCoords * 0.5 + 0.5;
@@ -105,18 +107,32 @@ float calculateShadow(vec4 lightSpacePos, vec3 normal, vec3 lightDir) {
     // Dynamic bias based on surface angle (reduces shadow acne)
     float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0005);
     
-    // PCF with Poisson disk sampling for soft shadows
     float shadow = 0.0;
-    float texelSize = 1.0 / 2048.0; // Assume 2048x2048 shadow map, adjust if needed
-    float shadowRadius = 1.5; // Controls shadow softness
     
+    // Quality level determines sample count and softness
+    int sampleCount = 1;      // LOW: hard shadows
+    float shadowRadius = 0.0; // LOW: no blur
+    
+    if (u_ueShadowQuality > 1.5) {
+        // HIGH: 16 samples, very soft shadows
+        sampleCount = 16;
+        shadowRadius = 1.5;
+    } else if (u_ueShadowQuality > 0.5) {
+        // MEDIUM: 4 samples, moderate softness
+        sampleCount = 4;
+        shadowRadius = 0.8;
+    }
+    
+    // Perform PCF sampling
     for(int i = 0; i < 16; i++) {
-        vec2 offset = getPoissonSample(i) * texelSize * shadowRadius;
+        if (i >= sampleCount) break;
+        
+        vec2 offset = getPoissonSample(i) * u_ueShadowTexelSize * shadowRadius;
         float closestDepth = texture2D(s_shadowMap, projCoords.xy + offset).r;
         shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
     }
     
-    shadow /= 16.0; // Average the samples
+    shadow /= float(sampleCount);
     
     return shadow;
 }
@@ -139,7 +155,21 @@ void main()
         vec3 lightDir = normalize(-u_ueDirLightDir0);
         float shadow = calculateShadow(v_vLightSpacePos, normal, lightDir);
         dirLight0 *= (1.0 - shadow);
+        
+        // DEBUG: Visualize depth comparison (comment out for production)
+        // vec3 projCoords = v_vLightSpacePos.xyz / v_vLightSpacePos.w;
+        // projCoords = projCoords * 0.5 + 0.5;
+        // float closestDepth = texture2D(s_shadowMap, projCoords.xy).r;
+        // float currentDepth = projCoords.z;
+        // gl_FragColor = vec4(currentDepth, closestDepth, 0.0, 1.0); return;        
     }
+    
+    // DEBUG: Visualize light direction (uncomment to test)
+    // gl_FragColor = vec4(dirLight0, 1.0); return;
+    
+    // DEBUG: Visualize dot product (green = lit, red = should be lit but isn't)
+    // float rawDot = dot(normal, normalize(-u_ueDirLightDir0));
+    // gl_FragColor = vec4(max(-rawDot, 0.0), max(rawDot, 0.0), 0.0, 1.0); return;               
     
     lighting += dirLight0;
     lighting += dirLight1;
@@ -161,6 +191,13 @@ void main()
 
     // === Back to sRGB color space ===
     vec3 finalColor = LinearToSRGB(clamp(litColor, 0.0, 1.0));
+    
+    // DEBUG: Visualize world normals (R=X, G=Y, B=Z)
+    //gl_FragColor = vec4(abs(normal), 1.0); return;
+    
+    // DEBUG: Visualize light direction as RGB (signed, remapped to 0-1)
+    //vec3 lightDir = normalize(-u_ueDirLightDir0);
+    //gl_FragColor = vec4(lightDir * 0.5 + 0.5, 1.0); return;
     
     gl_FragColor = vec4(finalColor, baseColor.a);
 }

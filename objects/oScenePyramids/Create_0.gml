@@ -1,8 +1,7 @@
 renderer = new UeRenderer();
 scene = new UeScene();
-camera = new UePerspectiveCamera({ x: 200, y: 70, z: 100 });
+camera = new UePerspectiveCamera({ x: 200, y: 70, z: 100 }).use();
 orbitControls = new UeOrbitControls(camera);
-camera.use();
 
 // Textures
 var texPyramid   = new UeTexture(spr_tex_pyramid);
@@ -48,7 +47,7 @@ array_foreach(treePositions, function(arr) {
 
 // Lighting
 var ambientLight = new UeAmbientLight(#5A4628);
-var sunLight = new UeDirectionalLight({ x: 100, y: 300, color: #FFFFC8, intensity: .7 });
+var sunLight = new UeDirectionalLight(#FFFFC8, .7, { x: 100, y: 300 });
 
 scene.add(ambientLight, sunLight, desert, pyramid0, pyramid1, pyramid2);
 scene.updateWorldMatrix(false, true);

@@ -1,9 +1,8 @@
 renderer = new UeRenderer();
 scene = new UeScene();
-camera = new UePerspectiveCamera({ x: -70, y: -130, z: 70 });
+camera = new UePerspectiveCamera({ x: -70, y: -130, z: 70 }).use();
 orbit = new UeOrbitControls(camera);
 scene.add(new UeAmbientLight(c_ltgray), new UeGridHelper(2000));
-camera.use();
 
 // Create the box object
 var boxSize = 50;

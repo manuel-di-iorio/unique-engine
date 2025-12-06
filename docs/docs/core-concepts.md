@@ -15,7 +15,7 @@ It supports hierarchical parenting, transformation, and visibility.
 
 
 
-> Tip: All transforms are automatically updated only when needed, improving performance.
+> Tip: All transforms are automatically updated only when needed, improving performance, unless you mark your objects as static (`matrixAutoUpdate = false`).
 
 ---
 
@@ -51,7 +51,7 @@ camera = new UeOrthographicCamera({
 camera.setPosition(0, 5, 10);
 ```
 
-You don't need to manually handle GameMaker's view system - the engine integrates cameras automatically.
+You don't need to manually handle GameMaker's view system - the engine integrates cameras automatically by simply calling their `use()` method.
 
 ### Field of View & Clipping
 By default, the perspective camera has:
@@ -81,16 +81,16 @@ renderer.render(scene, camera);
 ## 💡 Light
 Lights bring depth and realism to the scene. Currently supported types:
 
-- Ambient (default): global illumination
+- Ambient (default): base illumination
 
-- Point: light with position
+- Point: A point light emits light in all directions from a specific position in 3D space. It simulates a light bulb or any other light source that radiates light uniformly. The intensity of the light diminishes with distance, creating a natural falloff effect. 
 
-- Directional: light with direction (e.g. sun)
+- Directional: simulates distant light sources like the sun, with parallel rays from a fixed direction. Position doesn't affect intensity, only the direction matters (defined by position and target).
 
 Example:
 
 ```js
-light = new UeDirectionalLight(45, 45);
+light = new UeDirectionalLight(c_ltgray, .8, { x: 150, y: 80, z: 90 });
 scene.add(light);
 ```
 Lights automatically inject their data into shaders when the material support them, no manual uniform handling needed.

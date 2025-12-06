@@ -31,6 +31,12 @@ enum UE_TEXTURE_WRAP {
     MIRRORED_REPEAT
 }
 
+enum UE_SHADOW_QUALITY {
+    LOW = 0,    // No PCF, hard shadows (1 sample)
+    MEDIUM = 1, // Light PCF, soft shadows (4 samples)
+    HIGH = 2    // Full PCF, very soft shadows (16 samples)
+}
+
 // Internal globals
 global.UE_RENDERER_LIGHT_STATE = array_create(5);
 enum UE_RENDERER_LIGHT_STATE_ENUM {

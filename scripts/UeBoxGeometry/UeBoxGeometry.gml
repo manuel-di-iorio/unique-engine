@@ -10,27 +10,27 @@ function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeBufferGeo
     var hd = _height * 0.5;
 
     var faces = [
-        [ 0,  1,  0, [ // Front (Y+)
+        [ 0,  0,  1, [ // Front (Z+) - X and Y vary, Z is constant at +hh
             [-hw,-hd, hh, 0,1], [-hw, hd, hh, 0,0], [ hw, hd, hh, 1,0],
             [ hw, hd, hh, 1,0], [ hw,-hd, hh, 1,1], [-hw,-hd, hh, 0,1]
         ]],
-        [ 0, -1,  0, [ // Back (Y-)
+        [ 0,  0, -1, [ // Back (Z-) - X and Y vary, Z is constant at -hh
             [-hw,-hd,-hh, 1,1], [ hw,-hd,-hh, 0,1], [ hw, hd,-hh, 0,0],
             [ hw, hd,-hh, 0,0], [-hw, hd,-hh, 1,0], [-hw,-hd,-hh, 1,1]
         ]],
-        [ 0,  0,  1, [ // Top (Z+)
+        [ 0,  1,  0, [ // Top (Y+) - X and Z vary, Y is constant at +hd
             [-hw, hd,-hh, 0,1], [ hw, hd,-hh, 1,1], [ hw, hd, hh, 1,0],
             [ hw, hd, hh, 1,0], [-hw, hd, hh, 0,0], [-hw, hd,-hh, 0,1]
         ]],
-        [ 0,  0, -1, [ // Bottom (Z-)
+        [ 0, -1,  0, [ // Bottom (Y-) - X and Z vary, Y is constant at -hd
             [-hw,-hd,-hh, 0,0], [-hw,-hd, hh, 0,1], [ hw,-hd, hh, 1,1],
             [ hw,-hd, hh, 1,1], [ hw,-hd,-hh, 1,0], [-hw,-hd,-hh, 0,0]
         ]],
-        [ 1,  0,  0, [ // Right (X+)
+        [ 1,  0,  0, [ // Right (X+) - Y and Z vary, X is constant at +hw
             [ hw,-hd,-hh, 0,1], [ hw,-hd, hh, 1,1], [ hw, hd, hh, 1,0],
             [ hw, hd, hh, 1,0], [ hw, hd,-hh, 0,0], [ hw,-hd,-hh, 0,1]
         ]],
-        [-1,  0,  0, [ // Left (X-)
+        [-1,  0,  0, [ // Left (X-) - Y and Z vary, X is constant at -hw
             [-hw,-hd,-hh, 1,1], [-hw, hd,-hh, 1,0], [-hw, hd, hh, 0,0],
             [-hw, hd, hh, 0,0], [-hw,-hd, hh, 0,1], [-hw,-hd,-hh, 1,1]
         ]]
@@ -39,7 +39,7 @@ function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeBufferGeo
 
     for (var f = 0; f < array_length(faces); f++) {
         var nx = faces[f][0];
-        var ny = -faces[f][1];
+        var ny = faces[f][1];
         var nz = faces[f][2];
         var verts = faces[f][3];
     

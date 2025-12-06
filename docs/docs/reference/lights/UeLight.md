@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 1
 ---
 
 All lights in Unique Engine inherit from `UeLight`. These include `AmbientLight`, `DirectionalLight`, and `PointLight`.
@@ -126,7 +126,7 @@ Lights can cast shadows when `castShadow` is enabled. The renderer will create a
 
 ### Shadow Controllers by Light Type
 
-- **DirectionalLight:** Uses [`UeDirectionalLightShadow`](/docs/reference/core/UeDirectionalLightShadow) with orthographic camera
+- **DirectionalLight:** Uses [`UeDirectionalLightShadow`](/docs/reference/lights/shadows/UeDirectionalLightShadow) with orthographic camera
 - **PointLight:** Uses `UePointLightShadow` with 6 perspective cameras (cube map)
 - **AmbientLight:** Does not support shadows
 
@@ -181,6 +181,9 @@ const renderer = new UeRenderer({
     shadowMap: {
         enabled: true,       // Enable shadow map rendering
         autoUpdate: true,    // Update shadows every frame
+        needsUpdate: false   // Manual update trigger
     }
 });
 ```
+
+See [UeRenderer](/docs/reference/core/UeRenderer) for more details on shadow rendering.

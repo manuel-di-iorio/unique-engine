@@ -1,7 +1,6 @@
 renderer = new UeRenderer();
 scene = new UeScene();
-camera = new UePerspectiveCamera();
-camera.use();
+camera = new UePerspectiveCamera().use();
 
 orbitControls = new UeOrbitControls(camera, {
     autoRotate: true, 
@@ -13,7 +12,7 @@ orbitControls = new UeOrbitControls(camera, {
 
 // Lightning
 ambientLight = new UeAmbientLight(#888888);
-dirLight = new UeDirectionalLight({ x: 90, y: 45, color: #FFFFC8, intensity: .8 });
+dirLight = new UeDirectionalLight(#FFFFC8, .8, { x: 90, y: 45 });
 scene.add(ambientLight, dirLight);
 
 // Create the raycaster

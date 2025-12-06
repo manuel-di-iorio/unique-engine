@@ -60,7 +60,7 @@ A material with a flat color and a simple diffuse texture, that does not receive
 
 ### 🧱 UeMeshStandardMaterial
 
-A ready-to-use material with built-in lighting support (ambient, point, directional) and texture handling.
+A ready-to-use material with built-in lighting support (ambient, point, directional), shadows and texture handling.
 
 **Example:**
 ```js
@@ -112,5 +112,5 @@ Uniform locations are cached on material creation using `build()`.
 **Example of setting a custom value at runtime:**
 
 ```js
-myMaterial.uniforms.time.value = current_time / 1000;
+myMaterial.setUniform("time", current_time / 1000);
 ```

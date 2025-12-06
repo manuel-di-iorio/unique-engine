@@ -1,1 +1,0 @@
-//shadowMapViewer.render(camera, display_get_gui_width() - 260, display_get_gui_height() - 260);

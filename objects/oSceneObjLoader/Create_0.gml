@@ -1,12 +1,11 @@
 renderer = new UeRenderer();
 scene = new UeScene();
-camera = new UePerspectiveCamera({ x: 450, y: -300, z: 300 });
+camera = new UePerspectiveCamera({ x: 450, y: -300, z: 300 }).use();
 orbitControls = new UeOrbitControls(camera, { zt: 150 });
-camera.use();
 
 // Lighting
 var ambientLight = new UeAmbientLight(c_dkgray);
-var sunLight = new UeDirectionalLight({ x: 60, z: 185, color: #FFFFC8, intensity: .8 });
+var sunLight = new UeDirectionalLight(#FFFFC8, .8, { x: 60, z: 185 });
 scene.add(ambientLight, sunLight);
 
 objMesh = undefined;
