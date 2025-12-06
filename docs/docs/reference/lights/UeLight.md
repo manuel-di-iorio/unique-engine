@@ -81,6 +81,14 @@ new UePointLight(range = 1000, data = {})
 ```
 Emits light in all directions from a single point, attenuated by distance. Supports omnidirectional shadow casting.
 
+**Data Parameters**
+
+| Key           | Type     | Default | Description                              |
+| ------------- | -------- | ------- | ---------------------------------------- |
+| `color`       | `color`  | `c_white` | Light color                            |
+| `shadowNear`  | `number` | `0.5`   | Near plane for shadow cameras            |
+| `shadowFar`   | `number` | `range` | Far plane for shadow cameras             |
+
 **Properties**
 
 | Property | Type                  | Default | Description                              |
@@ -90,7 +98,11 @@ Emits light in all directions from a single point, attenuated by distance. Suppo
 
 **Example:**
 ```js
-const lamp = new UePointLight(500, { color: c_yellow });
+const lamp = new UePointLight(500, { 
+    color: c_yellow,
+    shadowNear: 1.0,
+    shadowFar: 500
+});
 lamp.position.set(10, 50, 10);
 lamp.castShadow = true;
 scene.add(lamp);

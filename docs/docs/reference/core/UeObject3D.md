@@ -19,6 +19,8 @@ new UeObject3D(data = {})
 | `visible`         | `boolean`                 | `true`      | Visibility flag                 |
 | `parent`          | `UeObject3D`              | `undefined` | Parent object in the hierarchy  |
 | `renderOrder`     | `number`                  | `0`         | Custom sort order for rendering |
+| `castShadow`      | `boolean`                 | `false`     | Whether this object casts shadows |
+| `receiveShadow`   | `boolean`                 | `false`     | Whether this object receives shadows |
 
 ### Properties
 
@@ -37,7 +39,11 @@ new UeObject3D(data = {})
 | `userData`    | `struct`     | {}               | A struct where to safely place custom related data for this entity |
 | `onBeforeRender` | `method`  | void method      | Function called before rendering this object |
 | `onAfterRender`  | `method`  | void method      | Function called after rendering this object  |
+| `onBeforeShadow` | `method`  | void method      | Function called before rendering this object to shadow map |
+| `onAfterShadow`  | `method`  | void method      | Function called after rendering this object to shadow map |
 | `frustumCulled`  | `boolean` | `true`           | If true, only renders this object if within the camera frustum. Geometry needs to have a bounding sphere, otherwise the test will be skipped and the object will always be rendered |
+| `castShadow`     | `boolean` | `false`          | If true, this object will cast shadows when shadow mapping is enabled |
+| `receiveShadow`  | `boolean` | `false`          | If true, this object will receive shadows from shadow-casting lights |
 | `object`         | `UeObject3D` | `undefined`     | Reference to the original object (if this is an instance). |
 | `instances`      | `UeInstanceList` |        | List of instances created from this object. |
 | `isInstance`     | `boolean`    | `false`         | Flag indicating if this object is an instance of another object. |

@@ -76,6 +76,24 @@ dispose()
 ```
 Destroys the GameMaker camera instance and cleans up resources.
 
+**Returns:** `self` (for method chaining)
+
+### use()
+```js
+use()
+```
+Activates this camera for the assigned viewport by calling `view_set_camera()` and making the view visible.
+
+This is a convenience method that simplifies camera activation.
+
+**Returns:** `self` (for method chaining)
+
+**Example:**
+```js
+const camera = new UePerspectiveCamera({ view: 0 });
+camera.use(); // Activates the camera on view 0
+```
+
 ## Notes
 
 - The camera uses `matrix_build_lookat()` to orient toward the target

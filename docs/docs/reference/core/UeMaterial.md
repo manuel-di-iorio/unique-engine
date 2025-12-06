@@ -40,6 +40,7 @@ new UeMaterial(data = {})
 | `shader`               | `shader`  | `sh_ue_standard`        | The shader program to use                                |
 | `uniforms`             | `object`  | `{}`                    | Custom uniforms to pass to the shader                    |
 | `lights`               | `number`  | `2`                     | Number of supported lights (0 to disable lighting)       |
+| `shadowQuality`        | `enum`    | `UE_SHADOW_QUALITY.HIGH`| Shadow quality level for this material (LOW/MEDIUM/HIGH)  |
 | `textures`             | `object`  | `{map, normalMap, ...}` | Maps for base color, normal, roughness, etc.             |
 | `wireframe`            | `boolean` | `false`                 | Whether to render the mesh as wireframe (pr_linelist)    |
 | `userData`             | `struct`  | {}                      | A struct where to safely place custom related data for this entity |
@@ -83,6 +84,26 @@ uniforms: {
 - ueModelPosition (only for sprite objects)
 - ueAmbient
 - ueDirLight* / uePointLight* (if lights > 0)
+- ueLightSpaceMatrix, ueShadowEnabled, ueReceiveShadow (shadow uniforms)
+- ueShadowQuality, ueShadowTexelSize (shadow quality control)
+
+## Shadow Quality
+
+Materials support shadow rendering with configurable quality levels via the `shadowQuality` property:
+
+```js
+material.shadowQuality = UE_SHADOW_QUALITY.HIGH;
+```
+
+**Available quality levels:**
+
+| Quality Level          | Value | Description                            | Sample Count |
+| ---------------------- | ----- | -------------------------------------- | ------------ |
+| `UE_SHADOW_QUALITY.LOW`    | `0`   | Hard shadows, no PCF filtering         | 1 sample     |
+| `UE_SHADOW_QUALITY.MEDIUM` | `1`   | Soft shadows with light PCF filtering  | 4 samples    |
+| `UE_SHADOW_QUALITY.HIGH`   | `2`   | Very soft shadows with full PCF        | 16 samples   |
+
+Higher quality settings provide smoother shadow edges but require more GPU samples per pixel.
 
 🧩 Methods
 ```js

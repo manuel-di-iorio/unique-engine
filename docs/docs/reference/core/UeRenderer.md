@@ -321,14 +321,3 @@ scene.add(mesh);
 // Render with shadows
 renderer.render(scene, camera);
 ```
-
----
-
-## See Also
-
-- [UeScene](/docs/reference/core/UeScene) - Scene graph container
-- [UeCamera](/docs/reference/core/UeCamera) - Camera system
-- [UeLight](/docs/reference/core/UeLight) - Lighting system
-- [UeDirectionalLightShadow](/docs/reference/core/UeDirectionalLightShadow) - Directional shadows
-- [UeShadowMap](/docs/reference/core/UeShadowMap) - Shadow map container
-- [UeMaterial](/docs/reference/core/UeMaterial) - Material system
