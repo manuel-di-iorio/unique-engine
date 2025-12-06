@@ -17,7 +17,7 @@ new UeMouse()
 
 | Properties     | Default | Description |
 |----------------|---------|-------------|
-| `view`         | `0`     | Returns an object with mouse coordinates adjusted to the viewport. Also includes normalized device coordinates (NDC). |
+| `view`         | `0`     | The viewport index from which to retrieve mouse coordinates. |
 
 ## Methods
 

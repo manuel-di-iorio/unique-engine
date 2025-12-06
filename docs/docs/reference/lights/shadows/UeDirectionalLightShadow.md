@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 11
 ---
 
 # UeDirectionalLightShadow
@@ -16,7 +16,7 @@ This class is automatically instantiated when creating a `UeDirectionalLight` an
 new UeDirectionalLightShadow(data = {})
 ```
 
-> Inherits from [UeLightShadow](/docs/reference/lights/shadows/UeLightShadow)
+> Inherits from [UeLightShadow](/docs/reference/core/UeLightShadow)
 
 ### Parameters
 

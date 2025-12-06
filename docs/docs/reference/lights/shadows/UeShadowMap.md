@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 12
 ---
 
 # UeShadowMap
@@ -147,8 +147,6 @@ const light = new UeDirectionalLight(c_white, 1);
 light.castShadow = true;
 
 var shadowMap = light.shadow.map;
-show_debug_message($"Shadow map size: {shadowMap.width}x{shadowMap.height}");
-show_debug_message($"Surface ID: {shadowMap.surface}");
 ```
 
 ### Shadow Rendering Callbacks
@@ -184,12 +182,3 @@ mesh.onAfterShadow = function() {
 2. **Reuse shadow maps:** Set `renderer.shadowMap.autoUpdate = false` for static scenes
 3. **Limit casting objects:** Only set `castShadow = true` on important objects
 4. **Tight shadow frustum:** Adjust shadow camera bounds to cover only necessary area
-
----
-
-## See Also
-
-- [UeDirectionalLightShadow](/docs/reference/lights/shadows/UeDirectionalLightShadow) - Directional light shadows
-- [UeLightShadow](/docs/reference/lights/shadows/UeLightShadow) - Base shadow class
-- [UeLight](/docs/reference/lights/UeLight) - Light base class
-- [UeRenderer](/docs/reference/core/UeRenderer) - Renderer shadow mapping
