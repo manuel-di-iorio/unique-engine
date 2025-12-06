@@ -80,7 +80,7 @@ Inherited from `UeCamera`. Cleans up the camera resource.
 
 Shadow Tips
 
-- When using an orthographic camera as a directional light shadow camera, prefer to call the shadow controller's `fitToBox()` method to compute tight bounds around the scene or caster objects. This reduces wasted shadow map space and improves resolution.
+- When using an orthographic camera as a directional light shadow camera, manually adjust the camera frustum bounds (left, right, top, bottom) to tightly fit the scene or shadow-casting objects. This reduces wasted shadow map space and improves resolution.
 - Texel snapping aligns the orthographic projection to the shadow map texel grid and reduces shimmering during camera or light movement. The engine's `UeDirectionalLightShadow` implements snapping via `updateMatrices()`.
 
 ## Orthographic vs Perspective

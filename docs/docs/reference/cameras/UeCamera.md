@@ -103,4 +103,4 @@ camera.use(); // Activates the camera on view 0
 Shadow Camera Requirements
 
 - Shadow controllers rely on `updateProjectionMatrix()` and `updateMatrixWorld()` to compute light-space matrices used for shadow mapping. When extending or subclassing cameras, ensure these methods correctly update `projectionMatrix`, `matrixWorld`, and `matrixWorldInverse`.
-- For directional shadow cameras (orthographic), shadow stability benefits from texel snapping: aligning the orthographic projection to shadow map texel size reduces shimmering during camera movement. Use `shadow.fitToBox()` or call `shadow.updateMatrices()` after changing the light or scene bounds.
+- For directional shadow cameras (orthographic), shadow stability benefits from texel snapping: aligning the orthographic projection to shadow map texel size reduces shimmering during camera movement. Call `shadow.updateMatrices()` after changing the light or scene bounds.
