@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # UePointLightShadow
 
 `UePointLightShadow` manages shadows for `UePointLight` using a cube shadow map approach (6 faces). This implementation enables point lights to cast shadows in all directions.

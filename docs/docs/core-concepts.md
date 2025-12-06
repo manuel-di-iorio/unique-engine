@@ -66,9 +66,10 @@ Cameras are `UeObject3D` instances, so you can move or rotate them like any othe
 The renderer is responsible for drawing the scene. It does:
 
 - Recursively traverses the scene graph
-- Sorts opaque and transparent objects independently
-- Passing light data to shaders
 - Updates world matrices only where necessary
+- Sorts opaque and transparent objects independently
+- Render the scene on the shadow maps (if available)
+- Passing light data to shaders
 - Calls the render function for each visible mesh
 
 ```js

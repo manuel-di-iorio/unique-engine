@@ -279,6 +279,7 @@
     {"id":{"name":"sh_ue_basic","path":"shaders/sh_ue_basic/sh_ue_basic.yy",},},
     {"id":{"name":"sh_ue_gizmo","path":"shaders/sh_ue_gizmo/sh_ue_gizmo.yy",},},
     {"id":{"name":"sh_ue_line","path":"shaders/sh_ue_line/sh_ue_line.yy",},},
+    {"id":{"name":"sh_ue_normals","path":"shaders/sh_ue_normals/sh_ue_normals.yy",},},
     {"id":{"name":"sh_ue_shadow_map","path":"shaders/sh_ue_shadow_map/sh_ue_shadow_map.yy",},},
     {"id":{"name":"sh_ue_sprite","path":"shaders/sh_ue_sprite/sh_ue_sprite.yy",},},
     {"id":{"name":"sh_ue_standard","path":"shaders/sh_ue_standard/sh_ue_standard.yy",},},

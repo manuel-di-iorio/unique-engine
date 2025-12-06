@@ -65,8 +65,8 @@ A ready-to-use material with built-in lighting support (ambient, point, directio
 **Example:**
 ```js
 material = new UeMeshStandardMaterial();
-material.color = #229094;
-material.textures.map = new UeTexture("my_texture.png");
+material.opacity = .8;
+material.setTexture("map", new UeTexture("my_texture.png"));
 material.build();
 // or pass these data into the first argument of UeMeshStandardMaterial({ <data> }) with automatic building.
 ```

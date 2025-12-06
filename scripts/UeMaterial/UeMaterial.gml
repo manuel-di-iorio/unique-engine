@@ -283,8 +283,8 @@ function UeMaterial(data = {}) constructor {
         }
         
         // Set receive shadow uniform
-        if (__uniformReceiveShadowLoc != -1) {
-            shader_set_uniform_f(__uniformReceiveShadowLoc, mesh.receiveShadow ? 1.0 : 0.0);
+        if (mesh.receiveShadow) {
+            shader_set_uniform_f(__uniformReceiveShadowLoc, 1);
         }
         
         // Set the culling mode (can be overwritten by argument for transparent objects)
@@ -297,9 +297,23 @@ function UeMaterial(data = {}) constructor {
      * Set the value of a cached uniform that will be passed to the shader in the next frame
      */
     function setUniform(name, value) {
+        gml_pragma("forceinline");
         uniforms[$ name] = value;
+        return self;
     }
     
+    /**
+     * Set the texture given the name
+     */
+    function setTexture(name, value) {
+        gml_pragma("forceinline");
+        textures[$ name] = value;
+        return self;
+    }
+    
+    /**
+     * Clone the marial
+     */
     function clone() {
         gml_pragma("forceinline");
         return variable_clone(self);
