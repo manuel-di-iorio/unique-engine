@@ -44,8 +44,8 @@ function SceneManager() constructor {
     global.UE_MOUSE.view = 1;
     
     // Test lights
-    self.scene.add(new UeAmbientLight(c_dkgray, { name: "UeAmbientLight", matrixAutoUpdate: false }));
-    self.scene.add(new UeDirectionalLight(30, 60, { name: "UeDirectionalLight", matrixAutoUpdate: false }));
+    var dirLight = new UeDirectionalLight(c_ltgray, 1, { x: -300, y: 300, z: 200 });
+    self.scene.add(new UeAmbientLight(c_dkgray, { name: "UeAmbientLight", matrixAutoUpdate: false }), dirLight);
 
     // Create raycaster and set from camera
     self.raycaster = new UeRaycaster();
