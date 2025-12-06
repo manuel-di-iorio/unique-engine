@@ -5,19 +5,12 @@ attribute vec2 in_TextureCoord;              // (u,v)
 
 varying vec3 v_vWorldPosition;
 varying vec3 v_vWorldNormal;
-varying vec2 v_vTexcoord;
-varying vec4 v_vColour;
-
-uniform mat4 u_ueLightSpaceMatrix;           // Light projection * view matrix
 
 void main()
 {
     vec4 worldPosition = gm_Matrices[MATRIX_WORLD] * vec4(in_Position.xyz, 1.0);
     v_vWorldPosition = worldPosition.xyz;
     v_vWorldNormal = normalize((gm_Matrices[MATRIX_WORLD] * vec4(in_Normal, 0.0)).xyz);
-    
-    v_vColour = in_Colour;
-    v_vTexcoord = in_TextureCoord;
     
     gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(in_Position.xyz, 1.0);
 }

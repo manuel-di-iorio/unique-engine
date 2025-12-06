@@ -1,5 +1,35 @@
 {
   "version":"2025.12.1.0",
+  "settings":{
+    "gizmos":{
+      "showBoxColliders":true
+    },
+    "gridEnabled":true,
+    "camera":{
+      "damping":true,
+      "dampingFactor":0.29999999999999999,
+      "position":[
+        79.448558798662845,
+        -402.32311726614648,
+        266.6216488944504
+      ],
+      "target":[
+        0.95801589013005894,
+        135.05675862680894,
+        0.0
+      ]
+    },
+    "counters":{
+      "models":28.0,
+      "folders":8.0,
+      "textures":2.0,
+      "cameras":0.0,
+      "instances":48.0,
+      "materials":28.0,
+      "lights":0.0,
+      "scenes":3.0
+    }
+  },
   "folders":{
     "9ff898e0-953e-4435-99b5-d5e825905d60":{
       "name":"Snow",
@@ -30,36 +60,6 @@
       "name":"Objects",
       "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
       "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
-    }
-  },
-  "settings":{
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true,
-    "camera":{
-      "dampingFactor":0.29999999999999999,
-      "target":[
-        195.17580930381266,
-        74.692558170285139,
-        0.0
-      ],
-      "damping":true,
-      "position":[
-        -262.01511525576529,
-        -479.87406754563995,
-        210.37491945177175
-      ]
-    },
-    "counters":{
-      "models":28.0,
-      "folders":8.0,
-      "cameras":0.0,
-      "instances":48.0,
-      "textures":2.0,
-      "materials":28.0,
-      "lights":0.0,
-      "scenes":3.0
     }
   },
   "assets":[

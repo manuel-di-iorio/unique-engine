@@ -256,6 +256,7 @@
     {"id":{"name":"ueStructEach","path":"scripts/ueStructEach/ueStructEach.yy",},},
     {"id":{"name":"ueStructMap","path":"scripts/ueStructMap/ueStructMap.yy",},},
     {"id":{"name":"UeTexture","path":"scripts/UeTexture/UeTexture.yy",},},
+    {"id":{"name":"UeTorusGeometry","path":"scripts/UeTorusGeometry/UeTorusGeometry.yy",},},
     {"id":{"name":"UeTransform","path":"scripts/UeTransform/UeTransform.yy",},},
     {"id":{"name":"UeTransformControls","path":"scripts/UeTransformControls/UeTransformControls.yy",},},
     {"id":{"name":"ueUuid","path":"scripts/ueUuid/ueUuid.yy",},},
@@ -319,8 +320,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
     {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
+    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

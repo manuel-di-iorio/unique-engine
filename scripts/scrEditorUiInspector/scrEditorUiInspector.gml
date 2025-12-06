@@ -87,7 +87,8 @@ function EditorUiInspector(ui) constructor {
                     { label: "Standard", value: sh_ue_standard, tooltip: "Shader with lighting support" },
                     { label: "Basic (unlit)", value: sh_ue_basic, tooltip: "Simple unlit shader" },
                     { label: "Line", value: sh_ue_line, tooltip: "Shader for rendering lines" },
-                    { label: "Sprite", value: sh_ue_sprite, tooltip: "Shader for rendering sprites" }
+                    { label: "Sprite", value: sh_ue_sprite, tooltip: "Shader for rendering sprites" },
+                    { label: "Normals", value: sh_ue_normals, tooltip: "Shader for showing normals" }
                 ],
                 onAfterChange: function() {
                     self.asset.build();

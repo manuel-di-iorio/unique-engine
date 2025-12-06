@@ -20,3 +20,10 @@ control.attach(box);
 scene.add(control.getHelper());
 
 tool = "view";
+
+// t = new UeTorusGeometry(15, .2, {
+//   radialSegments: 4,
+//   tubularSegments: 32
+// });
+// tm = new UeMesh(t, new UeMeshBasicMaterial());
+// scene.add(tm);

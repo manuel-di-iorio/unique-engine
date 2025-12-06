@@ -1,13 +1,6 @@
 device_mouse_dbclick_enable(false);
 randomize();
 
-// Anti-aliasing
-if (display_aa >= 8) {
-    display_reset(8, false);
-} else if (display_aa >= 4) {
-    display_reset(4, false);
-}
-
 // Maximize the window
 runLater(function() {
     window_command_run(window_command_maximize);
