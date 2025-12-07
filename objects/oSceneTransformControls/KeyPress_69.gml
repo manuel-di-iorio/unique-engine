@@ -1,1 +1,2 @@
-//tool = "rotate";
+tool = "rotate";
+control.setMode("rotate");

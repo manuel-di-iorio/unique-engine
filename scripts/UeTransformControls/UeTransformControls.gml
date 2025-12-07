@@ -39,6 +39,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     // Temporary vectors for dragging calculations
     self.pointStart = new UeVector3();
     self.pointEnd = new UeVector3();
+    self.pointPrevious = new UeVector3();  // Track previous point for incremental rotation
+    self._rotationAngle = 0; // Accumulates total rotation angle during drag
     self.delta = new UeVector3();
 
     // Store object's initial transform at drag start
@@ -62,6 +64,11 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         transparent: true,
         shader: sh_ue_gizmo
     });
+    
+    // Ensure ueEmissive uniform exists for highlighting (override if needed)
+    if (__matMesh.uniforms[$ "ueEmissive"] == undefined) {
+        __matMesh.uniforms.ueEmissive = { type: UE_UNIFORM_TYPE.ARRAY, value: [0, 0, 0] };
+    }
     
     /**
      * Attaches the transform controls to a 3D object, enabling manipulation.
@@ -110,13 +117,26 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     
     /**
      * Builds the gizmo visual lines for the axes according to current size and visibility.
-     * Creates arrow geometries for each axis and plane handles for multi-axis manipulation.
+     * Creates different geometries based on the current mode (move or rotate).
      */
     function build() {
         gml_pragma("forceinline");
         clearGizmo(self._root);  // Remove previous gizmo geometry to avoid memory leaks
         self._gizmo = new UeMesh(); // Interactable gizmo container
         self._root.add(self._gizmo);
+        
+        if (self.mode == "move") {
+            buildTranslateModeGizmo();
+        } else if (self.mode == "rotate") {
+            buildRotateModeGizmo();
+        }
+    }
+    
+    /**
+     * Builds the translate (move) mode gizmo with arrows and plane handles.
+     */
+    function buildTranslateModeGizmo() {
+        gml_pragma("forceinline");
         var _baseLength = __axisLengthHalf + __axisOffset;
         
         // Create X axis line (Red)
@@ -197,6 +217,70 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     }
     
     /**
+     * Builds the rotate mode gizmo with torus rings for each axis.
+     */
+    function buildRotateModeGizmo() {
+        gml_pragma("forceinline");
+        var _torusRadius = __axisLength * 1;  // Radius of the rotation rings
+        var _torusThickness = __axisLineWidth * 0.5; // Thickness of the rings
+        
+        // Create X axis ring (Red) - rotates around X axis in YZ plane
+        var geoX = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12,  // Increased for easier selection
+            tubularSegments: 32,
+            color: c_red
+        });
+        geoX.boundingBox = new UeBox3();
+        geoX.computeBoundingBox();
+        var meshX = new UeMesh(geoX, __matMesh.clone());
+        meshX.name = "X";
+        meshX.rotation.setFromAxisAngle(__yVec, 90);  // Align torus to YZ plane
+        meshX.raycastOrder = 0;
+        self._gizmo.add(meshX);
+        
+        // Create Y axis ring (Blue) - rotates around Y axis in XZ plane
+        var geoY = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12,  // Increased for easier selection
+            tubularSegments: 32,
+            color: #2277B3
+        });
+        geoY.boundingBox = new UeBox3();
+        geoY.computeBoundingBox();
+        var meshY = new UeMesh(geoY, __matMesh.clone());
+        meshY.name = "Y";
+        meshY.rotation.setFromAxisAngle(__xVec, 90);  // Align torus to XZ plane
+        meshY.raycastOrder = 0;
+        self._gizmo.add(meshY);
+        
+        // Create Z axis ring (Green) - rotates around Z axis in XY plane  
+        var geoZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12,  // Increased for easier selection
+            tubularSegments: 32,
+            color: c_lime
+        });
+        geoZ.boundingBox = new UeBox3();
+        geoZ.computeBoundingBox();
+        var meshZ = new UeMesh(geoZ, __matMesh.clone());
+        meshZ.name = "Z";
+        // Z torus is already in XY plane by default, no rotation needed
+        meshZ.raycastOrder = 0;
+        self._gizmo.add(meshZ);
+
+        // Create Screen Space Rotation ring (Yellow) - always faces camera ('E')
+        var geoE = new UeTorusGeometry(_torusRadius * 1.25, _torusThickness, {
+            radialSegments: 12,
+            tubularSegments: 32,
+            color: #fafadd
+        });
+        geoE.boundingBox = new UeBox3();
+        geoE.computeBoundingBox();
+        var meshE = new UeMesh(geoE, __matMesh.clone());
+        meshE.name = "E";
+        meshE.raycastOrder = 0;
+        self._gizmo.add(meshE);
+    }
+    
+    /**
      * Updates the gizmo's position and orientation to match the attached object's transform and camera direction.
      * In world space, plane handles are positioned relative to camera to maintain visibility.
      * Automatically scales the gizmo based on distance from camera to maintain consistent apparent size.
@@ -235,27 +319,45 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             self.object.getWorldQuaternion(_wq);
             self._root.rotation.copy(_wq);
         } else {
-            // In world space, position plane handles based on camera direction for optimal visibility
-            var camDir = self.camera.getWorldDirection();
-            
-            // XZ plane positioning - place on the side of the gizmo facing away from camera
-            var meshXZ = self._gizmo.getObjectByName("XZ");    
-            meshXZ.rotation.setFromAxisAngle(__xVec, 90);  // Orient plane horizontally
-            meshXZ.position.x = (camDir.x < 0) ? -__planeSize : __planeSize;
-            meshXZ.position.z = (camDir.z < 0) ? -__planeSize : __planeSize;
-                 
-            // YZ plane positioning
-            var meshYZ = self._gizmo.getObjectByName("YZ");
-            meshYZ.rotation.setFromAxisAngle(__yVec, 90);  // Orient plane vertically
-            meshYZ.position.y = (camDir.y < 0) ? -__planeSize : __planeSize;
-            meshYZ.position.z = (camDir.z < 0) ? -__planeSize : __planeSize;
-            
-            // XY plane positioning
-            var meshXY = self._gizmo.getObjectByName("XY");
-            meshXY.rotation.setFromAxisAngle(__zVec, 0);   // Keep plane facing camera
-            meshXY.position.z = 0;
-            meshXY.position.x = (camDir.x < 0) ? -__planeSize : __planeSize;
-            meshXY.position.y = (camDir.y < 0) ? -__planeSize : __planeSize;
+            // In world space mode
+            if (self.mode == "move") {
+                // Position plane handles based on camera direction for optimal visibility
+                var camDir = self.camera.getWorldDirection();
+                
+                // XZ plane positioning - place on the side of the gizmo facing away from camera
+                var meshXZ = self._gizmo.getObjectByName("XZ");    
+                meshXZ.rotation.setFromAxisAngle(__xVec, 90);  // Orient plane horizontally
+                meshXZ.position.x = (camDir.x < 0) ? -__planeSize : __planeSize;
+                meshXZ.position.z = (camDir.z < 0) ? -__planeSize : __planeSize;
+                     
+                // YZ plane positioning
+                var meshYZ = self._gizmo.getObjectByName("YZ");
+                meshYZ.rotation.setFromAxisAngle(__yVec, 90);  // Orient plane vertically
+                meshYZ.position.y = (camDir.y < 0) ? -__planeSize : __planeSize;
+                meshYZ.position.z = (camDir.z < 0) ? -__planeSize : __planeSize;
+                
+                // XY plane positioning
+                var meshXY = self._gizmo.getObjectByName("XY");
+                meshXY.rotation.setFromAxisAngle(__zVec, 0);   // Keep plane facing camera
+                meshXY.position.z = 0;
+                meshXY.position.x = (camDir.x < 0) ? -__planeSize : __planeSize;
+                meshXY.position.y = (camDir.y < 0) ? -__planeSize : __planeSize;
+            } else if (self.mode == "rotate") {
+                // For rotate mode in world space, update E axis to always face camera
+                var meshE = self._gizmo.getObjectByName("E");
+                if (meshE != undefined) {
+                    // Calculate direction from gizmo to camera
+                    var dirToCamera = self.camera.position.clone().sub(self._root.position).normalize();
+                    
+                    // Orient the E axis (torus) to face the camera
+                    // The torus normal (Z axis by default) should align with the camera direction
+                    // Use setFromUnitVectors to directly align Z axis with camera direction
+                    var quaternion = new UeQuaternion();
+                    var defaultNormal = new UeVector3(0, 0, 1); // Torus default normal (Z-up)
+                    quaternion.setFromUnitVectors(defaultNormal, dirToCamera);
+                    meshE.rotation.copy(quaternion);
+                }
+            }
         }
     }
 
@@ -293,13 +395,19 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             });
          
             if (array_length(intersects) > 0) {
-                // Highlight the hovered axis with slight scaling
+                // Highlight the hovered axis with slight scaling and white glow
                 var hovered = intersects[0].object;
                 hovered.scale.set(1.05, 1.05, 1.05);
+                hovered.material.uniforms.ueEmissive.value = [0.3, 0.3, 0.3]; // Subtle white glow
                 self.hoveredAxis = hovered;
             } else {
                 self.hoveredAxis = undefined;
             } 
+        } else {
+            // While dragging, keep the selected axis highlighted with yellow glow
+            if (self.selectedAxis != undefined) {
+                self.selectedAxis.material.uniforms.ueEmissive.value = [1, 1, 0]; // Bright yellow
+            }
         }
     }
 
@@ -332,16 +440,28 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             axisVec.applyQuaternion(self.object.rotation);
         }
 
-        // Calculate the optimal plane for dragging based on camera direction and selected axis
+        // Calculate the optimal plane for dragging based on mode and selected axis
         var camDir = self.camera.getWorldDirection(); 
         var _planeNormal = camDir;
         
-        if (self.axis == "X" || self.axis == "Y" || self.axis == "Z") {
-            // For single axis: create plane perpendicular to both camera direction and axis
+        if (self.mode == "rotate" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
+            // For rotate mode: plane is perpendicular to the rotation axis
+            // This allows the mouse to move in a circle around the axis
+            _planeNormal = axisVec.clone();
+            
+            // If camera is looking from the opposite side, flip the plane
+            var dot = camDir.dot(_planeNormal);
+            if (dot < 0) {
+                _planeNormal.negate();
+            }
+        }
+        else if (self.mode == "move" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
+            // For move mode single axis: create plane perpendicular to both camera direction and axis
             // Mathematical explanation: cross(camDir, axis) gives perpendicular vector,
             // then cross that with axis again to get plane normal that contains the axis
             _planeNormal = camDir.clone().cross(axisVec).cross(axisVec).normalize();
-        } else if (self.axis == "XZ" || self.axis == "YZ" || self.axis == "XY") {
+        } 
+        else if (self.axis == "XZ" || self.axis == "YZ" || self.axis == "XY") {
             // For plane handles: use the plane's natural normal
             switch (self.axis) {
                 case "XY": _planeNormal = __zVec.clone(); break; 
@@ -381,6 +501,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             return;
         }
         self.pointStart.copy(intersectionPoint);
+        self.pointPrevious.copy(intersectionPoint);  // Initialize previous point for rotation
+        self._rotationAngle = 0; // Reset accumulated rotation for new drag
     }
 
     /**
@@ -397,8 +519,9 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
         self.pointEnd.copy(intersectionPoint);
 
-        // Calculate drag delta vector between current and start points
-        // This delta represents the movement in 3D space
+        // Calculate drag delta vector
+        // For move/scale we use delta from start.
+        // For rotate, we will calculate angle directly from vectors in applyTransform
         self.delta.copy(self.pointEnd).sub(self.pointStart);
 
         applyTransform();  // Apply transform change to object based on delta
@@ -497,8 +620,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             // Apply to object (targetWorldPos is now the new local position)
             var newPos = targetWorldPos;
             
-            // Apply snapping (on local position for consistency with previous behavior, or we could snap worldDelta)
-            // For now, keeping local snapping as it maps to the grid usually expected in local editing
+            // Apply snapping if needed
             if (self.translationSnap != undefined) {
                 if (self.axis == "X") newPos.x = round(newPos.x / self.translationSnap) * self.translationSnap;
                 else if (self.axis == "Y") newPos.y = round(newPos.y / self.translationSnap) * self.translationSnap;
@@ -518,36 +640,67 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             // Apply the final position change to the object
             self.object.position.copy(newPos);
         }
+        else if (self.mode == "rotate") {
+            var axisVec = new UeVector3();
+            if (self.axis == "X") axisVec.copy(__xVec);
+            else if (self.axis == "Y") axisVec.copy(__yVec);
+            else if (self.axis == "Z") axisVec.copy(__zVec);
+            else if (self.axis == "E") {
+                // Screen space rotation: axis is vector from object to camera
+                axisVec.copy(self.camera.position).sub(self._positionStartWorld).normalize();
+            }
+            else return; 
+    
+            if (self.space == "local" && self.axis != "E") {
+                var objectWorldRot = new UeQuaternion();
+                self.object.getWorldQuaternion(objectWorldRot);
+                axisVec.applyQuaternion(objectWorldRot);
+            }
+    
+            // Accumulate rotation using small deltas (prev -> curr)
+            // This allows for infinite rotation (>360 degrees) and stable behavior
+            
+            var center = self._positionStartWorld;
+            var vPrev = self.pointPrevious.clone().sub(center);
+            var vCurr = self.pointEnd.clone().sub(center);
+            
+            // Project vectors onto the plane perpendicular to the axis
+            var vPrevProj = vPrev.clone().sub(axisVec.clone().multiplyScalar(vPrev.dot(axisVec)));
+            var vCurrProj = vCurr.clone().sub(axisVec.clone().multiplyScalar(vCurr.dot(axisVec)));
+            
+            vPrevProj.normalize();
+            vCurrProj.normalize();
+            
+            // Calculate small angle change this frame
+            var cross = vPrevProj.clone().cross(vCurrProj);
+            var dot = vPrevProj.dot(vCurrProj);
+            var angleDelta = radtodeg(arctan2(cross.dot(axisVec), dot));
+            
+            // Accumulate total angle
+            self._rotationAngle += angleDelta;
+            
+            // Prepare final angle (with snapping if enabled)
+            var finalAngle = self._rotationAngle;
+            if (self.rotationSnap != undefined) {
+                finalAngle = round(finalAngle / self.rotationSnap) * self.rotationSnap;
+            }
+            
+            // Create rotation from START state using accumulated angle
+            var rotationDelta = new UeQuaternion();
+            rotationDelta.setFromAxisAngle(axisVec, finalAngle);
+            
+            // Apply to initial rotation
+            // rotation = rotationDelta * rotationStart
+            var temp = rotationDelta.clone();
+            self.object.rotation.copy(temp.multiply(self._rotationStart));
+            
+            // Update previous point for next frame
+            self.pointPrevious.copy(self.pointEnd);
+        }
         
-        // Note: Rotation and scaling modes are commented out but would follow similar patterns:
-        // - Rotation: Convert drag delta to angular rotation around the selected axis
+        // Note: Scaling mode would follow similar patterns:
         // - Scaling: Convert drag delta to scale factors with proper sensitivity
         
-        //else if (self.mode == "rotate") {
-            //var axisVec = new UeVector3();
-            //if (self.axis == "X") axisVec.set(1,0,0);
-            //else if (self.axis == "Y") axisVec.set(0,1,0);
-            //else if (self.axis == "Z") axisVec.set(0,0,1);
-            //else return; // no axis selected
-    //
-            //if (self.space == "local") {
-                //axisVec.applyQuaternion(self.object.rotation);
-            //}
-    //
-            //// Use delta projection for rotation sensitivity
-            //var deltaLength = self.delta.length();
-            //var angle = deltaLength * 0.01; // Sensitivity factor for rotation
-            //
-            //if (self.rotationSnap != undefined) {
-                //angle = round(angle / self.rotationSnap) * self.rotationSnap;
-            //}
-    //
-            //// Create quaternion for rotation around axisVec by angle
-            //var q = new UeQuaternion();
-            //q.setFromAxisAngle(axisVec, angle);
-    //
-            //self.object.rotation.multiplyQuaternions(q, self._rotationStart);
-        //}
         //else if (self.mode == "scale") {
             //var newScale = self._scaleStart.clone();
             //var delta = self.delta.clone();
@@ -607,7 +760,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
      */
     function setMode(mode) {
         gml_pragma("forceinline"); 
-        self.mode = mode; 
+        self.mode = mode;
+        if (self.object != undefined) build();  // Rebuild gizmo with new mode
         return self; 
     }
     

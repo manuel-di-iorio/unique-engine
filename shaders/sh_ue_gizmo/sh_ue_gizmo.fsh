@@ -4,6 +4,9 @@ varying vec2 v_vTexcoord;
 varying vec4 v_vColour;
 varying vec3 v_vNormal;
 
+// Uniforms
+uniform vec3 u_ueEmissive; // Emissive color for highlighting
+
 // Gamma correction (sRGB to Linear color space)
 #define GAMMA 2.2
 
@@ -36,6 +39,9 @@ void main()
 
     // === Final lit color ===
     vec3 litColor = baseColor.rgb * lighting;
+    
+    // === Add emissive for highlighting ===
+    litColor += SRGBToLinear(u_ueEmissive);
 
     // === Back to sRGB color space ===
     vec3 finalColor = LinearToSRGB(clamp(litColor, 0.0, 1.0));
