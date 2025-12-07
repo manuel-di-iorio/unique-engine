@@ -1,2 +1,1 @@
-//tool = "scale";
-// control.setMode("scale");
+control.setMode("scale");

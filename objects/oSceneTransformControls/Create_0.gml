@@ -18,5 +18,3 @@ scene.add(box);
 control = new UeTransformControls(camera);
 control.attach(box);
 scene.add(control.getHelper());
-
-tool = "view";

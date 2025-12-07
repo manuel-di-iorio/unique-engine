@@ -99,12 +99,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         var boundingSphere = geometry[$ "boundingSphere"];
         if (boundingSphere != undefined) {
              if (!localRay.intersectSphere(boundingSphere, global.UE_DUMMY_VECTOR3)) return self; 
-        }
-        
-        var boundingBox = geometry[$ "boundingBox"];
-        if (boundingBox != undefined) {
-			if (!localRay.intersectBox(boundingBox, global.UE_DUMMY_VECTOR3)) return self;
-		} 
+        }       
         
         // --- 2. Precise Intersection Test (Triangles) ---
         // If precise raycasting is enabled for Mesh, we test every triangle
@@ -117,7 +112,6 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             var len = hasIndices ? array_length(indices) : array_length(verts);
             
             var minDistSq = infinity;
-            var hasHit = false;
             
             // Intersection calculation variables (reused globals)
             var edge1 = global.UE_DUMMY_VECTOR3_E;
@@ -184,25 +178,27 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                       
                       var dSq = intersectPoint.distanceToSquared(raycaster.ray.origin);
                       
-                      if (dSq < minDistSq) {
+                      if (dSq >= minDistSq) {
                           minDistSq = dSq;
-                          hasHit = true;
+                          return self;
                       }
                  }
             }
             
-            if (hasHit) {
-                array_push(hits, {
-                    object,
-                    distance: minDistSq
-                });
-            }
+            array_push(hits, {
+                object,
+                distance: minDistSq
+            });
 
         } else {
-            // --- 3. Approximate Intersection (Bounds passed) ---
+            // --- 3. Approximate Intersection (Bounding box) ---
             // If strictly precise is not required, we assume the bounding volume hit is sufficient
             // We use the object's origin distance as the sorting metric
-            // Note: This is a fallback and generally Gizmos require precise=true
+            var boundingBox = geometry[$ "boundingBox"];
+            if (boundingBox != undefined) {
+                if (!localRay.intersectBox(boundingBox, global.UE_DUMMY_VECTOR3)) return self;
+            } 
+            
             array_push(hits, {
                 object,
                 distance: position.distanceToSquared(raycaster.ray.origin)

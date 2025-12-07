@@ -4,6 +4,33 @@ global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().
 global.UE_TEXTURE_MAP = new UeTexture(sprUeMapTex);
 global.UE_TEXTURE_EMISSIVE = new UeTexture(sprUeEmissiveTex);
 global.UE_MOUSE = new UeMouse();
+
+// Uniform names configuration
+global.UE_UNIFORM_NAMES_CONFIG = {
+    modelPosition: "u_ueModelPosition",
+    ambient: "u_ueAmbient",
+    emissiveIntensity: "u_ueEmissiveIntensity",
+    
+    // Shadow
+    lightSpaceMatrix: "u_ueLightSpaceMatrix",
+    shadowEnabled: "u_ueShadowEnabled",
+    receiveShadow: "u_ueReceiveShadow",
+    shadowQuality: "u_ueShadowQuality",
+    shadowTexelSize: "u_ueShadowTexelSize",
+    shadowMapSampler: "s_shadowMap", // Sampler
+    
+    // Directional Light Prefixes
+    dirLightDir: "u_ueDirLightDir",
+    dirLightColor: "u_ueDirLightColor",
+    dirLightIntensity: "u_ueDirLightIntensity",
+    
+    // Point Light Prefixes
+    pointLightPosition: "u_uePointLightPosition",
+    pointLightColor: "u_uePointLightColor",
+    pointLightRange: "u_uePointLightRange",
+    pointLightIntensity: "u_uePointLightIntensity"
+};
+
 global.UE_DEFAULT_MATERIAL = new UeMeshBasicMaterial();
 global.UE_DEFAULT_MATERIAL_WIREFRAME = new UeMeshBasicMaterial();
 

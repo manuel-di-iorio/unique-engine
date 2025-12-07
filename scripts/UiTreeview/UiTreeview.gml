@@ -194,14 +194,13 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     
     // Left and right content
     self.LeftContent = new UiNode({ name: "UiTreeview.Item.Content.LeftContent", flexDirection: "row", alignItems: "center"  });
-    // self.RightContent = new UiNode({ name: "UiTreeview.Item.Content.RightContent", flexDirection: "row", alignItems: "center"  });
-    self.Content.add(self.LeftContent/*, self.RightContent*/);
+    self.Content.add(self.LeftContent);
 
     // Arrow
-    self.Arrow = new UiButton(sprUiTreeviewArrowDown, { 
+    self.Arrow = new UiSprite(sprUiTreeviewArrowDown, { 
         name: "UiTreeview.Item.Content.ArrowBtn",
         padding: 4, marginLeft: 5, marginRight: 10, width: 14, height: 9,
-    }, { outline: true, visible: false });
+    }, { outline: true, visible: false, pointerEvents: true });
     
     self.Arrow.onClick(method(self, function() {
         if (self.collapsed) {

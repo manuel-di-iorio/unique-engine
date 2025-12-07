@@ -1,4 +1,4 @@
-switch (tool) {
+switch (control.mode) {
     case "move":
     case "rotate":
     case "scale":

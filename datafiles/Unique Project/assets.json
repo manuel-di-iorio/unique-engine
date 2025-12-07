@@ -7,27 +7,27 @@
     "gridEnabled":true,
     "camera":{
       "damping":true,
-      "dampingFactor":0.29999999999999999,
-      "position":[
-        186.40372715550279,
-        -366.00074328875439,
-        283.85959195950238
-      ],
       "target":[
         0.95801589013005894,
         135.05675862680894,
         0.0
-      ]
+      ],
+      "position":[
+        86.099660887869916,
+        -441.2638936347754,
+        163.18825344938494
+      ],
+      "dampingFactor":0.29999999999999999
     },
     "counters":{
+      "scenes":3.0,
       "models":28.0,
       "folders":8.0,
       "textures":2.0,
       "cameras":0.0,
       "instances":48.0,
       "materials":28.0,
-      "lights":0.0,
-      "scenes":3.0
+      "lights":0.0
     }
   },
   "folders":{

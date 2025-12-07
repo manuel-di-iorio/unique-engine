@@ -12,7 +12,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     self.axis = undefined;            // Currently selected axis object name (X, Y, Z, etc..)
     self.dragging = false;            // Flag to indicate if dragging is in progress
     self.size = 1.3;                  // Gizmo visual size multiplier
-    self.mode = "move";               // Current transform mode: "move", "rotate", or "scale"
+    self.mode = "view";               // Current transform mode: "view", "move", "rotate", or "scale"
     self.space = "world";             // Transform space: "world" or "local"
 
     // === BOUNDS AND SNAP SETTINGS ===
@@ -33,7 +33,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
     // === INTERNAL HELPERS ===
     self._raycaster = new UeRaycaster();  // Raycaster for mouse picking
-    //self._raycaster.params.Mesh.precise = true;
+    // self._raycaster.params.Mesh.precise = true;
     self._root = new UeMesh();         // Root object    
     self._plane = new UePlane();       // Plane used for intersection during dragging
 
@@ -130,6 +130,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             buildTranslateModeGizmo();
         } else if (self.mode == "rotate") {
             buildRotateModeGizmo();
+        } else if (self.mode == "scale") {
+            buildScaleModeGizmo();
         }
     }
     
@@ -140,23 +142,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         var _baseLength = __axisLengthHalf + __axisOffset;
         
-        // Helper for manual bounding box creation
-        // var createArrowBox = function(len, width) {
-        //     var halfW = width * 0.5;
-        //     // Arrow usually goes from 0 to len in Y (or configured axis)
-        //     // UeArrowGeometry defaults: cylinder radius top=0, bottom=width, height=len.
-        //     return new UeBox3(new UeVector3(-halfW, 0, -halfW), new UeVector3(halfW, len, halfW));
-        // };
-        
-        // var createPlaneBox = function(size, depth) {
-        //     var halfS = size * 0.5;
-        //     var halfD = depth * 0.5;
-        //     return new UeBox3(new UeVector3(-halfS, -halfS, -halfD), new UeVector3(halfS, halfS, halfD));
-        // };
-
         // Create X axis line (Red)
         var geoX = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_red });
-        // geoX.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
         geoX.computeBoundingBox();
         var meshX = new UeMesh(geoX, __matMesh.clone());
         meshX.name = "X";
@@ -167,7 +154,6 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // Create Y axis line (Blue)
         var geoY = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: #2277B3 });
-        // geoY.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
         geoY.computeBoundingBox();
         var meshY = new UeMesh(geoY, __matMesh.clone());
         meshY.name = "Y";
@@ -178,7 +164,6 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // Create Z axis line (Green/Lime)
         var geoZ = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_lime });
-        // geoZ.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
         geoZ.computeBoundingBox();
         var meshZ = new UeMesh(geoZ, __matMesh.clone());
         meshZ.name = "Z";
@@ -192,7 +177,6 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // XZ plane (Blue) - allows movement along X and Z axes simultaneously
         var geoXZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: #2277B3, alpha: __planeOpacity });
-        // geoXZ.boundingBox = createPlaneBox(__planeSize, __planeDepth);
         geoXZ.computeBoundingBox();
         var meshXZ = new UeMesh(geoXZ, __matMesh.clone());
         meshXZ.name = "XZ";
@@ -201,7 +185,6 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // YZ plane (Red) - allows movement along Y and Z axes simultaneously
         var geoYZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_red, alpha: __planeOpacity });
-        // geoYZ.boundingBox = createPlaneBox(__planeSize, __planeDepth);
         geoYZ.computeBoundingBox();
         var meshYZ = new UeMesh(geoYZ, __matMesh.clone());
         meshYZ.name = "YZ";
@@ -210,7 +193,6 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // XY plane (Green) - allows movement along X and Y axes simultaneously
         var geoXY = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_lime, alpha: __planeOpacity });
-        // geoXY.boundingBox = createPlaneBox(__planeSize, __planeDepth);
         geoXY.computeBoundingBox();
         var meshXY = new UeMesh(geoXY, __matMesh.clone());
         meshXY.name = "XY";
@@ -222,7 +204,6 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         // Use axisLineWidth for proportional sizing instead of axisOffset to avoid oversized cubes
         var cubeSize = __axisLineWidth * 3;
         var geoBox = new UeBoxGeometry(cubeSize, cubeSize, cubeSize, { color: c_ltgray });
-        // geoBox.boundingBox = new UeBox3(new UeVector3(-cubeSize*0.5, -cubeSize*0.5, -cubeSize*0.5), new UeVector3(cubeSize*0.5, cubeSize*0.5, cubeSize*0.5));
         geoBox.computeBoundingBox();
         var meshBox = new UeMesh(geoBox, __matMesh.clone());
         meshBox.name = "XYZ";
@@ -378,7 +359,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self._gizmo.add(meshBackZ);
 
         // Create Screen Space Rotation ring (Yellow) - always faces camera ('E')
-        var eRadius = _torusRadius * 1.25;
+        var eRadius = _torusRadius * 1.3;
         var eLimit = eRadius + _torusThickness;
         var geoE = new UeTorusGeometry(eRadius, _torusThickness, {
             radialSegments: 12,
@@ -393,6 +374,115 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         meshE.name = "E";
         meshE.raycastOrder = 0;
         self._gizmo.add(meshE);
+    }
+
+    /**
+     * Builds the scale mode gizmo with box handles for each axis.
+     */
+    function buildScaleModeGizmo() {
+        gml_pragma("forceinline");
+         
+        var _handleSize = __axisLineWidth * 4;
+        var lineLen = __axisLength;
+
+        // Create X axis (Red)
+        // Cylinder X -> X: No rotation
+        var meshX = __createMergedScaleAxis("X", c_red, undefined, 0, new UeVector3(lineLen/2, 0, 0), new UeVector3(lineLen, 0, 0), _handleSize, lineLen);       
+        
+        // Create Y axis (Blue)
+        // Cylinder X -> Y: Rotate Z 90
+        var meshY = __createMergedScaleAxis("Y", #2277B3, __zVec, 90, new UeVector3(0, lineLen/2, 0), new UeVector3(0, lineLen, 0), _handleSize, lineLen);
+        
+        // Create Z axis (Green)
+        // Cylinder X -> Z: Rotate Y -90
+        var meshZ = __createMergedScaleAxis("Z", c_lime, __yVec, -90, new UeVector3(0, 0, lineLen/2), new UeVector3(0, 0, lineLen), _handleSize, lineLen);
+        
+        // XZ plane (Blue)
+        var geoXZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: #2277B3, alpha: __planeOpacity });
+        geoXZ.computeBoundingBox();
+        var meshXZ = new UeMesh(geoXZ, __matMesh.clone());
+        meshXZ.name = "XZ";
+        meshXZ.raycastOrder = 1;
+        self._gizmo.add(meshXZ);
+        
+        // YZ plane (Red)
+        var geoYZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_red, alpha: __planeOpacity });
+        geoYZ.computeBoundingBox();
+        var meshYZ = new UeMesh(geoYZ, __matMesh.clone());
+        meshYZ.name = "YZ";
+        meshYZ.raycastOrder = 1;
+        self._gizmo.add(meshYZ);
+        
+        // XY plane (Green)
+        var geoXY = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_lime, alpha: __planeOpacity });
+        geoXY.computeBoundingBox();
+        var meshXY = new UeMesh(geoXY, __matMesh.clone());
+        meshXY.name = "XY";
+        meshXY.raycastOrder = 1;
+        self._gizmo.add(meshXY);
+        
+        // Uniform Scale (XYZ) - Center Cube
+        var cubeSize = _handleSize * 1.5;
+        var geoBox = new UeBoxGeometry(cubeSize, cubeSize, cubeSize, { color: c_ltgray });
+        geoBox.computeBoundingBox();
+        var meshBox = new UeMesh(geoBox, __matMesh.clone());
+        meshBox.name = "XYZ";
+        meshBox.renderOrder = -1;
+        meshBox.raycastOrder = 2;
+        self._gizmo.add(meshBox);
+    }
+
+    /**
+     * Internal helper to create merged axis geometry for scale mode.
+     * @param {string} name
+     * @param {color} color
+     * @param {Vector3} rotationAxis
+     * @param {number} rotationAngle
+     * @param {Vector3} shaftPos
+     * @param {Vector3} handlePos
+     * @param {number} handleSize
+     * @param {number} lineLen
+     */
+    function __createMergedScaleAxis(name, color, rotationAxis, rotationAngle, shaftPos, handlePos, handleSize, lineLen) {
+         var mat = new UeMatrix4();
+         var q = new UeQuaternion();
+         var p = new UeVector3();
+         var s = new UeVector3(1, 1, 1);
+         
+         // Shaft Geometry
+         var geoShaft = new UeCylinderGeometry(__axisLineWidth, lineLen, 16, { color: color });
+         
+         // Shaft Transform
+         if (rotationAxis != undefined) q.setFromAxisAngle(rotationAxis, rotationAngle);
+         else q.set(0, 0, 0, 1);
+         p.copy(shaftPos);
+         mat.compose(p, q, s);
+         geoShaft.applyMatrix(mat);
+         
+         // Handle Geometry
+         var geoHandle = new UeBoxGeometry(handleSize, handleSize, handleSize, { color: color });
+         
+         // Handle Transform
+         p.copy(handlePos);
+         q.set(0, 0, 0, 1); // Axis aligned box
+         mat.compose(p, q, s);
+         geoHandle.applyMatrix(mat);
+         
+         // Merge
+         var geoMerged = new UeBufferGeometry().merge([geoShaft, geoHandle]);
+         geoMerged.computeBoundingBox();
+         
+         // Cleanup intermediate geometries
+         geoShaft.dispose();
+         geoHandle.dispose();
+         
+         // Create Mesh
+         var mesh = new UeMesh(geoMerged, __matMesh.clone());
+         mesh.name = name;
+         mesh.raycastOrder = 0;
+         self._gizmo.add(mesh);
+
+         return mesh;
     }
     
     /**
@@ -435,7 +525,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             self._root.rotation.copy(_wq);
         } else {
             // In world space mode
-            if (self.mode == "move") {
+            if (self.mode == "move" || self.mode == "scale") {
                 // Position plane handles based on camera direction for optimal visibility
                 var camDir = self.camera.getWorldDirection();
                 
@@ -642,6 +732,10 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self.dragging = true;
         self.selectedAxis = self.hoveredAxis;
         self.axis = self.selectedAxis.name;
+        
+        if (self.axis == "CX") self.axis = "X";
+        else if (self.axis == "CY") self.axis = "Y";
+        else if (self.axis == "CZ") self.axis = "Z";
 
         // Determine axis vector based on selected axis for mathematical calculations
         var axisVec = undefined;
@@ -918,39 +1012,74 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             self.pointPrevious.copy(self.pointEnd);
         }
         
-        // Note: Scaling mode would follow similar patterns:
-        // - Scaling: Convert drag delta to scale factors with proper sensitivity
-        
-        //else if (self.mode == "scale") {
-            //var newScale = self._scaleStart.clone();
-            //var delta = self.delta.clone();
-    //
-            //var scaleFactor = 1.0 + (delta.length() * 0.01); // Sensitivity factor
-            //
-            //if (self.space == "local") {
-                //var invRotation = self.object.rotation.clone().invert();
-                //delta.applyQuaternion(invRotation);
-            //}
-    //
-            //// Apply scale factor only to the selected axis
-            //if (self.axis == "X") newScale.x = self._scaleStart.x * scaleFactor;
-            //else if (self.axis == "Y") newScale.y = self._scaleStart.y * scaleFactor;
-            //else if (self.axis == "Z") newScale.z = self._scaleStart.z * scaleFactor;
-    //
-            //// Snap scale if enabled
-            //if (self.scaleSnap != undefined) {
-                //if (self.axis == "X") newScale.x = round(newScale.x / self.scaleSnap) * self.scaleSnap;
-                //else if (self.axis == "Y") newScale.y = round(newScale.y / self.scaleSnap) * self.scaleSnap;
-                //else if (self.axis == "Z") newScale.z = round(newScale.z / self.scaleSnap) * self.scaleSnap;
-            //}
-    //
-            //// Clamp scale to configured limits (prevent negative scaling)
-            //newScale.x = clamp(newScale.x, max(0.01, self.minX), self.maxX);
-            //newScale.y = clamp(newScale.y, max(0.01, self.minY), self.maxY);
-            //newScale.z = clamp(newScale.z, max(0.01, self.minZ), self.maxZ);
-    //
-            //self.object.scale.copy(newScale);
-        //}
+        else if (self.mode == "scale") {
+            // Calculate scale based on ratio of drag distance from center
+            
+            // We need to work in a coordinate space aligned with the object's axes
+            // effectively "Local" space delta, but derived from world positions relative to pivot
+            
+            var objectWorldRot = new UeQuaternion();
+            self.object.getWorldQuaternion(objectWorldRot);
+            var invRot = objectWorldRot.clone().invert();
+            
+            // Transform start/end points to object local space (offset from center)
+            var localStart = self.pointStart.clone().sub(self._positionStartWorld).applyQuaternion(invRot);
+            var localEnd = self.pointEnd.clone().sub(self._positionStartWorld).applyQuaternion(invRot);
+            
+            var scaleFactorX = 1;
+            var scaleFactorY = 1;
+            var scaleFactorZ = 1;
+            
+            if (self.axis == "XYZ") {
+                // Uniform scale using "virtual drag" in screen space.
+                // Project world delta into View Space to get "right/up" movement relative to camera.
+                
+                var viewDelta = self.delta.clone();
+                var camQuat = new UeQuaternion();
+                self.camera.getWorldQuaternion(camQuat);
+                viewDelta.applyQuaternion(camQuat.invert()); // Transform to View Space
+                
+                // Dragging Right (+X) or Up (+Y) increases scale. 
+                // Using X+Y allows diagonal drag.
+                var dragAmount = viewDelta.x + viewDelta.y;
+                
+                // Normalize sensitivity by distance to camera so it feels consistent
+                var dist = self.camera.position.distanceTo(self._positionStartWorld);
+                var sensitivity = 1.0 / (dist * 0.5); // Tune this value as needed
+                
+                var uniformScale = 1 + (dragAmount * sensitivity);
+                uniformScale = max(uniformScale, 0.01); // Prevent zero/negative scale
+                
+                scaleFactorX = uniformScale;
+                scaleFactorY = uniformScale;
+                scaleFactorZ = uniformScale;
+            } else {
+                // Per-axis scale based on projection ratio
+                if (self.axis == "X" || self.axis == "XY" || self.axis == "XZ") {
+                    if (abs(localStart.x) > 0.001) scaleFactorX = localEnd.x / localStart.x;
+                }
+                if (self.axis == "Y" || self.axis == "XY" || self.axis == "YZ") {
+                    if (abs(localStart.y) > 0.001) scaleFactorY = localEnd.y / localStart.y;
+                }
+                if (self.axis == "Z" || self.axis == "XZ" || self.axis == "YZ") {
+                    if (abs(localStart.z) > 0.001) scaleFactorZ = localEnd.z / localStart.z;
+                }
+            }
+            
+            var newScale = self._scaleStart.clone();
+            newScale.x *= scaleFactorX;
+            newScale.y *= scaleFactorY;
+            newScale.z *= scaleFactorZ;
+            
+            // Snap
+             if (self.scaleSnap != undefined) {
+                 newScale.x = round(newScale.x / self.scaleSnap) * self.scaleSnap;
+                 newScale.y = round(newScale.y / self.scaleSnap) * self.scaleSnap;
+                 newScale.z = round(newScale.z / self.scaleSnap) * self.scaleSnap;
+             }
+             
+            self.object.scale.copy(newScale);
+        }
     } 
     
     // === API METHODS ===

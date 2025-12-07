@@ -208,6 +208,80 @@ function UeBufferGeometry(data = {}) constructor {
         return cloneVb;
     }
     
+    
+    
+    /**
+     * Applies the matrix transform to the geometry vertices.
+     * @param {Struct} matrix - UeMatrix4
+     */
+    function applyMatrix(matrix) {
+        gml_pragma("forceinline");
+        
+        // We need to transform the position and rotation (normal)
+        var e = matrix.data;
+        // matrix for normals is the inverse transpose of the matrix
+        var normalMatrix = matrix.clone().invert().transpose();
+        var n = normalMatrix.data;
+        
+        for (var i = 0, l = array_length(vertices); i < l; i++) {
+            var v = vertices[i];
+            
+            // Apply position transform
+            var vx = v.x, vy = v.y, vz = v.z;
+            v.x = e[0]*vx + e[4]*vy + e[8]*vz + e[12];
+            v.y = e[1]*vx + e[5]*vy + e[9]*vz + e[13];
+            v.z = e[2]*vx + e[6]*vy + e[10]*vz + e[14];
+            
+            // Apply normal transform if exists
+            if (v[$ "nx"] != undefined) {
+                 var nx = v.nx, ny = v.ny, nz = v.nz;
+                 v.nx = n[0]*nx + n[4]*ny + n[8]*nz;
+                 v.ny = n[1]*nx + n[5]*ny + n[9]*nz;
+                 v.nz = n[2]*nx + n[6]*ny + n[10]*nz;
+                 
+                 // Normalize normal
+                 var len = sqrt(v.nx*v.nx + v.ny*v.ny + v.nz*v.nz);
+                 if (len > 0) {
+                     v.nx /= len;
+                     v.ny /= len;
+                     v.nz /= len;
+                 }
+            }
+        }
+        
+        build(); // Rebuild vertex buffer
+        return self;
+    }
+
+    /**
+     * Merges an array of geometries into a single new geometry.
+     * @param {Array<Struct.UeBufferGeometry>} geometries
+     * @returns {Struct.UeBufferGeometry}
+     */
+    function merge(geometries) {
+        gml_pragma("forceinline");
+        if (!is_array(geometries)) return undefined;
+        
+        var mergedVertices = [];
+        
+        for (var i = 0, il = array_length(geometries); i < il; i++) {
+            var geo = geometries[i];
+            var vs = geo.vertices;
+            for(var j=0, jl=array_length(vs); j<jl; j++) {
+                 var v = vs[j];
+                 // Manual shallow clone with dot notation
+                 array_push(mergedVertices, {
+                     x: v.x, y: v.y, z: v.z,
+                     nx: v.nx, ny: v.ny, nz: v.nz,
+                     u: v.u, v: v.v,
+                     color: v.color, alpha: v.alpha
+                 }); 
+            }
+        }
+        
+        return new UeBufferGeometry({ vertices: mergedVertices });
+    }
+
     // Auto-build vertex buffer if vertices are provided
     if (array_length(vertices)) build();
 }

@@ -52,6 +52,9 @@ function UeMaterial(data = {}) constructor {
     shadowQuality = data[$ "shadowQuality"] ?? UE_SHADOW_QUALITY.HIGH;
     __uniformShadowQualityLoc = undefined;
     
+    // Uniform names config
+    __uniformNamesConfig = global.UE_UNIFORM_NAMES_CONFIG;
+    
     // Textures
     textures = {
        map: data[$ "map"] ?? global.UE_TEXTURE_MAP.clone(),
@@ -67,34 +70,36 @@ function UeMaterial(data = {}) constructor {
         gml_pragma("forceinline");
         if (shader == undefined) return self;
             
+        var cfg = __uniformNamesConfig;
+
         // Cache the engine uniforms
-        __uniformModelPositionLoc = shader_get_uniform(shader, "u_ueModelPosition");
-        __uniformLightsAmbientLoc = shader_get_uniform(shader, "u_ueAmbient");
-        __uniformEmissiveIntensityLoc = shader_get_uniform(shader, "u_ueEmissiveIntensity");
+        __uniformModelPositionLoc = shader_get_uniform(shader, cfg.modelPosition);
+        __uniformLightsAmbientLoc = shader_get_uniform(shader, cfg.ambient);
+        __uniformEmissiveIntensityLoc = shader_get_uniform(shader, cfg.emissiveIntensity);
         
         // Cache shadow uniforms
-        __uniformLightSpaceMatrixLoc = shader_get_uniform(shader, "u_ueLightSpaceMatrix");
-        __uniformShadowEnabledLoc = shader_get_uniform(shader, "u_ueShadowEnabled");
-        __uniformReceiveShadowLoc = shader_get_uniform(shader, "u_ueReceiveShadow");
-        __uniformShadowQualityLoc = shader_get_uniform(shader, "u_ueShadowQuality");
-        __uniformShadowTexelSizeLoc = shader_get_uniform(shader, "u_ueShadowTexelSize");
-        __samplerShadowMapIdx = shader_get_sampler_index(shader, "s_shadowMap");
+        __uniformLightSpaceMatrixLoc = shader_get_uniform(shader, cfg.lightSpaceMatrix);
+        __uniformShadowEnabledLoc = shader_get_uniform(shader, cfg.shadowEnabled);
+        __uniformReceiveShadowLoc = shader_get_uniform(shader, cfg.receiveShadow);
+        __uniformShadowQualityLoc = shader_get_uniform(shader, cfg.shadowQuality);
+        __uniformShadowTexelSizeLoc = shader_get_uniform(shader, cfg.shadowTexelSize);
+        __samplerShadowMapIdx = shader_get_sampler_index(shader, cfg.shadowMapSampler);
         
         __uniformLightsDir = array_create(lights);
         __uniformLightsPos = array_create(lights);
         
         for (var l=0; l<lights; l++) { 
             __uniformLightsDir[l] = [
-                shader_get_uniform(shader, $"u_ueDirLightDir{l}"),
-                shader_get_uniform(shader, $"u_ueDirLightColor{l}"),
-                shader_get_uniform(shader, $"u_ueDirLightIntensity{l}"),
+                shader_get_uniform(shader, $"{cfg.dirLightDir}{l}"),
+                shader_get_uniform(shader, $"{cfg.dirLightColor}{l}"),
+                shader_get_uniform(shader, $"{cfg.dirLightIntensity}{l}"),
             ];
             
             __uniformLightsPos[l] = [
-                shader_get_uniform(shader, $"u_uePointLightPosition{l}"),
-                shader_get_uniform(shader, $"u_uePointLightColor{l}"),
-                shader_get_uniform(shader, $"u_uePointLightRange{l}"),
-                shader_get_uniform(shader, $"u_uePointLightIntensity{l}"),
+                shader_get_uniform(shader, $"{cfg.pointLightPosition}{l}"),
+                shader_get_uniform(shader, $"{cfg.pointLightColor}{l}"),
+                shader_get_uniform(shader, $"{cfg.pointLightRange}{l}"),
+                shader_get_uniform(shader, $"{cfg.pointLightIntensity}{l}"),
             ];
         }
             
