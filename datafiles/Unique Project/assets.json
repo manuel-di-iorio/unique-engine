@@ -1,46 +1,5 @@
 {
-  "version":"2025.12.1.0",
-  "settings":{
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true,
-    "camera":{
-      "damping":true,
-      "target":[
-        0.95801589013005894,
-        135.05675862680894,
-        0.0
-      ],
-      "position":[
-        -276.34874229039491,
-        -283.43326569297233,
-        337.62710408413085
-      ],
-      "dampingFactor":0.29999999999999999
-    },
-    "counters":{
-      "scenes":3.0,
-      "models":28.0,
-      "folders":8.0,
-      "textures":2.0,
-      "cameras":0.0,
-      "instances":48.0,
-      "materials":28.0,
-      "lights":0.0
-    }
-  },
   "folders":{
-    "aa10cefd-094c-4394-8382-9f287bb05aca":{
-      "name":"Presents",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
-    },
-    "855426d7-7661-4e99-9915-d0980137709c":{
-      "name":"Trees",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"855426d7-7661-4e99-9915-d0980137709c"
-    },
     "78732855-ca0f-4637-b371-4ba580dc7e2d":{
       "name":"Rocks",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
@@ -60,6 +19,46 @@
       "name":"Snow",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
+    },
+    "aa10cefd-094c-4394-8382-9f287bb05aca":{
+      "name":"Presents",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
+    },
+    "855426d7-7661-4e99-9915-d0980137709c":{
+      "name":"Trees",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"855426d7-7661-4e99-9915-d0980137709c"
+    }
+  },
+  "settings":{
+    "gridEnabled":true,
+    "camera":{
+      "target":[
+        -3.6879902493098855e-83,
+        9.3688329085377686e-84,
+        0.0
+      ],
+      "dampingFactor":0.29999999999999999,
+      "damping":true,
+      "position":[
+        -345.44552574322103,
+        -357.05792768050401,
+        287.26011284463056
+      ]
+    },
+    "counters":{
+      "scenes":3.0,
+      "models":28.0,
+      "folders":8.0,
+      "textures":2.0,
+      "instances":48.0,
+      "materials":28.0,
+      "cameras":0.0,
+      "lights":0.0
+    },
+    "gizmos":{
+      "showBoxColliders":true
     }
   },
   "assets":[
@@ -223,5 +222,6 @@
       "name":"oPresentBCube__Top",
       "type":"Mesh"
     }
-  ]
+  ],
+  "version":"2025.12.1.0"
 }

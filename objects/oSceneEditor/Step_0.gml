@@ -64,14 +64,14 @@ if (!uiHasFocus) {
        tool = "move";
        editorManager.sceneTools.updateToolButtons();
    }
-//    if (keyboard_check_pressed(ord("E"))) {
-//       editorManager.setTool("rotate");
-//       tool = "rotate";
-//       editorManager.sceneTools.updateToolButtons();
-//    }
-//    if (keyboard_check_pressed(ord("R"))) {
-//      editorManager.setTool("scale");
-//      tool = "scale";
-//      editorManager.sceneTools.updateToolButtons();
-//    }
+    if (keyboard_check_pressed(ord("E"))) {
+       editorManager.setTool("rotate");
+       tool = "rotate";
+       editorManager.sceneTools.updateToolButtons();
+    }
+    if (keyboard_check_pressed(ord("R"))) {
+      editorManager.setTool("scale");
+      tool = "scale";
+      editorManager.sceneTools.updateToolButtons();
+    }
 }

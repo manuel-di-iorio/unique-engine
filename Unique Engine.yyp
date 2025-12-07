@@ -309,7 +309,9 @@
     {"id":{"name":"sprUiMove","path":"sprites/sprUiMove/sprUiMove.yy",},},
     {"id":{"name":"sprUiNew","path":"sprites/sprUiNew/sprUiNew.yy",},},
     {"id":{"name":"sprUiObject","path":"sprites/sprUiObject/sprUiObject.yy",},},
+    {"id":{"name":"sprUiRotateModel","path":"sprites/sprUiRotateModel/sprUiRotateModel.yy",},},
     {"id":{"name":"sprUiSave","path":"sprites/sprUiSave/sprUiSave.yy",},},
+    {"id":{"name":"sprUiScaleModel","path":"sprites/sprUiScaleModel/sprUiScaleModel.yy",},},
     {"id":{"name":"sprUiScene","path":"sprites/sprUiScene/sprUiScene.yy",},},
     {"id":{"name":"sprUiSection","path":"sprites/sprUiSection/sprUiSection.yy",},},
     {"id":{"name":"sprUiTexture","path":"sprites/sprUiTexture/sprUiTexture.yy",},},
@@ -320,8 +322,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
     {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
+    {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

@@ -103,15 +103,16 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         
         // --- 2. Precise Intersection Test (Triangles) ---
         // If precise raycasting is enabled for Mesh, we test every triangle
-        // @todo: not actually working
+        var hitPrecise = false;
+        var MIN_DIST = infinity;
+        
         if (raycaster.params.Mesh[$ "precise"] && geometry && array_length(geometry.vertices) > 0) {
             
             var verts = geometry.vertices;
             var indices = geometry.index;
-            var hasIndices = is_array(indices);
+            var hasIndices = is_array(indices) && array_length(indices) > 0;
             var len = hasIndices ? array_length(indices) : array_length(verts);
-            
-            var minDistSq = infinity;
+            var EPSILON = 0.000001;
             
             // Intersection calculation variables (reused globals)
             var edge1 = global.UE_DUMMY_VECTOR3_E;
@@ -124,9 +125,13 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             var v1 = global.UE_DUMMY_VECTOR3_C;
             var v2 = global.UE_DUMMY_VECTOR3_D;
             
-            var rayOrigin = localRay.origin;
-            var rayDir = localRay.direction;
-            
+            var rox = localRay.origin.x;
+            var roy = localRay.origin.y;
+            var roz = localRay.origin.z;
+            var rdx = localRay.direction.x;
+            var rdy = localRay.direction.y;
+            var rdz = localRay.direction.z;
+
             // Loop through all triangles
             for (var i = 0; i < len; i += 3) {
                  var i0 = hasIndices ? indices[i] : i;
@@ -137,72 +142,94 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                  var v1d = verts[i1];
                  var v2d = verts[i2];
                  
-                 v0.set(v0d.x, v0d.y, v0d.z);
-                 v1.set(v1d.x, v1d.y, v1d.z);
-                 v2.set(v2d.x, v2d.y, v2d.z);
-                 
-                 // Möller–Trumbore intersection algorithm
-                 edge1.copy(v1).sub(v0);
-                 edge2.copy(v2).sub(v0);
-                 
-                 pvec.copy(rayDir).cross(edge2);
-                 
-                 var det = edge1.dot(pvec);
-                 
-                 // Ray is parallel to triangle (allowing for double-sided matching)
-                 if (abs(det) < UE_EPSILON) continue;
+                 // Get vertex positions directly
+                 var v0x = v0d.x, v0y = v0d.y, v0z = v0d.z;
+                 var v1x = v1d.x, v1y = v1d.y, v1z = v1d.z;
+                 var v2x = v2d.x, v2y = v2d.y, v2z = v2d.z;
+
+                 // edge1 = v1 - v0
+                 var e1x = v1x - v0x;
+                 var e1y = v1y - v0y;
+                 var e1z = v1z - v0z;
+
+                 // edge2 = v2 - v0
+                 var e2x = v2x - v0x;
+                 var e2y = v2y - v0y;
+                 var e2z = v2z - v0z;
+
+                 // pvec = rayDir (cross) edge2
+                 var pbx = rdy * e2z - rdz * e2y;
+                 var pby = rdz * e2x - rdx * e2z;
+                 var pbz = rdx * e2y - rdy * e2x;
+
+                 // det = edge1 (dot) pvec
+                 var det = e1x * pbx + e1y * pby + e1z * pbz;
+
+                 if (abs(det) < EPSILON) continue;
                  
                  var invDet = 1 / det;
-                 
-                 tvec.copy(rayOrigin).sub(v0);
-                 
-                 var u = tvec.dot(pvec) * invDet;
-                 // Add small epsilon tolerance for edge cases
-                 if (u < -UE_EPSILON || u > 1 + UE_EPSILON) continue;
-                 
-                 qvec.copy(tvec).cross(edge1);
-                 
-                 var v = rayDir.dot(qvec) * invDet;
-                 if (v < -UE_EPSILON || u + v > 1 + UE_EPSILON) continue;
-                 
-                 var t = edge2.dot(qvec) * invDet;
-                 
-                 if (t > UE_EPSILON) {
-                      // Calculate Intersection Point in World Space
-                      // P = O + tD
-                      // We use a clean vector compute to ensure no side effects
-                      intersectPoint.copy(rayDir).scale(t).add(rayOrigin);
+
+                 // tvec = rayOrigin - v0
+                 var tx = rox - v0x;
+                 var ty = roy - v0y;
+                 var tz = roz - v0z;
+
+                 // u = tvec (dot) pvec * invDet
+                 var u = (tx * pbx + ty * pby + tz * pbz) * invDet;
+                 if (u < -EPSILON || u > 1 + EPSILON) continue;
+
+                 // qvec = tvec (cross) edge1
+                 var qx = ty * e1z - tz * e1y;
+                 var qy = tz * e1x - tx * e1z;
+                 var qz = tx * e1y - ty * e1x;
+
+                 // v = rayDir (dot) qvec * invDet
+                 var v = (rdx * qx + rdy * qy + rdz * qz) * invDet;
+                 if (v < -EPSILON || u + v > 1 + EPSILON) continue;
+
+                 // t = edge2 (dot) qvec * invDet
+                 var t = (e2x * qx + e2y * qy + e2z * qz) * invDet;
+
+                 if (t > EPSILON) {
+                      // Intersection Point: P = O + tD
+                      var ipx = rdx * t + rox;
+                      var ipy = rdy * t + roy;
+                      var ipz = rdz * t + roz;
                       
                       // Transform point from Local -> World
-                      intersectPoint.applyMatrix4(matrixWorld);
+                      intersectPoint.set(ipx, ipy, ipz).applyMatrix4(matrixWorld);
                       
                       var dSq = intersectPoint.distanceToSquared(raycaster.ray.origin);
                       
-                      if (dSq >= minDistSq) {
-                          minDistSq = dSq;
-                          return self;
+                      if (dSq < MIN_DIST) {
+                          MIN_DIST = dSq;
+                          hitPrecise = true;
                       }
                  }
             }
-            
+        }
+        
+        if (hitPrecise) {
             array_push(hits, {
                 object,
-                distance: minDistSq
+                distance: MIN_DIST
             });
-
         } else {
             // --- 3. Approximate Intersection (Bounding box) ---
-            // If strictly precise is not required, we assume the bounding volume hit is sufficient
-            // We use the object's origin distance as the sorting metric
             var boundingBox = geometry[$ "boundingBox"];
             if (boundingBox != undefined) {
+                // If bounding box check fails, return early
                 if (!localRay.intersectBox(boundingBox, global.UE_DUMMY_VECTOR3)) return self;
-            } 
-            
-            array_push(hits, {
-                object,
-                distance: position.distanceToSquared(raycaster.ray.origin)
-            });
+                
+                // If bounding box hits, we use the intersection point distance for better sorting
+                global.UE_DUMMY_VECTOR3.applyMatrix4(matrixWorld);
+                var dist = global.UE_DUMMY_VECTOR3.distanceToSquared(raycaster.ray.origin);
+                
+                array_push(hits, {
+                    object,
+                    distance: dist
+                });
+            }
         }
         
         return self;

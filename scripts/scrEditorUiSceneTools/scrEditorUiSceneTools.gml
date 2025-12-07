@@ -7,7 +7,7 @@ function EditorUiSceneTools(ui) constructor {
         position: "absolute",
         top: 65,
         left: "21%",
-        minWidth: 330,
+        minWidth: 400,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
@@ -16,7 +16,6 @@ function EditorUiSceneTools(ui) constructor {
     });
     
     with (ui.SceneTools) {
-    
        // Custom draw for background and shadow
        function onDraw() {
            draw_set_alpha(1);
@@ -72,18 +71,34 @@ function EditorUiSceneTools(ui) constructor {
         oSceneEditor.editorManager.setTool("move");
         self.updateToolButtons();
     });
+
+    // Rotate tool
+    ui.SceneTools.BtnRotate = new UiButton(sprUiRotateModel, btnStyle, { tooltip: "Rotate tool (E)" });
+    ui.SceneTools.BtnRotate.onClick(function() {
+        oSceneEditor.editorManager.setTool("rotate");
+        self.updateToolButtons();
+    });
+
+    // Scale tool
+    ui.SceneTools.BtnScale = new UiButton(sprUiScaleModel, btnStyle, { tooltip: "Scale tool (R)" });
+    ui.SceneTools.BtnScale.onClick(function() {
+        oSceneEditor.editorManager.setTool("scale");
+        self.updateToolButtons();
+    });
     
     self.updateToolButtons = function() {
         var tool = oSceneEditor.editorManager.activeTool;
         ui.SceneTools.BtnView.selected = (tool == "view");
         ui.SceneTools.BtnMove.selected = (tool == "move");
+        ui.SceneTools.BtnRotate.selected = (tool == "rotate");
+        ui.SceneTools.BtnScale.selected = (tool == "scale");
         global.UI.needsRedraw = true;
     };
     
     // Initial update
     self.updateToolButtons();    
 
-    ui.SceneTools.Left.add(ui.SceneTools.BtnView, ui.SceneTools.BtnMove);
+    ui.SceneTools.Left.add(ui.SceneTools.BtnView, ui.SceneTools.BtnMove, ui.SceneTools.BtnRotate, ui.SceneTools.BtnScale);
     
     // Toggle camera easing
     ui.SceneTools.BtnCamAccel = new UiButton(sprUiCamera, btnStyle, { tooltip: "Toggle camera easing" });

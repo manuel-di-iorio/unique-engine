@@ -33,7 +33,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
     // === INTERNAL HELPERS ===
     self._raycaster = new UeRaycaster();  // Raycaster for mouse picking
-    // self._raycaster.params.Mesh.precise = true;
+    self._raycasterRotate = new UeRaycaster();  // Raycaster for mouse picking
+    self._raycasterRotate.params.Mesh.precise = true;
     self._root = new UeMesh();         // Root object    
     self._plane = new UePlane();       // Plane used for intersection during dragging
 
@@ -219,6 +220,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         var _torusRadius = __axisLength * 1;  // Radius of the rotation rings
         var _torusThickness = __axisLineWidth * 0.5; // Thickness of the rings
+        var _radialSegments = 2;
+        var _tubularSegments = 22;
         
         // Manual bounding box calculation for torus
         // Torus lies on XY plane usually, extending from -(R+r) to +(R+r)
@@ -230,21 +233,21 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         // --- Create X AXIS (Red, YZ plane) ---
         // Front Geometry (0 to 180 degrees) - Opaque
         var geoFrontX = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: c_red,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
             arc: pi, arcOffset: 0, alpha: 1.0
         });
         geoFrontX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
 
         // Back Geometry (180 to 360 degrees) - Semi-transparent
         var geoBackX = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: c_red,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
             arc: pi, arcOffset: pi, alpha: 0.2
         });
         geoBackX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
         
         // Back Geometry Opaque (for selection state)
         var geoBackOpaqueX = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: c_red,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
             arc: pi, arcOffset: pi, alpha: 1.0
         });
         geoBackOpaqueX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
@@ -276,19 +279,19 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // --- Create Y AXIS (Blue, XZ plane) ---
         var geoFrontY = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: #2277B3,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
             arc: pi, arcOffset: 0, alpha: 1.0
         });
         geoFrontY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
 
         var geoBackY = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: #2277B3,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
             arc: pi, arcOffset: pi, alpha: 0.2
         });
         geoBackY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
         
         var geoBackOpaqueY = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: #2277B3,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
             arc: pi, arcOffset: pi, alpha: 1.0
         });
         geoBackOpaqueY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
@@ -320,19 +323,19 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // --- Create Z AXIS (Green, XY plane) ---
         var geoFrontZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: c_lime,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
             arc: pi, arcOffset: 0, alpha: 1.0
         });
         geoFrontZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
         
         var geoBackZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: c_lime,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
             arc: pi, arcOffset: pi, alpha: 0.2
         });
         geoBackZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
         
         var geoBackOpaqueZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12, tubularSegments: 32, color: c_lime,
+            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
             arc: pi, arcOffset: pi, alpha: 1.0
         });
         geoBackOpaqueZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
@@ -359,11 +362,11 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self._gizmo.add(meshBackZ);
 
         // Create Screen Space Rotation ring (Yellow) - always faces camera ('E')
-        var eRadius = _torusRadius * 1.3;
+        var eRadius = _torusRadius * 1.4;
         var eLimit = eRadius + _torusThickness;
         var geoE = new UeTorusGeometry(eRadius, _torusThickness, {
-            radialSegments: 12,
-            tubularSegments: 32,
+            radialSegments: _radialSegments,
+            tubularSegments: _tubularSegments,
             color: #fafadd
         });
         geoE.boundingBox = new UeBox3(
@@ -627,7 +630,11 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function updateInteraction() {
         gml_pragma("forceinline");
         
-        self._raycaster.setFromCamera(self.camera);
+        var _raycaster = self._raycaster;
+        if (self.mode == "rotate") {
+            _raycaster = self._raycasterRotate;
+        }
+        _raycaster.setFromCamera(self.camera);
         
         if (!self.dragging) {
             // Reset scale and emissive properties of all axes when not dragging
@@ -647,13 +654,13 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             }
             
             // Perform raycasting to find intersected gizmo elements
-            var intersects = self._raycaster.intersectObjects(self._gizmo.children, false, false);
+            var intersects = _raycaster.intersectObjects(self._gizmo.children, false, false);
             
             // Sort intersections
             array_sort(intersects, function(a, b) {
                 var pa = a.object.raycastOrder;
                 var pb = b.object.raycastOrder;
-                if (pa != pb) return pb - pa;
+                if (pa != pb) return pa - pb;
                 return a.distance - b.distance;
             });
          
