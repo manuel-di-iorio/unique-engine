@@ -3,8 +3,6 @@ switch (tool) {
     case "rotate":
     case "scale":
         control.update();
-
-        
     break;
 }
 

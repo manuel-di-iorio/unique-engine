@@ -257,8 +257,8 @@ function UeRay(_origin = undefined, _direction = undefined) constructor {
         var pvec = self.direction.clone().cross(edge2);
         var det = edge1.dot(pvec);
 
-        if (backfaceCulling && det < 1000000) return undefined;
-        if (!backfaceCulling && abs(det) < 1000000) return undefined;
+        if (backfaceCulling && det < UE_EPSILON) return undefined;
+        if (!backfaceCulling && abs(det) < UE_EPSILON) return undefined;
 
         var invDet = 1 / det;
         var tvec = self.origin.clone().sub(a);

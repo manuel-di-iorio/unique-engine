@@ -16,7 +16,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      * @property {Struct} Points - Parameters for points intersection (e.g. threshold)
      */
     self.params = {
-        Mesh: {},
+        Mesh: { precise: false },
         Line: { threshold: 4 },
         Points: { threshold: 1 },
     };

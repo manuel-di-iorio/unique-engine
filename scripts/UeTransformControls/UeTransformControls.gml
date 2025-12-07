@@ -33,6 +33,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
 
     // === INTERNAL HELPERS ===
     self._raycaster = new UeRaycaster();  // Raycaster for mouse picking
+    //self._raycaster.params.Mesh.precise = true;
     self._root = new UeMesh();         // Root object    
     self._plane = new UePlane();       // Plane used for intersection during dragging
 
@@ -140,22 +141,23 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         var _baseLength = __axisLengthHalf + __axisOffset;
         
         // Helper for manual bounding box creation
-        var createArrowBox = function(len, width) {
-            var halfW = width * 0.5;
-            // Arrow usually goes from 0 to len in Y (or configured axis)
-            // UeArrowGeometry defaults: cylinder radius top=0, bottom=width, height=len.
-            return new UeBox3(new UeVector3(-halfW, 0, -halfW), new UeVector3(halfW, len, halfW));
-        };
+        // var createArrowBox = function(len, width) {
+        //     var halfW = width * 0.5;
+        //     // Arrow usually goes from 0 to len in Y (or configured axis)
+        //     // UeArrowGeometry defaults: cylinder radius top=0, bottom=width, height=len.
+        //     return new UeBox3(new UeVector3(-halfW, 0, -halfW), new UeVector3(halfW, len, halfW));
+        // };
         
-        var createPlaneBox = function(size, depth) {
-            var halfS = size * 0.5;
-            var halfD = depth * 0.5;
-            return new UeBox3(new UeVector3(-halfS, -halfS, -halfD), new UeVector3(halfS, halfS, halfD));
-        };
+        // var createPlaneBox = function(size, depth) {
+        //     var halfS = size * 0.5;
+        //     var halfD = depth * 0.5;
+        //     return new UeBox3(new UeVector3(-halfS, -halfS, -halfD), new UeVector3(halfS, halfS, halfD));
+        // };
 
         // Create X axis line (Red)
         var geoX = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_red });
-        geoX.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2); // Approximation
+        // geoX.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
+        geoX.computeBoundingBox();
         var meshX = new UeMesh(geoX, __matMesh.clone());
         meshX.name = "X";
         meshX.rotation.setFromAxisAngle(__zVec, 180);  // Rotate to point in positive X direction
@@ -165,7 +167,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // Create Y axis line (Blue)
         var geoY = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: #2277B3 });
-        geoY.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
+        // geoY.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
+        geoY.computeBoundingBox();
         var meshY = new UeMesh(geoY, __matMesh.clone());
         meshY.name = "Y";
         meshY.rotation.setFromAxisAngle(__zVec, 270);  // Rotate to point in positive Y direction
@@ -175,7 +178,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // Create Z axis line (Green/Lime)
         var geoZ = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_lime });
-        geoZ.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
+        // geoZ.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
+        geoZ.computeBoundingBox();
         var meshZ = new UeMesh(geoZ, __matMesh.clone());
         meshZ.name = "Z";
         meshZ.rotation.setFromAxisAngle(__yVec, -90);  // Rotate to point in positive Z direction
@@ -188,7 +192,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // XZ plane (Blue) - allows movement along X and Z axes simultaneously
         var geoXZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: #2277B3, alpha: __planeOpacity });
-        geoXZ.boundingBox = createPlaneBox(__planeSize, __planeDepth);
+        // geoXZ.boundingBox = createPlaneBox(__planeSize, __planeDepth);
+        geoXZ.computeBoundingBox();
         var meshXZ = new UeMesh(geoXZ, __matMesh.clone());
         meshXZ.name = "XZ";
         meshXZ.raycastOrder = 1;  // Lower priority than individual axes
@@ -196,7 +201,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // YZ plane (Red) - allows movement along Y and Z axes simultaneously
         var geoYZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_red, alpha: __planeOpacity });
-        geoYZ.boundingBox = createPlaneBox(__planeSize, __planeDepth);
+        // geoYZ.boundingBox = createPlaneBox(__planeSize, __planeDepth);
+        geoYZ.computeBoundingBox();
         var meshYZ = new UeMesh(geoYZ, __matMesh.clone());
         meshYZ.name = "YZ";
         meshYZ.raycastOrder = 1;
@@ -204,7 +210,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // XY plane (Green) - allows movement along X and Y axes simultaneously
         var geoXY = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_lime, alpha: __planeOpacity });
-        geoXY.boundingBox = createPlaneBox(__planeSize, __planeDepth);
+        // geoXY.boundingBox = createPlaneBox(__planeSize, __planeDepth);
+        geoXY.computeBoundingBox();
         var meshXY = new UeMesh(geoXY, __matMesh.clone());
         meshXY.name = "XY";
         meshXY.raycastOrder = 1;
@@ -215,7 +222,8 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         // Use axisLineWidth for proportional sizing instead of axisOffset to avoid oversized cubes
         var cubeSize = __axisLineWidth * 3;
         var geoBox = new UeBoxGeometry(cubeSize, cubeSize, cubeSize, { color: c_ltgray });
-        geoBox.boundingBox = new UeBox3(new UeVector3(-cubeSize*0.5, -cubeSize*0.5, -cubeSize*0.5), new UeVector3(cubeSize*0.5, cubeSize*0.5, cubeSize*0.5));
+        // geoBox.boundingBox = new UeBox3(new UeVector3(-cubeSize*0.5, -cubeSize*0.5, -cubeSize*0.5), new UeVector3(cubeSize*0.5, cubeSize*0.5, cubeSize*0.5));
+        geoBox.computeBoundingBox();
         var meshBox = new UeMesh(geoBox, __matMesh.clone());
         meshBox.name = "XYZ";
         meshBox.renderOrder = -1;   // Render behind other elements
