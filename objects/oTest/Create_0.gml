@@ -1,3 +1,10 @@
+// Antialiasing
+if (display_aa >= 8) {
+    display_reset(8, false);
+} else if (display_aa >= 4) {
+    display_reset(4, false);
+}
+
 currentDemo = undefined;
 bgLayer = layer_background_get_id("Background");
 selectorW = view_xport[0];

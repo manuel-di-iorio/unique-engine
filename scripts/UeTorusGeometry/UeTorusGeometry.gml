@@ -9,11 +9,13 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeBufferGeome
     var _tubularSegments = data[$ "tubularSegments"] ?? 32; // Segments around the main ring
     var _color = data[$ "color"] ?? c_white;
     var _alpha = data[$ "alpha"] ?? 1;
+    var _arc = data[$ "arc"] ?? (2 * pi); // Total arc length in radians (default full circle)
+    var _arcOffset = data[$ "arcOffset"] ?? 0; // Starting angle offset in radians
     
     // Generate torus geometry
     for (var i = 0; i < _tubularSegments; i++) {
-        var u1 = (i / _tubularSegments) * 2 * pi;
-        var u2 = ((i + 1) / _tubularSegments) * 2 * pi;
+        var u1 = _arcOffset + (i / _tubularSegments) * _arc;
+        var u2 = _arcOffset + ((i + 1) / _tubularSegments) * _arc;
         
         for (var j = 0; j < _radialSegments; j++) {
             var v1 = (j / _radialSegments) * 2 * pi;

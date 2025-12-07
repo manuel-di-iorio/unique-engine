@@ -139,10 +139,23 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         var _baseLength = __axisLengthHalf + __axisOffset;
         
+        // Helper for manual bounding box creation
+        var createArrowBox = function(len, width) {
+            var halfW = width * 0.5;
+            // Arrow usually goes from 0 to len in Y (or configured axis)
+            // UeArrowGeometry defaults: cylinder radius top=0, bottom=width, height=len.
+            return new UeBox3(new UeVector3(-halfW, 0, -halfW), new UeVector3(halfW, len, halfW));
+        };
+        
+        var createPlaneBox = function(size, depth) {
+            var halfS = size * 0.5;
+            var halfD = depth * 0.5;
+            return new UeBox3(new UeVector3(-halfS, -halfS, -halfD), new UeVector3(halfS, halfS, halfD));
+        };
+
         // Create X axis line (Red)
         var geoX = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_red });
-        geoX.boundingBox = new UeBox3();
-        geoX.computeBoundingBox();
+        geoX.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2); // Approximation
         var meshX = new UeMesh(geoX, __matMesh.clone());
         meshX.name = "X";
         meshX.rotation.setFromAxisAngle(__zVec, 180);  // Rotate to point in positive X direction
@@ -152,8 +165,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // Create Y axis line (Blue)
         var geoY = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: #2277B3 });
-        geoY.boundingBox = new UeBox3();
-        geoY.computeBoundingBox();
+        geoY.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
         var meshY = new UeMesh(geoY, __matMesh.clone());
         meshY.name = "Y";
         meshY.rotation.setFromAxisAngle(__zVec, 270);  // Rotate to point in positive Y direction
@@ -163,8 +175,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // Create Z axis line (Green/Lime)
         var geoZ = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_lime });
-        geoZ.boundingBox = new UeBox3();
-        geoZ.computeBoundingBox();
+        geoZ.boundingBox = createArrowBox(__axisLength, __axisLineWidth * 2);
         var meshZ = new UeMesh(geoZ, __matMesh.clone());
         meshZ.name = "Z";
         meshZ.rotation.setFromAxisAngle(__yVec, -90);  // Rotate to point in positive Z direction
@@ -177,8 +188,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // XZ plane (Blue) - allows movement along X and Z axes simultaneously
         var geoXZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: #2277B3, alpha: __planeOpacity });
-        geoXZ.boundingBox = new UeBox3();
-        geoXZ.computeBoundingBox();
+        geoXZ.boundingBox = createPlaneBox(__planeSize, __planeDepth);
         var meshXZ = new UeMesh(geoXZ, __matMesh.clone());
         meshXZ.name = "XZ";
         meshXZ.raycastOrder = 1;  // Lower priority than individual axes
@@ -186,8 +196,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // YZ plane (Red) - allows movement along Y and Z axes simultaneously
         var geoYZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_red, alpha: __planeOpacity });
-        geoYZ.boundingBox = new UeBox3();
-        geoYZ.computeBoundingBox();
+        geoYZ.boundingBox = createPlaneBox(__planeSize, __planeDepth);
         var meshYZ = new UeMesh(geoYZ, __matMesh.clone());
         meshYZ.name = "YZ";
         meshYZ.raycastOrder = 1;
@@ -195,8 +204,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         // XY plane (Green) - allows movement along X and Y axes simultaneously
         var geoXY = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_lime, alpha: __planeOpacity });
-        geoXY.boundingBox = new UeBox3();
-        geoXY.computeBoundingBox();
+        geoXY.boundingBox = createPlaneBox(__planeSize, __planeDepth);
         var meshXY = new UeMesh(geoXY, __matMesh.clone());
         meshXY.name = "XY";
         meshXY.raycastOrder = 1;
@@ -207,8 +215,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         // Use axisLineWidth for proportional sizing instead of axisOffset to avoid oversized cubes
         var cubeSize = __axisLineWidth * 3;
         var geoBox = new UeBoxGeometry(cubeSize, cubeSize, cubeSize, { color: c_ltgray });
-        geoBox.boundingBox = new UeBox3();
-        geoBox.computeBoundingBox();
+        geoBox.boundingBox = new UeBox3(new UeVector3(-cubeSize*0.5, -cubeSize*0.5, -cubeSize*0.5), new UeVector3(cubeSize*0.5, cubeSize*0.5, cubeSize*0.5));
         var meshBox = new UeMesh(geoBox, __matMesh.clone());
         meshBox.name = "XYZ";
         meshBox.renderOrder = -1;   // Render behind other elements
@@ -224,56 +231,156 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         var _torusRadius = __axisLength * 1;  // Radius of the rotation rings
         var _torusThickness = __axisLineWidth * 0.5; // Thickness of the rings
         
-        // Create X axis ring (Red) - rotates around X axis in YZ plane
-        var geoX = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12,  // Increased for easier selection
-            tubularSegments: 32,
-            color: c_red
-        });
-        geoX.boundingBox = new UeBox3();
-        geoX.computeBoundingBox();
-        var meshX = new UeMesh(geoX, __matMesh.clone());
-        meshX.name = "X";
-        meshX.rotation.setFromAxisAngle(__yVec, 90);  // Align torus to YZ plane
-        meshX.raycastOrder = 0;
-        self._gizmo.add(meshX);
+        // Manual bounding box calculation for torus
+        // Torus lies on XY plane usually, extending from -(R+r) to +(R+r)
+        var limit = _torusRadius + _torusThickness;
+        var zLimit = _torusThickness;
+        var torusBoxMin = new UeVector3(-limit, -limit, -zLimit);
+        var torusBoxMax = new UeVector3(limit, limit, zLimit);
         
-        // Create Y axis ring (Blue) - rotates around Y axis in XZ plane
-        var geoY = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12,  // Increased for easier selection
-            tubularSegments: 32,
-            color: #2277B3
+        // --- Create X AXIS (Red, YZ plane) ---
+        // Front Geometry (0 to 180 degrees) - Opaque
+        var geoFrontX = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: c_red,
+            arc: pi, arcOffset: 0, alpha: 1.0
         });
-        geoY.boundingBox = new UeBox3();
-        geoY.computeBoundingBox();
-        var meshY = new UeMesh(geoY, __matMesh.clone());
-        meshY.name = "Y";
-        meshY.rotation.setFromAxisAngle(__xVec, 90);  // Align torus to XZ plane
-        meshY.raycastOrder = 0;
-        self._gizmo.add(meshY);
+        geoFrontX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+
+        // Back Geometry (180 to 360 degrees) - Semi-transparent
+        var geoBackX = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: c_red,
+            arc: pi, arcOffset: pi, alpha: 0.2
+        });
+        geoBackX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
         
-        // Create Z axis ring (Green) - rotates around Z axis in XY plane  
-        var geoZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: 12,  // Increased for easier selection
-            tubularSegments: 32,
-            color: c_lime
+        // Back Geometry Opaque (for selection state)
+        var geoBackOpaqueX = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: c_red,
+            arc: pi, arcOffset: pi, alpha: 1.0
         });
-        geoZ.boundingBox = new UeBox3();
-        geoZ.computeBoundingBox();
-        var meshZ = new UeMesh(geoZ, __matMesh.clone());
-        meshZ.name = "Z";
-        // Z torus is already in XY plane by default, no rotation needed
-        meshZ.raycastOrder = 0;
-        self._gizmo.add(meshZ);
+        geoBackOpaqueX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+
+        var meshFrontX = new UeMesh(geoFrontX, __matMesh.clone());
+        meshFrontX.name = "X";
+        meshFrontX.rotation.setFromAxisAngle(__yVec, 90);
+        meshFrontX.raycastOrder = 0;
+        
+        var meshBackX = new UeMesh(geoBackX, __matMesh.clone());
+        meshBackX.name = "X"; 
+        meshBackX.rotation.copy(meshFrontX.rotation);
+        meshBackX.raycastOrder = 0;
+        meshBackX.material.opacity = 0.2; // Explicitly set opacity for material
+        
+        var staticRotX = meshFrontX.rotation.clone();
+        
+        meshFrontX.userData = {
+            isRotationGizmo: true, planeNormal: __xVec.clone(), staticRotation: staticRotX,
+            geoBack: geoBackX, geoBackOpaque: geoBackOpaqueX, partner: meshBackX, type: "front"
+        };
+        meshBackX.userData = {
+            isRotationGizmo: true, planeNormal: __xVec.clone(), staticRotation: staticRotX,
+            partner: meshFrontX, type: "back"
+        };
+
+        self._gizmo.add(meshFrontX);
+        self._gizmo.add(meshBackX);
+        
+        // --- Create Y AXIS (Blue, XZ plane) ---
+        var geoFrontY = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: #2277B3,
+            arc: pi, arcOffset: 0, alpha: 1.0
+        });
+        geoFrontY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+
+        var geoBackY = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: #2277B3,
+            arc: pi, arcOffset: pi, alpha: 0.2
+        });
+        geoBackY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        
+        var geoBackOpaqueY = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: #2277B3,
+            arc: pi, arcOffset: pi, alpha: 1.0
+        });
+        geoBackOpaqueY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+
+        var meshFrontY = new UeMesh(geoFrontY, __matMesh.clone());
+        meshFrontY.name = "Y";
+        meshFrontY.rotation.setFromAxisAngle(__xVec, 90);
+        meshFrontY.raycastOrder = 0;
+        
+        var meshBackY = new UeMesh(geoBackY, __matMesh.clone());
+        meshBackY.name = "Y"; 
+        meshBackY.rotation.copy(meshFrontY.rotation);
+        meshBackY.raycastOrder = 0;
+        meshBackY.material.opacity = 0.2; // Explicit opacity
+        
+        var staticRotY = meshFrontY.rotation.clone();
+        
+        meshFrontY.userData = {
+            isRotationGizmo: true, planeNormal: __yVec.clone(), staticRotation: staticRotY,
+            geoBack: geoBackY, geoBackOpaque: geoBackOpaqueY, partner: meshBackY, type: "front"
+        };
+        meshBackY.userData = {
+            isRotationGizmo: true, planeNormal: __yVec.clone(), staticRotation: staticRotY,
+            partner: meshFrontY, type: "back"
+        };
+
+        self._gizmo.add(meshFrontY);
+        self._gizmo.add(meshBackY);
+        
+        // --- Create Z AXIS (Green, XY plane) ---
+        var geoFrontZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: c_lime,
+            arc: pi, arcOffset: 0, alpha: 1.0
+        });
+        geoFrontZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        
+        var geoBackZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: c_lime,
+            arc: pi, arcOffset: pi, alpha: 0.2
+        });
+        geoBackZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        
+        var geoBackOpaqueZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
+            radialSegments: 12, tubularSegments: 32, color: c_lime,
+            arc: pi, arcOffset: pi, alpha: 1.0
+        });
+        geoBackOpaqueZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        
+        var meshFrontZ = new UeMesh(geoFrontZ, __matMesh.clone());
+        meshFrontZ.name = "Z";
+        meshFrontZ.raycastOrder = 0;
+        
+        var meshBackZ = new UeMesh(geoBackZ, __matMesh.clone());
+        meshBackZ.name = "Z";
+        meshBackZ.raycastOrder = 0;
+        meshBackZ.material.opacity = 0.2; // Explicit opacity
+
+        var staticRotZ = new UeQuaternion(); // Identity
+        meshFrontZ.userData = {
+            isRotationGizmo: true, planeNormal: __zVec.clone(), staticRotation: staticRotZ,
+            geoBack: geoBackZ, geoBackOpaque: geoBackOpaqueZ, partner: meshBackZ, type: "front"
+        };
+        meshBackZ.userData = {
+            isRotationGizmo: true, planeNormal: __zVec.clone(), staticRotation: staticRotZ,
+            partner: meshFrontZ, type: "back"
+        };
+        self._gizmo.add(meshFrontZ);
+        self._gizmo.add(meshBackZ);
 
         // Create Screen Space Rotation ring (Yellow) - always faces camera ('E')
-        var geoE = new UeTorusGeometry(_torusRadius * 1.25, _torusThickness, {
+        var eRadius = _torusRadius * 1.25;
+        var eLimit = eRadius + _torusThickness;
+        var geoE = new UeTorusGeometry(eRadius, _torusThickness, {
             radialSegments: 12,
             tubularSegments: 32,
             color: #fafadd
         });
-        geoE.boundingBox = new UeBox3();
-        geoE.computeBoundingBox();
+        geoE.boundingBox = new UeBox3(
+            new UeVector3(-eLimit, -eLimit, -zLimit),
+            new UeVector3(eLimit, eLimit, zLimit)
+        );
         var meshE = new UeMesh(geoE, __matMesh.clone());
         meshE.name = "E";
         meshE.raycastOrder = 0;
@@ -357,6 +464,60 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
                     quaternion.setFromUnitVectors(defaultNormal, dirToCamera);
                     meshE.rotation.copy(quaternion);
                 }
+                
+                // Update dynamic arcs for X, Y, Z axes to show only front-facing half
+                var dirToCamera = self.camera.position.clone().sub(self._root.position).normalize();
+                
+                // Update each axis with dynamic rotation
+                for (var i = 0; i < array_length(self._gizmo.children); i++) {
+                    var mesh = self._gizmo.children[i];
+                    var userData = mesh.userData;
+                    
+                    // Skip if this mesh isn't a rotation gizmo part
+                    if (userData == undefined || !userData[$ "isRotationGizmo"]) continue;
+                    
+                    // Calculate rotation angle based on camera position
+                    // Project camera direction onto the torus plane
+                    var planeNormal = userData.planeNormal;
+                    var camDirProjected = dirToCamera.clone();
+                    
+                    // Remove the component along the plane normal (project onto plane)
+                    var dotProduct = camDirProjected.dot(planeNormal);
+                    camDirProjected.sub(planeNormal.clone().multiplyScalar(dotProduct));
+                    camDirProjected.normalize();
+                    
+                    // Calculate angle in the plane relative to the torus local space
+                    // Since all tori are created in XY plane (normal Z) and then rotated,
+                    // we need to find the angle in the local XY plane
+                    // But our planeNormal and camDirProjected are in WORLD/GIZMO space.
+                    // We need to transform the projected camera vector into the mesh's LOCAL space (before spin)
+                    // The static rotation transforms Z -> planeNormal.
+                    // So we can apply inverse static rotation to camDirProjected.
+                    
+                    var localCamDir = camDirProjected.clone();
+                    var invStatic = userData.staticRotation.clone().invert();
+                    localCamDir.applyQuaternion(invStatic);
+                    
+                    // Now localCamDir is in the XY plane of the torus geometry (Z=0)
+                    // Calculate angle relative to local Y axis (because our arc is centered at pi/2 which is Y)
+                    // Actually, our arc is 0..pi. Center is pi/2 (+Y).
+                    // We want the center of the arc (+Y) to point at localCamDir.
+                    // So we want to rotate Z so that +Y becomes localCamDir.
+                    
+                    var targetAngle = arctan2(localCamDir.y, localCamDir.x);
+                    
+                    // We want to rotate the mesh such that its +Y axis points to targetAngle
+                    // Current +Y is at pi/2.
+                    // Rotation needed = targetAngle - pi/2
+                    var spinAngle = targetAngle - (pi / 2);
+                    
+                    // Create spin rotation around partial Z axis
+                    var spinQ = new UeQuaternion().setFromAxisAngle(new UeVector3(0, 0, 1), spinAngle);
+                    
+                    // Apply: Total = Static * Spin
+                    var totalQ = userData.staticRotation.clone().multiply(spinQ);
+                    mesh.rotation.copy(totalQ);
+                }
             }
         }
     }
@@ -372,41 +533,92 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         if (!self.dragging) {
             // Reset scale and emissive properties of all axes when not dragging
+            // Also reset geometry state
             for (var i = 0, l = array_length(self._gizmo.children); i < l; i++) {
                 var child = self._gizmo.children[i];
                 child.scale.set(1, 1, 1);
+                
+                // Default reset logic
                 child.material.uniforms.ueEmissive.value = [0, 0, 0];
+                if (child.userData != undefined && child.userData[$ "isRotationGizmo"]) {
+                    // Reset to semi-transparent state if it's a rotation gizmo part
+                    if (child.userData.type == "back" && child.userData.partner.userData.geoBack != undefined) {
+                        child.geometry = child.userData.partner.userData.geoBack;
+                    }
+                }
             }
             
             // Perform raycasting to find intersected gizmo elements
             var intersects = self._raycaster.intersectObjects(self._gizmo.children, false, false);
             
-            // Sort intersections by raycast priority first, then by distance
-            // This ensures axes have priority over planes, and closer objects over farther ones
+            // Sort intersections
             array_sort(intersects, function(a, b) {
                 var pa = a.object.raycastOrder;
                 var pb = b.object.raycastOrder;
-                
-                if (pa != pb) {
-                    return pb - pa;  // Higher raycastOrder = higher priority
-                } else {
-                    return a.distance - b.distance;  // Closer objects preferred when same priority
-                }
+                if (pa != pb) return pb - pa;
+                return a.distance - b.distance;
             });
          
             if (array_length(intersects) > 0) {
                 // Highlight the hovered axis with slight scaling and white glow
                 var hovered = intersects[0].object;
-                hovered.scale.set(1.05, 1.05, 1.05);
-                hovered.material.uniforms.ueEmissive.value = [0.3, 0.3, 0.3]; // Subtle white glow
                 self.hoveredAxis = hovered;
+                
+                // If it's part of a rotation gizmo pair, update both
+                if (hovered.userData != undefined && hovered.userData[$ "isRotationGizmo"]) {
+                    // Manually handle pair update
+                    var front, back;
+                    if (hovered.userData.type == "front") {
+                        front = hovered;
+                        back = hovered.userData.partner;
+                    } else {
+                        back = hovered;
+                        front = hovered.userData.partner;
+                    }
+                    
+                    // Highlight
+                    var color = [0.3, 0.3, 0.3];
+                    front.material.uniforms.ueEmissive.value = color;
+                    back.material.uniforms.ueEmissive.value = color;
+                    
+                    // Opaque Back
+                    if (front.userData.geoBackOpaque != undefined) {
+                         back.geometry = front.userData.geoBackOpaque;
+                    }
+                } else {
+                    // Standard highlighting
+                    hovered.scale.set(1.05, 1.05, 1.05);
+                    hovered.material.uniforms.ueEmissive.value = [0.3, 0.3, 0.3];
+                }
             } else {
                 self.hoveredAxis = undefined;
             } 
         } else {
             // While dragging, keep the selected axis highlighted with yellow glow
             if (self.selectedAxis != undefined) {
-                self.selectedAxis.material.uniforms.ueEmissive.value = [1, 1, 0]; // Bright yellow
+                if (self.selectedAxis.userData != undefined && self.selectedAxis.userData[$ "isRotationGizmo"]) {
+                    // Manually handle pair update
+                    var mesh = self.selectedAxis;
+                    var front, back;
+                    if (mesh.userData.type == "front") {
+                        front = mesh;
+                        back = mesh.userData.partner;
+                    } else {
+                        back = mesh;
+                        front = mesh.userData.partner;
+                    }
+                    
+                    var color = [1, 1, 0];
+                    front.material.uniforms.ueEmissive.value = color;
+                    back.material.uniforms.ueEmissive.value = color;
+                    
+                    // Opaque Back
+                    if (front.userData.geoBackOpaque != undefined) {
+                         back.geometry = front.userData.geoBackOpaque;
+                    }
+                } else {
+                    self.selectedAxis.material.uniforms.ueEmissive.value = [1, 1, 0];
+                }
             }
         }
     }
