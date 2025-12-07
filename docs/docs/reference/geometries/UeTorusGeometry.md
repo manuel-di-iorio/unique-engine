@@ -2,7 +2,7 @@
 sidebar_position: 9
 ---
 
-import Geometry from '@site/static/img/geometries/torus.jpeg';
+import Geometry from '@site/static/img/geometries/torus.jpg';
 
 <img src={Geometry} width="250" />
 
