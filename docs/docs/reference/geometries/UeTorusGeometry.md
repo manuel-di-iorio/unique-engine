@@ -24,3 +24,5 @@ new UeTorusGeometry(radius = 40, tubeRadius = 10, data = {})
 | `data.alpha`     | `number` | `1`       | Optional base alpha for vertices          |
 | `data.radialSegments` | `number` | `16`      | Number of segments around the tube          |
 | `data.tubularSegments` | `number` | `32`      | Number of segments along the tube           |
+| `data.arc`       | `number` | `2 * pi`  | Total arc length in radians               |
+| `data.arcOffset` | `number` | `0`       | Starting angle offset in radians          |

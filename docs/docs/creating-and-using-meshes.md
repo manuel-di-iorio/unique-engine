@@ -27,6 +27,7 @@ terrain = new UeMesh(terrainGeometry, new UeMeshStandardMaterial(), { z: 50 });
 - UeConeGeometry
 - UeCylinderGeometry
 - UeArrowGeometry
+- UeTorusGeometry
 
 You can instantiate them with relevant parameters (e.g., radius, width, height), and they automatically generate the vertex buffers needed for rendering.
 
