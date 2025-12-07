@@ -630,11 +630,11 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
     function updateInteraction() {
         gml_pragma("forceinline");
         
-        var _raycaster = self._raycaster;
+        var _raycasterInstance = self._raycaster;
         if (self.mode == "rotate") {
-            _raycaster = self._raycasterRotate;
+            _raycasterInstance = self._raycasterRotate;
         }
-        _raycaster.setFromCamera(self.camera);
+        _raycasterInstance.setFromCamera(self.camera);
         
         if (!self.dragging) {
             // Reset scale and emissive properties of all axes when not dragging
@@ -654,7 +654,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
             }
             
             // Perform raycasting to find intersected gizmo elements
-            var intersects = _raycaster.intersectObjects(self._gizmo.children, false, false);
+            var intersects = _raycasterInstance.intersectObjects(self._gizmo.children, false, false);
             
             // Sort intersections
             array_sort(intersects, function(a, b) {
@@ -736,6 +736,11 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         if (self.hoveredAxis == undefined || self.dragging) return;
 
+        var _raycasterInstance = self._raycaster;
+        if (self.mode == "rotate") {
+            _raycasterInstance = self._raycasterRotate;
+        }
+
         self.dragging = true;
         self.selectedAxis = self.hoveredAxis;
         self.axis = self.selectedAxis.name;
@@ -813,7 +818,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         self._plane.setFromNormalAndCoplanarPoint(_planeNormal, self._positionStartWorld);
 
         // Calculate initial intersection point where mouse ray meets the drag plane
-        var intersectionPoint = self._raycaster.ray.intersectPlane(self._plane);
+        var intersectionPoint = _raycasterInstance.ray.intersectPlane(self._plane);
         if (intersectionPoint == undefined) {
             // No intersection found; cancel dragging
             self.dragging = false;
@@ -834,8 +839,13 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         if (!self.dragging) return;
 
+        var _raycasterInstance = self._raycaster;
+        if (self.mode == "rotate") {
+            _raycasterInstance = self._raycasterRotate;
+        }
+
         // Calculate current intersection with drag plane
-        var intersectionPoint = self._raycaster.ray.intersectPlane(self._plane);
+        var intersectionPoint = _raycasterInstance.ray.intersectPlane(self._plane);
         if (intersectionPoint == undefined) return;
 
         self.pointEnd.copy(intersectionPoint);

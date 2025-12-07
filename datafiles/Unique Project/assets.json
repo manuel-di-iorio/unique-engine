@@ -1,20 +1,5 @@
 {
   "folders":{
-    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
-      "name":"Rocks",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
-    },
-    "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
-      "name":"Project",
-      "__parentUI":null,
-      "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0"
-    },
-    "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
-      "name":"Objects",
-      "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
-      "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
-    },
     "9ff898e0-953e-4435-99b5-d5e825905d60":{
       "name":"Snow",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
@@ -29,22 +14,37 @@
       "name":"Trees",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"855426d7-7661-4e99-9915-d0980137709c"
+    },
+    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
+      "name":"Rocks",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
+    },
+    "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
+      "name":"Project",
+      "__parentUI":null,
+      "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0"
+    },
+    "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
+      "name":"Objects",
+      "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
+      "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
     }
   },
   "settings":{
-    "gridEnabled":true,
+    "gridEnabled":false,
     "camera":{
       "target":[
-        -3.6879902493098855e-83,
-        9.3688329085377686e-84,
+        261.82998679775011,
+        50.979593674485358,
         0.0
       ],
       "dampingFactor":0.29999999999999999,
       "damping":true,
       "position":[
-        -345.44552574322103,
-        -357.05792768050401,
-        287.26011284463056
+        167.52058058137362,
+        -884.92581350096066,
+        659.63493779668102
       ]
     },
     "counters":{
@@ -58,7 +58,7 @@
       "lights":0.0
     },
     "gizmos":{
-      "showBoxColliders":true
+      "showBoxColliders":false
     }
   },
   "assets":[
