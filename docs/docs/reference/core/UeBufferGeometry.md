@@ -48,6 +48,8 @@ new UeBufferGeometry(data = {})
 | `dispose()`                        | `self`   | Deletes the vertex buffer and releases GPU resources                        |
 | `computeBoundingBox()`             | `self`   | Computes the bounding box from the current vertex positions                 |
 | `computeBoundingSphere()`          | `self`   | Computes the bounding sphere from the current vertex positions              |
+| `applyMatrix(matrix)`              | `self`   | Applies the matrix transform to the geometry vertices                       |
+| `merge(geometries)`         | `UeBufferGeometry` | Returns a new geometry by merging an array of geometries      |
 | `toJSON()`                         | `struct` | Returns an object representing this entity's properties. Not all props may be included |
 | `export(fname)`                    | `self`   | Exports only the vertex buffer to a file (without vertices or other props). |
 | `import(fname)`                    | `self`   | Loads the vertex buffer data from a previously exported `buffer` (no vertices or anything else) |
