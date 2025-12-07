@@ -85,22 +85,30 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         gml_pragma("forceinline");
         var object = self;
         
+        // Transform the ray into the local space of the mesh (inverse world matrix)
+        // We use dummy/cache objects to avoid GC allocation during raycasting
         var matrixWorldInverse = global.UE_DUMMY_MATRIX4.copy(matrixWorld).invert();
+        
+        // Note: We copy the ray to a local ray
         var localRay = global.UE_DUMMY_RAY.copy(raycaster.ray);
         localRay.origin.applyMatrix4(matrixWorldInverse);
         localRay.direction.transformDirection(matrixWorldInverse);
-        
-        var boundingBox = geometry[$ "boundingBox"];
+
+        // --- 1. Bounding Volume Checks (Local Space) ---
+        // If the geometry has bounding volumes, test them first for early rejection
         var boundingSphere = geometry[$ "boundingSphere"];
-        
         if (boundingSphere != undefined) {
-            if (!localRay.intersectSphere(boundingSphere, global.UE_DUMMY_VECTOR3)) return self; 
+             if (!localRay.intersectSphere(boundingSphere, global.UE_DUMMY_VECTOR3)) return self; 
         }
         
+        var boundingBox = geometry[$ "boundingBox"];
         if (boundingBox != undefined) {
 			if (!localRay.intersectBox(boundingBox, global.UE_DUMMY_VECTOR3)) return self;
 		} 
         
+        // --- 2. Precise Intersection Test (Triangles) ---
+        // If precise raycasting is enabled for Mesh, we test every triangle
+        // @todo: not actually working
         if (raycaster.params.Mesh[$ "precise"] && geometry && array_length(geometry.vertices) > 0) {
             
             var verts = geometry.vertices;
@@ -111,20 +119,21 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             var minDistSq = infinity;
             var hasHit = false;
             
-            // Reusing globals for intersection to avoid GC churn
-            var v0 = global.UE_DUMMY_VECTOR3_B;
-            var v1 = global.UE_DUMMY_VECTOR3_C;
-            var v2 = global.UE_DUMMY_VECTOR3_D;
+            // Intersection calculation variables (reused globals)
             var edge1 = global.UE_DUMMY_VECTOR3_E;
             var edge2 = global.UE_DUMMY_VECTOR3_F;
             var pvec = global.UE_DUMMY_VECTOR3_G;
             var tvec = global.UE_DUMMY_VECTOR3_H;
             var qvec = global.UE_DUMMY_VECTOR3_J; 
             var intersectPoint = global.UE_DUMMY_VECTOR3;
+            var v0 = global.UE_DUMMY_VECTOR3_B;
+            var v1 = global.UE_DUMMY_VECTOR3_C;
+            var v2 = global.UE_DUMMY_VECTOR3_D;
             
             var rayOrigin = localRay.origin;
             var rayDir = localRay.direction;
             
+            // Loop through all triangles
             for (var i = 0; i < len; i += 3) {
                  var i0 = hasIndices ? indices[i] : i;
                  var i1 = hasIndices ? indices[i+1] : i+1;
@@ -146,7 +155,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                  
                  var det = edge1.dot(pvec);
                  
-                 // No backface culling for better picking on meshes like gizmos
+                 // Ray is parallel to triangle (allowing for double-sided matching)
                  if (abs(det) < UE_EPSILON) continue;
                  
                  var invDet = 1 / det;
@@ -154,18 +163,23 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                  tvec.copy(rayOrigin).sub(v0);
                  
                  var u = tvec.dot(pvec) * invDet;
-                 if (u < 0 || u > 1) continue;
+                 // Add small epsilon tolerance for edge cases
+                 if (u < -UE_EPSILON || u > 1 + UE_EPSILON) continue;
                  
                  qvec.copy(tvec).cross(edge1);
                  
                  var v = rayDir.dot(qvec) * invDet;
-                 if (v < 0 || u + v > 1) continue;
+                 if (v < -UE_EPSILON || u + v > 1 + UE_EPSILON) continue;
                  
                  var t = edge2.dot(qvec) * invDet;
                  
                  if (t > UE_EPSILON) {
                       // Calculate Intersection Point in World Space
+                      // P = O + tD
+                      // We use a clean vector compute to ensure no side effects
                       intersectPoint.copy(rayDir).scale(t).add(rayOrigin);
+                      
+                      // Transform point from Local -> World
                       intersectPoint.applyMatrix4(matrixWorld);
                       
                       var dSq = intersectPoint.distanceToSquared(raycaster.ray.origin);
@@ -185,6 +199,10 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             }
 
         } else {
+            // --- 3. Approximate Intersection (Bounds passed) ---
+            // If strictly precise is not required, we assume the bounding volume hit is sufficient
+            // We use the object's origin distance as the sorting metric
+            // Note: This is a fallback and generally Gizmos require precise=true
             array_push(hits, {
                 object,
                 distance: position.distanceToSquared(raycaster.ray.origin)
