@@ -23,6 +23,7 @@ scenes = [
     { name: "TransformControls", obj: oSceneTransformControls, bg: #333333 }, // 7
     { name: "Project Loader", obj: oSceneProjectLoader, bg: #147FCC }, // 8
     { name: "Shadow Mapping", obj: oSceneShadowMapping, bg: #147FCC }, // 9
+    { name: "Post Processing", obj: oScenePostprocessing, bg: c_black }, // 10
 ];
 
 setScene = function(idx) {
@@ -34,8 +35,8 @@ setScene = function(idx) {
 
     currentDemo = scenes[idx];
     currentDemoIdx = idx;
-    instance_create_layer(0, 0, "Instances", currentDemo.obj);
-    layer_background_blend(bgLayer, currentDemo.bg);
+    layer_background_blend(bgLayer, currentDemo.bg); 
+    instance_create_layer(0, 0, "Instances", currentDemo.obj); 
 }
 
-setScene(7);
+setScene(10);

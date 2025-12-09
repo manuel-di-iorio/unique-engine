@@ -154,22 +154,8 @@ void main()
     if (u_ueShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
         vec3 lightDir = normalize(-u_ueDirLightDir0);
         float shadow = calculateShadow(v_vLightSpacePos, normal, lightDir);
-        dirLight0 *= (1.0 - shadow);
-        
-        // DEBUG: Visualize depth comparison (comment out for production)
-        // vec3 projCoords = v_vLightSpacePos.xyz / v_vLightSpacePos.w;
-        // projCoords = projCoords * 0.5 + 0.5;
-        // float closestDepth = texture2D(s_shadowMap, projCoords.xy).r;
-        // float currentDepth = projCoords.z;
-        // gl_FragColor = vec4(currentDepth, closestDepth, 0.0, 1.0); return;        
+        dirLight0 *= (1.0 - shadow);           
     }
-    
-    // DEBUG: Visualize light direction (uncomment to test)
-    // gl_FragColor = vec4(dirLight0, 1.0); return;
-    
-    // DEBUG: Visualize dot product (green = lit, red = should be lit but isn't)
-    // float rawDot = dot(normal, normalize(-u_ueDirLightDir0));
-    // gl_FragColor = vec4(max(-rawDot, 0.0), max(rawDot, 0.0), 0.0, 1.0); return;               
     
     lighting += dirLight0;
     lighting += dirLight1;
@@ -190,14 +176,7 @@ void main()
     litColor += emissive;
 
     // === Back to sRGB color space ===
-    vec3 finalColor = LinearToSRGB(clamp(litColor, 0.0, 1.0));
-    
-    // DEBUG: Visualize world normals (R=X, G=Y, B=Z)
-    //gl_FragColor = vec4(abs(normal), 1.0); return;
-    
-    // DEBUG: Visualize light direction as RGB (signed, remapped to 0-1)
-    //vec3 lightDir = normalize(-u_ueDirLightDir0);
-    //gl_FragColor = vec4(lightDir * 0.5 + 0.5, 1.0); return;
+    vec3 finalColor = LinearToSRGB(clamp(litColor, 0.0, 1.0));   
     
     gl_FragColor = vec4(finalColor, baseColor.a);
 }

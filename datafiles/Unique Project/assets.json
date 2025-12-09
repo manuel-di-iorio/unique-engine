@@ -32,19 +32,19 @@
     }
   },
   "settings":{
-    "gridEnabled":false,
+    "gridEnabled":true,
     "camera":{
       "target":[
-        261.82998679775011,
-        50.979593674485358,
+        -193.20579656099301,
+        -34.434737733271149,
         0.0
       ],
       "dampingFactor":0.29999999999999999,
       "damping":true,
       "position":[
-        167.52058058137362,
-        -884.92581350096066,
-        659.63493779668102
+        -508.84760649492063,
+        -506.22333201130323,
+        488.47831141486756
       ]
     },
     "counters":{
@@ -58,7 +58,7 @@
       "lights":0.0
     },
     "gizmos":{
-      "showBoxColliders":false
+      "showBoxColliders":true
     }
   },
   "assets":[

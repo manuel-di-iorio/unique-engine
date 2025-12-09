@@ -2,13 +2,13 @@
 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
 
 <svg
-   fill="#000000"
    width="64px"
    height="64px"
-   viewBox="0 0 1920 1920"
+   viewBox="0 0 24 24"
+   fill="none"
    version="1.1"
    id="svg1"
-   sodipodi:docname="rotate-right-svgrepo-com.svg"
+   sodipodi:docname="rotate-cw-svgrepo-com.svg"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -36,23 +36,25 @@
      inkscape:current-layer="svg1" />
   <g
      id="SVGRepo_bgCarrier"
-     stroke-width="0" />
+     stroke-width="0"
+     transform="matrix(0.25450436,0,0,0.25450436,1.4909913,16.028156)" />
   <g
      id="SVGRepo_tracerCarrier"
      stroke-linecap="round"
-     stroke-linejoin="round" />
+     stroke-linejoin="round"
+     transform="matrix(0.25450436,0,0,0.25450436,1.4909913,16.028156)" />
   <g
      id="SVGRepo_iconCarrier"
-     style="fill:#ffffff"
-     transform="matrix(0.24631961,0,0,0.24631961,1447.0664,1447.0664)"
+     transform="matrix(0.25450436,0,0,0.25450436,1.4909913,16.028156)"
      inkscape:export-filename="SVGRepo_iconCarrier.png"
      inkscape:export-xdpi="96"
      inkscape:export-ydpi="96">
     <path
-       fill-rule="evenodd"
-       clip-rule="evenodd"
-       d="M 639.999,209.777 H 756.018 L 621.665,75.425 697.09,0 960.201,263.111 700.005,523.307 624.58,447.883 756.019,316.444 h -116.02 c -176.731,0 -320,143.269 -320,320 H 213.332 c 0,-235.642 191.025,-426.667 426.667,-426.667 z m 0,643.556 C 639.999,735.513 735.511,640 853.332,640 h 853.338 c 117.82,0 213.33,95.513 213.33,213.333 v 853.337 c 0,117.82 -95.51,213.33 -213.33,213.33 H 853.332 c -117.821,0 -213.333,-95.51 -213.333,-213.33 z M 853.332,746.667 h 853.338 c 58.91,0 106.66,47.756 106.66,106.666 v 853.337 c 0,58.91 -47.75,106.66 -106.66,106.66 H 853.332 c -58.91,0 -106.667,-47.75 -106.667,-106.66 V 853.333 c 0,-58.91 47.757,-106.666 106.667,-106.666 z"
-       id="path1"
-       style="fill:#ffffff" />
+       d="M 11.5,20.5 C 6.80558,20.5 3,16.6944 3,12 3,7.30558 6.80558,3.5 11.5,3.5 c 4.6944,0 8.5,3.80558 8.5,8.5 0,1.5433 -0.4113,2.9905 -1.1302,4.238 M 22.5,15 18.8698,16.238 m -1.6951,-3.8548 1.3542,3.971 0.3409,-0.1162"
+       stroke="#ffffff"
+       stroke-width="2"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       id="path1" />
   </g>
 </svg>

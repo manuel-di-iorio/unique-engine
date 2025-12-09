@@ -220,10 +220,9 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         gml_pragma("forceinline");
         var _torusRadius = __axisLength * 1;  // Radius of the rotation rings
         var _torusThickness = __axisLineWidth * 0.5; // Thickness of the rings
-        var _radialSegments = 2;
+        var _radialSegments = 4;
         var _tubularSegments = 22;
         
-        // Manual bounding box calculation for torus
         // Torus lies on XY plane usually, extending from -(R+r) to +(R+r)
         var limit = _torusRadius + _torusThickness;
         var zLimit = _torusThickness;
@@ -267,7 +266,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
         
         meshFrontX.userData = {
             isRotationGizmo: true, planeNormal: __xVec.clone(), staticRotation: staticRotX,
-            geoBack: geoBackX, geoBackOpaque: geoBackOpaqueX, partner: meshBackX, type: "front"
+            geoBack: geoBackX, geoBackOpaque: geoBackX, partner: meshBackX, type: "front"
         };
         meshBackX.userData = {
             isRotationGizmo: true, planeNormal: __xVec.clone(), staticRotation: staticRotX,
@@ -453,7 +452,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
          var s = new UeVector3(1, 1, 1);
          
          // Shaft Geometry
-         var geoShaft = new UeCylinderGeometry(__axisLineWidth, lineLen, 16, { color: color });
+         var geoShaft = new UeCylinderGeometry(__axisLineWidth, lineLen, 16, { color });
          
          // Shaft Transform
          if (rotationAxis != undefined) q.setFromAxisAngle(rotationAxis, rotationAngle);
@@ -463,7 +462,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
          geoShaft.applyMatrix(mat);
          
          // Handle Geometry
-         var geoHandle = new UeBoxGeometry(handleSize, handleSize, handleSize, { color: color });
+         var geoHandle = new UeBoxGeometry(handleSize, handleSize, handleSize, { color });
          
          // Handle Transform
          p.copy(handlePos);

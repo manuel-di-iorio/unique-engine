@@ -2,6 +2,12 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     isRenderer = true;
     type = "Renderer";
     sortObjects = data[$ "sortObjects"] ?? true;
+    width = display_get_width(); // Default to display size
+    height = display_get_height();
+    autoClear = data[$ "autoClear"] ?? false;
+    __clearColor = c_white;
+    __clearAlpha = 1;
+    __renderTarget = undefined;
 
     // Shadow map configuration for the renderer
     shadowMap = data[$ "shadowMap"] ?? {};
@@ -9,12 +15,76 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     shadowMap.autoUpdate = shadowMap[$ "autoUpdate"] ?? true;
     shadowMap.needsUpdate = shadowMap[$ "needsUpdate"] ?? false;
     
+    function setSize(width, height) {
+        gml_pragma("forceinline");
+        self.width = width;
+        self.height = height;
+    }
+
+    function getSize(target = undefined) {
+        gml_pragma("forceinline");
+        if (target == undefined) target = {};
+        target.width = self.width;
+        target.height = self.height;
+        return target;
+    }
+    
     __boundMaterial = undefined; // Material that is currently bound
     __lightIdx = 0;
     __queueIdx = 0;
     __lights = array_create(2);
     __queue = array_create(512);
     __shadowIdx = 0;
+    
+    function clear(color = true, depth = true, stencil = true) {
+        if (color) draw_clear_alpha(self.__clearColor, self.__clearAlpha);
+        if (depth) draw_clear_depth(0);
+        if (stencil) draw_clear_stencil(0);
+    }
+    
+    function clearColor() {
+        draw_clear_alpha(self.__clearColor, self.__clearAlpha);
+    }
+    
+    function clearDepth() {
+        draw_clear_depth(0);
+    }
+    
+    function clearStencil() {
+        draw_clear_stencil(0);
+    }
+    
+    function getClearColor() {
+        return self.__clearColor;
+    }
+    
+    function getClearAlpha() {
+        return self.__clearAlpha;
+    }
+    
+    function setClearAlpha(alpha) {
+        self.__clearAlpha = alpha;
+    }
+
+    function setClearColor(color, alpha) {
+        self.__clearColor = color;
+        self.__clearAlpha = alpha;
+    }
+
+    function setRenderTarget(target) {
+        if (target != undefined) {
+            if (!surface_exists(target.surface)) target.create();
+            surface_set_target(target.surface);
+        } else if (self.__renderTarget != undefined) {
+            surface_reset_target();
+        }
+
+        self.__renderTarget = target;
+    }
+
+    function getRenderTarget() {
+        return self.__renderTarget;
+    }
     
     // Recursively collect renderable objects and precompute their sort key
     function __collectObjectQueues(objects, camera) {
@@ -236,14 +306,20 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     /**
      * Render the main scene
      */
-    function __renderObjects() {
+    function __renderObjects(scene) {
         gml_pragma("forceinline");
+        var overrideMaterial = scene.overrideMaterial;
         
         for (var i = 0; i < __queueIdx; i++) {
             var _object = __queue[i];
             var _onBeforeRender = _object[$ "onBeforeRender"];
             var _onAfterRender = _object[$ "onAfterRender"];
             var _material = _object[$ "material"];
+            
+            // 
+            if (overrideMaterial != undefined && _material[$ "allowOverride"]) {
+                _material = overrideMaterial;
+            }
 
             // Wireframes material applies the default material
             var _wireframe = _material.wireframe;
@@ -271,7 +347,13 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     function render(scene, camera) {
         gml_pragma("forceinline");
         if (view_current != camera.view) return;
+        
         var _gpuState = gpu_get_state();
+        
+        // Auto clear
+        if (self.autoClear) {
+            self.clear(self.autoClearColor, self.autoClearDepth, self.autoClearStencil); 
+        }
         
         // Collect and classify all renderable objects
         if (camera.matrixAutoUpdate) camera.updateMatrixWorld();
@@ -294,7 +376,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         if (sortObjects) __quickSortObjects(0, __queueIdx - 1);
     
         // **PASS 2: Render the main scene**
-        __renderObjects();
+        __renderObjects(scene);
         
         // Reset the world after rendering
         __boundMaterial = undefined;

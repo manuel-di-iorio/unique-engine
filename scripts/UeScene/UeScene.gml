@@ -1,6 +1,7 @@
 function UeScene(data = {}): UeObject3D(data) constructor {
     isScene = true;
     type = "Scene";
+    overrideMaterial = data[$ "overrideMaterial"];
     
     /**
      * Helper function to serialize a ModelInstance recursively

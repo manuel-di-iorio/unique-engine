@@ -15,6 +15,7 @@ function UeMaterial(data = {}) constructor {
     alphaTest = data[$ "alphaTest"] ?? 0;
     colorWrite = data[$ "colorWrite"] ?? true;
     wireframe = data[$ "wireframe"] ?? false;
+    allowOverride = data[$ "allowOverride"] ?? true;
     userData = {};
     
     // Blending
@@ -41,6 +42,7 @@ function UeMaterial(data = {}) constructor {
     __uniformShadowEnabledLoc = undefined;
     __uniformReceiveShadowLoc = undefined;
     __samplerShadowMapIdx = undefined;
+    __uniformEmissiveIntensityLoc = undefined;
     
     // Light uniforms
     lights = data[$ "lights"] ?? 2;
@@ -232,7 +234,9 @@ function UeMaterial(data = {}) constructor {
         __setLightsUniforms();
         
         // Reset emissive uniforms
-        shader_set_uniform_f(__uniformEmissiveIntensityLoc, 0);
+        if (__uniformEmissiveIntensityLoc != undefined) {
+            shader_set_uniform_f(__uniformEmissiveIntensityLoc, 0);
+        }
    
         // Apply the uniforms on the shader
         for (var u=0; u<__uniformsCachedCount; u++) {

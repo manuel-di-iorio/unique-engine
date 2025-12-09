@@ -89,7 +89,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         
         var dummyMat = global.UE_DUMMY_MATRIX4;
         matrix.identity()
-            // Move the offset (@todo needs to be tested)
+            // Move the offset
             .multiply(dummyMat.makeTranslation(ox, oy, 0))
             // Move the pivot to the sprite center
             .multiply(dummyMat.makeTranslation(cx, cy, 0))
