@@ -65,9 +65,10 @@ for (var i = 0; i < 150; i++) {
     geometry.boundingBox.setFromCenterAndSize(UE_VECTOR3_ZERO, new UeVector3(size, size, size));
     
     // Set the bounding sphere for frustum testing
-    geometry.boundingSphere = new UeSphere(UE_VECTOR3_ZERO, size);
+    // Radius = half diagonal of cube = size * sqrt(3) / 2
+    geometry.boundingSphere = new UeSphere(UE_VECTOR3_ZERO, size * sqrt(3) / 2);
     
     mesh.updateMatrix();
 }
 
-scene.updateWorldMatrix(false, true);
+scene.updateMatrixWorld();

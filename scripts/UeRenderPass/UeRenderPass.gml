@@ -10,7 +10,7 @@ function UeRenderPass(scene, camera, overrideMaterial = undefined, clearColor = 
     gml_pragma("forceinline");
 
     var oldAutoClear = renderer.autoClear;
-    renderer.autoClear = false;
+    renderer.autoClear = self.clear;
 
     var oldOverrideMaterial;
     if (self.overrideMaterial != undefined) {
@@ -20,20 +20,10 @@ function UeRenderPass(scene, camera, overrideMaterial = undefined, clearColor = 
 
     var oldClearColor = renderer.getClearColor();
     var oldClearAlpha = renderer.getClearAlpha();
-    if (self.clearColor != undefined) {
-        renderer.setClearColor(self.clearColor, self.clearAlpha);
-    }
-
-    if (self.clearDepth) {
-      renderer.clearDepth();
-    }
+    renderer.setClearColor(self.clearColor, self.clearAlpha);
 
     var oldRenderTarget = renderer.getRenderTarget();
     renderer.setRenderTarget(self.renderToScreen ? undefined : writeTarget);
-
-    if (self.clear) {
-      renderer.clear(self.clearColor, self.clearDepth, false);
-    }
 
     renderer.render(self.scene, self.camera);
     

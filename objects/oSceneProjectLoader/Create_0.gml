@@ -19,4 +19,4 @@ dirLight.target = _tree;
 
 // Add the terrain and lights to the scene
 scene.add(_terrain, new UeAmbientLight(c_dkgray), dirLight);
-scene.updateWorldMatrix(false, true);
+scene.updateMatrixWorld();

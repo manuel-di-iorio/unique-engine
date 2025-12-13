@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeShadowPass",
+  "%Name":"UeShaderPass",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeShadowPass",
+  "name":"UeShaderPass",
   "parent":{
     "name":"Passes",
     "path":"folders/Unique Engine/Postprocessing/Passes.yy",

@@ -33,7 +33,7 @@ function UeTransform(_data = undefined): UeEventDispatcher() constructor {
         return self;
     }
 
-    // Update local matrix and matrix world, also on children
+     // Update local matrix and matrix world, also on children
      function updateMatrixWorld(force = false) {
         gml_pragma("forceinline");
         if (matrixAutoUpdate) {
@@ -51,7 +51,7 @@ function UeTransform(_data = undefined): UeEventDispatcher() constructor {
             }
             
             matrixWorldNeedsUpdate = false; 
-			force = true;
+			      force = true;
             
             // For frustum culling, update the intersection sphere (if available) to world space
             var geometry = self[$ "geometry"];

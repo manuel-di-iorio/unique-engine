@@ -15,7 +15,7 @@ function UeEffectComposer(renderer, renderTarget = undefined) constructor {
 
     self.readTarget = renderTarget;
     self.writeTarget = renderTarget.clone();
-    
+
     function addPass(pass) {
         gml_pragma("forceinline");
         array_push(self.passes, pass);
@@ -56,6 +56,14 @@ function UeEffectComposer(renderer, renderTarget = undefined) constructor {
         self.writeTarget.dispose();
         return self;
     }
+
+    function swapBuffers() {
+        gml_pragma("forceinline");
+        var tmp = self.readTarget;
+        self.readTarget = self.writeTarget;
+        self.writeTarget = tmp;
+        return self;
+    }
     
     function render() {
         gml_pragma("forceinline");
@@ -68,9 +76,7 @@ function UeEffectComposer(renderer, renderTarget = undefined) constructor {
             pass.render(self.renderer, self.writeTarget, self.readTarget);
             
             if (pass.needsSwap) {
-                var tmp = self.readTarget;
-                self.readTarget = self.writeTarget;
-                self.writeTarget = tmp;
+                self.swapBuffers();
             }
         }
 

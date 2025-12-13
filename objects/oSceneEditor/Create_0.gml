@@ -1,8 +1,8 @@
 // Antialiasing
 if (display_aa >= 8) {
-    display_reset(8, false);
+    display_reset(8, true);
 } else if (display_aa >= 4) {
-    display_reset(4, false);
+    display_reset(4, true);
 }
 
 device_mouse_dbclick_enable(false);

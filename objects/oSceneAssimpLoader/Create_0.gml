@@ -32,12 +32,12 @@ airplaneMesh.traverse(function(mesh) {
     }
 });
 
+scene.add(ambientLight, sunLight, airplaneMesh);
+scene.updateWorldMatrix(false, true);
+
 airplaneBox = new UeBoxHelper(airplaneMesh);
 airplaneBox.visible = false;
 airplaneBox.matrixAutoUpdate = false;
-
-
-scene.add(ambientLight, sunLight, airplaneMesh, airplaneBox);
-scene.updateWorldMatrix(false, true);
+scene.add(airplaneBox);
 
 showWireframe = false;

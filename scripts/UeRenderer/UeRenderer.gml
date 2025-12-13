@@ -5,6 +5,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     width = display_get_width(); // Default to display size
     height = display_get_height();
     autoClear = data[$ "autoClear"] ?? false;
+    autoClearColor = data[$ "autoClearColor"] ?? true;
+    autoClearDepth = data[$ "autoClearDepth"] ?? true;
+    autoClearStencil = data[$ "autoClearStencil"] ?? true;
     __clearColor = c_white;
     __clearAlpha = 1;
     __renderTarget = undefined;
@@ -107,13 +110,12 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             /* Frustum intersection && sort key calculation */
             if (object.visible) {
                if (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined) {
-                   // Test the frustum intersection, only for parent meshes
-                   if (object[$ "isMesh"] && object.frustumCulled && object.parent == undefined) {
-                       var _position = object.position;
+                   // Test the frustum intersection
+                   if (object[$ "isMesh"] && object.frustumCulled) {
                        var _boundingSphere = object[$ "__intersectionSphere"];
    
                        if (_boundingSphere != undefined &&
-                           !sphere_is_visible(_position.x, _position.y, _position.z, _boundingSphere.radius)) continue;
+                           !sphere_is_visible(_boundingSphere.center.x, _boundingSphere.center.y, _boundingSphere.center.z, _boundingSphere.radius)) continue;
                    }
                    
                    // ** Precompute the sort hash **
@@ -308,7 +310,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
      */
     function __renderObjects(scene) {
         gml_pragma("forceinline");
-        var overrideMaterial = scene.overrideMaterial;
+        var overrideMaterial = scene[$ "overrideMaterial"];
         
         for (var i = 0; i < __queueIdx; i++) {
             var _object = __queue[i];
