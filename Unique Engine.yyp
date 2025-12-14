@@ -295,6 +295,7 @@
     {"id":{"name":"sh_ue_line","path":"shaders/sh_ue_line/sh_ue_line.yy",},},
     {"id":{"name":"sh_ue_normals","path":"shaders/sh_ue_normals/sh_ue_normals.yy",},},
     {"id":{"name":"sh_ue_outline_pass","path":"shaders/sh_ue_outline_pass/sh_ue_outline_pass.yy",},},
+    {"id":{"name":"sh_ue_outline","path":"shaders/sh_ue_outline/sh_ue_outline.yy",},},
     {"id":{"name":"sh_ue_shadow_map","path":"shaders/sh_ue_shadow_map/sh_ue_shadow_map.yy",},},
     {"id":{"name":"sh_ue_sprite","path":"shaders/sh_ue_sprite/sh_ue_sprite.yy",},},
     {"id":{"name":"sh_ue_standard","path":"shaders/sh_ue_standard/sh_ue_standard.yy",},},
@@ -302,6 +303,7 @@
     {"id":{"name":"spr_tex_palm_tree","path":"sprites/spr_tex_palm_tree/spr_tex_palm_tree.yy",},},
     {"id":{"name":"spr_tex_pyramid","path":"sprites/spr_tex_pyramid/spr_tex_pyramid.yy",},},
     {"id":{"name":"spr_tex_sand","path":"sprites/spr_tex_sand/spr_tex_sand.yy",},},
+    {"id":{"name":"spr_tex_snow","path":"sprites/spr_tex_snow/spr_tex_snow.yy",},},
     {"id":{"name":"sprDemoLogo","path":"sprites/sprDemoLogo/sprDemoLogo.yy",},},
     {"id":{"name":"sprUeEmissiveTex","path":"sprites/sprUeEmissiveTex/sprUeEmissiveTex.yy",},},
     {"id":{"name":"sprUeMapTex","path":"sprites/sprUeMapTex/sprUeMapTex.yy",},},
@@ -336,8 +338,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
     {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
+    {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

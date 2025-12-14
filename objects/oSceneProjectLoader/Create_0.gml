@@ -9,7 +9,8 @@ var _tree = scene.getObjectByName("oTreeDecoratedSnow_16");
 treePos = _tree.position;
 
 // Create the terrain
-var _materialStandard = new UeMeshStandardMaterial();
+var _texSnow = new UeTexture(spr_tex_snow);
+var _materialStandard = new UeMeshStandardMaterial({ map: _texSnow });
 var _terrainGeometry = new UeCircleGeometry(1000, { color: #FFFFFF });
 var _terrain = new UeStaticMesh(_terrainGeometry, _materialStandard, { x: treePos.x, y: treePos.y });
 

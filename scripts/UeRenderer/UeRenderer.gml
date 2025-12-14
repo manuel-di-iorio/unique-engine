@@ -2,8 +2,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     isRenderer = true;
     type = "Renderer";
     sortObjects = data[$ "sortObjects"] ?? true;
-    width = display_get_width(); // Default to display size
-    height = display_get_height();
+    width = data[$ "width"] ?? display_get_width(); // Default to display size
+    height = data[$ "height"] ?? display_get_height();
     autoClear = data[$ "autoClear"] ?? false;
     autoClearColor = data[$ "autoClearColor"] ?? true;
     autoClearDepth = data[$ "autoClearDepth"] ?? true;
@@ -41,7 +41,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     
     function clear(color = true, depth = true, stencil = true) {
         if (color) draw_clear_alpha(self.__clearColor, self.__clearAlpha);
-        if (depth) draw_clear_depth(0);
+        if (depth) draw_clear_depth(1);
         if (stencil) draw_clear_stencil(0);
     }
     
@@ -50,7 +50,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     }
     
     function clearDepth() {
-        draw_clear_depth(0);
+        draw_clear_depth(1);
     }
     
     function clearStencil() {
@@ -318,7 +318,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             var _onAfterRender = _object[$ "onAfterRender"];
             var _material = _object[$ "material"];
             
-            // 
+            // Override material
             if (overrideMaterial != undefined && _material[$ "allowOverride"]) {
                 _material = overrideMaterial;
             }
@@ -348,7 +348,13 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     /// Render the scene
     function render(scene, camera) {
         gml_pragma("forceinline");
-        if (view_current != camera.view) return;
+        
+        // When rendering to a surface (render target), skip the view check since
+        // there's no active view. Otherwise, ensure we're on the correct view.
+        if (self.__renderTarget == undefined && view_current != camera.view) return;
+        
+        // Apply camera to set view/projection matrices (essential for rendering to surfaces)
+        camera_apply(camera.camera);
         
         var _gpuState = gpu_get_state();
         

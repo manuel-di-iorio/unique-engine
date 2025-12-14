@@ -1,7 +1,7 @@
-function UeEffectComposer(renderer, renderTarget = undefined) constructor {
+function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constructor {
     self.passes = [];
     self.renderer = renderer;
-    self.renderToScreen = true;
+    self.renderToScreen = data[$ "renderToScreen"] ?? true;
 
     if (renderTarget == undefined) {
         var size = renderer.getSize(new UeVector2());
@@ -67,18 +67,23 @@ function UeEffectComposer(renderer, renderTarget = undefined) constructor {
     
     function render() {
         gml_pragma("forceinline");
+
+        var _gpuState = gpu_get_state();
         
         for (var i = 0, il = array_length(self.passes); i < il; i++) {
             var pass = self.passes[i];            
             if (!pass.enabled) continue;
             
-            pass.renderToScreen = (self.renderToScreen && self.isLastEnabledPass(i));
+            pass.renderToScreen = self.renderToScreen && self.isLastEnabledPass(i);
             pass.render(self.renderer, self.writeTarget, self.readTarget);
             
             if (pass.needsSwap) {
                 self.swapBuffers();
             }
         }
+
+        gpu_set_state(_gpuState);
+        shader_reset();
 
         return self;
     }

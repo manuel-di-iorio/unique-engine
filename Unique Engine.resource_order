@@ -150,6 +150,7 @@
     {"name":"spr_tex_box","order":3,"path":"sprites/spr_tex_box/spr_tex_box.yy",},
     {"name":"spr_tex_palm_tree","order":2,"path":"sprites/spr_tex_palm_tree/spr_tex_palm_tree.yy",},
     {"name":"spr_tex_pyramid","order":1,"path":"sprites/spr_tex_pyramid/spr_tex_pyramid.yy",},
+    {"name":"spr_tex_snow","order":4,"path":"sprites/spr_tex_snow/spr_tex_snow.yy",},
     {"name":"sprDemoLogo","order":4,"path":"sprites/sprDemoLogo/sprDemoLogo.yy",},
     {"name":"sprUeEmissiveTex","order":5,"path":"sprites/sprUeEmissiveTex/sprUeEmissiveTex.yy",},
     {"name":"sprUeMapTex","order":4,"path":"sprites/sprUeMapTex/sprUeMapTex.yy",},
