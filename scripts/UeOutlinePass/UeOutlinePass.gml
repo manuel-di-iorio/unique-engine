@@ -19,11 +19,6 @@
  *    - Blends edge color with scene color based on edge intensity
  *    - Optional glow effect for softer edges
  * 
- * Advantages over direct scene edge detection:
- * - Only outlines selected objects, not everything
- * - Ignores internal edges caused by lighting/shading
- * - Clean silhouette-only contours
- * 
  * @param {UeScene} scene - The scene containing the objects
  * @param {UeCamera} camera - The camera used for rendering
  * @param {Array} selectedObjects - Array of objects to outline
@@ -44,9 +39,6 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
     self.thickness = 1;                  // Edge thickness in pixels
     self.hiddenEdgeColor = [0.1, 0.04, 0.02]; // For future hidden edge support
     
-    // Disable swap - we composite directly to the output
-    self.needsSwap = false;
-    
     // ========================================
     // INTERNAL RESOURCES
     // ========================================
@@ -56,7 +48,7 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
     
     // Material for rendering objects as solid white (mask pass)
     self.__maskMaterial = new UeMaterial({
-        shader: sh_ue_outline,
+        shader: sh_ue_outline_mask,
         lights: 0,         // No lighting needed
         blending: false,   // Solid color, no blending
         depthTest: true,   // Respect depth for proper occlusion

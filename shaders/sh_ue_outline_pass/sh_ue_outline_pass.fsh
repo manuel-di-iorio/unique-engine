@@ -15,7 +15,6 @@
  */
 
 varying vec2 v_vTexcoord;
-varying vec4 v_vColour;
 
 // Outline parameters
 uniform vec3 u_visibleEdgeColor;  // RGB color for visible edges

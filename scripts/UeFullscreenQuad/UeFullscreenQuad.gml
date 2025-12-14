@@ -7,7 +7,7 @@
  * When rendered with identity matrices, this quad covers the entire screen,
  * making it perfect for fullscreen post-processing effects.
  * 
- * Vertex layout (looking at screen):
+ * Vertex layout:
  *   (-1,+1)-----(+1,+1)
  *      |   \      |
  *      |    \     |
@@ -21,17 +21,26 @@
 function UeQuadGeometry(data = {}): UeBufferGeometry(data) constructor {
     type = "QuadGeometry";
     
-    // Two triangles forming a quad covering the entire NDC space
+    // This is lighter than the default format (no normals/color needed for fullscreen quad)
+    self.format = global.UE_POSITION_UV_VFORMAT;
+    
+    // Optimization: Single large triangle covering the entire NDC space
+    // This avoids the diagonal seam issue sometimes visible with two triangles.
+    // The triangle vertices are:
+    // 1. Bottom-Left (-1, -1)
+    // 2. Far-Right   ( 3, -1)
+    // 3. Far-Top     (-1,  3)
+    //
+    // UV Mapping:
+    // (-1, -1) -> (0, 1)  (Bottom-Left of screen)
+    // ( 3, -1) -> (2, 1)  (Extrapolated Right)
+    // (-1,  3) -> (0, -1) (Extrapolated Top)
+    //
+    // This results in the screen area [-1, 1] having UVs [0, 1].
     var vertices = [
-        // Triangle 1: top-left -> bottom-left -> bottom-right
-        { x: -1, y:  1, z: 0, nx: 0, ny: 0, nz: 1, u: 0, v: 0, color: c_white, alpha: 1 }, // top-left
-        { x: -1, y: -1, z: 0, nx: 0, ny: 0, nz: 1, u: 0, v: 1, color: c_white, alpha: 1 }, // bottom-left
-        { x:  1, y: -1, z: 0, nx: 0, ny: 0, nz: 1, u: 1, v: 1, color: c_white, alpha: 1 }, // bottom-right
-        
-        // Triangle 2: top-left -> bottom-right -> top-right
-        { x: -1, y:  1, z: 0, nx: 0, ny: 0, nz: 1, u: 0, v: 0, color: c_white, alpha: 1 }, // top-left
-        { x:  1, y: -1, z: 0, nx: 0, ny: 0, nz: 1, u: 1, v: 1, color: c_white, alpha: 1 }, // bottom-right
-        { x:  1, y:  1, z: 0, nx: 0, ny: 0, nz: 1, u: 1, v: 0, color: c_white, alpha: 1 }  // top-right
+        { x: -1, y: -1, z: 0, u: 0, v:  1 },
+        { x:  3, y: -1, z: 0, u: 2, v:  1 },
+        { x: -1, y:  3, z: 0, u: 0, v: -1 }
     ];
     
     self.vertices = vertices;

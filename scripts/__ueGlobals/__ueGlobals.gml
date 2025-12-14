@@ -1,6 +1,7 @@
 global.UE_OBJECT_ID = 0;
 global.UE_VERSION = "0.2.0";
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
+global.UE_POSITION_UV_VFORMAT = new UeVertexFormat().position().uv().build();
 global.UE_TEXTURE_MAP = new UeTexture(sprUeMapTex);
 global.UE_TEXTURE_EMISSIVE = new UeTexture(sprUeEmissiveTex);
 global.UE_MOUSE = new UeMouse();

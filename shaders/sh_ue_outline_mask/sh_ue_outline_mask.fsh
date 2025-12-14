@@ -1,9 +1,5 @@
-//
 // Mask Fragment Shader - Outputs solid white for silhouette mask
 // Used to render selected objects as white on black background
-//
-varying vec2 v_vTexcoord;
-varying vec4 v_vColour;
 
 void main()
 {

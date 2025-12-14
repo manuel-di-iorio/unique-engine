@@ -1,7 +1,7 @@
 {
   "$GMShader":"",
-  "%Name":"sh_ue_outline",
-  "name":"sh_ue_outline",
+  "%Name":"sh_ue_outline_mask",
+  "name":"sh_ue_outline_mask",
   "parent":{
     "name":"Shaders",
     "path":"folders/Unique Engine/Shaders.yy",
