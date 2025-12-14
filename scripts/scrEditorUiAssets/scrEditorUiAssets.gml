@@ -2,40 +2,110 @@ function EditorUiAssets(ui) constructor {
     self.ui = ui;
     
     ui.Assets = new UiNode({ name: "Assets", minWidth: 300, width: "20%", marginBottom: 62 }, { border: true });
+
+    with (ui.Assets) {
+      self.onDraw = method(self, function() {
+            draw_set_color(global.UI_COL_INPUT_BG);
+            draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+            
+            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
+            draw_text(self.x1 + 20, self.y1 + 8, "Assets");
+        });
+    }
+
+    // Treeview
     ui.Assets.Treeview = new UiTreeview({ 
-        marginTop: 35, 
         flex: 1, 
-        height: "90%", 
-        flexDirection: "column" 
+        height: "85%", 
+        flexDirection: "column",
+    });
+
+    // Tools container
+    ui.Assets.ToolsContainer = new UiNode({
+      marginTop: 35,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 5
+    });
+
+    with (ui.Assets.ToolsContainer) {
+        function onDraw() {
+            draw_set_color(global.UI_COL_INSPECTOR_BG);
+            draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+        }   
+    }
+
+    ui.Assets.add(ui.Assets.ToolsContainer);
+
+    ui.Assets.ToolsContainer.Search = new UiTextbox({
+        position: "relative",
+        name: "Assets.ToolsContainer.Search",
+        flex: 1,
+        height: 24,
+    }, {
+        placeholder: "Filter assets...",
+        onChange: method({ treeview: ui.Assets.Treeview }, function(val) {
+             self.treeview.filter(val);
+        }) 
+    });
+    ui.Assets.ToolsContainer.add(ui.Assets.ToolsContainer.Search);
+  
+    // Add X button to clear search
+    ui.Assets.ToolsContainer.Search.ClearBtn = new UiButton(sprUiClose, {
+      name: "Assets.ToolsContainer.Search.ClearBtn",
+      position: "absolute",
+      right: 0,
+      top: 0,
+      bottom: 0,
+      width: 24,
+    }, {
+      outline: true,
+      tooltip: "Clear the filtered assets list",
+      enableRipple: false
     });
     
-    ui.Assets.add(ui.Assets.Treeview);
+    ui.Assets.ToolsContainer.Search.add(ui.Assets.ToolsContainer.Search.ClearBtn);
     
-    // Add button in header
-    ui.Assets.AddBtn = new UiButton(sprUiCreateAsset, { 
+    with (ui.Assets.ToolsContainer.Search.ClearBtn) {
+        self.parentTextbox = ui.Assets.ToolsContainer.Search;
+        
+        // Control visibility based on text content
+        self.onStep(method(self, function() {
+            self.visible = (self.parentTextbox.value != "");
+        }));
+        
+        // Handle click to clear text
+        self.onClick(method(self, function() {
+            self.parentTextbox.value = "";
+            if (self.parentTextbox.onChange) self.parentTextbox.onChange("", self.parentTextbox);
+        }));
+    }
+
+    ui.Assets.add(ui.Assets.Treeview);
+
+    // "Add button"
+    ui.Assets.ToolsContainer.AddBtn = new UiButton(sprUiCreateAsset, { 
         name: "Assets.AddBtn",
-        position: "absolute",
-        top: 5,
-        right: 10,
-        padding: 5,
-        paddingBottom: 4,
-        marginTop: 10,
-        marginRight: 10
+        marginLeft: 15,
+        marginRight: 3,
+        padding: 12,
     }, { 
         outline: true, 
         tooltip: "Add new asset or folder" 
     });
     
-    ui.Assets.add(ui.Assets.AddBtn);
-        
-    ui.Assets.onDraw = method(ui.Assets, function() {
-        draw_set_color(global.UI_COL_INPUT_BG);
-        draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
-        
-        draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
-        draw_text(self.x1 + 20, self.y1 + 8, "Assets");
-    });
-        
+    ui.Assets.ToolsContainer.add(ui.Assets.ToolsContainer.AddBtn);
+
+    // Connect Add button to context menu
+    ui.Assets.ToolsContainer.AddBtn.onClick(method({ treeview: ui.Assets.Treeview }, function() {
+        if (self.treeview.onContextMenu != undefined) {
+            self.treeview.onContextMenu(undefined);
+        }
+        return true;
+    }));
+
+    
     /** Events */
     var Treeview = ui.Assets.Treeview;
     Treeview.enableScrollbar();
@@ -117,18 +187,11 @@ function EditorUiAssets(ui) constructor {
         
         var menu = new UiContextMenu(global.UI.mouseX, global.UI.mouseY, items);
         menu.show();
-    });
+    });   
     
-    // Connect Add button to context menu
-    ui.Assets.AddBtn.onClick(method({ treeview: Treeview }, function() {
-        if (self.treeview.onContextMenu != undefined) {
-            self.treeview.onContextMenu(undefined);
-        }
-        return true;
-    }));
     
     // Handle right-click on treeview background
-    Treeview.onMouseUp(method({ Treeview }, function() {
+    ui.Assets.Treeview.onMouseUp(method({ Treeview }, function() {
         if (mouse_lastbutton == mb_right) {
             self.Treeview.onContextMenu(undefined);
             return true;

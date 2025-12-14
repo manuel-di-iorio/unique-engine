@@ -12,7 +12,7 @@ function EditorUiMenu(ui) constructor {
     });
 
     // Save Project Button
-    ui.Menu.SaveProjectBtn = new UiButton(sprUiSave, { display: "none", padding: 5, marginLeft: 80, marginRight: 20, width: 15, height: 15 }, { tooltip: "Save project (Ctrl+S)" });    
+    ui.Menu.SaveProjectBtn = new UiButton(sprUiSave, { display: "none", padding: 10, marginLeft: 80, marginRight: 15, width: 15, height: 15 }, { tooltip: "Save project (Ctrl+S)" });    
     
     ui.Menu.SaveProjectBtn.onClick(function() {
         with (oSceneEditor) {
@@ -24,7 +24,7 @@ function EditorUiMenu(ui) constructor {
     ui.Menu.add(ui.Menu.SaveProjectBtn);
 
     // Load Project Button
-    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { marginLeft: 80, padding: 5, marginRight: 20, width: 15, height: 15 }, { enableRipple: false, tooltip: "Load project" });    
+    ui.Menu.LoadProjectBtn = new UiButton(sprUiLoad, { marginLeft: 80, padding: 10, marginRight: 15, width: 15, height: 15 }, { enableRipple: false, tooltip: "Load project" });    
     ui.Menu.add(ui.Menu.LoadProjectBtn);
     
     ui.Menu.LoadProjectBtn.onClick(function() {

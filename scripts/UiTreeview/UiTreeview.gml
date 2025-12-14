@@ -79,6 +79,61 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         
         return false;
     }
+    
+    /**
+     * Filter the treeview items by name
+     * @param {String} searchText - The text to filter by
+     */
+    function filter(searchText) {
+        var _lowerSearch = string_lower(searchText);
+        
+        // Internal recursive function
+        var _filterItem = undefined;
+        _filterItem = method({ _lowerSearch, _filterItem:  function(item) {
+                // Check if this item matches
+                var nameToCheck = (item.asset != undefined) ? item.asset.name : item.name;
+                var matches = (_lowerSearch == "" || string_pos(_lowerSearch, string_lower(nameToCheck)) > 0);
+                
+                var hasMatchingChildren = false;
+                
+                // Check children items
+                if (item.Items != undefined && item.Items.children != undefined) {
+                    var children = item.Items.children;
+                    for (var i = 0; i < array_length(children); i++) {
+                        var child = children[i];
+                        // Recursively check child
+                        if (self._filterItem(child)) {
+                            hasMatchingChildren = true;
+                        }
+                    }
+                }
+                
+                var shouldBeVisible = matches || hasMatchingChildren;
+                
+                if (shouldBeVisible) {
+                    item.show();
+                    // If we have matching children and there is a search term, expand to show them
+                    if (hasMatchingChildren && _lowerSearch != "") {
+                        if (item.collapsed) item.expandItem();
+                    }
+                } else {
+                    item.hide();
+                }
+                
+                return shouldBeVisible;
+            } 
+        }, function(item) {
+            return _filterItem(item);
+        });
+        
+        // Apply to root items
+        if (self.Items.children != undefined) {
+            var rootItems = self.Items.children;
+            for (var i = 0; i < array_length(rootItems); i++) {
+                _filterItem(rootItems[i]);
+            }
+        }
+    }
 }
 
 /**
@@ -157,12 +212,12 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.onDraw = method({ item: treeviewItem, node: contentNode }, function() {
             if (node.hovered) {
                 draw_set_color(global.UI_COL_BTN_HOVER);
-                draw_rectangle(0, node.yp1 + 3, node.xp2-2, node.yp2 - 1, false);
+                draw_rectangle(0, node.y1 + 3, node.x2-2, node.y2 - 1, false);
             }
             
             if (item.selected) {
                 draw_set_color(global.UI_COL_SELECTED);
-                draw_rectangle(0, node.yp1 + 3, node.xp2-2, node.yp2 - 1, false);
+                draw_rectangle(0, node.y1 + 3, node.x2-2, node.y2 - 1, false);
             }
             
             // Draw the icon
@@ -193,13 +248,22 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     // Left and right content
-    self.LeftContent = new UiNode({ name: "UiTreeview.Item.Content.LeftContent", flexDirection: "row", alignItems: "center"  });
+    self.LeftContent = new UiNode({ 
+      name: "UiTreeview.Item.Content.LeftContent", 
+      flexDirection: "row", 
+      alignItems: "center",
+      width: 20,
+      height: 20,
+    });
     self.Content.add(self.LeftContent);
 
     // Arrow
     self.Arrow = new UiSprite(sprUiTreeviewArrowDown, { 
-        name: "UiTreeview.Item.Content.ArrowBtn",
-        padding: 4, marginLeft: 5, marginRight: 10, width: 14, height: 9,
+      name: "UiTreeview.Item.Content.ArrowBtn",
+      marginLeft: 5, 
+      marginRight: 10,
+      width: 20,
+      height: 20,
     }, { outline: true, visible: false, pointerEvents: true });
     
     self.Arrow.onClick(method(self, function() {
@@ -217,7 +281,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     
     // Methods 
     function __addItem() {
-        var child = new UiTreeviewItem({ name: "UiTreeview.Item", marginLeft: 15, paddingVertical: 2.5 }, {
+        var child = new UiTreeviewItem({ name: "UiTreeview.Item", marginLeft: 15 }, {
             treeview: self.treeview,
             assetType: self.assetType,
             type: self.assetType,

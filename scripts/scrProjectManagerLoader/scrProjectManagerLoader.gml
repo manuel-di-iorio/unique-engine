@@ -36,7 +36,7 @@ function ProjectLoader() constructor {
         });
         
         // Create Treeview Item
-        var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
+        var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item" }, {
             treeview,
             assetType: "Folder",
             type: "Folder",
@@ -113,7 +113,7 @@ function ProjectLoader() constructor {
 
         if (asset != undefined) {
             var icon = __iconForType(asset.type);
-            var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
+            var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item" }, {
                 treeview,
                 assetType: asset.type,
                 type: asset.type,
@@ -338,7 +338,7 @@ function ProjectLoader() constructor {
       
       // Create TreeView item for the instance
       var icon = __iconForType("ModelInstance");
-      var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item", paddingVertical: 2.5 }, {
+      var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item" }, {
           treeview: parentTreeItem.treeview,
           assetType: "ModelInstance",
           type: "ModelInstance",

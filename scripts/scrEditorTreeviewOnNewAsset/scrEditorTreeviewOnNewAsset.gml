@@ -15,7 +15,6 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       
       var folderItem = new UiTreeviewItem({ 
           name: "UiTreeview.Item", 
-          paddingVertical: 2.5 
       }, {
           treeview,
           name: folder.name,
@@ -113,7 +112,6 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   
   var newTreeviewItem = new UiTreeviewItem({ 
       name: "UiTreeview.Item", 
-      paddingVertical: 2.5 
   }, {
       treeview: treeview,
       assetType: assetType,

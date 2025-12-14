@@ -175,10 +175,10 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         elem.y1 = elem.layout.top - (elem.scrollableParent ? elem.scrollableParent.scrollTop : 0);
         elem.x2 = elem.layout.left + elem.width; 
         elem.y2 = elem.y1 + elem.height;
-        elem.xp1 = elem.x1 - elem.layout.paddingLeft;
-        elem.yp1 = elem.y1 - elem.layout.paddingTop;
-        elem.xp2 = elem.x2 + elem.layout.paddingRight;
-        elem.yp2 = elem.y2 + elem.layout.paddingBottom;
+        elem.xp1 = elem.x1 + elem.layout.paddingLeft;
+        elem.yp1 = elem.y1 + elem.layout.paddingTop;
+        elem.xp2 = elem.x2 - elem.layout.paddingRight;
+        elem.yp2 = elem.y2 - elem.layout.paddingBottom;
         
         // Add the element to the spatial partition grid
         self.__addElemToGrid(elem);
@@ -284,7 +284,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             for (var i = array_length(_nearestElems) - 1; i >= 0; i--) {
                 var _elem = _nearestElems[i];   
                 
-                if (self.deepestTarget == undefined && point_in_rectangle(self.mouseX, self.mouseY, _elem.xp1, _elem.yp1, _elem.xp2, _elem.yp2)) {
+                if (self.deepestTarget == undefined && point_in_rectangle(self.mouseX, self.mouseY, _elem.x1, _elem.y1, _elem.x2, _elem.y2)) {
                     _elem.hovered = true;
                     self.dispatchEvent(UI_EVENT.mouseenter, _elem); 
                     self.dispatchEvent(UI_EVENT.mouseover, _elem);
@@ -448,7 +448,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         if (elem.__UiScrollbar != undefined) {
             _scissor = gpu_get_scissor();
-            gpu_set_scissor(elem.xp1, elem.yp1, elem.xp2 - elem.xp1, elem.yp2 - elem.yp1);
+            gpu_set_scissor(elem.x1, elem.y1, elem.x2 - elem.x1, elem.y2 - elem.y1);
         }
 
         // Run the draw method of the element

@@ -20,14 +20,15 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     self.negative = props[$ "negative"] ?? false;
     
     self.Input = new UiNode({ 
-        name: "UiTextbox.Input", 
-        marginLeft,
-        paddingLeft: 5, 
-        paddingRight: 5, 
-        flex: 1,
-        height: "100%" 
+      name: "UiTextbox.Input", 
+      marginLeft,
+      paddingLeft: 5, 
+      paddingRight: 5, 
+      flex: 1,
+      height: "100%" 
     }, {
-        focusable: true,
+      focusable: true,
+      border: true
     });
 
     self.add(self.Input);
@@ -685,10 +686,6 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             // Background
             draw_set_color(global.UI_COL_INPUT_BG);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
-            
-            // Border
-            draw_set_color(global.UI_COL_BOX);
-            draw_rectangle(self.x1, self.y1, self.x2, self.y2, true);
             
             // Set clipping region to prevent text overflow
             var _scissor = gpu_get_scissor();

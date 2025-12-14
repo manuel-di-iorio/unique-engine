@@ -715,7 +715,10 @@ function EditorUiInspector(ui) constructor {
                 break;
                 
                 case "text": 
-                    input = new UiTextbox({ flex: 1, height: 25 }, {
+                    input = new UiTextbox({ 
+                      flex: 1, 
+                      height: 25
+                    }, {
                         format: assetField[$ "format"],
                         min: assetField[$ "min"],
                         max: assetField[$ "max"],

@@ -1,5 +1,10 @@
 {
   "folders":{
+    "aa10cefd-094c-4394-8382-9f287bb05aca":{
+      "name":"Presents",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
+    },
     "855426d7-7661-4e99-9915-d0980137709c":{
       "name":"Trees",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
@@ -24,43 +29,39 @@
       "name":"Snow",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
-    },
-    "aa10cefd-094c-4394-8382-9f287bb05aca":{
-      "name":"Presents",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
     }
   },
   "settings":{
     "gridEnabled":true,
     "camera":{
       "target":[
-        190.00219105112387,
-        -188.7462793904059,
+        104.35904353346787,
+        -98.728529797345814,
         0.0
       ],
       "dampingFactor":0.29999999999999999,
       "damping":true,
       "position":[
-        126.4073877822741,
-        -852.68920284276373,
-        340.53015429864763
+        -151.5736350276448,
+        -670.13588358861136,
+        310.53038690009424
       ]
     },
     "counters":{
       "scenes":3.0,
+      "lights":0.0,
       "models":28.0,
       "folders":8.0,
       "textures":2.0,
       "instances":48.0,
       "materials":28.0,
-      "cameras":0.0,
-      "lights":0.0
+      "cameras":0.0
     },
     "gizmos":{
       "showBoxColliders":true
     }
   },
+  "version":"2025.12.1.0",
   "assets":[
     {
       "id":"f4485e71-90a3-4771-b107-98c7347ec348",
@@ -222,6 +223,5 @@
       "name":"oPresentBCube__Top",
       "type":"Mesh"
     }
-  ],
-  "version":"2025.12.1.0"
+  ]
 }

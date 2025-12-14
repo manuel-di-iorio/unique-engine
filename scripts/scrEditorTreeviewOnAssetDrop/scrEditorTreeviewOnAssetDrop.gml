@@ -198,7 +198,6 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
 function __editorTreeview_createTreeviewItem(asset, parentTreeviewItem, icon) {
     var treeviewItem = new UiTreeviewItem({
         name: "UiTreeview.Item",
-        paddingVertical: 2.5
     }, {
         treeview: parentTreeviewItem.treeview,
         assetType: asset.type,

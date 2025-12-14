@@ -32,7 +32,6 @@ function editorTreeviewOnModelImport(treeviewItem) {
     
     var folderItem = new UiTreeviewItem({ 
         name: "UiTreeview.Item", 
-        paddingVertical: 2.5 
     }, {
         treeview: treeview,
         name: modelName,
@@ -72,7 +71,6 @@ function editorTreeviewOnModelImport(treeviewItem) {
         // Add to treeview inside folder (must be done before addAsset)
         var textureTreeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
-            paddingVertical: 2.5
         }, {
             treeview: treeview,
             assetType: "Texture",
@@ -104,7 +102,6 @@ function editorTreeviewOnModelImport(treeviewItem) {
         // Add to treeview inside folder (must be done before addAsset)
         var materialTreeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
-            paddingVertical: 2.5
         }, {
             treeview: treeview,
             assetType: "Material",
@@ -148,7 +145,6 @@ function editorTreeviewOnModelImport(treeviewItem) {
     // Create main model treeview item inside folder (must be done before addAsset)
     var modelTreeviewItem = new UiTreeviewItem({
         name: "UiTreeview.Item",
-        paddingVertical: 2.5
     }, {
         treeview: treeview,
         assetType: "Mesh",
@@ -175,7 +171,6 @@ function __editorTreeview_addModelChildrenRecursive(parentAsset, parentTreeviewI
         // Create Treeview Item
         var childTreeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
-            paddingVertical: 2.5
         }, {
             treeview: parentTreeviewItem.treeview,
             assetType: "Mesh",

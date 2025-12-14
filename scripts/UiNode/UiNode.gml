@@ -484,6 +484,51 @@ function UiNode(style = {}, props = {}) constructor {
         gml_pragma("forceinline");
         return flexpanel_node_style_get_margin(self.node, flexpanel_edge.bottom).value;
     }
+
+    // Padding
+    function setPaddingTop(value) {
+        gml_pragma("forceinline");
+        flexpanel_node_style_set_padding(self.node, flexpanel_edge.top, value);
+        global.UI.needsUpdate = true;
+    }
+    
+    function getPaddingTop() {
+        gml_pragma("forceinline");
+        return flexpanel_node_style_get_padding(self.node, flexpanel_edge.top).value;
+    }
+    
+    function setPaddingLeft(value) {
+        gml_pragma("forceinline");
+        flexpanel_node_style_set_padding(self.node, flexpanel_edge.left, value);
+        global.UI.needsUpdate = true;
+    }
+    
+    function getPaddingLeft() {
+        gml_pragma("forceinline");
+        return flexpanel_node_style_get_padding(self.node, flexpanel_edge.left).value;
+    }
+    
+    function setPaddingRight(value) {
+        gml_pragma("forceinline");
+        flexpanel_node_style_set_padding(self.node, flexpanel_edge.right, value);
+        global.UI.needsUpdate = true;
+    }
+    
+    function getPaddingRight() {
+        gml_pragma("forceinline");
+        return flexpanel_node_style_get_padding(self.node, flexpanel_edge.right).value;
+    }
+    
+    function setPaddingBottom(value) {
+        gml_pragma("forceinline");
+        flexpanel_node_style_set_padding(self.node, flexpanel_edge.bottom, value);
+        global.UI.needsUpdate = true;
+    }
+    
+    function getPaddingBottom() {
+        gml_pragma("forceinline");
+        return flexpanel_node_style_get_padding(self.node, flexpanel_edge.bottom).value;
+    }
     
     // Scrollbar
     function enableScrollbar(thumbColor = undefined) {
