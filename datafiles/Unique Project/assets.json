@@ -1,14 +1,9 @@
 {
-  "version":"2025.12.1.0",
+  "version":"0.2.0",
   "folders":{
-    "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
-      "name":"Project",
-      "__parentUI":null,
-      "uuid":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0"
-    },
     "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
       "name":"Objects",
-      "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
+      "__parentUI":null,
       "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
     },
     "9ff898e0-953e-4435-99b5-d5e825905d60":{
@@ -40,16 +35,16 @@
     "camera":{
       "damping":true,
       "target":[
-        60.753188466508213,
-        -311.79991415304505,
+        141.11863923600998,
+        58.332366206757783,
         0.0
       ],
-      "dampingFactor":0.29999999999999999,
       "position":[
-        -178.88481297312677,
-        -866.166482383691,
-        351.6935561034901
-      ]
+        -206.73684013727183,
+        -704.87676104490026,
+        443.71923788279463
+      ],
+      "dampingFactor":0.29999999999999999
     },
     "counters":{
       "cameras":0.0,
@@ -57,8 +52,8 @@
       "models":28.0,
       "lights":0.0,
       "instances":48.0,
-      "folders":8.0,
       "textures":2.0,
+      "folders":8.0,
       "materials":28.0
     }
   },

@@ -1,20 +1,20 @@
 {
   "children":[
     {
-      "model":"8612d488-8962-4d4e-99a0-b322390bbe30",
-      "name":"oTreeDecoratedSnow_16",
       "visible":true,
+      "name":"oTreeDecoratedSnow_16",
+      "position":[
+        152.17416510904394,
+        5.4923037842328881,
+        0.0
+      ],
       "uuid":"40f81290-62d8-4845-92c3-6ac5f3e01f86",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        152.17416510904394,
-        5.4923037842328881,
-        0.0
-      ],
+      "model":"8612d488-8962-4d4e-99a0-b322390bbe30",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -24,36 +24,35 @@
       ]
     },
     {
-      "model":"9d639333-4783-477b-9441-3408e9accca3",
-      "name":"oPresentACube_17",
       "visible":true,
+      "name":"oPresentACube_17",
+      "position":[
+        105.75837866455026,
+        82.686196982631486,
+        0.0
+      ],
       "uuid":"e0ce89bb-a7e1-4255-be11-3683c777b715",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        105.75837866455026,
-        82.686196982631486,
-        0.0
-      ],
       "children":[
         {
-          "model":"ded835fe-0b58-4a5d-ade5-2c96eb44ee7d",
-          "name":"oPresentACube__Base_18",
           "visible":true,
+          "name":"oPresentACube__Base_18",
+          "position":[
+            0.0,
+            0.0,
+            0.0
+          ],
           "uuid":"59c7d77f-a1d3-41bd-b16f-d5e8367f8aff",
           "scale":[
             1.0,
             1.0,
             1.0
           ],
-          "position":[
-            0.0,
-            0.0,
-            0.0
-          ],
+          "model":"ded835fe-0b58-4a5d-ade5-2c96eb44ee7d",
           "type":"ModelInstance",
           "rotation":[
             0.0,
@@ -63,20 +62,20 @@
           ]
         },
         {
-          "model":"7b3befe6-3dc9-486b-a640-f1a679a88190",
-          "name":"oPresentACube__Top_19",
           "visible":true,
+          "name":"oPresentACube__Top_19",
+          "position":[
+            0.0,
+            30.0,
+            0.0
+          ],
           "uuid":"5fef19e3-b235-4f6c-843b-97fde857f43f",
           "scale":[
             1.0,
             1.0,
             1.0
           ],
-          "position":[
-            0.0,
-            30.0,
-            0.0
-          ],
+          "model":"7b3befe6-3dc9-486b-a640-f1a679a88190",
           "type":"ModelInstance",
           "rotation":[
             0.0,
@@ -86,6 +85,7 @@
           ]
         }
       ],
+      "model":"9d639333-4783-477b-9441-3408e9accca3",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -95,20 +95,20 @@
       ]
     },
     {
-      "model":"927da630-411d-41b9-9231-9a7478c3355a",
-      "name":"oLantern_20",
       "visible":true,
+      "name":"oLantern_20",
+      "position":[
+        -122.22460847177805,
+        143.12141759099111,
+        0.0
+      ],
       "uuid":"c5b3ae57-9ef6-4907-a339-bb29a49d2317",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        -122.22460847177805,
-        143.12141759099111,
-        0.0
-      ],
+      "model":"927da630-411d-41b9-9231-9a7478c3355a",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -118,20 +118,20 @@
       ]
     },
     {
-      "model":"b84aacb1-03b4-46f7-b7ba-f36523ba7f7a",
-      "name":"oTree_21",
       "visible":true,
+      "name":"oTree_21",
+      "position":[
+        714.12436825865825,
+        87.25241768451906,
+        0.0
+      ],
       "uuid":"4c9f13df-af4d-4f8b-9077-245d29c49004",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        714.12436825865825,
-        87.25241768451906,
-        0.0
-      ],
+      "model":"b84aacb1-03b4-46f7-b7ba-f36523ba7f7a",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -141,20 +141,20 @@
       ]
     },
     {
-      "model":"be5c0cf1-034e-4831-9ef1-36528dbe39d2",
-      "name":"oTreeSnowA_22",
       "visible":true,
+      "name":"oTreeSnowA_22",
+      "position":[
+        516.33240840711346,
+        21.751063716090357,
+        9.9852161407470703
+      ],
       "uuid":"a3a1c6c1-3182-4ab0-bd77-af894b331c01",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        516.33240840711346,
-        21.751063716090357,
-        9.9852161407470703
-      ],
+      "model":"be5c0cf1-034e-4831-9ef1-36528dbe39d2",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -164,20 +164,20 @@
       ]
     },
     {
-      "model":"2347a4da-f160-4cea-b010-6e7c09550c16",
-      "name":"oSnowFlatLarge_23",
       "visible":true,
+      "name":"oSnowFlatLarge_23",
+      "position":[
+        542.76685719787474,
+        83.694084897428411,
+        0.0
+      ],
       "uuid":"ec528894-96d9-4128-a4e0-ba40ae24aebe",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        542.76685719787474,
-        83.694084897428411,
-        0.0
-      ],
+      "model":"2347a4da-f160-4cea-b010-6e7c09550c16",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -187,20 +187,20 @@
       ]
     },
     {
-      "model":"a1b29549-dcb5-4124-b948-5f85147f4900",
-      "name":"oRocksMedium_24",
       "visible":true,
+      "name":"oRocksMedium_24",
+      "position":[
+        609.90981767737003,
+        110.25534863054958,
+        0.0
+      ],
       "uuid":"fe1b80e2-9cb2-4150-b722-e5d336bee2a3",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        609.90981767737003,
-        110.25534863054958,
-        0.0
-      ],
+      "model":"a1b29549-dcb5-4124-b948-5f85147f4900",
       "type":"ModelInstance",
       "rotation":[
         0.5,
@@ -210,20 +210,20 @@
       ]
     },
     {
-      "model":"cf30cd7d-acea-4fca-9e63-d0ac3c573699",
-      "name":"oRocksSmall_26",
       "visible":true,
+      "name":"oRocksSmall_26",
+      "position":[
+        650.29545123897367,
+        514.177229279926,
+        0.0
+      ],
       "uuid":"50a3aebb-3d34-4f2b-9108-a0b4797ac3d0",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        650.29545123897367,
-        514.177229279926,
-        0.0
-      ],
+      "model":"cf30cd7d-acea-4fca-9e63-d0ac3c573699",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -233,20 +233,20 @@
       ]
     },
     {
-      "model":"7e0b3d0e-5c39-4eea-b536-585e49120572",
-      "name":"oRocksLarge_27",
       "visible":true,
+      "name":"oRocksLarge_27",
+      "position":[
+        250.405683683132,
+        589.33778024427943,
+        0.0
+      ],
       "uuid":"b2f50c23-15b8-47ba-ae32-52a0f055e527",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        250.405683683132,
-        589.33778024427943,
-        0.0
-      ],
+      "model":"7e0b3d0e-5c39-4eea-b536-585e49120572",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -256,20 +256,20 @@
       ]
     },
     {
-      "model":"138238bd-2637-4b0d-a4ff-5f6e78f9f4fb",
-      "name":"oSled_28",
       "visible":true,
+      "name":"oSled_28",
+      "position":[
+        530.02591626999981,
+        -74.460553755338992,
+        0.0
+      ],
       "uuid":"c7f18d62-6a82-4283-8cc1-7dca52d17c68",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        530.02591626999981,
-        -74.460553755338992,
-        0.0
-      ],
+      "model":"138238bd-2637-4b0d-a4ff-5f6e78f9f4fb",
       "type":"ModelInstance",
       "rotation":[
         -0.57922796533956911,
@@ -279,20 +279,20 @@
       ]
     },
     {
-      "model":"b636ff8e-6a96-4d77-95f6-4e6dc13fa6d8",
-      "name":"oSnowBunker_29",
       "visible":true,
+      "name":"oSnowBunker_29",
+      "position":[
+        413.7791592458961,
+        -221.15367253880328,
+        0.0
+      ],
       "uuid":"8efac943-ecb4-4ee5-a1d3-6c6f155bd570",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        413.7791592458961,
-        -221.15367253880328,
-        0.0
-      ],
+      "model":"b636ff8e-6a96-4d77-95f6-4e6dc13fa6d8",
       "type":"ModelInstance",
       "rotation":[
         -0.6830127018922193,
@@ -302,20 +302,20 @@
       ]
     },
     {
-      "model":"810fb466-6c69-4c04-8815-61b4e6cf382a",
-      "name":"oTreeSnowB_30",
       "visible":true,
+      "name":"oTreeSnowB_30",
+      "position":[
+        747.95166015625,
+        534.82611083984375,
+        0.0
+      ],
       "uuid":"0c64f2df-4c07-4b89-85e1-bfe12efaba21",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        747.95166015625,
-        534.82611083984375,
-        0.0
-      ],
+      "model":"810fb466-6c69-4c04-8815-61b4e6cf382a",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -325,36 +325,35 @@
       ]
     },
     {
-      "model":"897074dc-956f-4abf-a5c0-8f2c5f550631",
-      "name":"oPresentARound_31",
       "visible":true,
+      "name":"oPresentARound_31",
+      "position":[
+        88.62062464597706,
+        -64.550836680670272,
+        0.0
+      ],
       "uuid":"5ee06fb1-4a4a-455e-bfb2-38118a6a7123",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        88.62062464597706,
-        -64.550836680670272,
-        0.0
-      ],
       "children":[
         {
-          "model":"0f31065c-8e7c-4bbb-bdab-8579184a9512",
-          "name":"oPresentARound__Base_32",
           "visible":true,
+          "name":"oPresentARound__Base_32",
+          "position":[
+            0.0,
+            0.0,
+            0.0
+          ],
           "uuid":"c9800c89-a985-4fa5-a480-17bf654dee25",
           "scale":[
             1.0,
             1.0,
             1.0
           ],
-          "position":[
-            0.0,
-            0.0,
-            0.0
-          ],
+          "model":"0f31065c-8e7c-4bbb-bdab-8579184a9512",
           "type":"ModelInstance",
           "rotation":[
             0.0,
@@ -364,20 +363,20 @@
           ]
         },
         {
-          "model":"0b27c7d5-1788-4ca8-8790-a677cd216fc7",
-          "name":"oPresentARound__Top_33",
           "visible":true,
+          "name":"oPresentARound__Top_33",
+          "position":[
+            0.0,
+            30.0,
+            -0.0
+          ],
           "uuid":"be0df8ba-e6f9-4655-b510-0af5a8b3ac63",
           "scale":[
             1.0,
             1.0,
             1.0
           ],
-          "position":[
-            0.0,
-            30.0,
-            -0.0
-          ],
+          "model":"0b27c7d5-1788-4ca8-8790-a677cd216fc7",
           "type":"ModelInstance",
           "rotation":[
             0.0,
@@ -387,6 +386,7 @@
           ]
         }
       ],
+      "model":"897074dc-956f-4abf-a5c0-8f2c5f550631",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -396,20 +396,20 @@
       ]
     },
     {
-      "model":"87255f18-afaf-46aa-99ce-a53c453a7466",
-      "name":"oLightsColored_34",
       "visible":true,
+      "name":"oLightsColored_34",
+      "position":[
+        -87.680000000000007,
+        200.0,
+        128.0
+      ],
       "uuid":"fd50b88c-8857-4b57-b105-a46059b4bad0",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        -87.680000000000007,
-        200.0,
-        128.0
-      ],
+      "model":"87255f18-afaf-46aa-99ce-a53c453a7466",
       "type":"ModelInstance",
       "rotation":[
         0.61237243569579458,
@@ -419,20 +419,20 @@
       ]
     },
     {
-      "model":"927da630-411d-41b9-9231-9a7478c3355a",
-      "name":"oLantern_35",
       "visible":true,
+      "name":"oLantern_35",
+      "position":[
+        -56.28826498592985,
+        258.01449091453503,
+        0.0
+      ],
       "uuid":"4450d853-10ff-4228-a42a-2bf64dda5970",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        -56.28826498592985,
-        258.01449091453503,
-        0.0
-      ],
+      "model":"927da630-411d-41b9-9231-9a7478c3355a",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -442,36 +442,35 @@
       ]
     },
     {
-      "model":"3157358e-90c0-46a4-82da-46158d75bee5",
-      "name":"oPresentBCube_36",
       "visible":true,
+      "name":"oPresentBCube_36",
+      "position":[
+        246.88120783589531,
+        50.322020940821744,
+        0.0
+      ],
       "uuid":"c70f56d6-9168-4a7f-9d0d-bd75ab551860",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        246.88120783589531,
-        50.322020940821744,
-        0.0
-      ],
       "children":[
         {
-          "model":"1f33ceb8-dacd-4435-91c8-be3f1739fea0",
-          "name":"oPresentBCube__Base_37",
           "visible":true,
+          "name":"oPresentBCube__Base_37",
+          "position":[
+            0.0,
+            0.0,
+            0.0
+          ],
           "uuid":"5a476678-d25a-4dd7-8f60-a4cc3f274702",
           "scale":[
             1.0,
             1.0,
             1.0
           ],
-          "position":[
-            0.0,
-            0.0,
-            0.0
-          ],
+          "model":"1f33ceb8-dacd-4435-91c8-be3f1739fea0",
           "type":"ModelInstance",
           "rotation":[
             0.0,
@@ -481,20 +480,20 @@
           ]
         },
         {
-          "model":"a510bad6-d777-4064-921f-58860cfd2fb4",
-          "name":"oPresentBCube__Top_38",
           "visible":true,
+          "name":"oPresentBCube__Top_38",
+          "position":[
+            0.0,
+            20.0,
+            0.0
+          ],
           "uuid":"3b42e3b1-fcfb-409b-8669-602777929e1c",
           "scale":[
             1.0,
             1.0,
             1.0
           ],
-          "position":[
-            0.0,
-            20.0,
-            0.0
-          ],
+          "model":"a510bad6-d777-4064-921f-58860cfd2fb4",
           "type":"ModelInstance",
           "rotation":[
             0.0,
@@ -504,6 +503,7 @@
           ]
         }
       ],
+      "model":"3157358e-90c0-46a4-82da-46158d75bee5",
       "type":"ModelInstance",
       "rotation":[
         0.57922796533956922,
@@ -513,36 +513,35 @@
       ]
     },
     {
-      "model":"e07d4ed0-94d7-4aa7-8d56-1b5c54278468",
-      "name":"oPresentBRectangle_39",
       "visible":true,
+      "name":"oPresentBRectangle_39",
+      "position":[
+        255.53558785421254,
+        -17.243046554365606,
+        0.0
+      ],
       "uuid":"ca9665e6-d238-4e2a-8b91-485d2f3bc666",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        255.53558785421254,
-        -17.243046554365606,
-        0.0
-      ],
       "children":[
         {
-          "model":"82ec2814-fcf9-49cd-aac0-3741452e0715",
-          "name":"oPresentBRectangle__Base_40",
           "visible":true,
+          "name":"oPresentBRectangle__Base_40",
+          "position":[
+            0.0,
+            0.0,
+            0.0
+          ],
           "uuid":"7d0e5c40-ca03-45a3-97a9-b5586e1e993f",
           "scale":[
             1.0,
             1.0,
             1.0
           ],
-          "position":[
-            0.0,
-            0.0,
-            0.0
-          ],
+          "model":"82ec2814-fcf9-49cd-aac0-3741452e0715",
           "type":"ModelInstance",
           "rotation":[
             0.0,
@@ -552,20 +551,20 @@
           ]
         },
         {
-          "model":"d5936b47-954e-408e-95b3-ac331e77fabf",
-          "name":"oPresentBRectangle__Top_41",
           "visible":true,
+          "name":"oPresentBRectangle__Top_41",
+          "position":[
+            0.0,
+            20.0,
+            -0.0
+          ],
           "uuid":"36cb7d4d-6937-4cff-b3a3-23b3cd2c514a",
           "scale":[
             1.0,
             1.0,
             1.0
           ],
-          "position":[
-            0.0,
-            20.0,
-            -0.0
-          ],
+          "model":"d5936b47-954e-408e-95b3-ac331e77fabf",
           "type":"ModelInstance",
           "rotation":[
             0.0,
@@ -575,6 +574,7 @@
           ]
         }
       ],
+      "model":"e07d4ed0-94d7-4aa7-8d56-1b5c54278468",
       "type":"ModelInstance",
       "rotation":[
         -0.61237243569579458,
@@ -584,20 +584,20 @@
       ]
     },
     {
-      "model":"927da630-411d-41b9-9231-9a7478c3355a",
-      "name":"oLantern_42",
       "visible":true,
+      "name":"oLantern_42",
+      "position":[
+        767.81462988681028,
+        -109.85259938231837,
+        0.0
+      ],
       "uuid":"8f42f0db-0837-4aaf-b7f3-f86675161537",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        767.81462988681028,
-        -109.85259938231837,
-        0.0
-      ],
+      "model":"927da630-411d-41b9-9231-9a7478c3355a",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -607,20 +607,20 @@
       ]
     },
     {
-      "model":"a61bb5d5-5773-4e72-a923-360294be22cc",
-      "name":"oBench_43",
       "visible":true,
+      "name":"oBench_43",
+      "position":[
+        -188.20391157612249,
+        -146.49266232011689,
+        0.0
+      ],
       "uuid":"e85a2844-916f-4689-bc57-b75916284347",
       "scale":[
         0.69999999999999996,
         0.69999999999999996,
         0.69999999999999996
       ],
-      "position":[
-        -188.20391157612249,
-        -146.49266232011689,
-        0.0
-      ],
+      "model":"a61bb5d5-5773-4e72-a923-360294be22cc",
       "type":"ModelInstance",
       "rotation":[
         -0.69636424032001898,
@@ -630,20 +630,20 @@
       ]
     },
     {
-      "model":"e15d706a-2ad6-45aa-9d51-c17d847cbb1d",
-      "name":"oSnowmanHat_44",
       "visible":true,
+      "name":"oSnowmanHat_44",
+      "position":[
+        -131.1465963810405,
+        -62.320875952894426,
+        0.0
+      ],
       "uuid":"4a8e9f4f-d69a-415d-91c3-8d93ec8ae2d4",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        -131.1465963810405,
-        -62.320875952894426,
-        0.0
-      ],
+      "model":"e15d706a-2ad6-45aa-9d51-c17d847cbb1d",
       "type":"ModelInstance",
       "rotation":[
         0.66446302438867477,
@@ -653,20 +653,20 @@
       ]
     },
     {
-      "model":"de875630-d392-4d60-a277-517bb8431829",
-      "name":"oSnowFlat_45",
       "visible":true,
+      "name":"oSnowFlat_45",
+      "position":[
+        -106.55850910325742,
+        -51.949995934447372,
+        0.0
+      ],
       "uuid":"27d6b405-212e-401b-bc94-8ba61e5b52b6",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        -106.55850910325742,
-        -51.949995934447372,
-        0.0
-      ],
+      "model":"de875630-d392-4d60-a277-517bb8431829",
       "type":"ModelInstance",
       "rotation":[
         0.70710678118654757,
@@ -676,20 +676,20 @@
       ]
     },
     {
-      "model":"b636ff8e-6a96-4d77-95f6-4e6dc13fa6d8",
-      "name":"oSnowBunker_46",
       "visible":true,
+      "name":"oSnowBunker_46",
+      "position":[
+        -176.22109299250417,
+        -44.208526883629531,
+        0.0
+      ],
       "uuid":"f483912a-1cd8-4845-a4e8-7545f733f50f",
       "scale":[
         1.0,
         1.0,
         1.0
       ],
-      "position":[
-        -176.22109299250417,
-        -44.208526883629531,
-        0.0
-      ],
+      "model":"b636ff8e-6a96-4d77-95f6-4e6dc13fa6d8",
       "type":"ModelInstance",
       "rotation":[
         -0.45451947767204376,
@@ -699,20 +699,20 @@
       ]
     },
     {
-      "model":"66159d48-ba1f-412f-9fcb-a7ec849ee37e",
-      "name":"oReindeer_47",
       "visible":true,
+      "name":"oReindeer_47",
+      "position":[
+        712.78526065435881,
+        411.27171875409573,
+        0.0
+      ],
       "uuid":"da20bab1-f546-4a92-91ef-ae3dc9a4a559",
       "scale":[
         0.69999999999999996,
         0.69999999999999996,
         0.69999999999999996
       ],
-      "position":[
-        712.78526065435881,
-        411.27171875409573,
-        0.0
-      ],
+      "model":"66159d48-ba1f-412f-9fcb-a7ec849ee37e",
       "type":"ModelInstance",
       "rotation":[
         -0.61237243569579458,
@@ -723,7 +723,6 @@
     }
   ],
   "name":"sDemo",
-  "__parentUI":"a5a9b11e-fb36-441b-84f3-47d07aa7bfc0",
   "type":"Scene",
   "uuid":"5a597e90-a516-477e-9ba6-f2f5711952e3"
 }
