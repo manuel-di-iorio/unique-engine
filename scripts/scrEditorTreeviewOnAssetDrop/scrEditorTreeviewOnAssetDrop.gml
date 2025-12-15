@@ -26,17 +26,6 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             
             isValidDrop = true;
             dropAction = "moveToRoot";
-            
-            // Optimization: If already at root (parent is undefined), we can return false effectively
-            // But dragging onto root usually implies reordering or moving out of folder.
-            // If moving out of folder: parent is defined.
-            // If reordering at root: parent is undefined.
-            // For now, let's treat it as valid to allow moving OUT of folders.
-            if (draggedItem.asset != undefined && draggedItem.asset[$ "__parentUI"] == undefined) {
-                 // Already at root. Return false to avoid unnecessary processing?
-                 // Or allow it for reordering? (Reordering not implemented here yet)
-                 return false; 
-            }
         }
     }
     // Allow dropping anything into a Folder
