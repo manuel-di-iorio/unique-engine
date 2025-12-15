@@ -223,8 +223,14 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             // Draw the icon
             var xx = node.x1 + 30;
             var meanY = (node.y1 + node.y2) / 2;
-            if (item.icon) {
-                draw_sprite(item.icon, 0, xx + 10, meanY);
+            
+            var iconToDraw = item.icon;
+            if (item.assetType == "Folder" && item.collapsed) {
+                iconToDraw = sprUiFolderCollapsed;
+            }
+            
+            if (iconToDraw) {
+                draw_sprite(iconToDraw, 0, xx + 10, meanY);
                 xx += 25;
             }
             

@@ -15,16 +15,21 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
 
     self.readTarget = renderTarget;
     self.writeTarget = renderTarget.clone();
+  
+    // Internal
+    self.__cachedPassesLen = -1;
 
     function addPass(pass) {
         gml_pragma("forceinline");
         array_push(self.passes, pass);
+        self.__cachedPassesLen++;
         return self;        
     }
     
     function insertPass(pass, index) {
         gml_pragma("forceinline");
         array_insert(self.passes, index, pass);
+        self.__cachedPassesLen++;
         return self;        
     }
     
@@ -34,6 +39,7 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
             return el == pass;
         });
         array_delete(self.passes, index, 1);
+        self.__cachedPassesLen--;
         return self;
     }
     
@@ -41,7 +47,7 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
     function isLastEnabledPass(index) {
         gml_pragma("forceinline");
         
-        for (var i = array_length(self.passes) - 1; i >= 0; i--) {
+        for (var i = self.__cachedPassesLen; i >= 0; i--) {
             if (self.passes[i].enabled) {
                 return index == i;
             }

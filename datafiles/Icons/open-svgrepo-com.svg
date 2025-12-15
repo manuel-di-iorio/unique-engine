@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   width="64px"
+   height="64px"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="open-svgrepo-com.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="12.734375"
+     inkscape:cx="32"
+     inkscape:cy="32"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <g
+     id="SVGRepo_bgCarrier"
+     stroke-width="0"
+     transform="translate(-7.5092025,-5.2711656)" />
+  <g
+     id="SVGRepo_tracerCarrier"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     transform="translate(-7.5092025,-5.2711656)" />
+  <g
+     id="SVGRepo_iconCarrier"
+     transform="matrix(0.25349693,0,0,0.25349693,10.17438,11.151901)"
+     inkscape:export-filename="SVGRepo_iconCarrier.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <path
+       d="M 20,21 H 3 C 2.44772,21 2,20.5523 2,20 V 4 C 2,3.44772 2.44771,3 3,3 H 7.73381 C 8.08507,3 8.41058,3.1843 8.5913,3.4855 l 1.2174,2.029 C 9.98942,5.8157 10.3149,6 10.6662,6 H 20 c 0.5523,0 1,0.44772 1,1 v 3"
+       stroke="#ffffff"
+       stroke-width="2"
+       stroke-linecap="round"
+       id="path1" />
+    <path
+       d="m 4.79903,10.7369 -2.45454,9 C 2.17099,20.373 2.64988,21 3.30925,21 H 19.2362 c 0.451,0 0.8461,-0.3018 0.9648,-0.7369 l 2.4545,-9 C 22.829,10.627 22.3501,10 21.6908,10 H 5.7638 c -0.45096,0 -0.84611,0.3018 -0.96477,0.7369 z"
+       stroke="#ffffff"
+       stroke-width="2"
+       id="path2" />
+  </g>
+</svg>

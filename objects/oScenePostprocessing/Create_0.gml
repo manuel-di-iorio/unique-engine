@@ -19,5 +19,5 @@ renderPass.clearColor = layer_background_get_blend(layer_background_get_id("Back
 composer.addPass(renderPass);
 
 // Create the outline pass
-var outlinePass = new UeOutlinePass(scene, camera, [ cubeMesh ]);
-composer.addPass(outlinePass);
+ var outlinePass = new UeOutlinePass(scene, camera, [ cubeMesh ]);
+ composer.addPass(outlinePass);

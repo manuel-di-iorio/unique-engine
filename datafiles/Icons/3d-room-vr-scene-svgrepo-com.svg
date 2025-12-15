@@ -8,8 +8,8 @@
    xml:space="preserve"
    width="64px"
    height="64px"
-   fill="#000000"
-   sodipodi:docname="3d-room-vr-scene-svgrepo-com.svg"
+   fill="#ffffff"
+   sodipodi:docname="3d-room-vr-scene-svgrepo-com (1).svg"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -17,16 +17,16 @@
    xmlns:svg="http://www.w3.org/2000/svg"><defs
    id="defs2" /><sodipodi:namedview
    id="namedview2"
-   pagecolor="#050505"
+   pagecolor="#ffffff"
    bordercolor="#000000"
    borderopacity="0.25"
    inkscape:showpageshadow="2"
    inkscape:pageopacity="0.0"
    inkscape:pagecheckerboard="0"
    inkscape:deskcolor="#d1d1d1"
-   inkscape:zoom="6.3671875"
-   inkscape:cx="-8.8736196"
-   inkscape:cy="9.0306748"
+   inkscape:zoom="12.734375"
+   inkscape:cx="32"
+   inkscape:cy="32"
    inkscape:window-width="1920"
    inkscape:window-height="1017"
    inkscape:window-x="-8"
@@ -36,26 +36,28 @@
 
 <g
    id="SVGRepo_bgCarrier"
-   stroke-width="0" />
+   stroke-width="0"
+   transform="matrix(0.23761969,0,0,0.23761969,11.844711,14.907276)" />
 
 <g
    id="SVGRepo_tracerCarrier"
    stroke-linecap="round"
-   stroke-linejoin="round" />
+   stroke-linejoin="round"
+   transform="matrix(0.23761969,0,0,0.23761969,11.844711,14.907276)" />
 
 <g
    id="SVGRepo_iconCarrier"
-   transform="matrix(0.22699387,0,0,0.22699387,24.736196,24.736186)"
+   transform="matrix(0.23761969,0,0,0.23761969,11.844711,14.907276)"
    inkscape:export-filename="SVGRepo_iconCarrier.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"> <style
    type="text/css"
-   id="style1"> .st0{fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;} </style> <polyline
+   id="style1"> .st0{fill:none;stroke:#ffffff;stroke-width:2.2399999999999998;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;} </style> <polyline
    class="st0"
    points="1,23 1,9 16,1 31,9 31,23 "
    id="polyline1" /> <polygon
    class="st0"
-   points="1,23 16,31 31,23 16,15 "
+   points="16,31 31,23 16,15 1,23 "
    id="polygon1" /> <polyline
    class="st0"
    points="16,1 16,15 21,9 24,15 26,13 31,23 "

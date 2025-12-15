@@ -6,17 +6,6 @@
  * 
  * When rendered with identity matrices, this quad covers the entire screen,
  * making it perfect for fullscreen post-processing effects.
- * 
- * Vertex layout:
- *   (-1,+1)-----(+1,+1)
- *      |   \      |
- *      |    \     |
- *      |     \    |
- *   (-1,-1)-----(+1,-1)
- * 
- * UV coordinates follow GameMaker convention:
- *   (0,0) = top-left
- *   (1,1) = bottom-right
  */
 function UeQuadGeometry(data = {}): UeBufferGeometry(data) constructor {
     type = "QuadGeometry";
@@ -44,6 +33,8 @@ function UeQuadGeometry(data = {}): UeBufferGeometry(data) constructor {
     ];
     
     self.vertices = vertices;
+  
+    self.build();
 }
 
 
@@ -70,7 +61,6 @@ function UeFullscreenQuad(material) constructor {
     
     // Create the NDC quad geometry once
     self.geometry = new UeQuadGeometry();
-    self.geometry.build();
 
     /**
      * Clean up resources owned by this quad.
