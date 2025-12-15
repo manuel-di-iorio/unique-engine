@@ -46,592 +46,12 @@ function EditorUiInspector(ui) constructor {
     
     // Assets fields configuration
     fields = {
-        "Texture": [
-            { 
-                id: "name",
-                field: "name",
-                label: "Name", 
-                type: "text"
-            },
-            {
-                id: "sprite",
-                field: "sprite",
-                type: "spriteFilePicker",
-                onChange: function(value) {
-                    self.asset.dispose();
-                    self.asset.sprite = value;
-                    self.asset.__cachedSprite = value;
-                    self.asset.__cachedTexture = sprite_get_texture(value, 0);
-                    
-                    // Track the change in asset manager
-                    oSceneEditor.assetManager.editAsset(self.asset);
-                }
-            }
-        ],
-        
-        "Material": [
-            { 
-                id: "name",
-                field: "name",
-                label: "Name", 
-                type: "text"
-            },
-            { 
-                id: "shader",
-                field: "shader",
-                label: "Shader", 
-                type: "dropdown",
-                tooltip: "Select the shader program to use for rendering",
-                items: [
-                    { label: "None", value: undefined, tooltip: "No shader" },
-                    { label: "Standard", value: sh_ue_standard, tooltip: "Shader with lighting support" },
-                    { label: "Basic (unlit)", value: sh_ue_basic, tooltip: "Simple unlit shader" },
-                    { label: "Line", value: sh_ue_line, tooltip: "Shader for rendering lines" },
-                    { label: "Sprite", value: sh_ue_sprite, tooltip: "Shader for rendering sprites" },
-                    { label: "Normals", value: sh_ue_normals, tooltip: "Shader for showing normals" }
-                ],
-                onAfterChange: function() {
-                    self.asset.build();
-                    
-                    // Track the change in asset manager
-                    oSceneEditor.assetManager.editAsset(self.asset);
-                }
-            },
-        
-            { 
-                type: "section",
-                label: "Textures"
-            },
-            { 
-                id: "texturesMap",
-                field: "textures",
-                label: "Diffuse", 
-                type: "dropdown",
-                tooltip: "Base color/albedo texture",
-                search: "Search texture..",
-                subKey: "map",
-                itemsGetter: function(searchValue) {
-                    var allTextures = oSceneEditor.assetManager.getAssetsByType("Texture");
-                    
-                    var uniqueTextures = [];
-                    var seen = {};
-                    for (var i = 0; i < array_length(allTextures); i++) {
-                        var _asset = allTextures[i];
-                        var _key = string(ptr(_asset));
-                        if (seen[$ _key] == undefined) {
-                            seen[$ _key] = true;
-                            array_push(uniqueTextures, _asset);
-                        }
-                    }
-                    
-                    var textures = array_filter(uniqueTextures, method({ searchValue }, function(texture) {
-                        if (searchValue == "") return true;
-                        return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
-                    }));
-                    
-                    var mapped = array_map(textures, function(texture) {
-                        return {
-                            label: texture.name, 
-                            value: texture
-                        };
-                    });
-                    
-                    array_insert(mapped, 0, { label: "<None>", value: undefined });
-
-                    return mapped;
-                },
-                onChange: function(value, input) {
-                    self.asset.textures[$ "map"] = value;
-                    self.asset.build();
-                    
-                    // Track the change in asset manager
-                    oSceneEditor.assetManager.editAsset(self.asset);
-                }
-            },
-            //{ 
-                //id: "texturesEmissiveMap",
-                //field: "textures",
-                //label: "Emissive", 
-                //type: "dropdown",
-                 //items: [{ label: "", value: undefined}],
-                //search: true,
-                //itemsGetter: function(searchValue) {
-                    //return [];
-                //},
-                //onChange: function(value, input) {
-                    // save in self.asset.textures[$ "emissiveMap"] = value;
-                //}
-            //},
-        
-            { 
-                type: "section",
-                label: "Basic Properties"
-            },
-            //{ 
-                //id: "visible",
-                //field: "visible",
-                //label: "Visible", 
-                //type: "checkbox"
-            //},
-            { 
-                id: "transparent",
-                field: "transparent",
-                label: "Transparent", 
-                type: "checkbox",
-                tooltip: "Enable transparency for this material"
-            },
-            //{ 
-                //id: "opacity",
-                //field: "opacity",
-                //label: "Opacity", 
-                //type: "text",
-                //format: "float",
-                //min: 0,
-                //max: 1
-            //},
-            { 
-                id: "wireframe",
-                field: "wireframe",
-                label: "Wireframe", 
-                type: "checkbox",
-                tooltip: "Render only the edges of polygons"
-            },
-            { 
-                id: "lights",
-                field: "lights",
-                label: "Receive Lights",
-                type: "checkbox",
-                tooltip: "Enable lighting calculations for this material",
-                onChange: function(value) {
-                    self.asset.lights = value ? 2 : 0;
-                    self.asset.build();
-                    
-                    // Track the change in asset manager
-                    oSceneEditor.assetManager.editAsset(self.asset);
-                }
-            },
-            { 
-                id: "side",
-                field: "side",
-                label: "Backface Culling", 
-                type: "dropdown",
-                tooltip: "Control which polygon faces are rendered",
-                items: [
-                    { label: "No culling", value: cull_noculling, tooltip: "Render both front and back faces" },
-                    { label: "Counter Clockwise", value: cull_counterclockwise, tooltip: "Cull counter-clockwise faces" },
-                    { label: "Clockwise", value: cull_clockwise, tooltip: "Cull clockwise faces" },
-                ]
-            }, 
-        
-            { 
-                type: "section",
-                label: "Advanced Properties"
-            },
-            { 
-                id: "depthTest",
-                field: "depthTest",
-                label: "Depth Test",
-                type: "checkbox",
-                tooltip: "Enable depth buffer testing for proper occlusion"
-            },
-            { 
-                id: "depthWrite",
-                field: "depthWrite",
-                label: "Depth Write",
-                type: "checkbox",
-                tooltip: "Write to the depth buffer when rendering"
-            },
-            { 
-                id: "depthFunc",
-                field: "depthFunc",
-                label: "Depth Function", 
-                type: "dropdown",
-                tooltip: "Comparison function for depth testing",
-                items: [
-                    { label: "Always", value: cmpfunc_always, tooltip: "Always pass depth test" },
-                    { label: "Equal", value: cmpfunc_equal, tooltip: "Pass if depth equals" },
-                    { label: "Greater", value: cmpfunc_greater, tooltip: "Pass if depth is greater" },
-                    { label: "Greater Equal", value: cmpfunc_greaterequal, tooltip: "Pass if depth is greater or equal" },
-                    { label: "Less", value: cmpfunc_less, tooltip: "Pass if depth is less (default)" },
-                    { label: "Less Equal", value: cmpfunc_lessequal, tooltip: "Pass if depth is less or equal" },
-                    { label: "Never", value: cmpfunc_never, tooltip: "Never pass depth test" },
-                    { label: "Not Equal", value: cmpfunc_notequal, tooltip: "Pass if depth not equal" },
-                ]
-            },
-            
-            { 
-                id: "alphaTest",
-                field: "alphaTest",
-                label: "Alpha Test (0-255)", 
-                type: "text",
-                format: "integer",
-                min: 0,
-                max: 255,
-                tooltip: "Discard pixels with alpha below this threshold"
-            },
-            {
-                id: "forceSinglePass",
-                field: "forceSinglePass",
-                label: "Force Single Pass", 
-                type: "checkbox",
-                tooltip: "Force rendering in a single pass (disable multi-pass for transparent objects)"
-            },
-            { 
-                id: "colorWrite",
-                field: "colorWrite",
-                label: "Color Write", 
-                type: "checkbox",
-                tooltip: "Enable writing to the color buffer"
-            },
-            { 
-                id: "blending",
-                field: "blending",
-                label: "Blending", 
-                type: "checkbox",
-                tooltip: "Enable color blending with the framebuffer"
-            },
-            { 
-                id: "blendEquation",
-                field: "blendEquation",
-                label: "Blend Equation", 
-                type: "dropdown",
-                tooltip: "Mathematical operation for blending colors",
-                items: [
-                    { label: "Add", value: bm_eq_add, tooltip: "Source + Destination" },
-                    { label: "Max", value: bm_eq_max, tooltip: "Maximum of Source and Destination" },
-                    { label: "Min", value: bm_eq_min, tooltip: "Minimum of Source and Destination" },
-                    { label: "Reverse Subtract", value: bm_eq_reverse_subtract, tooltip: "Destination - Source" },
-                    { label: "Subtract", value: bm_eq_subtract, tooltip: "Source - Destination" },
-                ]
-            },
-            { 
-                id: "blendSrc",
-                field: "blendSrc",
-                label: "Blend Source", 
-                type: "dropdown",
-                tooltip: "Source blend factor",
-                items: [
-                    { label: "Zero", value: bm_zero, tooltip: "Multiply by 0" },
-                    { label: "One", value: bm_one, tooltip: "Multiply by 1" },
-                    { label: "Source Color", value: bm_src_colour, tooltip: "Multiply by source color" },
-                    { label: "Inverse Source Color", value: bm_inv_src_colour, tooltip: "Multiply by (1 - source color)" },                    
-                    { label: "Source Alpha", value: bm_src_alpha, tooltip: "Multiply by source alpha" },
-                    { label: "Inverse Source Alpha", value: bm_inv_src_alpha, tooltip: "Multiply by (1 - source alpha)" },
-                    { label: "Destination Alpha", value: bm_dest_alpha, tooltip: "Multiply by destination alpha" },
-                    { label: "Inverse Destination Alpha", value: bm_inv_dest_alpha, tooltip: "Multiply by (1 - destination alpha)" },
-                    { label: "Destination Color", value: bm_dest_colour, tooltip: "Multiply by destination color" },
-                    { label: "Inverse Destination Color", value: bm_inv_dest_colour, tooltip: "Multiply by (1 - destination color)" },
-                ]
-            },
-            { 
-                id: "blendDst",
-                field: "blendDst",
-                label: "Blend Destination", 
-                type: "dropdown",
-                tooltip: "Destination blend factor",
-                items: [
-                    { label: "Zero", value: bm_zero, tooltip: "Multiply by 0" },
-                    { label: "One", value: bm_one, tooltip: "Multiply by 1" },
-                    { label: "Source Color", value: bm_src_colour, tooltip: "Multiply by source color" },
-                    { label: "Inverse Source Color", value: bm_inv_src_colour, tooltip: "Multiply by (1 - source color)" },                    
-                    { label: "Source Alpha", value: bm_src_alpha, tooltip: "Multiply by source alpha" },
-                    { label: "Inverse Source Alpha", value: bm_inv_src_alpha, tooltip: "Multiply by (1 - source alpha)" },
-                    { label: "Destination Alpha", value: bm_dest_alpha, tooltip: "Multiply by destination alpha" },
-                    { label: "Inverse Destination Alpha", value: bm_inv_dest_alpha, tooltip: "Multiply by (1 - destination alpha)" },
-                    { label: "Destination Color", value: bm_dest_colour, tooltip: "Multiply by destination color" },
-                    { label: "Inverse Destination Color", value: bm_inv_dest_colour, tooltip: "Multiply by (1 - destination color)" },
-                ]
-            },
-            //{ 
-                //id: "emissive",
-                //field: "emissive",
-                //label: "Emissive color", 
-                //type: "shaderColor"
-            //},
-            //{ 
-                //id: "emissiveIntensity",
-                //field: "emissiveIntensity",
-                //label: "Emissive Intensity", 
-                //type: "float"
-            //},            
-        ],
-        
-        "Mesh": [
-           { 
-                id: "name",
-                field: "name",
-                label: "Name", 
-                type: "text"
-           }, 
-           { 
-                id: "static",
-                field: "__matrixAutoUpdate",
-                label: "Static", 
-                type: "checkbox",
-                tooltip: "Mark object as static (disable automatic matrix updates)",
-                valueGetter: function() {
-                    return !self.asset.__matrixAutoUpdate;
-                },
-                onChange: function(value) {
-                    self.asset.__matrixAutoUpdate = !value;
-               
-                    // Track the change in asset manager
-                    oSceneEditor.assetManager.editAsset(self.asset);
-                }
-           },
-           { 
-                id: "frustumCulled",
-                field: "frustumCulled",
-                label: "Frustum Culled", 
-                type: "checkbox",
-                tooltip: "Enable frustum culling (skip rendering when outside camera view)"
-           },           
-           { 
-                id: "material",
-                field: "material",
-                label: "Material", 
-                type: "dropdown",
-                tooltip: "Material that controls the visual appearance of this object",
-                search: "Search material..",
-                itemsGetter: function(searchValue) {
-                    var allMaterials = oSceneEditor.assetManager.getAssetsByType("Material");
-                    
-                    var uniqueMaterials = [];
-                    var seen = {};
-                    for (var i = 0; i < array_length(allMaterials); i++) {
-                        var _asset = allMaterials[i];
-                        var _key = string(ptr(_asset));
-                        if (seen[$ _key] == undefined) {
-                            seen[$ _key] = true;
-                            array_push(uniqueMaterials, _asset);
-                        }
-                    }
-                    
-                    var items = array_filter(uniqueMaterials, method({ searchValue }, function(item) {
-                        if (searchValue == "") return true;
-                        return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
-                    }));
-                    
-                    var mapped = array_map(items, function(item) {
-                        return {
-                            label: item.name, 
-                            value: item
-                        };
-                    });
-                    
-                    array_insert(mapped, 0, { label: "Default", value: global.UE_DEFAULT_MATERIAL });
-                    return mapped;
-                }
-           },
-        
-           { 
-                id: "renderOrder",
-                field: "renderOrder",
-                label: "Render Order", 
-                type: "text",
-                format: "integer",
-                negative: true,
-                tooltip: "Control rendering order (lower values render first)"
-            },
-        
-           {
-                id: "labelPosition",
-                label: "Transform", 
-                type: "section"
-           },
-           { 
-                id: "position",
-                field: "position",
-                label: "Position", 
-                type: "transformXYZ",
-                valueGetter: function() {
-                    return self.asset.position;
-                },
-                onBlur: function(value) {
-                    self.asset.position.x = value[0];
-                    self.asset.position.y = value[1];
-                    self.asset.position.z = value[2];
-                }
-           },
-        
-           { 
-                id: "rotation",
-                field: "rotation",
-                label: "Rotation", 
-                type: "transformXYZ",
-                valueGetter: function() {
-                    return self.asset.__rotationEuler;
-                },
-                onBlur: function(value) {
-                    var euler = self.asset.__rotationEuler;
-                    euler.set(value[0], value[1], value[2]);
-                    self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
-                }
-           },
-           { 
-                id: "scale",
-                field: "scale",
-                label: "Scale", 
-                type: "transformXYZ",
-                valueGetter: function() {
-                    return self.asset.scale;
-                },
-                onBlur: function(value) {
-                    self.asset.scale.x = value[0];
-                    self.asset.scale.y = value[1];
-                    self.asset.scale.z = value[2];
-                }
-           },
-        ],
-
-        "ModelInstance": [
-           {
-                type: "label",
-                field: "object",
-                label: "Object",
-                valueGetter: function() {
-                    return self.asset.object.name;                    
-                }
-            },
-            { 
-                id: "name",
-                field: "name",
-                label: "Name", 
-                type: "text"
-           }, 
-           {
-                id: "visible",
-                field: "visible",
-                label: "Visible",
-                type: "checkbox",
-                tooltip: "Enable instance visibility",
-           },
-        //    { 
-        //         id: "static",
-        //         field: "matrixAutoUpdate",
-        //         label: "Static", 
-        //         type: "checkbox", 
-        //         tooltip: "Mark object as static (disable automatic matrix updates)",
-        //         onValue: function(value) {
-        //             return !value;
-        //         },
-        //         onChange: function(value) {
-        //             self.matrixAutoUpdate = !value;
-                    
-        //             // Track the change in asset manager
-        //             oSceneEditor.assetManager.editAsset(self.asset);
-        //         }
-        //    },
-        //    { 
-        //         id: "frustumCulled",
-        //         field: "frustumCulled",
-        //         label: "Frustum Culled", 
-        //         type: "checkbox",
-        //         tooltip: "Enable frustum culling (skip rendering when outside camera view)"
-        //    },           
-           { 
-                id: "material",
-                field: "material",
-                label: "Material", 
-                type: "dropdown",
-                tooltip: "Material that controls the visual appearance of this instance",
-                search: "Search material..",
-                itemsGetter: function(searchValue) {
-                    var allMaterials = oSceneEditor.assetManager.getAssetsByType("Material");
-                    var items = array_filter(allMaterials, method({ searchValue }, function(item) {
-                        if (searchValue == "") return true;
-                        return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
-                    }));
-                    
-                    var mapped = array_map(items, function(item) {                        
-                        return {
-                            label: item.name, 
-                            value: item
-                        };
-                    });
-                    
-                    array_insert(mapped, 0, { label: "<None>", value: undefined });
-                    return mapped;
-                }
-           },
-        
-           { 
-                id: "renderOrder",
-                field: "renderOrder",
-                label: "Render Order", 
-                type: "text",
-                format: "integer",
-                negative: true,
-                tooltip: "Control rendering order (lower values render first)"
-            },
-        
-           {
-                id: "labelPosition",
-                label: "Transform", 
-                type: "section"
-           },
-           { 
-                id: "position",
-                field: "position",
-                label: "Position", 
-                type: "transformXYZ",
-                valueGetter: function() {
-                    return self.asset.position;
-                },
-                onBlur: function(value) {
-                    self.asset.position.x = value[0];
-                    self.asset.position.y = value[1];
-                    self.asset.position.z = value[2];
-                }
-           },
-        
-           { 
-                id: "rotation",
-                field: "rotation",
-                label: "Rotation", 
-                type: "transformXYZ",
-                valueGetter: function() {
-                    return self.asset.__rotationEuler;
-                },
-                onBlur: function(value) {
-                    var euler = self.asset.__rotationEuler;
-                    euler.set(value[0], value[1], value[2]);
-                    self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
-                }
-           },
-           { 
-                id: "scale",
-                field: "scale",
-                label: "Scale", 
-                type: "transformXYZ",
-                valueGetter: function() {
-                    return self.asset.scale;
-                },
-                onBlur: function(value) {
-                    self.asset.scale.x = value[0];
-                    self.asset.scale.y = value[1];
-                    self.asset.scale.z = value[2];
-                }
-           },
-        ],
-        
-        "Scene": [
-           { 
-                id: "name",
-                field: "name",
-                label: "Name", 
-                type: "text"
-           }, 
-        ],
-        
-        "Folder": [
-           { 
-                id: "name",
-                field: "name",
-                label: "Name", 
-                type: "text"
-           }, 
-        ]
+        "Texture": scrEditorInspectorTexture(),
+        "Material": scrEditorInspectorMaterial(),
+        "Mesh": scrEditorInspectorMesh(),
+        "ModelInstance": scrEditorInspectorModelInstance(), 
+        "Scene": scrEditorInspectorScene(), 
+        "Folder": scrEditorInspectorFolder(),
     }
     
     /**
@@ -640,6 +60,8 @@ function EditorUiInspector(ui) constructor {
     function inspect(asset, focusFirst = false) {
         self.ui.Inspector.Close.show();
 
+        self.asset = asset;
+        self.focusFirst = focusFirst;
         var assetType = asset.type;
         var assetFields = fields[$ assetType];
         
@@ -647,23 +69,92 @@ function EditorUiInspector(ui) constructor {
         var _Items = self.ui.Inspector.Content.Items;
         self.close();
         
-        // First pass: calculate the max label width among all items
-        var _labelWidth = 0;
-        draw_set_font(fText);
-        for (var i = 0, l = array_length(assetFields); i < l; i++) {
-            var _label = assetFields[i][$ "label"];
-            if (_label == undefined) continue;
-            _labelWidth = max(_labelWidth, string_width(_label)); 
-        }
+        // First pass: calculate the max label width among all items (recursive)
+        var _labelWidth = __getMaxLabelWidth(assetFields);
         
-        // Second pass: add the labels and inputs
-        var _focused = false;
-        for (var i = 0, l = array_length(assetFields); i < l; i++) {
-            var assetField = assetFields[i];
+        // Second pass: add the labels and inputs recursively
+        var _context = { focused: false };
+        
+        __renderFields(self.ui.Inspector.Content.Items, assetFields, _context, _labelWidth); 
+    } 
+    
+    function close() {
+        self.ui.Inspector.Content.Items.destroyChildren();
+    }
+
+    function __getMaxLabelWidth(list) {
+        var _max = 0;
+        for (var i = 0; i < array_length(list); i++) {
+            var field = list[i];
+            if (field[$ "label"] != undefined) _max = max(_max, string_width(field.label));
+            if (field[$ "children"] != undefined) _max = max(_max, __getMaxLabelWidth(field.children));
+        }
+        return _max;
+    }
+
+    function __renderFields(container, fieldsList, context, labelWidth) {
+        for (var i = 0, l = array_length(fieldsList); i < l; i++) {
+            var assetField = fieldsList[i];
+            
+            // Handle Sections with children
+            if (assetField.type == "section" && assetField[$ "children"] != undefined) {
+                var isCollapsed = assetField[$ "collapsed"] ?? false;
+
+                // Header
+                var _header = new UiNode({ 
+                    width: "100%",
+                    flexDirection: "row", 
+                    alignItems: "center",
+                    marginTop: 20, 
+                    paddingHorizontal: 10,
+                    paddingVertical: 2
+                }, { pointerEvents: true });
+              
+              with (_header) {
+                function onDraw() {
+                  draw_set_color(hovered ? global.UI_COL_SELECTION : global.UI_COL_BTN_HOVER);
+                  draw_roundrect(x1, y1, x2, y2, false)
+                }
+              }
+                
+                var _arrow = new UiSprite(isCollapsed ? sprUiTreeviewArrowRight : sprUiTreeviewArrowDown, { width: 12, height: 12, marginRight: 5 });
+                var _label = new UiText(assetField.label, {});
+                _header.add(_arrow, _label);
+                
+                // Content
+                var _content = new UiNode({ 
+                    width: "100%", 
+                    flexDirection: "column",
+                    display: isCollapsed ? "none" : "flex",
+                    paddingLeft: 0
+                });
+                
+                _header.onClick(method({ content: _content, arrow: _arrow }, function() {
+                    if (!content.isVisible()) {
+                        content.show();
+                        arrow.sprite = sprUiTreeviewArrowDown;
+                    } else {
+                        content.hide();
+                        arrow.sprite = sprUiTreeviewArrowRight;
+                    }
+                }));
+                
+                container.add(_header);
+                container.add(_content);
+                
+                __renderFields(_content, assetField.children, context, labelWidth);
+                continue;
+            }
+            
             var input = undefined;
             var width = assetField[$ "width"] ?? "100%";
-            var scope = { asset, assetField };
-            var marginTop = !i ? 0 : (assetField.type == "label" ? 35 : 15);
+            var _asset = self.asset;
+            var scope = { asset: _asset, assetField };
+            
+            // Only apply marginTop if it's the very first item of the list
+            var marginTop = (i == 0 && container == self.ui.Inspector.Content.Items) ? 
+              0 :
+              (assetField.type == "label" || assetField.type == "section" ? 25 : 15);
             
             var onChangeFn = assetField[$ "onChange"];
             var onChange = method(scope, onChangeFn != undefined ? onChangeFn : function(value, input) {
@@ -700,7 +191,7 @@ function EditorUiInspector(ui) constructor {
                 // Import a new sprite for the texture
                 case "spriteFilePicker":
                     input = new UiInspectorSpriteFilePicker({ flex: 1, justifyContent: "center" }, {
-                         valueGetter: method(scope, function() { 
+                            valueGetter: method(scope, function() { 
                             return asset.__cachedSprite;
                         }),
                         onChange
@@ -708,7 +199,7 @@ function EditorUiInspector(ui) constructor {
                 break;
                 
                 case "transformXYZ":
-                 input = new UiInspectorTransformXYZ({ flex: 1, justifyContent: "space-between", flexDirection: "row", gap: 15 }, {
+                    input = new UiInspectorTransformXYZ({ flex: 1, justifyContent: "space-between", flexDirection: "row", gap: 15 }, {
                         valueGetter,
                         onBlur
                     });
@@ -716,15 +207,15 @@ function EditorUiInspector(ui) constructor {
                 
                 case "text": 
                     input = new UiTextbox({ 
-                      flex: 1, 
-                      height: 25
+                        flex: 1, 
+                        height: 25
                     }, {
                         format: assetField[$ "format"],
                         min: assetField[$ "min"],
                         max: assetField[$ "max"],
                         negative: assetField[$ "negative"],
                         disabled: assetField[$ "disabled"],
-                        value: asset[$ assetField.field],
+                        value: self.asset[$ assetField.field],
                         valueGetter,
                         onBlur: method(scope, function(value, input) {
                             if (value == "") {
@@ -739,10 +230,10 @@ function EditorUiInspector(ui) constructor {
                         })
                     });
                 break; 
-                 
+                    
                 case "checkbox": 
                     input = new UiCheckbox({ flex: 1, }, {
-                        value: asset[$ assetField.field],
+                        value: self.asset[$ assetField.field],
                         valueGetter,
                         onChange: method(scope, function(value) {
                             self.asset[$ self.assetField.field] = value;
@@ -759,7 +250,7 @@ function EditorUiInspector(ui) constructor {
                 break;
                 
                 case "dropdown": 
-                    var dropdownValue = asset[$ assetField.field];
+                    var dropdownValue = self.asset[$ assetField.field];
                     if (is_struct(dropdownValue) && assetField[$ "subKey"] != undefined) {
                         dropdownValue = dropdownValue[$ assetField[$ "subKey"]];
                     }
@@ -801,10 +292,8 @@ function EditorUiInspector(ui) constructor {
             // Item label
             var _label = assetField[$ "label"];
             if (_label != undefined) {
-                var _icon = assetField.type == "section" ? sprUiSection : undefined;
                 var _tooltip = assetField[$ "tooltip"];
-                _Container.add(new UiText(assetField.label, { width: _labelWidth + 15, height: 20 }, { 
-                    icon: _icon,
+                _Container.add(new UiText(assetField.label, { width: labelWidth + 15, height: 20 }, { 
                     tooltip: _tooltip,
                     pointerEvents: true 
                 }));
@@ -814,17 +303,13 @@ function EditorUiInspector(ui) constructor {
                 _Container.add(input);
 
                 // Apply the focus on the first input added to the inspector
-                if (focusFirst && !_focused && assetField.type == "text") {
-                    _focused = true;
+                if (focusFirst && !context.focused && assetField.type == "text") {
+                    context.focused = true;
                     runLater(input.Input.focus);
                 }
             }
             
-            _Items.add(_Container);
-        } 
-    } 
-    
-    function close() {
-        self.ui.Inspector.Content.Items.destroyChildren();
+            container.add(_Container);
+        }
     }
 }

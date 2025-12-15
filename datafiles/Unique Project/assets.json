@@ -1,4 +1,34 @@
 {
+  "settings":{
+    "camera":{
+      "dampingFactor":0.29999999999999999,
+      "damping":true,
+      "position":[
+        -9.6195569499436715,
+        -336.44846982669503,
+        259.46668268017334
+      ],
+      "target":[
+        268.71948395074207,
+        93.139433048198811,
+        0.0
+      ]
+    },
+    "counters":{
+      "scenes":3.0,
+      "materials":28.0,
+      "folders":8.0,
+      "instances":48.0,
+      "cameras":0.0,
+      "models":28.0,
+      "lights":0.0,
+      "textures":2.0
+    },
+    "gizmos":{
+      "showBoxColliders":true
+    },
+    "gridEnabled":true
+  },
   "version":"0.2.0",
   "folders":{
     "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
@@ -25,36 +55,6 @@
       "name":"Rocks",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
-    }
-  },
-  "settings":{
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true,
-    "camera":{
-      "damping":true,
-      "target":[
-        141.11863923600998,
-        58.332366206757783,
-        0.0
-      ],
-      "position":[
-        -206.73684013727183,
-        -704.87676104490026,
-        443.71923788279463
-      ],
-      "dampingFactor":0.29999999999999999
-    },
-    "counters":{
-      "cameras":0.0,
-      "scenes":3.0,
-      "models":28.0,
-      "lights":0.0,
-      "instances":48.0,
-      "textures":2.0,
-      "folders":8.0,
-      "materials":28.0
     }
   },
   "assets":[

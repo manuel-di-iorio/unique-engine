@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scrEditorUiInspector",
   "parent":{
-    "name":"Components",
-    "path":"folders/Scene Editor/Scripts/Components.yy",
+    "name":"Inspector",
+    "path":"folders/Scene Editor/Scripts/Components/Inspector.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",
