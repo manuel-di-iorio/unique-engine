@@ -8,8 +8,39 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     var dropAction = "";
     
     // Validation rules
+
+    // Check if target is Root (UiTreeview context)
+    // The main Treeview (root) doesn't have an assetType property.
+    // It's a UiTreeview instance.
+    var isTargetRoot = (targetItem[$ "assetType"] == undefined && targetItem[$ "Items"] != undefined);
+
+    if (isTargetRoot) {
+        // We are dropping onto the root background
+        
+        // Instances cannot be at root (must be in a Scene or under a Mesh)
+        var draggedIsInstance = (draggedItem.asset != undefined && draggedItem.asset[$ "isInstance"] == true);
+        
+        if (!draggedIsInstance) {
+            // Check if already at root
+            // If dragging from a folder, parent is defined. If from root, parent is undefined.
+            
+            isValidDrop = true;
+            dropAction = "moveToRoot";
+            
+            // Optimization: If already at root (parent is undefined), we can return false effectively
+            // But dragging onto root usually implies reordering or moving out of folder.
+            // If moving out of folder: parent is defined.
+            // If reordering at root: parent is undefined.
+            // For now, let's treat it as valid to allow moving OUT of folders.
+            if (draggedItem.asset != undefined && draggedItem.asset[$ "__parentUI"] == undefined) {
+                 // Already at root. Return false to avoid unnecessary processing?
+                 // Or allow it for reordering? (Reordering not implemented here yet)
+                 return false; 
+            }
+        }
+    }
     // Allow dropping anything into a Folder
-    if (targetItem.assetType == "Folder") {
+    else if (targetItem.assetType == "Folder") {
         isValidDrop = true;
         dropAction = "moveToFolder";
     }
@@ -103,7 +134,22 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     
     // Perform the drop action
     if (isValidDrop) {
-        if (dropAction == "moveToFolder") {
+        if (dropAction == "moveToRoot") {
+             // Remove from current asset parent (if any)
+             __removeFromParent(draggedItem.asset);
+             
+             // Clear __parentUI since we're removing from hierarchy/folder
+             if (draggedItem.asset[$ "__parentUI"] != undefined) {
+                draggedItem.asset.__parentUI = undefined; 
+             }
+             
+             // Track change on dragged asset
+             oSceneEditor.assetManager.editAsset(draggedItem.asset);
+             
+             // Update the treeview UI
+             draggedItem.moveItemTo(targetItem);
+        }
+        else if (dropAction == "moveToFolder") {
             targetItem.asset.add(draggedItem.asset);
             oSceneEditor.assetManager.editAsset(draggedItem.asset);
             draggedItem.moveItemTo(targetItem);
@@ -169,7 +215,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     }
     
     return false;
-};
+}
 
 // On drop -> create instance -> imposta ricorsivamente, name, type e __rotationEuler su tutte le istanze
 function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {

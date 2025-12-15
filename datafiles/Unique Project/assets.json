@@ -1,20 +1,6 @@
 {
+  "version":"2025.12.1.0",
   "folders":{
-    "aa10cefd-094c-4394-8382-9f287bb05aca":{
-      "name":"Presents",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
-    },
-    "855426d7-7661-4e99-9915-d0980137709c":{
-      "name":"Trees",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"855426d7-7661-4e99-9915-d0980137709c"
-    },
-    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
-      "name":"Rocks",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
-    },
     "a5a9b11e-fb36-441b-84f3-47d07aa7bfc0":{
       "name":"Project",
       "__parentUI":null,
@@ -29,39 +15,53 @@
       "name":"Snow",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
+    },
+    "aa10cefd-094c-4394-8382-9f287bb05aca":{
+      "name":"Presents",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
+    },
+    "855426d7-7661-4e99-9915-d0980137709c":{
+      "name":"Trees",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"855426d7-7661-4e99-9915-d0980137709c"
+    },
+    "78732855-ca0f-4637-b371-4ba580dc7e2d":{
+      "name":"Rocks",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
     }
   },
   "settings":{
+    "gizmos":{
+      "showBoxColliders":true
+    },
     "gridEnabled":true,
     "camera":{
+      "damping":true,
       "target":[
-        104.35904353346787,
-        -98.728529797345814,
+        110.93784313558538,
+        -357.33489585995028,
         0.0
       ],
       "dampingFactor":0.29999999999999999,
-      "damping":true,
       "position":[
-        -151.5736350276448,
-        -670.13588358861136,
-        310.53038690009424
+        -213.7519938092926,
+        -993.64629475002573,
+        410.44732699981944
       ]
     },
     "counters":{
+      "cameras":0.0,
       "scenes":3.0,
-      "lights":0.0,
       "models":28.0,
+      "lights":0.0,
+      "instances":48.0,
       "folders":8.0,
       "textures":2.0,
-      "instances":48.0,
-      "materials":28.0,
-      "cameras":0.0
-    },
-    "gizmos":{
-      "showBoxColliders":true
+      "materials":28.0
     }
   },
-  "version":"2025.12.1.0",
   "assets":[
     {
       "id":"f4485e71-90a3-4771-b107-98c7347ec348",

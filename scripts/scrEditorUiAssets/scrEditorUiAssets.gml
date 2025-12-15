@@ -18,6 +18,8 @@ function EditorUiAssets(ui) constructor {
         flex: 1, 
         height: "85%", 
         flexDirection: "column",
+    }, {
+        dropzone: true
     });
 
     // Tools container
@@ -197,4 +199,11 @@ function EditorUiAssets(ui) constructor {
             return true;
         }
     }));
+
+    // Handle dropping assets on the treeview background (move to root)
+    ui.Assets.Treeview.onDrop = method({ Treeview }, function(draggedContent) {
+        var draggedItem = draggedContent.parent;
+        // Pass self.Treeview as the target (representing the root)
+        return editorTreeviewOnAssetDrop(draggedItem, self.Treeview);
+    });
 }

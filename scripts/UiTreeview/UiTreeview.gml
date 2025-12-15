@@ -355,7 +355,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         if (targetParent[$ "__updateArrowVisibility"]) {
             targetParent.__updateArrowVisibility();
         }
-        if (shouldExpand && targetParent.collapsed) {
+        if (shouldExpand && targetParent[$ "collapsed"] != undefined && targetParent.collapsed) {
             targetParent.expandItem();
         }
         
