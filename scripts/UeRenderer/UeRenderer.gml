@@ -114,7 +114,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                    if (object[$ "isMesh"] && object.frustumCulled) {
                        var _boundingSphere = object[$ "__intersectionSphere"];
    
-                       if (!_boundingSphere.isEmpty() &&
+                       if (_boundingSphere != undefined &&
                            !sphere_is_visible(_boundingSphere.center.x, _boundingSphere.center.y, 
                             _boundingSphere.center.z, _boundingSphere.radius)) {
                         continue;

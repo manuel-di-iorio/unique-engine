@@ -23,7 +23,7 @@ function UeTransform(_data = undefined): UeEventDispatcher() constructor {
     matrixWorldNeedsUpdate = false;      // Tells to update the world matrix for this frame
     
     // Internals
-    __intersectionSphere = new UeSphere();
+    __intersectionSphere = undefined;
     
     /// Rebuild local matrix from position/rotation/scale
     function updateMatrix() {
@@ -58,6 +58,7 @@ function UeTransform(_data = undefined): UeEventDispatcher() constructor {
             if (geometry != undefined) {
                 var boundingSphere = geometry[$ "boundingSphere"];
                 if (boundingSphere != undefined) {
+                    if (__intersectionSphere == undefined) __intersectionSphere = new UeSphere();
                     __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
                 }
             }
