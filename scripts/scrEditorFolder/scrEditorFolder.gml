@@ -54,4 +54,21 @@ function EditorFolder(data = {}) constructor {
         self.parent = data[$ "parent"];
         return self;
     }
+
+    function clone(recursive = true) {
+        var _newFolder = new EditorFolder({ name: self.name });
+        
+        if (recursive) {
+            for (var i = 0; i < array_length(self.children); i++) {
+                var _child = self.children[i];
+                if (variable_struct_exists(_child, "clone")) {
+                    _newFolder.add(_child.clone(true));
+                } else {
+                    _newFolder.add(variable_clone(_child));
+                }
+            }
+        }
+        
+        return _newFolder;
+    }
 }

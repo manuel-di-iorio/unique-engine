@@ -153,4 +153,15 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         
         return self;
     }
+
+    /**
+     * Returns a clone of this scene and optionally all descendants.
+     */
+    function clone(recursive = true) {
+         var _newScene = new UeScene();
+         _newScene.overrideMaterial = self.overrideMaterial;
+         _newScene.copy(self, recursive);
+         
+         return _newScene;
+    }
 }

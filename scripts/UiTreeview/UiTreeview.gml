@@ -134,6 +134,38 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
             }
         }
     }
+
+    /**
+     * Recursively collapse all items
+     */
+    function collapseAll() {
+        var context = {
+            run: function(item) {
+                 // Collapse self
+                if (item[$ "collapseItem"] != undefined) {
+                    item.collapseItem();
+                }
+                
+                // Recurse children
+                if (item.Items != undefined && item.Items.children != undefined) {
+                    var children = item.Items.children;
+                    for (var i = 0; i < array_length(children); i++) {
+                        self.run(children[i]);
+                    }
+                }
+            }
+        };
+        
+        var _recursiveCollapse = method(context, context.run);
+        
+        // Apply to root items
+        if (self.Items.children != undefined) {
+            var rootItems = self.Items.children;
+            for (var i = 0; i < array_length(rootItems); i++) {
+                _recursiveCollapse(rootItems[i]);
+            }
+        }
+    }
 }
 
 /**

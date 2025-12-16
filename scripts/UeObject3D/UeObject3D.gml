@@ -200,12 +200,16 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         layers = variable_clone(source.layers);
         userData = variable_clone(source.userData);
         frustumCulled = source.frustumCulled;
-        geometry = source.geometry.clone();
-        material = source.material.clone();
-
-        // object = source.object;
-        // isInstance = source.isInstance;
-        // instances = source.instances.clone();
+        
+        var _sourceGeometry = source[$ "geometry"];
+        if (_sourceGeometry != undefined) {
+            geometry = _sourceGeometry;
+        }
+        
+        var _sourceMaterial = source[$ "material"];
+        if (_sourceMaterial != undefined) {
+            material = _sourceMaterial;
+        }
 
         position.copy(source.position);
         rotation.copy(source.rotation);
@@ -216,7 +220,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             for (var i = 0, n = array_length(source.children); i < n; i++) {
                 add(source.children[i].clone(true));
             }
-        }
+        }   
         
         return self;
     }

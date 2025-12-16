@@ -1,41 +1,5 @@
 {
-  "settings":{
-    "camera":{
-      "dampingFactor":0.29999999999999999,
-      "damping":true,
-      "position":[
-        -9.6195569499436715,
-        -336.44846982669503,
-        259.46668268017334
-      ],
-      "target":[
-        268.71948395074207,
-        93.139433048198811,
-        0.0
-      ]
-    },
-    "counters":{
-      "scenes":3.0,
-      "materials":28.0,
-      "folders":8.0,
-      "instances":48.0,
-      "cameras":0.0,
-      "models":28.0,
-      "lights":0.0,
-      "textures":2.0
-    },
-    "gizmos":{
-      "showBoxColliders":true
-    },
-    "gridEnabled":true
-  },
-  "version":"0.2.0",
   "folders":{
-    "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
-      "name":"Objects",
-      "__parentUI":null,
-      "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
-    },
     "9ff898e0-953e-4435-99b5-d5e825905d60":{
       "name":"Snow",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
@@ -55,6 +19,41 @@
       "name":"Rocks",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
       "uuid":"78732855-ca0f-4637-b371-4ba580dc7e2d"
+    },
+    "59a07d4a-a762-4269-b750-1c7010ee5f4e":{
+      "name":"Objects",
+      "__parentUI":null,
+      "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
+    }
+  },
+  "settings":{
+    "gridEnabled":true,
+    "camera":{
+      "target":[
+        192.51601967563681,
+        81.7778779902319,
+        0.0
+      ],
+      "damping":true,
+      "dampingFactor":0.29999999999999999,
+      "position":[
+        -304.98448883257538,
+        -604.48165706417126,
+        299.2176358724912
+      ]
+    },
+    "counters":{
+      "scenes":3.0,
+      "materials":28.0,
+      "folders":8.0,
+      "instances":48.0,
+      "models":28.0,
+      "lights":0.0,
+      "textures":2.0,
+      "cameras":0.0
+    },
+    "gizmos":{
+      "showBoxColliders":true
     }
   },
   "assets":[
@@ -218,5 +217,6 @@
       "name":"oPresentBCube__Top",
       "type":"Mesh"
     }
-  ]
+  ],
+  "version":"0.2.0"
 }

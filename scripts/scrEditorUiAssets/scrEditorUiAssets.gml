@@ -86,10 +86,26 @@ function EditorUiAssets(ui) constructor {
 
     ui.Assets.add(ui.Assets.Treeview);
 
+    // "Collapse button"
+    ui.Assets.ToolsContainer.CollapseBtn = new UiButton(sprUiCollapse, {
+        name: "Assets.CollapseBtn",
+        marginLeft: 15,
+        padding: 12,
+    }, {
+        outline: true,
+        tooltip: "Collapse all folders"
+    });
+    
+    ui.Assets.ToolsContainer.add(ui.Assets.ToolsContainer.CollapseBtn);
+    
+    ui.Assets.ToolsContainer.CollapseBtn.onClick(method({ treeview: ui.Assets.Treeview }, function() {
+        self.treeview.collapseAll();
+    }));
+
     // "Add button"
     ui.Assets.ToolsContainer.AddBtn = new UiButton(sprUiCreateAsset, { 
         name: "Assets.AddBtn",
-        marginLeft: 15,
+        marginLeft: 10,
         marginRight: 3,
         padding: 12,
     }, { 
@@ -129,7 +145,6 @@ function EditorUiAssets(ui) constructor {
                 { label: "New folder", icon: sprUiFolder, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Folder");
                 })},
-                { separator: true },
                 { label: "New texture", icon: sprUiTexture, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Texture");
                 })},
@@ -161,7 +176,6 @@ function EditorUiAssets(ui) constructor {
                 array_push(items, { label: "New folder", icon: sprUiFolder, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Folder");
                 })});
-                array_push(items, { separator: true });
                 array_push(items, { label: "New texture", icon: sprUiTexture, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Texture");
                 })});
@@ -181,8 +195,18 @@ function EditorUiAssets(ui) constructor {
                 array_push(items, { separator: true });
             }
             
+            // Edit action
+            //array_push(items, { label: "Edit", icon: sprUiPencil, onClick: method({ item: treeviewItem }, function() {
+                 //self.item.treeview.__onItemSelected(self.item, true);
+            //})});
+
+            // Duplicate action
+            array_push(items, { label: "Duplicate", icon: sprUiDuplicate, onClick: method({ item: treeviewItem }, function() {
+                 editorTreeviewOnDuplicateAsset(self.item);
+            })});
+            
             // Delete action
-            array_push(items, { label: "Delete asset", icon: sprUiTrash, onClick: method({ item: treeviewItem }, function() {
+            array_push(items, { label: "Delete", icon: sprUiTrash, onClick: method({ item: treeviewItem }, function() {
                 self.item.__removeItem();
             })});
         }

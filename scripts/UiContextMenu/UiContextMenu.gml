@@ -31,6 +31,7 @@ function UiContextMenu(x, y, items) constructor {
         self.Menu = new UiNode({ 
             name: "UiContextMenu", 
             position: "absolute", 
+            flexDirection: "column",
             paddingHorizontal: 10,
             paddingVertical: 6,
             left: _x,
@@ -96,11 +97,11 @@ function UiContextMenu(x, y, items) constructor {
                         height: 1, 
                         marginVertical: 3,
                     });
-                    separator.onDraw = function() {
-                        // @separator position is buggy
-                        // draw_set_color(global.UI_COL_INSPECTOR_BG);
-                        // draw_line(self.x1, self.y1, self.x2, self.y2);
-                    };
+                    separator.onDraw = method(separator, function() {
+                         draw_set_color(global.UI_COL_INSPECTOR_BG);
+                         var _y = floor(mean(self.y1, self.y2));
+                         draw_line(self.x1, _y, self.x2, _y);
+                    });
                     self.add(separator);
                     continue;
                 }

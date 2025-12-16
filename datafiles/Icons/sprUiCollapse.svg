@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   width="64px"
+   height="64px"
+   viewBox="0 0 48 48"
+   fill="#ffffff"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="collapse-fullscreen-svgrepo-com.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="12.734375"
+     inkscape:cx="30.193865"
+     inkscape:cy="30.507975"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <g
+     id="SVGRepo_bgCarrier"
+     stroke-width="0"
+     transform="matrix(0.22944785,0,0,0.22944785,20.907975,19.376687)" />
+  <g
+     id="SVGRepo_tracerCarrier"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     transform="matrix(0.22944785,0,0,0.22944785,20.907975,19.376687)" />
+  <g
+     id="SVGRepo_iconCarrier"
+     transform="matrix(0.22944785,0,0,0.22944785,20.907975,19.376687)"
+     inkscape:export-filename="SVGRepo_iconCarrier.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <title
+       id="title1">collapse-fullscreen</title>
+    <g
+       id="Layer_2"
+       data-name="Layer 2">
+      <g
+         id="invisible_box"
+         data-name="invisible box">
+        <rect
+           width="48"
+           height="48"
+           fill="none"
+           id="rect1"
+           x="0"
+           y="0" />
+      </g>
+      <g
+         id="icons_Q2"
+         data-name="icons Q2">
+        <g
+           id="g2">
+          <path
+             d="M 8,26 A 2,2 0 0 0 6,28.3 2.1,2.1 0 0 0 8.1,30 h 7.1 L 4.7,40.5 A 2,2 0 0 0 4.5,43.3 1.8,1.8 0 0 0 6,44 2,2 0 0 0 7.4,43.4 L 18,32.8 v 7.1 A 2.1,2.1 0 0 0 19.7,42 2,2 0 0 0 22,40 V 28 a 2,2 0 0 0 -2,-2 z"
+             id="path1" />
+          <path
+             d="M 43.7,4.8 A 2,2 0 0 0 40.6,4.6 L 30,15.2 V 8.1 A 2.1,2.1 0 0 0 28.3,6 2,2 0 0 0 26,8 v 12 a 2,2 0 0 0 2,2 H 39.9 A 2.1,2.1 0 0 0 42,20.3 2,2 0 0 0 40,18 H 32.8 L 43.4,7.5 a 2.3,2.3 0 0 0 0.3,-2.7 z"
+             id="path2" />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

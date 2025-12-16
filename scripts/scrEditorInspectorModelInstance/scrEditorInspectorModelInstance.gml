@@ -71,14 +71,14 @@ function scrEditorInspectorModelInstance() {
     },
   
     { 
-          id: "renderOrder",
-          field: "renderOrder",
-          label: "Render Order", 
-          type: "text",
-          format: "integer",
-          negative: true,
-          tooltip: "Control rendering order (lower values render first)"
-      },
+      id: "renderOrder",
+      field: "renderOrder",
+      label: "Render Order", 
+      type: "text",
+      format: "integer",
+      negative: true,
+      tooltip: "Control rendering order (lower values render first)"
+    },
   
     {
           id: "labelPosition",
@@ -87,47 +87,47 @@ function scrEditorInspectorModelInstance() {
           collapsed: false,
           children: [
             { 
-                  id: "position",
-                  field: "position",
-                  label: "Position", 
-                  type: "transformXYZ",
-                  valueGetter: function() {
-                      return self.asset.position;
-                  },
-                  onBlur: function(value) {
-                      self.asset.position.x = value[0];
-                      self.asset.position.y = value[1];
-                      self.asset.position.z = value[2];
-                  }
+              id: "position",
+              field: "position",
+              label: "Position", 
+              type: "transformXYZ",
+              valueGetter: function() {
+                  return self.asset.position;
+              },
+              onBlur: function(value) {
+                  self.asset.position.x = value[0];
+                  self.asset.position.y = value[1];
+                  self.asset.position.z = value[2];
+              }
             },
           
             { 
-                  id: "rotation",
-                  field: "rotation",
-                  label: "Rotation", 
-                  type: "transformXYZ",
-                  valueGetter: function() {
-                      return self.asset.__rotationEuler;
-                  },
-                  onBlur: function(value) {
-                      var euler = self.asset.__rotationEuler;
-                      euler.set(value[0], value[1], value[2]);
-                      self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
-                  }
+              id: "rotation",
+              field: "rotation",
+              label: "Rotation", 
+              type: "transformXYZ",
+              valueGetter: function() {
+                  return self.asset.__rotationEuler;
+              },
+              onBlur: function(value) {
+                  var euler = self.asset.__rotationEuler;
+                  euler.set(value[0], value[1], value[2]);
+                  self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
+              }
             },
             { 
-                  id: "scale",
-                  field: "scale",
-                  label: "Scale", 
-                  type: "transformXYZ",
-                  valueGetter: function() {
-                      return self.asset.scale;
-                  },
-                  onBlur: function(value) {
-                      self.asset.scale.x = value[0];
-                      self.asset.scale.y = value[1];
-                      self.asset.scale.z = value[2];
-                  }
+              id: "scale",
+              field: "scale",
+              label: "Scale", 
+              type: "transformXYZ",
+              valueGetter: function() {
+                  return self.asset.scale;
+              },
+              onBlur: function(value) {
+                  self.asset.scale.x = value[0];
+                  self.asset.scale.y = value[1];
+                  self.asset.scale.z = value[2];
+              }
             }
         ]
     }

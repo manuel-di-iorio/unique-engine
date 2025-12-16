@@ -273,4 +273,19 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         
         return instance;
     }
+    
+    /**
+     * Returns a clone of this mesh and optionally all descendants.
+     */
+    function clone(recursive = true) {
+         var _newMesh = new UeMesh(self.geometry, self.material);
+         _newMesh.copy(self, recursive);
+         
+         if (self.isInstance) {
+             _newMesh.isInstance = true;
+             _newMesh.object = self.object;
+         }
+         
+         return _newMesh;
+    }
 }

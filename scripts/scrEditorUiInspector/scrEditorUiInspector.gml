@@ -70,6 +70,7 @@ function EditorUiInspector(ui) constructor {
         self.close();
         
         // First pass: calculate the max label width among all items (recursive)
+        draw_set_font(fText);
         var _labelWidth = __getMaxLabelWidth(assetFields);
         
         // Second pass: add the labels and inputs recursively
@@ -98,17 +99,17 @@ function EditorUiInspector(ui) constructor {
             
             // Handle Sections with children
             if (assetField.type == "section" && assetField[$ "children"] != undefined) {
-                var isCollapsed = assetField[$ "collapsed"] ?? false;
+              var isCollapsed = assetField[$ "collapsed"] ?? false;
 
-                // Header
-                var _header = new UiNode({ 
-                    width: "100%",
-                    flexDirection: "row", 
-                    alignItems: "center",
-                    marginTop: 20, 
-                    paddingHorizontal: 10,
-                    paddingVertical: 2
-                }, { pointerEvents: true });
+              // Header
+              var _header = new UiNode({ 
+                  width: "100%",
+                  flexDirection: "row", 
+                  alignItems: "center",
+                  marginTop: 20, 
+                  paddingHorizontal: 10,
+                  paddingVertical: 2
+              }, { pointerEvents: true });
               
               with (_header) {
                 function onDraw() {
@@ -117,33 +118,33 @@ function EditorUiInspector(ui) constructor {
                 }
               }
                 
-                var _arrow = new UiSprite(isCollapsed ? sprUiTreeviewArrowRight : sprUiTreeviewArrowDown, { width: 12, height: 12, marginRight: 5 });
-                var _label = new UiText(assetField.label, {});
-                _header.add(_arrow, _label);
+              var _arrow = new UiSprite(isCollapsed ? sprUiTreeviewArrowRight : sprUiTreeviewArrowDown, { width: 12, height: 12, marginRight: 10 });
+              var _label = new UiText(assetField.label, {});
+              _header.add(_arrow, _label);
                 
-                // Content
-                var _content = new UiNode({ 
-                    width: "100%", 
-                    flexDirection: "column",
-                    display: isCollapsed ? "none" : "flex",
-                    paddingLeft: 0
-                });
-                
-                _header.onClick(method({ content: _content, arrow: _arrow }, function() {
-                    if (!content.isVisible()) {
-                        content.show();
-                        arrow.sprite = sprUiTreeviewArrowDown;
-                    } else {
-                        content.hide();
-                        arrow.sprite = sprUiTreeviewArrowRight;
-                    }
-                }));
-                
-                container.add(_header);
-                container.add(_content);
-                
-                __renderFields(_content, assetField.children, context, labelWidth);
-                continue;
+              // Content
+              var _content = new UiNode({ 
+                  width: "100%", 
+                  flexDirection: "column",
+                  display: isCollapsed ? "none" : "flex",
+                  paddingLeft: 0
+              });
+              
+              _header.onClick(method({ content: _content, arrow: _arrow }, function() {
+                  if (!content.isVisible()) {
+                      content.show();
+                      arrow.sprite = sprUiTreeviewArrowDown;
+                  } else {
+                      content.hide();
+                      arrow.sprite = sprUiTreeviewArrowRight;
+                  }
+              }));
+              
+              container.add(_header);
+              container.add(_content);
+              
+              __renderFields(_content, assetField.children, context, labelWidth);
+              continue;
             }
             
             var input = undefined;
