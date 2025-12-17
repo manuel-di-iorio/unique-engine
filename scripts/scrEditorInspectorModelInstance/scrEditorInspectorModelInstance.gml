@@ -53,19 +53,31 @@ function scrEditorInspectorModelInstance() {
           search: "Search material..",
           itemsGetter: function(searchValue) {
               var allMaterials = oSceneEditor.assetManager.getAssetsByType("Material");
-              var items = array_filter(allMaterials, method({ searchValue }, function(item) {
+              
+              var uniqueMaterials = [];
+              var seen = {};
+              for (var i = 0; i < array_length(allMaterials); i++) {
+                  var _asset = allMaterials[i];
+                  var _key = string(ptr(_asset));
+                  if (seen[$ _key] == undefined) {
+                      seen[$ _key] = true;
+                      array_push(uniqueMaterials, _asset);
+                  }
+              }
+              
+              var items = array_filter(uniqueMaterials, method({ searchValue }, function(item) {
                   if (searchValue == "") return true;
                   return string_pos(string_trim(string_lower(searchValue)), string_lower(item.name)) > 0;
               }));
               
-              var mapped = array_map(items, function(item) {                        
+              var mapped = array_map(items, function(item) {
                   return {
                       label: item.name, 
                       value: item
                   };
               });
               
-              array_insert(mapped, 0, { label: "<None>", value: undefined });
+              array_insert(mapped, 0, { label: "Default", value: global.UE_DEFAULT_MATERIAL });
               return mapped;
           }
     },
