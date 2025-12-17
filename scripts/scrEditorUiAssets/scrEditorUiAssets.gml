@@ -126,7 +126,7 @@ function EditorUiAssets(ui) constructor {
     
     /** Events */
     var Treeview = ui.Assets.Treeview;
-    Treeview.enableScrollbar();
+    Treeview.Items.enableScrollbar();
         
     Treeview.onItemSelected = editorTreeviewOnItemSelected;
     Treeview.onAssetDrop = editorTreeviewOnAssetDrop;

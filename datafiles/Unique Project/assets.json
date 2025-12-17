@@ -1,15 +1,6 @@
 {
+  "version":"0.2.0",
   "folders":{
-    "9ff898e0-953e-4435-99b5-d5e825905d60":{
-      "name":"Snow",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
-    },
-    "aa10cefd-094c-4394-8382-9f287bb05aca":{
-      "name":"Presents",
-      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
-    },
     "855426d7-7661-4e99-9915-d0980137709c":{
       "name":"Trees",
       "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
@@ -24,36 +15,46 @@
       "name":"Objects",
       "__parentUI":null,
       "uuid":"59a07d4a-a762-4269-b750-1c7010ee5f4e"
+    },
+    "9ff898e0-953e-4435-99b5-d5e825905d60":{
+      "name":"Snow",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"9ff898e0-953e-4435-99b5-d5e825905d60"
+    },
+    "aa10cefd-094c-4394-8382-9f287bb05aca":{
+      "name":"Presents",
+      "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "uuid":"aa10cefd-094c-4394-8382-9f287bb05aca"
     }
   },
   "settings":{
+    "gizmos":{
+      "showBoxColliders":true
+    },
     "gridEnabled":true,
     "camera":{
       "target":[
-        192.51601967563681,
-        81.7778779902319,
+        -1997.0675931226149,
+        1233.7256869433168,
         0.0
       ],
-      "damping":true,
       "dampingFactor":0.29999999999999999,
+      "damping":true,
       "position":[
-        -304.98448883257538,
-        -604.48165706417126,
-        299.2176358724912
+        -2684.6528507736339,
+        584.10492308194864,
+        559.25178013387301
       ]
     },
     "counters":{
-      "scenes":3.0,
-      "materials":28.0,
-      "folders":8.0,
-      "instances":48.0,
-      "models":28.0,
       "lights":0.0,
       "textures":2.0,
-      "cameras":0.0
-    },
-    "gizmos":{
-      "showBoxColliders":true
+      "folders":8.0,
+      "scenes":3.0,
+      "cameras":0.0,
+      "materials":28.0,
+      "instances":48.0,
+      "models":28.0
     }
   },
   "assets":[
@@ -217,6 +218,5 @@
       "name":"oPresentBCube__Top",
       "type":"Mesh"
     }
-  ],
-  "version":"0.2.0"
+  ]
 }

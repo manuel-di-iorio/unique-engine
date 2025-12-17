@@ -146,25 +146,16 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     } 
     
     /** Update */
-    function __updateElemLayout(elem) {
+    function __updateElemLayout(elem, _inheritedScrollableParent = undefined, _inheritedVisibility = true) {
         gml_pragma("forceinline");
-        
-        // Cache the nearest scrollable parent (if exists)
+         
+        // Optimization: Resolve ancestor visibility down the tree
+        var _isVisible = _inheritedVisibility && elem.isVisible();
+
+        // Optimization: Resolve ancestor scrollable parent down the tree
+        var _scrollableParent = _inheritedScrollableParent;
         if (!elem.isScrollbar) {
-            var currentParent = elem.parent;
-            while (currentParent != undefined) {
-                if (currentParent.isScrollbar) {
-                    currentParent = currentParent.parent;
-                    continue;
-                }
-                
-                if (currentParent.__UiScrollbar != undefined) {
-                    elem.scrollableParent = currentParent;
-                    break;
-                }
-            
-                currentParent = currentParent.parent;
-            }
+            elem.scrollableParent = _scrollableParent;
         }
         
         // Store the layout position data of this element
@@ -181,7 +172,10 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         elem.yp2 = elem.y2 - elem.layout.paddingBottom;
         
         // Add the element to the spatial partition grid
-        self.__addElemToGrid(elem);
+        // Optimization: Only add to grid if visible and interactive
+        if (_isVisible && elem.pointerEvents) {
+            self.__addElemToGrid(elem);
+        }
         
         // Run the onMount method, if not yet executed for this element
         if (!elem.mounted) {
@@ -195,10 +189,17 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             if (elem.onMount != undefined) elem.onMount();
         }
         
+        // Determine next scrollable parent to pass to children
+        var _nextScrollableParent = _scrollableParent;
+        if (elem.__UiScrollbar != undefined) {
+            _nextScrollableParent = elem;
+        }
+        
         // Run the update on the children
         var _children = elem.children;
-        for (var i = elem.childrenLength - 1; i >= 0; i--) {
-            self.__updateElemLayout(_children[i]);
+        var _len = elem.childrenLength;
+        for (var i = _len - 1; i >= 0; i--) {
+            self.__updateElemLayout(_children[i], _nextScrollableParent, _isVisible);
         }
     }
     
@@ -512,6 +513,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     
     /** Spatial partition grid methods */
     function __addElemToGrid(elem) {
+        gml_pragma("forceinline");
         if (self.gridW == 0 || self.gridH == 0) return;
         
         // Calculate grid bounds for this node

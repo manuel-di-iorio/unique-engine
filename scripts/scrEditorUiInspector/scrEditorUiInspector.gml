@@ -100,50 +100,11 @@ function EditorUiInspector(ui) constructor {
             // Handle Sections with children
             if (assetField.type == "section" && assetField[$ "children"] != undefined) {
               var isCollapsed = assetField[$ "collapsed"] ?? false;
-
-              // Header
-              var _header = new UiNode({ 
-                  width: "100%",
-                  flexDirection: "row", 
-                  alignItems: "center",
-                  marginTop: 20, 
-                  paddingHorizontal: 10,
-                  paddingVertical: 2
-              }, { pointerEvents: true });
               
-              with (_header) {
-                function onDraw() {
-                  draw_set_color(hovered ? global.UI_COL_SELECTION : global.UI_COL_BTN_HOVER);
-                  draw_roundrect(x1, y1, x2, y2, false)
-                }
-              }
-                
-              var _arrow = new UiSprite(isCollapsed ? sprUiTreeviewArrowRight : sprUiTreeviewArrowDown, { width: 12, height: 12, marginRight: 10 });
-              var _label = new UiText(assetField.label, {});
-              _header.add(_arrow, _label);
-                
-              // Content
-              var _content = new UiNode({ 
-                  width: "100%", 
-                  flexDirection: "column",
-                  display: isCollapsed ? "none" : "flex",
-                  paddingLeft: 0
-              });
+              var _accordion = new UiAccordion(assetField.label, { marginTop: 20 }, { collapsed: isCollapsed });
+              container.add(_accordion);
               
-              _header.onClick(method({ content: _content, arrow: _arrow }, function() {
-                  if (!content.isVisible()) {
-                      content.show();
-                      arrow.sprite = sprUiTreeviewArrowDown;
-                  } else {
-                      content.hide();
-                      arrow.sprite = sprUiTreeviewArrowRight;
-                  }
-              }));
-              
-              container.add(_header);
-              container.add(_content);
-              
-              __renderFields(_content, assetField.children, context, labelWidth);
+              __renderFields(_accordion, assetField.children, context, labelWidth);
               continue;
             }
             

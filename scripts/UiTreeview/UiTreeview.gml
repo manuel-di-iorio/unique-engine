@@ -12,7 +12,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     self.onContextMenu = undefined; // Callback for showing context menu
     
     // Create the items container
-    self.Items = new UiNode({ name: "UiTreeview.Items", marginTop: 5, paddingBottom: 5 });
+    self.Items = new UiNode({ name: "UiTreeview.Items", marginTop: 5, paddingBottom: 5, flex: 1, width: "100%" });
     self.add(self.Items);
     
     // Handle delete shortcut

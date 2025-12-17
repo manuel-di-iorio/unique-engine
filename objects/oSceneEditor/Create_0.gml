@@ -5,7 +5,6 @@ if (display_aa >= 8) {
     display_reset(4, true);
 }
 
-device_mouse_dbclick_enable(false);
 randomize();
 
 // Maximize the window

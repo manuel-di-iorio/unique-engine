@@ -291,6 +291,7 @@
     {"id":{"name":"UeVector2","path":"scripts/UeVector2/UeVector2.yy",},},
     {"id":{"name":"UeVector3","path":"scripts/UeVector3/UeVector3.yy",},},
     {"id":{"name":"UeVertexFormat","path":"scripts/UeVertexFormat/UeVertexFormat.yy",},},
+    {"id":{"name":"UiAccordion","path":"scripts/UiAccordion/UiAccordion.yy",},},
     {"id":{"name":"UiButton","path":"scripts/UiButton/UiButton.yy",},},
     {"id":{"name":"UiCheckbox","path":"scripts/UiCheckbox/UiCheckbox.yy",},},
     {"id":{"name":"UiContextMenu","path":"scripts/UiContextMenu/UiContextMenu.yy",},},
