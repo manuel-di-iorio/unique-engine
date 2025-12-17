@@ -69,6 +69,12 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     
     // ModelInstance/Instance: rimuovere dalla scena
     else if (asset != undefined && asset[$ "isInstance"] == true) {
+        // Deseleziona anche se è un'istanza attiva
+        if (editorManager.activeAsset == asset) {
+            var keepScene = editorManager.activeScene != undefined;
+            editorManager.clearActiveAsset(keepScene);
+        }
+        
         // Rimuovi ricorsivamente i figli (se presenti nel treeview)
         __editorTreeview_removeChildrenRecursive(treeviewItem);
 
@@ -123,13 +129,40 @@ function __editorTreeview_removeMeshInstances(targetMesh, treeview) {
     
     var instances = targetMesh.instances.list;
     var assetManager = oSceneEditor.assetManager;
+    var editorManager = oSceneEditor.editorManager;
+    var parentSceneTreeviewItem = undefined;
     
     // Rimuovi tutte le istanze (itera all'indietro per evitare problemi con l'array che cambia)
     for (var i = array_length(instances) - 1; i >= 0; i--) {
         var instance = instances[i];
         
-        // Trova e rimuovi il treeview item associato all'istanza
-        if (treeview != undefined && treeview[$ "Items"] != undefined) {
+        // Deseleziona se questa istanza o uno dei suoi figli è attualmente selezionato
+        if (__editorTreeview_isInstanceOrChildSelected(instance, editorManager)) {
+            var keepScene = editorManager.activeScene != undefined;
+            editorManager.clearActiveAsset(keepScene);
+        }
+        
+        // Usa la back-reference __treeviewItem se esiste
+        if (instance[$ "__treeviewItem"] != undefined) {
+            var tvItem = instance.__treeviewItem;
+            parentSceneTreeviewItem = tvItem.parent; // Salva il parent per aggiornare freccia dopo
+            
+            // Rimuovi l'item dal parent nel treeview (Items container)
+            if (tvItem.parent != undefined && tvItem.parent[$ "children"] != undefined) {
+                for (var j = array_length(tvItem.parent.children) - 1; j >= 0; j--) {
+                    if (tvItem.parent.children[j] == tvItem) {
+                        array_delete(tvItem.parent.children, j, 1);
+                        tvItem.parent.childrenLength--;
+                        break;
+                    }
+                }
+            }
+            
+            // Distruggi l'elemento UI
+            tvItem.destroy();
+            instance.__treeviewItem = undefined;
+        } else if (treeview != undefined && treeview[$ "Items"] != undefined) {
+            // Fallback: cerca nel treeview se non c'è back-reference
             __editorTreeview_findAndRemoveTreeviewItem(treeview.Items, instance);
         }
         
@@ -144,6 +177,35 @@ function __editorTreeview_removeMeshInstances(targetMesh, treeview) {
     
     // Pulisci la lista delle istanze
     targetMesh.instances.list = [];
+    
+    // Aggiorna la visibility della freccia del parent TreeviewItem (Scene o Instance)
+    if (parentSceneTreeviewItem != undefined && parentSceneTreeviewItem.parent != undefined) {
+        var sceneTreeviewItem = parentSceneTreeviewItem.parent;
+        if (sceneTreeviewItem[$ "__updateArrowVisibility"] != undefined) {
+            sceneTreeviewItem.__updateArrowVisibility();
+        }
+    }
+}
+
+/**
+ * Controlla ricorsivamente se un'istanza o uno dei suoi figli è attualmente selezionato
+ */
+function __editorTreeview_isInstanceOrChildSelected(instance, editorManager) {
+    // Controlla sia activeAsset che gizmoTarget (per le istanze dentro scene)
+    if (editorManager.activeAsset == instance || editorManager.gizmoTarget == instance) {
+        return true;
+    }
+    
+    // Controlla ricorsivamente i figli
+    if (instance[$ "children"] != undefined) {
+        for (var i = 0; i < array_length(instance.children); i++) {
+            if (__editorTreeview_isInstanceOrChildSelected(instance.children[i], editorManager)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
 }
 
 /**

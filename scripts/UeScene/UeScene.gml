@@ -72,6 +72,9 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         instance.object = model;
         instance.isInstance = true;
         
+        // Register instance in the master model's instances list
+        model.instances.add(instance);
+        
         // Apply transform
         if (data[$ "position"] != undefined) {
             var pos = data.position;

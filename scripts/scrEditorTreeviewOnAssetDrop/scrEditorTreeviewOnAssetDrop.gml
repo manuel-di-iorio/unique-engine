@@ -83,6 +83,20 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         }
     }
     
+    // ModelInstance can be reparented under another ModelInstance or under a Scene
+    else if (draggedItem.assetType == "ModelInstance") {
+        var targetHasAsset = (targetItem.asset != undefined);
+        var targetIsInstance = targetHasAsset && (targetItem.asset[$ "isInstance"] == true);
+        
+        if (targetIsInstance || targetItem.assetType == "Scene") {
+            // Can reparent instance under another instance or under a scene
+            isValidDrop = true;
+            dropAction = "reparent";
+        } else {
+            return false;
+        }
+    }
+    
     // Other types of assets
     else {
         // For now, other asset types follow the same rules as models
