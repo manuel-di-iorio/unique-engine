@@ -34,6 +34,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     
     // Mesh/Model: rimuovere dal parent o dalla lista globale
     else if (assetType == "Mesh" && asset != undefined) {
+        // Rimuovi ricorsivamente i figli (se presenti nel treeview)
+        __editorTreeview_removeChildrenRecursive(treeviewItem);
+
         // Prima rimuovi tutte le istanze di questa mesh dalle scene
         __editorTreeview_removeMeshInstances(asset, treeviewItem.treeview);
         
@@ -50,6 +53,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     
     // Scene: cancella la scena (i figli verranno cancellati automaticamente)
     else if (assetType == "Scene" && asset != undefined) {
+        // Rimuovi ricorsivamente i figli (se presenti nel treeview)
+        __editorTreeview_removeChildrenRecursive(treeviewItem);
+
         // Se ha un parent, rimuovilo dal parent
         if (asset.parent != undefined) {
             asset.parent.remove(asset);
@@ -63,6 +69,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     
     // ModelInstance/Instance: rimuovere dalla scena
     else if (asset != undefined && asset[$ "isInstance"] == true) {
+        // Rimuovi ricorsivamente i figli (se presenti nel treeview)
+        __editorTreeview_removeChildrenRecursive(treeviewItem);
+
         // Rimuovi l'istanza dal parent
         if (asset.parent != undefined) {
             asset.parent.remove(asset);
@@ -80,14 +89,7 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     // Folder: rimuovere ricorsivamente tutti i figli
     else if (assetType == "Folder") {
         // Itera sui figli del treeview item per pulire i loro asset
-        if (treeviewItem.Items != undefined && treeviewItem.Items.children != undefined) {
-            var children = treeviewItem.Items.children;
-            for (var i = 0; i < array_length(children); i++) {
-                var childItem = children[i];
-                // Ricorsione: pulisci l'asset del figlio
-                editorTreeviewOnRemoveAsset(childItem, false);
-            }
-        }
+        __editorTreeview_removeChildrenRecursive(treeviewItem);
         
         // Rimuovi la cartella dall'AssetManager
         assetManager.removeAsset("Folder", asset);
@@ -95,6 +97,20 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
 }
 
 // === HELPER FUNCTIONS ===
+
+/**
+ * Assicura che anche gli asset figli nel treeview vengano cancellati
+ */
+function __editorTreeview_removeChildrenRecursive(treeviewItem) {
+    if (treeviewItem.Items != undefined && treeviewItem.Items.children != undefined) {
+        var children = treeviewItem.Items.children;
+        for (var i = 0; i < array_length(children); i++) {
+            var childItem = children[i];
+            // Ricorsione: pulisci l'asset del figlio
+            editorTreeviewOnRemoveAsset(childItem, false);
+        }
+    }
+}
 
 /**
  * Rimuove tutte le istanze di una mesh dalle scene
