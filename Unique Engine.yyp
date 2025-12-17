@@ -307,6 +307,7 @@
     {"id":{"name":"UiTooltip","path":"scripts/UiTooltip/UiTooltip.yy",},},
     {"id":{"name":"UiTreeview","path":"scripts/UiTreeview/UiTreeview.yy",},},
     {"id":{"name":"sh_ue_basic","path":"shaders/sh_ue_basic/sh_ue_basic.yy",},},
+    {"id":{"name":"sh_ue_fallback","path":"shaders/sh_ue_fallback/sh_ue_fallback.yy",},},
     {"id":{"name":"sh_ue_gizmo","path":"shaders/sh_ue_gizmo/sh_ue_gizmo.yy",},},
     {"id":{"name":"sh_ue_line","path":"shaders/sh_ue_line/sh_ue_line.yy",},},
     {"id":{"name":"sh_ue_normals","path":"shaders/sh_ue_normals/sh_ue_normals.yy",},},

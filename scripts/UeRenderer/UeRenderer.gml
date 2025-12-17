@@ -127,7 +127,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
           // Determine whether the material is transparent.
           // Transparent objects must be rendered *after* opaque ones,
           // and sorted back-to-front inside their own group.
-          var _material = object[$ "material"];
+          var _material = object[$ "material"] ?? global.UE_FALLBACK_MATERIAL;
           var _transparent = _material.transparent;
 
           // Material ID (12-bit)
@@ -319,7 +319,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       var _object = __queue[i];
       var _onBeforeRender = _object[$ "onBeforeRender"];
       var _onAfterRender = _object[$ "onAfterRender"];
-      var _material = _object[$ "material"];
+      var _material = _object[$ "material"] ?? global.UE_FALLBACK_MATERIAL;
 
       // Override material
       if (overrideMaterial != undefined && _material[$ "allowOverride"]) {

@@ -147,6 +147,7 @@
     {"name":"UiTextbox","order":7,"path":"scripts/UiTextbox/UiTextbox.yy",},
     {"name":"UiTooltip","order":10,"path":"scripts/UiTooltip/UiTooltip.yy",},
     {"name":"UiTreeview","order":5,"path":"scripts/UiTreeview/UiTreeview.yy",},
+    {"name":"sh_ue_fallback","order":9,"path":"shaders/sh_ue_fallback/sh_ue_fallback.yy",},
     {"name":"sh_ue_gizmo","order":5,"path":"shaders/sh_ue_gizmo/sh_ue_gizmo.yy",},
     {"name":"sh_ue_line","order":1,"path":"shaders/sh_ue_line/sh_ue_line.yy",},
     {"name":"sh_ue_normals","order":4,"path":"shaders/sh_ue_normals/sh_ue_normals.yy",},

@@ -33,6 +33,7 @@ global.UE_UNIFORM_NAMES_CONFIG = {
 };
 
 global.UE_DEFAULT_MATERIAL = new UeMeshBasicMaterial();
+global.UE_FALLBACK_MATERIAL = new UeMeshBasicMaterial({ shader: sh_ue_fallback });
 global.UE_DEFAULT_MATERIAL_WIREFRAME = new UeMeshBasicMaterial();
 
 enum UE_UNIFORM_TYPE {

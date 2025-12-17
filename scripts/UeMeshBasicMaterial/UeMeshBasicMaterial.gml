@@ -1,6 +1,6 @@
 function UeMeshBasicMaterial(data = {}): UeMaterial(data) constructor {
     lights = 0;
-    shader = sh_ue_basic;
+    shader = data[$ "shader"] ?? sh_ue_basic;
     
     var emissive = data[$ "emissive"];
     if (emissive != undefined) {
