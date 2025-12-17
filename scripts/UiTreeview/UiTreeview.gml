@@ -141,6 +141,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     function collapseAll() {
         var context = {
             run: function(item) {
+                if (item.isScrollbar) return;
+                
                  // Collapse self
                 if (item[$ "collapseItem"] != undefined) {
                     item.collapseItem();
