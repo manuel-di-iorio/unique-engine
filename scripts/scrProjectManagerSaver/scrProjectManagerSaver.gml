@@ -407,7 +407,7 @@ function ProjectSaver() constructor {
     }
 
     function __writeJson(path, data) {
-        var jsonString = json_stringify(data, true);
+        var jsonString = json_stringify_ordered(data, true);
         var buf = buffer_create(string_byte_length(jsonString), buffer_fixed, 1);
         buffer_write(buf, buffer_text, jsonString);
         buffer_save(buf, path);

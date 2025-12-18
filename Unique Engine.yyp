@@ -2,7 +2,7 @@
   "$GMProject":"v1",
   "%Name":"Unique Engine",
   "AudioGroups":[
-    {"$GMAudioGroup":"","%Name":"audiogroup_default","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
+    {"$GMAudioGroup":"v1","%Name":"audiogroup_default","exportDir":"","name":"audiogroup_default","resourceType":"GMAudioGroup","resourceVersion":"2.0","targets":-1,},
   ],
   "configs":{
     "children":[],
@@ -151,7 +151,7 @@
   "isEcma":false,
   "LibraryEmitters":[],
   "MetaData":{
-    "IDEVersion":"2024.14.2.212",
+    "IDEVersion":"2024.14.2.213",
   },
   "name":"Unique Engine",
   "resources":[
@@ -180,6 +180,7 @@
     {"id":{"name":"__UniqueUI_Globals","path":"scripts/__UniqueUI_Globals/__UniqueUI_Globals.yy",},},
     {"id":{"name":"assimp_config","path":"scripts/assimp_config/assimp_config.yy",},},
     {"id":{"name":"assimp_enums","path":"scripts/assimp_enums/assimp_enums.yy",},},
+    {"id":{"name":"json_stringify_ordered","path":"scripts/json_stringify_ordered/json_stringify_ordered.yy",},},
     {"id":{"name":"log","path":"scripts/log/log.yy",},},
     {"id":{"name":"runLater","path":"scripts/runLater/runLater.yy",},},
     {"id":{"name":"scrAssetManager","path":"scripts/scrAssetManager/scrAssetManager.yy",},},
