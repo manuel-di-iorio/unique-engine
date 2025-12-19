@@ -1,85 +1,67 @@
 /**
  * @class UeProjectLoader
  * @description Runtime project loader for loading and managing game assets from the exported project structure.
- * 
- * This loader reads assets from the "datafiles/Unique Project/" directory structure and provides
- * on-demand asset loading capabilities. It supports loading assets by name or UUID and can populate
- * scenes with model instances.
- * 
- * @example
- * // Create loader and load all assets
- * var loader = new UeProjectLoader();
- * 
- * // Load specific assets by name
- * loader.loadAssets(["MyTexture", "MyMaterial"]);
- * 
- * // Load specific assets by UUID
- * loader.loadAssetsByUuid(["uuid-1", "uuid-2"]);
- * 
- * // Populate a scene
- * loader.setScene("MainScene");
- * 
- * @param {Struct} data - Configuration options
- * @param {Bool} data.autoLoad - If true, automatically loads all assets on construction (default: true)
  */
 function UeProjectLoader(data = {}) constructor {
     self.renderer = data[$ "renderer"] ?? new UeRenderer();
     self.autoLoad = data[$ "autoLoad"] ?? true;
     
-    /// @member {UeScene} scene - The active scene populated by setScene()
     self.scene = new UeScene();
-    
-    /// @member {String} __projectPath - Path to the project's assets.json file
     self.__projectPath = "Unique Project";
 
-    /// @member {Struct} assets - Flat map of all loaded assets indexed by UUID
     self.assetsByUuid = {};
-    
-    /// @member {Struct} assetsByName - Flat map of all loaded assets indexed by name
     self.assetsByName = {};
+    self.projectId = "";
 
     /**
      * @function load
-     * @description Loads the project's assets.json and optionally loads all assets.
-     * This function must be called before using loadAssets() or setScene().
-     * 
-     * @example
-     * // Load only assets.json (for on-demand loading)
-     * loader.load(false);
-     * 
-     * // Load all assets immediately
-     * loader.load(true);
+     * @description Discovers all assets by scanning the Assets/ folder.
      */
     self.load = function() {
-        if (!file_exists(self.__projectPath + "/assets.json")) return;
+        var baseDir = self.__projectPath + "/";
+        var assetsDir = baseDir + "Assets/";
+        var projectJsonPath = baseDir + "project.json";
+        var types = ["Textures", "Materials", "Objects", "Scenes"];
+        
+        self.assetsByUuid = {};
+        self.assetsByName = {};
 
-        // Load all assets by UUID
-        self.jsonAssets = self.__readJson(self.__projectPath + "/assets.json");
+        if (file_exists(projectJsonPath)) {
+            var projectData = self.__readJson(projectJsonPath);
+            self.projectId = projectData[$ "id"] ?? "";
+        }
 
-        // Build maps from the UUID-only assets list. For each UUID read its metadata
-        for (var i = 0, il = array_length(self.jsonAssets.assets); i < il; i++) {
-            var assetEntry = self.jsonAssets.assets[i];
-            var uuid = is_string(assetEntry) ? assetEntry : assetEntry.id;
-            var metadataPath = self.__projectPath + "/assets/" + uuid + "/metadata.json";
-            if (!file_exists(metadataPath)) continue;
-            var entry = self.__readJson(metadataPath);
-            entry.uuid = uuid;
-            self.assetsByUuid[$ uuid] = entry;
-            if (entry.name != undefined && entry.name != "") {
-                self.assetsByName[$ entry.name] = entry;
+        for (var i = 0; i < array_length(types); i++) {
+            var typeDir = assetsDir + types[i] + "/";
+            if (!directory_exists(typeDir)) continue;
+
+            // Discover all Assets (UUID/asset.json)
+            var a = file_find_first(typeDir + "*", fa_directory);
+            while (a != "") {
+                var fullPath = typeDir + a + "/";
+                var metaPath = fullPath + "asset.json";
+                if (directory_exists(fullPath) && file_exists(metaPath)) {
+                    var entry = self.__readJson(metaPath);
+                    entry[$ "uuid"] = a;
+                    self.assetsByUuid[$ a] = entry;
+                    if (struct_exists(entry, "name") && entry[$ "name"] != "") {
+                        self.assetsByName[$ entry[$ "name"]] = entry;
+                    }
+                }
+                a = file_find_next();
             }
+            file_find_close();
         }
 
         if (self.autoLoad) {
             self.loadAssets();
             
-            // If only one scene is loaded, set it automatically
             var sceneNames = [];
             var assetNames = struct_get_names(self.assetsByName);
             for (var i = 0; i < array_length(assetNames); i++) {
                 var asset = self.assetsByName[$ assetNames[i]];
-                if (asset[$ "type"] == "Scene") {
-                    array_push(sceneNames, asset.name);
+                if (struct_exists(asset, "type") && asset[$ "type"] == "Scene") {
+                    array_push(sceneNames, asset[$ "name"]);
                 }
             }
             if (array_length(sceneNames) == 1) {
@@ -88,28 +70,8 @@ function UeProjectLoader(data = {}) constructor {
         }
     };
     
-    /**
-     * @function loadAssets
-     * @description Loads specific assets by name. Uses a two-pass loading system:
-     * Pass 1: Loads asset metadata and binary resources (textures, geometry)
-     * Pass 2: Links asset references (materials->textures, meshes->materials)
-     * 
-     * @param {...String} assetNames - Asset name(s) to load. If no arguments provided, loads all assets
-     * 
-     * @example
-     * // Load all assets
-     * loader.loadAssets();
-     * 
-     * // Load single asset by name
-     * loader.loadAssets("MyTexture");
-     * 
-     * // Load multiple assets by name
-     * loader.loadAssets("Texture1", "Material1", "Mesh1");
-     */
     self.loadAssets = function() {
         var assetNames = [];
-        
-        // Handle arguments (support both array and variable arguments)
         if (argument_count == 1 && is_array(argument[0])) {
             assetNames = argument[0];
         } else {
@@ -118,56 +80,21 @@ function UeProjectLoader(data = {}) constructor {
             }
         }
         
-        // If no arguments, load all assets
         if (array_length(assetNames) == 0) {
-            var assetList = self.jsonAssets.assets;
-            for (var i = 0; i < array_length(assetList); i++) {
-                var assetEntry = assetList[i];
-                var uuid = is_string(assetEntry) ? assetEntry : assetEntry.id;
-                var entry = self.assetsByUuid[$ uuid];
-                if (entry != undefined && entry.name != undefined) array_push(assetNames, entry.name);
-            }
+            assetNames = struct_get_names(self.assetsByName);
         }
         
-        // Convert names to UUIDs
         var uuidsToLoad = [];
         for (var i = 0; i < array_length(assetNames); i++) {
-            var assetName = assetNames[i];
-            var entry = self.assetsByName[$ assetName];
-
-            if (entry == undefined) {
-                continue;
-            }
-
-            array_push(uuidsToLoad, entry.uuid);
+            var entry = self.assetsByName[$ assetNames[i]];
+            if (entry != undefined) array_push(uuidsToLoad, entry[$ "uuid"]);
         }
         
-        // Load by UUIDs
         self.__loadAssetsInternal(uuidsToLoad);
     };
     
-    /**
-     * @function loadAssetsByUuid
-     * @description Loads specific assets by UUID. Uses a two-pass loading system:
-     * Pass 1: Loads asset metadata and binary resources (textures, geometry)
-     * Pass 2: Links asset references (materials->textures, meshes->materials)
-     * 
-     * @param {...String} assetUUIDs - Asset UUID(s) to load. If no arguments provided, loads all assets
-     * 
-     * @example
-     * // Load all assets
-     * loader.loadAssetsByUuid();
-     * 
-     * // Load single asset by UUID
-     * loader.loadAssetsByUuid("abc-123-def");
-     * 
-     * // Load multiple assets by UUID
-     * loader.loadAssetsByUuid("uuid-1", "uuid-2", "uuid-3");
-     */
     self.loadAssetsByUuid = function() {
         var uuidsToLoad = [];
-        
-        // Handle arguments (support both array and variable arguments)
         if (argument_count == 1 && is_array(argument[0])) {
             uuidsToLoad = argument[0];
         } else {
@@ -176,192 +103,148 @@ function UeProjectLoader(data = {}) constructor {
             }
         }
         
-        // If no arguments, load all assets
         if (array_length(uuidsToLoad) == 0) {
-            var assetList = self.jsonAssets.assets;
-            for (var i = 0; i < array_length(assetList); i++) {
-                var assetEntry = assetList[i];
-                var uuid = is_string(assetEntry) ? assetEntry : assetEntry.id;
-                array_push(uuidsToLoad, uuid);
-            }
+            uuidsToLoad = struct_get_names(self.assetsByUuid);
         }
         
         self.__loadAssetsInternal(uuidsToLoad);
     };
 
     self.__loadAssetsInternal = function(uuidsToLoad) {
-        var assetList = self.jsonAssets.assets;
-        
-        // Pass 1: Load requested assets and their metadata
-        for (var i = 0, il = array_length(uuidsToLoad); i < il; i++) {
+        for (var i = 0; i < array_length(uuidsToLoad); i++) {
             var uuid = uuidsToLoad[i];
+            var entry = self.assetsByUuid[$ uuid];
             
-            // Skip if already loaded
-            var existing = self.assetsByUuid[$ uuid];
-            if (existing != undefined && existing[$ "isLoaded"] == true) continue;
+            if (entry == undefined || (struct_exists(entry, "isLoaded") && entry[$ "isLoaded"] == true)) continue;
 
-            // Load metadata
-            var metaPath = self.__projectPath + "/assets/" + uuid + "/metadata.json";
-            if (file_exists(metaPath)) {
-                var metadata = self.__readJson(metaPath);
-                
-                // Create asset instance
-                var asset = self.__createAsset(metadata, uuid);
-                if (asset != undefined) {
-                    self.assetsByUuid[$ uuid] = asset;
-                    if (asset[$ "name"] != undefined && asset.name != "") {
-                        self.assetsByName[$ asset.name] = asset;
-                    }
+            var asset = self.__createAsset(entry, uuid);
+            if (asset != undefined) {
+                self.assetsByUuid[$ uuid] = asset;
+                if (struct_exists(asset, "name") && asset[$ "name"] != "") {
+                    self.assetsByName[$ asset[$ "name"]] = asset;
                 }
             }
         }
-        
-        // Pass 2: Link assets
         self.__linkAssets();
     };
     
-    /**
-     * @function getAsset
-     * @description Retrieves a loaded asset by its UUID.
-     * 
-     * @param {String} uuid - The UUID of the asset to retrieve
-     * @returns {Struct|undefined} The asset struct, or undefined if not found
-     * 
-     * @example
-     * var myTexture = loader.getAsset("abc-123-def");
-     * if (myTexture != undefined) {
-     *     // Use texture
-     * }
-     */
     self.getAsset = function(name) {
         return self.assetsByName[$ name];
     };
 
-    /**
-     * @function setScene
-     * @description Populates the loader's scene with model instances from a scene asset.
-     * Clears any existing scene content before populating.
-     * 
-     * @param {String} sceneName - Name of the scene to load (optional if sceneUUID is provided)
-     * @param {String} sceneUUID - UUID of the scene to load (takes priority over sceneName)
-     * 
-     * @example
-     * // Load scene by name
-     * loader.setScene("MainScene");
-     * 
-     * // Load scene by UUID (avoids name conflicts)
-     * loader.setScene(undefined, "scene-uuid-123");
-     * 
-     * // Access the populated scene
-     * renderer.render(loader.scene, camera);
-     */
     self.setScene = function(sceneName = undefined) {
-        // Get scene asset
         var sceneAsset = self.assetsByName[$ sceneName];
-        if (sceneAsset == undefined || sceneAsset[$ "type"] != "Scene") {
-            show_error("[UeProjectLoader] Scene not found: " + sceneName, true);
+        if (sceneAsset == undefined || !struct_exists(sceneAsset, "type") || sceneAsset[$ "type"] != "Scene") {
             return;
         }
         
-        // Clear existing scene
         self.scene.clear();
         
-        // Get scene metadata for ModelInstances
-        if (sceneAsset[$ "__metadata"] == undefined) {
-            return;
-        }
+        if (!struct_exists(sceneAsset, "__metadata") || sceneAsset[$ "__metadata"] == undefined) return;
+        var childrenData = sceneAsset[$ "__metadata"][$ "children"];
+        if (childrenData == undefined) return;
         
-        var children = sceneAsset.__metadata[$ "children"];
-        if (children == undefined) {
-            return;
-        }
-        
-        // Create instances
-        for (var i = 0, il = array_length(children); i < il; i++) {
-            var child = children[i];
-            
-            if (is_struct(child) && child[$ "type"] == "ModelInstance") {
-                var modelUUID = child[$ "model"];
+        self.__instantiateChildren(childrenData, self.scene);
+        self.scene.updateWorldMatrix(false, true);
+    };
+
+    self.__instantiateChildren = function(childrenData, parent) {
+        for (var i = 0; i < array_length(childrenData); i++) {
+            var childData = childrenData[i];
+            if (is_struct(childData) && childData[$ "type"] == "ModelInstance") {
+                var modelUUID = childData[$ "model"];
                 var model = self.assetsByUuid[$ modelUUID];
                 
-                if (model != undefined && model[$ "isMesh"] == true) {
+                if (model != undefined && struct_exists(model, "isMesh") && model[$ "isMesh"] == true) {
                     var instance = model.createInstance();
-                    instance.name = child.name;
+                    instance.name = childData[$ "name"] ?? "Instance";
                     instance.type = "ModelInstance";
                     
-                    // Apply transform
-                    if (child[$ "position"] != undefined) {
-                        var pos = child.position;
-                        instance.position.set(pos[0], pos[1], pos[2]);
+                    if (struct_exists(childData, "position")) {
+                        var p = childData[$ "position"];
+                        instance.position.set(p[0], p[1], p[2]);
                     }
-                    if (child[$ "rotation"] != undefined) {
-                        var rot = child.rotation;
-                        instance.rotation.set(rot[0], rot[1], rot[2], rot[3]);
+                    if (struct_exists(childData, "rotation")) {
+                        var r = childData[$ "rotation"];
+                        instance.rotation.set(r[0], r[1], r[2], r[3]);
                     }
-                    if (child[$ "scale"] != undefined) {
-                        var scl = child.scale;
-                        instance.scale.set(scl[0], scl[1], scl[2]);
+                    if (struct_exists(childData, "scale")) {
+                        var s = childData[$ "scale"];
+                        instance.scale.set(s[0], s[1], s[2]);
                     }
                     
                     instance.updateMatrix();
-                    self.scene.add(instance);
+                    parent.add(instance);
+                    
+                    if (struct_exists(childData, "children") && is_array(childData[$ "children"])) {
+                        self.__instantiateChildren(childData[$ "children"], instance);
+                    }
+                }
+            } else if (is_string(childData)) {
+                var childAsset = self.assetsByUuid[$ childData];
+                if (childAsset != undefined && is_struct(childAsset) && struct_exists(childAsset, "isObject3D")) {
+                     parent.add(childAsset);
                 }
             }
         }
-        
-        // Update the world matrixes
-        self.scene.updateWorldMatrix(false, true);
+    };
+
+    self.__getTypeDir = function(type) {
+        switch (type) {
+            case "Texture": return "Textures";
+            case "Material": return "Materials";
+            case "Mesh": return "Objects";
+            case "Scene": return "Scenes";
+            case "Light": return "Objects";
+            case "Camera": return "Objects";
+        }
+        return "Objects";
     };
 
     self.__createAsset = function(metadata, uuid) {
         var asset = undefined;
-        switch (metadata.type) {
+        var baseDir = self.__projectPath + "/";
+        
+        var type = metadata[$ "type"];
+        var typeDir = self.__getTypeDir(type);
+        var assetDir = baseDir + "Assets/" + typeDir + "/" + uuid + "/";
+
+        switch (type) {
             case "Texture":
-                var texture = new UeTexture();
-                texture.fromJSON(metadata);
-                // Load texture image
-                var texturePath = self.__projectPath + "/assets/" + uuid + "/texture.png";
-                if (file_exists(texturePath)) {
-                    texture.import(texturePath);
-                }
-                asset = texture;
+                asset = new UeTexture();
+                asset.fromJSON(metadata);
+                var texPath = assetDir + "texture.png";
+                if (file_exists(texPath)) asset.import(texPath);
                 break;
                 
             case "Material":
-                var material = new UeMaterial();
-                // Store metadata for linking pass
-                material.__metadata = metadata;
-                asset = material;
+                asset = new UeMaterial();
+                asset.__metadata = metadata;
                 break;
-
+ 
             case "Mesh":
-                var mesh = new UeMesh();
-                mesh.fromJSON(metadata);
-            
-                // Load geometry
-                var geometryPath = self.__projectPath + "/assets/" + uuid + "/geometry.buf";
-                if (file_exists(geometryPath)) {
-                    var geometry = new UeBufferGeometry();
-                    geometry.import(geometryPath);
-                    mesh.geometry = geometry;
+                asset = new UeStaticMesh();
+                asset.fromJSON(metadata);
+                var geoPath = assetDir + "geometry.buf";
+                
+                if (file_exists(geoPath)) {
+                    var geo = new UeBufferGeometry();
+                    geo.import(geoPath);
+                    asset.geometry = geo;
                 }
-                // Store metadata for material linking
-                mesh.__metadata = metadata;
-                asset = mesh;
+                asset.__metadata = metadata;
                 break;
                 
             case "Scene":
-                var scene = new UeScene();
-                scene.fromJSON(metadata);
-                // Store metadata for instance creation
-                scene.__metadata = metadata;
-                asset = scene;
+                asset = new UeScene();
+                asset.fromJSON(metadata);
+                asset.__metadata = metadata;
                 break;
         }
         
         if (asset != undefined) {
             asset.isLoaded = true;
-            asset.name = metadata.name;
+            asset.name = metadata[$ "name"] ?? "";
             asset.uuid = uuid;
         }
         return asset;
@@ -369,56 +252,33 @@ function UeProjectLoader(data = {}) constructor {
     
     self.__linkAssets = function() {
         var assetUUIDs = struct_get_names(self.assetsByUuid);
-        
-        // Build texture map
         var texturesByUUID = {};
-        for (var i = 0, il = array_length(assetUUIDs); i < il; i++) {
-            var asset = self.assetsByUuid[$ assetUUIDs[i]];
-            if (asset[$ "type"] == "Texture") {
-                texturesByUUID[$ asset.uuid] = asset;
-            }
-        }
-        
-        // Link materials to textures
         var materialsByUUID = {};
-        for (var i = 0, il = array_length(assetUUIDs); i < il; i++) {
+        
+        for (var i = 0; i < array_length(assetUUIDs); i++) {
             var asset = self.assetsByUuid[$ assetUUIDs[i]];
-            if (asset[$ "type"] == "Material") {
-                materialsByUUID[$ asset.uuid] = asset;
-                if (asset[$ "__metadata"] != undefined) {
-                    asset.fromJSON(asset.__metadata, texturesByUUID);
-                    delete asset.__metadata;
-                }
-            }
+            if (is_struct(asset) && struct_exists(asset, "type") && asset[$ "type"] == "Texture") texturesByUUID[$ asset[$ "uuid"]] = asset;
+            if (is_struct(asset) && struct_exists(asset, "type") && asset[$ "type"] == "Material") materialsByUUID[$ asset[$ "uuid"]] = asset;
         }
         
-        // Link meshes to materials and children
-        for (var i = 0, il = array_length(assetUUIDs); i < il; i++) {
+        for (var i = 0; i < array_length(assetUUIDs); i++) {
             var asset = self.assetsByUuid[$ assetUUIDs[i]];
-            if (asset[$ "type"] == "Mesh" && asset[$ "__metadata"] != undefined) {
-                // Link Material
-                var materialUUID = asset.__metadata[$ "material"];
-                if (materialUUID != undefined && materialsByUUID[$ materialUUID] != undefined) {
-                    asset.material = materialsByUUID[$ materialUUID];
-                }
-                
-                // Link Children
-                var childrenUUIDs = asset.__metadata[$ "children"];
-                if (childrenUUIDs != undefined && is_array(childrenUUIDs)) {
-                    for (var j = 0, jl = array_length(childrenUUIDs); j < jl; j++) {
-                        var childUUID = childrenUUIDs[j];
-                        var childAsset = self.assetsByUuid[$ childUUID];
-                        if (childAsset != undefined && childAsset[$ "isObject3D"] == true) {
-                            asset.add(childAsset);
-                        }
-                    }
-                }
+            if (!is_struct(asset)) continue;
 
+            if (struct_exists(asset, "type") && asset[$ "type"] == "Material" && struct_exists(asset, "__metadata") && asset[$ "__metadata"] != undefined) {
+                asset.fromJSON(asset[$ "__metadata"], texturesByUUID);
+                delete asset.__metadata;
+            }
+            if (struct_exists(asset, "type") && asset[$ "type"] == "Mesh" && struct_exists(asset, "__metadata") && asset[$ "__metadata"] != undefined) {
+                var matId = asset[$ "__metadata"][$ "material"];
+                if (matId != undefined && struct_exists(materialsByUUID, matId)) {
+                    asset.material = materialsByUUID[$ matId];
+                }
                 delete asset.__metadata;
             }
         }
     };
-
+ 
     self.__readJson = function(path) {
         var bf = buffer_load(path);
         var str = buffer_read(bf, buffer_text);
@@ -426,10 +286,10 @@ function UeProjectLoader(data = {}) constructor {
         return json_parse(str);
     };
     
-    function render(camera) {
+    self.render = function(camera) {
         self.renderer.render(self.scene, camera);
         return self;
-    }
+    };
 
     self.load();
 }

@@ -1,0 +1,31 @@
+{
+  "folders": [
+    {
+      "__parentUI": null,
+      "name": "Objects",
+      "uuid": "59a07d4a-a762-4269-b750-1c7010ee5f4e"
+    },
+    {
+      "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "name": "Rocks",
+      "uuid": "78732855-ca0f-4637-b371-4ba580dc7e2d"
+    },
+    {
+      "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "name": "Trees",
+      "uuid": "855426d7-7661-4e99-9915-d0980137709c"
+    },
+    {
+      "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "name": "Snow",
+      "uuid": "9ff898e0-953e-4435-99b5-d5e825905d60"
+    },
+    {
+      "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
+      "name": "Presents",
+      "uuid": "aa10cefd-094c-4394-8382-9f287bb05aca"
+    }
+  ],
+  "id": "a0a56d2b-2f00-4f48-a46c-5f1e75c9b082",
+  "version": "0.2.1"
+}
