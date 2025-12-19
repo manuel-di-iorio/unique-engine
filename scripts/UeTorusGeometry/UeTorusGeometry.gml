@@ -12,6 +12,11 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
     var _arc = data[$ "arc"] ?? (2 * pi); // Total arc length in radians (default full circle)
     var _arcOffset = data[$ "arcOffset"] ?? 0; // Starting angle offset in radians
     
+    var _pos = [];
+    var _norm = [];
+    var _uvs = [];
+    var _col = [];
+
     // Generate torus geometry
     for (var i = 0; i < _tubularSegments; i++) {
         var u1 = _arcOffset + (i / _tubularSegments) * _arc;
@@ -22,16 +27,16 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
             var v2 = ((j + 1) / _radialSegments) * 2 * pi;
             
             // Calculate four corners of quad
-            var p1 = calculateTorusVertex(u1, v1, _radius, _tubeRadius);
-            var p2 = calculateTorusVertex(u2, v1, _radius, _tubeRadius);
-            var p3 = calculateTorusVertex(u2, v2, _radius, _tubeRadius);
-            var p4 = calculateTorusVertex(u1, v2, _radius, _tubeRadius);
+            var p1 = __calculateTorusVertex(u1, v1, _radius, _tubeRadius);
+            var p2 = __calculateTorusVertex(u2, v1, _radius, _tubeRadius);
+            var p3 = __calculateTorusVertex(u2, v2, _radius, _tubeRadius);
+            var p4 = __calculateTorusVertex(u1, v2, _radius, _tubeRadius);
             
             // Calculate normals for each vertex
-            var n1 = calculateTorusNormal(u1, v1);
-            var n2 = calculateTorusNormal(u2, v1);
-            var n3 = calculateTorusNormal(u2, v2);
-            var n4 = calculateTorusNormal(u1, v2);
+            var n1 = __calculateTorusNormal(u1, v1);
+            var n2 = __calculateTorusNormal(u2, v1);
+            var n3 = __calculateTorusNormal(u2, v2);
+            var n4 = __calculateTorusNormal(u1, v2);
             
             // UV coordinates
             var uv1_u = i / _tubularSegments;
@@ -44,56 +49,28 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
             var uv4_v = (j + 1) / _radialSegments;
             
             // First triangle (p1, p2, p3)
-            array_push(vertices, {
-                x: p1.x, y: p1.y, z: p1.z,
-                nx: n1.nx, ny: n1.ny, nz: n1.nz,
-                u: uv1_u, v: uv1_v,
-                color: _color, alpha: _alpha
-            });
-            array_push(vertices, {
-                x: p2.x, y: p2.y, z: p2.z,
-                nx: n2.nx, ny: n2.ny, nz: n2.nz,
-                u: uv2_u, v: uv2_v,
-                color: _color, alpha: _alpha
-            });
-            array_push(vertices, {
-                x: p3.x, y: p3.y, z: p3.z,
-                nx: n3.nx, ny: n3.ny, nz: n3.nz,
-                u: uv3_u, v: uv3_v,
-                color: _color, alpha: _alpha
-            });
+            array_push(_pos, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z);
+            array_push(_norm, n1.nx, n1.ny, n1.nz,  n2.nx, n2.ny, n2.nz,  n3.nx, n3.ny, n3.nz);
+            array_push(_uvs, uv1_u, uv1_v, uv2_u, uv2_v, uv3_u, uv3_v);
+            array_push(_col, _color, _alpha, _color, _alpha, _color, _alpha);
             
             // Second triangle (p1, p3, p4)
-            array_push(vertices, {
-                x: p1.x, y: p1.y, z: p1.z,
-                nx: n1.nx, ny: n1.ny, nz: n1.nz,
-                u: uv1_u, v: uv1_v,
-                color: _color, alpha: _alpha
-            });
-            array_push(vertices, {
-                x: p3.x, y: p3.y, z: p3.z,
-                nx: n3.nx, ny: n3.ny, nz: n3.nz,
-                u: uv3_u, v: uv3_v,
-                color: _color, alpha: _alpha
-            });
-            array_push(vertices, {
-                x: p4.x, y: p4.y, z: p4.z,
-                nx: n4.nx, ny: n4.ny, nz: n4.nz,
-                u: uv4_u, v: uv4_v,
-                color: _color, alpha: _alpha
-            });
+            array_push(_pos, p1.x, p1.y, p1.z, p3.x, p3.y, p3.z, p4.x, p4.y, p4.z);
+            array_push(_norm, n1.nx, n1.ny, n1.nz,  n3.nx, n3.ny, n3.nz,  n4.nx, n4.ny, n4.nz);
+            array_push(_uvs, uv1_u, uv1_v, uv3_u, uv3_v, uv4_u, uv4_v);
+            array_push(_col, _color, _alpha, _color, _alpha, _color, _alpha);
         }
     }
     
+    self.position = _pos;
+    self.normal = _norm;
+    self.uv = _uvs;
+    self.color = _col;
+
     build();
     
     /// @desc Calculate vertex position on torus surface
-    /// @param {real} u Tubular angle (around main ring)
-    /// @param {real} v Radial angle (around tube)
-    /// @param {real} majorRadius Major radius of torus
-    /// @param {real} minorRadius Minor radius (tube radius)
-    /// @return {struct} Struct with x, y, z coordinates
-    function calculateTorusVertex(u, v, majorRadius, minorRadius) {
+    function __calculateTorusVertex(u, v, majorRadius, minorRadius) {
         var cosu = cos(u);
         var sinu = sin(u);
         var cosv = cos(v);
@@ -107,10 +84,7 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
     }
     
     /// @desc Calculate normal vector at torus surface point
-    /// @param {real} u Tubular angle (around main ring)
-    /// @param {real} v Radial angle (around tube)
-    /// @return {struct} Struct with nx, ny, nz normal components
-    function calculateTorusNormal(u, v) {
+    function __calculateTorusNormal(u, v) {
         var cosu = cos(u);
         var sinu = sin(u);
         var cosv = cos(v);

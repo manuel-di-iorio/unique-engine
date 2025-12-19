@@ -1,22 +1,24 @@
 function UeLineGeometry(data = {}): UeGeometry(data) constructor {
-    color = data[$ "color"] ?? c_white;          // Default line color
-    alpha = data[$ "alpha"] ?? 1;                // Default line alpha
+    self.__color = data[$ "color"] ?? c_white;          // Default line color
+    self.__alpha = data[$ "alpha"] ?? 1;                // Default line alpha
 
     /// Populates the geometry with 3D positions. Array must be multiple of 3 (x,y,z)
     function setPositions(array) {
         gml_pragma("forceinline");
-        vertices = [];
-        for (var i = 0, num = array_length(array); i < num; i += 3) {
-            array_push(vertices, {
-                x: array[i],
-                y: array[i + 1],
-                z: array[i + 2],
-                nx: 0, ny: 0, nz: 0,
-                u: 0, v: 0,
-                color,
-                alpha
-            });
+        self.position = array;
+        
+        // Initialize other attributes if needed
+        var count = array_length(array) / 3;
+        self.normal = array_create(count * 3, 0);
+        self.uv = array_create(count * 2, 0);
+        
+        var col = array_create(count * 2);
+        for (var i = 0; i < count; i++) {
+            col[i * 2] = self.__color;
+            col[i * 2 + 1] = self.__alpha;
         }
+        self.color = col;
+        
         build();
         return self;
     }
@@ -24,13 +26,13 @@ function UeLineGeometry(data = {}): UeGeometry(data) constructor {
     /// Populates the geometry with RGB colors. One color per vertex (r,g,b)
     function setColors(colors) {
         gml_pragma("forceinline");
-        var count = min(array_length(vertices), array_length(colors) / 3);
+        var count = array_length(colors) / 3;
+        var col = array_create(count * 2);
         for (var i = 0; i < count; i++) {
-            var r = colors[i * 3];
-            var g = colors[i * 3 + 1];
-            var b = colors[i * 3 + 2];
-            vertices[i].color = make_color_rgb(r, g, b);
+            col[i * 2] = make_color_rgb(colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2]);
+            col[i * 2 + 1] = self.__alpha;
         }
+        self.color = col;
         build();
         return self;
     }
@@ -38,19 +40,27 @@ function UeLineGeometry(data = {}): UeGeometry(data) constructor {
     /// Populates the geometry from a list of UeVector3 or UeVector2 points
     function setFromPoints(points) {
         gml_pragma("forceinline");
-        vertices = [];
-        for (var i = 0; i < array_length(points); i++) {
+        var num = array_length(points);
+        var pos = array_create(num * 3);
+        var norm = array_create(num * 3, 0);
+        var _uv = array_create(num * 2, 0);
+        var col = array_create(num * 2);
+        
+        for (var i = 0; i < num; i++) {
             var p = points[i];
-            array_push(vertices, {
-                x: p.x,
-                y: p.y,
-                z: p[$ "z"] ?? 0,
-                nx: 0, ny: 0, nz: 0,
-                u: 0, v: 0,
-                color,
-                alpha
-            });
+            pos[i * 3] = p.x;
+            pos[i * 3 + 1] = p.y;
+            pos[i * 3 + 2] = p[$ "z"] ?? 0;
+            
+            col[i * 2] = self.__color;
+            col[i * 2 + 1] = self.__alpha;
         }
+        
+        self.position = pos;
+        self.normal = norm;
+        self.uv = _uv;
+        self.color = col;
+        
         build();
         return self;
     }
@@ -60,24 +70,12 @@ function UeLineGeometry(data = {}): UeGeometry(data) constructor {
         gml_pragma("forceinline");
         if (!line.isLine) return self;
 
-        var srcVerts = line.geometry.vertices;
-        vertices = [];
-
-        for (var i = 0, num = array_length(srcVerts); i < num; i++) {
-            var v = srcVerts[i];
-            array_push(vertices, {
-                x: v.x,
-                y: v.y,
-                z: v.z,
-                nx: v.nx ?? 0,
-                ny: v.ny ?? 0,
-                nz: v.nz ?? 0,
-                u: v.u ?? 0,
-                v: v.v ?? 0,
-                color: v.color ?? color,
-                alpha: v.alpha ?? alpha
-            });
-        }
+        self.position = variable_clone(line.geometry.position);
+        self.normal = line.geometry.normal ? variable_clone(line.geometry.normal) : undefined;
+        self.uv = line.geometry.uv ? variable_clone(line.geometry.uv) : undefined;
+        self.color = line.geometry.color ? variable_clone(line.geometry.color) : undefined;
+        self.index = line.geometry.index ? variable_clone(line.geometry.index) : undefined;
+        
         build();
         return self;
     }

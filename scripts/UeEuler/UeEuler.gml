@@ -56,6 +56,22 @@ function UeEuler(_x = 0, _y = 0, _z = 0, _order = "XYZ") constructor {
         return arr;
     }
 
+    /// Converts the euler angles to a JSON representation (struct).
+    static toJSON = function() {
+        gml_pragma("forceinline");
+        return { x: self.x, y: self.y, z: self.z, order: self.order };
+    }
+
+    /// Loads the euler angles from a JSON representation (struct or array).
+    static fromJSON = function(data) {
+        gml_pragma("forceinline");
+        self.x = data[$ "x"] ?? 0;
+        self.y = data[$ "y"] ?? 0;
+        self.z = data[$ "z"] ?? 0;
+        self.order = data[$ "order"] ?? "XYZ";
+        return self;
+    }
+
     static setFromVector3 = function(v, order = undefined) {
         gml_pragma("forceinline");
         self.x = v.x;

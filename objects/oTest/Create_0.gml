@@ -39,4 +39,4 @@ setScene = function(idx) {
     instance_create_layer(0, 0, "Instances", currentDemo.obj); 
 }
 
-setScene(0);
+setScene(7);

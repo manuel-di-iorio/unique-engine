@@ -32,11 +32,19 @@ function UeBox2(_min = undefined, _max = undefined) constructor {
     }
     
     /// Sets the box bounds from an array of Vector2 points.
+    /// Supports a flat array of numbers [x0,y0, ...].
     static setFromPoints = function(points) {
         gml_pragma("forceinline");
         makeEmpty();
-        for (var i = 0, n = array_length(points); i < n; i++) {
-            expandByPoint(points[i]);
+        var n = array_length(points);
+        if (n == 0) return self;
+
+        for (var i = 0; i < n; i += 2) {
+            var px = points[i], py = points[i+1];
+            self.sizeMin.x = min(self.sizeMin.x, px);
+            self.sizeMin.y = min(self.sizeMin.y, py);
+            self.sizeMax.x = max(self.sizeMax.x, px);
+            self.sizeMax.y = max(self.sizeMax.y, py);
         }
         return self;
     }
@@ -59,12 +67,13 @@ function UeBox2(_min = undefined, _max = undefined) constructor {
     }
     
     /// Expands the box to include a given point.
+    /// Point can be an array [x,y].
     static expandByPoint = function(point) {
         gml_pragma("forceinline");
-        self.sizeMin.x = min(self.sizeMin.x, point.x);
-        self.sizeMin.y = min(self.sizeMin.y, point.y);
-        self.sizeMax.x = max(self.sizeMax.x, point.x);
-        self.sizeMax.y = max(self.sizeMax.y, point.y);
+        self.sizeMin.x = min(self.sizeMin.x, point[0]);
+        self.sizeMin.y = min(self.sizeMin.y, point[1]);
+        self.sizeMax.x = max(self.sizeMax.x, point[0]);
+        self.sizeMax.y = max(self.sizeMax.y, point[1]);
         return self;
     }
     
@@ -87,11 +96,12 @@ function UeBox2(_min = undefined, _max = undefined) constructor {
     }
     
     /// Returns true if the box contains the given point.
+    /// Point can be an array [x,y].
     static containsPoint = function(point) {
         gml_pragma("forceinline");
         return (
-            point.x >= self.sizeMin.x && point.x <= self.sizeMax.x &&
-            point.y >= self.sizeMin.y && point.y <= self.sizeMax.y
+            point[0] >= self.sizeMin.x && point[0] <= self.sizeMax.x &&
+            point[1] >= self.sizeMin.y && point[1] <= self.sizeMax.y
         );
     }
     
@@ -148,26 +158,30 @@ function UeBox2(_min = undefined, _max = undefined) constructor {
     }
     
     /// Returns the normalized coordinates of a point (0..1 range) relative to box bounds.
+    /// Point can be an array [x,y].
     static getParameter = function(point, target = new UeVector2()) {
         gml_pragma("forceinline");
-        target.x = (point.x - self.sizeMin.x) / (self.sizeMax.x - self.sizeMin.x);
-        target.y = (point.y - self.sizeMin.y) / (self.sizeMax.y - self.sizeMin.y);
+        target.x = (point[0] - self.sizeMin.x) / (self.sizeMax.x - self.sizeMin.x);
+        target.y = (point[1] - self.sizeMin.y) / (self.sizeMax.y - self.sizeMin.y);
         return target;
     }
     
     /// Clamps a point to the box bounds.
-    static clampPoint = function(point, target = new UeVector2()) {
+    /// Point can be an array [x,y]. Returns an array [x,y].
+    static clampPoint = function(point, target = array_create(2)) {
         gml_pragma("forceinline");
-        target.x = clamp(point.x, self.sizeMin.x, self.sizeMax.x);
-        target.y = clamp(point.y, self.sizeMin.y, self.sizeMax.y);
+        target[0] = clamp(point[0], self.sizeMin.x, self.sizeMax.x);
+        target[1] = clamp(point[1], self.sizeMin.y, self.sizeMax.y);
         return target;
     }
     
     /// Returns the distance from the point to the box (0 if inside).
+    /// Point can be an array [x,y].
     static distanceToPoint = function(point) {
         gml_pragma("forceinline");
-        var clamped = clampPoint(point);
-        return clamped.distanceTo(point);
+        var cp = clampPoint(point);
+        var dx = point[0] - cp[0], dy = point[1] - cp[1];
+        return sqrt(dx*dx + dy*dy);
     }
     
     /// Translates (moves) the box by an offset.
@@ -182,5 +196,22 @@ function UeBox2(_min = undefined, _max = undefined) constructor {
     static equals = function(box) {
         gml_pragma("forceinline");
         return self.sizeMin.equals(box.sizeMin) && self.sizeMax.equals(box.sizeMax);
+    }
+
+    /// Converts the box to a JSON representation.
+    static toJSON = function() {
+        gml_pragma("forceinline");
+        return { 
+            min: self.sizeMin.toJSON(), 
+            max: self.sizeMax.toJSON() 
+        };
+    }
+
+    /// Loads the box from a JSON representation.
+    static fromJSON = function(data) {
+        gml_pragma("forceinline");
+        self.sizeMin.fromJSON(data.min);
+        self.sizeMax.fromJSON(data.max);
+        return self;
     }
 }

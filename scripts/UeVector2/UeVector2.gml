@@ -171,4 +171,36 @@ function UeVector2(_x = 0, _y = 0) constructor {
         self.y = ny;
         return self;
     }
+
+    /// Sets components from a simple array.
+    static fromArray = function(arr, offset = 0) {
+        gml_pragma("forceinline");
+        self.x = arr[offset];
+        self.y = arr[offset + 1];
+        return self;
+    }
+
+    /// Copies components into an array (or creates one).
+    static toArray = function(arr = undefined, offset = 0) {
+        gml_pragma("forceinline");
+        arr ??= [];
+        arr[offset]     = self.x;
+        arr[offset + 1] = self.y;
+        return arr;
+    }
+
+    /// Converts the vector to a JSON representation (struct).
+    static toJSON = function() {
+        gml_pragma("forceinline");
+        return { x: self.x, y: self.y };
+    }
+
+    /// Loads the vector from a JSON representation (struct or array).
+    static fromJSON = function(data) {
+        gml_pragma("forceinline");
+        self.x = data[$ "x"] ?? 0;
+        self.y = data[$ "y"] ?? 0;
+        
+        return self;
+    }
 }

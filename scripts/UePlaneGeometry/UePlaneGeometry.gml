@@ -4,17 +4,41 @@ function UePlaneGeometry(width = 1, height = 1, data = {}): UeGeometry(data) con
     var halfW = width * 0.5;
     var halfH = height * 0.5;
 
-  array_push(vertices,
-        // Triangle 1
-        { x: -halfW, y: -halfH, z: 0, nx: 0, ny: 0, nz: 1, u: 0, v: 0, color, alpha },
-        { x:  halfW, y:  halfH, z: 0, nx: 0, ny: 0, nz: 1, u: 1, v: 1, color, alpha },
-        { x:  halfW, y: -halfH, z: 0, nx: 0, ny: 0, nz: 1, u: 1, v: 0, color, alpha },
+    self.position = [
+        -halfW, -halfH, 0,
+         halfW,  halfH, 0,
+         halfW, -halfH, 0,
+         halfW,  halfH, 0,
+        -halfW, -halfH, 0,
+        -halfW,  halfH, 0
+    ];
 
-        // Triangle 2
-        { x:  halfW, y:  halfH, z: 0, nx: 0, ny: 0, nz: 1, u: 1, v: 1, color, alpha },
-        { x: -halfW, y: -halfH, z: 0, nx: 0, ny: 0, nz: 1, u: 0, v: 0, color, alpha },
-        { x: -halfW, y:  halfH, z: 0, nx: 0, ny: 0, nz: 1, u: 0, v: 1, color, alpha },
-    );
+    self.normal = [
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1
+    ];
+
+    self.uv = [
+        0, 0,
+        1, 1,
+        1, 0,
+        1, 1,
+        0, 0,
+        0, 1
+    ];
+
+    self.color = [
+        color, alpha,
+        color, alpha,
+        color, alpha,
+        color, alpha,
+        color, alpha,
+        color, alpha
+    ];
     
     build();
 }

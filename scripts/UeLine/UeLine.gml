@@ -30,22 +30,21 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
             }
         }
     
-        var vertices = geometry[$ "vertices"];
-        var count = array_length(vertices) - 1;
+        var pos = geometry[$ "position"];
+        if (pos == undefined) return self;
+        var count = (array_length(pos) / 3) - 1;
     
         var vec3A = global.UE_DUMMY_VECTOR3;
         var vec3B = global.UE_DUMMY_VECTOR3_B;
         var vec3C = global.UE_DUMMY_VECTOR3_C;
         var vec3D = global.UE_DUMMY_VECTOR3_D;
-        var vec3E = global.UE_DUMMY_VECTOR3_E;
-        var box = global.UE_DUMMY_BOX;
     
         for (var i = 0; i < count; i++) {
-            var va = vertices[i];
-            var vb = vertices[i + 1];
-    
-            vec3A.set(va.x, va.y, va.z);
-            vec3B.set(vb.x, vb.y, vb.z);
+            var i3 = i * 3;
+            var i1_3 = (i + 1) * 3;
+
+            vec3A.set(pos[i3],   pos[i3 + 1],   pos[i3 + 2]);
+            vec3B.set(pos[i1_3], pos[i1_3 + 1], pos[i1_3 + 2]);
             
             // Check the actual point intersection
             var distSq = localRay.distanceSqToSegment(vec3A, vec3B, vec3C, vec3D);

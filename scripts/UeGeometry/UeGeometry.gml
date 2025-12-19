@@ -1,71 +1,73 @@
 function UeGeometry(data = {}) constructor {
-    isGeometry = true;                            // Flag to identify this as a geometry
-    type = "Geometry";                            // Type identifier string
-    uuid = ueUuid();                              // Unique identifier for this geometry instance
-    name = data[$ "name"] ?? undefined;           // Optional name for the geometry
-    vertices = data[$ "vertices"] ?? [];          // Array of vertex data
-    index = data[$ "index"] ?? undefined;         // Optional index array for indexed geometry
-    format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT; // Vertex format description
-    vb = undefined;                               // Vertex buffer handle (created on build)
-    canFreeze = data[$ "canFreeze"] ?? true;      // Flag whether vertex buffer can be frozen (optimization)
-
-    // Axis-aligned bounding box for the geometry
-    boundingBox = data[$ "boundingBox"] ?? undefined;
+    isGeometry = true;
+    type = "Geometry";
+    uuid = ueUuid();
+    name = data[$ "name"] ?? undefined;
     
-    // Bounding sphere for the geometry
+    // Core attributes
+    position = data[$ "position"] ?? undefined;
+    normal   = data[$ "normal"]   ?? undefined;
+    uv       = data[$ "uv"]       ?? undefined;
+    color    = data[$ "color"]    ?? undefined;
+    index    = data[$ "index"]    ?? undefined;
+    
+    format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
+    vb = undefined;
+    canFreeze = data[$ "canFreeze"] ?? true;
+
+    boundingBox = data[$ "boundingBox"] ?? undefined;
     boundingSphere = data[$ "boundingSphere"] ?? undefined;
 
     // Build the vertex buffer from vertices and format
     function build() {
         gml_pragma("forceinline");
+        if (position == undefined) return self;
         dispose();
-        vb = vertex_create_buffer();               // Create a new vertex buffer
-        vertex_begin(vb, format.vf);               // Begin vertex buffer with format flags
-        var attrs = format.attrs;                   // Attributes defined by the format
         
-        var useIndex = is_array(index);             // Check if geometry uses indexed vertices
-        var ilen = array_length(useIndex ? index : vertices);
+        vb = vertex_create_buffer();
+        vertex_begin(vb, format.vf);
+        
+        var attrs = format.attrs;
+        var useIdx = is_array(index);
+        var count = useIdx ? array_length(index) : (array_length(position) / 3);
         var alen = array_length(attrs);
 
-        // Iterate through vertices or indices
-        for (var i = 0; i < ilen; i++) {
-            var vertex = vertices[useIndex ? index[i] : i];
-            
-            // Add vertex attributes based on format
+        for (var i = 0; i < count; i++) {
+            var vi = useIdx ? index[i] : i;
+            var vi3 = vi * 3, vi2 = vi * 2;
+
             for (var a = 0; a < alen; a++) {
                 var attr = attrs[a];
-                
                 switch (attr.kind) {
                     case UE_FORMAT_ATTR.POSITION:
-                        vertex_position_3d(vb, vertex.x, vertex.y, vertex.z);
+                        vertex_position_3d(vb, position[vi3], position[vi3+1], position[vi3+2]);
                         break;
                     case UE_FORMAT_ATTR.NORMAL:
-                        vertex_normal(vb, vertex.nx, vertex.ny, vertex.nz);
+                        if (normal != undefined) vertex_normal(vb, normal[vi3], normal[vi3+1], normal[vi3+2]);
+                        else vertex_normal(vb, 0, 0, 1);
                         break;
                     case UE_FORMAT_ATTR.UV:
-                        vertex_texcoord(vb, vertex.u, vertex.v);
+                        if (uv != undefined) vertex_texcoord(vb, uv[vi2], uv[vi2+1]);
+                        else vertex_texcoord(vb, 0, 0);
                         break;
                     case UE_FORMAT_ATTR.COLOR:
-                        vertex_color(vb, vertex.color, vertex.alpha);
+                        if (color != undefined) vertex_color(vb, color[vi2], color[vi2+1]);
+                        else vertex_color(vb, c_white, 1);
                         break;
                     case UE_FORMAT_ATTR.CUSTOM:
-                        var customValue = vertex.custom[$ attr.name];
-                        switch (attr.type) {
-                            case vertex_type_float1:
-                                vertex_float1(vb, customValue);
-                                break;
-                            case vertex_type_float2:
-                                vertex_float2(vb, customValue[0], customValue[1]);
-                                break;
-                            case vertex_type_float3:
-                                vertex_float3(vb, customValue[0], customValue[1], customValue[2]);
-                                break;
-                            case vertex_type_float4:
-                                vertex_float4(vb, customValue[0], customValue[1], customValue[2], customValue[3]);
-                                break;
-                            case vertex_type_ubyte4:
-                                vertex_ubyte4(vb, customValue[0], customValue[1], customValue[2], customValue[3]);
-                                break;
+                        var val = self[$ attr.name];
+                        if (val != undefined) {
+                            var stride = 1;
+                            if (attr.type == vertex_type_float2) stride = 2;
+                            else if (attr.type == vertex_type_float3) stride = 3;
+                            else if (attr.type == vertex_type_float4) stride = 4;
+                            else if (attr.type == vertex_type_ubyte4) stride = 4;
+                            var ci = vi * stride;
+                            if (attr.type == vertex_type_float1) vertex_float1(vb, val[ci]);
+                            else if (attr.type == vertex_type_float2) vertex_float2(vb, val[ci], val[ci+1]);
+                            else if (attr.type == vertex_type_float3) vertex_float3(vb, val[ci], val[ci+1], val[ci+2]);
+                            else if (attr.type == vertex_type_float4) vertex_float4(vb, val[ci], val[ci+1], val[ci+2], val[ci+3]);
+                            else if (attr.type == vertex_type_ubyte4) vertex_ubyte4(vb, val[ci], val[ci+1], val[ci+2], val[ci+3]);
                         }
                         break;
                 }
@@ -90,7 +92,7 @@ function UeGeometry(data = {}) constructor {
     // Dispose the vertex buffer, releasing GPU resources
     function dispose() {
         gml_pragma("forceinline");
-        if (vb) {
+        if (vb != undefined) {
             vertex_delete_buffer(vb);
             vb = undefined;
         }
@@ -101,7 +103,7 @@ function UeGeometry(data = {}) constructor {
     function computeBoundingBox() {
         gml_pragma("forceinline");
         boundingBox ??= new UeBox3();
-        boundingBox.setFromPoints(vertices);
+        if (position != undefined) boundingBox.setFromPoints(position);
         return self;
     }
     
@@ -109,17 +111,16 @@ function UeGeometry(data = {}) constructor {
     function computeBoundingSphere() {
         gml_pragma("forceinline");
         boundingSphere ??= new UeSphere();
-        boundingSphere.setFromPoints(vertices);
+        if (position != undefined) boundingSphere.setFromPoints(position);
         return self;
     }
     
     // Vertically flip the UV of the vertices and rebuild the geometry
     function flipUV() {
         gml_pragma("forceinline");
-    
-        for (var i = 0, l= array_length(vertices); i < l; i++) {
-            var v = vertices[i];
-            v.v = 1 - v.v;
+        if (uv == undefined) return self;
+        for (var i = 1, l = array_length(uv); i < l; i += 2) {
+            uv[i] = 1 - uv[i];
         }
     
         build(); 
@@ -127,31 +128,48 @@ function UeGeometry(data = {}) constructor {
     }
     
     function toJSON() {
-        gml_pragma("forceinline");
-        return { 
-            uuid,
-            type,
-            name,
-            format: format.toJSON(),
-            boundingBox: boundingBox ? boundingBox.toJSON() : undefined,
-            boundingSphere: boundingSphere ? boundingSphere.toJSON() : undefined
+        var res = { 
+            uuid: uuid, 
+            type: type, 
+            name: name, 
+            position: position, 
+            normal: normal, 
+            uv: uv, 
+            color: color, 
+            index: index, 
+            format: format.toJSON() 
         };
+        res.boundingBox = boundingBox ? boundingBox.toJSON() : undefined;
+        res.boundingSphere = boundingSphere ? boundingSphere.toJSON() : undefined;
+        
+        var attrs = format.attrs;
+        for (var i = 0, l = array_length(attrs); i < l; i++) {
+            if (attrs[i].kind == UE_FORMAT_ATTR.CUSTOM) {
+                res[$ attrs[i].name] = self[$ attrs[i].name];
+            }
+        }
+        return res;
     }
 
     function fromJSON(data) {
         gml_pragma("forceinline");
         uuid = data[$ "uuid"];
         name = data[$ "name"];
+        position = data[$ "position"];
+        normal = data[$ "normal"];
+        uv = data[$ "uv"];
+        color = data[$ "color"];
+        index = data[$ "index"];
         format = new UeVertexFormat().fromJSON(data[$ "format"]);
         
-        if (data[$ "boundingBox"] != undefined) {
-            boundingBox = new UeBox3().fromJSON(data.boundingBox);
+        var attrs = format.attrs;
+        for (var i = 0, l = array_length(attrs); i < l; i++) {
+            if (attrs[i].kind == UE_FORMAT_ATTR.CUSTOM) {
+                self[$ attrs[i].name] = data[$ attrs[i].name];
+            }
         }
-        
-        if (data[$ "boundingSphere"] != undefined) {
-            boundingSphere = new UeSphere().fromJSON(data.boundingSphere);
-        }
-        
+        if (data[$ "boundingBox"] != undefined) boundingBox = new UeBox3().fromJSON(data.boundingBox);
+        if (data[$ "boundingSphere"] != undefined) boundingSphere = new UeSphere().fromJSON(data.boundingSphere);
         return self;
     }
     
@@ -166,10 +184,10 @@ function UeGeometry(data = {}) constructor {
         data.size += vbBufferSize;
         
         return {
-            payload,
+            payload: payload,
             ctx: {
-                vbBuffer, 
-                vbBufferSize
+                vbBuffer: vbBuffer, 
+                vbBufferSize: vbBufferSize
             }
         };
     }
@@ -209,80 +227,84 @@ function UeGeometry(data = {}) constructor {
         return cloneVb;
     }
     
-    
-    
     /**
      * Applies the matrix transform to the geometry vertices.
      * @param {Struct} matrix - UeMatrix4
      */
     function applyMatrix(matrix) {
         gml_pragma("forceinline");
+        if (position == undefined) return self;
         
-        // We need to transform the position and rotation (normal)
         var e = matrix.data;
-        // matrix for normals is the inverse transpose of the matrix
-        var normalMatrix = matrix.clone().invert().transpose();
-        var n = normalMatrix.data;
+        for (var i = 0, l = array_length(position); i < l; i += 3) {
+            var vx = position[i], vy = position[i+1], vz = position[i+2];
+            position[i]   = e[0]*vx + e[4]*vy + e[8]*vz + e[12];
+            position[i+1] = e[1]*vx + e[5]*vy + e[9]*vz + e[13];
+            position[i+2] = e[2]*vx + e[6]*vy + e[10]*vz + e[14];
+        }
         
-        for (var i = 0, l = array_length(vertices); i < l; i++) {
-            var v = vertices[i];
-            
-            // Apply position transform
-            var vx = v.x, vy = v.y, vz = v.z;
-            v.x = e[0]*vx + e[4]*vy + e[8]*vz + e[12];
-            v.y = e[1]*vx + e[5]*vy + e[9]*vz + e[13];
-            v.z = e[2]*vx + e[6]*vy + e[10]*vz + e[14];
-            
-            // Apply normal transform if exists
-            if (v[$ "nx"] != undefined) {
-                 var nx = v.nx, ny = v.ny, nz = v.nz;
-                 v.nx = n[0]*nx + n[4]*ny + n[8]*nz;
-                 v.ny = n[1]*nx + n[5]*ny + n[9]*nz;
-                 v.nz = n[2]*nx + n[6]*ny + n[10]*nz;
-                 
-                 // Normalize normal
-                 var len = sqrt(v.nx*v.nx + v.ny*v.ny + v.nz*v.nz);
-                 if (len > 0) {
-                     v.nx /= len;
-                     v.ny /= len;
-                     v.nz /= len;
-                 }
+        if (normal != undefined) {
+            var normalMatrix = matrix.clone().invert().transpose();
+            var n = normalMatrix.data;
+            for (var i = 0, l = array_length(normal); i < l; i += 3) {
+                var nx = normal[i], ny = normal[i+1], nz = normal[i+2];
+                normal[i]   = n[0]*nx + n[4]*ny + n[8]*nz;
+                normal[i+1] = n[1]*nx + n[5]*ny + n[9]*nz;
+                normal[i+2] = n[2]*nx + n[6]*ny + n[10]*nz;
+                
+                var d = sqrt(normal[i]*normal[i] + normal[i+1]*normal[i+1] + normal[i+2]*normal[i+2]);
+                if (d > 0) { normal[i] /= d; normal[i+1] /= d; normal[i+2] /= d; }
             }
         }
         
-        build(); // Rebuild vertex buffer
+        build();
         return self;
     }
 
     /**
-     * Merges an array of geometries into a single new geometry.
+     * Merges an array of geometries into a single new geometry. They must share the same format.
      * @param {Array<Struct.UeGeometry>} geometries
      * @returns {Struct.UeGeometry}
      */
     function merge(geometries) {
         gml_pragma("forceinline");
-        if (!is_array(geometries)) return undefined;
+        if (!is_array(geometries) || array_length(geometries) == 0) return undefined;
         
-        var mergedVertices = [];
+        var res = new UeGeometry();
+        // Assuming all geometries have the same format as the first one
+        res.format = geometries[0].format;
+        
+        var pos = [], norm = [], _uv = [], col = [], idx = [];
+        var offset = 0;
         
         for (var i = 0, il = array_length(geometries); i < il; i++) {
-            var geo = geometries[i];
-            var vs = geo.vertices;
-            for(var j=0, jl=array_length(vs); j<jl; j++) {
-                 var v = vs[j];
-                 // Manual shallow clone with dot notation
-                 array_push(mergedVertices, {
-                     x: v.x, y: v.y, z: v.z,
-                     nx: v.nx, ny: v.ny, nz: v.nz,
-                     u: v.u, v: v.v,
-                     color: v.color, alpha: v.alpha
-                 }); 
+            var g = geometries[i];
+            var vCount = array_length(g.position) / 3;
+            
+            pos = array_concat(pos, g.position);
+            if (g.normal != undefined) norm = array_concat(norm, g.normal);
+            if (g.uv != undefined) _uv = array_concat(_uv, g.uv);
+            if (g.color != undefined) col = array_concat(col, g.color);
+            
+            if (g.index != undefined) {
+                for (var j = 0; j < array_length(g.index); j++) {
+                    array_push(idx, g.index[j] + offset);
+                }
             }
+            
+            offset += vCount;
         }
         
-        return new UeGeometry({ vertices: mergedVertices });
+        res.position = pos;
+        if (array_length(norm) > 0) res.normal = norm;
+        if (array_length(_uv) > 0) res.uv = _uv;
+        if (array_length(col) > 0) res.color = col;
+        if (array_length(idx) > 0) res.index = idx;
+        
+        res.build();
+        return res;
     }
 
-    // Auto-build vertex buffer if vertices are provided
-    if (array_length(vertices)) build();
+    // Auto-build vertex buffer if position is provided
+    if (position != undefined) build();
 }

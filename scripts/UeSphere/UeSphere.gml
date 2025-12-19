@@ -1,4 +1,4 @@
-/// A bounding sphere defined by a center and a radius.
+/// Represents a bounding sphere defined by a center point and a radius.
 function UeSphere(center = undefined, radius = -1) constructor {
     self.isSphere = true;
     self.center = center ?? UE_VECTOR3_ZERO;
@@ -12,93 +12,13 @@ function UeSphere(center = undefined, radius = -1) constructor {
         return self;
     }
 
-    /// Copies values from another sphere.
-    static copy = function(sphere) {
-        gml_pragma("forceinline");
-        self.center.copy(sphere.center);
-        self.radius = sphere.radius;
-        return self;
-    }
-
-    /// Returns a clone of this sphere.
-    static clone = function() {
-        gml_pragma("forceinline");
-        return variable_clone(self);
-    }
-
-    /// Checks if the sphere is empty (radius < 0).
-    static isEmpty = function() {
-        gml_pragma("forceinline");
-        return self.radius < 0;
-    }
-
-    /// Makes the sphere empty.
-    static makeEmpty = function() {
-        gml_pragma("forceinline");
-        self.center.set(0, 0, 0);
-        self.radius = -1;
-        return self;
-    }
-
-    /// Checks if the sphere contains a given point.
-    static containsPoint = function(point) {
-        gml_pragma("forceinline");
-        return self.center.distanceToSquared(point) <= self.radius * self.radius;
-    }
-
-    /// Returns the distance from the point to the sphere surface.
-    static distanceToPoint = function(point) {
-        gml_pragma("forceinline");
-        return self.center.distanceTo(point) - self.radius;
-    }
-
-    /// Clamps a point inside the sphere boundary.
-    static clampPoint = function(point, target = new UeVector3()) {
-        gml_pragma("forceinline");
-        var d = self.center.distanceTo(point);
-        if (d > self.radius) {
-            target.copy(point).sub(self.center).normalize();
-            target.scale(self.radius).add(self.center);
-        } else {
-            target.copy(point);
-        }
-        return target;
-    }
-
-    /// Applies a 4x4 matrix transformation to the sphere.
-    static applyMatrix4 = function(matrix) {
-        gml_pragma("forceinline");
-        self.center = matrix.applyToVector3(self.center);
-        var scale = matrix.getMaxScaleOnAxis();
-        self.radius *= scale;
-        return self;
-    }
-
-    /// Expands the sphere to include a point.
-    static expandByPoint = function(point) {
-        gml_pragma("forceinline");
-        if (self.isEmpty()) {
-            self.center.copy(point);
-            self.radius = 0;
-            return self;
-        }
-
-        var dir = point.clone().sub(self.center);
-        var dist = dir.length();
-
-        if (dist > self.radius) {
-            var newRadius = (self.radius + dist) * 0.5;
-            var offset = dir.normalize().scale(newRadius - self.radius);
-            self.center.add(offset);
-            self.radius = newRadius;
-        }
-
-        return self;
-    }
-
     /// Sets the sphere from an array of points and optional center.
+    /// Supports a flat array of numbers [x0,y0,z0, ...].
     static setFromPoints = function(points, optionalCenter = undefined) {
         gml_pragma("forceinline");
+        var n = array_length(points);
+        if (n == 0) return self;
+
         if (optionalCenter != undefined) {
             self.center.copy(optionalCenter);
         } else {
@@ -107,11 +27,116 @@ function UeSphere(center = undefined, radius = -1) constructor {
         }
 
         self.radius = 0;
-        for (var i = 0, n = array_length(points); i < n; i++) {
-            self.radius = max(self.radius, self.center.distanceTo(points[i]));
+        for (var i = 0; i < n; i += 3) {
+            var px = points[i], py = points[i+1], pz = points[i+2];
+            var dx = px - self.center.x, dy = py - self.center.y, dz = pz - self.center.z;
+            var distSq = dx*dx + dy*dy + dz*dz;
+            self.radius = max(self.radius, sqrt(distSq));
         }
 
         return self;
+    }
+
+    /// Returns a deep clone of the sphere.
+    static clone = function() {
+        gml_pragma("forceinline");
+        return variable_clone(self);
+    }
+
+    /// Copies the properties from another sphere.
+    static copy = function(sphere) {
+        gml_pragma("forceinline");
+        self.center.copy(sphere.center);
+        self.radius = sphere.radius;
+        return self;
+    }
+
+    /// Returns true if the sphere is empty (radius < 0).
+    static isEmpty = function() {
+        gml_pragma("forceinline");
+        return self.radius < 0;
+    }
+
+    /// Resets the sphere to an empty state.
+    static makeEmpty = function() {
+        gml_pragma("forceinline");
+        self.center.set(0, 0, 0);
+        self.radius = -1;
+        return self;
+    }
+
+    /// Expands the sphere to include the given point.
+    /// Point can be an array [x,y,z].
+    static expandByPoint = function(point) {
+        gml_pragma("forceinline");
+        var dx = point[0] - self.center.x, dy = point[1] - self.center.y, dz = point[2] - self.center.z;
+        self.radius = max(self.radius, sqrt(dx*dx + dy*dy + dz*dz));
+        return self;
+    }
+
+    /// Checks if the sphere contains a point.
+    /// Point can be an array [x,y,z].
+    static containsPoint = function(point) {
+        gml_pragma("forceinline");
+        var dx = point[0] - self.center.x, dy = point[1] - self.center.y, dz = point[2] - self.center.z;
+        return (dx*dx + dy*dy + dz*dz) <= (self.radius * self.radius);
+    }
+
+    /// Returns the distance from the sphere boundary to a point.
+    /// Point can be an array [x,y,z].
+    static distanceToPoint = function(point) {
+        gml_pragma("forceinline");
+        var dx = point[0] - self.center.x, dy = point[1] - self.center.y, dz = point[2] - self.center.z;
+        return sqrt(dx*dx + dy*dy + dz*dz) - self.radius;
+    }
+
+    /// Checks for intersection with another sphere.
+    static intersectsSphere = function(sphere) {
+        gml_pragma("forceinline");
+        var radiusSum = self.radius + sphere.radius;
+        return (self.center.distanceToSquared(sphere.center) <= (radiusSum * radiusSum));
+    }
+
+    /// Checks for intersection with a box.
+    static intersectsBox = function(box) {
+        gml_pragma("forceinline");
+        return box.intersectsSphere(self);
+    }
+
+    /// Checks for intersection with a plane.
+    static intersectsPlane = function(plane) {
+        gml_pragma("forceinline");
+        return (abs(plane.distanceToPoint(self.center)) <= self.radius);
+    }
+
+    /// Clamps a point to the boundary of the sphere.
+    /// Point can be an array [x,y,z]. Returns an array [x,y,z].
+    static clampPoint = function(point, target = array_create(3)) {
+        gml_pragma("forceinline");
+        var dx = point[0] - self.center.x, dy = point[1] - self.center.y, dz = point[2] - self.center.z;
+        var d2 = dx*dx + dy*dy + dz*dz;
+        if (d2 > (self.radius * self.radius)) {
+            var d = sqrt(d2);
+            var f = self.radius / d;
+            target[0] = self.center.x + dx * f;
+            target[1] = self.center.y + dy * f;
+            target[2] = self.center.z + dz * f;
+        } else {
+            target[0] = point[0]; target[1] = point[1]; target[2] = point[2];
+        }
+        return target;
+    }
+
+    /// Returns the bounding box of the sphere.
+    static getBoundingBox = function(target = new UeBox3()) {
+        gml_pragma("forceinline");
+        if (isEmpty()) {
+            target.makeEmpty();
+            return target;
+        }
+        target.set(self.center, self.center);
+        target.expandByScalar(self.radius);
+        return target;
     }
 
     /// Translates the sphere by an offset vector.
@@ -121,71 +146,34 @@ function UeSphere(center = undefined, radius = -1) constructor {
         return self;
     }
 
-    /// Checks equality with another sphere.
+    /// Returns true if this sphere is equal to another.
     static equals = function(sphere) {
         gml_pragma("forceinline");
-        return self.center.equals(sphere.center) && self.radius == sphere.radius;
+        return (sphere.center.equals(self.center) && (sphere.radius == self.radius));
     }
 
-    /// Returns the minimal bounding box containing this sphere.
-    static getBoundingBox = function(target = new UeBox3()) {
+    /// Applies a 4x4 matrix transformation to the sphere.
+    static applyMatrix4 = function(matrix) {
         gml_pragma("forceinline");
-        target.setFromCenterAndSize(
-            self.center,
-            new UeVector3(1, 1, 1).scale(self.radius * 2)
-        );
-        return target;
-    }
-
-    /// Checks if this sphere intersects a given box.
-    static intersectsBox = function(box) {
-        gml_pragma("forceinline");
-        return box.distanceToPoint(self.center) <= self.radius;
-    }
-
-    /// Checks if this sphere intersects a given plane.
-    static intersectsPlane = function(plane) {
-        gml_pragma("forceinline");
-        return abs(plane.distanceToPoint(self.center)) <= self.radius;
-    }
-
-    /// Checks if this sphere intersects another sphere.
-    static intersectsSphere = function(sphere) {
-        gml_pragma("forceinline");
-        var rSum = self.radius + sphere.radius;
-        return self.center.distanceToSquared(sphere.center) <= rSum * rSum;
-    }
-
-    /// Expands this sphere to include another sphere.
-    static union = function(sphere) {
-        gml_pragma("forceinline");
-        if (self.isEmpty()) return copy(sphere);
-        if (sphere.isEmpty()) return self;
-
-        var d = self.center.distanceTo(sphere.center);
-
-        if (d + sphere.radius <= self.radius) return self;
-        if (d + self.radius <= sphere.radius) return copy(sphere);
-
-        var newRadius = (self.radius + d + sphere.radius) * 0.5;
-        var dir = sphere.center.clone().sub(self.center).normalize();
-        self.center.add(dir.scale(newRadius - self.radius));
-        self.radius = newRadius;
-
+        self.center.applyMatrix4(matrix);
+        self.radius = self.radius * matrix.getMaxScaleOnAxis();
         return self;
     }
+
+    /// Converts the sphere to a JSON representation.
     static toJSON = function() {
         gml_pragma("forceinline");
-        return {
-            center: { x: center.x, y: center.y, z: center.z },
-            radius
+        return { 
+            center: self.center.toJSON(), 
+            radius: self.radius 
         };
     }
 
+    /// Loads the sphere from a JSON representation.
     static fromJSON = function(data) {
         gml_pragma("forceinline");
-        center.set(data.center.x, data.center.y, data.center.z);
-        radius = data.radius;
+        self.center.fromJSON(data.center);
+        self.radius = data.radius;
         return self;
     }
 }

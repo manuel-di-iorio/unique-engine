@@ -9,33 +9,38 @@ function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeGeometry(
     var hh = _depth * 0.5;
     var hd = _height * 0.5;
 
+    // Direct flat arrays for attributes
+    var _position = [];
+    var _normal = [];
+    var _uv = [];
+    var _colorArray = [];
+
     var faces = [
-        [ 0,  0,  1, [ // Front (Z+) - X and Y vary, Z is constant at +hh
+        [ 0,  0,  1, [ // Front (Z+)
             [-hw,-hd, hh, 0,1], [-hw, hd, hh, 0,0], [ hw, hd, hh, 1,0],
             [ hw, hd, hh, 1,0], [ hw,-hd, hh, 1,1], [-hw,-hd, hh, 0,1]
         ]],
-        [ 0,  0, -1, [ // Back (Z-) - X and Y vary, Z is constant at -hh
+        [ 0,  0, -1, [ // Back (Z-)
             [-hw,-hd,-hh, 1,1], [ hw,-hd,-hh, 0,1], [ hw, hd,-hh, 0,0],
             [ hw, hd,-hh, 0,0], [-hw, hd,-hh, 1,0], [-hw,-hd,-hh, 1,1]
         ]],
-        [ 0,  1,  0, [ // Top (Y+) - X and Z vary, Y is constant at +hd
+        [ 0,  1,  0, [ // Top (Y+)
             [-hw, hd,-hh, 0,1], [ hw, hd,-hh, 1,1], [ hw, hd, hh, 1,0],
             [ hw, hd, hh, 1,0], [-hw, hd, hh, 0,0], [-hw, hd,-hh, 0,1]
         ]],
-        [ 0, -1,  0, [ // Bottom (Y-) - X and Z vary, Y is constant at -hd
+        [ 0, -1,  0, [ // Bottom (Y-)
             [-hw,-hd,-hh, 0,0], [-hw,-hd, hh, 0,1], [ hw,-hd, hh, 1,1],
             [ hw,-hd, hh, 1,1], [ hw,-hd,-hh, 1,0], [-hw,-hd,-hh, 0,0]
         ]],
-        [ 1,  0,  0, [ // Right (X+) - Y and Z vary, X is constant at +hw
+        [ 1,  0,  0, [ // Right (X+)
             [ hw,-hd,-hh, 0,1], [ hw,-hd, hh, 1,1], [ hw, hd, hh, 1,0],
             [ hw, hd, hh, 1,0], [ hw, hd,-hh, 0,0], [ hw,-hd,-hh, 0,1]
         ]],
-        [-1,  0,  0, [ // Left (X-) - Y and Z vary, X is constant at -hw
+        [-1,  0,  0, [ // Left (X-)
             [-hw,-hd,-hh, 1,1], [-hw, hd,-hh, 1,0], [-hw, hd, hh, 0,0],
             [-hw, hd, hh, 0,0], [-hw,-hd, hh, 0,1], [-hw,-hd,-hh, 1,1]
         ]]
     ];
-
 
     for (var f = 0; f < array_length(faces); f++) {
         var nx = faces[f][0];
@@ -45,20 +50,17 @@ function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeGeometry(
     
         for (var i = 0; i < array_length(verts); i++) {
             var v = verts[i];
-            array_push(vertices, {
-                x: v[0],
-                y: v[1],
-                z: v[2],
-                nx: nx,
-                ny: ny,
-                nz: nz,
-                u: v[3],
-                v: v[4],
-                color: _color,
-                alpha: _alpha
-            });
+            array_push(_position, v[0], v[1], v[2]);
+            array_push(_normal, nx, ny, nz);
+            array_push(_uv, v[3], v[4]);
+            array_push(_colorArray, _color, _alpha);
         }
     }
+    
+    self.position = _position;
+    self.normal = _normal;
+    self.uv = _uv;
+    self.color = _colorArray;
     
     build();
 }

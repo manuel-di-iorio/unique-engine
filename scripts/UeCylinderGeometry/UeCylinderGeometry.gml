@@ -4,155 +4,89 @@ function UeCylinderGeometry(radius = 1, height = 1, radialSegments = 32, data = 
     var _radialSegments = radialSegments ?? 32;
     var _color = data[$ "color"] ?? c_white;
     var _alpha = data[$ "alpha"] ?? 1;
-    
     var halfHeight = _height * 0.5;
     
-    // Generate vertices for the cylinder
-    var rightVertices = [];
-    var leftVertices = [];
+    var pos = [], norm = [], uvs = [], cols = [];
     
-    // Create vertices for right and left circles (oriented along X axis)
+    // We'll use flat arrays to store the ring vertices temporarily to avoid struct overhead
+    // ringPosition: [x, y, z, u, v] per segment
+    var rightRing = array_create((_radialSegments + 1) * 5);
+    var leftRing = array_create((_radialSegments + 1) * 5);
+    
     for (var i = 0; i <= _radialSegments; i++) {
-        var angle = (i / _radialSegments) * 2 * pi;
-        var cosAngle = cos(angle);
-        var sinAngle = sin(angle);
+        var a = (i / _radialSegments) * 2 * pi;
+        var ca = cos(a), sa = sin(a);
+        var u = (ca + 1) * 0.5;
+        var v = (sa + 1) * 0.5;
         
-        // Right circle vertices (X+)
-        array_push(rightVertices, {
-            x: halfHeight,
-            y: _radius * cosAngle,
-            z: _radius * sinAngle,
-            u: (cosAngle + 1) * 0.5,
-            v: (sinAngle + 1) * 0.5
-        });
+        var idx = i * 5;
+        // Right ring (x = halfHeight)
+        rightRing[idx]     = halfHeight;
+        rightRing[idx + 1] = _radius * ca;
+        rightRing[idx + 2] = _radius * sa;
+        rightRing[idx + 3] = u;
+        rightRing[idx + 4] = v;
         
-        // Left circle vertices (X-)
-        array_push(leftVertices, {
-            x: -halfHeight,
-            y: _radius * cosAngle,
-            z: _radius * sinAngle,
-            u: (cosAngle + 1) * 0.5,
-            v: (sinAngle + 1) * 0.5
-        });
+        // Left ring (x = -halfHeight)
+        leftRing[idx]      = -halfHeight;
+        leftRing[idx + 1]  = _radius * ca;
+        leftRing[idx + 2]  = _radius * sa;
+        leftRing[idx + 3]  = u;
+        leftRing[idx + 4] = v;
     }
     
-    // Generate side faces
+    // Sides
     for (var i = 0; i < _radialSegments; i++) {
-        var i1 = i;
-        var i2 = (i + 1) % (_radialSegments + 1);
+        var idx1 = i * 5;
+        var idx2 = (i + 1) * 5;
         
-        var rightV1 = rightVertices[i1];
-        var rightV2 = rightVertices[i2];
-        var leftV1 = leftVertices[i1];
-        var leftV2 = leftVertices[i2];
+        var r1x = rightRing[idx1], r1y = rightRing[idx1+1], r1z = rightRing[idx1+2];
+        var r2x = rightRing[idx2], r2y = rightRing[idx2+1], r2z = rightRing[idx2+2];
+        var l1x = leftRing[idx1],  l1y = leftRing[idx1+1],  l1z = leftRing[idx1+2];
+        var l2x = leftRing[idx2],  l2y = leftRing[idx2+1],  l2z = leftRing[idx2+2];
         
-        // Calculate normal for side face (oriented for X-axis cylinder)
-        var centerY = (rightV1.y + leftV1.y) * 0.5;
-        var centerZ = (rightV1.z + leftV1.z) * 0.5;
-        var normalLength = sqrt(centerY * centerY + centerZ * centerZ);
-        var ny = normalLength > 0 ? centerY / normalLength : 1;
-        var nz = normalLength > 0 ? centerZ / normalLength : 0;
+        var ny = r1y, nz = r1z; // Normal for side at this segment (approx)
+        var nLen = sqrt(ny * ny + nz * nz);
+        if (nLen > 0) { ny /= nLen; nz /= nLen; }
         
-        // UV coordinates for side faces
-        var u1 = i / _radialSegments;
-        var u2 = (i + 1) / _radialSegments;
+        var u1 = i / _radialSegments, u2 = (i + 1) / _radialSegments;
         
-        // First triangle (right-top, left-top, left-bottom)
-        array_push(vertices, {
-            x: rightV1.x, y: rightV1.y, z: rightV1.z,
-            nx: 0, ny: ny, nz: nz,
-            u: u1, v: 0,
-            color: _color, alpha: _alpha
-        });
-        array_push(vertices, {
-            x: leftV1.x, y: leftV1.y, z: leftV1.z,
-            nx: 0, ny: ny, nz: nz,
-            u: u1, v: 1,
-            color: _color, alpha: _alpha
-        });
-        array_push(vertices, {
-            x: leftV2.x, y: leftV2.y, z: leftV2.z,
-            nx: 0, ny: ny, nz: nz,
-            u: u2, v: 1,
-            color: _color, alpha: _alpha
-        });
+        // Face 1
+        array_push(pos, r1x, r1y, r1z,  l1x, l1y, l1z,  l2x, l2y, l2z);
+        array_push(norm, 0, ny, nz,  0, ny, nz,  0, ny, nz);
+        array_push(uvs, u1, 0,  u1, 1,  u2, 1);
+        array_push(cols, _color, _alpha, _color, _alpha, _color, _alpha);
         
-        // Second triangle (right-top, left-bottom, right-bottom)
-        array_push(vertices, {
-            x: rightV1.x, y: rightV1.y, z: rightV1.z,
-            nx: 0, ny: ny, nz: nz,
-            u: u1, v: 0,
-            color: _color, alpha: _alpha
-        });
-        array_push(vertices, {
-            x: leftV2.x, y: leftV2.y, z: leftV2.z,
-            nx: 0, ny: ny, nz: nz,
-            u: u2, v: 1,
-            color: _color, alpha: _alpha
-        });
-        array_push(vertices, {
-            x: rightV2.x, y: rightV2.y, z: rightV2.z,
-            nx: 0, ny: ny, nz: nz,
-            u: u2, v: 0,
-            color: _color, alpha: _alpha
-        });
+        // Face 2
+        array_push(pos, r1x, r1y, r1z,  l2x, l2y, l2z,  r2x, r2y, r2z);
+        array_push(norm, 0, ny, nz,  0, ny, nz,  0, ny, nz);
+        array_push(uvs, u1, 0,  u2, 1,  u2, 0);
+        array_push(cols, _color, _alpha, _color, _alpha, _color, _alpha);
     }
     
-    // Generate right cap (X+)
-    var rightCenter = {x: halfHeight, y: 0, z: 0, u: 0.5, v: 0.5};
-    
+    // Right cap
     for (var i = 0; i < _radialSegments; i++) {
-        var i1 = i;
-        var i2 = (i + 1) % (_radialSegments + 1);
-        
-        // Right cap triangle (center, v1, v2)
-        array_push(vertices, {
-            x: rightCenter.x, y: rightCenter.y, z: rightCenter.z,
-            nx: 1, ny: 0, nz: 0,
-            u: rightCenter.u, v: rightCenter.v,
-            color: _color, alpha: _alpha
-        });
-        array_push(vertices, {
-            x: rightVertices[i1].x, y: rightVertices[i1].y, z: rightVertices[i1].z,
-            nx: 1, ny: 0, nz: 0,
-            u: rightVertices[i1].u, v: rightVertices[i1].v,
-            color: _color, alpha: _alpha
-        });
-        array_push(vertices, {
-            x: rightVertices[i2].x, y: rightVertices[i2].y, z: rightVertices[i2].z,
-            nx: 1, ny: 0, nz: 0,
-            u: rightVertices[i2].u, v: rightVertices[i2].v,
-            color: _color, alpha: _alpha
-        });
+        var idx1 = i * 5;
+        var idx2 = (i + 1) * 5;
+        array_push(pos, halfHeight, 0, 0,  rightRing[idx1], rightRing[idx1+1], rightRing[idx1+2],  rightRing[idx2], rightRing[idx2+1], rightRing[idx2+2]);
+        array_push(norm, 1, 0, 0,  1, 0, 0,  1, 0, 0);
+        array_push(uvs, 0.5, 0.5,  rightRing[idx1+3], rightRing[idx1+4],  rightRing[idx2+3], rightRing[idx2+4]);
+        array_push(cols, _color, _alpha, _color, _alpha, _color, _alpha);
     }
     
-    // Generate left cap (X-)
-    var leftCenter = {x: -halfHeight, y: 0, z: 0, u: 0.5, v: 0.5};
-    
+    // Left cap
     for (var i = 0; i < _radialSegments; i++) {
-        var i1 = i;
-        var i2 = (i + 1) % (_radialSegments + 1);
-        
-        // Left cap triangle (center, v2, v1) - reversed winding
-        array_push(vertices, {
-            x: leftCenter.x, y: leftCenter.y, z: leftCenter.z,
-            nx: -1, ny: 0, nz: 0,
-            u: leftCenter.u, v: leftCenter.v,
-            color: _color, alpha: _alpha
-        });
-        array_push(vertices, {
-            x: leftVertices[i2].x, y: leftVertices[i2].y, z: leftVertices[i2].z,
-            nx: -1, ny: 0, nz: 0,
-            u: leftVertices[i2].u, v: leftVertices[i2].v,
-            color: _color, alpha: _alpha
-        });
-        array_push(vertices, {
-            x: leftVertices[i1].x, y: leftVertices[i1].y, z: leftVertices[i1].z,
-            nx: -1, ny: 0, nz: 0,
-            u: leftVertices[i1].u, v: leftVertices[i1].v,
-            color: _color, alpha: _alpha
-        });
+        var idx1 = i * 5;
+        var idx2 = (i + 1) * 5;
+        array_push(pos, -halfHeight, 0, 0,  leftRing[idx2], leftRing[idx2+1], leftRing[idx2+2],  leftRing[idx1], leftRing[idx1+1], leftRing[idx1+2]);
+        array_push(norm, -1, 0, 0,  -1, 0, 0,  -1, 0, 0);
+        array_push(uvs, 0.5, 0.5,  leftRing[idx2+3], leftRing[idx2+4],  leftRing[idx1+3], leftRing[idx1+4]);
+        array_push(cols, _color, _alpha, _color, _alpha, _color, _alpha);
     }
     
+    self.position = pos;
+    self.normal = norm;
+    self.uv = uvs;
+    self.color = cols;
     build();
 }

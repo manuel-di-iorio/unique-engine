@@ -19,51 +19,42 @@ function UeBoxHelper(object = undefined, color = c_yellow, data = {}): UeLineSeg
         var _min = _computedBox.sizeMin;
         var _max = _computedBox.sizeMax;
         
-        // Dispose the old box and create a new one
+        // Dispose the old geometry and create a new one if needed
         if (geometry != undefined) {
             geometry.dispose();
         } 
         
-        self.geometry.vertices = [
+        self.geometry.position = [
             // Back face
-            { x: _min.x, y: _min.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 0, v: 0, color: c_white, alpha: 1 }, // 0 → 1
-            { x: _max.x, y: _min.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 1, v: 0, color: c_white, alpha: 1 },
-            
-            { x: _max.x, y: _min.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 1, v: 0, color: c_white, alpha: 1 }, // 1 → 2
-            { x: _max.x, y: _max.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 1, v: 1, color: c_white, alpha: 1 },
-            
-            { x: _max.x, y: _max.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 1, v: 1, color: c_white, alpha: 1 }, // 2 → 3
-            { x: _min.x, y: _max.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 0, v: 1, color: c_white, alpha: 1 },
-            
-            { x: _min.x, y: _max.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 0, v: 1, color: c_white, alpha: 1 }, // 3 → 0
-            { x: _min.x, y: _min.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 0, v: 0, color: c_white, alpha: 1 },
+            _min.x, _min.y, _min.z,  _max.x, _min.y, _min.z,
+            _max.x, _min.y, _min.z,  _max.x, _max.y, _min.z,
+            _max.x, _max.y, _min.z,  _min.x, _max.y, _min.z,
+            _min.x, _max.y, _min.z,  _min.x, _min.y, _min.z,
         
             // Front face
-            { x: _min.x, y: _min.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 0, v: 0, color: c_white, alpha: 1 }, // 4 → 5
-            { x: _max.x, y: _min.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 1, v: 0, color: c_white, alpha: 1 },
-        
-            { x: _max.x, y: _min.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 1, v: 0, color: c_white, alpha: 1 }, // 5 → 6
-            { x: _max.x, y: _max.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 1, v: 1, color: c_white, alpha: 1 },
-        
-            { x: _max.x, y: _max.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 1, v: 1, color: c_white, alpha: 1 }, // 6 → 7
-            { x: _min.x, y: _max.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 0, v: 1, color: c_white, alpha: 1 },
-        
-            { x: _min.x, y: _max.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 0, v: 1, color: c_white, alpha: 1 }, // 7 → 4
-            { x: _min.x, y: _min.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 0, v: 0, color: c_white, alpha: 1 },
+            _min.x, _min.y, _max.z,  _max.x, _min.y, _max.z,
+            _max.x, _min.y, _max.z,  _max.x, _max.y, _max.z,
+            _max.x, _max.y, _max.z,  _min.x, _max.y, _max.z,
+            _min.x, _max.y, _max.z,  _min.x, _min.y, _max.z,
         
             // Side edges
-            { x: _min.x, y: _min.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 0, v: 0, color: c_white, alpha: 1 }, // 0 → 4
-            { x: _min.x, y: _min.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 0, v: 0, color: c_white, alpha: 1 },
-        
-            { x: _max.x, y: _min.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 1, v: 0, color: c_white, alpha: 1 }, // 1 → 5
-            { x: _max.x, y: _min.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 1, v: 0, color: c_white, alpha: 1 },
-        
-            { x: _max.x, y: _max.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 1, v: 1, color: c_white, alpha: 1 }, // 2 → 6
-            { x: _max.x, y: _max.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 1, v: 1, color: c_white, alpha: 1 },
-        
-            { x: _min.x, y: _max.y, z: _min.z, nx: 0, ny: 0, nz: 0, u: 0, v: 1, color: c_white, alpha: 1 }, // 3 → 7
-            { x: _min.x, y: _max.y, z: _max.z, nx: 0, ny: 0, nz: 0, u: 0, v: 1, color: c_white, alpha: 1 },
+            _min.x, _min.y, _min.z,  _min.x, _min.y, _max.z,
+            _max.x, _min.y, _min.z,  _max.x, _min.y, _max.z,
+            _max.x, _max.y, _min.z,  _max.x, _max.y, _max.z,
+            _min.x, _max.y, _min.z,  _min.x, _max.y, _max.z
         ];
+
+        // Initialize other attributes with default values
+        var count = array_length(self.geometry.position) / 3;
+        self.geometry.normal = array_create(count * 3, 0);
+        self.geometry.uv = array_create(count * 2, 0);
+        
+        var colArr = array_create(count * 2);
+        for (var i = 0; i < count; i++) {
+            colArr[i * 2] = c_white;
+            colArr[i * 2 + 1] = 1;
+        }
+        self.geometry.color = colArr;
 
         self.geometry.build();
         self.needsUpdate = false;        

@@ -461,6 +461,21 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return arr;
     }
 
+    /// Converts the vector to a JSON representation (struct).
+    static toJSON = function() {
+        gml_pragma("forceinline");
+        return { x: self.x, y: self.y, z: self.z };
+    }
+
+    /// Loads the vector from a JSON representation (struct or array).
+    static fromJSON = function(data) {
+        gml_pragma("forceinline");
+        self.x = data[$ "x"] ?? 0;
+        self.y = data[$ "y"] ?? 0;
+        self.z = data[$ "z"] ?? 0;
+        return self;
+    }
+
     /// Sets random values in the [0, 1) range.
     static random = function() {
         gml_pragma("forceinline");
@@ -606,8 +621,22 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
     
+    // Rotate around the specified axis by the angle (degrees)
     static applyEuler = function(x, y, z) {
-        
+        gml_pragma("forceinline");
+        var xx = self.x, yy = self.y, zz = self.z;
+        var ax = x.x, ay = x.y, az = x.z;
+    
+        var cosA = dcos(angle);
+        var sinA = dsin(angle);
+        var t = 1 - cosA;
+    
+        // Rodrigues' rotation formula
+        self.x = (t * ax * ax + cosA) * xx + (t * ax * ay - sinA * az) * yy + (t * ax * az + sinA * ay) * zz;
+        self.y = (t * ax * ay + sinA * az) * xx + (t * ay * ay + cosA) * yy + (t * ay * az - sinA * ax) * zz;
+        self.z = (t * ax * az - sinA * ay) * xx + (t * ay * az + sinA * ax) * yy + (t * az * az + cosA) * zz;
+    
+        return self;
     }
 }
 

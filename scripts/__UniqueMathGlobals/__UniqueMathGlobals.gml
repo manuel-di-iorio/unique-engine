@@ -2,7 +2,7 @@
 global.UE_OBJECT3D_DEFAULT_UP = new UeVector3(0, 0, -1);
 global.UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE = true;
 global.UE_OBJECT3D_DEFAULT_MATRIX_WORLD_AUTO_UPDATE = true;
-#macro UE_VECTOR3_ZERO new UeVector3(0, 0, 0)
+#macro UE_VECTOR3_ZERO new UeVector3()
 
 #macro UE_EPSILON 0.00001
 global.UE_DUMMY_VECTOR3 = new UeVector3();

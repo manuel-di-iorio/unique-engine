@@ -7,83 +7,53 @@ function UePyramidGeometry(data = {}): UeGeometry(data) constructor {
     var h = _height;
     var base = _base * 0.5;
 
-    // Base points
-    var v0 = [-base, -base, 0]; // bottom-left
-    var v1 = [ base, -base, 0]; // bottom-right
-    var v2 = [ base,  base, 0]; // top-right
-    var v3 = [-base,  base, 0]; // top-left
-
+    // Corner points
+    var v0 = [-base, -base, 0];
+    var v1 = [ base, -base, 0];
+    var v2 = [ base,  base, 0];
+    var v3 = [-base,  base, 0];
     var top = [0, 0, h];
 
-    // Invertito ordine per winding CCW guardando dal basso (normale verso -Z)
-    var baseTris = [
-        [v2, v1, v0], // triangle 1
-        [v0, v3, v2]  // triangle 2
-    ];
+    var _pos = [], _norm = [], _uvs = [], _colArr = [];
 
-    var uvBase = [
-        [1, 1], [1, 0], [0, 0],
-        [0, 0], [0, 1], [1, 1]
-    ];
+    // Base triangles
+    var baseTris = [ [v2, v1, v0], [v0, v3, v2] ];
+    var uvBase = [ [1, 1], [1, 0], [0, 0],  [0, 0], [0, 1], [1, 1] ];
 
-    // Base (normali = -Z)
-    for (var i = 0, len = array_length(baseTris); i < len; i++) {
+    for (var i = 0; i < 2; i++) {
         var tri = baseTris[i];
         for (var j = 0; j < 3; j++) {
-            var p = tri[j];
-            var uv = uvBase[i * 3 + j];
-            array_push(vertices, {
-                x: p[0],
-                y: p[1],
-                z: p[2],
-                nx: 0,
-                ny: 0,
-                nz: -1,
-                u: uv[0],
-                v: uv[1],
-                color: _color,
-                alpha: _alpha,
-                custom: {}
-            });
+            var p = tri[j], uv = uvBase[i * 3 + j];
+            array_push(_pos, p[0], p[1], p[2]);
+            array_push(_norm, 0, 0, -1);
+            array_push(_uvs, uv[0], uv[1]);
+            array_push(_colArr, _color, _alpha);
         }
     }
 
-    // Side triangles con ordine invertito per winding CCW (normale verso l'esterno)
-    var sideTris = [
-        [v1, v0, top],
-        [v2, v1, top],
-        [v3, v2, top],
-        [v0, v3, top]
-    ];
+    // Side triangles
+    var sideTris = [ [v1, v0, top], [v2, v1, top], [v3, v2, top], [v0, v3, top] ];
+    var uvSide = [ [1, 0], [0, 0], [0.5, 1] ];
 
-    var uvSide = [
-        [1, 0], [0, 0], [0.5, 1]
-    ];
-
-    for (var i = 0, len = array_length(sideTris); i < len; i++) {
+    for (var i = 0; i < 4; i++) {
         var tri = sideTris[i];
         var a = tri[0], b = tri[1], c = tri[2];
         var ab = new UeVector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
         var ac = new UeVector3(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
-        var normal = ac.cross(ab).normalize();
+        var n = ac.cross(ab).normalize();
 
         for (var j = 0; j < 3; j++) {
-            var p = tri[j];
-            var uv = uvSide[j];
-            array_push(vertices, {
-                x: p[0],
-                y: p[1],
-                z: p[2],
-                nx: normal.x,
-                ny: normal.y,
-                nz: normal.z,
-                u: uv[0],
-                v: uv[1],
-                color: _color,
-                alpha: _alpha
-            });
+            var p = tri[j], uv = uvSide[j];
+            array_push(_pos, p[0], p[1], p[2]);
+            array_push(_norm, n.x, n.y, n.z);
+            array_push(_uvs, uv[0], uv[1]);
+            array_push(_colArr, _color, _alpha);
         }
     }
     
+    self.position = _pos;
+    self.normal = _norm;
+    self.uv = _uvs;
+    self.color = _colArr;
     build();
 }

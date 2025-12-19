@@ -106,12 +106,12 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         var hitPrecise = false;
         var MIN_DIST = infinity;
         
-        if (raycaster.params.Mesh[$ "precise"] && geometry && array_length(geometry.vertices) > 0) {
+        if (raycaster.params.Mesh[$ "precise"] && geometry && geometry.position != undefined) {
             
-            var verts = geometry.vertices;
+            var verts = geometry.position;
             var indices = geometry.index;
             var hasIndices = is_array(indices) && array_length(indices) > 0;
-            var len = hasIndices ? array_length(indices) : array_length(verts);
+            var len = hasIndices ? array_length(indices) : (array_length(verts) / 3);
             var EPSILON = 0.000001;
             
             // Intersection calculation variables (reused globals)
@@ -138,14 +138,11 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                  var i1 = hasIndices ? indices[i+1] : i+1;
                  var i2 = hasIndices ? indices[i+2] : i+2;
                  
-                 var v0d = verts[i0];
-                 var v1d = verts[i1];
-                 var v2d = verts[i2];
+                 var i0_3 = i0 * 3, i1_3 = i1 * 3, i2_3 = i2 * 3;
                  
-                 // Get vertex positions directly
-                 var v0x = v0d.x, v0y = v0d.y, v0z = v0d.z;
-                 var v1x = v1d.x, v1y = v1d.y, v1z = v1d.z;
-                 var v2x = v2d.x, v2y = v2d.y, v2z = v2d.z;
+                 var v0x = verts[i0_3], v0y = verts[i0_3+1], v0z = verts[i0_3+2];
+                 var v1x = verts[i1_3], v1y = verts[i1_3+1], v1z = verts[i1_3+2];
+                 var v2x = verts[i2_3], v2y = verts[i2_3+1], v2z = verts[i2_3+2];
 
                  // edge1 = v1 - v0
                  var e1x = v1x - v0x;
