@@ -124,7 +124,7 @@ function ProjectSaver() constructor {
         var assets = []; // List of asset objects to save in assets.json
         var folders = {}; // Folders map
 
-        // Get all assets from AssetManager (now a flat array)
+        // Get all assets from AssetManager
         var am = oSceneEditor.assetManager;
         var allAssets = am.assets;
         

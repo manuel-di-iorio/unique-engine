@@ -25,13 +25,14 @@ function UeBufferGeometry(data = {}) constructor {
         
         var useIndex = is_array(index);             // Check if geometry uses indexed vertices
         var ilen = array_length(useIndex ? index : vertices);
-        
+        var alen = array_length(attrs);
+
         // Iterate through vertices or indices
         for (var i = 0; i < ilen; i++) {
             var vertex = vertices[useIndex ? index[i] : i];
             
             // Add vertex attributes based on format
-            for (var a = 0, alen = array_length(attrs); a < alen; a++) {
+            for (var a = 0; a < alen; a++) {
                 var attr = attrs[a];
                 
                 switch (attr.kind) {
