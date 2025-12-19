@@ -42,33 +42,33 @@ var format = new UeVertexFormat().position().normal().uv().color().build();
 
 **Step 2: Create Geometry**
 ```js
-var vertices = [
-    {
-        x: -0.5, y: -0.5, z: 0,
-        nx: 0, ny: 0, nz: 1,
-        u: 0, v: 0,
-        color: c_white,
-        alpha: 1
-    },
-    {
-        x: 0.5, y: -0.5, z: 0,
-        nx: 0, ny: 0, nz: 1,
-        u: 1, v: 0,
-        color: c_white,
-        alpha: 1
-    },
-    {
-        x: 0.0, y: 0.5, z: 0,
-        nx: 0, ny: 0, nz: 1,
-        u: 0.5, v: 1,
-        color: c_white,
-        alpha: 1
-    }
+var position = [
+    -0.5, -0.5, 0,
+     0.5, -0.5, 0,
+     0.0,  0.5, 0
 ];
 
-var geometry = new UeGeometry({ vertices, format });
+var normal = [
+    0, 0, 1,
+    0, 0, 1,
+    0, 0, 1
+];
+
+var uv = [
+    0, 0,
+    1, 0,
+    0.5, 1
+];
+
+var color = [
+    c_white, 1,
+    c_white, 1,
+    c_white, 1
+];
+
+var geometry = new UeGeometry({ position, normal, uv, color, format });
 ```
-🧠 The geometries also support custom attributes defined in the format.
+🧠 The geometries also support custom attributes defined in the format by passing them as flat arrays.
 
 ## 🎨 Adding a Material
 
