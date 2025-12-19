@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-The `UeVertexFormat` class defines the layout of vertex data for a `UeBufferGeometry`. It acts as a chainable builder for setting attributes like position, normal, UV, color, and custom fields.
+The `UeVertexFormat` class defines the layout of vertex data for a `UeGeometry`. It acts as a chainable builder for setting attributes like position, normal, UV, color, and custom fields.
 
 ### Constructor
 

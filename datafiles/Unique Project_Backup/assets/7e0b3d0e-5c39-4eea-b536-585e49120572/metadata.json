@@ -14,7 +14,7 @@
       }
     },
     "name":null,
-    "type":"BufferGeometry",
+    "type":"Geometry",
     "boundingSphere":{
       "radius":223.7533160635752,
       "center":{

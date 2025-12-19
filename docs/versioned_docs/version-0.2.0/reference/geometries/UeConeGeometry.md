@@ -16,7 +16,7 @@ This geometry is typically used for debugging or visualization of directions, su
 new UeConeGeometry(radius = 1, height = 1, radialSegments = 32, data = {})
 ```
 
-> Inherits from [UeBufferGeometry](/docs/reference/core/UeBufferGeometry)
+> Inherits from [UeGeometry](/docs/reference/core/UeGeometry)
 
 ## Constructor parameters
 

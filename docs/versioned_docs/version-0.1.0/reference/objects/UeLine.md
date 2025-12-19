@@ -16,7 +16,7 @@ new UeLine(geometry = undefined, material = undefined, data = {})
 
 | Name     | Type                  | Default                     | Description                          |
 | -------- | --------------------- | --------------------------- | ------------------------------------ |
-| geometry | `UeBufferGeometry`    | `new UeBufferGeometry()`    | Geometry defining the line vertices  |
+| geometry | `UeGeometry`    | `new UeGeometry()`    | Geometry defining the line vertices  |
 | material | `UeLineBasicMaterial` | `new UeLineBasicMaterial()` | Material used to render the line     |
 | data     | `Object`              | `{}`                        | Additional data passed to base class |
 
@@ -27,7 +27,7 @@ new UeLine(geometry = undefined, material = undefined, data = {})
 | ----------- | --------------------- | ---------------------------------------------------------- |
 | `isLine`    | `boolean`             | Flag identifying this as a line primitive                  |
 | `primitive` | `string`              | Primitive type, here `"pr_linestrip"` for continuous lines |
-| `geometry`  | `UeBufferGeometry`    | Geometry data for line vertices                            |
+| `geometry`  | `UeGeometry`    | Geometry data for line vertices                            |
 | `material`  | `UeLineBasicMaterial` | Material used for rendering the line                       |
 
 ## Methods

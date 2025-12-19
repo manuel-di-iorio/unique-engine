@@ -1,4 +1,4 @@
-function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeBufferGeometry(data) constructor {
+function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeGeometry(data) constructor {
     var _width  = width ?? 1;
     var _height = height ?? 1;
     var _depth  = depth ?? 1;

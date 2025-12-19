@@ -98,6 +98,10 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             instance.frustumCulled = data.frustumCulled;
         }
         
+        // Initialize editor-specific rotation tracker
+        instance.__rotationEuler = new UeEuler();
+        instance.__rotationEuler.setFromQuaternion(instance.rotation);
+        
         instance.updateMatrix();
         
         // Recursively load children (submeshes)

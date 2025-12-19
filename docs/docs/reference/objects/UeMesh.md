@@ -23,7 +23,7 @@ new UeMesh(geometry, material = UeMeshStandardMaterial(), data = {})
 | ----------- | ---------          | -------                    | -----------------------------------   |
 | `isMesh`    | `boolean`          | `true`                     | Identifies this object as a mesh      |
 | `type`      | `string`           | `"Mesh"`                   | Object type                           |
-| `geometry`  | `UeBufferGeometry` | **required**               | The geometry (vertex data)            |
+| `geometry`  | `UeGeometry` | **required**               | The geometry (vertex data)            |
 | `material`  | `UeMaterial`       | `UeMeshStandardMaterial()` | The material to use                   |
 | `primitive` | `number`           | `pr_trianglelist`          | GPU primitive mode                    |
 | `name`      | `string`           | ""                         | Object name (empty string by default) |

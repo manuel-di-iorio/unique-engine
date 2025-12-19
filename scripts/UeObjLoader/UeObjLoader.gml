@@ -58,7 +58,7 @@ function UeObjLoader() constructor {
     
         // Prepara la nuova mesh
         currentMesh = new UeMesh();
-        currentMesh.geometry = new UeBufferGeometry({ canFreeze: false });
+        currentMesh.geometry = new UeGeometry({ canFreeze: false });
         currentVb = vertex_create_buffer();
         currentMesh.geometry.vb = currentVb;
         vertex_begin(currentVb, currentMesh.geometry.format.vf); 

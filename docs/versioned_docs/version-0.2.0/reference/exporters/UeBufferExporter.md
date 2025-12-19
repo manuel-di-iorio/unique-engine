@@ -58,7 +58,7 @@ The exporter works in two phases:
 
 **Supported Object Types**
 
-- `BufferGeometry` - Includes vertex format compilation
+- `Geometry` - Includes vertex format compilation
 - `Material` - Includes all associated textures
 - `Mesh` - Includes geometry and material dependencies
 - All `UeObject3D` descendants with children

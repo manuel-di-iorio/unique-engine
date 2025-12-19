@@ -16,7 +16,7 @@ new UeLineSegments(geometry = undefined, material = undefined, data = {})
 
 | Name     | Type                  | Default     | Description                               |
 | -------- | --------------------- | ----------- | ----------------------------------------- |
-| geometry | `UeBufferGeometry`    | `undefined` | Geometry defining line segment vertices   |
+| geometry | `UeGeometry`    | `undefined` | Geometry defining line segment vertices   |
 | material | `UeLineBasicMaterial` | `undefined` | Material used to render the line segments |
 | data     | `Object`              | `{}`        | Additional data passed to base class      |
 

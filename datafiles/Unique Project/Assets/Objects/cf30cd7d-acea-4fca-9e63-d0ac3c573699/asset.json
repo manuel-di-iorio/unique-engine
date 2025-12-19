@@ -31,7 +31,7 @@
       "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250"
     },
     "uuid":"ef53f216-1486-4c37-8d9a-af92237dd5bc",
-    "type":"BufferGeometry",
+    "type":"Geometry",
     "boundingBox":{
       "min":{
         "x":-76.957633972167969,

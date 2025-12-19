@@ -6,4 +6,4 @@ import Geometry from '@site/static/img/geometries/sphere.jpeg';
 
 <img src={Geometry} width="250" />
 
-> Inherits from [UeBufferGeometry](/docs/reference/core/UeBufferGeometry)
+> Inherits from [UeGeometry](/docs/reference/core/UeGeometry)

@@ -1,4 +1,4 @@
-function UeCircleGeometry(radius = 1, data = {}): UeBufferGeometry(data) constructor {
+function UeCircleGeometry(radius = 1, data = {}): UeGeometry(data) constructor {
     var _segments = max(3, data[$ "segments"] ?? 32);
     var _color    = data[$ "color"] ?? c_white;
     var _alpha    = data[$ "alpha"] ?? 1;

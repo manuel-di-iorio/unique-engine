@@ -1,4 +1,4 @@
-function UePlaneGeometry(width = 1, height = 1, data = {}): UeBufferGeometry(data) constructor {
+function UePlaneGeometry(width = 1, height = 1, data = {}): UeGeometry(data) constructor {
     var color = data[$ "color"] ?? c_white;
     var alpha = data[$ "alpha"] ?? 1;
     var halfW = width * 0.5;

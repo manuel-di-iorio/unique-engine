@@ -471,7 +471,7 @@ function UeTransformControls(camera, data = {}) : UeControls(data) constructor {
          geoHandle.applyMatrix(mat);
          
          // Merge
-         var geoMerged = new UeBufferGeometry().merge([geoShaft, geoHandle]);
+         var geoMerged = new UeGeometry().merge([geoShaft, geoHandle]);
          geoMerged.computeBoundingBox();
          
          // Cleanup intermediate geometries

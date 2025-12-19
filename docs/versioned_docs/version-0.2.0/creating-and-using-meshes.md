@@ -33,7 +33,7 @@ You can instantiate them with relevant parameters (e.g., radius, width, height),
 
 ## 🛠️ Creating Custom Geometry
 
-If you want full control, create a `UeBufferGeometry` with a custom `UeVertexFormat`. In this example, we are going to create a triangle geometry:
+If you want full control, create a `UeGeometry` with a custom `UeVertexFormat`. In this example, we are going to create a triangle geometry:
 
 **Step 1: Define Vertex Format (optional)**
 ```js
@@ -66,7 +66,7 @@ var vertices = [
     }
 ];
 
-var geometry = new UeBufferGeometry({ vertices, format });
+var geometry = new UeGeometry({ vertices, format });
 ```
 🧠 The geometries also support custom attributes defined in the format.
 

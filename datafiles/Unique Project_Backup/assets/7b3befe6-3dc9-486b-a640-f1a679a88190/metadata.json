@@ -43,7 +43,7 @@
       "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250"
     },
     "uuid":"79772f8b-0856-43d4-98d5-2260b7b2ddf9",
-    "type":"BufferGeometry"
+    "type":"Geometry"
   },
   "frustumCulled":true,
   "ex":0.0,

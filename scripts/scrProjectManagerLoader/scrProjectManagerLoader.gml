@@ -271,6 +271,14 @@ function ProjectLoader() constructor {
         var scene = scenes[i];
         if (struct_exists(scene, "__metadata") && scene.__metadata != undefined) {
             scene.fromJSON(scene.__metadata, objectsByUUID);
+            
+            // Build treeview children for the scene
+            var treeview = global.UI.Main.Assets.Treeview;
+            var sceneItem = self.treeviewItemsByUUID[$ scene.uuid];
+            if (sceneItem != undefined) {
+                self.__buildTreeviewForScene(scene, sceneItem, treeview);
+            }
+
             delete scene.__metadata;
         }
     }
@@ -300,6 +308,41 @@ function ProjectLoader() constructor {
           case "Camera": return "Objects";
       }
       return "Objects";
+  };
+
+  self.__buildTreeviewForScene = function(scene, sceneItem, treeview) {
+      for (var i = 0; i < array_length(scene.children); i++) {
+          var child = scene.children[i];
+          if (child[$ "type"] == "ModelInstance") {
+              self.__buildTreeviewForInstance(child, sceneItem, treeview);
+          }
+      }
+  };
+
+  self.__buildTreeviewForInstance = function(instance, parentItem, treeview) {
+      if (instance == undefined) return;
+      
+      var icon = self.__iconForType(instance.type);
+      var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item" }, {
+          treeview: treeview,
+          assetType: instance.type,
+          type: instance.type,
+          icon: icon,
+          asset: instance
+      });
+      
+      parentItem.addChild(tvItem, false);
+      
+      // Register with asset manager to enable selection and tracking
+      oSceneEditor.assetManager.addAsset(instance.type, instance);
+      
+      // Recursively add children
+      for (var i = 0; i < array_length(instance.children); i++) {
+          var child = instance.children[i];
+          if (child[$ "type"] == "ModelInstance") {
+              self.__buildTreeviewForInstance(child, tvItem, treeview);
+          }
+      }
   };
 
   self.__createAssetFromNode = function(projectDir, node) {
@@ -339,7 +382,7 @@ function ProjectLoader() constructor {
         var geometryPath = assetDir + "geometry.buf";
 
         if (file_exists(geometryPath)) {
-          var geometry = new UeBufferGeometry({ canFreeze: true });
+          var geometry = new UeGeometry({ canFreeze: true });
           geometry.import(geometryPath);
           geometry.__vbClone = geometry.cloneVb();
           geometry.freeze();

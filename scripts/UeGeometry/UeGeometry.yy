@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeBufferGeometry",
+  "%Name":"UeGeometry",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeBufferGeometry",
+  "name":"UeGeometry",
   "parent":{
     "name":"Core",
     "path":"folders/Unique Engine/Core.yy",

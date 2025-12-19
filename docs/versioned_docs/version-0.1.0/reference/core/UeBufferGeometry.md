@@ -2,13 +2,13 @@
 sidebar_position: 3
 ---
 
-A geometry class representing a buffer geometry, optimized for GPU rendering.  
+A geometry class representing a geometry, optimized for GPU rendering.  
 Manages vertex data, index buffers, and provides methods to build, freeze, and dispose the vertex buffer.  
 Includes support for bounding volumes (bounding box and bounding sphere).
 
 ### Constructor
 ```js
-new UeBufferGeometry(data = {})
+new UeGeometry(data = {})
 ```
 
 ### Data parameters
@@ -26,8 +26,8 @@ new UeBufferGeometry(data = {})
 
 | Property           | Type                   | Description                                                 |
 | ------------------ | ---------------------- | ----------------------------------------------------------- |
-| `isBufferGeometry` | `boolean`              | Flag indicating this is a buffer geometry                   |
-| `type`             | `string`               | Type identifier `"BufferGeometry"`                          |
+| `isGeometry` | `boolean`              | Flag indicating this is a geometry                   |
+| `type`             | `string`               | Type identifier `"Geometry"`                          |
 | `uuid`             | `string`               | Unique identifier                                           |
 | `name`             | `string`               | Optional name                                               |
 | `vertices`         | `Array`                | Vertex data array                                           |

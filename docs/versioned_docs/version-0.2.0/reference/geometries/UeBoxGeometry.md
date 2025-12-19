@@ -8,4 +8,4 @@ import Geometry from '@site/static/img/geometries/box.png';
 
 Can be used also for parallelepipeds 
 
-> Inherits from [UeBufferGeometry](/docs/reference/core/UeBufferGeometry)
+> Inherits from [UeGeometry](/docs/reference/core/UeGeometry)

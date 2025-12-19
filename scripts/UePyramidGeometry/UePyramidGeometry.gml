@@ -1,4 +1,4 @@
-function UePyramidGeometry(data = {}): UeBufferGeometry(data) constructor {
+function UePyramidGeometry(data = {}): UeGeometry(data) constructor {
     var _base   = data[$ "base"]   ?? 100;
     var _height = data[$ "height"] ?? 100;
     var _color  = data[$ "color"]  ?? c_white;

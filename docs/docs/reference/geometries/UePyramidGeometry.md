@@ -6,4 +6,4 @@ import Geometry from '@site/static/img/geometries/pyramid.png';
 
 <img src={Geometry} width="400" />
 
-> Inherits from [UeBufferGeometry](/docs/reference/core/UeBufferGeometry)
+> Inherits from [UeGeometry](/docs/reference/core/UeGeometry)

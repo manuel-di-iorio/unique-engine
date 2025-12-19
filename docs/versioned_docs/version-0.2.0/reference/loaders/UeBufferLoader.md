@@ -60,7 +60,7 @@ The loader works in three phases:
 
 1. **Buffer Reading Phase** - Sequentially reads and parses objects from the buffer:
    - `VertexFormat` - Vertex layout definitions
-   - `BufferGeometry` - Geometry data with vertex buffers
+   - `Geometry` - Geometry data with vertex buffers
    - `Texture` - Image data and sampler settings
    - `Material` - Shader properties and texture references
    - `Mesh` - Scene graph nodes with transform data
@@ -80,7 +80,7 @@ The loader works in three phases:
 
 The internal cache stores objects during loading:
 - `formats` - Vertex format objects
-- `geometries` - Buffer geometry objects  
+- `geometries` - Geometry objects  
 - `textures` - Texture objects
 - `materials` - Material objects
 - `meshesFlat` - Flat array of all meshes

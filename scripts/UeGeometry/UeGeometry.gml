@@ -1,6 +1,6 @@
-function UeBufferGeometry(data = {}) constructor {
-    isBufferGeometry = true;                     // Flag to identify this as a buffer geometry
-    type = "BufferGeometry";                      // Type identifier string
+function UeGeometry(data = {}) constructor {
+    isGeometry = true;                            // Flag to identify this as a geometry
+    type = "Geometry";                            // Type identifier string
     uuid = ueUuid();                              // Unique identifier for this geometry instance
     name = data[$ "name"] ?? undefined;           // Optional name for the geometry
     vertices = data[$ "vertices"] ?? [];          // Array of vertex data
@@ -256,8 +256,8 @@ function UeBufferGeometry(data = {}) constructor {
 
     /**
      * Merges an array of geometries into a single new geometry.
-     * @param {Array<Struct.UeBufferGeometry>} geometries
-     * @returns {Struct.UeBufferGeometry}
+     * @param {Array<Struct.UeGeometry>} geometries
+     * @returns {Struct.UeGeometry}
      */
     function merge(geometries) {
         gml_pragma("forceinline");
@@ -280,7 +280,7 @@ function UeBufferGeometry(data = {}) constructor {
             }
         }
         
-        return new UeBufferGeometry({ vertices: mergedVertices });
+        return new UeGeometry({ vertices: mergedVertices });
     }
 
     // Auto-build vertex buffer if vertices are provided

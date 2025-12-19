@@ -39,7 +39,7 @@ function UeBufferExporter() constructor {
         }
         
         switch (obj.type) {
-            case "BufferGeometry": 
+            case "Geometry": 
                 _compileObject(obj.format, compilation); 
                 break;
             

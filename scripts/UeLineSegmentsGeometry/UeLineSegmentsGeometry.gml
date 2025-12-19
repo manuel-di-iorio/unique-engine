@@ -1,4 +1,4 @@
-function UeLineSegmentsGeometry(data = {}): UeBufferGeometry(data) constructor {
+function UeLineSegmentsGeometry(data = {}): UeGeometry(data) constructor {
     // Set default color and alpha
     color = data[$ "color"] ?? c_white;
     alpha = data[$ "alpha"] ?? 1;

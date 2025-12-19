@@ -1,4 +1,4 @@
-function UeCylinderGeometry(radius = 1, height = 1, radialSegments = 32, data = {}): UeBufferGeometry(data) constructor {
+function UeCylinderGeometry(radius = 1, height = 1, radialSegments = 32, data = {}): UeGeometry(data) constructor {
     var _radius = radius ?? 1;
     var _height = height ?? 1;
     var _radialSegments = radialSegments ?? 32;

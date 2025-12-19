@@ -1,4 +1,4 @@
-function UeLineGeometry(data = {}): UeBufferGeometry(data) constructor {
+function UeLineGeometry(data = {}): UeGeometry(data) constructor {
     color = data[$ "color"] ?? c_white;          // Default line color
     alpha = data[$ "alpha"] ?? 1;                // Default line alpha
 

@@ -7,7 +7,7 @@
  * When rendered with identity matrices, this quad covers the entire screen,
  * making it perfect for fullscreen post-processing effects.
  */
-function UeQuadGeometry(data = {}): UeBufferGeometry(data) constructor {
+function UeQuadGeometry(data = {}): UeGeometry(data) constructor {
     type = "QuadGeometry";
     
     // This is lighter than the default format (no normals/color needed for fullscreen quad)

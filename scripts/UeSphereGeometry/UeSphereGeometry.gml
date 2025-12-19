@@ -1,4 +1,4 @@
-function UeSphereGeometry(_radius = 40, data = {}): UeBufferGeometry(data) constructor {
+function UeSphereGeometry(_radius = 40, data = {}): UeGeometry(data) constructor {
     var _lats   = data[$ "lats"]   ?? 20;
     var _lons   = data[$ "lons"]   ?? 20;
     var _color  = data[$ "color"]  ?? c_white;

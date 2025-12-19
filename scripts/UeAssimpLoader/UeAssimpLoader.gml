@@ -154,7 +154,7 @@ function UeAssimpLoader(data = {}) constructor {
 
   function _addMeshes(materials) {
     gml_pragma("forceinline");
-    var model = new UeMesh(new UeBufferGeometry({ canFreeze: false }));
+    var model = new UeMesh(new UeGeometry({ canFreeze: false }));
 
     var meshesCount = ASSIMP_GetMeshNum();
     var meshes = array_create(meshesCount);
@@ -175,7 +175,7 @@ function UeAssimpLoader(data = {}) constructor {
 
   function _buildMesh() {
     gml_pragma("forceinline");
-    var mesh = new UeMesh(new UeBufferGeometry({ canFreeze: false }));
+    var mesh = new UeMesh(new UeGeometry({ canFreeze: false }));
     mesh.name = ASSIMP_GetMeshName();
     var geometry = mesh.geometry;
     var vb = vertex_create_buffer();

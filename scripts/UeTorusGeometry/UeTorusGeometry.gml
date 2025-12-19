@@ -2,7 +2,7 @@
 /// @param {real} radius Major radius of the torus (distance from center to tube center), default 40
 /// @param {real} tubeRadius Minor radius (tube thickness), default 10
 /// @param {struct} data Optional configuration: {radialSegments, tubularSegments, color, alpha}
-function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeBufferGeometry(data) constructor {
+function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(data) constructor {
     var _radius = radius ?? 40;
     var _tubeRadius = tubeRadius ?? 10;
     var _radialSegments = data[$ "radialSegments"] ?? 16; // Segments around the tube

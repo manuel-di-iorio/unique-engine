@@ -62,7 +62,7 @@ function UeBufferLoader() constructor {
       
         switch (obj.type) {
             case "VertexFormat": _readTypeFormat(obj, buffer); break;
-            case "BufferGeometry": _readTypeGeometry(obj, buffer); break;
+            case "Geometry": _readTypeGeometry(obj, buffer); break;
             case "Texture": _readTypeTexture(obj, buffer); break;
             case "Material": _readTypeMaterial(obj, buffer); break;
             case "Mesh": _readTypeMesh(obj, buffer); break;
@@ -87,7 +87,7 @@ function UeBufferLoader() constructor {
     
     function _readTypeGeometry(obj, buffer) {
         gml_pragma("forceinline");
-        var geometry = new UeBufferGeometry();
+        var geometry = new UeGeometry();
         geometry.uuid = obj.uuid;
         
         var name = obj[$ "name"];

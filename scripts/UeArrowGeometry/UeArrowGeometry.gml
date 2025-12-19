@@ -1,4 +1,4 @@
-function UeArrowGeometry(radius = 1, height = 1, radialSegments = 32, arrowSize = undefined, data = {}): UeBufferGeometry(data) constructor {
+function UeArrowGeometry(radius = 1, height = 1, radialSegments = 32, arrowSize = undefined, data = {}): UeGeometry(data) constructor {
     var _radius = radius ?? 1;
     var _height = height ?? 1;
     var _radialSegments = radialSegments ?? 32;

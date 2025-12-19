@@ -228,7 +228,7 @@ function UeProjectLoader(data = {}) constructor {
                 var geoPath = assetDir + "geometry.buf";
                 
                 if (file_exists(geoPath)) {
-                    var geo = new UeBufferGeometry();
+                    var geo = new UeGeometry();
                     geo.import(geoPath);
                     asset.geometry = geo;
                 }

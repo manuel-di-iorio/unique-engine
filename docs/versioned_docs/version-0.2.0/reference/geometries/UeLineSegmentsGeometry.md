@@ -14,7 +14,7 @@ Represents a series of individual line segments, each defined by a pair of 3D po
 new UeLineSegmentsGeometry(data = {})
 ```
 
-> Inherits from [UeBufferGeometry](/docs/reference/core/UeBufferGeometry)
+> Inherits from [UeGeometry](/docs/reference/core/UeGeometry)
 
 ### Data properties
 
