@@ -13,7 +13,7 @@ function UeSphere(center = undefined, radius = -1) constructor {
     }
 
     /// Sets the sphere from an array of points and optional center.
-    /// Supports a flat array of numbers [x0,y0,z0, ...].
+    /// Supports an array of UeVector3
     static setFromPoints = function(points, optionalCenter = undefined) {
         gml_pragma("forceinline");
         var n = array_length(points);
@@ -27,8 +27,34 @@ function UeSphere(center = undefined, radius = -1) constructor {
         }
 
         self.radius = 0;
-        for (var i = 0; i < n; i += 3) {
-            var px = points[i], py = points[i+1], pz = points[i+2];
+        
+        // Array of Vector3
+        for (var i = 0; i < n; i++) {
+            var p = points[i];
+            var dx = p.x - self.center.x, dy = p.y - self.center.y, dz = p.z - self.center.z;
+            var distSq = dx*dx + dy*dy + dz*dz;
+            self.radius = max(self.radius, sqrt(distSq));
+        }
+
+        return self;
+    }
+
+    /// Sets the sphere from a flat array of positions (like BufferAttribute).
+    /// Supports a flat array of numbers [x0,y0,z0,x1,y1,z1, ...] with optional offset.
+    static setFromBufferAttribute = function(buffer, offset = 0) {
+        gml_pragma("forceinline");
+        var n = array_length(buffer);
+        if (n == 0 || offset >= n) return self;
+
+        // First pass: compute bounding box to get center
+        var box = new UeBox3().setFromBufferAttribute(buffer, offset);
+        box.getCenter(self.center);
+
+        // Second pass: compute radius
+        self.radius = 0;
+        for (var i = offset; i < n; i += 3) {
+            if (i + 2 >= n) break;
+            var px = buffer[i], py = buffer[i + 1], pz = buffer[i + 2];
             var dx = px - self.center.x, dy = py - self.center.y, dz = pz - self.center.z;
             var distSq = dx*dx + dy*dy + dz*dz;
             self.radius = max(self.radius, sqrt(distSq));
@@ -66,27 +92,32 @@ function UeSphere(center = undefined, radius = -1) constructor {
     }
 
     /// Expands the sphere to include the given point.
-    /// Point can be an array [x,y,z].
+    /// Point must be a UeVector3.
     static expandByPoint = function(point) {
         gml_pragma("forceinline");
-        var dx = point[0] - self.center.x, dy = point[1] - self.center.y, dz = point[2] - self.center.z;
-        self.radius = max(self.radius, sqrt(dx*dx + dy*dy + dz*dz));
+        if (isEmpty()) {
+            self.center.copy(point);
+            self.radius = 0;
+        } else {
+            var dx = point.x - self.center.x, dy = point.y - self.center.y, dz = point.z - self.center.z;
+            self.radius = max(self.radius, sqrt(dx*dx + dy*dy + dz*dz));
+        }
         return self;
     }
 
     /// Checks if the sphere contains a point.
-    /// Point can be an array [x,y,z].
+    /// Point must be a UeVector3.
     static containsPoint = function(point) {
         gml_pragma("forceinline");
-        var dx = point[0] - self.center.x, dy = point[1] - self.center.y, dz = point[2] - self.center.z;
+        var dx = point.x - self.center.x, dy = point.y - self.center.y, dz = point.z - self.center.z;
         return (dx*dx + dy*dy + dz*dz) <= (self.radius * self.radius);
     }
 
     /// Returns the distance from the sphere boundary to a point.
-    /// Point can be an array [x,y,z].
+    /// Point must be a UeVector3.
     static distanceToPoint = function(point) {
         gml_pragma("forceinline");
-        var dx = point[0] - self.center.x, dy = point[1] - self.center.y, dz = point[2] - self.center.z;
+        var dx = point.x - self.center.x, dy = point.y - self.center.y, dz = point.z - self.center.z;
         return sqrt(dx*dx + dy*dy + dz*dz) - self.radius;
     }
 
@@ -110,19 +141,19 @@ function UeSphere(center = undefined, radius = -1) constructor {
     }
 
     /// Clamps a point to the boundary of the sphere.
-    /// Point can be an array [x,y,z]. Returns an array [x,y,z].
-    static clampPoint = function(point, target = array_create(3)) {
+    /// Point must be a UeVector3. Returns a UeVector3.
+    static clampPoint = function(point, target = new UeVector3()) {
         gml_pragma("forceinline");
-        var dx = point[0] - self.center.x, dy = point[1] - self.center.y, dz = point[2] - self.center.z;
+        var dx = point.x - self.center.x, dy = point.y - self.center.y, dz = point.z - self.center.z;
         var d2 = dx*dx + dy*dy + dz*dz;
         if (d2 > (self.radius * self.radius)) {
             var d = sqrt(d2);
             var f = self.radius / d;
-            target[0] = self.center.x + dx * f;
-            target[1] = self.center.y + dy * f;
-            target[2] = self.center.z + dz * f;
+            target.x = self.center.x + dx * f;
+            target.y = self.center.y + dy * f;
+            target.z = self.center.z + dz * f;
         } else {
-            target[0] = point[0]; target[1] = point[1]; target[2] = point[2];
+            target.copy(point);
         }
         return target;
     }
@@ -143,6 +174,50 @@ function UeSphere(center = undefined, radius = -1) constructor {
     static translate = function(offset) {
         gml_pragma("forceinline");
         self.center.add(offset);
+        return self;
+    }
+
+    /// Expands this sphere to include another sphere.
+    static union = function(sphere) {
+        gml_pragma("forceinline");
+        // If this sphere is empty, copy the other sphere
+        if (isEmpty()) {
+            self.center.copy(sphere.center);
+            self.radius = sphere.radius;
+            return self;
+        }
+        
+        // If the other sphere is empty, do nothing
+        if (sphere.isEmpty()) {
+            return self;
+        }
+        
+        // Calculate distance between centers
+        var dist = self.center.distanceTo(sphere.center);
+        
+        // If one sphere completely contains the other, use the larger one
+        if (dist + sphere.radius <= self.radius) {
+            // This sphere already contains the other, do nothing
+            return self;
+        }
+        if (dist + self.radius <= sphere.radius) {
+            // The other sphere contains this one, copy it
+            self.center.copy(sphere.center);
+            self.radius = sphere.radius;
+            return self;
+        }
+        
+        // Otherwise, create a new sphere that contains both
+        // The new center is on the line between the two centers
+        // The new radius is (distance + r1 + r2) / 2
+        var newRadius = (dist + self.radius + sphere.radius) * 0.5;
+        var t = (dist + self.radius - sphere.radius) / (2 * dist);
+        
+        // Interpolate between centers
+        var dir = new UeVector3().subVectors(sphere.center, self.center);
+        self.center.addScaledVector(dir, t);
+        self.radius = newRadius;
+        
         return self;
     }
 

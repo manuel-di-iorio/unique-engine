@@ -4,6 +4,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
     self.geometry = geometry;
     self.material = material;
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
+    self.isSprite = false;
     
     function render(wireframe = false) {
          gml_pragma("forceinline");

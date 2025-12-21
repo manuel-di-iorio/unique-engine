@@ -37,7 +37,7 @@ new UeTexture(sprite = undefined, data = {})
 | `wrapS`            | `boolean`      | Horizontal wrapping (`UE_TEXTURE_WRAP.REPEAT`, `UE_TEXTURE_WRAP.CLAMP_TO_EDGE`, `UE_TEXTURE_WRAP.MIRRORED_REPEAT`). |
 | `wrapT`            | `boolean`      | Vertical wrapping                                                   |
 | `filter`           | `boolean`      | Texture filtering mode.                                             |
-| `generateMipmaps`  | `boolean`      | Enables mipmap generation.                                          |
+| `generateMipmaps`  | `real`         | Enables mipmap generation (default `mip_markedonly`).               |
 | `matrix`           | `UeMatrix4`    | UV transformation matrix.                                           |
 | `matrixAutoUpdate` | `boolean`      | Auto-updates matrix when needed.                                    |
 | `needsUpdate`      | `boolean`      | Marks texture as needing rebake.                                    |

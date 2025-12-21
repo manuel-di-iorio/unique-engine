@@ -103,7 +103,7 @@ function UeGeometry(data = {}) constructor {
     function computeBoundingBox() {
         gml_pragma("forceinline");
         boundingBox ??= new UeBox3();
-        if (position != undefined) boundingBox.setFromPoints(position);
+        if (position != undefined) boundingBox.setFromBufferAttribute(position);
         return self;
     }
     
@@ -111,7 +111,7 @@ function UeGeometry(data = {}) constructor {
     function computeBoundingSphere() {
         gml_pragma("forceinline");
         boundingSphere ??= new UeSphere();
-        if (position != undefined) boundingSphere.setFromPoints(position);
+        if (position != undefined) boundingSphere.setFromBufferAttribute(position);
         return self;
     }
     

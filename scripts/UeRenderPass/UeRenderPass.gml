@@ -11,8 +11,8 @@ function UeRenderPass(scene, camera, overrideMaterial = undefined, clearColor = 
 
     var oldOverrideMaterial;
     if (self.overrideMaterial != undefined) {
-        oldOverrideMaterial = self.scene.overrideMaterial;
-        self.scene.overrideMaterial = self.overrideMaterial;
+      oldOverrideMaterial = self.scene.overrideMaterial;
+      self.scene.overrideMaterial = self.overrideMaterial;
     }
     
     var oldAutoClear = renderer.autoClear;
@@ -24,6 +24,9 @@ function UeRenderPass(scene, camera, overrideMaterial = undefined, clearColor = 
     
     var oldRenderTarget = renderer.getRenderTarget();
     renderer.setRenderTarget(self.renderToScreen ? undefined : writeTarget);
+    
+    // Apply camera to set view/projection matrices (essential for rendering to surfaces)
+    camera_apply(self.camera.camera);
 
     renderer.render(self.scene, self.camera);
     

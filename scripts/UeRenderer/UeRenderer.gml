@@ -356,10 +356,16 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // there's no active view. Otherwise, ensure we're on the correct view.
     if (self.__renderTarget == undefined && view_current != camera.view) return;
 
-    // Apply camera to set view/projection matrices (essential for rendering to surfaces)
-    camera_apply(camera.camera);
-
-    var _gpuState = gpu_get_state();
+    var _gpuZTestEnable = gpu_get_ztestenable();
+    var _gpuZWriteEnable = gpu_get_zwriteenable();
+    var _gpuZFunc = gpu_get_zfunc();
+    var _gpuAlphaTestEnable = gpu_get_alphatestenable();
+    var _gpuAlphaTestRef = gpu_get_alphatestref();
+    var _gpuColorWriteEnable = gpu_get_colorwriteenable();
+    var _gpuBlendEnable = gpu_get_blendenable();
+    var _gpuBlendEquationSepAlpha = gpu_get_blendequation_sepalpha();
+    var _gpuBlendModeExtSepAlpha = gpu_get_blendmode_ext_sepalpha();
+    var _gpuCullMode = gpu_get_cullmode();
 
     // Auto clear
     if (self.autoClear) {
@@ -393,7 +399,17 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     __boundMaterial = undefined;
     shader_reset();
     matrix_set(matrix_world, global.UE_MATRIX_IDENTITY);
-    gpu_set_state(_gpuState);
+    
+    gpu_set_ztestenable(_gpuZTestEnable);
+    gpu_set_zwriteenable(_gpuZWriteEnable);
+    gpu_set_zfunc(_gpuZFunc);
+    gpu_set_alphatestenable(_gpuAlphaTestEnable);
+    gpu_set_alphatestref(_gpuAlphaTestRef);
+    gpu_set_colorwriteenable(_gpuColorWriteEnable);
+    gpu_set_blendenable(_gpuBlendEnable);
+    gpu_set_blendequation_sepalpha(_gpuBlendEquationSepAlpha[0], _gpuBlendEquationSepAlpha[1]);
+    gpu_set_blendmode_ext_sepalpha(_gpuBlendModeExtSepAlpha[0], _gpuBlendModeExtSepAlpha[1], _gpuBlendModeExtSepAlpha[2], _gpuBlendModeExtSepAlpha[3]);
+    gpu_set_cullmode(_gpuCullMode);
 
     return self;
   }

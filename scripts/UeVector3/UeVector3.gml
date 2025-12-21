@@ -639,4 +639,3 @@ function UeVector3(_x = 0, _y = 0, _z = 0) constructor {
         return self;
     }
 }
-

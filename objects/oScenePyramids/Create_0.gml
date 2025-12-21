@@ -4,9 +4,9 @@ camera = new UePerspectiveCamera({ x: 200, y: 70, z: 100 }).use();
 orbitControls = new UeOrbitControls(camera);
 
 // Textures
-var texPyramid   = new UeTexture(spr_tex_pyramid);
+var texPyramid   = new UeTexture(spr_tex_pyramid, { generateMipmaps: true });
 var texSand      = new UeTexture(spr_tex_sand);
-var texPalmTree  = new UeTexture(spr_tex_palm_tree);
+var texPalmTree  = new UeTexture(spr_tex_palm_tree, { generateMipmaps: true });
 
 // Materials
 var matSand     = new UeMaterial({ map: texSand, shader: sh_ue_standard });

@@ -44,7 +44,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
     filter = data[$ "filter"] ?? true;
 
     // Enable mipmaps generation
-    generateMipmaps = data[$ "generateMipmaps"] ?? true;
+    generateMipmaps = data[$ "generateMipmaps"] ?? mip_markedonly;
 
     // 4x4 transformation matrix for UVs
     matrix = new UeMatrix4();
@@ -421,7 +421,6 @@ function UeTexture(sprite = undefined, data = {}) constructor {
 
     /**
      * Clone this texture instance
-     * @todo undoocumented
      */
     function clone() {
         return variable_clone(self);

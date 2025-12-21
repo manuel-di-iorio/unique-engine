@@ -1,4 +1,4 @@
-renderer = new UeRenderer();
+renderer = new UeRenderer({ sortObjects: false });
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 450, y: -300, z: 300 }).use();
 orbitControls = new UeOrbitControls(camera, { zt: 150 });
