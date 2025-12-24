@@ -6,7 +6,7 @@
   "name":"UeObject3D",
   "parent":{
     "name":"Core",
-    "path":"folders/Unique Engine/Core.yy",
+    "path":"folders/Packages/Unique Engine/Core.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

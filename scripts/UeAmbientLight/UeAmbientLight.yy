@@ -6,7 +6,7 @@
   "name":"UeAmbientLight",
   "parent":{
     "name":"Lights",
-    "path":"folders/Unique Engine/Lights.yy",
+    "path":"folders/Packages/Unique Engine/Lights.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

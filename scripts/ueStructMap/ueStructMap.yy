@@ -6,7 +6,7 @@
   "name":"ueStructMap",
   "parent":{
     "name":"__internals",
-    "path":"folders/Unique Engine/__internals.yy",
+    "path":"folders/Packages/Unique Engine/__internals.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

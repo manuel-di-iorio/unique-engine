@@ -6,7 +6,7 @@
   "name":"UeObjLoader",
   "parent":{
     "name":"Loaders",
-    "path":"folders/Unique Engine/Loaders.yy",
+    "path":"folders/Packages/Unique Engine/Loaders.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

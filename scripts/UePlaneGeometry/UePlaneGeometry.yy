@@ -6,7 +6,7 @@
   "name":"UePlaneGeometry",
   "parent":{
     "name":"Geometries",
-    "path":"folders/Unique Engine/Geometries.yy",
+    "path":"folders/Packages/Unique Engine/Geometries.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

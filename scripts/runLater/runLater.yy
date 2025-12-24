@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"runLater",
   "parent":{
-    "name":"Unique Engine",
-    "path":"Unique Engine.yyp",
+    "name":"Packages",
+    "path":"folders/Packages.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

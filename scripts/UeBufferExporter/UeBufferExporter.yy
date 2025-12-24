@@ -6,7 +6,7 @@
   "name":"UeBufferExporter",
   "parent":{
     "name":"Exporters",
-    "path":"folders/Unique Engine/Exporters.yy",
+    "path":"folders/Packages/Unique Engine/Exporters.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

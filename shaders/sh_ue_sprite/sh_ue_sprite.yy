@@ -4,7 +4,7 @@
   "name":"sh_ue_sprite",
   "parent":{
     "name":"Shaders",
-    "path":"folders/Unique Engine/Shaders.yy",
+    "path":"folders/Packages/Unique Engine/Shaders.yy",
   },
   "resourceType":"GMShader",
   "resourceVersion":"2.0",

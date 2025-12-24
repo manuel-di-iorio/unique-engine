@@ -6,7 +6,7 @@
   "name":"UiTextbox",
   "parent":{
     "name":"Unique UI",
-    "path":"folders/Unique UI.yy",
+    "path":"folders/Packages/Unique UI.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

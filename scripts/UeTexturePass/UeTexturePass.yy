@@ -6,7 +6,7 @@
   "name":"UeTexturePass",
   "parent":{
     "name":"Passes",
-    "path":"folders/Unique Engine/Postprocessing/Passes.yy",
+    "path":"folders/Packages/Unique Engine/Postprocessing/Passes.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

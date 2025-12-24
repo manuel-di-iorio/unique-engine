@@ -1,4 +1,4 @@
-function UeTransform(_data = undefined): UeEventDispatcher() constructor {
+function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
     var data = _data ?? {};
     
     // Local transform components
@@ -58,7 +58,7 @@ function UeTransform(_data = undefined): UeEventDispatcher() constructor {
             if (geometry != undefined) {
                 var boundingSphere = geometry[$ "boundingSphere"];
                 if (boundingSphere != undefined) {
-                    if (__intersectionSphere == undefined) __intersectionSphere = new UeSphere();
+                    __intersectionSphere ??= new UeSphere();
                     __intersectionSphere.copy(boundingSphere).applyMatrix4(matrixWorld);
                 }
             }
@@ -288,7 +288,7 @@ function UeTransform(_data = undefined): UeEventDispatcher() constructor {
     // Returns a vector representing the direction of object's positive Y axis in world space.
     function getWorldDirection(target = undefined) {
         gml_pragma("forceinline");
-        if (target == undefined) target = new UeVector3();
+        target ??= new UeVector3();
         var dir = up.clone();
         dir.transformDirection(matrixWorld);
         target.copy(dir);

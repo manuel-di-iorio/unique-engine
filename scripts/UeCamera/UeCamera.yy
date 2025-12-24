@@ -6,7 +6,7 @@
   "name":"UeCamera",
   "parent":{
     "name":"Cameras",
-    "path":"folders/Unique Engine/Cameras.yy",
+    "path":"folders/Packages/Unique Engine/Cameras.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -6,7 +6,7 @@
   "name":"UeControls",
   "parent":{
     "name":"Controls",
-    "path":"folders/Unique Engine/Controls.yy",
+    "path":"folders/Packages/Unique Engine/Controls.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

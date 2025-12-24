@@ -268,7 +268,7 @@
   "packageId":"",
   "parent":{
     "name":"UeAssimpLoader",
-    "path":"folders/Unique Engine/Loaders/UeAssimpLoader.yy",
+    "path":"folders/Packages/Unique Engine/Loaders/UeAssimpLoader.yy",
   },
   "productId":"",
   "resourceType":"GMExtension",
