@@ -18,11 +18,13 @@ function UePerspectiveCamera(data = {}): UeCamera(data) constructor {
      * Updates the camera's projection matrix using perspective projection.
      */
     function updateProjectionMatrix() {
-        gml_pragma("forceinline");
-        matrix_build_projection_perspective_fov(fov, aspect, near, far, global.UE_DUMMY_ARRAY16);
-        projectionMatrix.fromArray(global.UE_DUMMY_ARRAY16);
-        projectionMatrixInverse.copy(projectionMatrix).invert();
-    	camera_set_proj_mat(camera, projectionMatrix.data);
+      gml_pragma("forceinline");
+      matrix_build_projection_perspective_fov(fov, aspect, near, far, projectionMatrix);
+      
+      mat4_copy(projectionMatrixInverse, projectionMatrix);
+      mat4_invert(projectionMatrixInverse);
+    	
+      camera_set_proj_mat(camera, projectionMatrix);
     }
     
     // Build the perspective projection

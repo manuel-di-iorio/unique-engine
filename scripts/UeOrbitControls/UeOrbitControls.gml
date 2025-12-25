@@ -1,13 +1,13 @@
 // @todo check input configuration in variables (mouse/keyboard)
 function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self.camera = camera;
-    self.target = data[$ "target"] ?? new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
+    self.target = data[$ "target"] ?? vec3_create(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
     
     // Set the initial azimuth/elevation from the camera position towards the target
-    var dir = camera.position.clone().sub(target);
-    self.radius = camera.position.distanceTo(target);
-    self.azimuth = arctan2(dir.y, dir.x);
-    self.elevation = radius == 0 ? 0 : arcsin(clamp(dir.z / radius, -1, 1));
+    var dir = vec3_clone(camera.position); vec3_sub(dir, target);
+    self.radius = vec3_distance_to(camera.position, target);
+    self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
+    self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
 
     self.enableZoom = data[$"enableZoom"] ?? true;
     self.zoomSpeed = data[$"zoomSpeed"] ?? 5;
@@ -53,30 +53,31 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     self._deltaAzimuth = 0;
     self._deltaElevation = 0;
-    self._deltaPan = new UeVector3(0, 0, 0);
+    self._deltaPan = vec3_create();
 
     // @todo missing doc
     function reset() {
-        gml_pragma("forceinline");
-        self.target.set(0, 0, 0); // @todo should set to the actual initial target
-        var dir = camera.position.clone().sub(target);
-        self.radius = camera.position.distanceTo(target);
-        self.azimuth = arctan2(dir.y, dir.x);
-        self.elevation = radius == 0 ? 0 : arcsin(clamp(dir.z / radius, -1, 1));
+      gml_pragma("forceinline");
+      vec3_set(self.target, 0, 0, 0);  // @todo should set to the actual initial target
+      
+      var dir = vec3_clone(camera.position); vec3_sub(dir, target);
+      self.radius = vec3_distance_to(camera.position, target);
+      self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
+      self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
     }
 
     // Update spherical coordinates from current camera position and target
     // Useful when manually setting the camera position and target
     // @todo missing doc
     function updateSphericalCoordinates() {
-        var dir = camera.position.clone().sub(target);
-        self.radius = camera.position.distanceTo(target);
-        self.azimuth = arctan2(dir.y, dir.x);
-        self.elevation = self.radius == 0 ? 0 : arcsin(clamp(dir.z / self.radius, -1, 1));
+      var dir = vec3_clone(camera.position); vec3_sub(dir, target);
+      self.radius = vec3_distance_to(camera.position, target);
+      self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
+      self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
         
-        self._deltaAzimuth = 0;
-        self._deltaElevation = 0;
-        self._deltaPan.set(0, 0, 0);
+      self._deltaAzimuth = 0;
+      self._deltaElevation = 0;
+      vec3_set(self._deltaPan, 0, 0, 0);
     }
 
     // Update the camera orbit. 
@@ -94,7 +95,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         
         var displayWidth = display_get_width();
         var displayHeight = display_get_height();
-        var worldUp = global.UE_OBJECT3D_DEFAULT_UP;
+        var worldUp = global.UE_DEFAULT_UP;
         
         // Allow interactions only if they have been allowed from the user
         var allowInteractions = shouldHandleInput();
@@ -169,20 +170,20 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             
             var camPos = self.camera.position;
             var camTarget = self.target;
-            var camDir = camTarget.clone().sub(camPos).normalize();
+            var camDir = vec3_clone(camTarget); vec3_sub(camDir, camPos); vec3_normalize(camDir);
 
             if (self.screenSpacePanning) {
-                var right = camDir.cross(worldUp).normalize();
-                var up = right.cross(camDir).normalize();
+                var right = vec3_clone(camDir); vec3_cross(right, worldUp); vec3_normalize(right);
+                var up = vec3_clone(camDir); vec3_cross(up, worldUp); vec3_normalize(up);
 
-                self._deltaPan.add(right.scale(-panX));
-                self._deltaPan.add(up.scale(-panY));
+                vec3_add_scaled_vector(self._deltaPan, right, -panX);
+                vec3_add_scaled_vector(self._deltaPan, up, -panY);
             } else {
-                var forward = new UeVector3(camDir.x, camDir.y, 0).normalize();
-                var right = new UeVector3(-forward.y, forward.x, 0); // 90° clockwise
+                var forward = vec3_create(camDir[VEC3.x], camDir[VEC3.y], 0); vec3_normalize(forward);
+                var right = vec3_create(-forward[VEC3.y], forward[VEC3.x], 0); // 90° clockwise
 
-                self._deltaPan.add(right.scale(-panX));
-                self._deltaPan.add(forward.scale(panY));
+                vec3_add_scaled_vector(self._deltaPan, right, -panX);
+                vec3_add_scaled_vector(self._deltaPan, forward, panY);
             }
         }
 
@@ -204,72 +205,74 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
         var camPos = self.camera.position;
         var camTarget = self.target;
-        var camDir = camTarget.clone().sub(camPos).normalize();
+        var camDir = vec3_clone(camTarget); vec3_sub(camDir, camPos); vec3_normalize(camDir);
 
         if (allowInteractions && !global.UI.hasAnyFocus()) {
             if (!shiftPressed) {
-                if (self.screenSpacePanning) {
-                    // Pan aligned to camera screen space
-                    var right = camDir.cross(worldUp).normalize();
-                    var up = right.cross(camDir).normalize();
-            
-                    if (keyboard_check(self.keys.LEFT))   self._deltaPan.add(right.scale(panKeyAmount));
-                    if (keyboard_check(self.keys.RIGHT))  self._deltaPan.add(right.scale(-panKeyAmount));
-                    if (keyboard_check(self.keys.UP))     self._deltaPan.add(up.scale(-panKeyAmount));
-                    if (keyboard_check(self.keys.BOTTOM)) self._deltaPan.add(up.scale(panKeyAmount));
-                } else {
-                    // Project cam direction onto world XY plane
-                    var forward = new UeVector3(camDir.x, camDir.y, 0).normalize();
-                    var right = new UeVector3(-forward.y, forward.x, 0);
-                    
-                    // World space pan (assumed XY plane)
-                    if (keyboard_check(self.keys.LEFT))   self._deltaPan.add(right.scale(panKeyAmount));
-                    if (keyboard_check(self.keys.RIGHT))  self._deltaPan.add(right.scale(-panKeyAmount));
-                    if (keyboard_check(self.keys.UP))     self._deltaPan.add(forward.scale(panKeyAmount));
-                    if (keyboard_check(self.keys.BOTTOM)) self._deltaPan.add(forward.scale(-panKeyAmount));
-                }
+              if (self.screenSpacePanning) {
+                // Pan aligned to camera screen space
+                var right = vec3_clone(camDir); vec3_cross(right, worldUp); vec3_normalize(right);
+                var up = vec3_clone(camDir); vec3_cross(up, worldUp); vec3_normalize(up);
+              
+                if (keyboard_check(self.keys.LEFT))   vec3_add_scaled_vector(self._deltaPan, right, panKeyAmount);
+                if (keyboard_check(self.keys.RIGHT))  vec3_add_scaled_vector(self._deltaPan, right, -panKeyAmount);
+                if (keyboard_check(self.keys.UP))     vec3_add_scaled_vector(self._deltaPan, up, -panKeyAmount);
+                if (keyboard_check(self.keys.BOTTOM)) vec3_add_scaled_vector(self._deltaPan, up, panKeyAmount);
+              } else {
+                // Project cam direction onto world XY plane
+                var forward = vec3_create(camDir[VEC3.x], camDir[VEC3.y], 0); vec3_normalize(forward);
+                var right = vec3_create(-forward[VEC3.y], forward[VEC3.x], 0);
+                
+                // World space pan (assumed XY plane)
+                if (keyboard_check(self.keys.LEFT))   vec3_add_scaled_vector(self._deltaPan, right, panKeyAmount);
+                if (keyboard_check(self.keys.RIGHT))  vec3_add_scaled_vector(self._deltaPan, right, -panKeyAmount);
+                if (keyboard_check(self.keys.UP))     vec3_add_scaled_vector(self._deltaPan, forward, panKeyAmount);
+                if (keyboard_check(self.keys.BOTTOM)) vec3_add_scaled_vector(self._deltaPan, forward, -panKeyAmount);
+              }
             } else {
-                if (keyboard_check(self.keys.LEFT))  self._deltaAzimuth += rotateKeyAmount;
-                if (keyboard_check(self.keys.RIGHT)) self._deltaAzimuth -= rotateKeyAmount;
-                if (keyboard_check(self.keys.UP))    self._deltaElevation += rotateKeyAmount;
-                if (keyboard_check(self.keys.BOTTOM))self._deltaElevation -= rotateKeyAmount;
+              if (keyboard_check(self.keys.LEFT))  self._deltaAzimuth += rotateKeyAmount;
+              if (keyboard_check(self.keys.RIGHT)) self._deltaAzimuth -= rotateKeyAmount;
+              if (keyboard_check(self.keys.UP))    self._deltaElevation += rotateKeyAmount;
+              if (keyboard_check(self.keys.BOTTOM))self._deltaElevation -= rotateKeyAmount;
             }
         }
 
         // Auto-rotate
         if (self.autoRotate && !self._dragging && !self._panning) {
-            self._deltaAzimuth -= degtorad(self.autoRotateSpeed);
+          self._deltaAzimuth -= degtorad(self.autoRotateSpeed);
         }
 
         // Clamp and apply motion
         if (self.enableDamping) {
-            self.azimuth += self._deltaAzimuth * self.dampingFactor;
-            self.elevation += self._deltaElevation * self.dampingFactor;
-            self.target.add(self._deltaPan.clone().scale(self.dampingFactor));
+          self.azimuth += self._deltaAzimuth * self.dampingFactor;
+          self.elevation += self._deltaElevation * self.dampingFactor;
+        
+          var _deltaPanScaled = vec3_clone(self._deltaPan); vec3_multiply_scalar(_deltaPanScaled, self.dampingFactor);
+          vec3_add(self.target, _deltaPanScaled);
 
-            self._deltaAzimuth *= (1 - self.dampingFactor);
-            self._deltaElevation *= (1 - self.dampingFactor);
-            self._deltaPan.scale(1 - self.dampingFactor);
+          self._deltaAzimuth *= (1 - self.dampingFactor);
+          self._deltaElevation *= (1 - self.dampingFactor);
+          vec3_multiply_scalar(self._deltaPan, 1 - self.dampingFactor);
         } else {
-            self.azimuth += self._deltaAzimuth;
-            self.elevation += self._deltaElevation;
-            self.target.add(self._deltaPan);
+          self.azimuth += self._deltaAzimuth;
+          self.elevation += self._deltaElevation;
+          vec3_add(self.target, self._deltaPan);
 
-            self._deltaAzimuth = 0;
-            self._deltaElevation = 0;
-            self._deltaPan.set(0, 0, 0);
+          self._deltaAzimuth = 0;
+          self._deltaElevation = 0;
+          vec3_set(self._deltaPan, 0, 0, 0);
         }
         
         self.radius = clamp(self.radius, self.minTargetRadius, self.maxTargetRadius);
         self.elevation = clamp(self.elevation, -pi * 0.4999, pi * 0.4999);
 
         // Update camera position
-        var cx = self.target.x + self.radius * cos(self.elevation) * cos(self.azimuth);
-        var cy = self.target.y + self.radius * cos(self.elevation) * sin(self.azimuth);
-        var cz = self.target.z + self.radius * sin(self.elevation);
+        var cx = self.target[VEC3.x] + self.radius * cos(self.elevation) * cos(self.azimuth);
+        var cy = self.target[VEC3.y] + self.radius * cos(self.elevation) * sin(self.azimuth);
+        var cz = self.target[VEC3.z] + self.radius * sin(self.elevation);
     
         self.camera.setPosition(cx, cy, cz);
-        self.camera.target.copy(self.target);
+        vec3_copy(self.camera.target, self.target);
         
         self._prevMouseX = mx;
         self._prevMouseY = my;

@@ -4,7 +4,7 @@
 
 // @todo add static
 // Ctrl+H function\s+(\w+)\((?!.*\)\s*constructor) static $1 = function(
-function UeObject3D(data = {}): UeTransform(data) constructor {
+function UeObject3D(data = {}): Transform(data) constructor {
     isObject3D = true;
     type = "Object3D";
     id = global.UE_OBJECT_ID++; 

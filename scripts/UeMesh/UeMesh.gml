@@ -10,7 +10,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
          gml_pragma("forceinline");
         
          // Set the world matrix
-         matrix_set(matrix_world, matrixWorld.data);
+         matrix_set(matrix_world, matrixWorld);
 
          // Submit the vertex buffer
          vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, -1); 
@@ -86,21 +86,20 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         gml_pragma("forceinline");
         var object = self;
         
-        // Transform the ray into the local space of the mesh (inverse world matrix)
-        // We use dummy/cache objects to avoid GC allocation during raycasting
-        var matrixWorldInverse = global.UE_DUMMY_MATRIX4.copy(matrixWorld).invert();
+        // Transform the ray into the local space of the mesh (inverse world matrix), array-based
+        mat4_copy(global.UE_MAT4_TEMP0, matrixWorld.data); mat4_invert(global.UE_MAT4_TEMP0);
         
         // Note: We copy the ray to a local ray
-        var localRay = global.UE_DUMMY_RAY.copy(raycaster.ray);
-        localRay.origin.applyMatrix4(matrixWorldInverse);
-        localRay.direction.transformDirection(matrixWorldInverse);
+        var localRay = global.UE_RAY_TEMP0.copy(raycaster.ray);
+        localRay.origin.applyMatrix4(global.UE_MAT4_TEMP0);
+        localRay.direction.transformDirection(global.UE_MAT4_TEMP0);
 
         // --- 1. Bounding Volume Checks (Local Space) ---
         // If the geometry has bounding volumes, test them first for early rejection
         var boundingSphere = geometry[$ "boundingSphere"];
         if (boundingSphere != undefined) {
-             if (!localRay.intersectSphere(boundingSphere, global.UE_DUMMY_VECTOR3)) return self; 
-        }       
+            if (ray_intersect_sphere(localRay, boundingSphere) == -1) return self;
+        }
         
         // --- 2. Precise Intersection Test (Triangles) ---
         // If precise raycasting is enabled for Mesh, we test every triangle
@@ -113,26 +112,12 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             var indices = geometry.index;
             var hasIndices = is_array(indices) && array_length(indices) > 0;
             var len = hasIndices ? array_length(indices) : (array_length(verts) / 3);
-            var EPSILON = 0.000001;
             
-            // Intersection calculation variables (reused globals)
-            var edge1 = global.UE_DUMMY_VECTOR3_E;
-            var edge2 = global.UE_DUMMY_VECTOR3_F;
-            var pvec = global.UE_DUMMY_VECTOR3_G;
-            var tvec = global.UE_DUMMY_VECTOR3_H;
-            var qvec = global.UE_DUMMY_VECTOR3_J; 
-            var intersectPoint = global.UE_DUMMY_VECTOR3;
-            var v0 = global.UE_DUMMY_VECTOR3_B;
-            var v1 = global.UE_DUMMY_VECTOR3_C;
-            var v2 = global.UE_DUMMY_VECTOR3_D;
+            var v0 = global.UE_VEC3_TEMP0;
+            var v1 = global.UE_VEC3_TEMP1;
+            var v2 = global.UE_VEC3_TEMP2;
+            var localHit = global.UE_VEC3_TEMP3;
             
-            var rox = localRay.origin.x;
-            var roy = localRay.origin.y;
-            var roz = localRay.origin.z;
-            var rdx = localRay.direction.x;
-            var rdy = localRay.direction.y;
-            var rdz = localRay.direction.z;
-
             // Loop through all triangles
             for (var i = 0; i < len; i += 3) {
                  var i0 = hasIndices ? indices[i] : i;
@@ -141,68 +126,15 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                  
                  var i0_3 = i0 * 3, i1_3 = i1 * 3, i2_3 = i2 * 3;
                  
-                 var v0x = verts[i0_3], v0y = verts[i0_3+1], v0z = verts[i0_3+2];
-                 var v1x = verts[i1_3], v1y = verts[i1_3+1], v1z = verts[i1_3+2];
-                 var v2x = verts[i2_3], v2y = verts[i2_3+1], v2z = verts[i2_3+2];
+                 vec3_set(v0, verts[i0_3], verts[i0_3+1], verts[i0_3+2]);
+                 vec3_set(v1, verts[i1_3], verts[i1_3+1], verts[i1_3+2]);
+                 vec3_set(v2, verts[i2_3], verts[i2_3+1], verts[i2_3+2]);
 
-                 // edge1 = v1 - v0
-                 var e1x = v1x - v0x;
-                 var e1y = v1y - v0y;
-                 var e1z = v1z - v0z;
-
-                 // edge2 = v2 - v0
-                 var e2x = v2x - v0x;
-                 var e2y = v2y - v0y;
-                 var e2z = v2z - v0z;
-
-                 // pvec = rayDir (cross) edge2
-                 var pbx = rdy * e2z - rdz * e2y;
-                 var pby = rdz * e2x - rdx * e2z;
-                 var pbz = rdx * e2y - rdy * e2x;
-
-                 // det = edge1 (dot) pvec
-                 var det = e1x * pbx + e1y * pby + e1z * pbz;
-
-                 if (abs(det) < EPSILON) continue;
-                 
-                 var invDet = 1 / det;
-
-                 // tvec = rayOrigin - v0
-                 var tx = rox - v0x;
-                 var ty = roy - v0y;
-                 var tz = roz - v0z;
-
-                 // u = tvec (dot) pvec * invDet
-                 var u = (tx * pbx + ty * pby + tz * pbz) * invDet;
-                 if (u < -EPSILON || u > 1 + EPSILON) continue;
-
-                 // qvec = tvec (cross) edge1
-                 var qx = ty * e1z - tz * e1y;
-                 var qy = tz * e1x - tx * e1z;
-                 var qz = tx * e1y - ty * e1x;
-
-                 // v = rayDir (dot) qvec * invDet
-                 var v = (rdx * qx + rdy * qy + rdz * qz) * invDet;
-                 if (v < -EPSILON || u + v > 1 + EPSILON) continue;
-
-                 // t = edge2 (dot) qvec * invDet
-                 var t = (e2x * qx + e2y * qy + e2z * qz) * invDet;
-
-                 if (t > EPSILON) {
-                      // Intersection Point: P = O + tD
-                      var ipx = rdx * t + rox;
-                      var ipy = rdy * t + roy;
-                      var ipz = rdz * t + roz;
-                      
-                      // Transform point from Local -> World
-                      intersectPoint.set(ipx, ipy, ipz).applyMatrix4(matrixWorld);
-                      
-                      var dSq = intersectPoint.distanceToSquared(raycaster.ray.origin);
-                      
-                      if (dSq < MIN_DIST) {
-                          MIN_DIST = dSq;
-                          hitPrecise = true;
-                      }
+                 var p = ray_intersect_triangle(localRay, v0, v1, v2, false, localHit);
+                 if (p != undefined) {
+                      vec3_apply_matrix4(localHit, matrixWorld);
+                      var dSq = ray_distance_sq_to_point(raycaster.ray, localHit[0], localHit[1], localHit[2]);
+                      if (dSq < MIN_DIST) { MIN_DIST = dSq; hitPrecise = true; }
                  }
             }
         }
@@ -216,12 +148,11 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             // --- 3. Approximate Intersection (Bounding box) ---
             var boundingBox = geometry[$ "boundingBox"];
             if (boundingBox != undefined) {
-                // If bounding box check fails, return early
-                if (!localRay.intersectBox(boundingBox, global.UE_DUMMY_VECTOR3)) return self;
-                
-                // If bounding box hits, we use the intersection point distance for better sorting
-                global.UE_DUMMY_VECTOR3.applyMatrix4(matrixWorld);
-                var dist = global.UE_DUMMY_VECTOR3.distanceToSquared(raycaster.ray.origin);
+                var t = ray_intersect_box(localRay, boundingBox);
+                if (t == -1) return self;
+                var localPoint = ray_at(localRay, t);
+                vec3_apply_matrix4(localPoint, matrixWorld);
+                var dist = ray_distance_sq_to_point(raycaster.ray, localPoint[0], localPoint[1], localPoint[2]);
                 
                 array_push(hits, {
                     object,

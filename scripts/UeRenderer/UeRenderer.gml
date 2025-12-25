@@ -26,7 +26,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
   function getSize(target = undefined) {
     gml_pragma("forceinline");
-    if (target == undefined) target = {};
+    target ??= {};
     target.width = self.width;
     target.height = self.height;
     return target;
@@ -142,7 +142,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
           // - Sorting with floats introduces instability and z-fighting-like errors.
           // - By converting to a 31-bit integer, we guarantee a stable and uniform
           //   precision distribution across the whole range.
-          var _nd = clamp(object.position.distanceToSquared(cameraPos) / 32000, 0, 1);
+          var _nd = clamp(vec3_distance_to_squared(object.position, cameraPos) / 32000, 0, 1);
           var _quantDepth = floor(_nd * 0x7FFFFFFF);  // 31-bit integer depth value
 
           // --- DEPTH INVERSION FOR TRANSPARENT OBJECTS --------------------------------
@@ -398,7 +398,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // Reset the world after rendering
     __boundMaterial = undefined;
     shader_reset();
-    matrix_set(matrix_world, global.UE_MATRIX_IDENTITY);
+    matrix_set(matrix_world, global.UE_MAT4_IDENTITY);
     
     gpu_set_ztestenable(_gpuZTestEnable);
     gpu_set_zwriteenable(_gpuZWriteEnable);

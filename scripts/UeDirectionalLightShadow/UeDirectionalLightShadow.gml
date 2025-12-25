@@ -17,7 +17,7 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
     map = new UeShadowMap(mapSize.width, mapSize.height);
 
     // Light space transformation matrix
-    lightSpaceMatrix = new UeMatrix4();
+    lightSpaceMatrix = mat4_create();
     
     /**
      * Updates the shadow map size and recreates the render target.
@@ -42,10 +42,10 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
         gml_pragma("forceinline");
         
         // Position shadow camera at the light's position
-        camera.position.copy(light.position);
+        vec3_copy(camera.position, light.position);
         
         // Look at the light's target position
-        camera.target.copy(light.target.position);
+        vec3_copy(camera.target, light.target.position);
         
         // Update camera matrices (recalculates view matrix)
         camera.updateMatrixWorld();
@@ -55,7 +55,7 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
         camera_apply(_shadowCameraView);
         
         // Light space matrix = Projection * View
-        matrix_multiply(camera.matrixWorldInverse.data, camera.projectionMatrix.data, lightSpaceMatrix.data)
+        mat4_multiply_matrices(lightSpaceMatrix, camera.projectionMatrix, camera.matrixWorldInverse);
         
         return self;
     }

@@ -4,7 +4,7 @@
 /// Rotation angles are in DEGREES.
 
 // Global temp matrix for temporary operations
-global.__MAT3_TEMP = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+global.UE_MAT3_TEMP0 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 
 /// @func mat3_create()
 /// @desc Creates a new identity 3x3 matrix.

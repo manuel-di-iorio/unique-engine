@@ -1,3 +1,9 @@
+global.UE_DEFAULT_UP = vec3_create(0, 0, -1);
+
+// ============================================================================
+// BOX3
+// ============================================================================
+
 function box3_set_from_object(b, object) {
     gml_pragma("forceinline");
     box3_make_empty(b);
@@ -36,4 +42,33 @@ function box3_set_from_object(b, object) {
     }
 
     return b;
+}
+
+// ============================================================================
+// VECTOR3 - CAMERA PROJECTION
+// ============================================================================
+
+/// @func vec3_project(vec, camera)
+/// @desc Projects this vector from world space into normalized device coordinate (NDC) space.
+/// @param {Array<Real>} vec The vector to project
+/// @param {Struct} camera The camera struct with matrixWorldInverse and projectionMatrix
+function vec3_project(vec, camera) {
+    gml_pragma("forceinline");
+    // Apply view matrix (matrixWorldInverse) first, then projection matrix
+    vec3_apply_matrix4(vec, camera.matrixWorldInverse);
+    vec3_apply_matrix4(vec, camera.projectionMatrix);
+}
+
+/// @func vec3_unproject(vec, camera)
+/// @desc Unprojects this vector from normalized device coordinate (NDC) space into world space.
+/// @param {Array<Real>} vec The vector to unproject
+/// @param {Struct} camera The camera struct with projectionMatrixInverse and matrixWorld
+function vec3_unproject(vec, camera) {
+    gml_pragma("forceinline");
+    // Apply inverse projection first, then matrixWorld
+    vec3_apply_matrix4(vec, camera.projectionMatrixInverse);
+    vec3_apply_matrix4(vec, camera.matrixWorld);
+    vec[0] = colour_get_red(color) / 255;
+    vec[1] = colour_get_green(color) / 255;
+    vec[2] = colour_get_blue(color) / 255;
 }

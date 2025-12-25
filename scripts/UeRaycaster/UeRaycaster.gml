@@ -1,6 +1,9 @@
 function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _far = infinity) constructor {
-    // Ray used for intersection tests
-    self.ray = new UeRay(_origin, _direction);
+    // Ray used for intersection tests (array: [ox,oy,oz, dx,dy,dz])
+    self.ray = ray_create(
+        0, 0, 0,
+        0, 0, -1
+    );
     // Near and far clipping distances for raycasting
     self.near = _near;
     self.far = _far;
@@ -28,7 +31,12 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
      */
     function set(origin, direction) {
         gml_pragma("forceinline");
-        self.ray.set(origin, direction);
+        var ox, oy, oz, dx, dy, dz;
+        ox = origin[0]; oy = origin[1]; oz = origin[2];
+        dx = direction[0]; dy = direction[1]; dz = direction[2];
+        var len = sqrt(dx*dx + dy*dy + dz*dz);
+        if (len > 0) { var inv = 1/len; dx*=inv; dy*=inv; dz*=inv; }
+        ray_set(self.ray, ox, oy, oz, dx, dy, dz);
         return self;
     }
 
@@ -59,7 +67,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
             global.UE_DUMMY_VECTOR3_B.set(0, 1, 0).transformDirection(camera.matrixWorld).normalize();
         }
 
-        self.ray.set(global.UE_DUMMY_VECTOR3, global.UE_DUMMY_VECTOR3_B);
+        ray_set(self.ray, ox, oy, oz, dx, dy, dz);
         return self;
     }
 

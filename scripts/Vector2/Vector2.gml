@@ -3,7 +3,7 @@
 /// All functions modify the first vector in-place when applicable for zero allocations.
 
 // Global dummy array for temporary operations - reuse to avoid allocations
-global.__VEC2_TEMP = [0, 0];
+global.UE_VEC2_TEMP0 = [0, 0];
 
 /// @func vec2_create(x, y)
 /// @desc Creates a new vec2 array with the given components.

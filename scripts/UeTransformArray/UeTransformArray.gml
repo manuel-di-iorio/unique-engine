@@ -6,16 +6,12 @@ function Transform(_data = undefined): UeEventDispatcher(_data) constructor {
     // === Local transform properties ===
 
     /// Local position vector
-    position = data[$ "position"] ?? vec3_create(0, 0, 0);
-
-    /// Local rotation quaternion
-    rotation = data[$ "rotation"] ?? quat_create(0, 0, 0, 1);
-
-    /// Local scale vector
-    scale = data[$ "scale"] ?? vec3_create(1, 1, 1);
+    position = data[$ "position"] ?? vec3_create(data[$ "x"] ?? 0, data[$ "y"] ?? 0, data[$ "z"] ?? 0);
+    rotation = data[$ "rotation"] ?? quat_create(data[$ "rx"] ?? 0, data[$ "ry"] ?? 0, data[$ "rz"] ?? 0);
+    scale    = data[$ "scale"]    ?? vec3_create(data[$ "sx"] ?? 1, data[$ "sy"] ?? 1, data[$ "sz"] ?? 1);
 
     /// Local up direction (used for lookAt and world direction)
-    up = data[$ "up"] ?? [0, 0, -1];
+    up = data[$ "up"] ?? global.UE_DEFAULT_UP;
 
     // === Matrices ===
 
@@ -81,11 +77,7 @@ function Transform(_data = undefined): UeEventDispatcher(_data) constructor {
             }
             // Child object
             else {
-                mat4_multiply_matrices(
-                    matrixWorld,
-                    matrix,
-                    parent.matrixWorld
-                );
+                matrix_multiply(parent.matrixWorld, matrix, matrixWorld);
             }
 
             matrixWorldNeedsUpdate = false;
@@ -126,11 +118,7 @@ function Transform(_data = undefined): UeEventDispatcher(_data) constructor {
             if (parent == undefined) {
                 mat4_copy(matrixWorld, matrix);
             } else {
-                mat4_multiply_matrices(
-                    matrixWorld,
-                    matrix,
-                    parent.matrixWorld
-                );
+                matrix_multiply(parent.matrixWorld, matrix, matrixWorld); 
             }
         }
 
@@ -204,7 +192,7 @@ function Transform(_data = undefined): UeEventDispatcher(_data) constructor {
     function lookAtVec(target) {
         gml_pragma("forceinline");
 
-        var m = global.__MAT4_TEMP;
+        var m = global.__MAT4_TEMP0;
         mat4_look_at(m, position, target, up);
         quat_set_from_rotation_matrix(rotation, m);
 

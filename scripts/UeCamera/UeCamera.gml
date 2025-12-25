@@ -12,33 +12,36 @@ function UeCamera(data = {}): UeObject3D(data) constructor {
     camera = camera_create();
     
     // Camera target (point the camera is looking at)
-    target = new UeVector3(data[$ "xt"] ?? 0, data[$ "yt"] ?? 1, data[$ "zt"] ?? 0);
+    target = vec3_create(data[$ "xt"] ?? 0, data[$ "yt"] ?? 1, data[$ "zt"] ?? 0);
     
     // Camera up vector
-    upX = data[$ "upX"] ?? global.UE_OBJECT3D_DEFAULT_UP.x;
-    upY = data[$ "upY"] ?? global.UE_OBJECT3D_DEFAULT_UP.y;
-    upZ = data[$ "upZ"] ?? global.UE_OBJECT3D_DEFAULT_UP.z;
+    upX = data[$ "upX"] ?? global.UE_DEFAULT_UP[VEC3.x];
+    upY = data[$ "upY"] ?? global.UE_DEFAULT_UP[VEC3.y];
+    upZ = data[$ "upZ"] ?? global.UE_DEFAULT_UP[VEC3.z];
     
     // Matrices
-    matrixWorldInverse = new UeMatrix4();
-    projectionMatrix = new UeMatrix4();
-    projectionMatrixInverse = new UeMatrix4();
+    matrixWorldInverse = mat4_create();
+    projectionMatrix = mat4_create();
+    projectionMatrixInverse = mat4_create();
     
     /**
      * Updates the camera's world matrix and view matrix.
      * This method calculates the view matrix using lookat transformation.
      */
     function updateMatrixWorld() {
-        gml_pragma("forceinline");
-        matrix_build_lookat(
-            position.x, position.y, position.z,  // From
-            target.x, target.y, target.z, // To
-            upX, upY, upZ, // Up
-            global.UE_DUMMY_ARRAY16
-        )
-        matrixWorldInverse.fromArray(global.UE_DUMMY_ARRAY16);
-        matrixWorld.copy(matrixWorldInverse).invert();
-        camera_set_view_mat(camera, global.UE_DUMMY_ARRAY16);
+      gml_pragma("forceinline");
+      matrix_build_lookat(
+          position[VEC3.x], position[VEC3.y], position[VEC3.z],  // From
+          target[VEC3.x], target[VEC3.y], target[VEC3.z], // To
+          upX, upY, upZ, // Up
+          matrixWorldInverse
+      )
+      
+      // Get the inverted matrix from the lookat matrix
+      mat4_copy(matrixWorld, matrixWorldInverse);
+      mat4_invert(matrixWorld);
+      
+      camera_set_view_mat(camera, matrixWorldInverse);
     }
     
     /**

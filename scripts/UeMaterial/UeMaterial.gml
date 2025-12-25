@@ -146,7 +146,7 @@ function UeMaterial(data = {}) constructor {
    if (!lights) return;
  
    var lightState = global.UE_RENDERER_LIGHT_STATE;
-   var uniformsCache = global.UE_DUMMY_ARRAY3;
+   var uniformsCache = global.UE_VEC3_TEMP0;
  
    var directionalState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL];
    var directionalCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT];
@@ -163,11 +163,7 @@ function UeMaterial(data = {}) constructor {
        var light = directionalState[i];
  
        // Get light direction (from position to target)
-       var lightDirection = light.getDirection();
- 
-       uniformsCache[0] = lightDirection.x;
-       uniformsCache[1] = lightDirection.y;
-       uniformsCache[2] = lightDirection.z;
+       light.getDirection();
        shader_set_uniform_f_array(lightLoc[0], uniformsCache);
  
        shader_set_uniform_f_array(lightLoc[1], light.color);
@@ -197,7 +193,7 @@ function UeMaterial(data = {}) constructor {
      var texelSize = 1.0 / shadowMapWidth;
      shader_set_uniform_f(__uniformShadowTexelSizeLoc, texelSize);
  
-     shader_set_uniform_matrix_array(__uniformLightSpaceMatrixLoc, shadowLight.shadow.lightSpaceMatrix.data);
+     shader_set_uniform_matrix_array(__uniformLightSpaceMatrixLoc, shadowLight.shadow.lightSpaceMatrix);
      texture_set_stage(__samplerShadowMapIdx, shadowLight.shadow.map.getTexture());
    } else {
      shader_set_uniform_f(__uniformShadowEnabledLoc, 0.0);
@@ -283,12 +279,7 @@ function UeMaterial(data = {}) constructor {
   
     // Update the shader's model position uniform (for billboard sprites)
     if (mesh.isSprite) {
-      var uniformsCache = global.UE_DUMMY_ARRAY3;
-      var meshPosition = mesh.position;
-      uniformsCache[0] = meshPosition.x;
-      uniformsCache[1] = meshPosition.y;
-      uniformsCache[2] = meshPosition.z;
-      shader_set_uniform_f_array(__uniformModelPositionLoc, uniformsCache);
+      shader_set_uniform_f_array(__uniformModelPositionLoc, mesh.position);
     }
   
     // Set receive shadow uniform

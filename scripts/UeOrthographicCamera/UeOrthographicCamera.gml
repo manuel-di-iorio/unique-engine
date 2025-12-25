@@ -26,13 +26,15 @@ function UeOrthographicCamera(data = {}): UeCamera(data) constructor {
      * The zoom factor is applied to scale the frustum.
      */
     function updateProjectionMatrix() {
-        gml_pragma("forceinline");
-        var w = abs(right - left);
-        var h = abs(top - bottom);
-        matrix_build_projection_ortho(w, h, near, far, global.UE_DUMMY_ARRAY16);
-        projectionMatrix.fromArray(global.UE_DUMMY_ARRAY16);
-        projectionMatrixInverse.copy(projectionMatrix);
-    	camera_set_proj_mat(camera, projectionMatrix.data);
+      gml_pragma("forceinline");
+      var w = abs(right - left);
+      var h = abs(top - bottom);
+      matrix_build_projection_ortho(w, h, near, far, projectionMatrix);
+      
+      mat4_copy(projectionMatrixInverse, projectionMatrix);
+      // @todo invert it?
+      
+    	camera_set_proj_mat(camera, projectionMatrix);
     }
     
     // Build the orthographic projection

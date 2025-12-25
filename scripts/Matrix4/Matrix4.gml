@@ -4,7 +4,8 @@
 /// Rotation angles are in DEGREES.
 
 // Global temp matrix for temporary operations
-global.__MAT4_TEMP = matrix_build_identity();
+global.UE_MAT4_IDENTITY = matrix_build_identity();
+global.UE_MAT4_TEMP0 = matrix_build_identity();
 
 /// @func mat4_create()
 /// @desc Creates a new identity 4x4 matrix.

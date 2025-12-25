@@ -3,7 +3,7 @@
 /// Rotation angles are in DEGREES.
 
 // Global temp quaternion
-global.__QUAT_TEMP = [0, 0, 0, 1];
+global.UE_QUAT_TEMP0 = [0, 0, 0, 1];
 
 /// @func quat_create(x, y, z, w)
 /// @desc Creates a new quaternion. Defaults to identity [0, 0, 0, 1].

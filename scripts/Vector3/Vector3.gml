@@ -3,7 +3,15 @@
 /// All functions modify the first vector in-place when applicable for zero allocations.
 
 // Global dummy array for temporary operations - reuse to avoid allocations
-global.__VEC3_TEMP = [0, 0, 0];
+global.UE_VEC3_TEMP0 = vec3_create();
+global.UE_VEC3_TEMP1 = vec3_create();
+global.UE_VEC3_TEMP2 = vec3_create();
+global.UE_VEC3_TEMP3 = vec3_create();
+
+// Vector3 Enum
+enum VEC3 {
+  x, y, z
+}
 
 /// @func vec3_create(x, y, z)
 /// @desc Creates a new vec3 array with the given components.

@@ -23,10 +23,14 @@ function UeDirectionalLight(color = c_white, intensity = 1, data = {}): UeLight(
     /**
      * Gets the current light direction (normalized vector from position to target).
      * This is recalculated each time to reflect any changes in position or target.
-     * @returns {Struct.UeVector3} Normalized direction vector
+     * @returns {Array} Normalized direction vector (vec3)
      */
     function getDirection() {
         gml_pragma("forceinline");
-        return global.UE_DUMMY_VECTOR3.copy(target.position).sub(position).normalize();
+        var v = global.UE_VEC3_TEMP0;
+        vec3_copy(v, target.position);
+        vec3_sub(v, position);
+        vec3_normalize(v);
+        return v;
     }
 }

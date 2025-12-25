@@ -1,3 +1,5 @@
+global.UE_MATH_VERSION = "2.1.2";
+
 /// @desc Box2 functions using arrays [minX, minY, maxX, maxY]
 
 function box2_create(minX = infinity, minY = infinity, maxX = -infinity, maxY = -infinity) {
