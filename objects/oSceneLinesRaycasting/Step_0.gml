@@ -6,6 +6,6 @@ hitSphere.visible = false;
 
 if (array_length(intersects) > 0) {
     var hit = intersects[0].point;
-    hitSphere.position.copy(hit);
+    vec3_copy(hitSphere.position, hit);
     hitSphere.visible = true;
 }

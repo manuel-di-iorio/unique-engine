@@ -460,7 +460,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             mat4_identity(mat);
         }
         // Apply position (shaftPos is already an array from vec3_create)
-        mat4_set_position(mat, shaftPos[0], shaftPos[1], shaftPos[2]); 
+        mat4_set_position(mat, shaftPos[0], shaftPos[1], shaftPos[2]);
         geoShaft.applyMatrix(mat);
 
         // Handle Geometry
@@ -556,24 +556,27 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
                 var meshE = self._gizmo.getObjectByName("E");
                 if (meshE != undefined) {
                     // Calculate direction from gizmo to camera
-                    var dirToCamera = vec3_sub_vectors(global.UE_VEC3_TEMP0, self.camera.position, self._root.position);
+                    var dirToCamera = global.UE_VEC3_TEMP0;
+                    vec3_sub_vectors(global.UE_VEC3_TEMP0, self.camera.position, self._root.position);
                     vec3_normalize(dirToCamera);
 
                     // Orient the E axis (torus) to face the camera
                     // The torus normal (Z axis by default) should align with the camera direction
                     // Use setFromUnitVectors to directly align Z axis with camera direction
                     var quaternion = global.UE_QUAT_TEMP0;
-                    var defaultNormal = vec3_set(global.UE_VEC3_TEMP1, 0, 0, 1); // Torus default normal (Z-up)
+                    var defaultNormal = global.UE_VEC3_TEMP1;
+                    vec3_set(defaultNormal, 0, 0, 1); // Torus default normal (Z-up)
                     quat_set_from_unit_vectors(quaternion, defaultNormal, dirToCamera);
                     quat_copy(meshE.rotation, quaternion);
                 }
 
                 // Update dynamic arcs for X, Y, Z axes to show only front-facing half
-                var dirToCamera = vec3_sub_vectors(global.UE_VEC3_TEMP0, self.camera.position, self._root.position);
+                var dirToCamera = global.UE_VEC3_TEMP0
+                vec3_sub_vectors(dirToCamera, self.camera.position, self._root.position);
                 vec3_normalize(dirToCamera);
 
                 // Update each axis with dynamic rotation
-                for (var i = 0; i < array_length(self._gizmo.children); i++) {
+                for (var i = 0, il = array_length(self._gizmo.children); i < il; i++) {
                     var mesh = self._gizmo.children[i];
                     var userData = mesh.userData;
 
@@ -609,7 +612,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
                     // We want the center of the arc (+Y) to point at localCamDir.
                     // So we want to rotate Z so that +Y becomes localCamDir.
 
-                    var targetAngle = arctan2(localCamDir.y, localCamDir.x);
+                    var targetAngle = arctan2(localCamDir[VEC3.x], localCamDir[VEC3.y]);
 
                     // We want to rotate the mesh such that its +Y axis points to targetAngle
                     // Current +Y is at pi/2.
@@ -621,8 +624,9 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
                     quat_set_from_axis_angle(spinQ, __zVec, spinAngle);
 
                     // Apply: Total = Static * Spin
-                    var totalQ = userData.staticRotation.clone().multiply(spinQ);
-                    mesh.rotation.copy(totalQ);
+                    var totalQ = quat_clone(userData.staticRotation)
+                    quat_multiply(totalQ, spinQ);
+                    quat_copy(mesh.rotation, totalQ);
                 }
             }
         }
@@ -768,7 +772,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
         // Transform axis vector to local space if needed
         if (self.space == "local" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
-            axisVec.applyQuaternion(self.object.rotation);
+            vec3_apply_quaternion(axisVec, self.object.rotation);
         }
 
         // Calculate the optimal plane for dragging based on mode and selected axis
@@ -778,19 +782,20 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         if (self.mode == "rotate" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
             // For rotate mode: plane is perpendicular to the rotation axis
             // This allows the mouse to move in a circle around the axis
-            _planeNormal = axisVec.clone();
+            _planeNormal = vec3_clone(axisVec);
 
             // If camera is looking from the opposite side, flip the plane
-            var dot = camDir.dot(_planeNormal);
+            var dot = vec3_dot(camDir, _planeNormal);
             if (dot < 0) {
-                _planeNormal.negate();
+                vec3_negate(_planeNormal);
             }
         }
         else if (self.mode == "move" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
             // For move mode single axis: create plane perpendicular to both camera direction and axis
-            // Mathematical explanation: cross(camDir, axis) gives perpendicular vector,
-            // then cross that with axis again to get plane normal that contains the axis
-            _planeNormal = camDir.clone().cross(axisVec).cross(axisVec).normalize();
+            _planeNormal = vec3_clone(camDir);
+            vec3_cross(_planeNormal, axisVec);
+            vec3_cross(_planeNormal, axisVec);
+            vec3_normalize(_planeNormal);
         }
         else if (self.axis == "XZ" || self.axis == "YZ" || self.axis == "XY") {
             // For plane handles: use the plane's natural normal
@@ -802,28 +807,28 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
             // Transform normal to local space if needed
             if (self.space == "local") {
-                _planeNormal.applyQuaternion(self.object.rotation);
+                vec3_apply_quaternion(_planeNormal, self.object.rotation);
             }
 
             // Flip plane normal if camera is looking from the wrong side
             // Dot product tells us if camera and normal are pointing in same direction
-            var dot = camDir.dot(_planeNormal);
+            var dot = vec3_dot(camDir, _planeNormal);
             if (dot > 0) {
-                _planeNormal.negate();
+                vec3_negate(_planeNormal);
             }
         }
 
         // Save the initial transform state before dragging begins for delta calculations
-        self._positionStart.copy(self.object.position);
-        self._rotationStart.copy(self.object.rotation);
-        self._scaleStart.copy(self.object.scale);
+        vec3_copy(self._positionStart, self.object.position);
+        quat_copy(self._rotationStart, self.object.rotation);
+        vec3_copy(self._scaleStart, self.object.scale);
         self.object.getWorldPosition(self._positionStartWorld);
 
         // Create the drag plane using the calculated normal and object position
-        self._plane.setFromNormalAndCoplanarPoint(_planeNormal, self._positionStartWorld);
+        plane_set_from_normal_and_coplanar_point(self._plane, _planeNormal, self._positionStartWorld);
 
         // Calculate initial intersection point where mouse ray meets the drag plane
-        var intersectionPoint = _raycasterInstance.ray.intersectPlane(self._plane);
+        var intersectionPoint = ray_intersect_plane(_raycasterInstance.ray, self._plane);
         if (intersectionPoint == undefined) {
             // No intersection found; cancel dragging
             self.dragging = false;
@@ -831,8 +836,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             self.axis = undefined;
             return;
         }
-        self.pointStart.copy(intersectionPoint);
-        self.pointPrevious.copy(intersectionPoint);  // Initialize previous point for rotation
+        vec3_copy(self.pointStart, intersectionPoint);
+        vec3_copy(self.pointPrevious, intersectionPoint);  // Initialize previous point for rotation
         self._rotationAngle = 0; // Reset accumulated rotation for new drag
     }
 
@@ -850,15 +855,16 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         }
 
         // Calculate current intersection with drag plane
-        var intersectionPoint = _raycasterInstance.ray.intersectPlane(self._plane);
+        var intersectionPoint = ray_intersect_plane(_raycasterInstance.ray, self._plane);
         if (intersectionPoint == undefined) return;
 
-        self.pointEnd.copy(intersectionPoint);
+        vec3_copy(self.pointEnd, intersectionPoint);
 
         // Calculate drag delta vector
         // For move/scale we use delta from start.
         // For rotate, we will calculate angle directly from vectors in applyTransform
-        self.delta.copy(self.pointEnd).sub(self.pointStart);
+        vec3_copy(self.delta, self.pointEnd);
+        vec3_sub(self.delta, self.pointStart);
 
         applyTransform();  // Apply transform change to object based on delta
         updateGizmo();     // Update gizmo transform to match object
@@ -1180,10 +1186,10 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         gml_pragma("forceinline");
         if (!self.object || !self.dragging) return self;
 
-        self.object.position.copy(self._positionStart);
-        self.object.rotation.copy(self._rotationStart);
-        self.object.scale.copy(self._scaleStart);
-        self.pointStart.copy(self.pointEnd);
+        vec3_copy(self.object.position, self._positionStart);
+        quat_copy(self.object.rotation, self._rotationStart);
+        vec3_copy(self.object.scale, self._scaleStart);
+        vec3_copy(self.pointStart, self.pointEnd);
         updateGizmo();
         return self;
     }

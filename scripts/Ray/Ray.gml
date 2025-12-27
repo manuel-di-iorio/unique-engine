@@ -108,26 +108,17 @@ function ray_intersect_sphere(r, sphere) {
     var vz = sz - r[2];
     
     var tca = vx * r[3] + vy * r[4] + vz * r[5];
-    if (tca < 0) return -1; // Behind origin
-    
     var d2 = (vx*vx + vy*vy + vz*vz) - tca*tca;
     var radius2 = radius*radius;
     
     if (d2 > radius2) return -1; // Outside radius
     
     var thc = sqrt(radius2 - d2);
-    
-    // t0 = first intersection
     var t0 = tca - thc;
+    var t1 = tca + thc;
     
-    // t1 = second intersection
-    // var t1 = tca + thc; 
-    
-    if (t0 < 0) {
-        // origin inside?
-        t0 = tca + thc;
-        if (t0 < 0) return -1;
-    }
+    if (t0 < 0) t0 = t1;
+    if (t0 < 0) return -1;
     
     return t0;
 }
@@ -231,10 +222,11 @@ function ray_distance_sq_to_point(r, px, py, pz) {
 }
 
 /// @func ray_distance_to_point(r, px, py, pz)
-/// @desc Distance from ray to point.
+/// @desc Linear distance from ray origin to point along the ray direction.
 function ray_distance_to_point(r, px, py, pz) {
     gml_pragma("forceinline");
-    return sqrt(ray_distance_sq_to_point(r, px, py, pz));
+    var vx = px - r[0], vy = py - r[1], vz = pz - r[2];
+    return (vx*r[3] + vy*r[4] + vz*r[5]);
 }
 
 /// @func ray_closest_point_to_point(r, px, py, pz, out)
@@ -290,7 +282,7 @@ function ray_distance_sq_to_segment(r, v0, v1, outRay = undefined, outSeg = unde
     var qcx = sx + tc*vx, qcy = sy + tc*vy, qcz = sz + tc*vz;
     if (outRay != undefined) { outRay[0]=pcx; outRay[1]=pcy; outRay[2]=pcz; }
     if (outSeg != undefined) { outSeg[0]=qcx; outSeg[1]=qcy; outSeg[2]=qcz; }
-    var dxo = rx - qcx, dyo = ry - qcy, dzo = rz - qcz;
+    var dxo = pcx - qcx, dyo = pcy - qcy, dzo = pcz - qcz;
     return dxo*dxo + dyo*dyo + dzo*dzo;
 }
 

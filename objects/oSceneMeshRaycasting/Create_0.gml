@@ -62,7 +62,7 @@ for (var i = 0; i < 150; i++) {
      
     // Set the bounding box size matching the mesh scale
     geometry.boundingBox = box3_create();
-    box3_set_from_center_and_size(geometry.boundingBox, UE_MATH_VECTOR3_ZERO, vec3_create(size, size, size));
+    box3_set_from_center_and_size(geometry.boundingBox, vec3_create(), vec3_create(size, size, size));
     
     // Set the bounding sphere for frustum testing
     // Radius = half diagonal of cube = size * sqrt(3) / 2

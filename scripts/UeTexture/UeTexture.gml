@@ -70,39 +70,37 @@ function UeTexture(sprite = undefined, data = {}) constructor {
      * Uses matrix multiplication to concatenate transformations.
      */
     function updateMatrix() {
-        gml_pragma("forceinline");
-    
-        var tx = -center.x;
-        var ty = -center.y;
+      gml_pragma("forceinline");
+  
+      var tx = -center.x;
+      var ty = -center.y;
 
-        var repeatVec = self[$ "repeat"];
-        var sx = repeatVec.x * (flipX ? -1 : 1);
-        var sy = repeatVec.y * (flipY ? -1 : 1);
+      var repeatVec = self[$ "repeat"];
+      var sx = repeatVec[VEC2.x] * (flipX ? -1 : 1);
+      var sy = repeatVec[VEC2.y] * (flipY ? -1 : 1);
 
-        var ox = offset.x + center.x;
-        var oy = offset.y + center.y;
-    
-        
-        var cx = sprite_get_width(sprite) * 0.5;
-        var cy = sprite_get_height(sprite) * 0.5;
+      var ox = offset[VEC2.x] + center[VEC2.x];
+      var oy = offset[VEC2.y] + center[VEC2.y];
+      
+      var cx = sprite_get_width(sprite) * 0.5;
+      var cy = sprite_get_height(sprite) * 0.5;
 
-        
-        var dummyMat = global.UE_DUMMY_MATRIX4;
-        matrix.identity()
-            // Move the offset
-            .multiply(dummyMat.makeTranslation(ox, oy, 0))
-            // Move the pivot to the sprite center
-            .multiply(dummyMat.makeTranslation(cx, cy, 0))
-            // Rotate around the pivot
-            .multiply(dummyMat.makeRotationFromEuler(0, 0, rotation))
-            // Flip if requested
-            .multiply(dummyMat.makeScale(sx, sy, 1))
-            // Move back the pivot
-            .multiply(dummyMat.makeTranslation(-cx, -cy, 0))
-            // Move to the specified center
-            .multiply(dummyMat.makeTranslation(tx, ty, 0));
-        
-        return self;
+      var tempMat = global.UE_MAT4_TEMP0;
+      mat4_identity(matrix);
+      // Move the offset
+      mat4_make_translation(tempMat, ox, oy, 0); mat4_multiply(matrix, tempMat);
+      // Move the pivot to the sprite center
+      mat4_make_translation(tempMat, cx, cy, 0); mat4_multiply(matrix, tempMat);
+      // Rotate around the pivot
+      mat4_make_rotation_from_euler(tempMat, 0, 0, rotation); mat4_multiply(matrix, tempMat);
+      // Flip if requested
+      mat4_make_scale(tempMat, sx, sy, 1); mat4_multiply(matrix, tempMat);
+      // Move back the pivot
+      mat4_make_translation(tempMat, -cx, -cy, 0); mat4_multiply(matrix, tempMat);
+      // Move to the specified center
+      mat4_make_translation(tempMat, tx, ty, 0); mat4_multiply(matrix, tempMat);
+      
+      return self;
     }
 
     /**
@@ -116,8 +114,8 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         if (!sprite_exists(sprite)) return;
         
         var repeatVec = self[$ "repeat"];
-        var tilesX = ceil(abs(repeatVec.x));
-        var tilesY = ceil(abs(repeatVec.y));
+        var tilesX = ceil(abs(repeatVec[VEC2.x]));
+        var tilesY = ceil(abs(repeatVec[VEC2.y]));
         
         var spriteW = sprite_get_width(sprite);
         var spriteH = sprite_get_height(sprite);
@@ -132,7 +130,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         gpu_set_blendenable(false);
         
         updateMatrix();  // Build the transformation matrix
-        matrix_set(matrix_world, matrix.data);
+        matrix_set(matrix_world, matrix);
      
         for (var ix = 0; ix < tilesX; ix++) {
             for (var iy = 0; iy < tilesY; iy++) {
@@ -224,8 +222,8 @@ function UeTexture(sprite = undefined, data = {}) constructor {
             spriteBuffSize: 0,
             
             // UV transform parameters
-            offset: [offset.x, offset],
-            center: [center.x, center.y],
+            offset,
+            center,
             rotation,
             
              // Flip flags
@@ -240,7 +238,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
             userData
         };
 
-        payload[$ "repeat"] = [repeatVec.x, repeatVec.y];
+        payload[$ "repeat"] = [repeatVec[0], repeatVec[1]];
         return payload;
     }
 
@@ -253,13 +251,13 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         generateMipmaps = data.generateMipmaps;
 
         var repeatArr = data[$ "repeat"] ?? [1, 1];
-        self[$ "repeat"].set(repeatArr[0], repeatArr[1]);
+        vec2_set(self[$ "repeat"], repeatArr[0], repeatArr[1]);
 
         var offsetArr = data[$ "offset"] ?? [0, 0];
-        offset.set(offsetArr[0], offsetArr[1]);
+        vec2_set(offset, offsetArr[0], offsetArr[1]);
 
         var centerArr = data[$ "center"] ?? [0, 0];
-        center.set(centerArr[0], centerArr[1]);
+        vec2_set(center, centerArr[0], centerArr[1]);
 
         rotation = data.rotation ?? 0;
         flipX = data.flipX ?? false;
@@ -365,10 +363,10 @@ function UeTexture(sprite = undefined, data = {}) constructor {
             scaleX = aspect / imageAspect;
         }
     
-        self[$ "repeat"].x = 1 / scaleX;
-        self[$ "repeat"].y = 1 / scaleY;
-        offset.x = (1 - self[$ "repeat"].x) * 0.5;
-        offset.y = (1 - self[$ "repeat"].y) * 0.5;
+        self[$ "repeat"][0] = 1 / scaleX;
+        self[$ "repeat"][1] = 1 / scaleY;
+        offset[0] = (1 - self[$ "repeat"][0]) * 0.5;
+        offset[1] = (1 - self[$ "repeat"][1]) * 0.5;
     
         needsUpdate = true;
         return self;
@@ -394,10 +392,10 @@ function UeTexture(sprite = undefined, data = {}) constructor {
             scaleY = aspect / imageAspect;
         }
     
-        self[$ "repeat"].x = scaleX;
-        self[$ "repeat"].y = scaleY;
-        offset.x = (1 - self[$ "repeat"].x) * 0.5;
-        offset.y = (1 - self[$ "repeat"].y) * 0.5;
+        self[$ "repeat"][0] = scaleX;
+        self[$ "repeat"][1] = scaleY;
+        offset[0] = (1 - self[$ "repeat"][0]) * 0.5;
+        offset[1] = (1 - self[$ "repeat"][1]) * 0.5;
     
         needsUpdate = true;
         return self;
@@ -408,8 +406,8 @@ function UeTexture(sprite = undefined, data = {}) constructor {
      */
     function fill() {
         gml_pragma("forceinline");
-        self[$ "repeat"].x = 1;
-        self[$ "repeat"].y = 1;
+        self[$ "repeat"][0] = 1;
+        self[$ "repeat"][1] = 1;
         offset.x = 0;
         offset.y = 0;
         rotation = 0;

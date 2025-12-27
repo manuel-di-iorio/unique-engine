@@ -108,16 +108,16 @@ function UeMaterial(data = {}) constructor {
    // Cache the uniforms
    var uniformNames = variable_struct_get_names(uniforms);
    __uniformsCachedCount = array_length(uniformNames);
-   __uniformCached = array_create(__uniformsCachedCount);
+   __uniformsCached = array_create(__uniformsCachedCount);
  
    for (var u = 0; u < __uniformsCachedCount; u++) {
      var uniformName = uniformNames[u];
      var uniformLoc = shader_get_uniform(shader, $"u_{uniformName}");
  
-     __uniformCached[u] = [
+     __uniformsCached[u] = [
        uniforms[$ uniformName],
-       shader_get_uniform(shader, $"u_{uniformName}")
-             ];
+       uniformLoc
+    ];
    }
  
    // Cache the textures        
@@ -206,12 +206,7 @@ function UeMaterial(data = {}) constructor {
  
      if (i < pointLightCount) {
        var light = pointLightState[i];
- 
-       uniformsCache[0] = light.position.x;
-       uniformsCache[1] = light.position.y;
-       uniformsCache[2] = light.position.z;
-       shader_set_uniform_f_array(lightLoc[0], uniformsCache);
- 
+       shader_set_uniform_f_array(lightLoc[0], light.position);
        shader_set_uniform_f_array(lightLoc[1], light.color);
        shader_set_uniform_f(lightLoc[2], light.range);
        shader_set_uniform_f(lightLoc[3], light.intensity);
@@ -236,7 +231,7 @@ function UeMaterial(data = {}) constructor {
   
     // Apply the uniforms on the shader
     for (var u = 0; u < __uniformsCachedCount; u++) {
-      var uniformCached = __uniformCached[u];
+      var uniformCached = __uniformsCached[u];
       var uniform = uniformCached[0];
   
       var val = uniform.value;
@@ -248,7 +243,7 @@ function UeMaterial(data = {}) constructor {
         case UE_UNIFORM_TYPE.VEC2: shader_set_uniform_f(loc, val[0], val[1]); break;
         case UE_UNIFORM_TYPE.VEC3: shader_set_uniform_f(loc, val[0], val[1], val[2]); break;
         case UE_UNIFORM_TYPE.VEC4: shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]); break;
-        case UE_UNIFORM_TYPE.MAT4: shader_set_uniform_matrix(loc); break;
+        case UE_UNIFORM_TYPE.MAT4: shader_set_uniform_matrix_array(loc, val); break;
         case UE_UNIFORM_TYPE.ARRAY: shader_set_uniform_f_array(loc, val); break;
         case UE_UNIFORM_TYPE.BUFFER: shader_set_uniform_f_buffer(loc, val, uniform.offset, uniform.count); break;
       }
@@ -298,7 +293,7 @@ function UeMaterial(data = {}) constructor {
    */
   function setUniform(name, value) {
     gml_pragma("forceinline");
-    uniforms[$ name] = value;
+    uniforms[$ name].value = value;
     return self;
   }
   

@@ -66,6 +66,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
             vec3_sub_vectors(dir, worldPoint, origin);
             vec3_normalize(dir);
             ray_set(self.ray, origin[0], origin[1], origin[2], dir[0], dir[1], dir[2]);
+          
         } else if (camera.isOrthographicCamera) {
             var invProj = global.UE_MAT4_TEMP0;
             mat4_copy(invProj, camera.projectionMatrix);

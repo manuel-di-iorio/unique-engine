@@ -272,22 +272,20 @@ function UeGeometry(data = {}) constructor {
         gml_pragma("forceinline");
         if (position == undefined) return self;
         
-        var e = matrix.data;
         for (var i = 0, l = array_length(position); i < l; i += 3) {
             var vx = position[i], vy = position[i+1], vz = position[i+2];
-            position[i]   = e[0]*vx + e[4]*vy + e[8]*vz + e[12];
-            position[i+1] = e[1]*vx + e[5]*vy + e[9]*vz + e[13];
-            position[i+2] = e[2]*vx + e[6]*vy + e[10]*vz + e[14];
+            position[i]   = matrix[0]*vx + matrix[4]*vy + matrix[8]*vz + matrix[12];
+            position[i+1] = matrix[1]*vx + matrix[5]*vy + matrix[9]*vz + matrix[13];
+            position[i+2] = matrix[2]*vx + matrix[6]*vy + matrix[10]*vz + matrix[14];
         }
         
         if (normal != undefined) {
-            var normalMatrix = matrix.clone().invert().transpose();
-            var n = normalMatrix.data;
+            var normalMatrix = mat4_clone(matrix); mat4_invert(normalMatrix); mat4_transpose(normalMatrix);
             for (var i = 0, l = array_length(normal); i < l; i += 3) {
                 var nx = normal[i], ny = normal[i+1], nz = normal[i+2];
-                normal[i]   = n[0]*nx + n[4]*ny + n[8]*nz;
-                normal[i+1] = n[1]*nx + n[5]*ny + n[9]*nz;
-                normal[i+2] = n[2]*nx + n[6]*ny + n[10]*nz;
+                normal[i]   = normalMatrix[0]*nx + normalMatrix[4]*ny + normalMatrix[8]*nz;
+                normal[i+1] = normalMatrix[1]*nx + normalMatrix[5]*ny + normalMatrix[9]*nz;
+                normal[i+2] = normalMatrix[2]*nx + normalMatrix[6]*ny + normalMatrix[10]*nz;
                 
                 var d = sqrt(normal[i]*normal[i] + normal[i+1]*normal[i+1] + normal[i+2]*normal[i+2]);
                 if (d > 0) { normal[i] /= d; normal[i+1] /= d; normal[i+2] /= d; }

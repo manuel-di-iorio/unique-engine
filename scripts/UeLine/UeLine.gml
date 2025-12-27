@@ -8,9 +8,8 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
         gml_pragma("forceinline");
         var object = self;
     
-        mat4_copy(global.UE_MAT4_TEMP0, matrixWorld);
-        mat4_invert(global.UE_MAT4_TEMP0);
-        var invWorld = global.UE_MAT4_TEMP0;
+        var invWorld = mat4_clone(matrixWorld);
+        mat4_invert(invWorld);
     
         var localRay = ray_clone(raycaster.ray);
         ray_apply_matrix4(localRay, invWorld);
@@ -29,14 +28,15 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
     
         var pos = geometry[$ "position"];
         if (pos == undefined) return self;
-        var count = (array_length(pos) / 3) - 1;
+        var count = (array_length(pos) / 3);
+        var step = (primitive == pr_linelist) ? 2 : 1;
     
         var vec3A = global.UE_VEC3_TEMP0;
         var vec3B = global.UE_VEC3_TEMP1;
         var closestOnRay = global.UE_VEC3_TEMP2;
         var closestOnSeg = global.UE_VEC3_TEMP3;
     
-        for (var i = 0; i < count; i++) {
+        for (var i = 0; i < count - 1; i += step) {
             var i3 = i * 3;
             var i1_3 = (i + 1) * 3;
 

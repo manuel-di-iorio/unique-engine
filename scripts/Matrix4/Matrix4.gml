@@ -115,7 +115,7 @@ function mat4_determinant(m) {
 /// @param {Array<Real>} m The matrix to invert
 function mat4_invert(m) {
   gml_pragma("forceinline");
-  matrix_inverse(m, m);
+  return matrix_inverse(m, m);
 }
 
 // ============================================================================
