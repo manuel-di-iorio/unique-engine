@@ -449,7 +449,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         var s = vec3_create(1, 1, 1);
 
         // Shaft Geometry
-        var geoShaft = new UeCylinderGeometry(__axisLineWidth, __axisLineWidth, lineLen, { radialSegments: 4, color: color });
+        var geoShaft = new UeCylinderGeometry(__axisLineWidth, lineLen, 4, { color: color });
 
         // Shaft Transform
         if (rotationAxis != undefined) {
@@ -1007,22 +1007,22 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             // Accumulate rotation using small deltas (prev -> curr)
             // This allows for infinite rotation (>360 degrees) and stable behavior
             var center = self._positionStartWorld;
-            var vPrev = vec3_sub_vectors(vec3_create(), self.pointPrevious, center);
-            var vCurr = vec3_sub_vectors(vec3_create(), self.pointEnd, center);
+            var vPrev = vec3_create(); vec3_sub_vectors(vPrev, self.pointPrevious, center);
+            var vCurr = vec3_create(); vec3_sub_vectors(vCurr, self.pointEnd, center);
 
             // Project vectors onto the plane perpendicular to the axis
             // vProj = v - axis * (v . axis)
-            var vPrevProj = vec3_copy(vec3_create(), vPrev);
+            var vPrevProj = vec3_create(); vec3_copy(vPrevProj, vPrev);
             vec3_add_scaled_vector(vPrevProj, axisVec, -vec3_dot(vPrev, axisVec));
             
-            var vCurrProj = vec3_copy(vec3_create(), vCurr);
+            var vCurrProj = vec3_create(); vec3_copy(vCurrProj, vCurr);
             vec3_add_scaled_vector(vCurrProj, axisVec, -vec3_dot(vCurr, axisVec));
 
             vec3_normalize(vPrevProj);
             vec3_normalize(vCurrProj);
 
             // Calculate small angle change this frame
-            var vCross = vec3_cross_vectors(vec3_create(), vPrevProj, vCurrProj);
+            var vCross = vec3_create(); vec3_cross_vectors(vCross, vPrevProj, vCurrProj);
             var vDot = vec3_dot(vPrevProj, vCurrProj);
             var angleDelta = radtodeg(arctan2(vec3_dot(vCross, axisVec), vDot));
 
@@ -1041,7 +1041,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
             // Apply to initial rotation
             // rotation = rotationDelta * rotationStart
-            var finalRot = quat_multiply(quat_clone(rotationDelta), self._rotationStart);
+            var finalRot = quat_clone(rotationDelta);
+            quat_multiply(finalRot, self._rotationStart);
             quat_copy(self.object.rotation, finalRot);
 
             // Update previous point for next frame
@@ -1056,10 +1057,10 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             quat_invert(invRot);
 
             // Transform start/end points to object local space (offset from center)
-            var localStart = vec3_sub_vectors(vec3_create(), self.pointStart, self._positionStartWorld);
+            var localStart = vec3_create(); vec3_sub_vectors(localStart, self.pointStart, self._positionStartWorld);
             vec3_apply_quaternion(localStart, invRot);
             
-            var localEnd = vec3_sub_vectors(vec3_create(), self.pointEnd, self._positionStartWorld);
+            var localEnd = vec3_create(); vec3_sub_vectors(localEnd, self.pointEnd, self._positionStartWorld);
             vec3_apply_quaternion(localEnd, invRot);
 
             var scaleFactorX = 1;

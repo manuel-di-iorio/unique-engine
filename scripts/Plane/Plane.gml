@@ -41,17 +41,19 @@ function plane_normalize(p) {
     }
 }
 
-/// @func plane_distance_to_point(p, px, py, pz)
+/// @func plane_distance_to_point(p, point)
 /// @desc Returns signed distance from point to plane.
-function plane_distance_to_point(p, px, py, pz) {
+function plane_distance_to_point(p, point) {
     gml_pragma("forceinline");
-    return p[0] * px + p[1] * py + p[2] * pz + p[3];
+    return p[0] * point[0] + p[1] * point[1] + p[2] * point[2] + p[3];
 }
 
-/// @func plane_set_from_normal_and_coplanar_point(p, nx, ny, nz, px, py, pz)
+/// @func plane_set_from_normal_and_coplanar_point(p, normal, point)
 /// @desc Sets plane from normal and a point on the plane.
-function plane_set_from_normal_and_coplanar_point(p, nx, ny, nz, px, py, pz) {
+function plane_set_from_normal_and_coplanar_point(p, normal, point) {
     gml_pragma("forceinline");
+    var nx = normal[0], ny = normal[1], nz = normal[2];
+    var px = point[0], py = point[1], pz = point[2];
     p[0] = nx;
     p[1] = ny;
     p[2] = nz;
@@ -86,10 +88,10 @@ function plane_coplanar_point(p, out = undefined) {
     return out;
 }
 
-function plane_project_point(p, px, py, pz, out = undefined) {
+function plane_project_point(p, point, out = array_create(3)) {
     gml_pragma("forceinline");
+    var px = point[0], py = point[1], pz = point[2];
     var t = -(p[0]*px + p[1]*py + p[2]*pz + p[3]);
-    out ??= array_create(3);
     out[0] = px + p[0]*t;
     out[1] = py + p[1]*t;
     out[2] = pz + p[2]*t;
@@ -162,7 +164,7 @@ function plane_apply_matrix4(p, m, normalMatrix = undefined) {
     } else {
         vec3_transform_direction(n, m);
     }
-    plane_set_from_normal_and_coplanar_point(p, n[0], n[1], n[2], pt[0], pt[1], pt[2]);
+    plane_set_from_normal_and_coplanar_point(p, n, pt);
 }
 
 function plane_set_from_coplanar_points(p, a, b, c) {
@@ -174,5 +176,5 @@ function plane_set_from_coplanar_points(p, a, b, c) {
     var nz = e1x*e2y - e1y*e2x;
     var len = sqrt(nx*nx + ny*ny + nz*nz);
     if (len > 0) { var inv = 1/len; nx*=inv; ny*=inv; nz*=inv; }
-    plane_set_from_normal_and_coplanar_point(p, nx, ny, nz, a[0], a[1], a[2]);
+    plane_set_from_normal_and_coplanar_point(p, [nx, ny, nz], a);
 }

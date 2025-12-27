@@ -12,9 +12,9 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             type: "ModelInstance",
             name: instance.name,
             model: instance.object != undefined ? instance.object.uuid : undefined,
-            position: instance.position.toArray(),
-            rotation: instance.rotation.toArray(),
-            scale: instance.scale.toArray(),
+            position: instance.position,
+            rotation: instance.rotation,
+            scale: instance.scale,
             visible: instance.visible
         };
         
@@ -78,15 +78,15 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         // Apply transform
         if (data[$ "position"] != undefined) {
             var pos = data.position;
-            instance.position.set(pos[0], pos[1], pos[2]);
+            vec3_set(instance.position, pos[0], pos[1], pos[2]);
         }
         if (data[$ "rotation"] != undefined) {
             var rot = data.rotation;
-            instance.rotation.set(rot[0], rot[1], rot[2], rot[3]);
+            quat_set(instance.rotation, rot[0], rot[1], rot[2], rot[3]);
         }
         if (data[$ "scale"] != undefined) {
             var scl = data.scale;
-            instance.scale.set(scl[0], scl[1], scl[2]);
+            vec3_set(instance.scale, scl[0], scl[1], scl[2]);
         }
         if (data[$ "visible"] != undefined) {
             instance.visible = data.visible;
@@ -100,7 +100,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         
         // Initialize editor-specific rotation tracker
         instance.__rotationEuler = euler_create();
-        instance.__rotationEuler.setFromQuaternion(instance.rotation);
+        euler_set_from_quaternion(instance.__rotationEuler, instance.rotation);
         
         instance.updateMatrix();
         
