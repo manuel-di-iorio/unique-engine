@@ -184,10 +184,11 @@ function ProjectSaver() constructor {
         var metadata = is_callable(assetToJSON) ? assetToJSON() : asset;
         
         if (struct_exists(asset, "__rotationEuler") && asset[$ "__rotationEuler"] != undefined) {
-            metadata[$ "ex"] = asset[$ "__rotationEuler"][$ "x"];
-            metadata[$ "ey"] = asset[$ "__rotationEuler"][$ "y"];
-            metadata[$ "ez"] = asset[$ "__rotationEuler"][$ "z"];
-            metadata[$ "eo"] = asset[$ "__rotationEuler"][$ "order"];
+            var e = asset[$ "__rotationEuler"];
+            metadata[$ "ex"] = e[0];
+            metadata[$ "ey"] = e[1];
+            metadata[$ "ez"] = e[2];
+            metadata[$ "eo"] = "YXZ";
         }
         
         if (type == "Mesh" && struct_exists(asset, "__matrixAutoUpdate") && asset[$ "__matrixAutoUpdate"] != undefined) {
@@ -238,10 +239,10 @@ function ProjectSaver() constructor {
             damping: true
         };
 
-        cameraSettings[$ "position"] = [sm.camera.position.x, sm.camera.position.y, sm.camera.position.z];
+        cameraSettings[$ "position"] = [sm.camera.position[VEC3.x], sm.camera.position[VEC3.y], sm.camera.position[VEC3.z]];
 
         if (sm.orbit != undefined) {
-            cameraSettings[$ "target"] = [sm.orbit.target.x, sm.orbit.target.y, sm.orbit.target.z];
+            cameraSettings[$ "target"] = [sm.orbit.target[VEC3.x], sm.orbit.target[VEC3.y], sm.orbit.target[VEC3.z]];
             cameraSettings[$ "dampingFactor"] = sm.orbit.dampingFactor;
         }
 

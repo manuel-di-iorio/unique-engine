@@ -97,10 +97,16 @@ function EditorManager() constructor {
             var hasChildren = array_length(self.gizmoTarget.children) > 0;
             
             if (hasGeometry || hasChildren) {
-                runLater(method({ sm, gizmoTarget: self.gizmoTarget }, function() { 
-                    sm.boxHelper.object = gizmoTarget;
-                    oSceneEditor.assetManager.updateAssetMatrix(gizmoTarget);
-                }));
+                // runLater(method({ sm, gizmoTarget: self.gizmoTarget }, function() { 
+                //     sm.boxHelper.object = gizmoTarget;
+                //     oSceneEditor.assetManager.updateAssetMatrix(gizmoTarget);
+                // }));
+                
+                sm.boxHelper.object = self.gizmoTarget;
+                
+                // Update the whole scene if we are in one, otherwise just the target
+                var targetToUpdate = self.activeScene != undefined ? self.activeScene : self.gizmoTarget;
+                oSceneEditor.assetManager.updateAssetMatrix(targetToUpdate);
             }
         }
         

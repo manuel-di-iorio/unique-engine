@@ -23,13 +23,6 @@ function box3_set_from_object(b, object) {
         box3_union(b, localBox);
     }
 
-    // Espandi con eventuale sphere
-    var s = object[$ "__intersectionSphere"];
-    if (s != undefined) {
-        var sb = sphere_get_bounding_box(s);
-        box3_union(b, sb);
-    }
-
     // Richiama la stessa funzione sui figli
     var children = object[$ "children"];
     var n = array_length(children);

@@ -92,9 +92,7 @@ function scrEditorInspectorMesh() {
                       return self.asset.position;
                   },
                   onBlur: function(value) {
-                      self.asset.position.x = value[0];
-                      self.asset.position.y = value[1];
-                      self.asset.position.z = value[2];
+                      vec3_set(self.asset.position, value[0], value[1], value[2]);
                   }
             },
           
@@ -108,8 +106,8 @@ function scrEditorInspectorMesh() {
                   },
                   onBlur: function(value) {
                       var euler = self.asset.__rotationEuler;
-                      euler.set(value[0], value[1], value[2]);
-                      self.asset.rotation.setFromEuler(euler.x, euler.y, euler.z);
+                      euler_set(euler, value[0], value[1], value[2]);
+                      self.asset.setRotation(value[0], value[1], value[2]);
                   }
             },
             { 
@@ -121,9 +119,7 @@ function scrEditorInspectorMesh() {
                       return self.asset.scale;
                   },
                   onBlur: function(value) {
-                      self.asset.scale.x = value[0];
-                      self.asset.scale.y = value[1];
-                      self.asset.scale.z = value[2];
+                      vec3_set(self.asset.scale, value[0], value[1], value[2]);
                   }
             }
           ]

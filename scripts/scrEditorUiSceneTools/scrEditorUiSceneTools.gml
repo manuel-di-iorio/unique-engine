@@ -141,7 +141,7 @@ function EditorUiSceneTools(ui) constructor {
             sm.camera.setPosition(100, -300, 70);
             sm.camera.lookAt(0, 0, 0);
             if (sm.orbit != undefined) {
-                sm.orbit.target.set(0, 0, 0);
+                vec3_set(sm.orbit.target, 0, 0, 0);
                 sm.orbit.reset(); 
             }
             oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);

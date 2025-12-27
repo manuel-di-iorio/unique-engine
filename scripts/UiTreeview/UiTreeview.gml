@@ -91,7 +91,7 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         var _filterItem = undefined;
         _filterItem = method({ _lowerSearch, _filterItem:  function(item) {
                 // Check if this item matches
-                var nameToCheck = (item.asset != undefined) ? item.asset.name : item.name;
+                var nameToCheck = (item[$ "asset"] != undefined) ? item.asset.name : item.name;
                 var matches = (_lowerSearch == "" || string_pos(_lowerSearch, string_lower(nameToCheck)) > 0);
                 
                 var hasMatchingChildren = false;

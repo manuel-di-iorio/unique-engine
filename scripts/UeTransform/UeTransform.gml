@@ -124,6 +124,17 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
             } else {
                 matrix_multiply(matrix, parent.matrixWorld, matrixWorld); 
             }
+
+            // Update cached world-space bounding sphere if geometry exists
+            var geometry = self[$ "geometry"];
+            if (geometry != undefined) {
+                var boundingSphere = geometry[$ "boundingSphere"];
+                if (boundingSphere != undefined) {
+                    __intersectionSphere ??= sphere_create();
+                    sphere_copy(__intersectionSphere, boundingSphere);
+                    sphere_apply_matrix4(__intersectionSphere, matrixWorld);
+                }
+            }
         }
 
         // Update children if requested
