@@ -1,5 +1,16 @@
 /// @desc Ray functions using arrays [ox, oy, oz, dx, dy, dz]
 
+global.UE_RAY_TEMP0 = ray_create();
+
+enum RAY {
+  origX,
+  origY,
+  origZ,
+  dirX,
+  dirY,
+  dirZ
+}
+
 function ray_create(ox = 0, oy = 0, oz = 0, dx = 0, dy = 0, dz = -1) {
     gml_pragma("forceinline");
     return [ox, oy, oz, dx, dy, dz];

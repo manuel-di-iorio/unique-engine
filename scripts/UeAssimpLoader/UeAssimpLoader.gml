@@ -215,13 +215,13 @@ function UeAssimpLoader(data = {}) constructor {
     var x2 = ASSIMP_GetMeshAABBMaxX();
     var y2 = ASSIMP_GetMeshAABBMaxY();
     var z2 = ASSIMP_GetMeshAABBMaxZ();
-    var minV = new UeVector3(x1, y1, z1);
-    var maxV = new UeVector3(x2, y2, z2);
+    var minV = vec3_create(x1, y1, z1);
+    var maxV = vec3_create(x2, y2, z2);
 
-    geometry.boundingBox = new UeBox3(minV, maxV);
+    geometry.boundingBox = box3_create(x1, y1, z1,x2, y2, z2);
 
-    var center = minV.clone().add(maxV).multiplyScalar(0.5);
-    geometry.boundingSphere = new UeSphere(center, center.distanceTo(maxV));
+    var center = vec3_clone(minV); vec3_add(center, maxV); vec3_multiply_scalar(center, 0.5);
+    geometry.boundingSphere = sphere_create(center[VEC3.x], center[VEC3.y], center[VEC3.z], vec3_distance_to(center, maxV));
 
     return mesh;
   }
@@ -232,38 +232,36 @@ function UeAssimpLoader(data = {}) constructor {
 
     // Initialize with first mesh bounds
     var firstGeometry = meshes[0].geometry;
-    if (!firstGeometry.boundingBox) return;
+    if (firstGeometry.boundingBox == undefined) return;
 
-    var minX = firstGeometry.boundingBox.sizeMin.x;
-    var minY = firstGeometry.boundingBox.sizeMin.y;
-    var minZ = firstGeometry.boundingBox.sizeMin.z;
-    var maxX = firstGeometry.boundingBox.sizeMax.x;
-    var maxY = firstGeometry.boundingBox.sizeMax.y;
-    var maxZ = firstGeometry.boundingBox.sizeMax.z;
+    var minX = firstGeometry.boundingBox[BOX3.minX];
+    var minY = firstGeometry.boundingBox[BOX3.minY];
+    var minZ = firstGeometry.boundingBox[BOX3.minZ];
+    var maxX = firstGeometry.boundingBox[BOX3.maxX];
+    var maxY = firstGeometry.boundingBox[BOX3.maxY];
+    var maxZ = firstGeometry.boundingBox[BOX3.maxZ];
 
     // Expand bounds for all other meshes
     for (var i = 1, il = array_length(meshes); i < il; i++) {
       var geometry = meshes[i].geometry;
       if (geometry.boundingBox == undefined) continue;
 
-      minX = min(minX, geometry.boundingBox.sizeMin.x);
-      minY = min(minY, geometry.boundingBox.sizeMin.y);
-      minZ = min(minZ, geometry.boundingBox.sizeMin.z);
-      maxX = max(maxX, geometry.boundingBox.sizeMax.x);
-      maxY = max(maxY, geometry.boundingBox.sizeMax.y);
-      maxZ = max(maxZ, geometry.boundingBox.sizeMax.z);
+      minX = min(minX, geometry.boundingBox[BOX3.minX]);
+      minY = min(minY, geometry.boundingBox[BOX3.minY]);
+      minZ = min(minZ, geometry.boundingBox[BOX3.minZ]);
+      maxX = max(maxX, geometry.boundingBox[BOX3.maxX]);
+      maxY = max(maxY, geometry.boundingBox[BOX3.maxY]);
+      maxZ = max(maxZ, geometry.boundingBox[BOX3.maxZ]);
     }
 
     // Set model's overall bounding box
-    var minV = new UeVector3(minX, minY, minZ);
-    var maxV = new UeVector3(maxX, maxY, maxZ);
+    var minV = vec3_create(minX, minY, minZ);
+    var maxV = vec3_create(maxX, maxY, maxZ);
 
-    model.geometry.boundingBox = new UeBox3(minV, maxV);
+    geometry.boundingBox = box3_create(minX, minY, minZ, maxX, maxY, maxZ);
 
-    // Calculate bounding sphere from overall bounding box
-    var center = minV.add(maxV).multiplyScalar(0.5);
-    var radius = center.distanceTo(maxV);
-    model.geometry.boundingSphere = new UeSphere(center, radius);
+    var center = vec3_clone(minV); vec3_add(center, maxV); vec3_multiply_scalar(center, 0.5);
+    geometry.boundingSphere = sphere_create(center[0], center[1], center[2], vec3_distance_to(center, maxV));
   }
 
   function dispose() {

@@ -62,9 +62,9 @@ function UeFullscreenQuad(material) constructor {
         gpu_set_zwriteenable(false);
         gpu_set_cullmode(cull_noculling);
         
-        matrix_set(matrix_projection, global.UE_MATRIX_IDENTITY);
-        matrix_set(matrix_view, global.UE_MATRIX_IDENTITY);
-        matrix_set(matrix_world, global.UE_MATRIX_IDENTITY);
+        matrix_set(matrix_projection, global.UE_MAT4_IDENTITY);
+        matrix_set(matrix_view, global.UE_MAT4_IDENTITY);
+        matrix_set(matrix_world, global.UE_MAT4_IDENTITY);
         
         vertex_submit(self.geometry.vb, pr_trianglelist, texture);
         

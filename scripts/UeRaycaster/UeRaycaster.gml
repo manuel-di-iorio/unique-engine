@@ -52,22 +52,35 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         var mouse = global.UE_MOUSE.get();
 
         if (camera.isPerspectiveCamera) {
-            // For perspective camera, origin is camera position
-            global.UE_DUMMY_VECTOR3.copy(camera.position);
-            // Direction is computed by unprojecting NDC point and normalizing
-            global.UE_DUMMY_VECTOR3_B.set(mouse.ndcX, mouse.ndcY, 0.5)
-                .unproject(camera)
-                .sub(camera.position)
-                .normalize();
+            var origin = camera.position;
+            
+            var ndc = global.UE_VEC3_TEMP0;
+            vec3_set(ndc, mouse.ndcX, mouse.ndcY, 0.5);
+            
+            var worldPoint = global.UE_VEC3_TEMP1;
+            vec3_copy(worldPoint, ndc);
+            vec3_apply_matrix4(worldPoint, camera.projectionMatrixInverse);
+            vec3_apply_matrix4(worldPoint, camera.matrixWorld);
+            
+            var dir = global.UE_VEC3_TEMP2;
+            vec3_sub_vectors(dir, worldPoint, origin);
+            vec3_normalize(dir);
+            ray_set(self.ray, origin[0], origin[1], origin[2], dir[0], dir[1], dir[2]);
         } else if (camera.isOrthographicCamera) {
-            // For orthographic camera, origin is unprojected NDC, direction is camera forward
-            global.UE_DUMMY_VECTOR3.set(mouse.ndcX, mouse.ndcY, (camera.near + camera.far) / (camera.near - camera.far))
-                .unproject(camera);
-            // Calculate camera forward direction (in orthographic projection, all rays are parallel)
-            global.UE_DUMMY_VECTOR3_B.set(0, 1, 0).transformDirection(camera.matrixWorld).normalize();
+            var invProj = global.UE_MAT4_TEMP0;
+            mat4_copy(invProj, camera.projectionMatrix);
+            mat4_invert(invProj);
+            
+            var originVec = global.UE_VEC3_TEMP0;
+            vec3_set(originVec, mouse.ndcX, mouse.ndcY, (camera.near + camera.far) / (camera.near - camera.far));
+            vec3_apply_matrix4(originVec, invProj);
+            vec3_apply_matrix4(originVec, camera.matrixWorld);
+            
+            var dirVec = global.UE_VEC3_TEMP1;
+            vec3_set(dirVec, 0, 1, 0);
+            vec3_transform_direction(dirVec, camera.matrixWorld);
+            ray_set(self.ray, originVec[0], originVec[1], originVec[2], dirVec[0], dirVec[1], dirVec[2]);
         }
-
-        ray_set(self.ray, ox, oy, oz, dx, dy, dz);
         return self;
     }
 

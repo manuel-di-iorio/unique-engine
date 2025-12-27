@@ -115,8 +115,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
             var _boundingSphere = object[$ "__intersectionSphere"];
 
             if (_boundingSphere != undefined &&
-              !sphere_is_visible(_boundingSphere.center.x, _boundingSphere.center.y,
-                _boundingSphere.center.z, _boundingSphere.radius)) {
+              !sphere_is_visible(_boundingSphere[SPHERE.x], _boundingSphere[SPHERE.y],
+                _boundingSphere[SPHERE.z], _boundingSphere[SPHERE.r])) {
               continue;
             }
           }

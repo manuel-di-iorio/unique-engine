@@ -24,8 +24,8 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
                 clonedAsset.rotation.copy(originalAsset.rotation);
                 clonedAsset.scale.copy(originalAsset.scale);
                 if (variable_struct_exists(originalAsset, "__rotationEuler")) {
-                    if (clonedAsset[$ "__rotationEuler"] == undefined) clonedAsset.__rotationEuler = new UeEuler();
-                    clonedAsset.__rotationEuler.copy(originalAsset.__rotationEuler);
+                    if (clonedAsset[$ "__rotationEuler"] == undefined) clonedAsset.__rotationEuler = euler_create();
+                    euler_copy(clonedAsset.__rotationEuler, originalAsset.__rotationEuler);
                 }
                 
                 // If the instance had an overriden material, carry it over
@@ -47,8 +47,8 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
     // Copy editor properties
     if (clonedAsset != undefined) {
          if (variable_struct_exists(originalAsset, "__rotationEuler")) {
-            if (clonedAsset[$ "__rotationEuler"] == undefined) clonedAsset.__rotationEuler = new UeEuler();
-            clonedAsset.__rotationEuler.copy(originalAsset.__rotationEuler);
+            if (clonedAsset[$ "__rotationEuler"] == undefined) clonedAsset.__rotationEuler = euler_create();
+            euler_copy(clonedAsset.__rotationEuler, originalAsset.__rotationEuler);
         }
         
         if (variable_struct_exists(originalAsset, "__matrixAutoUpdate")) {
@@ -71,9 +71,9 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
         
         // __rotationEuler
         if (variable_struct_exists(asset, "rotation") && asset[$ "__rotationEuler"] == undefined) {
-             asset.__rotationEuler = new UeEuler();
-             if (is_struct(asset.rotation)) {
-                asset.__rotationEuler.setFromQuaternion(asset.rotation);
+             asset.__rotationEuler = euler_create();
+             if (is_array(asset.rotation)) {
+                euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
              }
         }
         

@@ -38,14 +38,19 @@ function UePyramidGeometry(data = {}): UeGeometry(data) constructor {
     for (var i = 0; i < 4; i++) {
         var tri = sideTris[i];
         var a = tri[0], b = tri[1], c = tri[2];
-        var ab = new UeVector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
-        var ac = new UeVector3(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
-        var n = ac.cross(ab).normalize();
+        
+        var ab = global.UE_VEC3_TEMP0;
+        var ac = global.UE_VEC3_TEMP1;
+        vec3_sub_vectors(ab, b, a);
+        vec3_sub_vectors(ac, c, a);
+        var n = global.UE_VEC3_TEMP2;
+        vec3_cross_vectors(n, ac, ab);
+        vec3_normalize(n);
 
         for (var j = 0; j < 3; j++) {
             var p = tri[j], uv = uvSide[j];
             array_push(_pos, p[0], p[1], p[2]);
-            array_push(_norm, n.x, n.y, n.z);
+            array_push(_norm, n[0], n[1], n[2]);
             array_push(_uvs, uv[0], uv[1]);
             array_push(_colArr, _color, _alpha);
         }

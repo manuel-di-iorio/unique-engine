@@ -29,7 +29,8 @@ treeGroup.add(treeShadow, treeTrunk, treeTop);
 
 // Light
 var ambientLight = new UeAmbientLight(#999966);
+dirLight = new UeDirectionalLight(c_ltgray, 1, { x: 150, y: 80, z: 90 }); 
 
 // Add everything to the scene
-scene.add(ambientLight, terrain, treeGroup);
+scene.add(ambientLight, dirLight, terrain, treeGroup);
 scene.updateWorldMatrix(false, true);

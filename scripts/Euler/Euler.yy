@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"Euler",
   "parent":{
-    "name":"Unique Math (Functions)",
-    "path":"folders/Packages/Unique Math (Functions).yy",
+    "name":"Unique Math",
+    "path":"folders/Packages/Unique Math.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

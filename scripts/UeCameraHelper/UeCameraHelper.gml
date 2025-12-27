@@ -8,9 +8,12 @@ function UeCameraHelper(camera, color = c_yellow): UeLineSegments() constructor 
     material.forceSinglePass = true;
     material.side = cull_noculling;
 
-    matrixWorld.copy(self.camera.matrixWorld)
-        .multiply(global.UE_DUMMY_MATRIX4.makeRotationZ(180))
-        .multiply(global.UE_DUMMY_MATRIX4.makeRotationY(180));
+    mat4_copy(matrixWorld, self.camera.matrixWorld);
+    var mRot = global.UE_MAT4_TEMP0;
+    mat4_make_rotation_z(mRot, 180);
+    mat4_multiply(matrixWorld, mRot);
+    mat4_make_rotation_y(mRot, 180);
+    mat4_multiply(matrixWorld, mRot);
     matrixAutoUpdate = false;
     
     geometry = new UeLineSegmentsGeometry({ color });
@@ -29,9 +32,9 @@ function UeCameraHelper(camera, color = c_yellow): UeLineSegments() constructor 
 
     for (var i = 0; i < 4; i++) {
         var ndcPoint = ndcPoints[i];
-        var v = new UeVector3().set(ndcPoint[0], ndcPoint[1], ndcPoint[2])
-            .unproject(camera)
-            .applyMatrix4(rotFix);
+        var v = vec3_create(ndcPoint[0], ndcPoint[1], ndcPoint[2]);
+        vec3_unproject(v, camera);
+        vec3_apply_matrix4(v, rotFix);
         array_push(farPoints, v);
     }
 
@@ -40,14 +43,14 @@ function UeCameraHelper(camera, color = c_yellow): UeLineSegments() constructor 
     // From camera position to far plane corners
     for (var i = 0; i < 4; i++) {
         var p = farPoints[i];
-        array_push(segments, camPos.x, camPos.x, camPos.z,  p.x, p.y, p.z);
+        array_push(segments, camPos[0], camPos[1], camPos[2],  p[0], p[1], p[2]);
     }
 
     // Far plane square
     for (var i = 0; i < 4; i++) {
         var a = farPoints[i];
         var b = farPoints[(i + 1) % 4];
-        array_push(segments, a.x, a.y, a.z,  b.x, b.y, b.z);
+        array_push(segments, a[0], a[1], a[2],  b[0], b[1], b[2]);
     }
     
     geometry.setPositions(segments);
@@ -55,7 +58,7 @@ function UeCameraHelper(camera, color = c_yellow): UeLineSegments() constructor 
     // -- Methods --
     function update() {
         gml_pragma("forceinline");
-        matrixWorld.copy(self.camera.matrixWorld);
+        mat4_copy(matrixWorld, self.camera.matrixWorld);
         return self;
     }
     

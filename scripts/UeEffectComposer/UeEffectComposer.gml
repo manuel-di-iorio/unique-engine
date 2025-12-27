@@ -4,7 +4,7 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
     self.renderToScreen = data[$ "renderToScreen"] ?? true;
 
     if (renderTarget == undefined) {
-        var size = renderer.getSize(new UeVector2());
+        var size = renderer.getSize();
         self.width = size.width;
         self.height = size.height;
         renderTarget = new UeRenderTarget(self.width, self.height);

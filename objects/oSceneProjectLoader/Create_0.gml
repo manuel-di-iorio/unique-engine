@@ -12,7 +12,7 @@ treePos = _tree.position;
 var _texSnow = new UeTexture(spr_tex_snow);
 var _materialStandard = new UeMeshStandardMaterial({ map: _texSnow });
 var _terrainGeometry = new UeCircleGeometry(1000, { color: #FFFFFF });
-var _terrain = new UeStaticMesh(_terrainGeometry, _materialStandard, { x: treePos.x, y: treePos.y });
+var _terrain = new UeStaticMesh(_terrainGeometry, _materialStandard, { position: treePos });
 
 // Add directional light
 dirLight = new UeDirectionalLight(c_ltgray, 1, { x: -300, y: 300, z: 200 });

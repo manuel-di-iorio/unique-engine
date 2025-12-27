@@ -4,7 +4,7 @@
 
 // @todo add static
 // Ctrl+H function\s+(\w+)\((?!.*\)\s*constructor) static $1 = function(
-function UeObject3D(data = {}): Transform(data) constructor {
+function UeObject3D(data = {}): UeTransform(data) constructor {
     isObject3D = true;
     type = "Object3D";
     id = global.UE_OBJECT_ID++; 
@@ -68,12 +68,14 @@ function UeObject3D(data = {}): Transform(data) constructor {
         add(child);
         
         // Convert child's world transform into local relative to this object
-        var localMatrix = matrixWorld.clone().invert().multiply(child.matrixWorld);
+        var localMatrix = mat4_clone(matrixWorld);
+        mat4_invert(localMatrix);
+        mat4_multiply(localMatrix, child.matrixWorld);
     
         // Decompose localMatrix into TRS and assign to child
-        child.position.setFromMatrixPosition(localMatrix);
-        child.rotation.setFromRotationMatrix(localMatrix);
-        child.scale.setFromMatrixScale(localMatrix);
+        vec3_set_from_matrix_position(child.position, localMatrix);
+        quat_set_from_rotation_matrix(child.rotation, localMatrix);
+        vec3_set_from_matrix_scale(child.scale, localMatrix);
         
         // Immediately update the child matrixes to reflect the new transform
         child.updateWorldMatrix(false, true);
@@ -211,10 +213,10 @@ function UeObject3D(data = {}): Transform(data) constructor {
             material = _sourceMaterial;
         }
 
-        position.copy(source.position);
-        rotation.copy(source.rotation);
-        scale.copy(source.scale);
-        up.copy(source.up);
+        vec3_copy(position, source.position);
+        quat_copy(rotation, source.rotation);
+        vec3_copy(scale, source.scale);
+        vec3_copy(up, source.up);
         
         if (recursive) {
             for (var i = 0, n = array_length(source.children); i < n; i++) {

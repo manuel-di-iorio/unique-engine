@@ -162,15 +162,15 @@ function UeProjectLoader(data = {}) constructor {
                     
                     if (struct_exists(childData, "position")) {
                         var p = childData[$ "position"];
-                        instance.position.set(p[0], p[1], p[2]);
+                        vec3_set(instance.position, p[0], p[1], p[2]);
                     }
                     if (struct_exists(childData, "rotation")) {
                         var r = childData[$ "rotation"];
-                        instance.rotation.set(r[0], r[1], r[2], r[3]);
+                        quat_set(instance.rotation, r[0], r[1], r[2], r[3]);
                     }
                     if (struct_exists(childData, "scale")) {
                         var s = childData[$ "scale"];
-                        instance.scale.set(s[0], s[1], s[2]);
+                        vec3_set(instance.scale, s[0], s[1], s[2]);
                     }
                     
                     instance.updateMatrix();

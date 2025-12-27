@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UeTransform",
   "parent":{
-    "name":"Unique Math (Struct)",
-    "path":"folders/Packages/Unique Math (Struct).yy",
+    "name":"Core",
+    "path":"folders/Packages/Unique Engine/Core.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

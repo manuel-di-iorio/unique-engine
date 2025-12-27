@@ -61,27 +61,24 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           var geometry = new UeBoxGeometry(size, size, size, { canFreeze: false });
           
           // Set bounding box
-          geometry.boundingBox = new UeBox3();
-          geometry.boundingBox.setFromCenterAndSize(
-              new UeVector3(0, 0, 0),
-              new UeVector3(size, size, size)
-          );
+          geometry.boundingBox = box3_create();
+          box3_set_from_center_and_size(geometry.boundingBox, [0, 0, 0], [size, size, size]);
           
           // Set bounding sphere
-          geometry.boundingSphere = new UeSphere(new UeVector3(0, 0, 0), size * 0.866); // sqrt(3)/2 ≈ 0.866
+          geometry.boundingSphere = sphere_create(0, 0, 0, size * 0.866); // sqrt(3)/2 ≈ 0.866
           
           asset = new UeStaticMesh(geometry);
           asset.geometry.__vbClone = geometry.cloneVb();
           geometry.freeze();
           asset.material = undefined;
-          asset.__rotationEuler = new UeEuler();
+          asset.__rotationEuler = euler_create();
           asset.__matrixAutoUpdate = false; // Internal field for export (false = static mesh)
           assetId = global.UI_ASSETS_MODELS_ID++;
       break;
       
       case "Light":
           asset = new UeLight(); 
-          asset.__rotationEuler = new UeEuler();
+          asset.__rotationEuler = euler_create();
           assetId = global.UI_ASSETS_LIGHTS_ID++;
       break;
       
@@ -89,7 +86,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           asset = new UeObject3D();
           asset.isCamera = true;
           asset.type = "Camera";
-          asset.__rotationEuler = new UeEuler();
+          asset.__rotationEuler = euler_create();
           assetId = global.UI_ASSETS_CAMERAS_ID++;
       break;
       

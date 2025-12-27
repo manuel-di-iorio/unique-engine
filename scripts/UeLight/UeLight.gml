@@ -23,15 +23,15 @@ function UeLight(data = {}): UeObject3D(data) constructor {
             enabled,
             range,
             color,
-            px: position.x,
-            py: position.y,
-            pz: position.z,
+            px: position[0],
+            py: position[1],
+            pz: position[2],
         };
         
         if (target != undefined) {
-            payload.targetX = target.x;
-            payload.targetY = target.y;
-            payload.targetZ = target.z;
+            payload.targetX = target[0];
+            payload.targetY = target[1];
+            payload.targetZ = target[2];
         }
         
         return payload;
@@ -46,10 +46,10 @@ function UeLight(data = {}): UeObject3D(data) constructor {
         enabled = data[$ "enabled"];
         range = data[$ "range"];
         color = data[$ "color"];
-        position = new UeVector3(data[$ "px"] ?? 0, data[$ "py"] ?? 0, data[$ "pz"] ?? 0);
+        vec3_set(position, data[$ "px"] ?? 0, data[$ "py"] ?? 0, data[$ "pz"] ?? 0);
         
         if (data[$ "targetX"] != undefined && data[$ "targetY"] != undefined && data[$ "targetZ"] != undefined) {
-            target = new UeVector3(data[$ "targetX"], data[$ "targetY"], data[$ "targetZ"]);
+            target = vec3_create(data[$ "targetX"], data[$ "targetY"], data[$ "targetZ"]);
         }
     }
     

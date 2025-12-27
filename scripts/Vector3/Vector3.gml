@@ -2,11 +2,12 @@
 /// All angles are in DEGREES.
 /// All functions modify the first vector in-place when applicable for zero allocations.
 
-// Global dummy array for temporary operations - reuse to avoid allocations
+// Global temp vectors in order to avoid allocations
 global.UE_VEC3_TEMP0 = vec3_create();
 global.UE_VEC3_TEMP1 = vec3_create();
 global.UE_VEC3_TEMP2 = vec3_create();
 global.UE_VEC3_TEMP3 = vec3_create();
+#macro UE_MATH_VECTOR3_ZERO vec3_create()
 
 // Vector3 Enum
 enum VEC3 {

@@ -99,7 +99,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         }
         
         // Initialize editor-specific rotation tracker
-        instance.__rotationEuler = new UeEuler();
+        instance.__rotationEuler = euler_create();
         instance.__rotationEuler.setFromQuaternion(instance.rotation);
         
         instance.updateMatrix();

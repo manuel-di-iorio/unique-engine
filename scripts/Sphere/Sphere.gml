@@ -1,5 +1,9 @@
 /// @desc Sphere functions using arrays [x, y, z, radius]
 
+enum SPHERE {
+  x, y, z, r
+}
+
 function sphere_create(x = 0, y = 0, z = 0, r = 0) {
     gml_pragma("forceinline");
     return [x, y, z, r];

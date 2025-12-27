@@ -36,25 +36,25 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     self._raycasterRotate = new UeRaycaster();  // Raycaster for mouse picking
     self._raycasterRotate.params.Mesh.precise = true;
     self._root = new UeMesh();         // Root object    
-    self._plane = new UePlane();       // Plane used for intersection during dragging
+    self._plane = plane_create();       // Plane used for intersection during dragging
 
     // Temporary vectors for dragging calculations
-    self.pointStart = new UeVector3();
-    self.pointEnd = new UeVector3();
-    self.pointPrevious = new UeVector3();  // Track previous point for incremental rotation
+    self.pointStart = vec3_create();
+    self.pointEnd = vec3_create();
+    self.pointPrevious = vec3_create();  // Track previous point for incremental rotation
     self._rotationAngle = 0; // Accumulates total rotation angle during drag
-    self.delta = new UeVector3();
+    self.delta = vec3_create();
 
     // Store object's initial transform at drag start
-    self._positionStart = new UeVector3();
-    self._rotationStart = new UeQuaternion();
-    self._scaleStart = new UeVector3();
-    self._positionStartWorld = new UeVector3();
+    self._positionStart = vec3_create();
+    self._rotationStart = quat_create();
+    self._scaleStart = vec3_create();
+    self._positionStartWorld = vec3_create();
 
     // === Build properties ===
-    __xVec = new UeVector3(1, 0, 0);  // Unit vector for X axis
-    __yVec = new UeVector3(0, 1, 0);  // Unit vector for Y axis
-    __zVec = new UeVector3(0, 0, 1);  // Unit vector for Z axis
+    __xVec = vec3_create(1, 0, 0);  // Unit vector for X axis
+    __yVec = vec3_create(0, 1, 0);  // Unit vector for Y axis
+    __zVec = vec3_create(0, 0, 1);  // Unit vector for Z axis
 
     self.onDrag = data[$ "onDrag"] ?? undefined;
     self.onDragEnd = data[$ "onDragEnd"] ?? undefined;
@@ -149,8 +149,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         geoX.computeBoundingBox();
         var meshX = new UeMesh(geoX, __matMesh.clone());
         meshX.name = "X";
-        meshX.rotation.setFromAxisAngle(__zVec, 180);  // Rotate to point in positive X direction
-        meshX.position.x = -_baseLength;
+        quat_set_from_axis_angle(meshX.rotation, __zVec, 180);  // Rotate to point in positive X direction
+        meshX.position[VEC3.x] = -_baseLength;
         meshX.raycastOrder = 0;  // Higher priority for raycasting (axes before planes)
         self._gizmo.add(meshX);
 
@@ -159,8 +159,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         geoY.computeBoundingBox();
         var meshY = new UeMesh(geoY, __matMesh.clone());
         meshY.name = "Y";
-        meshY.rotation.setFromAxisAngle(__zVec, 270);  // Rotate to point in positive Y direction
-        meshY.position.y = -_baseLength;
+        quat_set_from_axis_angle(meshY.rotation, __zVec, 270);  // Rotate to point in positive Y direction
+        meshY.position[VEC3.y] = -_baseLength;
         meshY.raycastOrder = 0;
         self._gizmo.add(meshY);
 
@@ -169,8 +169,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         geoZ.computeBoundingBox();
         var meshZ = new UeMesh(geoZ, __matMesh.clone());
         meshZ.name = "Z";
-        meshZ.rotation.setFromAxisAngle(__yVec, -90);  // Rotate to point in positive Z direction
-        meshZ.position.z = _baseLength;
+        quat_set_from_axis_angle(meshZ.rotation, __yVec, -90);  // Rotate to point in positive Z direction
+        meshZ.position[VEC3.z] = _baseLength;
         meshZ.raycastOrder = 0;
         self._gizmo.add(meshZ);
 
@@ -227,8 +227,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         // Torus lies on XY plane usually, extending from -(R+r) to +(R+r)
         var limit = _torusRadius + _torusThickness;
         var zLimit = _torusThickness;
-        var torusBoxMin = new UeVector3(-limit, -limit, -zLimit);
-        var torusBoxMax = new UeVector3(limit, limit, zLimit);
+        var torusBoxMin = vec3_create(-limit, -limit, -zLimit);
+        var torusBoxMax = vec3_create(limit, limit, zLimit);
 
         // --- Create X AXIS (Red, YZ plane) ---
         // Front Geometry (0 to 180 degrees) - Opaque
@@ -236,41 +236,41 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
             arc: pi, arcOffset: 0, alpha: 1.0
         });
-        geoFrontX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoFrontX.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         // Back Geometry (180 to 360 degrees) - Semi-transparent
         var geoBackX = new UeTorusGeometry(_torusRadius, _torusThickness, {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
             arc: pi, arcOffset: pi, alpha: 0.2
         });
-        geoBackX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoBackX.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         // Back Geometry Opaque (for selection state)
         var geoBackOpaqueX = new UeTorusGeometry(_torusRadius, _torusThickness, {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
             arc: pi, arcOffset: pi, alpha: 1.0
         });
-        geoBackOpaqueX.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoBackOpaqueX.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         var meshFrontX = new UeMesh(geoFrontX, __matMesh.clone());
         meshFrontX.name = "X";
-        meshFrontX.rotation.setFromAxisAngle(__yVec, 90);
+        quat_set_from_axis_angle(meshFrontX.rotation, __yVec, 90);
         meshFrontX.raycastOrder = 0;
 
         var meshBackX = new UeMesh(geoBackX, __matMesh.clone());
         meshBackX.name = "X";
-        meshBackX.rotation.copy(meshFrontX.rotation);
+        quat_copy(meshBackX.rotation, meshFrontX.rotation);
         meshBackX.raycastOrder = 0;
         meshBackX.material.opacity = 0.2; // Explicitly set opacity for material
 
-        var staticRotX = meshFrontX.rotation.clone();
+        var staticRotX = quat_clone(meshFrontX.rotation);
 
         meshFrontX.userData = {
-            isRotationGizmo: true, planeNormal: __xVec.clone(), staticRotation: staticRotX,
+            isRotationGizmo: true, planeNormal: vec3_clone(__xVec), staticRotation: staticRotX,
             geoBack: geoBackX, geoBackOpaque: geoBackX, partner: meshBackX, type: "front"
         };
         meshBackX.userData = {
-            isRotationGizmo: true, planeNormal: __xVec.clone(), staticRotation: staticRotX,
+            isRotationGizmo: true, planeNormal: vec3_clone(__xVec), staticRotation: staticRotX,
             partner: meshFrontX, type: "back"
         };
 
@@ -282,39 +282,39 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
             arc: pi, arcOffset: 0, alpha: 1.0
         });
-        geoFrontY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoFrontY.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         var geoBackY = new UeTorusGeometry(_torusRadius, _torusThickness, {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
             arc: pi, arcOffset: pi, alpha: 0.2
         });
-        geoBackY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoBackY.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         var geoBackOpaqueY = new UeTorusGeometry(_torusRadius, _torusThickness, {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
             arc: pi, arcOffset: pi, alpha: 1.0
         });
-        geoBackOpaqueY.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoBackOpaqueY.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         var meshFrontY = new UeMesh(geoFrontY, __matMesh.clone());
         meshFrontY.name = "Y";
-        meshFrontY.rotation.setFromAxisAngle(__xVec, 90);
+        quat_set_from_axis_angle(meshFrontY.rotation, __xVec, 90);
         meshFrontY.raycastOrder = 0;
 
         var meshBackY = new UeMesh(geoBackY, __matMesh.clone());
         meshBackY.name = "Y";
-        meshBackY.rotation.copy(meshFrontY.rotation);
+        quat_copy(meshBackY.rotation, meshFrontY.rotation);
         meshBackY.raycastOrder = 0;
         meshBackY.material.opacity = 0.2; // Explicit opacity
 
-        var staticRotY = meshFrontY.rotation.clone();
+        var staticRotY = quat_clone(meshFrontY.rotation);
 
         meshFrontY.userData = {
-            isRotationGizmo: true, planeNormal: __yVec.clone(), staticRotation: staticRotY,
+            isRotationGizmo: true, planeNormal: vec3_clone(__yVec), staticRotation: staticRotY,
             geoBack: geoBackY, geoBackOpaque: geoBackOpaqueY, partner: meshBackY, type: "front"
         };
         meshBackY.userData = {
-            isRotationGizmo: true, planeNormal: __yVec.clone(), staticRotation: staticRotY,
+            isRotationGizmo: true, planeNormal: vec3_clone(__yVec), staticRotation: staticRotY,
             partner: meshFrontY, type: "back"
         };
 
@@ -326,19 +326,19 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
             arc: pi, arcOffset: 0, alpha: 1.0
         });
-        geoFrontZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoFrontZ.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         var geoBackZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
             arc: pi, arcOffset: pi, alpha: 0.2
         });
-        geoBackZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoBackZ.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         var geoBackOpaqueZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
             radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
             arc: pi, arcOffset: pi, alpha: 1.0
         });
-        geoBackOpaqueZ.boundingBox = new UeBox3(torusBoxMin.clone(), torusBoxMax.clone());
+        geoBackOpaqueZ.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
 
         var meshFrontZ = new UeMesh(geoFrontZ, __matMesh.clone());
         meshFrontZ.name = "Z";
@@ -349,13 +349,13 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         meshBackZ.raycastOrder = 0;
         meshBackZ.material.opacity = 0.2; // Explicit opacity
 
-        var staticRotZ = new UeQuaternion(); // Identity
+        var staticRotZ = quat_create(); // Identity
         meshFrontZ.userData = {
-            isRotationGizmo: true, planeNormal: __zVec.clone(), staticRotation: staticRotZ,
+            isRotationGizmo: true, planeNormal: vec3_clone(__zVec), staticRotation: staticRotZ,
             geoBack: geoBackZ, geoBackOpaque: geoBackOpaqueZ, partner: meshBackZ, type: "front"
         };
         meshBackZ.userData = {
-            isRotationGizmo: true, planeNormal: __zVec.clone(), staticRotation: staticRotZ,
+            isRotationGizmo: true, planeNormal: vec3_clone(__zVec), staticRotation: staticRotZ,
             partner: meshFrontZ, type: "back"
         };
         self._gizmo.add(meshFrontZ);
@@ -369,10 +369,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             tubularSegments: _tubularSegments,
             color: #fafadd
         });
-        geoE.boundingBox = new UeBox3(
-            new UeVector3(-eLimit, -eLimit, -zLimit),
-            new UeVector3(eLimit, eLimit, zLimit)
-        );
+        geoE.boundingBox = [ -eLimit, -eLimit, -zLimit, eLimit, eLimit, zLimit ];
         var meshE = new UeMesh(geoE, __matMesh.clone());
         meshE.name = "E";
         meshE.raycastOrder = 0;
@@ -390,15 +387,15 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
         // Create X axis (Red)
         // Cylinder X -> X: No rotation
-        var meshX = __createMergedScaleAxis("X", c_red, undefined, 0, new UeVector3(lineLen / 2, 0, 0), new UeVector3(lineLen, 0, 0), _handleSize, lineLen);
+        var meshX = __createMergedScaleAxis("X", c_red, undefined, 0, vec3_create(lineLen / 2, 0, 0), vec3_create(lineLen, 0, 0), _handleSize, lineLen);
 
         // Create Y axis (Blue)
         // Cylinder X -> Y: Rotate Z 90
-        var meshY = __createMergedScaleAxis("Y", #2277B3, __zVec, 90, new UeVector3(0, lineLen / 2, 0), new UeVector3(0, lineLen, 0), _handleSize, lineLen);
+        var meshY = __createMergedScaleAxis("Y", #2277B3, __zVec, 90, vec3_create(0, lineLen / 2, 0), vec3_create(0, lineLen, 0), _handleSize, lineLen);
 
         // Create Z axis (Green)
         // Cylinder X -> Z: Rotate Y -90
-        var meshZ = __createMergedScaleAxis("Z", c_lime, __yVec, -90, new UeVector3(0, 0, lineLen / 2), new UeVector3(0, 0, lineLen), _handleSize, lineLen);
+        var meshZ = __createMergedScaleAxis("Z", c_lime, __yVec, -90, vec3_create(0, 0, lineLen / 2), vec3_create(0, 0, lineLen), _handleSize, lineLen);
 
         // XZ plane (Blue)
         var geoXZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: #2277B3, alpha: __planeOpacity });
@@ -447,28 +444,31 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
      * @param {number} lineLen
      */
     function __createMergedScaleAxis(name, color, rotationAxis, rotationAngle, shaftPos, handlePos, handleSize, lineLen) {
-        var mat = new UeMatrix4();
-        var q = new UeQuaternion();
-        var p = new UeVector3();
-        var s = new UeVector3(1, 1, 1);
+        var mat = mat4_create();
+        var q = quat_create();
+        var s = vec3_create(1, 1, 1);
 
         // Shaft Geometry
-        var geoShaft = new UeCylinderGeometry(__axisLineWidth, lineLen, 16, { color });
+        var geoShaft = new UeCylinderGeometry(__axisLineWidth, __axisLineWidth, lineLen, { radialSegments: 4, color: color });
 
         // Shaft Transform
-        if (rotationAxis != undefined) q.setFromAxisAngle(rotationAxis, rotationAngle);
-        else q.set(0, 0, 0, 1);
-        p.copy(shaftPos);
-        mat.compose(p, q, s);
+        if (rotationAxis != undefined) {
+             quat_set_from_axis_angle(q, rotationAxis, rotationAngle);
+             mat4_make_rotation_from_quaternion(mat, q);
+        } else {
+            quat_set(q, 0, 0, 0, 1); // Identity
+            mat4_identity(mat);
+        }
+        // Apply position (shaftPos is already an array from vec3_create)
+        mat4_set_position(mat, shaftPos[0], shaftPos[1], shaftPos[2]); 
         geoShaft.applyMatrix(mat);
 
         // Handle Geometry
-        var geoHandle = new UeBoxGeometry(handleSize, handleSize, handleSize, { color });
+        var geoHandle = new UeBoxGeometry(handleSize, handleSize, handleSize, { color: color });
 
         // Handle Transform
-        p.copy(handlePos);
-        q.set(0, 0, 0, 1); // Axis aligned box
-        mat.compose(p, q, s);
+        quat_set(q, 0, 0, 0, 1); // Axis aligned box, so identity rotation
+        mat4_compose(mat, handlePos, q, s); // Compose with handle position, identity rotation, and unit scale
         geoHandle.applyMatrix(mat);
 
         // Merge
@@ -504,12 +504,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         }
 
         // Set gizmo root position to the object's world position
-        var _wp = global.UE_DUMMY_VECTOR3;
+        var _wp = global.UE_VEC3_TEMP0;
         self.object.getWorldPosition(_wp);
-        self._root.position.copy(_wp);
+        vec3_copy(self._root.position, _wp);
 
         // Calculate distance-based scale to maintain consistent apparent size (billboard-like behavior)
-        var distance = self.camera.position.distanceTo(_wp);
+        var distance = vec3_distance_to(self.camera.position, _wp);
 
         // Scale formula: distance * constant
         var currentScale = distance * 0.008;
@@ -519,55 +519,58 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         if (self.gizmoMaxScale != undefined) currentScale = min(currentScale, self.gizmoMaxScale);
 
         // Apply the distance-based scale to the entire gizmo
-        self._root.scale.set(currentScale, currentScale, currentScale);
+        vec3_set(self._root.scale, currentScale, currentScale, currentScale);
 
         if (self.space == "local") {
             // In local space, gizmo rotates with the object's world rotation
             var _wq = global.UE_DUMMY_QUATERNION;
             self.object.getWorldQuaternion(_wq);
-            self._root.rotation.copy(_wq);
+            quat_copy(self._root.rotation, _wq);
         } else {
             // In world space mode
             if (self.mode == "move" || self.mode == "scale") {
                 // Position plane handles based on camera direction for optimal visibility
-                var camDir = self.camera.getWorldDirection();
+                var camDir = global.UE_VEC3_TEMP0;
+                self.camera.getWorldDirection(camDir);
 
                 // XZ plane positioning - place on the side of the gizmo facing away from camera
                 var meshXZ = self._gizmo.getObjectByName("XZ");
-                meshXZ.rotation.setFromAxisAngle(__xVec, 90);  // Orient plane horizontally
-                meshXZ.position.x = (camDir.x < 0) ? -__planeSize : __planeSize;
-                meshXZ.position.z = (camDir.z < 0) ? -__planeSize : __planeSize;
+                quat_set_from_axis_angle(meshXZ.rotation, __xVec, 90);  // Orient plane horizontally
+                meshXZ.position[VEC3.x] = (camDir[VEC3.x] < 0) ? -__planeSize : __planeSize;
+                meshXZ.position[VEC3.z] = (camDir[VEC3.z] < 0) ? -__planeSize : __planeSize;
 
                 // YZ plane positioning
                 var meshYZ = self._gizmo.getObjectByName("YZ");
-                meshYZ.rotation.setFromAxisAngle(__yVec, 90);  // Orient plane vertically
-                meshYZ.position.y = (camDir.y < 0) ? -__planeSize : __planeSize;
-                meshYZ.position.z = (camDir.z < 0) ? -__planeSize : __planeSize;
+                quat_set_from_axis_angle(meshYZ.rotation, __yVec, 90);  // Orient plane vertically
+                meshYZ.position[VEC3.y] = (camDir[VEC3.y] < 0) ? -__planeSize : __planeSize;
+                meshYZ.position[VEC3.z] = (camDir[VEC3.z] < 0) ? -__planeSize : __planeSize;
 
                 // XY plane positioning
                 var meshXY = self._gizmo.getObjectByName("XY");
-                meshXY.rotation.setFromAxisAngle(__zVec, 0);   // Keep plane facing camera
-                meshXY.position.z = 0;
-                meshXY.position.x = (camDir.x < 0) ? -__planeSize : __planeSize;
-                meshXY.position.y = (camDir.y < 0) ? -__planeSize : __planeSize;
+                quat_set_from_axis_angle(meshXY.rotation, __zVec, 0);   // Keep plane facing camera
+                meshXY.position[VEC3.z] = 0;
+                meshXY.position[VEC3.x] = (camDir[VEC3.x] < 0) ? -__planeSize : __planeSize;
+                meshXY.position[VEC3.y] = (camDir[VEC3.y] < 0) ? -__planeSize : __planeSize;
             } else if (self.mode == "rotate") {
                 // For rotate mode in world space, update E axis to always face camera
                 var meshE = self._gizmo.getObjectByName("E");
                 if (meshE != undefined) {
                     // Calculate direction from gizmo to camera
-                    var dirToCamera = self.camera.position.clone().sub(self._root.position).normalize();
+                    var dirToCamera = vec3_sub_vectors(global.UE_VEC3_TEMP0, self.camera.position, self._root.position);
+                    vec3_normalize(dirToCamera);
 
                     // Orient the E axis (torus) to face the camera
                     // The torus normal (Z axis by default) should align with the camera direction
                     // Use setFromUnitVectors to directly align Z axis with camera direction
-                    var quaternion = new UeQuaternion();
-                    var defaultNormal = new UeVector3(0, 0, 1); // Torus default normal (Z-up)
-                    quaternion.setFromUnitVectors(defaultNormal, dirToCamera);
-                    meshE.rotation.copy(quaternion);
+                    var quaternion = global.UE_QUAT_TEMP0;
+                    var defaultNormal = vec3_set(global.UE_VEC3_TEMP1, 0, 0, 1); // Torus default normal (Z-up)
+                    quat_set_from_unit_vectors(quaternion, defaultNormal, dirToCamera);
+                    quat_copy(meshE.rotation, quaternion);
                 }
 
                 // Update dynamic arcs for X, Y, Z axes to show only front-facing half
-                var dirToCamera = self.camera.position.clone().sub(self._root.position).normalize();
+                var dirToCamera = vec3_sub_vectors(global.UE_VEC3_TEMP0, self.camera.position, self._root.position);
+                vec3_normalize(dirToCamera);
 
                 // Update each axis with dynamic rotation
                 for (var i = 0; i < array_length(self._gizmo.children); i++) {
@@ -580,12 +583,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
                     // Calculate rotation angle based on camera position
                     // Project camera direction onto the torus plane
                     var planeNormal = userData.planeNormal;
-                    var camDirProjected = dirToCamera.clone();
+                    var camDirProjected = vec3_clone(dirToCamera);
 
                     // Remove the component along the plane normal (project onto plane)
-                    var dotProduct = camDirProjected.dot(planeNormal);
-                    camDirProjected.sub(planeNormal.clone().multiplyScalar(dotProduct));
-                    camDirProjected.normalize();
+                    var dotProduct = vec3_dot(camDirProjected, planeNormal);
+                    vec3_add_scaled_vector(camDirProjected, planeNormal, -dotProduct);
+                    vec3_normalize(camDirProjected);
 
                     // Calculate angle in the plane relative to the torus local space
                     // Since all tori are created in XY plane (normal Z) and then rotated,
@@ -595,9 +598,10 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
                     // The static rotation transforms Z -> planeNormal.
                     // So we can apply inverse static rotation to camDirProjected.
 
-                    var localCamDir = camDirProjected.clone();
-                    var invStatic = userData.staticRotation.clone().invert();
-                    localCamDir.applyQuaternion(invStatic);
+                    var localCamDir = vec3_clone(camDirProjected);
+                    var invStatic = quat_clone(userData.staticRotation);
+                    quat_invert(invStatic);
+                    vec3_apply_quaternion(localCamDir, invStatic);
 
                     // Now localCamDir is in the XY plane of the torus geometry (Z=0)
                     // Calculate angle relative to local Y axis (because our arc is centered at pi/2 which is Y)
@@ -613,7 +617,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
                     var spinAngle = targetAngle - (pi / 2);
 
                     // Create spin rotation around partial Z axis
-                    var spinQ = new UeQuaternion().setFromAxisAngle(new UeVector3(0, 0, 1), spinAngle);
+                    var spinQ = quat_create();
+                    quat_set_from_axis_angle(spinQ, __zVec, spinAngle);
 
                     // Apply: Total = Static * Spin
                     var totalQ = userData.staticRotation.clone().multiply(spinQ);
@@ -641,7 +646,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             // Also reset geometry state
             for (var i = 0, l = array_length(self._gizmo.children); i < l; i++) {
                 var child = self._gizmo.children[i];
-                child.scale.set(1, 1, 1);
+                vec3_set(child.scale, 1, 1, 1);
 
                 // Default reset logic
                 child.material.uniforms.ueEmissive.value = [0, 0, 0];
@@ -692,7 +697,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
                     }
                 } else {
                     // Standard highlighting
-                    hovered.scale.set(1.05, 1.05, 1.05);
+                    vec3_set(hovered.scale, 1.05, 1.05, 1.05);
                     hovered.material.uniforms.ueEmissive.value = [0.3, 0.3, 0.3];
                 }
             } else {
@@ -758,7 +763,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         }
 
         // Visual feedback: reset scale and add yellow emissive highlight
-        self.selectedAxis.scale.set(1, 1, 1);
+        vec3_set(self.selectedAxis.scale, 1, 1, 1);
         self.selectedAxis.material.uniforms.ueEmissive.value = [1, 1, 0];
 
         // Transform axis vector to local space if needed
@@ -790,9 +795,9 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         else if (self.axis == "XZ" || self.axis == "YZ" || self.axis == "XY") {
             // For plane handles: use the plane's natural normal
             switch (self.axis) {
-                case "XY": _planeNormal = __zVec.clone(); break;
-                case "XZ": _planeNormal = __yVec.clone(); break;
-                case "YZ": _planeNormal = __xVec.clone(); break;
+                case "XY": _planeNormal = vec3_clone(__zVec); break;
+                case "XZ": _planeNormal = vec3_clone(__yVec); break;
+                case "YZ": _planeNormal = vec3_clone(__xVec); break;
             }
 
             // Transform normal to local space if needed
@@ -907,45 +912,49 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         if (!self.object) return;
 
         if (self.mode == "move") {
-            var worldDelta = self.delta.clone();
+            var worldDelta = vec3_clone(self.delta);
 
             // --- Constrain Delta to Axis ---
             if (self.space == "local") {
                 // We need the object's world rotation to align the delta
-                var objectWorldRot = new UeQuaternion();
+                var objectWorldRot = quat_create();
                 self.object.getWorldQuaternion(objectWorldRot);
-                var invRot = objectWorldRot.clone().invert();
+                var invRot = quat_clone(objectWorldRot);
+                quat_invert(invRot);
 
                 // Transform world delta to "aligned" space
-                worldDelta.applyQuaternion(invRot);
+                vec3_apply_quaternion(worldDelta, invRot);
 
                 // Apply constraints
-                if (self.axis == "X") worldDelta.set(worldDelta.x, 0, 0);
-                else if (self.axis == "Y") worldDelta.set(0, worldDelta.y, 0);
-                else if (self.axis == "Z") worldDelta.set(0, 0, worldDelta.z);
-                else if (self.axis == "XY") worldDelta.z = 0;
-                else if (self.axis == "XZ") worldDelta.y = 0;
-                else if (self.axis == "YZ") worldDelta.x = 0;
+                if (self.axis == "X") vec3_set(worldDelta, worldDelta[0], 0, 0);
+                else if (self.axis == "Y") vec3_set(worldDelta, 0, worldDelta[1], 0);
+                else if (self.axis == "Z") vec3_set(worldDelta, 0, 0, worldDelta[2]);
+                else if (self.axis == "XY") worldDelta[2] = 0;
+                else if (self.axis == "XZ") worldDelta[1] = 0;
+                else if (self.axis == "YZ") worldDelta[0] = 0;
 
                 // Transform back to world space
-                worldDelta.applyQuaternion(objectWorldRot);
+                vec3_apply_quaternion(worldDelta, objectWorldRot);
             } else {
                 // World space constraints
-                if (self.axis == "X") worldDelta.set(worldDelta.x, 0, 0);
-                else if (self.axis == "Y") worldDelta.set(0, worldDelta.y, 0);
-                else if (self.axis == "Z") worldDelta.set(0, 0, worldDelta.z);
-                else if (self.axis == "XY") worldDelta.z = 0;
-                else if (self.axis == "XZ") worldDelta.y = 0;
-                else if (self.axis == "YZ") worldDelta.x = 0;
+                if (self.axis == "X") vec3_set(worldDelta, worldDelta[0], 0, 0);
+                else if (self.axis == "Y") vec3_set(worldDelta, 0, worldDelta[1], 0);
+                else if (self.axis == "Z") vec3_set(worldDelta, 0, 0, worldDelta[2]);
+                else if (self.axis == "XY") worldDelta[2] = 0;
+                else if (self.axis == "XZ") worldDelta[1] = 0;
+                else if (self.axis == "YZ") worldDelta[0] = 0;
             }
 
             // Calculate Target World Position
-            var targetWorldPos = self._positionStartWorld.clone().add(worldDelta);
+            var targetWorldPos = vec3_clone(self._positionStartWorld);
+            vec3_add(targetWorldPos, worldDelta);
 
             // Convert to Parent Local Space
             if (self.object.parent != undefined) {
-                var parentInv = new UeMatrix4().copy(self.object.parent.matrixWorld).invert();
-                targetWorldPos.applyMatrix4(parentInv);
+                var parentInv = mat4_create();
+                mat4_copy(parentInv, self.object.parent.matrixWorld);
+                mat4_invert(parentInv);
+                vec3_apply_matrix4(targetWorldPos, parentInv);
             }
 
             // Apply to object (targetWorldPos is now the new local position)
@@ -953,59 +962,63 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
             // Apply snapping if needed
             if (self.translationSnap != undefined) {
-                if (self.axis == "X") newPos.x = round(newPos.x / self.translationSnap) * self.translationSnap;
-                else if (self.axis == "Y") newPos.y = round(newPos.y / self.translationSnap) * self.translationSnap;
-                else if (self.axis == "Z") newPos.z = round(newPos.z / self.translationSnap) * self.translationSnap;
+                if (self.axis == "X") newPos[0] = round(newPos[0] / self.translationSnap) * self.translationSnap;
+                else if (self.axis == "Y") newPos[1] = round(newPos[1] / self.translationSnap) * self.translationSnap;
+                else if (self.axis == "Z") newPos[2] = round(newPos[2] / self.translationSnap) * self.translationSnap;
                 else if (self.axis == "XYZ") {
-                    newPos.x = round(newPos.x / self.translationSnap) * self.translationSnap;
-                    newPos.y = round(newPos.y / self.translationSnap) * self.translationSnap;
-                    newPos.z = round(newPos.z / self.translationSnap) * self.translationSnap;
+                    newPos[0] = round(newPos[0] / self.translationSnap) * self.translationSnap;
+                    newPos[1] = round(newPos[1] / self.translationSnap) * self.translationSnap;
+                    newPos[2] = round(newPos[2] / self.translationSnap) * self.translationSnap;
                 }
             }
 
             // Clamp to configured limits
-            newPos.x = clamp(newPos.x, self.minX, self.maxX);
-            newPos.y = clamp(newPos.y, self.minY, self.maxY);
-            newPos.z = clamp(newPos.z, self.minZ, self.maxZ);
+            newPos[0] = clamp(newPos[0], self.minX, self.maxX);
+            newPos[1] = clamp(newPos[1], self.minY, self.maxY);
+            newPos[2] = clamp(newPos[2], self.minZ, self.maxZ);
 
             // Apply the final position change to the object
-            self.object.position.copy(newPos);
+            vec3_copy(self.object.position, newPos);
         }
         else if (self.mode == "rotate") {
-            var axisVec = new UeVector3();
-            if (self.axis == "X") axisVec.copy(__xVec);
-            else if (self.axis == "Y") axisVec.copy(__yVec);
-            else if (self.axis == "Z") axisVec.copy(__zVec);
+            var axisVec = vec3_create();
+            if (self.axis == "X") vec3_copy(axisVec, __xVec);
+            else if (self.axis == "Y") vec3_copy(axisVec, __yVec);
+            else if (self.axis == "Z") vec3_copy(axisVec, __zVec);
             else if (self.axis == "E") {
                 // Screen space rotation: axis is vector from object to camera
-                axisVec.copy(self.camera.position).sub(self._positionStartWorld).normalize();
+                vec3_sub_vectors(axisVec, self.camera.position, self._positionStartWorld);
+                vec3_normalize(axisVec);
             }
             else return;
 
             if (self.space == "local" && self.axis != "E") {
-                var objectWorldRot = new UeQuaternion();
+                var objectWorldRot = quat_create();
                 self.object.getWorldQuaternion(objectWorldRot);
-                axisVec.applyQuaternion(objectWorldRot);
+                vec3_apply_quaternion(axisVec, objectWorldRot);
             }
 
             // Accumulate rotation using small deltas (prev -> curr)
             // This allows for infinite rotation (>360 degrees) and stable behavior
-
             var center = self._positionStartWorld;
-            var vPrev = self.pointPrevious.clone().sub(center);
-            var vCurr = self.pointEnd.clone().sub(center);
+            var vPrev = vec3_sub_vectors(vec3_create(), self.pointPrevious, center);
+            var vCurr = vec3_sub_vectors(vec3_create(), self.pointEnd, center);
 
             // Project vectors onto the plane perpendicular to the axis
-            var vPrevProj = vPrev.clone().sub(axisVec.clone().multiplyScalar(vPrev.dot(axisVec)));
-            var vCurrProj = vCurr.clone().sub(axisVec.clone().multiplyScalar(vCurr.dot(axisVec)));
+            // vProj = v - axis * (v . axis)
+            var vPrevProj = vec3_copy(vec3_create(), vPrev);
+            vec3_add_scaled_vector(vPrevProj, axisVec, -vec3_dot(vPrev, axisVec));
+            
+            var vCurrProj = vec3_copy(vec3_create(), vCurr);
+            vec3_add_scaled_vector(vCurrProj, axisVec, -vec3_dot(vCurr, axisVec));
 
-            vPrevProj.normalize();
-            vCurrProj.normalize();
+            vec3_normalize(vPrevProj);
+            vec3_normalize(vCurrProj);
 
             // Calculate small angle change this frame
-            var cross = vPrevProj.clone().cross(vCurrProj);
-            var dot = vPrevProj.dot(vCurrProj);
-            var angleDelta = radtodeg(arctan2(cross.dot(axisVec), dot));
+            var vCross = vec3_cross_vectors(vec3_create(), vPrevProj, vCurrProj);
+            var vDot = vec3_dot(vPrevProj, vCurrProj);
+            var angleDelta = radtodeg(arctan2(vec3_dot(vCross, axisVec), vDot));
 
             // Accumulate total angle
             self._rotationAngle += angleDelta;
@@ -1017,31 +1030,31 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             }
 
             // Create rotation from START state using accumulated angle
-            var rotationDelta = new UeQuaternion();
-            rotationDelta.setFromAxisAngle(axisVec, finalAngle);
+            var rotationDelta = quat_create();
+            quat_set_from_axis_angle(rotationDelta, axisVec, finalAngle);
 
             // Apply to initial rotation
             // rotation = rotationDelta * rotationStart
-            var temp = rotationDelta.clone();
-            self.object.rotation.copy(temp.multiply(self._rotationStart));
+            var finalRot = quat_multiply(quat_clone(rotationDelta), self._rotationStart);
+            quat_copy(self.object.rotation, finalRot);
 
             // Update previous point for next frame
-            self.pointPrevious.copy(self.pointEnd);
+            vec3_copy(self.pointPrevious, self.pointEnd);
         }
 
         else if (self.mode == "scale") {
             // Calculate scale based on ratio of drag distance from center
-
-            // We need to work in a coordinate space aligned with the object's axes
-            // effectively "Local" space delta, but derived from world positions relative to pivot
-
-            var objectWorldRot = new UeQuaternion();
+            var objectWorldRot = quat_create();
             self.object.getWorldQuaternion(objectWorldRot);
-            var invRot = objectWorldRot.clone().invert();
+            var invRot = quat_clone(objectWorldRot);
+            quat_invert(invRot);
 
             // Transform start/end points to object local space (offset from center)
-            var localStart = self.pointStart.clone().sub(self._positionStartWorld).applyQuaternion(invRot);
-            var localEnd = self.pointEnd.clone().sub(self._positionStartWorld).applyQuaternion(invRot);
+            var localStart = vec3_sub_vectors(vec3_create(), self.pointStart, self._positionStartWorld);
+            vec3_apply_quaternion(localStart, invRot);
+            
+            var localEnd = vec3_sub_vectors(vec3_create(), self.pointEnd, self._positionStartWorld);
+            vec3_apply_quaternion(localEnd, invRot);
 
             var scaleFactorX = 1;
             var scaleFactorY = 1;
@@ -1049,19 +1062,17 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
             if (self.axis == "XYZ") {
                 // Uniform scale using "virtual drag" in screen space.
-                // Project world delta into View Space to get "right/up" movement relative to camera.
-
-                var viewDelta = self.delta.clone();
-                var camQuat = new UeQuaternion();
+                var viewDelta = vec3_clone(self.delta);
+                var camQuat = quat_create();
                 self.camera.getWorldQuaternion(camQuat);
-                viewDelta.applyQuaternion(camQuat.invert()); // Transform to View Space
+                quat_invert(camQuat);
+                vec3_apply_quaternion(viewDelta, camQuat); // Transform to View Space
 
                 // Dragging Right (+X) or Up (+Y) increases scale. 
-                // Using X+Y allows diagonal drag.
-                var dragAmount = viewDelta.x + viewDelta.y;
+                var dragAmount = viewDelta[0] + viewDelta[1];
 
                 // Normalize sensitivity by distance to camera so it feels consistent
-                var dist = self.camera.position.distanceTo(self._positionStartWorld);
+                var dist = vec3_distance_to(self.camera.position, self._positionStartWorld);
                 var sensitivity = 1.0 / (dist * 0.5); // Tune this value as needed
 
                 var uniformScale = 1 + (dragAmount * sensitivity);
@@ -1073,29 +1084,34 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
             } else {
                 // Per-axis scale based on projection ratio
                 if (self.axis == "X" || self.axis == "XY" || self.axis == "XZ") {
-                    if (abs(localStart.x) > 0.001) scaleFactorX = localEnd.x / localStart.x;
+                    if (abs(localStart[0]) > 0.001) scaleFactorX = localEnd[0] / localStart[0];
                 }
                 if (self.axis == "Y" || self.axis == "XY" || self.axis == "YZ") {
-                    if (abs(localStart.y) > 0.001) scaleFactorY = localEnd.y / localStart.y;
+                    if (abs(localStart[1]) > 0.001) scaleFactorY = localEnd[1] / localStart[1];
                 }
                 if (self.axis == "Z" || self.axis == "XZ" || self.axis == "YZ") {
-                    if (abs(localStart.z) > 0.001) scaleFactorZ = localEnd.z / localStart.z;
+                    if (abs(localStart[2]) > 0.001) scaleFactorZ = localEnd[2] / localStart[2];
                 }
             }
 
-            var newScale = self._scaleStart.clone();
-            newScale.x *= scaleFactorX;
-            newScale.y *= scaleFactorY;
-            newScale.z *= scaleFactorZ;
+            var newScale = vec3_clone(self._scaleStart);
+            newScale[0] *= scaleFactorX;
+            newScale[1] *= scaleFactorY;
+            newScale[2] *= scaleFactorZ;
 
             // Snap
             if (self.scaleSnap != undefined) {
-                newScale.x = round(newScale.x / self.scaleSnap) * self.scaleSnap;
-                newScale.y = round(newScale.y / self.scaleSnap) * self.scaleSnap;
-                newScale.z = round(newScale.z / self.scaleSnap) * self.scaleSnap;
+                newScale[0] = round(newScale[0] / self.scaleSnap) * self.scaleSnap;
+                newScale[1] = round(newScale[1] / self.scaleSnap) * self.scaleSnap;
+                newScale[2] = round(newScale[2] / self.scaleSnap) * self.scaleSnap;
             }
 
-            self.object.scale.copy(newScale);
+            // Clamp
+            newScale[0] = max(newScale[0], 0.01);
+            newScale[1] = max(newScale[1], 0.01);
+            newScale[2] = max(newScale[2], 0.01);
+
+            vec3_copy(self.object.scale, newScale);
         }
     }
 

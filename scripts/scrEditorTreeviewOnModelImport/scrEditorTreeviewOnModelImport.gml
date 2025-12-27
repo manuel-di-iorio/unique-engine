@@ -121,7 +121,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
     model.traverse(function(node) {
         node.name = node.name == undefined || node.name == "" ?
          "Object" + string(global.UI_ASSETS_MODELS_ID++) : node.name;
-        node.__rotationEuler = new UeEuler();
+        node.__rotationEuler = euler_create();
         node.matrixAutoUpdate = false; // Editor meshes don't auto-update for performance
         node.__matrixAutoUpdate = false; // Internal field for export (false = static mesh)
 

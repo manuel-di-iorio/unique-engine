@@ -24,18 +24,20 @@ function UeConeGeometry(radius = 1, height = 1, radialSegments = 32, data = {}) 
         var y1 = cos(b) * radius;
         var z1 = sin(b) * radius;
 
-        var n0 = new UeVector3(slope, y0, z0).normalize();
-        var n1 = new UeVector3(slope, y1, z1).normalize();
+        var n0 = vec3_set(global.UE_VEC3_TEMP0, slope, y0, z0);
+        vec3_normalize(n0);
+        var n1 = vec3_set(global.UE_VEC3_TEMP1, slope, y1, z1);
+        vec3_normalize(n1);
 
         // Vertex 1
         array_push(_pos, -halfHeight, y1, z1);
-        array_push(_norm, n1.x, n1.y, n1.z);
+        array_push(_norm, n1[0], n1[1], n1[2]);
         array_push(_uvs, 1, 0);
         array_push(_col, color, alpha);
 
         // Vertex 0
         array_push(_pos, -halfHeight, y0, z0);
-        array_push(_norm, n0.x, n0.y, n0.z);
+        array_push(_norm, n0[0], n0[1], n0[2]);
         array_push(_uvs, 0, 0);
         array_push(_col, color, alpha);
 

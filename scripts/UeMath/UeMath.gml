@@ -1,5 +1,3 @@
-global.UE_DEFAULT_UP = vec3_create(0, 0, -1);
-
 // ============================================================================
 // BOX3
 // ============================================================================
@@ -68,7 +66,4 @@ function vec3_unproject(vec, camera) {
     // Apply inverse projection first, then matrixWorld
     vec3_apply_matrix4(vec, camera.projectionMatrixInverse);
     vec3_apply_matrix4(vec, camera.matrixWorld);
-    vec[0] = colour_get_red(color) / 255;
-    vec[1] = colour_get_green(color) / 255;
-    vec[2] = colour_get_blue(color) / 255;
 }

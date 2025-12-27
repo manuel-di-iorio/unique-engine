@@ -32,22 +32,22 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             matrixAutoUpdate,
             frustumCulled,
             
-            px: position.x,
-            py: position.y,
-            pz: position.z,
+            px: position[VEC3.x],
+            py: position[VEC3.y],
+            pz: position[VEC3.z],
             
-            rx: rotation.x,
-            ry: rotation.y,
-            rz: rotation.z, 
-            rw: rotation.w,
+            rx: rotation[QUAT.x],
+            ry: rotation[QUAT.y],
+            rz: rotation[QUAT.z],
+            rw: rotation[QUAT.w],
             
-            sx: scale.x,
-            sy: scale.y,
-            sz: scale.z,
+            sx: scale[VEC3.x],
+            sy: scale[VEC3.y],
+            sz: scale[VEC3.z],
             
-            ux: up.x,
-            uy: up.y,
-            uz: up.z,
+            ux: up[VEC3.x],
+            uy: up[VEC3.y],
+            uz: up[VEC3.z],
         };
     }
 
@@ -59,10 +59,10 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         renderOrder = data[$ "renderOrder"];
         layers.mask = data[$ "layers"];
         
-        position.set(data[$ "px"], data[$ "py"], data[$ "pz"]);
-        rotation.set(data[$ "rx"], data[$ "ry"], data[$ "rz"], data[$ "rw"]);
-        scale.set(data[$ "sx"], data[$ "sy"], data[$ "sz"]);
-        up.set(data[$ "ux"], data[$ "uy"], data[$ "uz"]);
+        vec3_set(position, data[$ "px"], data[$ "py"], data[$ "pz"]);
+        quat_set(rotation, data[$ "rx"], data[$ "ry"], data[$ "rz"], data[$ "rw"]);
+        vec3_set(scale, data[$ "sx"], data[$ "sy"], data[$ "sz"]);
+        vec3_set(up, data[$ "ux"], data[$ "uy"], data[$ "uz"]);
         
         if (geometry != undefined && data[$ "geometry"] != undefined) {
             geometry.fromJSON(data.geometry);
@@ -86,13 +86,12 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         gml_pragma("forceinline");
         var object = self;
         
-        // Transform the ray into the local space of the mesh (inverse world matrix), array-based
-        mat4_copy(global.UE_MAT4_TEMP0, matrixWorld.data); mat4_invert(global.UE_MAT4_TEMP0);
+        var matrixWorldInverse = global.UE_MAT4_TEMP0;
+        mat4_copy(matrixWorldInverse, matrixWorld);
+        mat4_invert(matrixWorldInverse);
         
-        // Note: We copy the ray to a local ray
-        var localRay = global.UE_RAY_TEMP0.copy(raycaster.ray);
-        localRay.origin.applyMatrix4(global.UE_MAT4_TEMP0);
-        localRay.direction.transformDirection(global.UE_MAT4_TEMP0);
+        var localRay = ray_clone(raycaster.ray);
+        ray_apply_matrix4(localRay, matrixWorldInverse);
 
         // --- 1. Bounding Volume Checks (Local Space) ---
         // If the geometry has bounding volumes, test them first for early rejection
@@ -179,10 +178,10 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         var _this = self;
         
         var instance = new UeMesh(self.geometry, self.material, {
-            position: _this.position.clone(),
-            rotation: _this.rotation.clone(),
-            scale: _this.scale.clone(),
-            up: _this.up.clone(),
+            position: vec3_clone(_this.position),
+            rotation: quat_clone(_this.rotation),
+            scale: vec3_clone(_this.scale),
+            up: vec3_clone(_this.up),
             name: _this.name,
             visible: _this.visible,
             renderOrder: _this.renderOrder,

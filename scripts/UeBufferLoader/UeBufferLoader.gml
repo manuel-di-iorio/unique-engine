@@ -135,9 +135,9 @@ function UeBufferLoader() constructor {
         var repeatVec = obj[$ "repeat"];
         var offset = obj.offset;
         var center = obj.center;
-        texture[$ "repeat"] = new UeVector2(repeatVec.x, repeatVec.y);
-        texture.offset = new UeVector2(offset.x, offset.y);
-        texture.center = new UeVector2(center.x, center.y);
+        texture[$ "repeat"] = vec2_create(repeatVec.x, repeatVec.y);
+        texture.offset = vec2_create(offset.x, offset.y);
+        texture.center = vec2_create(center.x, center.y);
         texture.rotation = obj.rotation;
         texture.flipX = obj.flipX;
         texture.flipY = obj.flipY;
@@ -209,10 +209,11 @@ function UeBufferLoader() constructor {
         mesh.layers.mask = obj.layers;
         
         // Read the transform
-        mesh.position = new UeVector3(obj.px, obj.py, obj.pz);
-        mesh.rotation = new UeQuaternion().set(obj.rx, obj.ry, obj.rz, obj.rw);
-        mesh.scale = new UeVector3(obj.sx, obj.sy, obj.sz);
-        mesh.up = new UeVector3(obj.ux, obj.uy, obj.uz);
+        mesh.position = vec3_create(obj.px, obj.py, obj.pz);
+        mesh.rotation = quat_create();
+        quat_set(mesh.rotation, obj.rx, obj.ry, obj.rz, obj.rw);
+        mesh.scale = vec3_create(obj.sx, obj.sy, obj.sz);
+        mesh.up = vec3_create(obj.ux, obj.uy, obj.uz);
         mesh.updateMatrix();
         
         // Store the mesh into a temporary flat array/map for later association of the UUIDs
@@ -232,10 +233,10 @@ function UeBufferLoader() constructor {
         light.intensity = obj.intensity;
         light.range = obj.range;
         light.color = obj.color;
-        light.position = new UeVector3(obj.px, obj.py, obj.pz);
+        light.position = vec3_create(obj.px, obj.py, obj.pz);
         
         if (obj[$ "targetX"] != undefined) {
-            light.target = new UeVector3(obj.targetX, obj.targetY, obj.targetZ);
+            light.target = vec3_create(obj.targetX, obj.targetY, obj.targetZ);
         }
         
         array_push(objects, light);

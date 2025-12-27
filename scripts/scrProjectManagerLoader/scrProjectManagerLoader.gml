@@ -194,7 +194,7 @@ function ProjectLoader() constructor {
               sm.camera.setPosition(c.position[0], c.position[1], c.position[2]);
           }
           if (sm.orbit != undefined) {
-              if (c[$ "target"] != undefined) sm.orbit.target.set(c.target[0], c.target[1], c.target[2]);
+              if (c[$ "target"] != undefined) vec3_set(sm.orbit.target, c.target[0], c.target[1], c.target[2]);
               if (c[$ "dampingFactor"] != undefined) sm.orbit.dampingFactor = c.dampingFactor;
               sm.orbit.updateSphericalCoordinates();
               sm.orbit.update();
@@ -373,10 +373,10 @@ function ProjectLoader() constructor {
       if (asset.type == "Mesh") {        
         asset.__matrixAutoUpdate = node[$ "matrixAutoUpdate"] ?? false;
         if (struct_exists(node, "ex") && struct_exists(node, "ey") && struct_exists(node, "ez")) {
-          asset.__rotationEuler = new UeEuler(node[$ "ex"], node[$ "ey"], node[$ "ez"], node[$ "eo"] ?? "XYZ");
+          asset.__rotationEuler = euler_create(node[$ "ex"], node[$ "ey"], node[$ "ez"]);
         } else {
-          asset.__rotationEuler = new UeEuler();
-          asset.__rotationEuler.setFromQuaternion(asset.rotation);
+          asset.__rotationEuler = euler_create();
+          euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
         }
         
         var geometryPath = assetDir + "geometry.buf";

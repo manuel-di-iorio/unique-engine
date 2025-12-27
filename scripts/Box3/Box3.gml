@@ -1,4 +1,10 @@
-/// @desc Box3 functions using arrays [minX, minY, minZ, maxX, maxY, maxZ]
+/// @desc Box3 functions [minX, minY, minZ, maxX, maxY, maxZ]
+
+global.UE_BOX3_TEMP0 = box3_create();
+
+enum BOX3 {
+  minX, minY, minZ, maxX, maxY, maxZ
+}
 
 /// @func box3_create(minX, minY, minZ, maxX, maxY, maxZ)
 function box3_create(minX = infinity, minY = infinity, minZ = infinity, maxX = -infinity, maxY = -infinity, maxZ = -infinity) {

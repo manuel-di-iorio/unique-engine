@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeRay",
+  "%Name":"__UniqueMathInternal",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeRay",
+  "name":"__UniqueMathInternal",
   "parent":{
-    "name":"Unique Math (Struct)",
-    "path":"folders/Packages/Unique Math (Struct).yy",
+    "name":"Unique Math",
+    "path":"folders/Packages/Unique Math.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

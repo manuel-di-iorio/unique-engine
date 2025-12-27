@@ -159,7 +159,7 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
             var obj = self.selectedObjects[i];
             if (obj != undefined && obj[$ "geometry"] != undefined && obj.geometry[$ "vb"] != undefined) {
                 // Set world matrix for this object
-                matrix_set(matrix_world, obj.matrixWorld.data);
+                matrix_set(matrix_world, obj.matrixWorld);
                 // Submit the geometry
                 vertex_submit(obj.geometry.vb, obj.primitive ?? pr_trianglelist, -1);
             }

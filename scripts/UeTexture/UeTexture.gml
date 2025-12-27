@@ -17,13 +17,13 @@ function UeTexture(sprite = undefined, data = {}) constructor {
     self.sprite = sprite;
 
     // UV offset for texture coordinates (Vector2)
-    offset = new UeVector2(0, 0);
+    offset = vec2_create();
 
     // Number of times the texture repeats on UV axes (Vector2)
-    self[$ "repeat"] = data[$ "repeat"] ?? new UeVector2(1, 1);
+    self[$ "repeat"] = data[$ "repeat"] ?? vec2_create(1, 1);
 
     // Center point for rotation and transformations (Vector2)
-    center = new UeVector2(0, 0);
+    center = vec2_create();
 
     // Rotation angle in degrees (around Z axis)
     rotation = 0;
@@ -47,7 +47,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
     generateMipmaps = data[$ "generateMipmaps"] ?? mip_markedonly;
 
     // 4x4 transformation matrix for UVs
-    matrix = new UeMatrix4();
+    matrix = mat4_create()
 
     // Whether to auto-update matrix before drawing
     matrixAutoUpdate = true;

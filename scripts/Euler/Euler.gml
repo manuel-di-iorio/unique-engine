@@ -121,5 +121,5 @@ function euler_set_from_quaternion(e, q) {
 
 function euler_equals(e1, e2) {
     gml_pragma("forceinline");
-    return (e1[0] == e2[0] && e1[1] == e2[1] && e1[2] == e2[2] && e1[3] == e2[3]);
+    return (e1[0] == e2[0] && e1[1] == e2[1] && e1[2] == e2[2]);
 }

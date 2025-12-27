@@ -5,6 +5,10 @@
 // Global dummy array for temporary operations - reuse to avoid allocations
 global.UE_VEC2_TEMP0 = [0, 0];
 
+enum VEC2 {
+  x, y
+}
+
 /// @func vec2_create(x, y)
 /// @desc Creates a new vec2 array with the given components.
 /// @param {Real} [x=0] X component

@@ -2,8 +2,9 @@ function UeArrowHelper(
     dir, origin, length = 1, color = c_yellow, headLength = undefined, headWidth = undefined
 ): UeMesh() constructor {
 
-    var _dir = dir.clone().normalize();
-    var _origin = origin.clone();
+    var _dir = vec3_clone(dir);
+    vec3_normalize(_dir);
+    var _origin = vec3_clone(origin);
 
     self._length = length;
     self.headLength = headLength ?? length * 0.1;
@@ -41,17 +42,22 @@ function UeArrowHelper(
     function setDirection(dir) {
         gml_pragma("forceinline");
         // Normalize the new direction vector
-        var _dir = dir.clone().normalize();
+        var _dir = vec3_clone(dir);
+        vec3_normalize(_dir);
         
         // Compute quaternion rotation from default direction (X+) to new direction
-        self.rotation.copy(global.UE_DUMMY_QUATERNION.setFromUnitVectors(new UeVector3(1, 0, 0), _dir));
+        var q = global.UE_QUAT_TEMP0;
+        var axisX = vec3_set(global.UE_VEC3_TEMP0, 1, 0, 0);
+        quat_set_from_unit_vectors(q, axisX, _dir);
+        quat_copy(self.rotation, q);
         updateMatrix();
         
         // Calculate new position for the cone along the rotated direction
-        var pos = _dir.scale(self._length - self.headLength);
-        // Update the cone’s position to stay at the tip of the arrow
-        self.cone.setPosition(pos.x, pos.y, pos.z);
-        self.cone.updateMatrix();
+        // @todo visually verify
+        // var pos = _dir.scale(self._length - self.headLength);
+        // // Update the cone’s position to stay at the tip of the arrow
+        // self.cone.setPosition(pos.x, pos.y, pos.z);
+        // self.cone.updateMatrix();
     }
 
     // --- Method to update the length and dimensions of the arrow (untested) ---
@@ -97,5 +103,5 @@ function UeArrowHelper(
 
     // Initialize arrow direction and position
     setDirection(_dir);
-    self.position.copy(_origin);
+    vec3_copy(self.position, _origin);
 }

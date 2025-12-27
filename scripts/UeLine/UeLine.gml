@@ -8,27 +8,23 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
         gml_pragma("forceinline");
         var object = self;
     
-        // Preleva e inverte la matrice world
-        mat4_copy(global.UE_MAT4_TEMP0, matrixWorld.data);
+        mat4_copy(global.UE_MAT4_TEMP0, matrixWorld);
         mat4_invert(global.UE_MAT4_TEMP0);
+        var invWorld = global.UE_MAT4_TEMP0;
     
-        // Prepara il raggio nello spazio locale
-        var localRay = global.UE_DUMMY_RAY.copy(raycaster.ray);
-        localRay.origin.applyMatrix4(inverseMatrix);
-        localRay.direction.transformDirection(inverseMatrix);
+        var localRay = ray_clone(raycaster.ray);
+        ray_apply_matrix4(localRay, invWorld);
     
-        // Calcola soglia di distanza localizzata
         var s = scale;
-        var avgScale = (s.x + s.y + s.z) * 0.3333333;
+        var avgScale = (s[0] + s[1] + s[2]) * 0.3333333;
         var localThreshold = raycaster.params.Line.threshold / avgScale;
         var localThresholdSq = localThreshold * localThreshold;
     
-        // Bounding sphere check on the entire mesh
         var intersectionSphere = object[$ "__intersectionSphere"];
-        if (intersectionSphere != undefined) {
-            if (ray_intersect_sphere(localRay, intersectionSphere) == -1) {
-                return self;
-            }
+        if (intersectionSphere != undefined && is_array(intersectionSphere)) {
+            var localSphere = sphere_clone(intersectionSphere);
+            sphere_apply_matrix4(localSphere, invWorld);
+            if (ray_intersect_sphere(localRay, localSphere) == -1) return self;
         }
     
         var pos = geometry[$ "position"];
@@ -47,14 +43,14 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
             vec3_set(vec3A, pos[i3],   pos[i3 + 1],   pos[i3 + 2]);
             vec3_set(vec3B, pos[i1_3], pos[i1_3 + 1], pos[i1_3 + 2]);
             
-            // Check the actual point intersection
             var distSq = ray_distance_sq_to_segment(localRay, vec3A, vec3B, closestOnRay, closestOnSeg);
             if (distSq > localThresholdSq) {
                 continue;
              } 
     
-            var hitPoint = vec3D.applyMatrix4(matrixWorld);
-            var distance = raycaster.ray.origin.distanceTo(hitPoint);
+            var worldPoint = [closestOnSeg[0], closestOnSeg[1], closestOnSeg[2]];
+            vec3_apply_matrix4(worldPoint, matrixWorld);
+            var distance = ray_distance_to_point(raycaster.ray, worldPoint[0], worldPoint[1], worldPoint[2]);
     
             if (distance < raycaster.near || distance > raycaster.far) {
                 continue;
@@ -63,7 +59,7 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
             array_push(hits, {
                 object,
                 distance,
-                point: global.UE_VEC3_TEMP3.set(closestOnSeg[0], closestOnSeg[1], closestOnSeg[2]).clone(),
+                point: [worldPoint[0], worldPoint[1], worldPoint[2]],
                 segmentIndex: i
             });
         }

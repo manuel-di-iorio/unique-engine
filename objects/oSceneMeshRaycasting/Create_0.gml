@@ -26,12 +26,12 @@ scene.add(meshGroup);
 
 // Create the materials
 materialDefault = new UeMeshStandardMaterial();
-materialDefault.uniforms.ueEmissive.value = [0.8, 0.8, 0];
-materialDefault.uniforms.ueEmissiveIntensity.value = 0;
+materialDefault.setUniform("ueEmissive", [0.8, 0.8, 0]);
+materialDefault.setUniform("ueEmissiveIntensity", 0);
 
 materialSelected = new UeMeshStandardMaterial();
-materialSelected.uniforms.ueEmissive.value = [0.8, 0.8, 0];
-materialSelected.uniforms.ueEmissiveIntensity.value = 1;
+materialSelected.setUniform("ueEmissive", [0.8, 0.8, 0]);
+materialSelected.setUniform("ueEmissiveIntensity", 1);
 
 // Create the random boxes
 var maxDist = 500;
@@ -61,12 +61,12 @@ for (var i = 0; i < 150; i++) {
     mesh.setPosition(xx, yy, zz); 
      
     // Set the bounding box size matching the mesh scale
-    geometry.boundingBox = new UeBox3();
-    geometry.boundingBox.setFromCenterAndSize(UE_VECTOR3_ZERO, new UeVector3(size, size, size));
+    geometry.boundingBox = box3_create();
+    box3_set_from_center_and_size(geometry.boundingBox, UE_MATH_VECTOR3_ZERO, vec3_create(size, size, size));
     
     // Set the bounding sphere for frustum testing
     // Radius = half diagonal of cube = size * sqrt(3) / 2
-    geometry.boundingSphere = new UeSphere(UE_VECTOR3_ZERO, size * sqrt(3) / 2);
+    geometry.boundingSphere = sphere_create(0, 0, 0, size * sqrt(3) / 2);
     
     mesh.updateMatrix();
 }

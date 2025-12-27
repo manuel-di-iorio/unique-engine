@@ -102,16 +102,16 @@ function UeGeometry(data = {}) constructor {
     // Compute bounding box based on current vertices
     function computeBoundingBox() {
         gml_pragma("forceinline");
-        boundingBox ??= new UeBox3();
-        if (position != undefined) boundingBox.setFromBufferAttribute(position);
+        boundingBox ??= box3_create();
+        if (position != undefined) box3_set_from_buffer_attribute(boundingBox, position);
         return self;
     }
     
     // Compute bounding sphere based on current vertices
     function computeBoundingSphere() {
         gml_pragma("forceinline");
-        boundingSphere ??= new UeSphere();
-        if (position != undefined) boundingSphere.setFromBufferAttribute(position);
+        if (boundingBox == undefined) computeBoundingBox();
+        if (boundingBox != undefined) boundingSphere = box3_get_bounding_sphere(boundingBox);
         return self;
     }
     
@@ -139,8 +139,24 @@ function UeGeometry(data = {}) constructor {
             index: index, 
             format: format.toJSON() 
         };
-        res.boundingBox = boundingBox ? boundingBox.toJSON() : undefined;
-        res.boundingSphere = boundingSphere ? boundingSphere.toJSON() : undefined;
+        if (boundingBox != undefined) {
+            res.boundingBox = {
+                minX: boundingBox[0], minY: boundingBox[1], minZ: boundingBox[2],
+                maxX: boundingBox[3], maxY: boundingBox[4], maxZ: boundingBox[5]
+            };
+        } else {
+            res.boundingBox = undefined;
+        }
+        if (boundingSphere != undefined) {
+            res.boundingSphere = {
+                x: boundingSphere[0],
+                y: boundingSphere[1],
+                z: boundingSphere[2],
+                r: boundingSphere[3]
+            };
+        } else {
+            res.boundingSphere = undefined;
+        }
         
         var attrs = format.attrs;
         for (var i = 0, l = array_length(attrs); i < l; i++) {
@@ -168,8 +184,29 @@ function UeGeometry(data = {}) constructor {
                 self[$ attrs[i].name] = data[$ attrs[i].name];
             }
         }
-        if (data[$ "boundingBox"] != undefined) boundingBox = new UeBox3().fromJSON(data.boundingBox);
-        if (data[$ "boundingSphere"] != undefined) boundingSphere = new UeSphere().fromJSON(data.boundingSphere);
+        if (data[$ "boundingBox"] != undefined) {
+            var b = data.boundingBox;
+            if (is_struct(b) && struct_exists(b, "minX")) {
+                boundingBox = box3_create(b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ);
+            } else if (is_struct(b) && struct_exists(b, "min")) {
+                var _min = b.min;
+                var _max = b.max;
+                boundingBox = box3_create(_min.x, _min.y, _min.z, _max.x, _max.y, _max.z);
+            } else if (is_array(b)) {
+                boundingBox = box3_clone(b);
+            }
+        }
+        if (data[$ "boundingSphere"] != undefined) {
+            var s = data.boundingSphere;
+            if (is_struct(s) && struct_exists(s, "x")) {
+                boundingSphere = sphere_create(s.x, s.y, s.z, s.r);
+            } else if (is_struct(s) && struct_exists(s, "center")) {
+                var c = s.center;
+                boundingSphere = sphere_create(c.x, c.y, c.z, s.radius ?? -1);
+            } else if (is_array(s)) {
+                boundingSphere = sphere_clone(s);
+            }
+        }
         return self;
     }
     
