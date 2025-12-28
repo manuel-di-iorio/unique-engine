@@ -50,7 +50,7 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
     
             var worldPoint = [closestOnSeg[0], closestOnSeg[1], closestOnSeg[2]];
             vec3_apply_matrix4(worldPoint, matrixWorld);
-            var distance = ray_distance_to_point(raycaster.ray, worldPoint);
+            var distance = vec3_distance_to(raycaster.ray, worldPoint);
     
             if (distance < raycaster.near || distance > raycaster.far) {
                 continue;

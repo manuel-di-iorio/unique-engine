@@ -132,17 +132,26 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                  var p = ray_intersect_triangle(localRay, v0, v1, v2, false, localHit);
                  if (p != undefined) {
                       vec3_apply_matrix4(localHit, matrixWorld);
-                      var distance = ray_distance_to_point(raycaster.ray, localHit);
-                      if (distance < MIN_DIST) { MIN_DIST = distance; hitPrecise = true; }
+                      var distance = vec3_distance_to(raycaster.ray, localHit);
+                      if (distance < MIN_DIST) { 
+                          MIN_DIST = distance; 
+                          hitPrecise = true; 
+                          global.UE_VEC3_TEMP4[0] = localHit[0];
+                          global.UE_VEC3_TEMP4[1] = localHit[1];
+                          global.UE_VEC3_TEMP4[2] = localHit[2];
+                      }
                  }
             }
         }
         
         if (hitPrecise) {
-            array_push(hits, {
-                object,
-                distance: MIN_DIST
-            });
+            if (MIN_DIST >= raycaster.near && MIN_DIST <= raycaster.far) {
+                array_push(hits, {
+                    object,
+                    distance: MIN_DIST,
+                    point: [global.UE_VEC3_TEMP4[0], global.UE_VEC3_TEMP4[1], global.UE_VEC3_TEMP4[2]]
+                });
+            }
         } else {
             // --- 3. Approximate Intersection (Bounding box) ---
             var boundingBox = geometry[$ "boundingBox"];
@@ -151,12 +160,15 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                 if (t == -1) return self;
                 var localPoint = ray_at(localRay, t);
                 vec3_apply_matrix4(localPoint, matrixWorld);
-                var dist = ray_distance_to_point(raycaster.ray, localPoint);
+                var dist = vec3_distance_to(raycaster.ray, localPoint);
                 
-                array_push(hits, {
-                    object,
-                    distance: dist
-                });
+                if (dist >= raycaster.near && dist <= raycaster.far) {
+                    array_push(hits, {
+                        object,
+                        distance: dist,
+                        point: [localPoint[0], localPoint[1], localPoint[2]]
+                    });
+                }
             }
         }
         

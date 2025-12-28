@@ -105,7 +105,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         // Recursively test child objects if requested
         if (recursive) {
             for (var i = 0, n = array_length(object.children); i < n; i++) {
-                intersectObject(object.children[i], true, sort, hits);
+                intersectObject(object.children[i], true, false, hits);
             }
         }
 

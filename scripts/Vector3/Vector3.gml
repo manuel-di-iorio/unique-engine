@@ -7,6 +7,7 @@ global.UE_VEC3_TEMP0 = vec3_create();
 global.UE_VEC3_TEMP1 = vec3_create();
 global.UE_VEC3_TEMP2 = vec3_create();
 global.UE_VEC3_TEMP3 = vec3_create();
+global.UE_VEC3_TEMP4 = vec3_create();
 
 // Vector3 Enum
 enum VEC3 {
