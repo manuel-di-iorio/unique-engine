@@ -6,33 +6,63 @@ function euler_create(x = 0, y = 0, z = 0) {
     return [x, y, z];
 }
 
+/// @func euler_set(e, x, y, z)
+/// @desc Sets the euler angles (in degrees).
+/// @param {Array<Real>} e The euler array to modify
+/// @param {Real} x The x angle
+/// @param {Real} y The y angle
+/// @param {Real} z The z angle
+/// @returns {Array<Real>} The modified euler array
 function euler_set(e, x, y, z) {
     gml_pragma("forceinline");
     e[0] = x;
     e[1] = y;
     e[2] = z;
+    return e;
 }
 
+/// @func euler_copy(e, src)
+/// @desc Copies euler angles from one array to another.
+/// @param {Array<Real>} e The target array (will be modified)
+/// @param {Array<Real>} src The source array
+/// @returns {Array<Real>} The modified euler array
 function euler_copy(e, src) {
     gml_pragma("forceinline");
     e[0] = src[0];
     e[1] = src[1];
     e[2] = src[2];
+    return e;
 }
 
+/// @func euler_clone(e)
+/// @desc Creates a new euler array with the same angles.
+/// @param {Array<Real>} e The euler array to clone
+/// @returns {Array<Real>} A new euler array
 function euler_clone(e) {
     gml_pragma("forceinline");
     return [e[0], e[1], e[2]];
 }
 
+/// @func euler_from_array(e, array, offset = 0)
+/// @desc Sets euler angles from a flat array.
+/// @param {Array<Real>} e The euler array to modify
+/// @param {Array<Real>} array The source flat array
+/// @param {Real} [offset=0] Starting offset
+/// @returns {Array<Real>} The modified euler array
 function euler_from_array(e, array, offset = 0) {
     gml_pragma("forceinline");
     e[0] = array[offset];
     e[1] = array[offset + 1];
     e[2] = array[offset + 2];
-    var idx = offset + 3;
+    return e;
 }
 
+/// @func euler_to_array(e, array = undefined, offset = 0)
+/// @desc Copies euler angles to a flat array.
+/// @param {Array<Real>} e The euler array
+/// @param {Array<Real>} [array] Optional target array
+/// @param {Real} [offset=0] Starting offset
+/// @returns {Array<Real>} The target array
 function euler_to_array(e, array = undefined, offset = 0) {
     gml_pragma("forceinline");
     array ??= array_create(3);
@@ -42,15 +72,24 @@ function euler_to_array(e, array = undefined, offset = 0) {
     return array;
 }
 
+/// @func euler_set_from_vector3(e, v)
+/// @desc Sets euler angles from a Vector3.
+/// @param {Array<Real>} e The euler array to modify
+/// @param {Array<Real>} v The Vector3 [x, y, z]
+/// @returns {Array<Real>} The modified euler array
 function euler_set_from_vector3(e, v) {
     gml_pragma("forceinline");
     e[0] = v[0];
     e[1] = v[1];
     e[2] = v[2];
+    return e;
 }
 
 /// @func euler_set_from_rotation_matrix(e, m)
-/// @desc Sets euler angles from rotation matrix.
+/// @desc Sets euler angles from a rotation matrix.
+/// @param {Array<Real>} e The euler array to modify
+/// @param {Array<Real>} m The rotation matrix
+/// @returns {Array<Real>} The modified euler array
 function euler_set_from_rotation_matrix(e, m) {
     gml_pragma("forceinline");
     
@@ -74,10 +113,14 @@ function euler_set_from_rotation_matrix(e, m) {
     e[0] = _x;
     e[1] = _y;
     e[2] = _z;
+    return e;
 }
 
 /// @func euler_set_from_quaternion(e, q)
-/// @desc Sets euler angles from quaternion.
+/// @desc Sets euler angles from a quaternion.
+/// @param {Array<Real>} e The euler array to modify
+/// @param {Array<Real>} q The quaternion [x, y, z, w]
+/// @returns {Array<Real>} The modified euler array
 function euler_set_from_quaternion(e, q) {
     gml_pragma("forceinline");
     // Matrix conversion is often easier/robust
@@ -101,22 +144,21 @@ function euler_set_from_quaternion(e, q) {
     var m31 = xz - wy;
     var m32 = yz + wx;
     var m33 = 1 - (xx + yy);
-
-    // Reuse matrix extraction logic (duplicated for performance/independence or could wrap)
     
-    var rx, ry, rz;
-    rx = darcsin(-clamp(m23, -1, 1));
+    var ex, ey, ez;
+    ex = darcsin(-clamp(m23, -1, 1));
     if (abs(m23) < 0.9999999) {
-        ry = darctan2(m13, m33);
-        rz = darctan2(m21, m22);
+        ey = darctan2(m13, m33);
+        ez = darctan2(m21, m22);
     } else {
-        ry = darctan2(-m31, m11);
-        rz = 0;
+        ey = darctan2(-m31, m11);
+        ez = 0;
     }
     
-    e[0] = rx;
-    e[1] = ry;
-    e[2] = rz;
+    e[0] = ex;
+    e[1] = ey;
+    e[2] = ez;
+    return e;
 }
 
 function euler_equals(e1, e2) {

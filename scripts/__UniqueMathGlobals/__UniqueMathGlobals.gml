@@ -1,0 +1,2 @@
+global.UE_MATH_VERSION = "3.0.0";
+#macro UE_EPSILON 0.00001

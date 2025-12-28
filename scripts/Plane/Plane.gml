@@ -1,26 +1,44 @@
 /// @desc Plane functions using arrays [nx, ny, nz, constant]
 
-function plane_create(nx = 0, ny = 1, nz = 0, constant = 0) {
-    gml_pragma("forceinline");
-    return [nx, ny, nz, constant];
+function plane_create(normal, constant = 0) {
+  gml_pragma("forceinline");
+  normal ??= vec3_create(1, 0, 0);
+  return [normal[0], normal[1], normal[2], constant];
 }
 
-function plane_set(p, nx, ny, nz, constant) {
-    gml_pragma("forceinline");
-    p[0] = nx;
-    p[1] = ny;
-    p[2] = nz;
-    p[3] = constant;
+/// @func plane_set(p, normal, constant)
+/// @desc Sets the plane's normal and constant.
+/// @param {Array<Real>} p The plane array to modify
+/// @param {Array<Real>} normal Normal (Vector 3)
+/// @param {Real} constant Plane constant
+/// @returns {Array<Real>} The modified plane array
+function plane_set(p, normal, constant) {
+  gml_pragma("forceinline");
+  p[0] = normal[0];
+  p[1] = normal[1];
+  p[2] = normal[2]
+  p[3] = constant;
+  return p;
 }
 
+/// @func plane_copy(p, src)
+/// @desc Copies plane properties from one array to another.
+/// @param {Array<Real>} p The target array (will be modified)
+/// @param {Array<Real>} src The source array
+/// @returns {Array<Real>} The modified plane array
 function plane_copy(p, src) {
     gml_pragma("forceinline");
     p[0] = src[0];
     p[1] = src[1];
     p[2] = src[2];
     p[3] = src[3];
+    return p;
 }
 
+/// @func plane_clone(p)
+/// @desc Creates a new plane array with the same properties.
+/// @param {Array<Real>} p The plane array to clone
+/// @returns {Array<Real>} A new plane array
 function plane_clone(p) {
     gml_pragma("forceinline");
     return [p[0], p[1], p[2], p[3]];
@@ -28,6 +46,8 @@ function plane_clone(p) {
 
 /// @func plane_normalize(p)
 /// @desc Normalizes the plane normal and adjusts constant.
+/// @param {Array<Real>} p The plane array to modify
+/// @returns {Array<Real>} The modified plane array
 function plane_normalize(p) {
     gml_pragma("forceinline");
     var nx = p[0], ny = p[1], nz = p[2];
@@ -39,10 +59,14 @@ function plane_normalize(p) {
         p[2] *= invLen;
         p[3] *= invLen;
     }
+    return p;
 }
 
 /// @func plane_distance_to_point(p, point)
 /// @desc Returns signed distance from point to plane.
+/// @param {Array<Real>} p The plane
+/// @param {Array<Real>} point The point [x, y, z]
+/// @returns {Real}
 function plane_distance_to_point(p, point) {
     gml_pragma("forceinline");
     return p[0] * point[0] + p[1] * point[1] + p[2] * point[2] + p[3];
@@ -50,6 +74,10 @@ function plane_distance_to_point(p, point) {
 
 /// @func plane_set_from_normal_and_coplanar_point(p, normal, point)
 /// @desc Sets plane from normal and a point on the plane.
+/// @param {Array<Real>} p The plane array to modify
+/// @param {Array<Real>} normal The normal vector
+/// @param {Array<Real>} point A point on the plane
+/// @returns {Array<Real>} The modified plane array
 function plane_set_from_normal_and_coplanar_point(p, normal, point) {
     gml_pragma("forceinline");
     var nx = normal[0], ny = normal[1], nz = normal[2];
@@ -58,26 +86,48 @@ function plane_set_from_normal_and_coplanar_point(p, normal, point) {
     p[1] = ny;
     p[2] = nz;
     p[3] = -(nx * px + ny * py + nz * pz);
+    return p;
 }
 
+/// @func plane_equals(p, p2)
+/// @desc Checks if two planes are equal.
+/// @param {Array<Real>} p The first plane
+/// @param {Array<Real>} p2 The second plane
+/// @returns {Bool}
 function plane_equals(p, p2) {
     gml_pragma("forceinline");
     return p[0]==p2[0] && p[1]==p2[1] && p[2]==p2[2] && p[3]==p2[3];
 }
 
+/// @func plane_negate(p)
+/// @desc Negates the plane normal and constant.
+/// @param {Array<Real>} p The plane array to modify
+/// @returns {Array<Real>} The modified plane array
 function plane_negate(p) {
     gml_pragma("forceinline");
     p[0] = -p[0];
     p[1] = -p[1];
     p[2] = -p[2];
     p[3] = -p[3];
+    return p;
 }
 
-function plane_translate(p, tx, ty, tz) {
+/// @func plane_translate(p, offset)
+/// @desc Translates the plane by the given offset.
+/// @param {Array<Real>} p The plane array to modify
+/// @param {Array<Real>} offset The translation offset [tx, ty, tz]
+/// @returns {Array<Real>} The modified plane array
+function plane_translate(p, offset) {
     gml_pragma("forceinline");
-    p[3] -= p[0]*tx + p[1]*ty + p[2]*tz;
+    p[3] -= p[0]*offset[0] + p[1]*offset[1] + p[2]*offset[2];
+    return p;
 }
 
+/// @func plane_coplanar_point(p, out = undefined)
+/// @desc Returns a point on the plane.
+/// @param {Array<Real>} p The plane
+/// @param {Array<Real>} [out] Optional output vector
+/// @returns {Array<Real>} The point on the plane
 function plane_coplanar_point(p, out = undefined) {
     gml_pragma("forceinline");
     out ??= array_create(3);
@@ -88,6 +138,12 @@ function plane_coplanar_point(p, out = undefined) {
     return out;
 }
 
+/// @func plane_project_point(p, point, out = array_create(3))
+/// @desc Projects a point onto the plane.
+/// @param {Array<Real>} p The plane
+/// @param {Array<Real>} point The point to project
+/// @param {Array<Real>} [out] Optional output vector
+/// @returns {Array<Real>} The projected point
 function plane_project_point(p, point, out = array_create(3)) {
     gml_pragma("forceinline");
     var px = point[0], py = point[1], pz = point[2];
@@ -98,16 +154,32 @@ function plane_project_point(p, point, out = array_create(3)) {
     return out;
 }
 
+/// @func plane_distance_to_sphere(p, sphere)
+/// @desc Returns signed distance from sphere center to plane, minus radius.
+/// @param {Array<Real>} p The plane
+/// @param {Array<Real>} sphere The sphere [x, y, z, r]
+/// @returns {Real}
 function plane_distance_to_sphere(p, sphere) {
     gml_pragma("forceinline");
     return (p[0]*sphere[0] + p[1]*sphere[1] + p[2]*sphere[2] + p[3]) - sphere[3];
 }
 
+/// @func plane_intersects_sphere(p, sphere)
+/// @desc Checks if the plane intersects a sphere.
+/// @param {Array<Real>} p The plane
+/// @param {Array<Real>} sphere The sphere
+/// @returns {Bool}
 function plane_intersects_sphere(p, sphere) {
     gml_pragma("forceinline");
     return abs(p[0]*sphere[0] + p[1]*sphere[1] + p[2]*sphere[2] + p[3]) <= sphere[3];
 }
 
+/// @func plane_intersect_line(p, line, out = undefined)
+/// @desc Finds the intersection point between the plane and a line segment.
+/// @param {Array<Real>} p The plane
+/// @param {Array<Real>} line The line segment [x1, y1, z1, x2, y2, z2]
+/// @param {Array<Real>} [out] Optional output vector
+/// @returns {Array<Real>|undefined} The intersection point or undefined
 function plane_intersect_line(p, line, out = undefined) {
     gml_pragma("forceinline");
     var sx = line[0], sy = line[1], sz = line[2];
@@ -130,6 +202,11 @@ function plane_intersect_line(p, line, out = undefined) {
     return out;
 }
 
+/// @func plane_intersects_line(p, line)
+/// @desc Checks if the plane intersects a line segment.
+/// @param {Array<Real>} p The plane
+/// @param {Array<Real>} line The line segment
+/// @returns {Bool}
 function plane_intersects_line(p, line) {
     gml_pragma("forceinline");
     var sd = p[0]*line[0] + p[1]*line[1] + p[2]*line[2] + p[3];
@@ -137,6 +214,11 @@ function plane_intersects_line(p, line) {
     return sd == 0 || ed == 0 || (sd < 0 && ed > 0) || (sd > 0 && ed < 0);
 }
 
+/// @func plane_intersects_box(p, box)
+/// @desc Checks if the plane intersects an AABB.
+/// @param {Array<Real>} p The plane
+/// @param {Array<Real>} box The AABB [minX, minY, minZ, maxX, maxY, maxZ]
+/// @returns {Bool}
 function plane_intersects_box(p, box) {
     gml_pragma("forceinline");
     var nx = p[0], ny = p[1], nz = p[2];

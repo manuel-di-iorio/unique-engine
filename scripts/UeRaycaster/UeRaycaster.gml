@@ -1,9 +1,6 @@
 function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _far = infinity) constructor {
     // Ray used for intersection tests (array: [ox,oy,oz, dx,dy,dz])
-    self.ray = ray_create(
-        0, 0, 0,
-        0, 0, -1
-    );
+    self.ray = ray_create(vec3_create(0, 0, 0), vec3_create(0, 0, -1));
     // Near and far clipping distances for raycasting
     self.near = _near;
     self.far = _far;
@@ -36,7 +33,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         dx = direction[0]; dy = direction[1]; dz = direction[2];
         var len = sqrt(dx*dx + dy*dy + dz*dz);
         if (len > 0) { var inv = 1/len; dx*=inv; dy*=inv; dz*=inv; }
-        ray_set(self.ray, ox, oy, oz, dx, dy, dz);
+        ray_set(self.ray, vec3_create(ox, oy, oz), vec3_create(dx, dy, dz));
         return self;
     }
 
@@ -65,7 +62,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
             var dir = global.UE_VEC3_TEMP2;
             vec3_sub_vectors(dir, worldPoint, origin);
             vec3_normalize(dir);
-            ray_set(self.ray, origin[0], origin[1], origin[2], dir[0], dir[1], dir[2]);
+            ray_set(self.ray, vec3_create(origin[0], origin[1], origin[2]), vec3_create(dir[0], dir[1], dir[2]));
           
         } else if (camera.isOrthographicCamera) {
             var invProj = global.UE_MAT4_TEMP0;
@@ -80,7 +77,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
             var dirVec = global.UE_VEC3_TEMP1;
             vec3_set(dirVec, 0, 1, 0);
             vec3_transform_direction(dirVec, camera.matrixWorld);
-            ray_set(self.ray, originVec[0], originVec[1], originVec[2], dirVec[0], dirVec[1], dirVec[2]);
+            ray_set(self.ray, vec3_create(originVec[0], originVec[1], originVec[2]), vec3_create(dirVec[0], dirVec[1], dirVec[2]));
         }
         return self;
     }

@@ -132,7 +132,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                  var p = ray_intersect_triangle(localRay, v0, v1, v2, false, localHit);
                  if (p != undefined) {
                       vec3_apply_matrix4(localHit, matrixWorld);
-                      var distance = ray_distance_to_point(raycaster.ray, localHit[0], localHit[1], localHit[2]);
+                      var distance = ray_distance_to_point(raycaster.ray, localHit);
                       if (distance < MIN_DIST) { MIN_DIST = distance; hitPrecise = true; }
                  }
             }
@@ -151,7 +151,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
                 if (t == -1) return self;
                 var localPoint = ray_at(localRay, t);
                 vec3_apply_matrix4(localPoint, matrixWorld);
-                var dist = ray_distance_to_point(raycaster.ray, localPoint[VEC3.x], localPoint[VEC3.y], localPoint[VEC3.z]);
+                var dist = ray_distance_to_point(raycaster.ray, localPoint);
                 
                 array_push(hits, {
                     object,

@@ -66,7 +66,7 @@ for (var i = 0; i < 150; i++) {
     
     // Set the bounding sphere for frustum testing
     // Radius = half diagonal of cube = size * sqrt(3) / 2
-    geometry.boundingSphere = sphere_create(0, 0, 0, size * sqrt(3) / 2);
+    geometry.boundingSphere = sphere_create(vec3_create(0, 0, 0), size * sqrt(3) / 2);
     
     mesh.updateMatrix();
 }

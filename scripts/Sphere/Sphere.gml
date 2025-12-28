@@ -4,27 +4,47 @@ enum SPHERE {
   x, y, z, r
 }
 
-function sphere_create(x = 0, y = 0, z = 0, r = 0) {
-    gml_pragma("forceinline");
-    return [x, y, z, r];
+function sphere_create(center, r = -1) {
+  gml_pragma("forceinline");
+  center ??= vec3_create();
+  return [center[0], center[1], center[2], r];
 }
 
-function sphere_set(s, x, y, z, r) {
-    gml_pragma("forceinline");
-    s[0] = x;
-    s[1] = y;
-    s[2] = z;
-    s[3] = r;
+/// @func sphere_set(s, x, y, z, r)
+/// @desc Sets the sphere's position and radius.
+/// @param {Array<Real>} s The sphere to modify
+/// @param {Real} x The x coordinate
+/// @param {Real} y The y coordinate
+/// @param {Real} z The z coordinate
+/// @param {Real} r The radius
+/// @returns {Array<Real>} The modified sphere
+function sphere_set(s, center, r = -1) {
+  gml_pragma("forceinline");
+  s[0] = center[0];
+  s[1] = center[1];
+  s[2] = center[2];
+  s[3] = r;
+  return s;
 }
 
+/// @func sphere_copy(s, src)
+/// @desc Copies the properties of one sphere to another.
+/// @param {Array<Real>} s The target sphere (will be modified)
+/// @param {Array<Real>} src The source sphere
+/// @returns {Array<Real>} The modified sphere
 function sphere_copy(s, src) {
     gml_pragma("forceinline");
     s[0] = src[0];
     s[1] = src[1];
     s[2] = src[2];
     s[3] = src[3];
+    return s;
 }
 
+/// @func sphere_clone(s)
+/// @desc Creates a new sphere with the same properties.
+/// @param {Array<Real>} s The sphere to clone
+/// @returns {Array<Real>} A new sphere
 function sphere_clone(s) {
     gml_pragma("forceinline");
     return [s[0], s[1], s[2], s[3]];
@@ -32,6 +52,9 @@ function sphere_clone(s) {
 
 /// @func sphere_apply_matrix4(s, m)
 /// @desc Transforms the sphere by the given matrix 4.
+/// @param {Array<Real>} s The sphere to modify
+/// @param {Array<Real>} m The matrix to apply
+/// @returns {Array<Real>} The modified sphere
 function sphere_apply_matrix4(s, m) {
     gml_pragma("forceinline");
     var _x = s[0], _y = s[1], _z = s[2], r = s[3];
@@ -46,18 +69,27 @@ function sphere_apply_matrix4(s, m) {
     var maxScale = sqrt(max(sx, sy, sz));
     
     s[3] = r * maxScale;
+    return s;
 }
 
-/// @func sphere_contains_point(s, px, py, pz)
-function sphere_contains_point(s, px, py, pz) {
+/// @func sphere_contains_point(s, point)
+/// @desc Checks if the sphere contains a point.
+/// @param {Array<Real>} s The sphere
+/// @param {Array<Real>} point The point to check
+/// @returns {Bool} True if the point is inside the sphere
+function sphere_contains_point(s, point) {
     gml_pragma("forceinline");
-    var dx = px - s[0];
-    var dy = py - s[1];
-    var dz = pz - s[2];
+    var dx = point[0] - s[0];
+    var dy = point[1] - s[1];
+    var dz = point[2] - s[2];
     return (dx*dx + dy*dy + dz*dz) <= (s[3] * s[3]);
 }
 
 /// @func sphere_intersects_sphere(s1, s2)
+/// @desc Checks if two spheres intersect.
+/// @param {Array<Real>} s1 The first sphere
+/// @param {Array<Real>} s2 The second sphere
+/// @returns {Bool} True if the spheres intersect
 function sphere_intersects_sphere(s1, s2) {
     gml_pragma("forceinline");
     var rSum = s1[3] + s2[3];
@@ -67,24 +99,44 @@ function sphere_intersects_sphere(s1, s2) {
     return (dx*dx + dy*dy + dz*dz) <= (rSum * rSum);
 }
 
+/// @func sphere_equals(a, b)
+/// @desc Checks if two spheres are equal.
+/// @param {Array<Real>} a The first sphere
+/// @param {Array<Real>} b The second sphere
+/// @returns {Bool} True if the spheres are equal
 function sphere_equals(a, b) {
     gml_pragma("forceinline");
     return a[0]==b[0] && a[1]==b[1] && a[2]==b[2] && a[3]==b[3];
 }
 
-function sphere_distance_to_point(s, px, py, pz) {
+/// @func sphere_distance_to_point(s, point)
+/// @desc Calculates the distance from the sphere to a point.
+/// @param {Array<Real>} s The sphere
+/// @param {Array<Real>} point The point to check
+/// @returns {Real} The distance to the point
+function sphere_distance_to_point(s, point) {
     gml_pragma("forceinline");
-    var dx = px - s[0];
-    var dy = py - s[1];
-    var dz = pz - s[2];
+    var dx = point[0] - s[0];
+    var dy = point[1] - s[1];
+    var dz = point[2] - s[2];
     return sqrt(dx*dx + dy*dy + dz*dz) - s[3];
 }
 
-function sphere_clamp_point(s, px, py, pz, out = undefined) {
+/// @func sphere_clamp_point(s, point, out)
+/// @desc Clamps a point to the surface of the sphere.
+/// @param {Array<Real>} s The sphere
+/// @param {Real} px The x coordinate
+/// @func sphere_clamp_point(s, point, out)
+/// @desc Clamps a point to the surface of the sphere.
+/// @param {Array<Real>} s The sphere
+/// @param {Array<Real>} point The point to clamp
+/// @param {Array<Real>} [out] Optional output array
+/// @returns {Array<Real>} The clamped point
+function sphere_clamp_point(s, point, out = undefined) {
     gml_pragma("forceinline");
-    var dx = px - s[0];
-    var dy = py - s[1];
-    var dz = pz - s[2];
+    var dx = point[0] - s[0];
+    var dy = point[1] - s[1];
+    var dz = point[2] - s[2];
     var d2 = dx*dx + dy*dy + dz*dz;
     out ??= array_create(3);
     if (d2 > (s[3]*s[3])) {
@@ -94,47 +146,78 @@ function sphere_clamp_point(s, px, py, pz, out = undefined) {
         out[1] = s[1] + dy * f;
         out[2] = s[2] + dz * f;
     } else {
-        out[0] = px; out[1] = py; out[2] = pz;
+        out[0] = point[0]; out[1] = point[1]; out[2] = point[2];
     }
     return out;
 }
 
-function sphere_expand_by_point(s, px, py, pz) {
+/// @func sphere_expand_by_point(s, point)
+/// @desc Expands the sphere to include a point.
+/// @param {Array<Real>} s The sphere to modify
+/// @param {Array<Real>} point The point to expand by
+/// @returns {Array<Real>} The modified sphere
+function sphere_expand_by_point(s, point) { 
     gml_pragma("forceinline");
     if (s[3] < 0) {
-        s[0] = px; s[1] = py; s[2] = pz; s[3] = 0;
-        return;
+        s[0] = point[0]; s[1] = point[1]; s[2] = point[2]; s[3] = 0;
+        return s;
     }
-    var dx = px - s[0];
-    var dy = py - s[1];
-    var dz = pz - s[2];
+    var dx = point[0] - s[0];
+    var dy = point[1] - s[1];
+    var dz = point[2] - s[2];
     var d = sqrt(dx*dx + dy*dy + dz*dz);
     if (d > s[3]) s[3] = d;
+    return s;
 }
 
+/// @func sphere_is_empty(s)
+/// @desc Checks if the sphere is empty (negative radius).
+/// @param {Array<Real>} s The sphere
+/// @returns {Bool} True if the sphere is empty
 function sphere_is_empty(s) {
     gml_pragma("forceinline");
     return s[3] < 0;
 }
 
+/// @func sphere_make_empty(s)
+/// @desc Makes the sphere empty.
+/// @param {Array<Real>} s The sphere to modify
+/// @returns {Array<Real>} The modified sphere
 function sphere_make_empty(s) {
     gml_pragma("forceinline");
     s[0] = 0; s[1] = 0; s[2] = 0; s[3] = -1;
+    return s;
 }
 
-function sphere_translate(s, ox, oy, oz) {
+/// @func sphere_translate(s, offset)
+/// @desc Translates the sphere by an offset.
+/// @param {Array<Real>} s The sphere to modify
+/// @param {Array<Real>} offset The translation offset [ox, oy, oz]
+/// @returns {Array<Real>} The modified sphere
+function sphere_translate(s, offset) {
     gml_pragma("forceinline");
-    s[0] += ox; s[1] += oy; s[2] += oz;
+    s[0] += offset[0]; s[1] += offset[1]; s[2] += offset[2];
+    return s;
 }
 
+/// @func sphere_get_bounding_box(s, out)
+/// @desc Gets the bounding box of the sphere.
+/// @param {Array<Real>} s The sphere
+/// @param {Array<Real>} [out] Optional output box
+/// @returns {Array<Real>} The bounding box
 function sphere_get_bounding_box(s, out = undefined) {
     gml_pragma("forceinline");
     var r = s[3];
     out ??= box3_create();
-    box3_set(out, s[0]-r, s[1]-r, s[2]-r, s[0]+r, s[1]+r, s[2]+r);
+    box3_set(out, vec3_create(s[0]-r, s[1]-r, s[2]-r), vec3_create(s[0]+r, s[1]+r, s[2]+r));
     return out;
 }
 
+/// @func sphere_intersects_box(s, box)
+/// @desc Checks if the sphere intersects a bounding box.
+/// @param {Array<Real>} s The sphere
+/// @param {Array<Real>} box The box
+/// @returns {Bool} True if the sphere intersects the box
 function sphere_intersects_box(s, box) {
     gml_pragma("forceinline");
     var cx = s[0], cy = s[1], cz = s[2];
@@ -145,12 +228,22 @@ function sphere_intersects_box(s, box) {
     return (dx*dx + dy*dy + dz*dz) <= (s[3]*s[3]);
 }
 
+/// @func sphere_intersects_plane(s, plane)
+/// @desc Checks if the sphere intersects a plane.
+/// @param {Array<Real>} s The sphere
+/// @param {Array<Real>} plane The plane
+/// @returns {Bool} True if the sphere intersects the plane
 function sphere_intersects_plane(s, plane) {
     gml_pragma("forceinline");
-    var d = plane_distance_to_point(plane, s[0], s[1], s[2]);
+    var d = plane_distance_to_point(plane, s);
     return abs(d) <= s[3];
 }
 
+/// @func sphere_union(s, s2)
+/// @desc Expands the sphere to include another sphere.
+/// @param {Array<Real>} s The sphere to modify
+/// @param {Array<Real>} s2 The other sphere
+/// @returns {Array<Real>} The modified sphere
 function sphere_union(s, s2) {
     gml_pragma("forceinline");
     var x1 = s[0], y1 = s[1], z1 = s[2], r1 = s[3];
@@ -168,6 +261,12 @@ function sphere_union(s, s2) {
     return s;
 }
 
+/// @func sphere_set_from_points(s, points, optionalCenter)
+/// @desc Sets the sphere to enclose a set of points.
+/// @param {Array<Real>} s The sphere to modify
+/// @param {Array<Array<Real>>} points An array of point arrays
+/// @param {Array<Real>} [optionalCenter] Optional pre-calculated center
+/// @returns {Array<Real>} The modified sphere
 function sphere_set_from_points(s, points, optionalCenter = undefined) {
     gml_pragma("forceinline");
     var n = array_length(points);

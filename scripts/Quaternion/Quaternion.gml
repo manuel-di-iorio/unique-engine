@@ -32,23 +32,27 @@ function quat_create(x = 0, y = 0, z = 0, w = 1) {
 /// @param {Real} y Y component
 /// @param {Real} z Z component
 /// @param {Real} w W component
+/// @returns {Array<Real>} The modified quaternion
 function quat_set(q, x, y, z, w) {
     gml_pragma("forceinline");
     q[0] = x;
     q[1] = y;
     q[2] = z;
     q[3] = w;
+    return q;
 }
 
 /// @func quat_identity(q)
 /// @desc Resets the quaternion to identity [0, 0, 0, 1].
 /// @param {Array<Real>} q The quaternion to modify
+/// @returns {Array<Real>} The modified quaternion
 function quat_identity(q) {
     gml_pragma("forceinline");
     q[0] = 0;
     q[1] = 0;
     q[2] = 0;
     q[3] = 1;
+    return q;
 }
 
 // ============================================================================
@@ -68,12 +72,14 @@ function quat_clone(q) {
 /// @desc Copies value from source quaternion to target.
 /// @param {Array<Real>} q The target quaternion
 /// @param {Array<Real>} src The source quaternion
+/// @returns {Array<Real>} The modified quaternion
 function quat_copy(q, src) {
     gml_pragma("forceinline");
     q[0] = src[0];
     q[1] = src[1];
     q[2] = src[2];
     q[3] = src[3];
+    return q;
 }
 
 // ============================================================================
@@ -87,6 +93,7 @@ function quat_copy(q, src) {
 /// @param {Real} y Rotation around Y in degrees
 /// @param {Real} z Rotation around Z in degrees
 /// @param {String} [order="XYZ"] Rotation order
+/// @returns {Array<Real>} The modified quaternion
 function quat_set_from_euler(q, x, y, z) {
     gml_pragma("forceinline");
     // http://www.mathworks.com/matlabcentral/fileexchange/
@@ -105,6 +112,7 @@ function quat_set_from_euler(q, x, y, z) {
     q[1] = c1 * s2 * c3 - s1 * c2 * s3;
     q[2] = c1 * c2 * s3 - s1 * s2 * c3;
     q[3] = c1 * c2 * c3 + s1 * s2 * s3;
+    return q;
 }
 
 /// @func quat_set_from_axis_angle(q, axis, angle)
@@ -112,6 +120,7 @@ function quat_set_from_euler(q, x, y, z) {
 /// @param {Array<Real>} q The quaternion to modify
 /// @param {Array<Real>} axis The normalized axis vector
 /// @param {Real} angle The angle in degrees
+/// @returns {Array<Real>} The modified quaternion
 function quat_set_from_axis_angle(q, axis, angle) {
     gml_pragma("forceinline");
     // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
@@ -124,12 +133,14 @@ function quat_set_from_axis_angle(q, axis, angle) {
     q[1] = axis[1] * s;
     q[2] = axis[2] * s;
     q[3] = dcos(halfAngle);
+    return q;
 }
 
 /// @func quat_set_from_rotation_matrix(q, m)
 /// @desc Sets this quaternion from rotation component of a 4x4 matrix.
 /// @param {Array<Real>} q The quaternion to modify
 /// @param {Array<Real>} m The rotation matrix
+/// @returns {Array<Real>} The modified quaternion
 function quat_set_from_rotation_matrix(q, m) {
     gml_pragma("forceinline");
     // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
@@ -166,6 +177,7 @@ function quat_set_from_rotation_matrix(q, m) {
         q[1] = (m23 + m32) / s;
         q[2] = 0.25 * s;
     }
+    return q;
 }
 
 /// @func quat_set_from_unit_vectors(q, vFrom, vTo)
@@ -173,6 +185,7 @@ function quat_set_from_rotation_matrix(q, m) {
 /// @param {Array<Real>} q The quaternion to modify
 /// @param {Array<Real>} vFrom Normalized start vector
 /// @param {Array<Real>} vTo Normalized end vector
+/// @returns {Array<Real>} The modified quaternion
 function quat_set_from_unit_vectors(q, vFrom, vTo) {
     gml_pragma("forceinline");
     // Assumes vFrom and vTo are normalized using vec3 functions externally if needed
@@ -199,6 +212,7 @@ function quat_set_from_unit_vectors(q, vFrom, vTo) {
     }
     
     quat_normalize(q);
+    return q;
 }
 
 // ============================================================================
@@ -208,6 +222,7 @@ function quat_set_from_unit_vectors(q, vFrom, vTo) {
 /// @func quat_invert(q)
 /// @desc Inverts the quaternion (conjugate if normalized).
 /// @param {Array<Real>} q The quaternion to invert
+/// @returns {Array<Real>} The modified quaternion
 function quat_invert(q) {
     gml_pragma("forceinline");
     // For unit quaternion, inverse = conjugate
@@ -219,11 +234,13 @@ function quat_invert(q) {
 /// @func quat_conjugate(q)
 /// @desc Conjugates the quaternion (-x, -y, -z, w).
 /// @param {Array<Real>} q The quaternion
+/// @returns {Array<Real>} The modified quaternion
 function quat_conjugate(q) {
     gml_pragma("forceinline");
     q[0] *= -1;
     q[1] *= -1;
     q[2] *= -1;
+    return q;
 }
 
 /// @func quat_dot(q, q2)
@@ -257,6 +274,7 @@ function quat_length(q) {
 /// @func quat_normalize(q)
 /// @desc Normalizes the quaternion.
 /// @param {Array<Real>} q The quaternion to normalize
+/// @returns {Array<Real>} The modified quaternion
 function quat_normalize(q) {
     gml_pragma("forceinline");
     var l = q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
@@ -269,12 +287,14 @@ function quat_normalize(q) {
         q[2] *= l;
         q[3] *= l;
     }
+    return q;
 }
 
 /// @func quat_multiply(q, q2)
 /// @desc Multiplies quaternion q by q2 (q = q * q2).
 /// @param {Array<Real>} q The quaternion to modify
 /// @param {Array<Real>} q2 The quaternion to multiply with
+/// @returns {Array<Real>} The modified quaternion
 function quat_multiply(q, q2) {
     gml_pragma("forceinline");
     var qax = q[0], quay = q[1], qaz = q[2], qaw = q[3];
@@ -284,12 +304,14 @@ function quat_multiply(q, q2) {
     q[1] = quay * qbw + qaw * qby + qaz * qbx - qax * qbz;
     q[2] = qaz * qbw + qaw * qbz + qax * qby - quay * qbx;
     q[3] = qaw * qbw - qax * qbx - quay * qby - qaz * qbz;
+    return q;
 }
 
 /// @func quat_premultiply(q, q2)
 /// @desc Multiplies quaternion q by q2 (q = q2 * q).
 /// @param {Array<Real>} q The quaternion to modify
 /// @param {Array<Real>} q2 The quaternion to multiply with
+/// @returns {Array<Real>} The modified quaternion
 function quat_premultiply(q, q2) {
     gml_pragma("forceinline");
     var qax = q2[0], quay = q2[1], qaz = q2[2], qaw = q2[3];
@@ -299,6 +321,7 @@ function quat_premultiply(q, q2) {
     q[1] = quay * qbw + qaw * qby + qaz * qbx - qax * qbz;
     q[2] = qaz * qbw + qaw * qbz + qax * qby - quay * qbx;
     q[3] = qaw * qbw - qax * qbx - quay * qby - qaz * qbz;
+    return q;
 }
 
 /// @func quat_slerp(q, qb, t)
@@ -306,12 +329,12 @@ function quat_premultiply(q, q2) {
 /// @param {Array<Real>} q The start quaternion (will be modified)
 /// @param {Array<Real>} qb The target quaternion
 /// @param {Real} t Interpolation factor [0..1]
+/// @returns {Array<Real>} The modified quaternion
 function quat_slerp(q, qb, t) {
     gml_pragma("forceinline");
-    if (t == 0) return;
+    if (t == 0) return q;
     if (t == 1) {
-        quat_copy(q, qb);
-        return;
+        return quat_copy(q, qb);
     }
     
     var _x = q[0], _y = q[1], _z = q[2], _w = q[3];
@@ -328,7 +351,7 @@ function quat_slerp(q, qb, t) {
     
     if (cosHalfTheta >= 1.0) {
         q[0] = _x; q[1] = _y; q[2] = _z; q[3] = _w;
-        return;
+        return q;
     }
     
     var sqrSinHalfTheta = 1.0 - cosHalfTheta * cosHalfTheta;
@@ -340,8 +363,7 @@ function quat_slerp(q, qb, t) {
         q[1] = s * _y + t * q[1];
         q[2] = s * _z + t * q[2];
         q[3] = s * _w + t * q[3];
-        quat_normalize(q);
-        return;
+        return quat_normalize(q);
     }
     
     var sinHalfTheta = sqrt(sqrSinHalfTheta);
@@ -353,6 +375,7 @@ function quat_slerp(q, qb, t) {
     q[1] = (_y * ratioA + q[1] * ratioB);
     q[2] = (_z * ratioA + q[2] * ratioB);
     q[3] = (_w * ratioA + q[3] * ratioB);
+    return q;
 }
 
 // ============================================================================
@@ -374,12 +397,14 @@ function quat_equals(q, q2) {
 /// @param {Array<Real>} q The quaternion to modify
 /// @param {Array<Real>} array Source array
 /// @param {Real} [offset=0] Index offset
+/// @returns {Array<Real>} The modified quaternion
 function quat_from_array(q, array, offset = 0) {
     gml_pragma("forceinline");
     q[0] = array[offset];
     q[1] = array[offset + 1];
     q[2] = array[offset + 2];
     q[3] = array[offset + 3];
+    return q;
 }
 
 /// @func quat_to_array(q, array, offset)

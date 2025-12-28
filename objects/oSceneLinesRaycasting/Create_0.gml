@@ -14,6 +14,6 @@ scene.add(hitSphere);
 scene.add(new UeGridHelper(500));
 
 axesHelper = new UeAxesHelper(50, { matrixAutoUpdate: true });
-axesHelper.geometry.boundingSphere = sphere_create(0, 0, 0, 100);
+axesHelper.geometry.boundingSphere = sphere_create(vec3_create(0, 0, 0), 100);
 axesHelper.frustumCulled = false;
 scene.add(axesHelper);

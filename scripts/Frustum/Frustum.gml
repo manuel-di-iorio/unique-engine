@@ -1,5 +1,8 @@
 /// @desc Frustum functions. A frustum is an array of 6 planes.
 
+/// @func frustum_create()
+/// @desc Creates a new frustum (array of 6 planes).
+/// @returns {Array<Array<Real>>} The new frustum
 function frustum_create() {
     gml_pragma("forceinline");
     return [
@@ -12,6 +15,10 @@ function frustum_create() {
     ];
 }
 
+/// @func frustum_clone(f)
+/// @desc Clones a frustum.
+/// @param {Array<Array<Real>>} f The frustum to clone
+/// @returns {Array<Array<Real>>} A new frustum
 function frustum_clone(f) {
     gml_pragma("forceinline");
     return [
@@ -24,6 +31,11 @@ function frustum_clone(f) {
     ];
 }
 
+/// @func frustum_copy(f, src)
+/// @desc Copies the planes from one frustum to another.
+/// @param {Array<Array<Real>>} f The target frustum to modify
+/// @param {Array<Array<Real>>} src The source frustum
+/// @returns {Array<Array<Real>>} The modified frustum
 function frustum_copy(f, src) {
     gml_pragma("forceinline");
     plane_copy(f[0], src[0]);
@@ -32,8 +44,19 @@ function frustum_copy(f, src) {
     plane_copy(f[3], src[3]);
     plane_copy(f[4], src[4]);
     plane_copy(f[5], src[5]);
+    return f;
 }
 
+/// @func frustum_set(f, p0, p1, p2, p3, p4, p5)
+/// @desc Sets the planes of the frustum.
+/// @param {Array<Array<Real>>} f The frustum to modify
+/// @param {Array<Real>} p0 Plane 0
+/// @param {Array<Real>} p1 Plane 1
+/// @param {Array<Real>} p2 Plane 2
+/// @param {Array<Real>} p3 Plane 3
+/// @param {Array<Real>} p4 Plane 4
+/// @param {Array<Real>} p5 Plane 5
+/// @returns {Array<Array<Real>>} The modified frustum
 function frustum_set(f, p0, p1, p2, p3, p4, p5) {
     gml_pragma("forceinline");
     plane_copy(f[0], p0);
@@ -42,10 +65,14 @@ function frustum_set(f, p0, p1, p2, p3, p4, p5) {
     plane_copy(f[3], p3);
     plane_copy(f[4], p4);
     plane_copy(f[5], p5);
+    return f;
 }
 
 /// @func frustum_set_from_matrix(f, m)
 /// @desc Sets frustum planes from a projection (or view-projection) matrix.
+/// @param {Array<Array<Real>>} f The frustum to modify
+/// @param {Array<Real>} m The matrix
+/// @returns {Array<Array<Real>>} The modified frustum
 function frustum_set_from_matrix(f, m) {
     gml_pragma("forceinline");
     
@@ -58,30 +85,37 @@ function frustum_set_from_matrix(f, m) {
     var p3 = f[3], p4 = f[4], p5 = f[5];
 
     // Left
-    plane_set(p0, me3 + me0, me7 + me4, me11 + me8, me15 + me12);
+    plane_set(p0, vec3_create(me3 + me0, me7 + me4, me11 + me8), me15 + me12);
     plane_normalize(p0);
 
     // Right
-    plane_set(p1, me3 - me0, me7 - me4, me11 - me8, me15 - me12);
+    plane_set(p1, vec3_create(me3 - me0, me7 - me4, me11 - me8), me15 - me12);
     plane_normalize(p1);
 
     // Bottom
-    plane_set(p2, me3 + me1, me7 + me5, me11 + me9, me15 + me13);
+    plane_set(p2, vec3_create(me3 + me1, me7 + me5, me11 + me9), me15 + me13);
     plane_normalize(p2);
 
     // Top
-    plane_set(p3, me3 - me1, me7 - me5, me11 - me9, me15 - me13);
+    plane_set(p3, vec3_create(me3 - me1, me7 - me5, me11 - me9), me15 - me13);
     plane_normalize(p3);
 
     // Near
-    plane_set(p4, me3 + me2, me7 + me6, me11 + me10, me15 + me14);
+    plane_set(p4, vec3_create(me3 + me2, me7 + me6, me11 + me10), me15 + me14);
     plane_normalize(p4);
 
     // Far
-    plane_set(p5, me3 - me2, me7 - me6, me11 - me10, me15 - me14);
+    plane_set(p5, vec3_create(me3 - me2, me7 - me6, me11 - me10), me15 - me14);
     plane_normalize(p5);
+    return f;
 }
 
+/// @func frustum_set_from_projection_matrix(f, m, reversedDepth)
+/// @desc Sets frustum planes from a projection matrix, with optional reversed depth.
+/// @param {Array<Array<Real>>} f The frustum to modify
+/// @param {Array<Real>} m The projection matrix
+/// @param {Bool} [reversedDepth] Whether the projection uses reversed depth
+/// @returns {Array<Array<Real>>} The modified frustum
 function frustum_set_from_projection_matrix(f, m, reversedDepth = false) {
     gml_pragma("forceinline");
     frustum_set_from_matrix(f, m);
@@ -90,10 +124,14 @@ function frustum_set_from_projection_matrix(f, m, reversedDepth = false) {
         plane_copy(f[4], f[5]);
         plane_copy(f[5], tmp);
     }
+    return f;
 }
 
 /// @func frustum_intersects_sphere(f, s)
 /// @desc Returns true if sphere intersects the frustum.
+/// @param {Array<Array<Real>>} f The frustum
+/// @param {Array<Real>} s The sphere [x, y, z, r]
+/// @returns {Bool} True if the sphere intersects the frustum
 function frustum_intersects_sphere(f, s) {
     gml_pragma("forceinline");
     var _x = s[0], _y = s[1], _z = s[2], _r = s[3];
@@ -107,8 +145,13 @@ function frustum_intersects_sphere(f, s) {
     return true;
 }
 
-/// @func frustum_contains_point(f, x, y, z)
+/// @func frustum_contains_point(f, _x, _y, _z)
 /// @desc Returns true if point is inside frustum.
+/// @param {Array<Array<Real>>} f The frustum
+/// @param {Real} _x The x coordinate
+/// @param {Real} _y The y coordinate
+/// @param {Real} _z The z coordinate
+/// @returns {Bool} True if the point is inside the frustum
 function frustum_contains_point(f, _x, _y, _z) {
     gml_pragma("forceinline");
     for (var i = 0; i < 6; i++) {
@@ -118,6 +161,11 @@ function frustum_contains_point(f, _x, _y, _z) {
     return true;
 }
 
+/// @func frustum_contains_point_vec(f, v)
+/// @desc Returns true if vector point is inside frustum.
+/// @param {Array<Array<Real>>} f The frustum
+/// @param {Array<Real>} v The vector [x, y, z]
+/// @returns {Bool} True if the point is inside the frustum
 function frustum_contains_point_vec(f, v) {
     gml_pragma("forceinline");
     return frustum_contains_point(f, v[0], v[1], v[2]);
@@ -125,6 +173,9 @@ function frustum_contains_point_vec(f, v) {
 
 /// @func frustum_intersects_box(f, b)
 /// @desc Returns true if box intersects frustum.
+/// @param {Array<Array<Real>>} f The frustum
+/// @param {Array<Real>} b The box [minX, minY, minZ, maxX, maxY, maxZ]
+/// @returns {Bool} True if the box intersects the frustum
 function frustum_intersects_box(f, b) {
     gml_pragma("forceinline");
     var minX = b[0], minY = b[1], minZ = b[2];

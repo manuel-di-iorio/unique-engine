@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"__UniqueMathInternal",
+  "%Name":"__UniqueMathGlobals",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"__UniqueMathInternal",
+  "name":"__UniqueMathGlobals",
   "parent":{
     "name":"Unique Math",
     "path":"folders/Packages/Unique Math.yy",

@@ -215,13 +215,14 @@ function UeAssimpLoader(data = {}) constructor {
     var x2 = ASSIMP_GetMeshAABBMaxX();
     var y2 = ASSIMP_GetMeshAABBMaxY();
     var z2 = ASSIMP_GetMeshAABBMaxZ();
+
     var minV = vec3_create(x1, y1, z1);
     var maxV = vec3_create(x2, y2, z2);
 
-    geometry.boundingBox = box3_create(x1, y1, z1,x2, y2, z2);
+    geometry.boundingBox = box3_create(minV, maxV);
 
     var center = vec3_clone(minV); vec3_add(center, maxV); vec3_multiply_scalar(center, 0.5);
-    geometry.boundingSphere = sphere_create(center[VEC3.x], center[VEC3.y], center[VEC3.z], vec3_distance_to(center, maxV));
+    geometry.boundingSphere = sphere_create(center, vec3_distance_to(center, maxV));
 
     return mesh;
   }
@@ -258,10 +259,10 @@ function UeAssimpLoader(data = {}) constructor {
     var minV = vec3_create(minX, minY, minZ);
     var maxV = vec3_create(maxX, maxY, maxZ);
 
-    geometry.boundingBox = box3_create(minX, minY, minZ, maxX, maxY, maxZ);
+    geometry.boundingBox = box3_create(minV, maxV);
 
     var center = vec3_clone(minV); vec3_add(center, maxV); vec3_multiply_scalar(center, 0.5);
-    geometry.boundingSphere = sphere_create(center[0], center[1], center[2], vec3_distance_to(center, maxV));
+    geometry.boundingSphere = sphere_create(center, vec3_distance_to(center, maxV));
   }
 
   function dispose() {

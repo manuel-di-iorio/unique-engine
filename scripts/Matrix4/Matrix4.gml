@@ -22,6 +22,7 @@ function mat4_create() {
 /// @func mat4_set(m, n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44)
 /// @desc Sets the matrix elements. Arguments are in ROW-MAJOR order for readability.
 /// @param {Array<Real>} m The matrix to modify
+/// @returns {Array<Real>} The modified matrix
 function mat4_set(m, n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44) {
   gml_pragma("forceinline");
   // Store in column-major order
@@ -29,17 +30,20 @@ function mat4_set(m, n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34,
   m[4] = n12; m[5] = n22; m[6] = n32; m[7] = n42;
   m[8] = n13; m[9] = n23; m[10] = n33; m[11] = n43;
   m[12] = n14; m[13] = n24; m[14] = n34; m[15] = n44;
+  return m;
 }
 
 /// @func mat4_identity(m)
 /// @desc Sets this matrix to the 4x4 identity matrix.
 /// @param {Array<Real>} m The matrix to modify
+/// @returns {Array<Real>} The modified matrix
 function mat4_identity(m) {
   gml_pragma("forceinline");
   m[0] = 1; m[1] = 0; m[2] = 0; m[3] = 0;
   m[4] = 0; m[5] = 1; m[6] = 0; m[7] = 0;
   m[8] = 0; m[9] = 0; m[10] = 1; m[11] = 0;
   m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;  
+  return m;
 }
 
 // ============================================================================
@@ -60,23 +64,27 @@ function mat4_clone(m) {
 /// @desc Copies the values of the given matrix to this instance.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} src The matrix to copy
+/// @returns {Array<Real>} The modified matrix
 function mat4_copy(m, src) {
   gml_pragma("forceinline");
   m[0] = src[0]; m[1] = src[1]; m[2] = src[2]; m[3] = src[3];
   m[4] = src[4]; m[5] = src[5]; m[6] = src[6]; m[7] = src[7];
   m[8] = src[8]; m[9] = src[9]; m[10] = src[10]; m[11] = src[11];
   m[12] = src[12]; m[13] = src[13]; m[14] = src[14]; m[15] = src[15];
+  return m;
 }
 
 /// @func mat4_copy_position(m, src)
 /// @desc Copies the translation component of the given matrix into this matrix.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} src The matrix to copy translation from
+/// @returns {Array<Real>} The modified matrix
 function mat4_copy_position(m, src) {
   gml_pragma("forceinline");
   m[12] = src[12];
   m[13] = src[13];
   m[14] = src[14];
+  return m;
 }
 
 // ============================================================================
@@ -113,9 +121,11 @@ function mat4_determinant(m) {
 /// @func mat4_invert(m)
 /// @desc Inverts this matrix. If determinant is zero, produces a zero matrix.
 /// @param {Array<Real>} m The matrix to invert
+/// @returns {Array<Real>} The modified matrix
 function mat4_invert(m) {
   gml_pragma("forceinline");
-  return matrix_inverse(m, m);
+  matrix_inverse(m, m);
+  return m;
 }
 
 // ============================================================================
@@ -125,6 +135,7 @@ function mat4_invert(m) {
 /// @func mat4_transpose(m)
 /// @desc Transposes this matrix in place.
 /// @param {Array<Real>} m The matrix to transpose
+/// @returns {Array<Real>} The modified matrix
 function mat4_transpose(m) {
   gml_pragma("forceinline");
   var tmp;
@@ -134,6 +145,7 @@ function mat4_transpose(m) {
   tmp = m[6]; m[6] = m[9]; m[9] = tmp;
   tmp = m[7]; m[7] = m[13]; m[13] = tmp;
   tmp = m[11]; m[11] = m[14]; m[14] = tmp;
+  return m;
 }
 
 // ============================================================================
@@ -161,18 +173,22 @@ function mat4_equals(m, m2) {
 /// @desc Post-multiplies this matrix by the given 4x4 matrix (m = m * m2).
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} m2 The matrix to multiply with
+/// @returns {Array<Real>} The modified matrix
 function mat4_multiply(m, m2) {
   gml_pragma("forceinline");
   matrix_multiply(m2, m, m);
+  return m;
 }
 
 /// @func mat4_premultiply(m, m2)
 /// @desc Pre-multiplies this matrix by the given 4x4 matrix (m = m2 * m).
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} m2 The matrix to multiply with
+/// @returns {Array<Real>} The modified matrix
 function mat4_premultiply(m, m2) {
   gml_pragma("forceinline");
   matrix_multiply(m, m2, m);
+  return m;
 }
 
 /// @func mat4_multiply_matrices(m, a, b)
@@ -180,18 +196,22 @@ function mat4_premultiply(m, m2) {
 /// @param {Array<Real>} m The matrix to store result
 /// @param {Array<Real>} a The first matrix
 /// @param {Array<Real>} b The second matrix
+/// @returns {Array<Real>} The modified matrix
 function mat4_multiply_matrices(m, a, b) {
   gml_pragma("forceinline");
   matrix_multiply(b, a, m);
+  return m;
 }
 
 /// @func mat4_multiply_scalar(m, s)
 /// @desc Multiplies every component of the matrix by the given scalar.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Real} s The scalar
+/// @returns {Array<Real>} The modified matrix
 function mat4_multiply_scalar(m, s) {
   gml_pragma("forceinline");
   for (var i = 0; i < 16; i++) m[i] *= s;
+  return m;
 }
 
 // ============================================================================
@@ -204,9 +224,11 @@ function mat4_multiply_scalar(m, s) {
 /// @param {Real} x Translation X
 /// @param {Real} y Translation Y
 /// @param {Real} z Translation Z
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_translation(m, x, y, z) {
   gml_pragma("forceinline");
   matrix_build(x, y, z, 0, 0, 0, 1, 1, 1, m);
+  return m;
 }
 
 /// @func mat4_make_scale(m, x, y, z)
@@ -215,36 +237,44 @@ function mat4_make_translation(m, x, y, z) {
 /// @param {Real} x Scale X
 /// @param {Real} y Scale Y
 /// @param {Real} z Scale Z
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_scale(m, x, y, z) {
   gml_pragma("forceinline");
   matrix_build(0, 0, 0, 0, 0, 0, x, y, z, m);
+  return m;
 }
 
 /// @func mat4_make_rotation_x(m, angle)
 /// @desc Sets this matrix as a rotational transformation around the X axis.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Real} angle The rotation in degrees
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_rotation_x(m, angle) {
   gml_pragma("forceinline");
   matrix_build(0, 0, 0, angle, 0, 0, 1, 1, 1, m);
+  return m;
 }
 
 /// @func mat4_make_rotation_y(m, angle)
 /// @desc Sets this matrix as a rotational transformation around the Y axis.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Real} angle The rotation in degrees
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_rotation_y(m, angle) {
   gml_pragma("forceinline");
   matrix_build(0, 0, 0, 0, angle, 0, 1, 1, 1, m);
+  return m;
 }
 
 /// @func mat4_make_rotation_z(m, angle)
 /// @desc Sets this matrix as a rotational transformation around the Z axis.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Real} angle The rotation in degrees
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_rotation_z(m, angle) {
   gml_pragma("forceinline");
   matrix_build(0, 0, 0, 0, 0, angle, 1, 1, 1, m);
+  return m;
 }
 
 /// @func mat4_make_rotation_axis(m, axis, angle)
@@ -252,6 +282,7 @@ function mat4_make_rotation_z(m, angle) {
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} axis The normalized rotation axis (vec3)
 /// @param {Real} angle The rotation in degrees
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_rotation_axis(m, axis, angle) {
   gml_pragma("forceinline");
   var c = dcos(angle);
@@ -263,24 +294,27 @@ function mat4_make_rotation_axis(m, axis, angle) {
   m[4] = t * _x * _y - s * _z; m[5] = t * _y * _y + c; m[6] = t * _y * _z + s * _x; m[7] = 0;
   m[8] = t * _x * _z + s * _y; m[9] = t * _y * _z - s * _x; m[10] = t * _z * _z + c; m[11] = 0;
   m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+  return m;
 }
 
-/// @func mat4_make_rotation_from_euler(m, x, y, z, order)
+/// @func mat4_make_rotation_from_euler(m, rx, ry, rz)
 /// @desc Sets the rotation component from Euler angles (XYZ order by default).
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Real} rx Rotation around X in degrees
 /// @param {Real} ry Rotation around Y in degrees
 /// @param {Real} rz Rotation around Z in degrees
-/// @param {String} [order="XYZ"] The rotation order
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_rotation_from_euler(m, rx, ry, rz) {
   gml_pragma("forceinline");
   matrix_build(0, 0, 0, rx, ry, rz, 1, 1, 1, m);
+  return m;
 }
 
 /// @func mat4_make_rotation_from_quaternion(m, q)
 /// @desc Sets the rotation component from a quaternion.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} q The quaternion [x, y, z, w]
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_rotation_from_quaternion(m, q) {
   gml_pragma("forceinline");
   var _x = q[0], _y = q[1], _z = q[2], _w = q[3];
@@ -293,17 +327,20 @@ function mat4_make_rotation_from_quaternion(m, q) {
   m[4] = xy - wz; m[5] = 1 - (xx + zz); m[6] = yz + wx; m[7] = 0;
   m[8] = xz + wy; m[9] = yz - wx; m[10] = 1 - (xx + yy); m[11] = 0;
   m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+  return m;
 }
 
 /// @func mat4_make_shear(m, xy, xz, yx, yz, zx, zy)
 /// @desc Sets this matrix as a shear transformation.
 /// @param {Array<Real>} m The matrix to modify
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_shear(m, xy, xz, yx, yz, zx, zy) {
   gml_pragma("forceinline");
   m[0] = 1; m[1] = yx; m[2] = zx; m[3] = 0;
   m[4] = xy; m[5] = 1; m[6] = zy; m[7] = 0;
   m[8] = xz; m[9] = yz; m[10] = 1; m[11] = 0;
   m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+  return m;
 }
 
 // ============================================================================
@@ -317,17 +354,21 @@ function mat4_make_shear(m, xy, xz, yx, yz, zx, zy) {
 /// @param {Real} aspect Aspect ratio
 /// @param {Real} near Near plane distance
 /// @param {Real} far Far plane distance
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_perspective(m, fov, aspect, near, far) {
   gml_pragma("forceinline");
   matrix_build_projection_perspective_fov(fov, aspect, near, far, m);
+  return m;
 }
 
 /// @func mat4_make_orthographic(m, left, right, top, bottom, near, far)
 /// @desc Creates an orthographic projection matrix.
 /// @param {Array<Real>} m The matrix to modify
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_orthographic(m, left, right, top, bottom, near, far) {
   gml_pragma("forceinline");
   matrix_build_projection_ortho(right - left, top - bottom, near, far, m);
+  return m;
 }
 
 // ============================================================================
@@ -340,9 +381,11 @@ function mat4_make_orthographic(m, left, right, top, bottom, near, far) {
 /// @param {Array<Real>} eye The eye position (vec3)
 /// @param {Array<Real>} target The target position (vec3)
 /// @param {Array<Real>} up The up vector (vec3)
+/// @returns {Array<Real>} The modified matrix
 function mat4_look_at(m, eye, target, up) {
   gml_pragma("forceinline");
   matrix_build_lookat(eye[0], eye[1], eye[2], target[0], target[1], target[2], up[0], up[1], up[2], m);
+  return m;
 }
 
 // ============================================================================
@@ -355,12 +398,14 @@ function mat4_look_at(m, eye, target, up) {
 /// @param {Array<Real>} xAxis The basis's x axis (vec3)
 /// @param {Array<Real>} yAxis The basis's y axis (vec3)
 /// @param {Array<Real>} zAxis The basis's z axis (vec3)
+/// @returns {Array<Real>} The modified matrix
 function mat4_make_basis(m, xAxis, yAxis, zAxis) {
   gml_pragma("forceinline");
   m[0] = xAxis[0]; m[1] = xAxis[1]; m[2] = xAxis[2]; m[3] = 0;
   m[4] = yAxis[0]; m[5] = yAxis[1]; m[6] = yAxis[2]; m[7] = 0;
   m[8] = zAxis[0]; m[9] = zAxis[1]; m[10] = zAxis[2]; m[11] = 0;
   m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+  return m;
 }
 
 /// @func mat4_extract_basis(m, xAxis, yAxis, zAxis)
@@ -380,6 +425,7 @@ function mat4_extract_basis(m, xAxis, yAxis, zAxis) {
 /// @desc Extracts the rotation component of the given matrix.
 /// @param {Array<Real>} m The matrix to store result
 /// @param {Array<Real>} src The source matrix
+/// @returns {Array<Real>} The modified matrix
 function mat4_extract_rotation(m, src) {
   gml_pragma("forceinline");
   var sx = sqrt(src[0] * src[0] + src[1] * src[1] + src[2] * src[2]);
@@ -394,6 +440,7 @@ function mat4_extract_rotation(m, src) {
   m[4] = src[4] * invSy; m[5] = src[5] * invSy; m[6] = src[6] * invSy; m[7] = 0;
   m[8] = src[8] * invSz; m[9] = src[9] * invSz; m[10] = src[10] * invSz; m[11] = 0;
   m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+  return m;
 }
 
 // ============================================================================
@@ -406,6 +453,7 @@ function mat4_extract_rotation(m, src) {
 /// @param {Array<Real>} position The position (vec3)
 /// @param {Array<Real>} quaternion The rotation [x, y, z, w]
 /// @param {Array<Real>} scale The scale (vec3)
+/// @returns {Array<Real>} The modified matrix
 function mat4_compose(m, position, quaternion, scale) {
   gml_pragma("forceinline");
   var _x = quaternion[0], _y = quaternion[1], _z = quaternion[2], _w = quaternion[3];
@@ -435,6 +483,7 @@ function mat4_compose(m, position, quaternion, scale) {
   m[13] = position[1];
   m[14] = position[2];
   m[15] = 1;
+  return m;
 }
 
 /// @func mat4_decompose(m, position, quaternion, scale)
@@ -509,12 +558,14 @@ function mat4_decompose(m, position, quaternion, scale) {
 /// @desc Multiplies the columns of this matrix by the given vector.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} v The scale vector (vec3)
+/// @returns {Array<Real>} The modified matrix
 function mat4_scale(m, v) {
   gml_pragma("forceinline");
   var sx = v[0], sy = v[1], sz = v[2];
   m[0] *= sx; m[1] *= sx; m[2] *= sx; m[3] *= sx;
   m[4] *= sy; m[5] *= sy; m[6] *= sy; m[7] *= sy;
   m[8] *= sz; m[9] *= sz; m[10] *= sz; m[11] *= sz;
+  return m;
 }
 
 /// @func mat4_set_position(m, x, y, z)
@@ -523,11 +574,13 @@ function mat4_scale(m, v) {
 /// @param {Real} x Position X
 /// @param {Real} y Position Y
 /// @param {Real} z Position Z
+/// @returns {Array<Real>} The modified matrix
 function mat4_set_position(m, x, y, z) {
   gml_pragma("forceinline");
   m[12] = x;
   m[13] = y;
   m[14] = z;
+  return m;
 }
 
 /// @func mat4_get_max_scale_on_axis(m)
@@ -550,11 +603,13 @@ function mat4_get_max_scale_on_axis(m) {
 /// @desc Set the upper 3x3 elements of this matrix to the values of given 3x3 matrix.
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} m3 The 3x3 matrix
+/// @returns {Array<Real>} The modified matrix
 function mat4_set_from_matrix3(m, m3) {
   gml_pragma("forceinline");
   m[0] = m3[0]; m[1] = m3[1]; m[2] = m3[2];
   m[4] = m3[3]; m[5] = m3[4]; m[6] = m3[5];
   m[8] = m3[6]; m[9] = m3[7]; m[10] = m3[8];
+  return m;
 }
 
 // ============================================================================
@@ -566,9 +621,11 @@ function mat4_set_from_matrix3(m, m3) {
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Array<Real>} array The matrix elements in column-major order
 /// @param {Real} [offset=0] Index of the first element in the array
+/// @returns {Array<Real>} The modified matrix
 function mat4_from_array(m, array, offset = 0) {
   gml_pragma("forceinline");
   for (var i = 0; i < 16; i++) m[i] = array[offset + i];
+  return m;
 }
 
 /// @func mat4_to_array(m, array, offset)
