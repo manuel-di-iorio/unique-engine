@@ -217,14 +217,35 @@ function AssetManager() constructor {
     /**
      * Update the matrix of an asset and of the box helper
      * The update is scheduled in the next frame in order to wait for box helper update
+     * @param {Struct} asset - The asset to update
+     * @param {Bool} [recursive=false] - Whether to update children recursively
      */
-    function updateAssetMatrix(asset) {
-        asset.updateMatrix();
-        asset.updateMatrixWorld(true);
+    function updateAssetMatrix(asset, recursive = false) {
+        self.__updateMatrixInternal(asset, recursive);
         
         // Update the box helper to match the new transform
         oSceneEditor.sceneManager.boxHelper.update();        
         oSceneEditor.sceneManager.transformControls.updateGizmo();
+    }
+
+    /**
+     * Internal: Update matrix recursively without updating helpers
+     * @param {Struct} asset - The asset to update
+     * @param {Bool} recursive - Whether to update children recursively
+     */
+    function __updateMatrixInternal(asset, recursive) {
+        asset.updateMatrix();
+        asset.updateMatrixWorld(true);
+        
+        if (recursive) {
+            var children = asset[$ "children"];
+            if (children != undefined) {
+                var n = array_length(children);
+                for (var i = 0; i < n; i++) {
+                    self.__updateMatrixInternal(children[i], true);
+                }
+            }
+        }
     }
     
     /**

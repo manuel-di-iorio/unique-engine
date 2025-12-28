@@ -105,8 +105,9 @@ function EditorManager() constructor {
                 sm.boxHelper.object = self.gizmoTarget;
                 
                 // Update the whole scene if we are in one, otherwise just the target
+                // Recursive update to ensure all children matrices are correct
                 var targetToUpdate = self.activeScene != undefined ? self.activeScene : self.gizmoTarget;
-                oSceneEditor.assetManager.updateAssetMatrix(targetToUpdate);
+                oSceneEditor.assetManager.updateAssetMatrix(targetToUpdate, true);
             }
         }
         
