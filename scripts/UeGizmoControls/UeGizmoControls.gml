@@ -16,6 +16,7 @@ function UeGizmoControls(camera, data = {}): UeControls(data) constructor {
   self.space = "world";    // "world", "local"
   self.size = 1.0;         // Gizmo size multiplier
   self.enabled = true;
+  self.view = data[$ "view"] ?? 0;
 
   self.hoveredAxis = undefined;
   self.selectedAxis = undefined;
@@ -426,8 +427,9 @@ function UeGizmoControls(camera, data = {}): UeControls(data) constructor {
       var p3x = bx + dy * headW;
       var p3y = by - dx * headW;
 
-      draw_line_width_color(origin2D[0], origin2D[1], lineEndX, lineEndY, self.lineWidth, col, col);
-      draw_triangle_color(p1x, p1y, p2x, p2y, p3x, p3y, col, col, col, false);
+      draw_set_color(col);
+      draw_line_width(origin2D[0], origin2D[1], lineEndX, lineEndY, self.lineWidth);
+      draw_triangle(p1x, p1y, p2x, p2y, p3x, p3y, false);
     }
   }
 
@@ -463,7 +465,7 @@ function UeGizmoControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _updateRingGeom(center, scale) {
-    if (self._ringCache == undefined) self._ringCache = [ [], [], [] ];
+    if (self._ringCache == undefined) self._ringCache = [[], [], []];
     // X
     self._ringCache[0] = self._getRingArcPoints(UE_GIZMO_AXIS.x, center, scale, 24);
     // Y
@@ -584,11 +586,11 @@ function UeGizmoControls(camera, data = {}): UeControls(data) constructor {
     var ndcX = cx / cw;
     var ndcY = cy / cw;
 
-    // NDC → VIEWPORT (non window!)
-    var vx = view_xport[0];
-    var vy = view_yport[0];
-    var vw = view_wport[0];
-    var vh = view_hport[0];
+    // NDC → VIEWPORT
+    var vx = view_xport[self.view];
+    var vy = view_yport[self.view];
+    var vw = view_wport[self.view];
+    var vh = view_hport[self.view];
 
     var screenX = vx + (ndcX + 1) * 0.5 * vw;
     var screenY = vy + ((ndcY + 1) * 0.5) * vh;
@@ -608,55 +610,43 @@ function UeGizmoControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _screenToWorldDir(mx, my) {
+
     var winW = window_get_width();
     var winH = window_get_height();
     var guiW = display_get_gui_width();
     var guiH = display_get_gui_height();
 
-    // GUI → Window
     var winX = mx * (winW / guiW);
     var winY = my * (winH / guiH);
 
-    // Window → Viewport local
-    var vx = view_xport[0];
-    var vy = view_yport[0];
-    var vw = view_wport[0];
-    var vh = view_hport[0];
-
-    // Fuori dalla viewport → niente picking
-    if (winX < vx || winX > vx + vw || winY < vy || winY > vy + vh)
-      return undefined;
+    var vx = view_xport[self.view];
+    var vy = view_yport[self.view];
+    var vw = view_wport[self.view];
+    var vh = view_hport[self.view];
 
     var localX = (winX - vx) / vw;
     var localY = (winY - vy) / vh;
 
-    // Viewport → NDC (NO flip Y)
     var ndcX = localX * 2 - 1;
     var ndcY = localY * 2 - 1;
 
-    // Inverse ViewProjection
     var invVP = mat4_clone(self._matViewProj);
     mat4_invert(invVP);
 
-    // Clip space (far plane)
     var cx = ndcX;
     var cy = ndcY;
-    var cz = 1.0;
-    var cw = 1.0;
+    var cz = 1;
+    var cw = 1;
 
-    // Clip → World
     var ox = invVP[0] * cx + invVP[4] * cy + invVP[8] * cz + invVP[12] * cw;
     var oy = invVP[1] * cx + invVP[5] * cy + invVP[9] * cz + invVP[13] * cw;
     var oz = invVP[2] * cx + invVP[6] * cy + invVP[10] * cz + invVP[14] * cw;
     var ow = invVP[3] * cx + invVP[7] * cy + invVP[11] * cz + invVP[15] * cw;
 
-    if (ow != 0) {
-      ox /= ow; oy /= ow; oz /= ow;
-    }
+    if (ow != 0) { ox /= ow; oy /= ow; oz /= ow; }
 
     var farPos = [ox, oy, oz];
 
-    // Ray direction
     var dir = vec3_create();
     vec3_sub_vectors(dir, farPos, self.camera.position);
     vec3_normalize(dir);
@@ -664,6 +654,26 @@ function UeGizmoControls(camera, data = {}): UeControls(data) constructor {
     return dir;
   }
 
+  // function _screenToWorldDirViewport(mx, my) {
+  //   var winW = window_get_width();
+  //   var winH = window_get_height();
+  //   var guiW = display_get_gui_width();
+  //   var guiH = display_get_gui_height();
+
+  //   var winX = mx * (winW / guiW);
+  //   var winY = my * (winH / guiH);
+
+  //   var vx = view_xport[self.view];
+  //   var vy = view_yport[self.view];
+  //   var vw = view_wport[self.view];
+  //   var vh = view_hport[self.view];
+
+  //   if (winX < vx || winX > vx + vw || winY < vy || winY > vy + vh)
+  //     return undefined;
+
+  //   // poi chiama la versione libera
+  //   return _screenToWorldDir(mx, my);
+  // }
 
   function _distanceToSegment(p, a, b) {
     if (is_nan(a[0]) || is_nan(a[1]) || is_nan(b[0]) || is_nan(b[1])) return infinity;
