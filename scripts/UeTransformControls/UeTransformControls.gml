@@ -195,6 +195,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     self._winW = window_get_width();
     self._winH = window_get_height();
 
+    if (self._winW <= 0 || self._winH <= 0) return;
+
     var scaleX = self._guiW / self._winW;
     var scaleY = self._guiH / self._winH;
     
@@ -694,7 +696,9 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     // Fake 3D Arrow (Triangle)
     var dx = end2D[0] - origin2D[0];
     var dy = end2D[1] - origin2D[1];
-    var len = sqrt(dx * dx + dy * dy);
+    var distSq = dx * dx + dy * dy;
+    if (is_nan(distSq) || distSq <= 0) return;
+    var len = sqrt(distSq);
 
     // Draw line shorter to not overlap head
     var headLen = self.lineWidth * 6.0;
@@ -1018,6 +1022,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var points2D = self._ringCache[axis];
 
     if (points2D != undefined && array_length(points2D) > 1) {
+      if (is_nan(self._ringOriginW) || self._ringOriginW <= 0) return;
       var fx = (self._projFactorX / self._ringOriginW) * self._gizmoScale;
       var fy = (self._projFactorY / self._ringOriginW) * self._gizmoScale;
       
@@ -1037,6 +1042,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var points2D = self._ringCache[axis];
 
     if (points2D == undefined) return false;
+
+    if (is_nan(self._ringOriginW) || self._ringOriginW <= 0) return false;
 
     var pMouse = [mx, my];
     var cx = self._ringOrigin2D[0];
@@ -1088,8 +1095,9 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
       var dirX = p2x - p1x;
       var dirY = p2y - p1y;
-      var len = sqrt(dirX * dirX + dirY * dirY);
-      if (len == 0) continue;
+      var distSq = dirX * dirX + dirY * dirY;
+      if (is_nan(distSq) || distSq <= 0) continue;
+      var len = sqrt(distSq);
       dirX /= len; dirY /= len;
 
       var perpX = -dirY * halfW;
@@ -1107,13 +1115,15 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var m = viewProjMat;
     var cw = m[3] * worldPos[0] + m[7] * worldPos[1] + m[11] * worldPos[2] + m[15];
 
-    if (cw <= 0) return undefined;
+    if (is_nan(cw) || cw <= 0) return undefined;
 
     var cx = m[0] * worldPos[0] + m[4] * worldPos[1] + m[8] * worldPos[2] + m[12];
     var cy = m[1] * worldPos[0] + m[5] * worldPos[1] + m[9] * worldPos[2] + m[13];
 
     var ndcX = cx / cw;
     var ndcY = cy / cw;
+
+    if (is_nan(ndcX) || is_nan(ndcY)) return undefined;
 
     var res = out ?? self._vec2D;
     res[0] = ndcX * self._projFactorX + self._projOffsetX;
