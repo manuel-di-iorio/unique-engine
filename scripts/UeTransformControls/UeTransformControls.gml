@@ -442,8 +442,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
         vec3_copy(self.object.position, newPos);
         self.object.updateWorldMatrix(true, false);
-        return;
-      }
+      } else {
 
       var currT = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
       if (currT == undefined || self._dragOffset == undefined) return;
@@ -486,6 +485,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
       // IMPORTANT: Immediately update world matrix to prevent jitter
       self.object.updateWorldMatrix(true, false);
+    }
 
     } else if (self.mode == "scale") {
       var currT = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
