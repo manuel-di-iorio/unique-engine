@@ -128,6 +128,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
    * @param {String} mode - "move", "rotate", or "scale".
    */
   function setMode(mode) {
+    gml_pragma("forceinline");
     self.mode = mode;
     return self;
   }
@@ -137,6 +138,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
    * @param {Struct} object - The object to transform (must have position, rotation, scale).
    */
   function attach(object) {
+    gml_pragma("forceinline");
     self.object = object;
 
     // Ensure object's world matrix is up-to-date so gizmo uses correct world transforms
@@ -151,6 +153,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
    * Detaches the gizmo from the current object.
    */
   function detach() {
+    gml_pragma("forceinline");
     self.object = undefined;
     self.hoveredAxis = undefined;
     self.selectedAxis = undefined;
@@ -163,6 +166,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
    * Useful for updating the gizmo's orientation/position without processing mouse interactions.
    */
   function updateGizmo() {
+    gml_pragma("forceinline");
     if (!self.object || !self.enabled) return;
 
     // 1. Force the target object to update its world matrix so we have accurate position/rotation.
@@ -242,6 +246,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
    * 2. Interaction logic (picking and dragging).
    */
   function update() {
+    gml_pragma("forceinline");
     if (!self.object || !self.enabled) return;
 
     // 1. Update internal state (matrices, position, scale, caching)
@@ -329,6 +334,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
    * Should be called in Draw GUI event.
    */
   function render() {
+    gml_pragma("forceinline");
     if (!self.object || !self.enabled) return;
 
     // Use a member buffer for origin2D
@@ -356,7 +362,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
   // --- DRAG HANDLERS ---
 
+  /**
+   * Initiates dragging for the given axis.
+   * Stores initial state and prepares for drag calculations.
+   */
   function _startDrag(mx, my, centerPos, scale) {
+    gml_pragma("forceinline");
     self.dragging = true;
     self.selectedAxis = self.hoveredAxis;
     self.axis = self.hoveredAxis;
@@ -402,7 +413,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     }
   }
 
+  /**
+   * Handles dragging for the current axis.
+   * Applies delta transformations to the object.
+   */
   function _handleDrag(mx, my, centerPos, scale) {
+    gml_pragma("forceinline");
     if (self.mode == "move") {
 
       if (self.axis == UE_GIZMO_AXIS.xy || self.axis == UE_GIZMO_AXIS.xz || self.axis == UE_GIZMO_AXIS.yz) {
@@ -523,7 +539,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     }
   }
 
+  /**
+   * Computes the projection of the mouse point (mx, my) onto the given axis.
+   * Returns the distance from the centerPos to the projection point.
+   */
   function _computeAxisProjection(mx, my, centerPos, axisName) {
+    gml_pragma("forceinline");
     var axisVec = self._vec4;
     self._getAxisVector(axisName, axisVec);
 
@@ -559,7 +580,13 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     return vec3_dot(hitPoint, axisVec);
   }
 
+  /**
+   * Computes the projection of the mouse point (mx, my) onto the given axis.
+   * Returns the distance from the centerPos to the projection point.
+   * Handles edge cases where the axis is parallel to the camera direction.
+   */
   function _computeAxisProjectionStable(mx, my, centerPos, axisVec) {
+    gml_pragma("forceinline");
     var camDir = self._vec5;
     self.camera.getWorldDirection(camDir);
 
@@ -594,14 +621,24 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
   // --- INTERNAL HELPERS ---
 
+  /**
+   * Computes the scale of the gizmo based on the distance to the object.
+   * Ensures a minimum size of self.size.
+   */
   function _computeGizmoScale(pos) {
+    gml_pragma("forceinline");
     if (is_nan(pos[0]) || is_nan(pos[1]) || is_nan(pos[2])) return self.size;
     var dist = vec3_distance_to(self.camera.position, pos);
     if (is_nan(dist) || dist == infinity) return self.size;
     return dist * 0.15 * self.size;
   }
 
+  /**
+   * Computes the vector of the given axis in world space.
+   * Optionally transforms the vector to local space if self.space is "local".
+   */
   function _getAxisVector(axis, out) {
+    gml_pragma("forceinline");
     vec3_set(out, 0, 0, 0);
     // Normals: X for YZ, Y for XZ, Z for XY
     if (axis == UE_GIZMO_AXIS.x || axis == UE_GIZMO_AXIS.yz) out[0] = 1;
@@ -626,7 +663,11 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     return out;
   }
 
+  /**
+   * Returns the color of the given axis based on its state (hovered, selected, or default).
+   */
   function _getAxisColor(axis) {
+    gml_pragma("forceinline");
     if (self.hoveredAxis == axis || self.selectedAxis == axis) return self.cYellow;
     if (axis == UE_GIZMO_AXIS.x || axis == UE_GIZMO_AXIS.yz) return self.cRed;
     if (axis == UE_GIZMO_AXIS.y || axis == UE_GIZMO_AXIS.xz) return self.cBlue;
@@ -634,7 +675,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     return c_white;
   }
 
+  /**
+   * Draws an arrow for the given axis at the specified center position.
+   * The arrow is scaled by the given factor and drawn from the origin2D.
+   */
   function _drawArrow(axis, center, scale, origin2D) {
+    gml_pragma("forceinline");
     var endPos = self._vec0;
     vec3_copy(endPos, center);
     self._getAxisVector(axis, self._vec1);
@@ -680,7 +726,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     }
   }
 
+  /**
+   * Checks if the mouse position (mx, my) is within the click threshold of the arrow for the given axis.
+   * The arrow is defined by the center position, scale, and axis normal.
+   */
   function _pickArrow(axisName, center, scale, mx, my, threshold) {
+    gml_pragma("forceinline");
     var endPos = self._vec0;
     vec3_copy(endPos, center);
     self._getAxisVector(axisName, self._vec1);
@@ -697,7 +748,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     return false;
   }
 
+  /**
+   * Computes the right and up vectors for the given axis plane.
+   * The axis plane is defined by the axis normal.
+   */
   function _getPlaneBasis(axis, outRight, outUp) {
+    gml_pragma("forceinline");
     if (axis == UE_GIZMO_AXIS.yz) {
       self._getAxisVector(UE_GIZMO_AXIS.y, outRight);
       self._getAxisVector(UE_GIZMO_AXIS.z, outUp);
@@ -712,7 +768,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     }
   }
 
+  /**
+   * Draws a scale handle for the given axis at the specified center position.
+   * The handle is scaled by the given factor and drawn from the origin2D.
+   */
   function _drawScaleHandle(axisName, center, scale, origin2D) {
+    gml_pragma("forceinline");
     var endPos = self._vec0;
     vec3_copy(endPos, center);
     self._getAxisVector(axisName, self._vec1);
@@ -729,7 +790,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     draw_rectangle_color(end2D[0] - s, end2D[1] - s, end2D[0] + s, end2D[1] + s, col, col, col, col, false);
   }
 
+  /**
+   * Draws a plane handle for the given axis at the specified center position.
+   * The handle is scaled by the given factor and drawn from the origin2D.
+   */
   function _drawPlaneHandle(axis, center, scale, origin2D) {
+    gml_pragma("forceinline");
     // Planes:
     // YZ (Red): Normal X. Spans Y, Z.
     // XZ (Blue): Normal Y. Spans X, Z.
@@ -806,7 +872,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     draw_set_alpha(1.0);
   }
 
+  /**
+   * Checks if the mouse position (mx, my) is within the click threshold of the plane handle for the given axis.
+   * The handle is defined by the center position, scale, and axis normal.
+   */
   function _pickPlaneHandle(axis, center, scale, mx, my) {
+    gml_pragma("forceinline");  
     var size = self.axisLength * scale * 0.3;
     var offset = 0;
 
@@ -865,13 +936,23 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     return false;
   }
 
+  /**
+   * Updates the geometry of the ring arcs for the given axis.
+   * The ring arcs are defined by the center position and the axis normal.
+   */
   function _updateRingGeom(center) {
+    gml_pragma("forceinline");
     self._updateRingArc(0, center);
     self._updateRingArc(1, center);
     self._updateRingArc(2, center);
   }
 
+  /**
+   * Updates the geometry of the ring arc for the given axis index and center position.
+   * The ring arc is defined by the center position and the axis normal.
+   */
   function _updateRingArc(axisIdx, center) {
+    gml_pragma("forceinline");
     var axisEnum = (axisIdx == 0) ? UE_GIZMO_AXIS.x : ((axisIdx == 1) ? UE_GIZMO_AXIS.y : UE_GIZMO_AXIS.z);
     
     var rotQ = self._quat0;
@@ -926,7 +1007,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     }
   }
 
+  /**
+   * Draws the ring arc for the given axis.
+   * The ring arc is defined by the center position and the axis normal.
+   */
   function _drawRing(axis) {
+    gml_pragma("forceinline");
     if (self._ringCache == undefined) return;
     var col = self._getAxisColor(axis);
     var points2D = self._ringCache[axis];
@@ -941,7 +1027,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     }
   }
 
+  /**
+   * Checks if the mouse position (mx, my) is within the click threshold of the ring arc for the given axis.
+   * The ring arc is defined by the center position and the axis normal.
+   */
   function _pickRing(axis, mx, my, threshold) {
+    gml_pragma("forceinline");
     if (self._ringCache == undefined) return false;
     var points2D = self._ringCache[axis];
 
@@ -974,7 +1065,16 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     return false;
   }
 
+  /**
+   * Draws a thick line strip between the given points.
+   * The line strip is defined by an array of 2D points (x, y).
+   * The width is the thickness of the line strip.
+   * The color is the color of the line strip.
+   * The offsetX and offsetY are the offset to apply to the points.
+   * The scaleX and scaleY are the scale to apply to the points.
+   */
   function _drawThickLineStrip(points, width, color, offsetX = 0, offsetY = 0, scaleX = 1, scaleY = 1) {
+    gml_pragma("forceinline");
     var halfW = width * 0.5;
     draw_set_color(color);
     for (var i = 0; i < array_length(points) - 1; i++) {
@@ -1003,6 +1103,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _worldToScreen(worldPos, viewProjMat, out = undefined) {
+    gml_pragma("forceinline");
     var m = viewProjMat;
     var cw = m[3] * worldPos[0] + m[7] * worldPos[1] + m[11] * worldPos[2] + m[15];
 
@@ -1022,6 +1123,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _screenToWorldDir(mx, my) {
+    gml_pragma("forceinline");
     var winW = window_get_width();
     var winH = window_get_height();
     var guiW = display_get_gui_width();
@@ -1064,7 +1166,13 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     return dir;
   }
 
+  /**
+   * Computes the direction of a ray from the screen coordinates (mx, my) to the world.
+   * The screen coordinates are normalized to the viewport coordinates.
+   * Returns the direction of the ray as a 3D vector, or undefined if the ray is not visible.
+   */
   // function _screenToWorldDirViewport(mx, my) {
+  //   gml_pragma("forceinline");
   //   var winW = window_get_width();
   //   var winH = window_get_height();
   //   var guiW = display_get_gui_width();
@@ -1085,7 +1193,14 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   //   return _screenToWorldDir(mx, my);
   // }
 
+  /**
+   * Computes the intersection point of a ray with a plane.
+   * The ray is defined by the origin and direction.
+   * The plane is defined by the origin and normal.
+   * Returns the intersection point as a 3D vector, or undefined if no intersection.
+   */
   function _computePlaneIntersection(mx, my, planeOrigin, planeNormal) {
+    gml_pragma("forceinline");
     var rayDir = self._screenToWorldDir(mx, my);
     if (rayDir == undefined) return undefined;
 
