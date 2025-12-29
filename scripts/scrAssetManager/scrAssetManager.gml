@@ -224,7 +224,7 @@ function AssetManager() constructor {
         self.__updateMatrixInternal(asset, recursive);
         
         // Update the box helper to match the new transform
-        oSceneEditor.sceneManager.boxHelper.update();        
+        oSceneEditor.sceneManager.boxHelper.update();   
         oSceneEditor.sceneManager.transformControls.updateGizmo();
     }
 

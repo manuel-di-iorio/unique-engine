@@ -18,6 +18,7 @@ function SceneManager() constructor {
     self.showBoxColliders = true;
     self.objects = new UeObject3D({ matrixAutoUpdate: false });
     self.transformControls = new UeTransformControls(self.camera, {
+        view: 1,
         onDrag: function() {
             oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object);
         },
@@ -32,13 +33,11 @@ function SceneManager() constructor {
         depthWrite = false;
         depthTest = false;
     }
-    self.transformControlsHelper = self.transformControls.getHelper();
     
     // Assimp loader
     self.assimp = new UeAssimpLoader();
     
-    self.scene.add(self.transformControlsHelper);
-    self.scene.add(self.grid, self.objects,  self.boxHelper);
+    self.scene.add(self.grid, self.objects, self.boxHelper);
     
     // Configure mouse
     global.UE_MOUSE.view = 1;

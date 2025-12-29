@@ -97,6 +97,11 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   self.cWhite = c_white;
   self.cYellow = c_yellow;
 
+  // --- Callbacks ---
+  self.onDragStart = data[$ "onDragStart"]; // Fired when dragging begins
+  self.onDrag      = data[$ "onDrag"];      // Fired every frame while dragging
+  self.onDragEnd   = data[$ "onDragEnd"];   // Fired when dragging stops
+
   // --- Geometry Generation ---
   // Generates unit-sized points for the rotation rings in X, Y, and Z planes.
   self._ringCache = array_create(3, undefined); 
@@ -154,20 +159,18 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   /**
-   * Updates logic (picking, dragging).
+   * Updates only the gizmo's internal state (matrices, position, scale, and ring caching).
+   * Useful for updating the gizmo's orientation/position without processing mouse interactions.
    */
-  function update() {
+  function updateGizmo() {
     if (!self.object || !self.enabled) return;
 
-    var mx = device_mouse_x_to_gui(0);
-    var my = device_mouse_y_to_gui(0);
-
-    // 1. Update Object Matrix
+    // 1. Force the target object to update its world matrix so we have accurate position/rotation.
     if (self.object.updateWorldMatrix != undefined) {
       self.object.updateWorldMatrix(true, false);
     }
 
-    // 2. Update Camera Matrix & View-Projection
+    // 2. Sync camera matrices and calculate the combined View-Projection matrix.
     if (variable_struct_exists(self.camera, "updateMatrixWorld")) self.camera.updateMatrixWorld();
 
     if (self.camera.matrixWorldInverse != undefined) {
@@ -178,7 +181,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
     matrix_multiply(self.camera.matrixWorldInverse, self.camera.projectionMatrix, self._matViewProj);
 
-    // 3. Update Viewport & GUI Constants for Projection
+    // 3. Pre-calculate viewport and GUI constants to optimize _worldToScreen projections.
     self._vw = view_wport[self.view];
     self._vh = view_hport[self.view];
     self._vx = view_xport[self.view];
@@ -196,13 +199,15 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     self._projFactorY = (0.5 * self._vh) * scaleY;
     self._projOffsetY = (self._vy + 0.5 * self._vh) * scaleY;
 
-    // 4. Update Gizmo State (Position & Scale)
+    // 4. Update the gizmo's world center and dynamic scale (keeping it constant size on screen).
     self.object.getWorldPosition(self._centerPos);
     self._gizmoScale = self._computeGizmoScale(self._centerPos);
 
-    // 5. Update Ring Geometry Cache (Projected to screen)
+    // 5. Intelligent Ring Caching logic for "rotate" mode.
     var origin2D = self._worldToScreen(self._centerPos, self._matViewProj, self._ringOrigin2D);
     var m = self._matViewProj;
+    
+    // Calculate the W component (depth) for the ring center to use in screen-space scaling.
     self._ringOriginW = m[3] * self._centerPos[0] + m[7] * self._centerPos[1] + m[11] * self._centerPos[2] + m[15];
     
     if (self.mode == "rotate" && origin2D != undefined) {
@@ -222,19 +227,35 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
       if (needsUpdate) {
         self._updateRingGeom(self._centerPos);
         
-        // Update cache keys
+        // Cache current state for the next frame
         vec3_copy(self._ringLastUpdateViewDir, viewDir);
         quat_copy(self._ringLastUpdateObjRot, objRot);
         self._ringLastUpdateSpace = self.space;
         self._ringLastUpdateMode = self.mode;
       }
     }
+  }
 
-    // --- DRAGGING LOGIC ---
+  /**
+   * The main update loop for the gizmo. Handles:
+   * 1. State updates (via updateGizmo).
+   * 2. Interaction logic (picking and dragging).
+   */
+  function update() {
+    if (!self.object || !self.enabled) return;
+
+    // 1. Update internal state (matrices, position, scale, caching)
+    self.updateGizmo();
+
+    var mx = device_mouse_x_to_gui(0);
+    var my = device_mouse_y_to_gui(0);
+
+    // --- INTERACTION: DRAGGING ---
     if (self.dragging && self.selectedAxis != undefined) {
       if (mouse_check_button_released(mb_left)) {
         self.dragging = false;
         self.selectedAxis = undefined;
+        if (self.onDragEnd != undefined) self.onDragEnd();
         return;
       }
 
@@ -242,7 +263,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
       return;
     }
 
-    // --- PICKING LOGIC ---
+    // --- INTERACTION: PICKING ---
+    // Detect if the user clicks on any gizmo component.
     if (mouse_check_button_pressed(mb_left) && self.hoveredAxis != undefined) {
       self._startDrag(mx, my, self._centerPos, self._gizmoScale);
       return;
@@ -252,11 +274,11 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var minDist = self.hitThreshold;
 
     var origin2D = self._worldToScreen(self._centerPos, self._matViewProj);
-    if (origin2D == undefined) return; // Behind camera
+    if (origin2D == undefined) return; // Gizmo is behind the camera clipping plane
 
-    // Check Axes
+    // Component-specific picking logic
     if (self.mode == "move") {
-      // Check Planes FIRST
+      // 1. Plane handles (the squares between axes) have priority
       if (self._pickPlaneHandle(UE_GIZMO_AXIS.xy, self._centerPos, self._gizmoScale, mx, my)) {
         self.hoveredAxis = UE_GIZMO_AXIS.xy; minDist = 0;
       }
@@ -267,6 +289,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         self.hoveredAxis = UE_GIZMO_AXIS.yz; minDist = 0;
       }
 
+      // 2. Standard axis arrows
       if (self.hoveredAxis == undefined) {
         if (self._pickArrow(UE_GIZMO_AXIS.x, self._centerPos, self._gizmoScale, mx, my, minDist)) {
           self.hoveredAxis = UE_GIZMO_AXIS.x; minDist = 0;
@@ -372,6 +395,10 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
       if (origin2D != undefined) {
         self._dragAngleStart = arctan2(my - origin2D[1], mx - origin2D[0]);
       }
+    }
+
+    if (self.dragging && self.onDragStart != undefined) {
+      self.onDragStart();
     }
   }
 
@@ -489,6 +516,10 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         quat_copy(self.object.rotation, newRot);
         self.object.updateWorldMatrix(true, false);
       }
+    }
+
+    if (self.onDrag != undefined) {
+      self.onDrag();
     }
   }
 
@@ -751,8 +782,6 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     vec3_copy(p3, p0); vec3_add(p3, vSizeUp);
 
     // Project
-    // We need 4 unique 2D points. Let's use internal buffers.
-    // Actually, draw_triangle takes floats directly, so we can reuse self._vec2D
     var s0 = self._worldToScreen(p0, self._matViewProj, self._vec2D_1);
     if (s0 == undefined) return;
     var s0x = s0[0], s0y = s0[1];
@@ -778,13 +807,6 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _pickPlaneHandle(axis, center, scale, mx, my) {
-    // Ideally reuse the projection logic from draw, but stripped down.
-    // Re-run the same point calc.
-    // NOTE: For optimization, we could cache these 2D quads too, but let's implement the logic first.
-
-    // ... (Same basis logic as draw) ... or Refactor "getPlanePoints" helper?
-    // Let's copy-paste for safety/simplicity to avoid huge diffs, then refactor.
-
     var size = self.axisLength * scale * 0.3;
     var offset = 0;
 

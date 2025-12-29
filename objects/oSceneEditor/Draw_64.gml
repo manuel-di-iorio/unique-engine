@@ -1,4 +1,9 @@
 if (!enableUI) exit;
+
+if (sceneManager.transformControls.object != undefined) {
+  sceneManager.transformControls.render();
+}
+
 draw_set_font(fText);
 global.UI.render(uiDebug);
 
