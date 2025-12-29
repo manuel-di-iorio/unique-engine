@@ -154,10 +154,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   /**
-   * The main update loop for the gizmo. Handles:
-   * 1. Matrix and viewport constant updates.
-   * 2. Intelligent caching for rotation rings.
-   * 3. Interaction logic (picking and dragging).
+   * Updates logic (picking, dragging).
    */
   function update() {
     if (!self.object || !self.enabled) return;
@@ -165,12 +162,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var mx = device_mouse_x_to_gui(0);
     var my = device_mouse_y_to_gui(0);
 
-    // 1. Force the target object to update its world matrix so we have accurate position/rotation.
+    // 1. Update Object Matrix
     if (self.object.updateWorldMatrix != undefined) {
       self.object.updateWorldMatrix(true, false);
     }
 
-    // 2. Sync camera matrices and calculate the combined View-Projection matrix.
+    // 2. Update Camera Matrix & View-Projection
     if (variable_struct_exists(self.camera, "updateMatrixWorld")) self.camera.updateMatrixWorld();
 
     if (self.camera.matrixWorldInverse != undefined) {
@@ -181,7 +178,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
     matrix_multiply(self.camera.matrixWorldInverse, self.camera.projectionMatrix, self._matViewProj);
 
-    // 3. Pre-calculate viewport and GUI constants to optimize _worldToScreen projections.
+    // 3. Update Viewport & GUI Constants for Projection
     self._vw = view_wport[self.view];
     self._vh = view_hport[self.view];
     self._vx = view_xport[self.view];
@@ -199,17 +196,13 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     self._projFactorY = (0.5 * self._vh) * scaleY;
     self._projOffsetY = (self._vy + 0.5 * self._vh) * scaleY;
 
-    // 4. Update the gizmo's world center and dynamic scale (keeping it constant size on screen).
+    // 4. Update Gizmo State (Position & Scale)
     self.object.getWorldPosition(self._centerPos);
     self._gizmoScale = self._computeGizmoScale(self._centerPos);
 
-    // 5. Intelligent Ring Caching logic for "rotate" mode.
-    // We only re-generate the 3D-to-2D projection of the rings if the view direction
-    // or the object's local rotation (in local space) has changed significantly.
+    // 5. Update Ring Geometry Cache (Projected to screen)
     var origin2D = self._worldToScreen(self._centerPos, self._matViewProj, self._ringOrigin2D);
     var m = self._matViewProj;
-    
-    // Calculate the W component (depth) for the ring center to use in screen-space scaling.
     self._ringOriginW = m[3] * self._centerPos[0] + m[7] * self._centerPos[1] + m[11] * self._centerPos[2] + m[15];
     
     if (self.mode == "rotate" && origin2D != undefined) {
@@ -223,15 +216,13 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
       var needsUpdate = false;
       if (self.space != self._ringLastUpdateSpace) needsUpdate = true;
       else if (self.mode != self._ringLastUpdateMode) needsUpdate = true;
-      // Check if camera moved significantly relative to the center
       else if (vec3_distance_to_squared(viewDir, self._ringLastUpdateViewDir) > UE_EPSILON) needsUpdate = true;
-      // If in local space, check if the object itself rotated
       else if (self.space == "local" && abs(1.0 - abs(quat_dot(objRot, self._ringLastUpdateObjRot))) > UE_EPSILON) needsUpdate = true;
 
       if (needsUpdate) {
         self._updateRingGeom(self._centerPos);
         
-        // Cache current state for the next frame
+        // Update cache keys
         vec3_copy(self._ringLastUpdateViewDir, viewDir);
         quat_copy(self._ringLastUpdateObjRot, objRot);
         self._ringLastUpdateSpace = self.space;
@@ -239,7 +230,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
       }
     }
 
-    // --- INTERACTION: DRAGGING ---
+    // --- DRAGGING LOGIC ---
     if (self.dragging && self.selectedAxis != undefined) {
       if (mouse_check_button_released(mb_left)) {
         self.dragging = false;
@@ -251,8 +242,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
       return;
     }
 
-    // --- INTERACTION: PICKING ---
-    // Detect if the user clicks on any gizmo component.
+    // --- PICKING LOGIC ---
     if (mouse_check_button_pressed(mb_left) && self.hoveredAxis != undefined) {
       self._startDrag(mx, my, self._centerPos, self._gizmoScale);
       return;
@@ -262,11 +252,11 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var minDist = self.hitThreshold;
 
     var origin2D = self._worldToScreen(self._centerPos, self._matViewProj);
-    if (origin2D == undefined) return; // Gizmo is behind the camera clipping plane
+    if (origin2D == undefined) return; // Behind camera
 
-    // Component-specific picking logic
+    // Check Axes
     if (self.mode == "move") {
-      // 1. Plane handles (the squares between axes) have priority
+      // Check Planes FIRST
       if (self._pickPlaneHandle(UE_GIZMO_AXIS.xy, self._centerPos, self._gizmoScale, mx, my)) {
         self.hoveredAxis = UE_GIZMO_AXIS.xy; minDist = 0;
       }
@@ -277,7 +267,6 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         self.hoveredAxis = UE_GIZMO_AXIS.yz; minDist = 0;
       }
 
-      // 2. Standard axis arrows
       if (self.hoveredAxis == undefined) {
         if (self._pickArrow(UE_GIZMO_AXIS.x, self._centerPos, self._gizmoScale, mx, my, minDist)) {
           self.hoveredAxis = UE_GIZMO_AXIS.x; minDist = 0;
@@ -313,23 +302,21 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   /**
-   * Renders the gizmo to the screen. 
-   * This should be called in a Draw GUI event for correct overlay behavior.
+   * Draws the gizmo.
+   * Should be called in Draw GUI event.
    */
   function render() {
     if (!self.object || !self.enabled) return;
 
-    // Use a member buffer for origin2D to avoid allocations
+    // Use a member buffer for origin2D
     var origin2D = self._worldToScreen(self._centerPos, self._matViewProj, self._vec2D_0);
     if (origin2D == undefined) return;
 
     if (self.mode == "move") {
-      // Draw plane handles first (they are translucent)
-      self._drawPlaneHandle(UE_GIZMO_AXIS.yz, self._centerPos, self._gizmoScale, origin2D); 
-      self._drawPlaneHandle(UE_GIZMO_AXIS.xz, self._centerPos, self._gizmoScale, origin2D); 
-      self._drawPlaneHandle(UE_GIZMO_AXIS.xy, self._centerPos, self._gizmoScale, origin2D); 
+      self._drawPlaneHandle(UE_GIZMO_AXIS.yz, self._centerPos, self._gizmoScale, origin2D); // Red
+      self._drawPlaneHandle(UE_GIZMO_AXIS.xz, self._centerPos, self._gizmoScale, origin2D); // Blue
+      self._drawPlaneHandle(UE_GIZMO_AXIS.xy, self._centerPos, self._gizmoScale, origin2D); // Green
 
-      // Draw axis arrows
       self._drawArrow(UE_GIZMO_AXIS.x, self._centerPos, self._gizmoScale, origin2D);
       self._drawArrow(UE_GIZMO_AXIS.y, self._centerPos, self._gizmoScale, origin2D);
       self._drawArrow(UE_GIZMO_AXIS.z, self._centerPos, self._gizmoScale, origin2D);
@@ -346,15 +333,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
   // --- DRAG HANDLERS ---
 
-  /**
-   * Initializes the drag operation. Captures the initial state of the object and mouse.
-   */
   function _startDrag(mx, my, centerPos, scale) {
     self.dragging = true;
     self.selectedAxis = self.hoveredAxis;
     self.axis = self.hoveredAxis;
 
-    // Capture initial object transforms and world state.
+    // Store Start State
     vec3_copy(self._dragStartPoint, self.object.position);
     quat_copy(self._dragStartRot, self.object.rotation);
     vec3_copy(self._dragStartScale, self.object.scale);
@@ -363,28 +347,27 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
     if (self.mode == "move") {
       if (self.axis == UE_GIZMO_AXIS.xy || self.axis == UE_GIZMO_AXIS.xz || self.axis == UE_GIZMO_AXIS.yz) {
-        // Plane Drag: Project mouse to a virtual plane passing through the object.
+        // Plane Drag
         var normal = self._vec1;
-        self._getAxisVector(self.axis, normal); 
+        self._getAxisVector(self.axis, normal); // Returns proper normal for plane enums
 
         var hit = self._computePlaneIntersection(mx, my, self._dragStartWorldPos, normal);
         if (hit != undefined) {
-          // Store the offset between the object center and the mouse hit point on the plane.
           vec3_copy(self._dragOffsetVec, hit);
           vec3_sub(self._dragOffsetVec, self._dragStartWorldPos);
         } else {
-          self.dragging = false; 
+          self.dragging = false; // Failed to hit plane??
         }
       } else {
-        // Axis Drag: Project mouse onto the axis line.
+        // Axis Drag
         self._dragOffset = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
         if (self._dragOffset == undefined) self.dragging = false;
       }
     } else if (self.mode == "scale") {
-      // Scale Drag: Similar to axis drag, we track movement along the axis.
+      // Project initial mouse hit onto axis line
       self._dragOffset = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
     } else if (self.mode == "rotate") {
-      // Rotation Drag: Calculate the initial angle on the screen relative to the gizmo center.
+      // Compute Initial Angle on Screen relative to center
       var origin2D = self._worldToScreen(self._dragStartWorldPos, self._matViewProj);
       if (origin2D != undefined) {
         self._dragAngleStart = arctan2(my - origin2D[1], mx - origin2D[0]);
@@ -392,25 +375,21 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     }
   }
 
-  /**
-   * Processes the ongoing drag operation and applies transformations to the object.
-   */
   function _handleDrag(mx, my, centerPos, scale) {
     if (self.mode == "move") {
 
       if (self.axis == UE_GIZMO_AXIS.xy || self.axis == UE_GIZMO_AXIS.xz || self.axis == UE_GIZMO_AXIS.yz) {
-        // Plane Move Logic:
-        // 1. Find where the mouse ray hits the locked plane.
+        // Plane Logic
         var normal = self._dragLockedAxisVec;
+
         var hit = self._computePlaneIntersection(mx, my, self._dragStartWorldPos, normal);
         if (hit == undefined) return;
 
         var newPos = self._vec2;
         vec3_copy(newPos, hit);
-        // 2. Subtract the initial offset to keep the object relative to the mouse.
-        vec3_sub(newPos, self._dragOffsetVec); 
+        vec3_sub(newPos, self._dragOffsetVec); // This is now a world position
 
-        // 3. Convert world position back to local space if the object has a parent.
+        // Apply to Object
         if (self.object.parent != undefined) {
           var parentInv = self._mat0;
           mat4_copy(parentInv, self.object.parent.matrixWorld);
@@ -423,43 +402,53 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         return;
       }
 
-      // Axis Move Logic:
-      // 1. Calculate current projection on the axis.
       var currT = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
       if (currT == undefined || self._dragOffset == undefined) return;
 
-      // 2. Calculate delta movement along the axis.
       var delta = currT - self._dragOffset;
 
+      // Apply Delta to Position
       var axisVec = self._dragLockedAxisVec;
       var moveVec = self._vec2;
       vec3_copy(moveVec, axisVec);
       vec3_multiply_scalar(moveVec, delta);
 
-      // 3. Transform world delta into local space.
-      if (self.object.parent != undefined) {
-        var parentInv = self._mat0;
-        mat4_copy(parentInv, self.object.parent.matrixWorld);
-        mat4_invert(parentInv);
-        // We only care about rotation for delta movement, not position.
-        mat4_set_position(parentInv, 0, 0, 0); 
-        vec3_apply_matrix4(moveVec, parentInv);
-      }
-      
-      var newPos = self._vec3;
-      vec3_copy(newPos, self._dragStartPoint);
-      vec3_add(newPos, moveVec);
-      vec3_copy(self.object.position, newPos);
+      // Transform to Local Space logic
+      if (self.space == "local") {
+        if (self.object.parent != undefined) {
+          var parentInv = self._mat0;
+          mat4_copy(parentInv, self.object.parent.matrixWorld);
+          mat4_invert(parentInv);
+          mat4_set_position(parentInv, 0, 0, 0);
+          vec3_apply_matrix4(moveVec, parentInv);
+        }
+        var newPos = self._vec3;
+        vec3_copy(newPos, self._dragStartPoint);
+        vec3_add(newPos, moveVec);
+        vec3_copy(self.object.position, newPos);
 
-      // IMPORTANT: Immediately update world matrix to prevent jitter in the next frame's projection.
+      } else { // World Space Axis
+        if (self.object.parent != undefined) {
+          var parentInv = self._mat0;
+          mat4_copy(parentInv, self.object.parent.matrixWorld);
+          mat4_invert(parentInv);
+          mat4_set_position(parentInv, 0, 0, 0);
+          vec3_apply_matrix4(moveVec, parentInv);
+        }
+        var newPos = self._vec3;
+        vec3_copy(newPos, self._dragStartPoint);
+        vec3_add(newPos, moveVec);
+        vec3_copy(self.object.position, newPos);
+      }
+
+      // IMPORTANT: Immediately update world matrix to prevent jitter
       self.object.updateWorldMatrix(true, false);
 
     } else if (self.mode == "scale") {
       var currT = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
       if (currT == undefined) return;
 
-      // Scale sensitivity adjustment.
-      var delta = (currT - self._dragOffset) * 0.1; 
+      var delta = (currT - self._dragOffset) * 0.1; // Reduced sensitivity
 
       var scaleAxis = (self.axis == UE_GIZMO_AXIS.x) ? 0 : ((self.axis == UE_GIZMO_AXIS.y) ? 1 : 2);
       var newScale = self._vec2;
@@ -472,29 +461,25 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     } else if (self.mode == "rotate") {
       var origin2D = self._worldToScreen(self._dragStartWorldPos, self._matViewProj);
       if (origin2D != undefined) {
-        // Rotation Logic:
-        // 1. Calculate current angle on screen and delta from start.
         var currAngle = arctan2(my - origin2D[1], mx - origin2D[0]);
         var deltaAngle = currAngle - self._dragAngleStart;
 
-        // 2. Handle camera orientation. If we are looking "along" the axis, 
-        // the screen rotation needs to be inverted to match natural mouse movement.
+        // Invert rotation if camera is looking "along" the axis
         var camDir = self._vec0;
         self.camera.getWorldDirection(camDir);
         var axisVec = self._dragLockedAxisVec;
 
+        // If angle between View and Axis is acute (<90), we are "behind" -> Flip
         if (vec3_dot(camDir, axisVec) > 0) {
           deltaAngle = -deltaAngle;
         }
 
-        // 3. Construct a delta quaternion from the angle and axis.
         var qDelta = self._quat0;
         quat_set_from_axis_angle(qDelta, axisVec, radtodeg(deltaAngle));
 
         var newRot = self._quat1;
         quat_copy(newRot, self._dragStartRot);
 
-        // 4. Apply delta rotation. Premultiply for world space, postmultiply for local.
         if (self.space == "local") {
           quat_multiply(newRot, qDelta);
         } else {
