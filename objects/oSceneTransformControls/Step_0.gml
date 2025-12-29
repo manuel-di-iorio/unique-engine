@@ -1,12 +1,6 @@
-switch (control.mode) {
-    case "move":
-    case "rotate":
-    case "scale":
-        control.update();
-    break;
-}
+
+control.update();
 
 if (!control.dragging) {
-    control.updateGizmo();
     orbit.update();
 }

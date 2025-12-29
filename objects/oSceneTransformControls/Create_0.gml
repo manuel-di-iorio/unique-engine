@@ -18,6 +18,5 @@ box.material.build();
 scene.add(box);
 
 // Create the TransformControls helper and attach the object
-control = new UeTransformControls(camera);
+control = new UeGizmoControls(camera);
 control.attach(box);
-scene.add(control.getHelper());

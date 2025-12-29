@@ -32,6 +32,7 @@
     {"$GMFolder":"","%Name":"Passes","folderPath":"folders/Packages/Unique Engine/Postprocessing/Passes.yy","name":"Passes","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Shaders","folderPath":"folders/Packages/Unique Engine/Shaders.yy","name":"Shaders","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Utils","folderPath":"folders/Packages/Unique Engine/Utils.yy","name":"Utils","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Unique Math","folderPath":"folders/Packages/Unique Math.yy","name":"Unique Math","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Unique UI","folderPath":"folders/Packages/Unique UI.yy","name":"Unique UI","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Scene Editor","folderPath":"folders/Scene Editor.yy","name":"Scene Editor","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Extensions","folderPath":"folders/Scene Editor/Extensions.yy","name":"Extensions","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -45,7 +46,6 @@
     {"$GMFolder":"","%Name":"UI","folderPath":"folders/Scene Editor/UI.yy","name":"UI","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Fonts","folderPath":"folders/Scene Editor/UI/Fonts.yy","name":"Fonts","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Icons","folderPath":"folders/Scene Editor/UI/Icons.yy","name":"Icons","resourceType":"GMFolder","resourceVersion":"2.0",},
-    {"$GMFolder":"","%Name":"Unique Math","folderPath":"folders/Packages/Unique Math.yy","name":"Unique Math","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
@@ -244,6 +244,7 @@
     {"id":{"name":"UeEventDispatcher","path":"scripts/UeEventDispatcher/UeEventDispatcher.yy",},},
     {"id":{"name":"UeFullscreenQuad","path":"scripts/UeFullscreenQuad/UeFullscreenQuad.yy",},},
     {"id":{"name":"UeGeometry","path":"scripts/UeGeometry/UeGeometry.yy",},},
+    {"id":{"name":"UeGizmoControls","path":"scripts/UeGizmoControls/UeGizmoControls.yy",},},
     {"id":{"name":"UeGridHelper","path":"scripts/UeGridHelper/UeGridHelper.yy",},},
     {"id":{"name":"UeInstanceList","path":"scripts/UeInstanceList/UeInstanceList.yy",},},
     {"id":{"name":"UeLayers","path":"scripts/UeLayers/UeLayers.yy",},},
@@ -365,8 +366,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
     {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
+    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[
