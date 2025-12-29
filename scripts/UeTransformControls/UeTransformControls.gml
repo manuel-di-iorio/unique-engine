@@ -4,37 +4,68 @@ enum UE_GIZMO_AXIS {
 }
 
 /**
- * UeGizmoControls constructor
- * Lightweight 2D gizmo controls using mathematical raycasting and primitive drawing.
- * Optimized for editor usage.
- * @param {Struct} camera - Camera used for projection.
- * @param {Struct} data - Optional initial settings.
+ * UeTransformControls
+ * A high-performance, lightweight 3D transform gizmo for GameMaker.
+ * 
+ * Technical Overview:
+ * - Uses a 2D-overlay approach: 3D positions are projected to screen space for rendering and picking.
+ * - Supports three main modes: "move", "rotate", and "scale".
+ * - Supports both "world" and "local" transformation spaces.
+ * - Optimized with internal math buffers to minimize per-frame memory allocations.
+ * - Implements intelligent geometry caching for rotation rings to reduce projection overhead.
+ * - Uses mathematical ray-plane and ray-line projections for stable dragging without jitter.
+ * 
+ * @param {Struct} camera - The camera object used for 3D-to-2D projections.
+ * @param {Struct} data - Optional configuration data.
  */
 function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   self.camera = camera;
   self.object = undefined;
-  self.mode = "move"; // "move", "rotate", "scale"
-  self.space = "world";    // "world", "local"
-  self.size = 1.0;         // Gizmo size multiplier
-  self.enabled = true;
-  self.view = data[$ "view"] ?? 0;
+  self.mode = "move"; // Current transformation mode: "move", "rotate", "scale"
+  self.space = "world";    // Coordinate space: "world" or "local"
+  self.size = 1.0;         // User-defined size multiplier for the gizmo
+  self.enabled = true;     // Whether the gizmo is active and visible
+  self.view = data[$ "view"] ?? 0; // The GameMaker view index to use
 
-  self.hoveredAxis = undefined;
-  self.selectedAxis = undefined;
-  self.dragging = false;
-  self.axis = undefined;
+  self.hoveredAxis = undefined;  // The axis currently under the mouse
+  self.selectedAxis = undefined; // The axis currently being dragged
+  self.dragging = false;         // Drag state flag
+  self.axis = undefined;         // Active axis index (X, Y, Z, etc.)
 
-  // Internal state
-  self._dragStartPoint = vec3_create();     // World position when drag started
-  self._dragStartRot = [0, 0, 0, 1];           // Rotation when drag started
-  self._dragStartScale = vec3_create();     // Scale when drag started
-  self._dragOffset = 0;                     // Linear offset (t) at start
-  self._dragOffsetVec = vec3_create();      // Vector offset for plane dragging
-  self._dragAngleStart = 0;                 // Angle at start
-  self._centerPos = vec3_create();
-  self._gizmoScale = 1.0;
+  // --- Internal Drag State ---
+  // These variables store the state of the object and mouse at the moment a drag starts.
+  self._dragStartPoint = vec3_create();     // Object's local position at drag start
+  self._dragStartRot = quat_create();       // Object's rotation at drag start
+  self._dragStartScale = vec3_create();     // Object's scale at drag start
+  self._dragStartWorldPos = vec3_create();  // Object's world position at drag start (stable reference)
+  self._dragLockedAxisVec = vec3_create();  // Normalized world direction of the active axis
+  self._dragOffset = 0;                     // Initial scalar offset along the axis
+  self._dragOffsetVec = vec3_create();      // Initial vector offset for plane-based dragging
+  self._dragAngleStart = 0;                 // Initial screen-space angle for rotation
+  self._centerPos = vec3_create();          // Current world center of the gizmo
+  self._gizmoScale = 1.0;                   // Dynamic scale based on distance to camera
 
-  // Math Caches (Buffers to avoid allocations)
+  // --- Viewport & Projection Caches ---
+  // Pre-calculated constants to speed up 3D -> 2D projections every frame.
+  self._vw = 0; self._vh = 0; self._vx = 0; self._vy = 0;
+  self._guiW = 0; self._guiH = 0; self._winW = 0; self._winH = 0;
+  self._projFactorX = 0; self._projOffsetX = 0;
+  self._projFactorY = 0; self._projOffsetY = 0;
+
+  // --- Ring Geometry Optimization ---
+  // Caches for the rotation rings to avoid re-projecting 3D points when the view hasn't changed significantly.
+  self._ringLastUpdateCenter = vec3_create();
+  self._ringLastUpdateCamPos = vec3_create();
+  self._ringLastUpdateCamRot = quat_create();
+  self._ringLastUpdateObjRot = quat_create();
+  self._ringLastUpdateSpace = "";
+  self._ringLastUpdateMode = "";
+  self._ringLastUpdateViewDir = vec3_create();
+  self._ringOrigin2D = vec2_create(); // Screen-space center of the rings
+  self._ringOriginW = 1.0;            // W-component (depth) for projection scaling
+
+  // --- Math Buffers ---
+  // Reusable arrays/structs to prevent garbage collection spikes from per-frame math.
   self._matViewProj = mat4_create();
   self._vec0 = vec3_create();
   self._vec1 = vec3_create();
@@ -44,27 +75,34 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   self._vec5 = vec3_create();
   self._vec6 = vec3_create();
   self._vec7 = vec3_create();
-  self._quat0 = [0, 0, 0, 1];
-  self._quat1 = [0, 0, 0, 1];
+  self._vec2D = vec2_create();
+  self._vec2D_0 = vec2_create();
+  self._vec2D_1 = vec2_create();
+  self._vec2D_2 = vec2_create();
+  self._quat0 = quat_create();
+  self._quat1 = quat_create();
+  self._quat2 = quat_create();
+  self._quat3 = quat_create();
   self._mat0 = mat4_create();
 
-  // Drawing Config
-  self.lineWidth = 3;
-  self.hitThreshold = 10; // Pixel distance for picking
-  self.axisLength = 1.5;  // World units length of axes
+  // --- Drawing Configuration ---
+  self.lineWidth = 3;      // Thickness of gizmo lines in pixels
+  self.hitThreshold = 10;  // Pixel distance for mouse picking
+  self.axisLength = 1.5;   // Length of the axes in world units
 
-  // Colors (User Defined Mapping)
+  // --- Color Palette ---
   self.cRed = c_red;
   self.cBlue = make_color_rgb(0x22, 0x77, 0xB3);
   self.cGreen = c_lime;
   self.cWhite = c_white;
   self.cYellow = c_yellow;
 
-  // Geometry Caches
-  self._ringCache = array_create(3, undefined); // 0:X, 1:Y, 2:Z (Screen points)
-  self._unitRings = array_create(3);            // Local space unit ring points
+  // --- Geometry Generation ---
+  // Generates unit-sized points for the rotation rings in X, Y, and Z planes.
+  self._ringCache = array_create(3, undefined); 
+  self._unitRings = array_create(3);            
   
-  var _segs = 32; // Reduced for performance
+  var _segs = 32; // Number of segments for the ring circles
   for (var a = 0; a < 3; a++) {
     var points = array_create(_segs + 1);
     for (var i = 0; i <= _segs; i++) {
@@ -72,6 +110,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
       var px = cos(_angle);
       var py = sin(_angle);
       
+      // Points are relative to the gizmo center
       if (a == 0) points[i] = [0, px, py];      // X-axis ring (YZ plane)
       else if (a == 1) points[i] = [px, 0, py]; // Y-axis ring (XZ plane)
       else points[i] = [px, py, 0];             // Z-axis ring (XY plane)
@@ -79,13 +118,18 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     self._unitRings[a] = points;
   }
 
+  /**
+   * Sets the current transformation mode.
+   * @param {String} mode - "move", "rotate", or "scale".
+   */
   function setMode(mode) {
     self.mode = mode;
     return self;
   }
 
   /**
-   * Attaches the gizmo to an object.
+   * Attaches the gizmo to a specific object for manipulation.
+   * @param {Struct} object - The object to transform (must have position, rotation, scale).
    */
   function attach(object) {
     self.object = object;
@@ -99,7 +143,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   /**
-   * Detaches the gizmo.
+   * Detaches the gizmo from the current object.
    */
   function detach() {
     self.object = undefined;
@@ -110,7 +154,10 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   /**
-   * Updates logic (picking, dragging).
+   * The main update loop for the gizmo. Handles:
+   * 1. Matrix and viewport constant updates.
+   * 2. Intelligent caching for rotation rings.
+   * 3. Interaction logic (picking and dragging).
    */
   function update() {
     if (!self.object || !self.enabled) return;
@@ -118,37 +165,81 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var mx = device_mouse_x_to_gui(0);
     var my = device_mouse_y_to_gui(0);
 
-    // 1. Update Object Matrix
+    // 1. Force the target object to update its world matrix so we have accurate position/rotation.
     if (self.object.updateWorldMatrix != undefined) {
       self.object.updateWorldMatrix(true, false);
     }
 
-    // 2. Update Camera Matrix & Calculate View Matrix (Inverse World)
+    // 2. Sync camera matrices and calculate the combined View-Projection matrix.
     if (variable_struct_exists(self.camera, "updateMatrixWorld")) self.camera.updateMatrixWorld();
 
-    // Manually invert to ensure fresh View Matrix
     if (self.camera.matrixWorldInverse != undefined) {
-      var inv = mat4_clone(self.camera.matrixWorld);
-      mat4_invert(inv);
-      mat4_copy(self.camera.matrixWorldInverse, inv);
+      mat4_copy(self._mat0, self.camera.matrixWorld);
+      mat4_invert(self._mat0);
+      mat4_copy(self.camera.matrixWorldInverse, self._mat0);
     }
 
-    // 3. Calculate MVP: View * Projection
     matrix_multiply(self.camera.matrixWorldInverse, self.camera.projectionMatrix, self._matViewProj);
 
-    // Gizmo Origin in World Space
-    self.object.getWorldPosition(self._dragStartPoint);
-    var centerPos = vec3_clone(self._dragStartPoint);
+    // 3. Pre-calculate viewport and GUI constants to optimize _worldToScreen projections.
+    self._vw = view_wport[self.view];
+    self._vh = view_hport[self.view];
+    self._vx = view_xport[self.view];
+    self._vy = view_yport[self.view];
+    self._guiW = display_get_gui_width();
+    self._guiH = display_get_gui_height();
+    self._winW = window_get_width();
+    self._winH = window_get_height();
 
-    // Scale logic
-    var scale = self._computeGizmoScale(centerPos);
+    var scaleX = self._guiW / self._winW;
+    var scaleY = self._guiH / self._winH;
+    
+    self._projFactorX = (0.5 * self._vw) * scaleX;
+    self._projOffsetX = (self._vx + 0.5 * self._vw) * scaleX;
+    self._projFactorY = (0.5 * self._vh) * scaleY;
+    self._projOffsetY = (self._vy + 0.5 * self._vh) * scaleY;
 
-    // Update Ring Geometry Cache once per frame
-    if (self.mode == "rotate") {
-      self._updateRingGeom(centerPos, scale);
+    // 4. Update the gizmo's world center and dynamic scale (keeping it constant size on screen).
+    self.object.getWorldPosition(self._centerPos);
+    self._gizmoScale = self._computeGizmoScale(self._centerPos);
+
+    // 5. Intelligent Ring Caching logic for "rotate" mode.
+    // We only re-generate the 3D-to-2D projection of the rings if the view direction
+    // or the object's local rotation (in local space) has changed significantly.
+    var origin2D = self._worldToScreen(self._centerPos, self._matViewProj, self._ringOrigin2D);
+    var m = self._matViewProj;
+    
+    // Calculate the W component (depth) for the ring center to use in screen-space scaling.
+    self._ringOriginW = m[3] * self._centerPos[0] + m[7] * self._centerPos[1] + m[11] * self._centerPos[2] + m[15];
+    
+    if (self.mode == "rotate" && origin2D != undefined) {
+      var camPos = self.camera.getWorldPosition(self._vec0);
+      var viewDir = self._vec6;
+      vec3_sub(viewDir, camPos, self._centerPos);
+      vec3_normalize(viewDir);
+
+      var objRot = self.object.getWorldQuaternion(self._quat2);
+      
+      var needsUpdate = false;
+      if (self.space != self._ringLastUpdateSpace) needsUpdate = true;
+      else if (self.mode != self._ringLastUpdateMode) needsUpdate = true;
+      // Check if camera moved significantly relative to the center
+      else if (vec3_distance_to_squared(viewDir, self._ringLastUpdateViewDir) > UE_EPSILON) needsUpdate = true;
+      // If in local space, check if the object itself rotated
+      else if (self.space == "local" && abs(1.0 - abs(quat_dot(objRot, self._ringLastUpdateObjRot))) > UE_EPSILON) needsUpdate = true;
+
+      if (needsUpdate) {
+        self._updateRingGeom(self._centerPos);
+        
+        // Cache current state for the next frame
+        vec3_copy(self._ringLastUpdateViewDir, viewDir);
+        quat_copy(self._ringLastUpdateObjRot, objRot);
+        self._ringLastUpdateSpace = self.space;
+        self._ringLastUpdateMode = self.mode;
+      }
     }
 
-    // --- DRAGGING LOGIC ---
+    // --- INTERACTION: DRAGGING ---
     if (self.dragging && self.selectedAxis != undefined) {
       if (mouse_check_button_released(mb_left)) {
         self.dragging = false;
@@ -156,67 +247,61 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         return;
       }
 
-      _handleDrag(mx, my, centerPos, scale);
+      _handleDrag(mx, my, self._centerPos, self._gizmoScale);
       return;
     }
 
-    // --- PICKING LOGIC ---
+    // --- INTERACTION: PICKING ---
+    // Detect if the user clicks on any gizmo component.
     if (mouse_check_button_pressed(mb_left) && self.hoveredAxis != undefined) {
-      self._startDrag(mx, my, centerPos, scale);
+      self._startDrag(mx, my, self._centerPos, self._gizmoScale);
       return;
     }
 
     self.hoveredAxis = undefined;
     var minDist = self.hitThreshold;
 
-    var origin2D = self._worldToScreen(centerPos, self._matViewProj);
-    if (origin2D == undefined) return; // Behind camera
+    var origin2D = self._worldToScreen(self._centerPos, self._matViewProj);
+    if (origin2D == undefined) return; // Gizmo is behind the camera clipping plane
 
-    // Check Axes
-    // Check Axes
+    // Component-specific picking logic
     if (self.mode == "move") {
-      // Check Planes FIRST (Prioritize over Axes)
-      if (self._pickPlaneHandle(UE_GIZMO_AXIS.xy, centerPos, scale, mx, my)) {
+      // 1. Plane handles (the squares between axes) have priority
+      if (self._pickPlaneHandle(UE_GIZMO_AXIS.xy, self._centerPos, self._gizmoScale, mx, my)) {
         self.hoveredAxis = UE_GIZMO_AXIS.xy; minDist = 0;
       }
-      else if (self._pickPlaneHandle(UE_GIZMO_AXIS.xz, centerPos, scale, mx, my)) {
+      else if (self._pickPlaneHandle(UE_GIZMO_AXIS.xz, self._centerPos, self._gizmoScale, mx, my)) {
         self.hoveredAxis = UE_GIZMO_AXIS.xz; minDist = 0;
       }
-      else if (self._pickPlaneHandle(UE_GIZMO_AXIS.yz, centerPos, scale, mx, my)) {
+      else if (self._pickPlaneHandle(UE_GIZMO_AXIS.yz, self._centerPos, self._gizmoScale, mx, my)) {
         self.hoveredAxis = UE_GIZMO_AXIS.yz; minDist = 0;
       }
 
+      // 2. Standard axis arrows
       if (self.hoveredAxis == undefined) {
-        // X Axis
-        if (self._pickArrow(UE_GIZMO_AXIS.x, centerPos, scale, mx, my, minDist)) {
+        if (self._pickArrow(UE_GIZMO_AXIS.x, self._centerPos, self._gizmoScale, mx, my, minDist)) {
           self.hoveredAxis = UE_GIZMO_AXIS.x; minDist = 0;
         }
-        // Y Axis
-        else if (self._pickArrow(UE_GIZMO_AXIS.y, centerPos, scale, mx, my, minDist)) {
+        else if (self._pickArrow(UE_GIZMO_AXIS.y, self._centerPos, self._gizmoScale, mx, my, minDist)) {
           self.hoveredAxis = UE_GIZMO_AXIS.y; minDist = 0;
         }
-        // Z Axis
-        else if (self._pickArrow(UE_GIZMO_AXIS.z, centerPos, scale, mx, my, minDist)) {
+        else if (self._pickArrow(UE_GIZMO_AXIS.z, self._centerPos, self._gizmoScale, mx, my, minDist)) {
           self.hoveredAxis = UE_GIZMO_AXIS.z; minDist = 0;
         }
       }
     }
     else if (self.mode == "scale") {
-      // X Axis
-      if (self._pickArrow(UE_GIZMO_AXIS.x, centerPos, scale, mx, my, minDist)) {
+      if (self._pickArrow(UE_GIZMO_AXIS.x, self._centerPos, self._gizmoScale, mx, my, minDist)) {
         self.hoveredAxis = UE_GIZMO_AXIS.x; minDist = 0;
       }
-      // Y Axis
-      else if (self._pickArrow(UE_GIZMO_AXIS.y, centerPos, scale, mx, my, minDist)) {
+      else if (self._pickArrow(UE_GIZMO_AXIS.y, self._centerPos, self._gizmoScale, mx, my, minDist)) {
         self.hoveredAxis = UE_GIZMO_AXIS.y; minDist = 0;
       }
-      // Z Axis
-      else if (self._pickArrow(UE_GIZMO_AXIS.z, centerPos, scale, mx, my, minDist)) {
+      else if (self._pickArrow(UE_GIZMO_AXIS.z, self._centerPos, self._gizmoScale, mx, my, minDist)) {
         self.hoveredAxis = UE_GIZMO_AXIS.z; minDist = 0;
       }
     }
     else if (self.mode == "rotate") {
-      // Use Cached Rings for Picking
       if (self._pickRing(UE_GIZMO_AXIS.x, mx, my, minDist)) {
         self.hoveredAxis = UE_GIZMO_AXIS.x; minDist = 0;
       } else if (self._pickRing(UE_GIZMO_AXIS.y, mx, my, minDist)) {
@@ -228,39 +313,30 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   /**
-   * Draws the gizmo.
-   * Should be called in Draw GUI event.
+   * Renders the gizmo to the screen. 
+   * This should be called in a Draw GUI event for correct overlay behavior.
    */
   function render() {
     if (!self.object || !self.enabled) return;
 
-    // Ensure matrices are fresh for rendering frame
-    if (variable_struct_exists(self.camera, "updateMatrixWorld")) self.camera.updateMatrixWorld();
-
-    matrix_multiply(self.camera.matrixWorldInverse, self.camera.projectionMatrix, self._matViewProj);
-
-    self.object.getWorldPosition(self._vec0);
-    var centerPos = vec3_clone(self._vec0);
-    var scale = self._computeGizmoScale(centerPos);
-
-    var origin2D = self._worldToScreen(centerPos, self._matViewProj);
+    // Use a member buffer for origin2D to avoid allocations
+    var origin2D = self._worldToScreen(self._centerPos, self._matViewProj, self._vec2D_0);
     if (origin2D == undefined) return;
 
-    // Draw Modes
     if (self.mode == "move") {
-      // Draw Planes
-      // Gizmo usually draws axes on top of planes.
-      self._drawPlaneHandle(UE_GIZMO_AXIS.yz, centerPos, scale, origin2D); // Red
-      self._drawPlaneHandle(UE_GIZMO_AXIS.xz, centerPos, scale, origin2D); // Blue
-      self._drawPlaneHandle(UE_GIZMO_AXIS.xy, centerPos, scale, origin2D); // Green
+      // Draw plane handles first (they are translucent)
+      self._drawPlaneHandle(UE_GIZMO_AXIS.yz, self._centerPos, self._gizmoScale, origin2D); 
+      self._drawPlaneHandle(UE_GIZMO_AXIS.xz, self._centerPos, self._gizmoScale, origin2D); 
+      self._drawPlaneHandle(UE_GIZMO_AXIS.xy, self._centerPos, self._gizmoScale, origin2D); 
 
-      self._drawArrow(UE_GIZMO_AXIS.x, centerPos, scale, origin2D);
-      self._drawArrow(UE_GIZMO_AXIS.y, centerPos, scale, origin2D);
-      self._drawArrow(UE_GIZMO_AXIS.z, centerPos, scale, origin2D);
+      // Draw axis arrows
+      self._drawArrow(UE_GIZMO_AXIS.x, self._centerPos, self._gizmoScale, origin2D);
+      self._drawArrow(UE_GIZMO_AXIS.y, self._centerPos, self._gizmoScale, origin2D);
+      self._drawArrow(UE_GIZMO_AXIS.z, self._centerPos, self._gizmoScale, origin2D);
     } else if (self.mode == "scale") {
-      self._drawScaleHandle(UE_GIZMO_AXIS.x, centerPos, scale, origin2D);
-      self._drawScaleHandle(UE_GIZMO_AXIS.y, centerPos, scale, origin2D);
-      self._drawScaleHandle(UE_GIZMO_AXIS.z, centerPos, scale, origin2D);
+      self._drawScaleHandle(UE_GIZMO_AXIS.x, self._centerPos, self._gizmoScale, origin2D);
+      self._drawScaleHandle(UE_GIZMO_AXIS.y, self._centerPos, self._gizmoScale, origin2D);
+      self._drawScaleHandle(UE_GIZMO_AXIS.z, self._centerPos, self._gizmoScale, origin2D);
     } else if (self.mode == "rotate") {
       self._drawRing(UE_GIZMO_AXIS.x);
       self._drawRing(UE_GIZMO_AXIS.y);
@@ -270,67 +346,75 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
   // --- DRAG HANDLERS ---
 
+  /**
+   * Initializes the drag operation. Captures the initial state of the object and mouse.
+   */
   function _startDrag(mx, my, centerPos, scale) {
     self.dragging = true;
     self.selectedAxis = self.hoveredAxis;
     self.axis = self.hoveredAxis;
 
-    // Store Start State
+    // Capture initial object transforms and world state.
     vec3_copy(self._dragStartPoint, self.object.position);
     quat_copy(self._dragStartRot, self.object.rotation);
     vec3_copy(self._dragStartScale, self.object.scale);
+    self.object.getWorldPosition(self._dragStartWorldPos);
+    self._getAxisVector(self.axis, self._dragLockedAxisVec);
 
     if (self.mode == "move") {
       if (self.axis == UE_GIZMO_AXIS.xy || self.axis == UE_GIZMO_AXIS.xz || self.axis == UE_GIZMO_AXIS.yz) {
-        // Plane Drag
+        // Plane Drag: Project mouse to a virtual plane passing through the object.
         var normal = self._vec1;
-        self._getAxisVector(self.axis, normal); // Returns proper normal for plane enums
+        self._getAxisVector(self.axis, normal); 
 
-        var hit = self._computePlaneIntersection(mx, my, centerPos, normal);
+        var hit = self._computePlaneIntersection(mx, my, self._dragStartWorldPos, normal);
         if (hit != undefined) {
-          self._dragOffsetVec = vec3_clone(hit);
-          vec3_sub(self._dragOffsetVec, self.object.position);
+          // Store the offset between the object center and the mouse hit point on the plane.
+          vec3_copy(self._dragOffsetVec, hit);
+          vec3_sub(self._dragOffsetVec, self._dragStartWorldPos);
         } else {
-          self.dragging = false; // Failed to hit plane??
+          self.dragging = false; 
         }
       } else {
-        // Axis Drag
-        self._dragOffset = self._computeAxisProjection(mx, my, centerPos, self.axis);
+        // Axis Drag: Project mouse onto the axis line.
+        self._dragOffset = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
         if (self._dragOffset == undefined) self.dragging = false;
       }
     } else if (self.mode == "scale") {
-      // Project initial mouse hit onto axis line
-      self._dragOffset = self._computeAxisProjection(mx, my, centerPos, self.axis);
+      // Scale Drag: Similar to axis drag, we track movement along the axis.
+      self._dragOffset = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
     } else if (self.mode == "rotate") {
-      // Compute Initial Angle on Screen relative to center
-      var origin2D = self._worldToScreen(centerPos, self._matViewProj);
+      // Rotation Drag: Calculate the initial angle on the screen relative to the gizmo center.
+      var origin2D = self._worldToScreen(self._dragStartWorldPos, self._matViewProj);
       if (origin2D != undefined) {
         self._dragAngleStart = arctan2(my - origin2D[1], mx - origin2D[0]);
       }
     }
   }
 
+  /**
+   * Processes the ongoing drag operation and applies transformations to the object.
+   */
   function _handleDrag(mx, my, centerPos, scale) {
     if (self.mode == "move") {
 
       if (self.axis == UE_GIZMO_AXIS.xy || self.axis == UE_GIZMO_AXIS.xz || self.axis == UE_GIZMO_AXIS.yz) {
-        // Plane Logic
-        var normal = self._vec1;
-        self._getAxisVector(self.axis, normal);
-
-        var hit = self._computePlaneIntersection(mx, my, centerPos, normal);
+        // Plane Move Logic:
+        // 1. Find where the mouse ray hits the locked plane.
+        var normal = self._dragLockedAxisVec;
+        var hit = self._computePlaneIntersection(mx, my, self._dragStartWorldPos, normal);
         if (hit == undefined) return;
 
-        var newPos = vec3_clone(hit);
-        vec3_sub(newPos, self._dragOffsetVec); // Apply offset
+        var newPos = self._vec2;
+        vec3_copy(newPos, hit);
+        // 2. Subtract the initial offset to keep the object relative to the mouse.
+        vec3_sub(newPos, self._dragOffsetVec); 
 
-        // Apply to Object
-        // If parent exists, transform to local?
+        // 3. Convert world position back to local space if the object has a parent.
         if (self.object.parent != undefined) {
-          var parentInv = mat4_clone(self.object.parent.matrixWorld);
+          var parentInv = self._mat0;
+          mat4_copy(parentInv, self.object.parent.matrixWorld);
           mat4_invert(parentInv);
-          // We need to transform the World Position 'newPos' to Local Position
-          // vec3_apply_matrix4(newPos, parentInv) handles position transform
           vec3_apply_matrix4(newPos, parentInv);
         }
 
@@ -339,80 +423,78 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         return;
       }
 
-      var currT = self._computeAxisProjection(mx, my, centerPos, self.axis);
+      // Axis Move Logic:
+      // 1. Calculate current projection on the axis.
+      var currT = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
       if (currT == undefined || self._dragOffset == undefined) return;
 
+      // 2. Calculate delta movement along the axis.
       var delta = currT - self._dragOffset;
 
-      // Apply Delta to Position
-      var axisVec = self._vec1;
-      self._getAxisVector(self.axis, axisVec);
-
-      var moveVec = vec3_clone(axisVec);
+      var axisVec = self._dragLockedAxisVec;
+      var moveVec = self._vec2;
+      vec3_copy(moveVec, axisVec);
       vec3_multiply_scalar(moveVec, delta);
 
-      // Transform to Local Space logic
-      if (self.space == "local") {
-        if (self.object.parent != undefined) {
-          var parentInv = mat4_clone(self.object.parent.matrixWorld);
-          mat4_invert(parentInv);
-          mat4_set_position(parentInv, 0, 0, 0);
-          vec3_apply_matrix4(moveVec, parentInv);
-        }
-        var newPos = vec3_clone(self._dragStartPoint);
-        vec3_add(newPos, moveVec);
-        vec3_copy(self.object.position, newPos);
-
-      } else { // World Space Axis
-        if (self.object.parent != undefined) {
-          var parentInv = mat4_clone(self.object.parent.matrixWorld);
-          mat4_invert(parentInv);
-          mat4_set_position(parentInv, 0, 0, 0);
-          vec3_apply_matrix4(moveVec, parentInv);
-        }
-        var newPos = vec3_clone(self._dragStartPoint);
-        vec3_add(newPos, moveVec);
-        vec3_copy(self.object.position, newPos);
+      // 3. Transform world delta into local space.
+      if (self.object.parent != undefined) {
+        var parentInv = self._mat0;
+        mat4_copy(parentInv, self.object.parent.matrixWorld);
+        mat4_invert(parentInv);
+        // We only care about rotation for delta movement, not position.
+        mat4_set_position(parentInv, 0, 0, 0); 
+        vec3_apply_matrix4(moveVec, parentInv);
       }
+      
+      var newPos = self._vec3;
+      vec3_copy(newPos, self._dragStartPoint);
+      vec3_add(newPos, moveVec);
+      vec3_copy(self.object.position, newPos);
 
-      // IMPORTANT: Immediately update world matrix to prevent jitter
+      // IMPORTANT: Immediately update world matrix to prevent jitter in the next frame's projection.
       self.object.updateWorldMatrix(true, false);
 
     } else if (self.mode == "scale") {
-      var currT = self._computeAxisProjection(mx, my, centerPos, self.axis);
+      var currT = self._computeAxisProjectionStable(mx, my, self._dragStartWorldPos, self._dragLockedAxisVec);
       if (currT == undefined) return;
 
-      var delta = (currT - self._dragOffset) * 0.1; // Reduced sensitivity
+      // Scale sensitivity adjustment.
+      var delta = (currT - self._dragOffset) * 0.1; 
 
       var scaleAxis = (self.axis == UE_GIZMO_AXIS.x) ? 0 : ((self.axis == UE_GIZMO_AXIS.y) ? 1 : 2);
-      var newScale = vec3_clone(self._dragStartScale);
+      var newScale = self._vec2;
+      vec3_copy(newScale, self._dragStartScale);
 
       newScale[scaleAxis] += delta;
       vec3_copy(self.object.scale, newScale);
       self.object.updateWorldMatrix(true, false);
 
     } else if (self.mode == "rotate") {
-      var origin2D = self._worldToScreen(centerPos, self._matViewProj);
+      var origin2D = self._worldToScreen(self._dragStartWorldPos, self._matViewProj);
       if (origin2D != undefined) {
+        // Rotation Logic:
+        // 1. Calculate current angle on screen and delta from start.
         var currAngle = arctan2(my - origin2D[1], mx - origin2D[0]);
         var deltaAngle = currAngle - self._dragAngleStart;
 
-        // Invert rotation if camera is looking "along" the axis
-        var camDir = global.UE_VEC3_TEMP2;
+        // 2. Handle camera orientation. If we are looking "along" the axis, 
+        // the screen rotation needs to be inverted to match natural mouse movement.
+        var camDir = self._vec0;
         self.camera.getWorldDirection(camDir);
-        var axisVec = self._vec1;
-        self._getAxisVector(self.axis, axisVec);
+        var axisVec = self._dragLockedAxisVec;
 
-        // If angle between View and Axis is acute (<90), we are "behind" -> Flip
         if (vec3_dot(camDir, axisVec) > 0) {
           deltaAngle = -deltaAngle;
         }
 
-        var qDelta = global.UE_QUAT_TEMP0;
+        // 3. Construct a delta quaternion from the angle and axis.
+        var qDelta = self._quat0;
         quat_set_from_axis_angle(qDelta, axisVec, radtodeg(deltaAngle));
 
-        var newRot = quat_clone(self._dragStartRot);
+        var newRot = self._quat1;
+        quat_copy(newRot, self._dragStartRot);
 
+        // 4. Apply delta rotation. Premultiply for world space, postmultiply for local.
         if (self.space == "local") {
           quat_multiply(newRot, qDelta);
         } else {
@@ -426,13 +508,14 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _computeAxisProjection(mx, my, centerPos, axisName) {
-    var axisVec = self._vec1;
+    var axisVec = self._vec4;
     self._getAxisVector(axisName, axisVec);
 
-    var camDir = global.UE_VEC3_TEMP2;
+    var camDir = self._vec5;
     self.camera.getWorldDirection(camDir);
 
-    var planeNormal = vec3_clone(axisVec);
+    var planeNormal = self._vec6;
+    vec3_copy(planeNormal, axisVec);
     vec3_cross(planeNormal, camDir);
     vec3_cross(planeNormal, axisVec);
 
@@ -446,11 +529,46 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var denom = vec3_dot(rayDir, planeNormal);
     if (abs(denom) < UE_EPSILON) return 0;
 
-    var p0lo = vec3_clone(centerPos);
+    var p0lo = self._vec7;
+    vec3_copy(p0lo, centerPos);
     vec3_sub(p0lo, rayOrigin);
     var t = vec3_dot(p0lo, planeNormal) / denom;
 
-    var hitPoint = vec3_clone(rayDir);
+    var hitPoint = self._vec7; // Reuse p0lo as hitPoint
+    vec3_copy(hitPoint, rayDir);
+    vec3_multiply_scalar(hitPoint, t);
+    vec3_add(hitPoint, rayOrigin);
+
+    vec3_sub(hitPoint, centerPos);
+    return vec3_dot(hitPoint, axisVec);
+  }
+
+  function _computeAxisProjectionStable(mx, my, centerPos, axisVec) {
+    var camDir = self._vec5;
+    self.camera.getWorldDirection(camDir);
+
+    var planeNormal = self._vec6;
+    vec3_copy(planeNormal, axisVec);
+    vec3_cross(planeNormal, camDir);
+    vec3_cross(planeNormal, axisVec);
+
+    if (vec3_length(planeNormal) < UE_EPSILON) return undefined;
+    vec3_normalize(planeNormal);
+
+    var rayOrigin = self.camera.position;
+    var rayDir = self._screenToWorldDir(mx, my);
+    if (rayDir == undefined) return undefined;
+
+    var denom = vec3_dot(rayDir, planeNormal);
+    if (abs(denom) < UE_EPSILON) return 0;
+
+    var p0lo = self._vec7;
+    vec3_copy(p0lo, centerPos);
+    vec3_sub(p0lo, rayOrigin);
+    var t = vec3_dot(p0lo, planeNormal) / denom;
+
+    var hitPoint = self._vec7; 
+    vec3_copy(hitPoint, rayDir);
     vec3_multiply_scalar(hitPoint, t);
     vec3_add(hitPoint, rayOrigin);
 
@@ -501,11 +619,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _drawArrow(axis, center, scale, origin2D) {
-    var endPos = vec3_clone(center);
+    var endPos = self._vec0;
+    vec3_copy(endPos, center);
     self._getAxisVector(axis, self._vec1);
     vec3_add_scaled_vector(endPos, self._vec1, self.axisLength * scale);
 
-    var end2D = self._worldToScreen(endPos, self._matViewProj);
+    var end2D = self._worldToScreen(endPos, self._matViewProj, self._vec2D_1);
     if (end2D == undefined) return;
 
     var col = self._getAxisColor(axis);
@@ -546,12 +665,13 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _pickArrow(axisName, center, scale, mx, my, threshold) {
-    var endPos = vec3_clone(center);
+    var endPos = self._vec0;
+    vec3_copy(endPos, center);
     self._getAxisVector(axisName, self._vec1);
     vec3_add_scaled_vector(endPos, self._vec1, self.axisLength * scale);
 
-    var origin2D = self._worldToScreen(center, self._matViewProj);
-    var end2D = self._worldToScreen(endPos, self._matViewProj);
+    var origin2D = self._worldToScreen(center, self._matViewProj, self._vec2D_1);
+    var end2D = self._worldToScreen(endPos, self._matViewProj, self._vec2D_2);
 
     if (origin2D != undefined && end2D != undefined) {
       // Use Vector2 library function
@@ -577,11 +697,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   }
 
   function _drawScaleHandle(axisName, center, scale, origin2D) {
-    var endPos = vec3_clone(center);
+    var endPos = self._vec0;
+    vec3_copy(endPos, center);
     self._getAxisVector(axisName, self._vec1);
     vec3_add_scaled_vector(endPos, self._vec1, self.axisLength * scale);
 
-    var end2D = self._worldToScreen(endPos, self._matViewProj);
+    var end2D = self._worldToScreen(endPos, self._matViewProj, self._vec2D_1);
     if (end2D == undefined) return;
 
     var col = self._getAxisColor(axisName);
@@ -598,16 +719,20 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     // XZ (Blue): Normal Y. Spans X, Z.
     // XY (Green): Normal Z. Spans X, Y.
 
-    var size = self.axisLength * scale * 0.25;
+    var size = self.axisLength * scale * 0.3;
     var offset = 0;
 
-    var p0 = vec3_clone(center);
-    var p1 = vec3_clone(center);
-    var p2 = vec3_clone(center);
-    var p3 = vec3_clone(center);
+    var p0 = self._vec2;
+    var p1 = self._vec3;
+    var p2 = self._vec4;
+    var p3 = self._vec5;
+    vec3_copy(p0, center);
+    vec3_copy(p1, center);
+    vec3_copy(p2, center);
+    vec3_copy(p3, center);
 
-    var up = global.UE_VEC3_TEMP0;
-    var right = global.UE_VEC3_TEMP1;
+    var up = self._vec6;
+    var right = self._vec7;
     vec3_set(up, 0, 0, 0);
     vec3_set(right, 0, 0, 0);
 
@@ -619,13 +744,20 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     // p2 = center + (offset+size)*right + (offset+size)*up
     // p3 = center + offset*right + (offset+size)*up
 
-    var vOffsetRight = vec3_clone(right); vec3_multiply_scalar(vOffsetRight, offset);
-    var vOffsetUp = vec3_clone(up); vec3_multiply_scalar(vOffsetUp, offset);
-    var vSizeRight = vec3_clone(right); vec3_multiply_scalar(vSizeRight, size);
-    var vSizeUp = vec3_clone(up); vec3_multiply_scalar(vSizeUp, size);
-
+    var vOffsetRight = self._vec0; 
+    vec3_copy(vOffsetRight, right); vec3_multiply_scalar(vOffsetRight, offset);
+    var vOffsetUp = self._vec1; 
+    vec3_copy(vOffsetUp, up); vec3_multiply_scalar(vOffsetUp, offset);
+    
     // p0
     vec3_add(p0, vOffsetRight); vec3_add(p0, vOffsetUp);
+    
+    // Reuse vOffsetRight/Up for Size
+    var vSizeRight = vOffsetRight; 
+    vec3_copy(vSizeRight, right); vec3_multiply_scalar(vSizeRight, size);
+    var vSizeUp = vOffsetUp; 
+    vec3_copy(vSizeUp, up); vec3_multiply_scalar(vSizeUp, size);
+
     // p1
     vec3_copy(p1, p0); vec3_add(p1, vSizeRight);
     // p2
@@ -634,18 +766,29 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     vec3_copy(p3, p0); vec3_add(p3, vSizeUp);
 
     // Project
-    var s0 = self._worldToScreen(p0, self._matViewProj);
-    var s1 = self._worldToScreen(p1, self._matViewProj);
-    var s2 = self._worldToScreen(p2, self._matViewProj);
-    var s3 = self._worldToScreen(p3, self._matViewProj);
+    // We need 4 unique 2D points. Let's use internal buffers.
+    // Actually, draw_triangle takes floats directly, so we can reuse self._vec2D
+    var s0 = self._worldToScreen(p0, self._matViewProj, self._vec2D_1);
+    if (s0 == undefined) return;
+    var s0x = s0[0], s0y = s0[1];
 
-    if (s0 == undefined || s1 == undefined || s2 == undefined || s3 == undefined) return;
+    var s1 = self._worldToScreen(p1, self._matViewProj, self._vec2D_1);
+    if (s1 == undefined) return;
+    var s1x = s1[0], s1y = s1[1];
+
+    var s2 = self._worldToScreen(p2, self._matViewProj, self._vec2D_1);
+    if (s2 == undefined) return;
+    var s2x = s2[0], s2y = s2[1];
+
+    var s3 = self._worldToScreen(p3, self._matViewProj, self._vec2D_1);
+    if (s3 == undefined) return;
+    var s3x = s3[0], s3y = s3[1];
 
     var col = self._getAxisColor(axis);
     draw_set_color(col);
     draw_set_alpha(0.5); // Semi-transparent
-    draw_triangle(s0[0], s0[1], s1[0], s1[1], s2[0], s2[1], false);
-    draw_triangle(s0[0], s0[1], s2[0], s2[1], s3[0], s3[1], false);
+    draw_triangle(s0x, s0y, s1x, s1y, s2x, s2y, false);
+    draw_triangle(s0x, s0y, s2x, s2y, s3x, s3y, false);
     draw_set_alpha(1.0);
   }
 
@@ -660,96 +803,120 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var size = self.axisLength * scale * 0.3;
     var offset = 0;
 
-    var p0 = vec3_clone(center);
-    var p1 = vec3_clone(center);
-    var p2 = vec3_clone(center);
-    var p3 = vec3_clone(center);
+    var p0 = self._vec2;
+    var p1 = self._vec3;
+    var p2 = self._vec4;
+    var p3 = self._vec5;
+    vec3_copy(p0, center);
+    vec3_copy(p1, center);
+    vec3_copy(p2, center);
+    vec3_copy(p3, center);
 
-    var up = global.UE_VEC3_TEMP0;
-    var right = global.UE_VEC3_TEMP1;
+    var up = self._vec6;
+    var right = self._vec7;
     vec3_set(up, 0, 0, 0);
     vec3_set(right, 0, 0, 0);
 
     self._getPlaneBasis(axis, right, up);
 
-    var vOffsetRight = vec3_clone(right); vec3_multiply_scalar(vOffsetRight, offset);
-    var vOffsetUp = vec3_clone(up); vec3_multiply_scalar(vOffsetUp, offset);
-    var vSizeRight = vec3_clone(right); vec3_multiply_scalar(vSizeRight, size);
-    var vSizeUp = vec3_clone(up); vec3_multiply_scalar(vSizeUp, size);
-
+    var vOffsetRight = self._vec0; 
+    vec3_copy(vOffsetRight, right); vec3_multiply_scalar(vOffsetRight, offset);
+    var vOffsetUp = self._vec1; 
+    vec3_copy(vOffsetUp, up); vec3_multiply_scalar(vOffsetUp, offset);
+    
     vec3_add(p0, vOffsetRight); vec3_add(p0, vOffsetUp);
+    
+    var vSizeRight = vOffsetRight; 
+    vec3_copy(vSizeRight, right); vec3_multiply_scalar(vSizeRight, size);
+    var vSizeUp = vOffsetUp; 
+    vec3_copy(vSizeUp, up); vec3_multiply_scalar(vSizeUp, size);
+
     vec3_copy(p1, p0); vec3_add(p1, vSizeRight);
     vec3_copy(p2, p1); vec3_add(p2, vSizeUp);
     vec3_copy(p3, p0); vec3_add(p3, vSizeUp);
 
-    var s0 = self._worldToScreen(p0, self._matViewProj);
-    var s1 = self._worldToScreen(p1, self._matViewProj);
-    var s2 = self._worldToScreen(p2, self._matViewProj);
-    var s3 = self._worldToScreen(p3, self._matViewProj);
+    var s0 = self._worldToScreen(p0, self._matViewProj, self._vec2D_1);
+    if (s0 == undefined) return false;
+    var s0x = s0[0], s0y = s0[1];
 
-    if (s0 == undefined || s1 == undefined || s2 == undefined || s3 == undefined) return false;
+    var s1 = self._worldToScreen(p1, self._matViewProj, self._vec2D_1);
+    if (s1 == undefined) return false;
+    var s1x = s1[0], s1y = s1[1];
+
+    var s2 = self._worldToScreen(p2, self._matViewProj, self._vec2D_1);
+    if (s2 == undefined) return false;
+    var s2x = s2[0], s2y = s2[1];
+
+    var s3 = self._worldToScreen(p3, self._matViewProj, self._vec2D_1);
+    if (s3 == undefined) return false;
+    var s3x = s3[0], s3y = s3[1];
 
     // Point in Triangle Check (Fan)
-    // Tri 1: s0, s1, s2
-    // Tri 2: s0, s2, s3
-    if (point_in_triangle(mx, my, s0[0], s0[1], s1[0], s1[1], s2[0], s2[1])) return true;
-    if (point_in_triangle(mx, my, s0[0], s0[1], s2[0], s2[1], s3[0], s3[1])) return true;
+    if (point_in_triangle(mx, my, s0x, s0y, s1x, s1y, s2x, s2y)) return true;
+    if (point_in_triangle(mx, my, s0x, s0y, s2x, s2y, s3x, s3y)) return true;
 
     return false;
   }
 
-  function _updateRingGeom(center, scale) {
-    self._ringCache[UE_GIZMO_AXIS.x] = self._getRingArcPoints(UE_GIZMO_AXIS.x, center, scale, 24);
-    self._ringCache[UE_GIZMO_AXIS.y] = self._getRingArcPoints(UE_GIZMO_AXIS.y, center, scale, 24);
-    self._ringCache[UE_GIZMO_AXIS.z] = self._getRingArcPoints(UE_GIZMO_AXIS.z, center, scale, 24);
+  function _updateRingGeom(center) {
+    self._updateRingArc(0, center);
+    self._updateRingArc(1, center);
+    self._updateRingArc(2, center);
   }
 
-  function _getRingArcPoints(axis, center, scale, steps) {
-    var rotQ = global.UE_QUAT_TEMP0;
+  function _updateRingArc(axisIdx, center) {
+    var axisEnum = (axisIdx == 0) ? UE_GIZMO_AXIS.x : ((axisIdx == 1) ? UE_GIZMO_AXIS.y : UE_GIZMO_AXIS.z);
+    
+    var rotQ = self._quat0;
     quat_set(rotQ, 0, 0, 0, 1);
-    if (axis == UE_GIZMO_AXIS.x) quat_set_from_axis_angle(rotQ, [0, 1, 0], 90);
-    else if (axis == UE_GIZMO_AXIS.y) quat_set_from_axis_angle(rotQ, [1, 0, 0], -90);
+    
+    // Basis rotation for the ring
+    if (axisIdx == 0) quat_set_from_axis_angle(rotQ, [0, 1, 0], 90);
+    else if (axisIdx == 1) quat_set_from_axis_angle(rotQ, [1, 0, 0], -90);
+    
     if (self.space == "local") {
-      var objQ = global.UE_QUAT_TEMP1;
+      var objQ = self._quat1;
       self.object.getWorldQuaternion(objQ);
       quat_multiply(rotQ, objQ);
     }
 
-    // Calculate View Vector relative to center
-    // Reuse temp1 for viewDir
-    var viewDir = global.UE_VEC3_TEMP1;
+    // View direction in ring local space to find the arc center
+    var viewDir = self._vec0;
     vec3_copy(viewDir, self.camera.position);
     vec3_sub(viewDir, center);
 
-    // Transform ViewDir into Ring Local Space (InvRot * ViewDir)
-    // Reuse temp2 for invRot
-    var invRot = global.UE_QUAT_TEMP2;
+    var invRot = self._quat1;
     quat_copy(invRot, rotQ);
     quat_invert(invRot);
     vec3_apply_quaternion(viewDir, invRot);
 
-    // Arc Center Angle
     var midAngle = arctan2(viewDir[1], viewDir[0]);
-
-    var points = [];
-    var r = self.axisLength * scale;
-
-    // Generate Semi-Circle (Pi)
+    var r = self.axisLength; // Fixed radius 1.0 * axisLength
+    
+    var steps = 32;
     var range = pi;
     var stepRad = range / steps;
     var startAngle = midAngle - range * 0.5;
 
+    var points2D = self._ringCache[axisEnum];
+    if (points2D == undefined) {
+      points2D = array_create(steps + 1);
+      for (var i = 0; i <= steps; i++) points2D[i] = [0, 0]; // Pre-allocate sub-arrays
+      self._ringCache[axisEnum] = points2D;
+    }
+
+    var pLocal = self._vec2;
+    var m = self._matViewProj;
+
     for (var i = 0; i <= steps; i++) {
       var a = startAngle + stepRad * i;
-
-      var p3 = [cos(a) * r, sin(a) * r, 0];
-      vec3_apply_quaternion(p3, rotQ);
-      vec3_add(p3, center);
-
-      var p2 = self._worldToScreen(p3, self._matViewProj);
-      if (p2 != undefined) array_push(points, p2);
+      vec3_set(pLocal, cos(a) * r, sin(a) * r, 0);
+      vec3_apply_quaternion(pLocal, rotQ);
+      
+      // Project the offset vector into "unscaled screen space"
+      points2D[i][0] = m[0] * pLocal[0] + m[4] * pLocal[1] + m[8] * pLocal[2];
+      points2D[i][1] = m[1] * pLocal[0] + m[5] * pLocal[1] + m[9] * pLocal[2];
     }
-    return points;
   }
 
   function _drawRing(axis) {
@@ -758,8 +925,11 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var points2D = self._ringCache[axis];
 
     if (points2D != undefined && array_length(points2D) > 1) {
+      var fx = (self._projFactorX / self._ringOriginW) * self._gizmoScale;
+      var fy = (self._projFactorY / self._ringOriginW) * self._gizmoScale;
+      
       draw_primitive_begin(pr_trianglestrip);
-      self._drawThickLineStrip(points2D, self.lineWidth, col);
+      self._drawThickLineStrip(points2D, self.lineWidth, col, self._ringOrigin2D[0], self._ringOrigin2D[1], fx, fy);
       draw_primitive_end();
     }
   }
@@ -771,27 +941,46 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     if (points2D == undefined) return false;
 
     var pMouse = [mx, my];
-    var prevP2 = undefined;
+    var cx = self._ringOrigin2D[0];
+    var cy = self._ringOrigin2D[1];
+    var fx = (self._projFactorX / self._ringOriginW) * self._gizmoScale;
+    var fy = (self._projFactorY / self._ringOriginW) * self._gizmoScale;
+    
+    var prevP2 = self._vec2D_0;
+    var currP2 = self._vec2D_1;
+    var isFirst = true;
+
     for (var i = 0, il = array_length(points2D); i < il; i++) {
-      var p2 = points2D[i];
-      if (prevP2 != undefined) {
-        var d = vec2_distance_to_segment(pMouse, prevP2, p2);
+      var p = points2D[i];
+      currP2[0] = p[0] * fx + cx;
+      currP2[1] = p[1] * fy + cy;
+
+      if (!isFirst) {
+        var d = vec2_distance_to_segment(pMouse, prevP2, currP2);
         if (d < threshold) return true;
       }
-      prevP2 = p2;
+      
+      prevP2[0] = currP2[0];
+      prevP2[1] = currP2[1];
+      isFirst = false;
     }
     return false;
   }
 
-  function _drawThickLineStrip(points, width, color) {
+  function _drawThickLineStrip(points, width, color, offsetX = 0, offsetY = 0, scaleX = 1, scaleY = 1) {
     var halfW = width * 0.5;
     draw_set_color(color);
     for (var i = 0; i < array_length(points) - 1; i++) {
       var p1 = points[i];
       var p2 = points[i + 1];
 
-      var dirX = p2[0] - p1[0];
-      var dirY = p2[1] - p1[1];
+      var p1x = p1[0] * scaleX + offsetX;
+      var p1y = p1[1] * scaleY + offsetY;
+      var p2x = p2[0] * scaleX + offsetX;
+      var p2y = p2[1] * scaleY + offsetY;
+
+      var dirX = p2x - p1x;
+      var dirY = p2y - p1y;
       var len = sqrt(dirX * dirX + dirY * dirY);
       if (len == 0) continue;
       dirX /= len; dirY /= len;
@@ -799,53 +988,33 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
       var perpX = -dirY * halfW;
       var perpY = dirX * halfW;
 
-      draw_vertex(p1[0] + perpX, p1[1] + perpY);
-      draw_vertex(p1[0] - perpX, p1[1] - perpY);
-      draw_vertex(p2[0] + perpX, p2[1] + perpY);
-      draw_vertex(p2[0] - perpX, p2[1] - perpY);
+      draw_vertex(p1x + perpX, p1y + perpY);
+      draw_vertex(p1x - perpX, p1y - perpY);
+      draw_vertex(p2x + perpX, p2y + perpY);
+      draw_vertex(p2x - perpX, p2y - perpY);
     }
   }
 
-  function _worldToScreen(worldPos, viewProjMat) {
-    var _x = worldPos[0], _y = worldPos[1], _z = worldPos[2], _w = 1;
-
+  function _worldToScreen(worldPos, viewProjMat, out = undefined) {
     var m = viewProjMat;
-
-    var cx = m[0] * _x + m[4] * _y + m[8] * _z + m[12];
-    var cy = m[1] * _x + m[5] * _y + m[9] * _z + m[13];
-    var cz = m[2] * _x + m[6] * _y + m[10] * _z + m[14];
-    var cw = m[3] * _x + m[7] * _y + m[11] * _z + m[15];
+    var cw = m[3] * worldPos[0] + m[7] * worldPos[1] + m[11] * worldPos[2] + m[15];
 
     if (cw <= 0) return undefined;
+
+    var cx = m[0] * worldPos[0] + m[4] * worldPos[1] + m[8] * worldPos[2] + m[12];
+    var cy = m[1] * worldPos[0] + m[5] * worldPos[1] + m[9] * worldPos[2] + m[13];
 
     var ndcX = cx / cw;
     var ndcY = cy / cw;
 
-    // NDC → VIEWPORT
-    var vx = view_xport[self.view];
-    var vy = view_yport[self.view];
-    var vw = view_wport[self.view];
-    var vh = view_hport[self.view];
+    var res = out ?? self._vec2D;
+    res[0] = ndcX * self._projFactorX + self._projOffsetX;
+    res[1] = ndcY * self._projFactorY + self._projOffsetY;
 
-    var screenX = vx + (ndcX + 1) * 0.5 * vw;
-    var screenY = vy + ((ndcY + 1) * 0.5) * vh;
-
-    // Viewport → GUI
-    var guiW = display_get_gui_width();
-    var guiH = display_get_gui_height();
-    var winW = window_get_width();
-    var winH = window_get_height();
-
-    screenX *= guiW / winW;
-    screenY *= guiH / winH;
-
-    if (is_nan(screenX) || is_nan(screenY)) return undefined;
-
-    return [screenX, screenY];
+    return res;
   }
 
   function _screenToWorldDir(mx, my) {
-
     var winW = window_get_width();
     var winH = window_get_height();
     var guiW = display_get_gui_width();
@@ -865,7 +1034,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var ndcX = localX * 2 - 1;
     var ndcY = localY * 2 - 1;
 
-    var invVP = mat4_clone(self._matViewProj);
+    var invVP = self._mat0;
+    mat4_copy(invVP, self._matViewProj);
     mat4_invert(invVP);
 
     var cx = ndcX;
@@ -880,10 +1050,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
     if (ow != 0) { ox /= ow; oy /= ow; oz /= ow; }
 
-    var farPos = [ox, oy, oz];
-
     var dir = vec3_create();
-    vec3_sub_vectors(dir, farPos, self.camera.position);
+    vec3_set(dir, ox - self.camera.position[0], oy - self.camera.position[1], oz - self.camera.position[2]);
     vec3_normalize(dir);
 
     return dir;
