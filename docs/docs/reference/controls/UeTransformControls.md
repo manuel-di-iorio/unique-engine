@@ -12,17 +12,12 @@ new UeTransformControls(camera, data = {})
 
 ### Data parameters
 
-| Key          | Type                   | Default            | Description                                      |
-| ------------ | ---------------------- | ------------------ | ------------------------------------------------ |
-| `camera`     | `UeCamera`             | **required**       | The camera used for raycasting and rendering     |
-| `object`     | `UeObject3D`           | `undefined`        | The object to control                            |
-| `mode`       | `string`               | `"view"`           | Initial mode: `"view"`, `"move"`, `"rotate"`, `"scale"` |
-| `space`      | `string`               | `"world"`          | Transform space: `"world"` or `"local"`          |
-| `size`       | `number`               | `1.3`              | Visual size of the gizmo                         |
-| `snap`       | `number` or `undefined`| `undefined`        | General snap increment (legacy)                  |
-| `moveSnap`   | `number` or `undefined`| `undefined`        | Snap increment for movement                      |
-| `rotateSnap` | `number` or `undefined`| `undefined`        | Snap increment for rotation (in degrees)         |
-| `scaleSnap`  | `number` or `undefined`| `undefined`        | Snap increment for scaling                       |
+| Key           | Type       | Default     | Description                                     |
+| ------------- | ---------- | ----------- | ----------------------------------------------- |
+| `view`        | `number`   | `0`         | The GameMaker view index to use for projections |
+| `onDragStart` | `function` | `undefined` | Callback fired when dragging begins             |
+| `onDrag`      | `function` | `undefined` | Callback fired every frame while dragging       |
+| `onDragEnd`   | `function` | `undefined` | Callback fired when dragging stops              |
 
 ### Properties
 
@@ -33,8 +28,14 @@ new UeTransformControls(camera, data = {})
 | `mode`        | `string`     | Current mode: `"move"`, `"rotate"`, `"scale"`    |
 | `space`       | `string`     | Transformation space: `"world"` or `"local"`     |
 | `size`        | `number`     | Size multiplier for the gizmo                    |
+| `enabled`     | `boolean`    | Whether the gizmo is active and visible          |
+| `view`        | `number`     | The GameMaker view index being used              |
 | `dragging`    | `boolean`    | Whether the user is currently dragging the gizmo |
-| `axis`        | `string`     | The currently selected axis (e.g., "X", "XY")    |
+| `hoveredAxis` | `enum`       | The axis currently under the mouse (`UE_GIZMO_AXIS`) |
+| `selectedAxis`| `enum`       | The axis currently being dragged (`UE_GIZMO_AXIS`) |
+| `lineWidth`   | `number`     | Thickness of gizmo lines in pixels (default: 3)    |
+| `hitThreshold`| `number`     | Pixel distance for mouse picking (default: 10)     |
+| `axisLength`  | `number`     | Length of the axes in world units (default: 1.5)   |
 
 ## Methods
 
@@ -52,29 +53,22 @@ Detaches the controls from the current object.
 setMode(mode)
 ```
 Sets the interaction mode.
-- `mode`: `"move"`, `"rotate"`, `"scale"`, or `"view"` (hidden).
+- `mode`: `"move"`, `"rotate"`, or `"scale"`.
 
 ```js
-setSpace(space)
+updateGizmo()
 ```
-Sets the coordinate space for transformations.
-- `space`: `"world"` or `"local"`.
-
-```js
-setSize(size)
-```
-Sets the visual size of the gizmo.
+Updates the gizmo's internal state (matrices, position, scale). Useful for updating the gizmo's orientation without processing mouse interactions.
 
 ```js
 update()
 ```
-Updates the gizmo logic. Must be called every frame.
-Automatically handles mouse interaction and object transformation.
+The main update loop. Handles interaction logic (picking and dragging). Must be called in the Step event.
 
 ```js
-getHelper()
+render()
 ```
-Returns the `UeMesh` root of the gizmo, which should be added to the scene to be visible.
+Draws the gizmo. Must be called in the **Draw GUI** event.
 
 ## Modes
 
@@ -93,27 +87,34 @@ Allows scaling of the object.
 - **Center Cube**: Uniform scaling on all axes.
   - Uniform scaling uses a visual "drag" distance logic for intuitive control.
 
-## Events
+## Callbacks
 
-The controls emit events via `dispatchEvent` (inherited from `UeControls` -> `UeEventDispatcher`).
+The controls use callbacks provided in the `data` struct during initialization.
 
-- `change`: Fired when the object is transformed.
-- `mouseDown`: Fired when drag starts.
-- `mouseUp`: Fired when drag ends.
+- `onDragStart`: Fired when the user starts dragging a gizmo axis.
+- `onDrag`: Fired every frame while the gizmo is being dragged.
+- `onDragEnd`: Fired when the user releases the mouse button.
 
 ## Usage Example
 
 ```js
 // Create controls
-var transformControls = new UeTransformControls(camera);
-scene.add(transformControls.getHelper());
+var transformControls = new UeTransformControls(camera, {
+    view: 0,
+    onDrag: function() {
+        show_debug_message("Object is being transformed!");
+    }
+});
 
 // Attach to an object
 transformControls.attach(myObject);
 
 // Set mode
-transformControls.setMode("scale");
+transformControls.setMode("move");
 
 // In Step Event
 transformControls.update();
+
+// In Draw GUI Event
+transformControls.render();
 ```

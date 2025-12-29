@@ -221,6 +221,11 @@ function AssetManager() constructor {
      * @param {Bool} [recursive=false] - Whether to update children recursively
      */
     function updateAssetMatrix(asset, recursive = false) {
+        // Sync rotation euler if it exists (for editor inspector)
+        if (variable_struct_exists(asset, "__rotationEuler")) {
+            euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
+        }
+
         self.__updateMatrixInternal(asset, recursive);
         
         // Update the box helper to match the new transform
