@@ -3,7 +3,9 @@
 /// Rotation angles are in DEGREES.
 
 // Global temp quaternion
-global.UE_QUAT_TEMP0 = [0, 0, 0, 1];
+global.UE_QUAT_TEMP0 = quat_create();
+global.UE_QUAT_TEMP1 = quat_create();
+global.UE_QUAT_TEMP2 = quat_create();
 
 enum QUAT {
   x, y, z, w

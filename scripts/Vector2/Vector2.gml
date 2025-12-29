@@ -6,7 +6,7 @@
 global.UE_VEC2_TEMP0 = [0, 0];
 
 enum VEC2 {
-  x, y
+    x, y
 }
 
 /// @func vec2_create(x, y)
@@ -764,4 +764,43 @@ function vec2_perp(vec) {
     vec[0] = -vec[1];
     vec[1] = temp;
     return vec;
+}
+
+/// @func vec2_distance_to_segment(vec, a, b)
+/// @desc Computes the distance from this vector (point) to the segment defined by a and b.
+/// @param {Array<Real>} vec The point
+/// @param {Array<Real>} a Segment start
+/// @param {Array<Real>} b Segment end
+/// @returns {Real} The distance from point to segment
+function vec2_distance_to_segment(vec, a, b) {
+    gml_pragma("forceinline");
+    if (is_nan(a[0]) || is_nan(a[1]) || is_nan(b[0]) || is_nan(b[1])) return infinity;
+
+    var px = vec[0], py = vec[1];
+    var ax = a[0], ay = a[1];
+    var bx = b[0], by = b[1];
+
+    var dx = bx - ax;
+    var dy = by - ay;
+    var l2 = dx * dx + dy * dy;
+
+    if (l2 == 0 || is_nan(l2)) {
+        var dpx = px - ax;
+        var dpy = py - ay;
+        var distSq = dpx * dpx + dpy * dpy;
+        return is_nan(distSq) ? infinity : sqrt(distSq);
+    }
+
+    var t = ((px - ax) * dx + (py - ay) * dy) / l2;
+    t = clamp(t, 0, 1);
+
+    var projX = ax + t * dx;
+    var projY = ay + t * dy;
+
+    var ddx = px - projX;
+    var ddy = py - projY;
+
+    var finalDistSq = ddx * ddx + ddy * ddy;
+    if (is_nan(finalDistSq)) return infinity;
+    return sqrt(finalDistSq);
 }

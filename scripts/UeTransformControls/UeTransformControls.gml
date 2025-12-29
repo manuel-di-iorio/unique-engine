@@ -1,1222 +1,927 @@
+enum UE_GIZMO_AXIS {
+  x, y, z,
+  yz, xz, xy
+}
+
 /**
- * UeTransformControls constructor
- * Provides interactive gizmo controls to translate, rotate, and scale 3D objects.
- * @param {Struct} camera - Camera used for raycasting and projection.
+ * UeGizmoControls constructor
+ * Lightweight 2D gizmo controls using mathematical raycasting and primitive drawing.
+ * Optimized for editor usage.
+ * @param {Struct} camera - Camera used for projection.
  * @param {Struct} data - Optional initial settings.
  */
 function UeTransformControls(camera, data = {}): UeControls(data) constructor {
-    // === BASE PROPERTIES ===
-    self.camera = camera;             // Camera for raycasting calculations
-    self.hoveredAxis = undefined;     // Currently hovered axis object
-    self.selectedAxis = undefined;    // Currently selected axis object
-    self.axis = undefined;            // Currently selected axis object name (X, Y, Z, etc..)
-    self.dragging = false;            // Flag to indicate if dragging is in progress
-    self.size = 1.3;                  // Gizmo visual size multiplier
-    self.mode = "view";               // Current transform mode: "view", "move", "rotate", or "scale"
-    self.space = "world";             // Transform space: "world" or "local"
+  self.camera = camera;
+  self.object = undefined;
+  self.mode = "move"; // "move", "rotate", "scale"
+  self.space = "world";    // "world", "local"
+  self.size = 1.0;         // Gizmo size multiplier
+  self.enabled = true;
+  self.view = data[$ "view"] ?? 0;
 
-    // === BOUNDS AND SNAP SETTINGS ===
-    self.minX = -infinity; self.minY = -infinity; self.minZ = -infinity;
-    self.maxX = infinity; self.maxY = infinity; self.maxZ = infinity;
+  self.hoveredAxis = undefined;
+  self.selectedAxis = undefined;
+  self.dragging = false;
+  self.axis = undefined;
 
-    self.translationSnap = undefined; // Increment step for translation snapping
-    self.rotationSnap = undefined;    // Increment step for rotation snapping (radians)
-    self.scaleSnap = undefined;       // Increment step for scale snapping
+  // Internal state
+  self._dragStartPoint = vec3_create();     // World position when drag started
+  self._dragStartRot = [0, 0, 0, 1];           // Rotation when drag started
+  self._dragStartScale = vec3_create();     // Scale when drag started
+  self._dragOffset = 0;                     // Linear offset (t) at start
+  self._dragOffsetVec = vec3_create();      // Vector offset for plane dragging
+  self._dragAngleStart = 0;                 // Angle at start
+  self._centerPos = vec3_create();
+  self._gizmoScale = 1.0;
 
-    self.gizmoMinScale = undefined;   // Minimum scale for the gizmo
-    self.gizmoMaxScale = undefined;   // Maximum scale for the gizmo
+  // Math Caches (Buffers to avoid allocations)
+  self._matViewProj = mat4_create();
+  self._vec0 = vec3_create();
+  self._vec1 = vec3_create();
+  self._vec2 = vec3_create();
+  self._vec3 = vec3_create();
+  self._vec4 = vec3_create();
+  self._vec5 = vec3_create();
+  self._vec6 = vec3_create();
+  self._vec7 = vec3_create();
+  self._quat0 = [0, 0, 0, 1];
+  self._quat1 = [0, 0, 0, 1];
+  self._mat0 = mat4_create();
 
-    // === AXIS VISIBILITY ===
-    self.showX = true;                // Show X axis gizmo line
-    self.showY = true;                // Show Y axis gizmo line
-    self.showZ = true;                // Show Z axis gizmo line
+  // Drawing Config
+  self.lineWidth = 3;
+  self.hitThreshold = 10; // Pixel distance for picking
+  self.axisLength = 1.5;  // World units length of axes
 
-    // === INTERNAL HELPERS ===
-    self._raycaster = new UeRaycaster();  // Raycaster for mouse picking
-    self._raycasterRotate = new UeRaycaster();  // Raycaster for mouse picking
-    self._raycasterRotate.params.Mesh.precise = true;
-    self._root = new UeMesh();         // Root object    
-    self._plane = plane_create();       // Plane used for intersection during dragging
+  // Colors (User Defined Mapping)
+  self.cRed = c_red;
+  self.cBlue = make_color_rgb(0x22, 0x77, 0xB3);
+  self.cGreen = c_lime;
+  self.cWhite = c_white;
+  self.cYellow = c_yellow;
 
-    // Temporary vectors for dragging calculations
-    self.pointStart = vec3_create();
-    self.pointEnd = vec3_create();
-    self.pointPrevious = vec3_create();  // Track previous point for incremental rotation
-    self._rotationAngle = 0; // Accumulates total rotation angle during drag
-    self.delta = vec3_create();
-
-    // Store object's initial transform at drag start
-    self._positionStart = vec3_create();
-    self._rotationStart = quat_create();
-    self._scaleStart = vec3_create();
-    self._positionStartWorld = vec3_create();
-
-    // === Build properties ===
-    __xVec = vec3_create(1, 0, 0);  // Unit vector for X axis
-    __yVec = vec3_create(0, 1, 0);  // Unit vector for Y axis
-    __zVec = vec3_create(0, 0, 1);  // Unit vector for Z axis
-
-    self.onDrag = data[$ "onDrag"] ?? undefined;
-    self.onDragEnd = data[$ "onDragEnd"] ?? undefined;
-
-    // Base material for all gizmo components with transparency and depth testing disabled
-    __matMesh = new UeMeshStandardMaterial({
-        depthTest: false,
-        depthWrite: false,
-        transparent: true,
-        shader: sh_ue_gizmo
-    });
-
-    // Ensure ueEmissive uniform exists for highlighting (override if needed)
-    if (__matMesh.uniforms[$ "ueEmissive"] == undefined) {
-        __matMesh.uniforms.ueEmissive = { type: UE_UNIFORM_TYPE.ARRAY, value: [0, 0, 0] };
+  // Geometry Caches
+  self._ringCache = array_create(3, undefined); // 0:X, 1:Y, 2:Z (Screen points)
+  self._unitRings = array_create(3);            // Local space unit ring points
+  
+  var _segs = 32; // Reduced for performance
+  for (var a = 0; a < 3; a++) {
+    var points = array_create(_segs + 1);
+    for (var i = 0; i <= _segs; i++) {
+      var _angle = (i / _segs) * (pi * 2);
+      var px = cos(_angle);
+      var py = sin(_angle);
+      
+      if (a == 0) points[i] = [0, px, py];      // X-axis ring (YZ plane)
+      else if (a == 1) points[i] = [px, 0, py]; // Y-axis ring (XZ plane)
+      else points[i] = [px, py, 0];             // Z-axis ring (XY plane)
     }
-
-    /**
-     * Attaches the transform controls to a 3D object, enabling manipulation.
-     * @param {UeObject3D} object - The target object to control.
-     * @returns {self}
-     */
-    function attach(object) {
-        gml_pragma("forceinline");
-        self.object = object;
-
-        // Ensure object's world matrix is up-to-date so gizmo uses correct world transforms
-        if (object.updateWorldMatrix != undefined) {
-            object.updateWorldMatrix(true, false);
-        }
-
-        /**
-         * Computes the visual dimensions of the gizmo axes based on the current size setting.
-         * These calculations determine the proportions of arrows, planes, and interactive elements.
-         */
-        __axisLength = self.size * 10;           // Total length of each axis arrow
-        __axisLengthHalf = __axisLength * .5;    // Half the axis length for positioning
-        __axisLineWidth = self.size * 0.4;       // Width/thickness of axis lines
-        __axisOffset = self.size * 1.5;          // Offset from origin for axis positioning
-        __planeOpacity = 0.3;                    // Transparency level for plane handles
-        __planeDepth = self.size * 0.2;          // Thickness of plane interaction handles
-        __planeSize = __axisLength * 0.35;       // Size of square plane handles
-
-        build();
-        updateGizmo();
-        return self;
-    }
-
-    /**
-     * Detaches the transform controls from the current object and hides the gizmo.
-     * @returns {self}
-     */
-    function detach() {
-        gml_pragma("forceinline");
-        self.hoveredAxis = undefined;
-        self.selectedAxis = undefined;
-        self.axis = undefined;
-        self.object = undefined;
-        self.clearGizmo(self._root);
-        return self;
-    }
-
-    /**
-     * Builds the gizmo visual lines for the axes according to current size and visibility.
-     * Creates different geometries based on the current mode (move or rotate).
-     */
-    function build() {
-        gml_pragma("forceinline");
-        clearGizmo(self._root);  // Remove previous gizmo geometry to avoid memory leaks
-        self._gizmo = new UeMesh(); // Interactable gizmo container
-        self._root.add(self._gizmo);
-
-        if (self.mode == "move") {
-            buildTranslateModeGizmo();
-        } else if (self.mode == "rotate") {
-            buildRotateModeGizmo();
-        } else if (self.mode == "scale") {
-            buildScaleModeGizmo();
-        }
-        return self;
-    }
-
-    /**
-     * Builds the translate (move) mode gizmo with arrows and plane handles.
-     */
-    function buildTranslateModeGizmo() {
-        gml_pragma("forceinline");
-        var _baseLength = __axisLengthHalf + __axisOffset;
-
-        // Create X axis line (Red)
-        var geoX = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_red });
-        geoX.computeBoundingBox();
-        var meshX = new UeMesh(geoX, __matMesh.clone());
-        meshX.name = "X";
-        quat_set_from_axis_angle(meshX.rotation, __zVec, 180);  // Rotate to point in positive X direction
-        meshX.position[VEC3.x] = -_baseLength;
-        meshX.raycastOrder = 0;  // Higher priority for raycasting (axes before planes)
-        self._gizmo.add(meshX);
-
-        // Create Y axis line (Blue)
-        var geoY = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: #2277B3 });
-        geoY.computeBoundingBox();
-        var meshY = new UeMesh(geoY, __matMesh.clone());
-        meshY.name = "Y";
-        quat_set_from_axis_angle(meshY.rotation, __zVec, 270);  // Rotate to point in positive Y direction
-        meshY.position[VEC3.y] = -_baseLength;
-        meshY.raycastOrder = 0;
-        self._gizmo.add(meshY);
-
-        // Create Z axis line (Green/Lime)
-        var geoZ = new UeArrowGeometry(__axisLineWidth, __axisLength, 10, 0.25, { color: c_lime });
-        geoZ.computeBoundingBox();
-        var meshZ = new UeMesh(geoZ, __matMesh.clone());
-        meshZ.name = "Z";
-        quat_set_from_axis_angle(meshZ.rotation, __yVec, -90);  // Rotate to point in positive Z direction
-        meshZ.position[VEC3.z] = _baseLength;
-        meshZ.raycastOrder = 0;
-        self._gizmo.add(meshZ);
-
-        // === ADDITIONAL PLANES FOR COMBINED AXES ===
-        // These planes allow dragging along two axes simultaneously
-
-        // XZ plane (Blue) - allows movement along X and Z axes simultaneously
-        var geoXZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: #2277B3, alpha: __planeOpacity });
-        geoXZ.computeBoundingBox();
-        var meshXZ = new UeMesh(geoXZ, __matMesh.clone());
-        meshXZ.name = "XZ";
-        meshXZ.raycastOrder = 1;  // Lower priority than individual axes
-        self._gizmo.add(meshXZ);
-
-        // YZ plane (Red) - allows movement along Y and Z axes simultaneously
-        var geoYZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_red, alpha: __planeOpacity });
-        geoYZ.computeBoundingBox();
-        var meshYZ = new UeMesh(geoYZ, __matMesh.clone());
-        meshYZ.name = "YZ";
-        meshYZ.raycastOrder = 1;
-        self._gizmo.add(meshYZ);
-
-        // XY plane (Green) - allows movement along X and Y axes simultaneously
-        var geoXY = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_lime, alpha: __planeOpacity });
-        geoXY.computeBoundingBox();
-        var meshXY = new UeMesh(geoXY, __matMesh.clone());
-        meshXY.name = "XY";
-        meshXY.raycastOrder = 1;
-        self._gizmo.add(meshXY);
-
-        // === Add the center cube (XYZ) ===
-        // Center cube allows free movement in all three axes simultaneously
-        // Use axisLineWidth for proportional sizing instead of axisOffset to avoid oversized cubes
-        var cubeSize = __axisLineWidth * 3;
-        var geoBox = new UeBoxGeometry(cubeSize, cubeSize, cubeSize, { color: c_ltgray });
-        geoBox.computeBoundingBox();
-        var meshBox = new UeMesh(geoBox, __matMesh.clone());
-        meshBox.name = "XYZ";
-        meshBox.renderOrder = -1;   // Render behind other elements
-        meshBox.raycastOrder = 2;   // Lowest raycast priority
-        self._gizmo.add(meshBox);
-    }
-
-    /**
-     * Builds the rotate mode gizmo with torus rings for each axis.
-     */
-    function buildRotateModeGizmo() {
-        gml_pragma("forceinline");
-        var _torusRadius = __axisLength * 1;  // Radius of the rotation rings
-        var _torusThickness = __axisLineWidth * 0.5; // Thickness of the rings
-        var _radialSegments = 4;
-        var _tubularSegments = 22;
-
-        // Torus lies on XY plane usually, extending from -(R+r) to +(R+r)
-        var limit = _torusRadius + _torusThickness;
-        var zLimit = _torusThickness;
-        var torusBoxMin = vec3_create(-limit, -limit, -zLimit);
-        var torusBoxMax = vec3_create(limit, limit, zLimit);
-
-        // --- Create X AXIS (Red, YZ plane) ---
-        // Front Geometry (0 to 180 degrees) - Opaque
-        var geoFrontX = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
-            arc: pi, arcOffset: 0, alpha: 1.0
-        });
-        geoFrontX.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        // Back Geometry (180 to 360 degrees) - Semi-transparent
-        var geoBackX = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
-            arc: pi, arcOffset: pi, alpha: 0.2
-        });
-        geoBackX.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        // Back Geometry Opaque (for selection state)
-        var geoBackOpaqueX = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_red,
-            arc: pi, arcOffset: pi, alpha: 1.0
-        });
-        geoBackOpaqueX.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        var meshFrontX = new UeMesh(geoFrontX, __matMesh.clone());
-        meshFrontX.name = "X";
-        quat_set_from_axis_angle(meshFrontX.rotation, __yVec, 90);
-        meshFrontX.raycastOrder = 0;
-
-        var meshBackX = new UeMesh(geoBackX, __matMesh.clone());
-        meshBackX.name = "X";
-        quat_copy(meshBackX.rotation, meshFrontX.rotation);
-        meshBackX.raycastOrder = 0;
-        meshBackX.material.opacity = 0.2; // Explicitly set opacity for material
-
-        var staticRotX = quat_clone(meshFrontX.rotation);
-
-        meshFrontX.userData = {
-            isRotationGizmo: true, planeNormal: vec3_clone(__xVec), staticRotation: staticRotX,
-            geoBack: geoBackX, geoBackOpaque: geoBackX, partner: meshBackX, type: "front"
-        };
-        meshBackX.userData = {
-            isRotationGizmo: true, planeNormal: vec3_clone(__xVec), staticRotation: staticRotX,
-            partner: meshFrontX, type: "back"
-        };
-
-        self._gizmo.add(meshFrontX);
-        self._gizmo.add(meshBackX);
-
-        // --- Create Y AXIS (Blue, XZ plane) ---
-        var geoFrontY = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
-            arc: pi, arcOffset: 0, alpha: 1.0
-        });
-        geoFrontY.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        var geoBackY = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
-            arc: pi, arcOffset: pi, alpha: 0.2
-        });
-        geoBackY.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        var geoBackOpaqueY = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: #2277B3,
-            arc: pi, arcOffset: pi, alpha: 1.0
-        });
-        geoBackOpaqueY.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        var meshFrontY = new UeMesh(geoFrontY, __matMesh.clone());
-        meshFrontY.name = "Y";
-        quat_set_from_axis_angle(meshFrontY.rotation, __xVec, 90);
-        meshFrontY.raycastOrder = 0;
-
-        var meshBackY = new UeMesh(geoBackY, __matMesh.clone());
-        meshBackY.name = "Y";
-        quat_copy(meshBackY.rotation, meshFrontY.rotation);
-        meshBackY.raycastOrder = 0;
-        meshBackY.material.opacity = 0.2; // Explicit opacity
-
-        var staticRotY = quat_clone(meshFrontY.rotation);
-
-        meshFrontY.userData = {
-            isRotationGizmo: true, planeNormal: vec3_clone(__yVec), staticRotation: staticRotY,
-            geoBack: geoBackY, geoBackOpaque: geoBackOpaqueY, partner: meshBackY, type: "front"
-        };
-        meshBackY.userData = {
-            isRotationGizmo: true, planeNormal: vec3_clone(__yVec), staticRotation: staticRotY,
-            partner: meshFrontY, type: "back"
-        };
-
-        self._gizmo.add(meshFrontY);
-        self._gizmo.add(meshBackY);
-
-        // --- Create Z AXIS (Green, XY plane) ---
-        var geoFrontZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
-            arc: pi, arcOffset: 0, alpha: 1.0
-        });
-        geoFrontZ.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        var geoBackZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
-            arc: pi, arcOffset: pi, alpha: 0.2
-        });
-        geoBackZ.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        var geoBackOpaqueZ = new UeTorusGeometry(_torusRadius, _torusThickness, {
-            radialSegments: _radialSegments, tubularSegments: _tubularSegments, color: c_lime,
-            arc: pi, arcOffset: pi, alpha: 1.0
-        });
-        geoBackOpaqueZ.boundingBox = [torusBoxMin[0], torusBoxMin[1], torusBoxMin[2], torusBoxMax[0], torusBoxMax[1], torusBoxMax[2]];
-
-        var meshFrontZ = new UeMesh(geoFrontZ, __matMesh.clone());
-        meshFrontZ.name = "Z";
-        meshFrontZ.raycastOrder = 0;
-
-        var meshBackZ = new UeMesh(geoBackZ, __matMesh.clone());
-        meshBackZ.name = "Z";
-        meshBackZ.raycastOrder = 0;
-        meshBackZ.material.opacity = 0.2; // Explicit opacity
-
-        var staticRotZ = quat_create(); // Identity
-        meshFrontZ.userData = {
-            isRotationGizmo: true, planeNormal: vec3_clone(__zVec), staticRotation: staticRotZ,
-            geoBack: geoBackZ, geoBackOpaque: geoBackOpaqueZ, partner: meshBackZ, type: "front"
-        };
-        meshBackZ.userData = {
-            isRotationGizmo: true, planeNormal: vec3_clone(__zVec), staticRotation: staticRotZ,
-            partner: meshFrontZ, type: "back"
-        };
-        self._gizmo.add(meshFrontZ);
-        self._gizmo.add(meshBackZ);
-
-        // Create Screen Space Rotation ring (Yellow) - always faces camera ('E')
-        var eRadius = _torusRadius * 1.4;
-        var eLimit = eRadius + _torusThickness;
-        var geoE = new UeTorusGeometry(eRadius, _torusThickness, {
-            radialSegments: _radialSegments,
-            tubularSegments: _tubularSegments,
-            color: #fafadd
-        });
-        geoE.boundingBox = [ -eLimit, -eLimit, -zLimit, eLimit, eLimit, zLimit ];
-        var meshE = new UeMesh(geoE, __matMesh.clone());
-        meshE.name = "E";
-        meshE.raycastOrder = 0;
-        self._gizmo.add(meshE);
-    }
-
-    /**
-     * Builds the scale mode gizmo with box handles for each axis.
-     */
-    function buildScaleModeGizmo() {
-        gml_pragma("forceinline");
-
-        var _handleSize = __axisLineWidth * 4;
-        var lineLen = __axisLength;
-
-        // Create X axis (Red)
-        // Cylinder X -> X: No rotation
-        var meshX = __createMergedScaleAxis("X", c_red, undefined, 0, vec3_create(lineLen / 2, 0, 0), vec3_create(lineLen, 0, 0), _handleSize, lineLen);
-
-        // Create Y axis (Blue)
-        // Cylinder X -> Y: Rotate Z 90
-        var meshY = __createMergedScaleAxis("Y", #2277B3, __zVec, 90, vec3_create(0, lineLen / 2, 0), vec3_create(0, lineLen, 0), _handleSize, lineLen);
-
-        // Create Z axis (Green)
-        // Cylinder X -> Z: Rotate Y -90
-        var meshZ = __createMergedScaleAxis("Z", c_lime, __yVec, -90, vec3_create(0, 0, lineLen / 2), vec3_create(0, 0, lineLen), _handleSize, lineLen);
-
-        // XZ plane (Blue)
-        var geoXZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: #2277B3, alpha: __planeOpacity });
-        geoXZ.computeBoundingBox();
-        var meshXZ = new UeMesh(geoXZ, __matMesh.clone());
-        meshXZ.name = "XZ";
-        meshXZ.raycastOrder = 1;
-        self._gizmo.add(meshXZ);
-
-        // YZ plane (Red)
-        var geoYZ = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_red, alpha: __planeOpacity });
-        geoYZ.computeBoundingBox();
-        var meshYZ = new UeMesh(geoYZ, __matMesh.clone());
-        meshYZ.name = "YZ";
-        meshYZ.raycastOrder = 1;
-        self._gizmo.add(meshYZ);
-
-        // XY plane (Green)
-        var geoXY = new UeBoxGeometry(__planeSize, __planeSize, __planeDepth, { color: c_lime, alpha: __planeOpacity });
-        geoXY.computeBoundingBox();
-        var meshXY = new UeMesh(geoXY, __matMesh.clone());
-        meshXY.name = "XY";
-        meshXY.raycastOrder = 1;
-        self._gizmo.add(meshXY);
-
-        // Uniform Scale (XYZ) - Center Cube
-        var cubeSize = _handleSize * 1.5;
-        var geoBox = new UeBoxGeometry(cubeSize, cubeSize, cubeSize, { color: c_ltgray });
-        geoBox.computeBoundingBox();
-        var meshBox = new UeMesh(geoBox, __matMesh.clone());
-        meshBox.name = "XYZ";
-        meshBox.renderOrder = -1;
-        meshBox.raycastOrder = 2;
-        self._gizmo.add(meshBox);
-    }
-
-    /**
-     * Internal helper to create merged axis geometry for scale mode.
-     * @param {string} name
-     * @param {color} color
-     * @param {Vector3} rotationAxis
-     * @param {number} rotationAngle
-     * @param {Vector3} shaftPos
-     * @param {Vector3} handlePos
-     * @param {number} handleSize
-     * @param {number} lineLen
-     */
-    function __createMergedScaleAxis(name, color, rotationAxis, rotationAngle, shaftPos, handlePos, handleSize, lineLen) {
-        var mat = mat4_create();
-        var q = quat_create();
-        var s = vec3_create(1, 1, 1);
-
-        // Shaft Geometry
-        var geoShaft = new UeCylinderGeometry(__axisLineWidth, lineLen, 4, { color: color });
-
-        // Shaft Transform
-        if (rotationAxis != undefined) {
-             quat_set_from_axis_angle(q, rotationAxis, rotationAngle);
-             mat4_make_rotation_from_quaternion(mat, q);
-        } else {
-            quat_set(q, 0, 0, 0, 1); // Identity
-            mat4_identity(mat);
-        }
-        // Apply position (shaftPos is already an array from vec3_create)
-        mat4_set_position(mat, shaftPos[0], shaftPos[1], shaftPos[2]);
-        geoShaft.applyMatrix(mat);
-
-        // Handle Geometry
-        var geoHandle = new UeBoxGeometry(handleSize, handleSize, handleSize, { color: color });
-
-        // Handle Transform
-        quat_set(q, 0, 0, 0, 1); // Axis aligned box, so identity rotation
-        mat4_compose(mat, handlePos, q, s); // Compose with handle position, identity rotation, and unit scale
-        geoHandle.applyMatrix(mat);
-
-        // Merge
-        var geoMerged = new UeGeometry().merge([geoShaft, geoHandle]);
-        geoMerged.computeBoundingBox();
-
-         // Cleanup intermediate geometries
-         geoShaft.dispose();
-         geoHandle.dispose();
-
-         // Create Mesh
-         var mesh = new UeMesh(geoMerged, __matMesh.clone());
-         mesh.name = name;
-         mesh.raycastOrder = 0;
-         self._gizmo.add(mesh);
-
-         return mesh;
-    }
-
-    /**
-     * Updates the gizmo's position and orientation to match the attached object's transform and camera direction.
-     * In world space, plane handles are positioned relative to camera to maintain visibility.
-     * Automatically scales the gizmo based on distance from camera to maintain consistent apparent size.
-     */
-    function updateGizmo() {
-        gml_pragma("forceinline");
-
-        if (!self.object) return;
-
-        // Ensure object's world matrix is updated so world-space queries are correct
-        if (self.object.updateWorldMatrix != undefined) {
-            self.object.updateWorldMatrix(true, false);
-        }
-
-        // Set gizmo root position to the object's world position
-        var _wp = global.UE_VEC3_TEMP0;
-        self.object.getWorldPosition(_wp);
-        vec3_copy(self._root.position, _wp);
-
-        // Calculate distance-based scale to maintain consistent apparent size (billboard-like behavior)
-        var distance = vec3_distance_to(self.camera.position, _wp);
-
-        // Scale formula: distance * constant
-        var currentScale = distance * 0.008;
-
-        // Clamp scale if limits are defined
-        if (self.gizmoMinScale != undefined) currentScale = max(currentScale, self.gizmoMinScale);
-        if (self.gizmoMaxScale != undefined) currentScale = min(currentScale, self.gizmoMaxScale);
-
-        // Apply the distance-based scale to the entire gizmo
-        vec3_set(self._root.scale, currentScale, currentScale, currentScale);
-
-        if (self.space == "local") {
-            // In local space, gizmo rotates with the object's world rotation
-            var _wq = global.UE_DUMMY_QUATERNION;
-            self.object.getWorldQuaternion(_wq);
-            quat_copy(self._root.rotation, _wq);
-        } else {
-            // In world space mode
-            if (self.mode == "move" || self.mode == "scale") {
-                // Position plane handles based on camera direction for optimal visibility
-                var camDir = global.UE_VEC3_TEMP0;
-                self.camera.getWorldDirection(camDir);
-
-                // XZ plane positioning - place on the side of the gizmo facing away from camera
-                var meshXZ = self._gizmo.getObjectByName("XZ");
-                quat_set_from_axis_angle(meshXZ.rotation, __xVec, 90);  // Orient plane horizontally
-                meshXZ.position[VEC3.x] = (camDir[VEC3.x] < 0) ? -__planeSize : __planeSize;
-                meshXZ.position[VEC3.z] = (camDir[VEC3.z] < 0) ? -__planeSize : __planeSize;
-
-                // YZ plane positioning
-                var meshYZ = self._gizmo.getObjectByName("YZ");
-                quat_set_from_axis_angle(meshYZ.rotation, __yVec, 90);  // Orient plane vertically
-                meshYZ.position[VEC3.y] = (camDir[VEC3.y] < 0) ? -__planeSize : __planeSize;
-                meshYZ.position[VEC3.z] = (camDir[VEC3.z] < 0) ? -__planeSize : __planeSize;
-
-                // XY plane positioning
-                var meshXY = self._gizmo.getObjectByName("XY");
-                quat_set_from_axis_angle(meshXY.rotation, __zVec, 0);   // Keep plane facing camera
-                meshXY.position[VEC3.z] = 0;
-                meshXY.position[VEC3.x] = (camDir[VEC3.x] < 0) ? -__planeSize : __planeSize;
-                meshXY.position[VEC3.y] = (camDir[VEC3.y] < 0) ? -__planeSize : __planeSize;
-            } else if (self.mode == "rotate") {
-                // For rotate mode in world space, update E axis to always face camera
-                var meshE = self._gizmo.getObjectByName("E");
-                if (meshE != undefined) {
-                    // Calculate direction from gizmo to camera
-                    var dirToCamera = global.UE_VEC3_TEMP0;
-                    vec3_sub_vectors(global.UE_VEC3_TEMP0, self.camera.position, self._root.position);
-                    vec3_normalize(dirToCamera);
-
-                    // Orient the E axis (torus) to face the camera
-                    // The torus normal (Z axis by default) should align with the camera direction
-                    // Use setFromUnitVectors to directly align Z axis with camera direction
-                    var quaternion = global.UE_QUAT_TEMP0;
-                    var defaultNormal = global.UE_VEC3_TEMP1;
-                    vec3_set(defaultNormal, 0, 0, 1); // Torus default normal (Z-up)
-                    quat_set_from_unit_vectors(quaternion, defaultNormal, dirToCamera);
-                    quat_copy(meshE.rotation, quaternion);
-                }
-
-                // Update dynamic arcs for X, Y, Z axes to show only front-facing half
-                var dirToCamera = global.UE_VEC3_TEMP0
-                vec3_sub_vectors(dirToCamera, self.camera.position, self._root.position);
-                vec3_normalize(dirToCamera);
-
-                // Update each axis with dynamic rotation
-                for (var i = 0, il = array_length(self._gizmo.children); i < il; i++) {
-                    var mesh = self._gizmo.children[i];
-                    var userData = mesh.userData;
-
-                    // Skip if this mesh isn't a rotation gizmo part
-                    if (userData == undefined || !userData[$ "isRotationGizmo"]) continue;
-
-                    // Calculate rotation angle based on camera position
-                    // Project camera direction onto the torus plane
-                    var planeNormal = userData.planeNormal;
-                    var camDirProjected = vec3_clone(dirToCamera);
-
-                    // Remove the component along the plane normal (project onto plane)
-                    var dotProduct = vec3_dot(camDirProjected, planeNormal);
-                    vec3_add_scaled_vector(camDirProjected, planeNormal, -dotProduct);
-                    vec3_normalize(camDirProjected);
-
-                    // Calculate angle in the plane relative to the torus local space
-                    // Since all tori are created in XY plane (normal Z) and then rotated,
-                    // we need to find the angle in the local XY plane
-                    // But our planeNormal and camDirProjected are in WORLD/GIZMO space.
-                    // We need to transform the projected camera vector into the mesh's LOCAL space (before spin)
-                    // The static rotation transforms Z -> planeNormal.
-                    // So we can apply inverse static rotation to camDirProjected.
-
-                    var localCamDir = vec3_clone(camDirProjected);
-                    var invStatic = quat_clone(userData.staticRotation);
-                    quat_invert(invStatic);
-                    vec3_apply_quaternion(localCamDir, invStatic);
-
-                    // Now localCamDir is in the XY plane of the torus geometry (Z=0)
-                    // Calculate angle relative to local Y axis (because our arc is centered at pi/2 which is Y)
-                    // Actually, our arc is 0..pi. Center is pi/2 (+Y).
-                    // We want the center of the arc (+Y) to point at localCamDir.
-                    // So we want to rotate Z so that +Y becomes localCamDir.
-
-                    var targetAngle = arctan2(localCamDir[VEC3.x], localCamDir[VEC3.y]);
-
-                    // We want to rotate the mesh such that its +Y axis points to targetAngle
-                    // Current +Y is at pi/2.
-                    // Rotation needed = targetAngle - pi/2
-                    var spinAngle = targetAngle - (pi / 2);
-
-                    // Create spin rotation around partial Z axis
-                    var spinQ = quat_create();
-                    quat_set_from_axis_angle(spinQ, __zVec, spinAngle);
-
-                    // Apply: Total = Static * Spin
-                    var totalQ = quat_clone(userData.staticRotation)
-                    quat_multiply(totalQ, spinQ);
-                    quat_copy(mesh.rotation, totalQ);
-                }
-            }
-        }
-    }
-
-    /**
-     * Updates the currently hovered/selected axis by performing raycast on gizmo lines.
-     * Handles visual feedback (scaling and emissive highlighting) for interactive elements.
-     */
-    function updateInteraction() {
-        gml_pragma("forceinline");
-
-        var _raycasterInstance = self._raycaster;
-        if (self.mode == "rotate") {
-            _raycasterInstance = self._raycasterRotate;
-        }
-        _raycasterInstance.setFromCamera(self.camera);
-
-        if (!self.dragging) {
-            // Reset scale and emissive properties of all axes when not dragging
-            // Also reset geometry state
-            for (var i = 0, l = array_length(self._gizmo.children); i < l; i++) {
-                var child = self._gizmo.children[i];
-                vec3_set(child.scale, 1, 1, 1);
-
-                // Default reset logic
-                child.material.uniforms.ueEmissive.value = [0, 0, 0];
-                if (child.userData != undefined && child.userData[$ "isRotationGizmo"]) {
-                    // Reset to semi-transparent state if it's a rotation gizmo part
-                    if (child.userData.type == "back" && child.userData.partner.userData.geoBack != undefined) {
-                        child.geometry = child.userData.partner.userData.geoBack;
-                    }
-                }
-            }
-
-            // Perform raycasting to find intersected gizmo elements
-            var intersects = _raycasterInstance.intersectObjects(self._gizmo.children, false, false);
-
-            // Sort intersections
-            array_sort(intersects, function (a, b) {
-                var pa = a.object.raycastOrder;
-                var pb = b.object.raycastOrder;
-                if (pa != pb) return pa - pb;
-                return a.distance - b.distance;
-            });
-
-            if (array_length(intersects) > 0) {
-                // Highlight the hovered axis with slight scaling and white glow
-                var hovered = intersects[0].object;
-                self.hoveredAxis = hovered;
-
-                // If it's part of a rotation gizmo pair, update both
-                if (hovered.userData != undefined && hovered.userData[$ "isRotationGizmo"]) {
-                    // Manually handle pair update
-                    var front, back;
-                    if (hovered.userData.type == "front") {
-                        front = hovered;
-                        back = hovered.userData.partner;
-                    } else {
-                        back = hovered;
-                        front = hovered.userData.partner;
-                    }
-
-                    // Highlight
-                    var color = [0.3, 0.3, 0.3];
-                    front.material.uniforms.ueEmissive.value = color;
-                    back.material.uniforms.ueEmissive.value = color;
-
-                    // Opaque Back
-                    if (front.userData.geoBackOpaque != undefined) {
-                        back.geometry = front.userData.geoBackOpaque;
-                    }
-                } else {
-                    // Standard highlighting
-                    vec3_set(hovered.scale, 1.05, 1.05, 1.05);
-                    hovered.material.uniforms.ueEmissive.value = [0.3, 0.3, 0.3];
-                }
-            } else {
-                self.hoveredAxis = undefined;
-            }
-        } else {
-            // While dragging, keep the selected axis highlighted with yellow glow
-            if (self.selectedAxis != undefined) {
-                if (self.selectedAxis.userData != undefined && self.selectedAxis.userData[$ "isRotationGizmo"]) {
-                    // Manually handle pair update
-                    var mesh = self.selectedAxis;
-                    var front, back;
-                    if (mesh.userData.type == "front") {
-                        front = mesh;
-                        back = mesh.userData.partner;
-                    } else {
-                        back = mesh;
-                        front = mesh.userData.partner;
-                    }
-
-                    var color = [1, 1, 0];
-                    front.material.uniforms.ueEmissive.value = color;
-                    back.material.uniforms.ueEmissive.value = color;
-
-                    // Opaque Back
-                    if (front.userData.geoBackOpaque != undefined) {
-                        back.geometry = front.userData.geoBackOpaque;
-                    }
-                } else {
-                    self.selectedAxis.material.uniforms.ueEmissive.value = [1, 1, 0];
-                }
-            }
-        }
-    }
-
-    /**
-     * Handles pointer down event to start dragging the selected axis if possible.
-     * Sets up the drag plane based on the selected axis and camera orientation.
-     */
-    function onPointerDown() {
-        gml_pragma("forceinline");
-        if (self.hoveredAxis == undefined || self.dragging) return;
-
-        var _raycasterInstance = self._raycaster;
-        if (self.mode == "rotate") {
-            _raycasterInstance = self._raycasterRotate;
-        }
-
-        self.dragging = true;
-        self.selectedAxis = self.hoveredAxis;
-        self.axis = self.selectedAxis.name;
-
-        if (self.axis == "CX") self.axis = "X";
-        else if (self.axis == "CY") self.axis = "Y";
-        else if (self.axis == "CZ") self.axis = "Z";
-
-        // Determine axis vector based on selected axis for mathematical calculations
-        var axisVec = undefined;
-        switch (self.axis) {
-            case "X": axisVec = __xVec; break;
-            case "Y": axisVec = __yVec; break;
-            case "Z": axisVec = __zVec; break;
-        }
-
-        // Visual feedback: reset scale and add yellow emissive highlight
-        vec3_set(self.selectedAxis.scale, 1, 1, 1);
-        self.selectedAxis.material.uniforms.ueEmissive.value = [1, 1, 0];
-
-        // Transform axis vector to local space if needed
-        if (self.space == "local" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
-            vec3_apply_quaternion(axisVec, self.object.rotation);
-        }
-
-        // Calculate the optimal plane for dragging based on mode and selected axis
-        var camDir = self.camera.getWorldDirection();
-        var _planeNormal = camDir;
-
-        if (self.mode == "rotate" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
-            // For rotate mode: plane is perpendicular to the rotation axis
-            // This allows the mouse to move in a circle around the axis
-            _planeNormal = vec3_clone(axisVec);
-
-            // If camera is looking from the opposite side, flip the plane
-            var dot = vec3_dot(camDir, _planeNormal);
-            if (dot < 0) {
-                vec3_negate(_planeNormal);
-            }
-        }
-        else if (self.mode == "move" && (self.axis == "X" || self.axis == "Y" || self.axis == "Z")) {
-            // For move mode single axis: create plane perpendicular to both camera direction and axis
-            _planeNormal = vec3_clone(camDir);
-            vec3_cross(_planeNormal, axisVec);
-            vec3_cross(_planeNormal, axisVec);
-            vec3_normalize(_planeNormal);
-        }
-        else if (self.axis == "XZ" || self.axis == "YZ" || self.axis == "XY") {
-            // For plane handles: use the plane's natural normal
-            switch (self.axis) {
-                case "XY": _planeNormal = vec3_clone(__zVec); break;
-                case "XZ": _planeNormal = vec3_clone(__yVec); break;
-                case "YZ": _planeNormal = vec3_clone(__xVec); break;
-            }
-
-            // Transform normal to local space if needed
-            if (self.space == "local") {
-                vec3_apply_quaternion(_planeNormal, self.object.rotation);
-            }
-
-            // Flip plane normal if camera is looking from the wrong side
-            // Dot product tells us if camera and normal are pointing in same direction
-            var dot = vec3_dot(camDir, _planeNormal);
-            if (dot > 0) {
-                vec3_negate(_planeNormal);
-            }
-        }
-
-        // Save the initial transform state before dragging begins for delta calculations
-        vec3_copy(self._positionStart, self.object.position);
-        quat_copy(self._rotationStart, self.object.rotation);
-        vec3_copy(self._scaleStart, self.object.scale);
-        self.object.getWorldPosition(self._positionStartWorld);
-
-        // Create the drag plane using the calculated normal and object position
-        plane_set_from_normal_and_coplanar_point(self._plane, _planeNormal, self._positionStartWorld);
-
-        // Calculate initial intersection point where mouse ray meets the drag plane
-        var intersectionPoint = ray_intersect_plane(_raycasterInstance.ray, self._plane);
-        if (intersectionPoint == undefined) {
-            // No intersection found; cancel dragging
-            self.dragging = false;
-            self.selectedAxis = undefined;
-            self.axis = undefined;
-            return;
-        }
-        vec3_copy(self.pointStart, intersectionPoint);
-        vec3_copy(self.pointPrevious, intersectionPoint);  // Initialize previous point for rotation
-        self._rotationAngle = 0; // Reset accumulated rotation for new drag
-    }
-
-    /**
-     * Handles pointer move event to update dragging transform.
-     * Calculates the drag delta and applies the appropriate transformation.
-     */
-    function onPointerMove() {
-        gml_pragma("forceinline");
-        if (!self.dragging) return;
-
-        var _raycasterInstance = self._raycaster;
-        if (self.mode == "rotate") {
-            _raycasterInstance = self._raycasterRotate;
-        }
-
-        // Calculate current intersection with drag plane
-        var intersectionPoint = ray_intersect_plane(_raycasterInstance.ray, self._plane);
-        if (intersectionPoint == undefined) return;
-
-        vec3_copy(self.pointEnd, intersectionPoint);
-
-        // Calculate drag delta vector
-        // For move/scale we use delta from start.
-        // For rotate, we will calculate angle directly from vectors in applyTransform
-        vec3_copy(self.delta, self.pointEnd);
-        vec3_sub(self.delta, self.pointStart);
-
-        applyTransform();  // Apply transform change to object based on delta
-        updateGizmo();     // Update gizmo transform to match object
-
-        if (self.onDrag != undefined) self.onDrag();
-    }
-
-    /**
-     * Handles pointer up event to stop dragging.
-     */
-    function onPointerUp() {
-        gml_pragma("forceinline");
-
-        if (self.dragging && self.onDragEnd != undefined) self.onDragEnd();
-
-        self.dragging = false;
-        self.selectedAxis = undefined;
-        self.axis = undefined;
-    }
-
-    /**
-     * Main update loop - handles mouse events and interaction updates.
-     */
-    function update() {
-        if (!self.object) return;
-
-        // Update gizmo transform (scale/rotation) to match camera/object changes
-        updateGizmo();
-
-        // Update which axis is hovered based on mouse position
-        updateInteraction();
-
-        // Handle mouse events for dragging
-        if (mouse_check_button_pressed(mb_left)) {
-            onPointerDown();
-        }
-        if (mouse_check_button(mb_left)) {
-            onPointerMove();
-        }
-        if (mouse_check_button_released(mb_left)) {
-            onPointerUp();
-        }
-    }
-
-    /**
-     * Applies the transformation (move, rotate, scale) to the attached object based on drag delta.
-     * Handles coordinate space conversion, axis constraints, snapping, and bounds clamping.
-     */
-    function applyTransform() {
-        gml_pragma("forceinline");
-        if (!self.object) return;
-
-        if (self.mode == "move") {
-            var worldDelta = vec3_clone(self.delta);
-
-            // --- Constrain Delta to Axis ---
-            if (self.space == "local") {
-                // We need the object's world rotation to align the delta
-                var objectWorldRot = quat_create();
-                self.object.getWorldQuaternion(objectWorldRot);
-                var invRot = quat_clone(objectWorldRot);
-                quat_invert(invRot);
-
-                // Transform world delta to "aligned" space
-                vec3_apply_quaternion(worldDelta, invRot);
-
-                // Apply constraints
-                if (self.axis == "X") vec3_set(worldDelta, worldDelta[0], 0, 0);
-                else if (self.axis == "Y") vec3_set(worldDelta, 0, worldDelta[1], 0);
-                else if (self.axis == "Z") vec3_set(worldDelta, 0, 0, worldDelta[2]);
-                else if (self.axis == "XY") worldDelta[2] = 0;
-                else if (self.axis == "XZ") worldDelta[1] = 0;
-                else if (self.axis == "YZ") worldDelta[0] = 0;
-
-                // Transform back to world space
-                vec3_apply_quaternion(worldDelta, objectWorldRot);
-            } else {
-                // World space constraints
-                if (self.axis == "X") vec3_set(worldDelta, worldDelta[0], 0, 0);
-                else if (self.axis == "Y") vec3_set(worldDelta, 0, worldDelta[1], 0);
-                else if (self.axis == "Z") vec3_set(worldDelta, 0, 0, worldDelta[2]);
-                else if (self.axis == "XY") worldDelta[2] = 0;
-                else if (self.axis == "XZ") worldDelta[1] = 0;
-                else if (self.axis == "YZ") worldDelta[0] = 0;
-            }
-
-            // Calculate Target World Position
-            var targetWorldPos = vec3_clone(self._positionStartWorld);
-            vec3_add(targetWorldPos, worldDelta);
-
-            // Convert to Parent Local Space
-            if (self.object.parent != undefined) {
-                var parentInv = mat4_create();
-                mat4_copy(parentInv, self.object.parent.matrixWorld);
-                mat4_invert(parentInv);
-                vec3_apply_matrix4(targetWorldPos, parentInv);
-            }
-
-            // Apply to object (targetWorldPos is now the new local position)
-            var newPos = targetWorldPos;
-
-            // Apply snapping if needed
-            if (self.translationSnap != undefined) {
-                if (self.axis == "X") newPos[0] = round(newPos[0] / self.translationSnap) * self.translationSnap;
-                else if (self.axis == "Y") newPos[1] = round(newPos[1] / self.translationSnap) * self.translationSnap;
-                else if (self.axis == "Z") newPos[2] = round(newPos[2] / self.translationSnap) * self.translationSnap;
-                else if (self.axis == "XYZ") {
-                    newPos[0] = round(newPos[0] / self.translationSnap) * self.translationSnap;
-                    newPos[1] = round(newPos[1] / self.translationSnap) * self.translationSnap;
-                    newPos[2] = round(newPos[2] / self.translationSnap) * self.translationSnap;
-                }
-            }
-
-            // Clamp to configured limits
-            newPos[0] = clamp(newPos[0], self.minX, self.maxX);
-            newPos[1] = clamp(newPos[1], self.minY, self.maxY);
-            newPos[2] = clamp(newPos[2], self.minZ, self.maxZ);
-
-            // Apply the final position change to the object
-            vec3_copy(self.object.position, newPos);
-        }
-        else if (self.mode == "rotate") {
-            var axisVec = vec3_create();
-            if (self.axis == "X") vec3_copy(axisVec, __xVec);
-            else if (self.axis == "Y") vec3_copy(axisVec, __yVec);
-            else if (self.axis == "Z") vec3_copy(axisVec, __zVec);
-            else if (self.axis == "E") {
-                // Screen space rotation: axis is vector from object to camera
-                vec3_sub_vectors(axisVec, self.camera.position, self._positionStartWorld);
-                vec3_normalize(axisVec);
-            }
-            else return;
-
-            if (self.space == "local" && self.axis != "E") {
-                var objectWorldRot = quat_create();
-                self.object.getWorldQuaternion(objectWorldRot);
-                vec3_apply_quaternion(axisVec, objectWorldRot);
-            }
-
-            // Accumulate rotation using small deltas (prev -> curr)
-            // This allows for infinite rotation (>360 degrees) and stable behavior
-            var center = self._positionStartWorld;
-            var vPrev = vec3_create(); vec3_sub_vectors(vPrev, self.pointPrevious, center);
-            var vCurr = vec3_create(); vec3_sub_vectors(vCurr, self.pointEnd, center);
-
-            // Project vectors onto the plane perpendicular to the axis
-            // vProj = v - axis * (v . axis)
-            var vPrevProj = vec3_create(); vec3_copy(vPrevProj, vPrev);
-            vec3_add_scaled_vector(vPrevProj, axisVec, -vec3_dot(vPrev, axisVec));
-            
-            var vCurrProj = vec3_create(); vec3_copy(vCurrProj, vCurr);
-            vec3_add_scaled_vector(vCurrProj, axisVec, -vec3_dot(vCurr, axisVec));
-
-            vec3_normalize(vPrevProj);
-            vec3_normalize(vCurrProj);
-
-            // Calculate small angle change this frame
-            var vCross = vec3_create(); vec3_cross_vectors(vCross, vPrevProj, vCurrProj);
-            var vDot = vec3_dot(vPrevProj, vCurrProj);
-            var angleDelta = radtodeg(arctan2(vec3_dot(vCross, axisVec), vDot));
-
-            // Accumulate total angle
-            self._rotationAngle += angleDelta;
-
-            // Prepare final angle (with snapping if enabled)
-            var finalAngle = self._rotationAngle;
-            if (self.rotationSnap != undefined) {
-                finalAngle = round(finalAngle / self.rotationSnap) * self.rotationSnap;
-            }
-
-            // Create rotation from START state using accumulated angle
-            var rotationDelta = quat_create();
-            quat_set_from_axis_angle(rotationDelta, axisVec, finalAngle);
-
-            // Apply to initial rotation
-            // rotation = rotationDelta * rotationStart
-            var finalRot = quat_clone(rotationDelta);
-            quat_multiply(finalRot, self._rotationStart);
-            quat_copy(self.object.rotation, finalRot);
-
-            // Update previous point for next frame
-            vec3_copy(self.pointPrevious, self.pointEnd);
-        }
-
-        else if (self.mode == "scale") {
-            // Calculate scale based on ratio of drag distance from center
-            var objectWorldRot = quat_create();
-            self.object.getWorldQuaternion(objectWorldRot);
-            var invRot = quat_clone(objectWorldRot);
-            quat_invert(invRot);
-
-            // Transform start/end points to object local space (offset from center)
-            var localStart = vec3_create(); vec3_sub_vectors(localStart, self.pointStart, self._positionStartWorld);
-            vec3_apply_quaternion(localStart, invRot);
-            
-            var localEnd = vec3_create(); vec3_sub_vectors(localEnd, self.pointEnd, self._positionStartWorld);
-            vec3_apply_quaternion(localEnd, invRot);
-
-            var scaleFactorX = 1;
-            var scaleFactorY = 1;
-            var scaleFactorZ = 1;
-
-            if (self.axis == "XYZ") {
-                // Uniform scale using "virtual drag" in screen space.
-                var viewDelta = vec3_clone(self.delta);
-                var camQuat = quat_create();
-                self.camera.getWorldQuaternion(camQuat);
-                quat_invert(camQuat);
-                vec3_apply_quaternion(viewDelta, camQuat); // Transform to View Space
-
-                // Dragging Right (+X) or Up (+Y) increases scale. 
-                var dragAmount = viewDelta[0] + viewDelta[1];
-
-                // Normalize sensitivity by distance to camera so it feels consistent
-                var dist = vec3_distance_to(self.camera.position, self._positionStartWorld);
-                var sensitivity = 1.0 / (dist * 0.5); // Tune this value as needed
-
-                var uniformScale = 1 + (dragAmount * sensitivity);
-                uniformScale = max(uniformScale, 0.01); // Prevent zero/negative scale
-
-                scaleFactorX = uniformScale;
-                scaleFactorY = uniformScale;
-                scaleFactorZ = uniformScale;
-            } else {
-                // Per-axis scale based on projection ratio
-                if (self.axis == "X" || self.axis == "XY" || self.axis == "XZ") {
-                    if (abs(localStart[0]) > 0.001) scaleFactorX = localEnd[0] / localStart[0];
-                }
-                if (self.axis == "Y" || self.axis == "XY" || self.axis == "YZ") {
-                    if (abs(localStart[1]) > 0.001) scaleFactorY = localEnd[1] / localStart[1];
-                }
-                if (self.axis == "Z" || self.axis == "XZ" || self.axis == "YZ") {
-                    if (abs(localStart[2]) > 0.001) scaleFactorZ = localEnd[2] / localStart[2];
-                }
-            }
-
-            var newScale = vec3_clone(self._scaleStart);
-            newScale[0] *= scaleFactorX;
-            newScale[1] *= scaleFactorY;
-            newScale[2] *= scaleFactorZ;
-
-            // Snap
-            if (self.scaleSnap != undefined) {
-                newScale[0] = round(newScale[0] / self.scaleSnap) * self.scaleSnap;
-                newScale[1] = round(newScale[1] / self.scaleSnap) * self.scaleSnap;
-                newScale[2] = round(newScale[2] / self.scaleSnap) * self.scaleSnap;
-            }
-
-            // Clamp
-            newScale[0] = max(newScale[0], 0.01);
-            newScale[1] = max(newScale[1], 0.01);
-            newScale[2] = max(newScale[2], 0.01);
-
-            vec3_copy(self.object.scale, newScale);
-        }
-    }
-
-    // === API METHODS ===
-
-    /**
-     * Returns the root node of the gizmo for attaching to the scene.
-     * @returns {Struct}
-     */
-    function getHelper() {
-        gml_pragma("forceinline");
-        return self._root;
-    }
-
-    /**
-     * Returns the raycaster instance used for picking.
-     * @returns {Struct}
-     */
-    function getRaycaster() {
-        gml_pragma("forceinline");
-        return self._raycaster;
-    }
-
-    /**
-     * Sets the transform mode.
-     * @param {string} mode - "move", "rotate", or "scale"
-     * @returns {self}
-     */
-    function setMode(mode) {
-        gml_pragma("forceinline");
-        self.mode = mode;
-        if (self.object != undefined) build();  // Rebuild gizmo with new mode
-        return self;
-    }
-
-    /**
-     * Sets the visual size of the gizmo and rebuilds it.
-     * @param {number} value
-     * @returns {self}
-     */
-    function setSize(value) {
-        gml_pragma("forceinline");
-        self.size = value;
-        build();  // Rebuild gizmo geometry with new size
-        return self;
-    }
-
-    /**
-     * Sets the transform space: "world" or "local" and updates the gizmo rotation.
-     * @param {string} value
-     * @returns {self}
-     */
-    function setSpace(value) {
-        gml_pragma("forceinline");
-        self.space = value;
-        updateGizmo(); // Update gizmo to match new space setting
-        return self;
-    }
-
-    /**
-     * Resets the transform of the attached object to its state at drag start.
-     * Only active while dragging.
-     * @returns {self}
-     */
-    function reset() {
-        gml_pragma("forceinline");
-        if (!self.object || !self.dragging) return self;
-
-        vec3_copy(self.object.position, self._positionStart);
-        quat_copy(self.object.rotation, self._rotationStart);
-        vec3_copy(self.object.scale, self._scaleStart);
-        vec3_copy(self.pointStart, self.pointEnd);
-        updateGizmo();
-        return self;
-    }
-
-    /**
-     * Recursively clears and disposes of the gizmo geometry and children.
-     * Important for memory management to prevent geometry leaks.
-     */
-    function clearGizmo(node) {
-        gml_pragma("forceinline");
-
-        var _children = node.children;
-        var count = array_length(_children);
-
-        // Iterate backwards to safely remove children while iterating
-        for (var i = count - 1; i >= 0; i--) {
-            var child = _children[i];
-            var geometry = child[$ "geometry"];
-            if (geometry != undefined) {
-                child.geometry.dispose();  // Dispose geometry to free GPU memory
-            }
-            clearGizmo(child);  // Recursively clear child nodes
-        }
-
-        node.clear();  // Remove all children from node
+    self._unitRings[a] = points;
+  }
+
+  function setMode(mode) {
+    self.mode = mode;
+    return self;
+  }
+
+  /**
+   * Attaches the gizmo to an object.
+   */
+  function attach(object) {
+    self.object = object;
+
+    // Ensure object's world matrix is up-to-date so gizmo uses correct world transforms
+    if (object.updateWorldMatrix != undefined) {
+      object.updateWorldMatrix(true, false);
     }
 
     return self;
+  }
+
+  /**
+   * Detaches the gizmo.
+   */
+  function detach() {
+    self.object = undefined;
+    self.hoveredAxis = undefined;
+    self.selectedAxis = undefined;
+    self.dragging = false;
+    return self;
+  }
+
+  /**
+   * Updates logic (picking, dragging).
+   */
+  function update() {
+    if (!self.object || !self.enabled) return;
+
+    var mx = device_mouse_x_to_gui(0);
+    var my = device_mouse_y_to_gui(0);
+
+    // 1. Update Object Matrix
+    if (self.object.updateWorldMatrix != undefined) {
+      self.object.updateWorldMatrix(true, false);
+    }
+
+    // 2. Update Camera Matrix & Calculate View Matrix (Inverse World)
+    if (variable_struct_exists(self.camera, "updateMatrixWorld")) self.camera.updateMatrixWorld();
+
+    // Manually invert to ensure fresh View Matrix
+    if (self.camera.matrixWorldInverse != undefined) {
+      var inv = mat4_clone(self.camera.matrixWorld);
+      mat4_invert(inv);
+      mat4_copy(self.camera.matrixWorldInverse, inv);
+    }
+
+    // 3. Calculate MVP: View * Projection
+    matrix_multiply(self.camera.matrixWorldInverse, self.camera.projectionMatrix, self._matViewProj);
+
+    // Gizmo Origin in World Space
+    self.object.getWorldPosition(self._dragStartPoint);
+    var centerPos = vec3_clone(self._dragStartPoint);
+
+    // Scale logic
+    var scale = self._computeGizmoScale(centerPos);
+
+    // Update Ring Geometry Cache once per frame
+    if (self.mode == "rotate") {
+      self._updateRingGeom(centerPos, scale);
+    }
+
+    // --- DRAGGING LOGIC ---
+    if (self.dragging && self.selectedAxis != undefined) {
+      if (mouse_check_button_released(mb_left)) {
+        self.dragging = false;
+        self.selectedAxis = undefined;
+        return;
+      }
+
+      _handleDrag(mx, my, centerPos, scale);
+      return;
+    }
+
+    // --- PICKING LOGIC ---
+    if (mouse_check_button_pressed(mb_left) && self.hoveredAxis != undefined) {
+      self._startDrag(mx, my, centerPos, scale);
+      return;
+    }
+
+    self.hoveredAxis = undefined;
+    var minDist = self.hitThreshold;
+
+    var origin2D = self._worldToScreen(centerPos, self._matViewProj);
+    if (origin2D == undefined) return; // Behind camera
+
+    // Check Axes
+    // Check Axes
+    if (self.mode == "move") {
+      // Check Planes FIRST (Prioritize over Axes)
+      if (self._pickPlaneHandle(UE_GIZMO_AXIS.xy, centerPos, scale, mx, my)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.xy; minDist = 0;
+      }
+      else if (self._pickPlaneHandle(UE_GIZMO_AXIS.xz, centerPos, scale, mx, my)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.xz; minDist = 0;
+      }
+      else if (self._pickPlaneHandle(UE_GIZMO_AXIS.yz, centerPos, scale, mx, my)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.yz; minDist = 0;
+      }
+
+      if (self.hoveredAxis == undefined) {
+        // X Axis
+        if (self._pickArrow(UE_GIZMO_AXIS.x, centerPos, scale, mx, my, minDist)) {
+          self.hoveredAxis = UE_GIZMO_AXIS.x; minDist = 0;
+        }
+        // Y Axis
+        else if (self._pickArrow(UE_GIZMO_AXIS.y, centerPos, scale, mx, my, minDist)) {
+          self.hoveredAxis = UE_GIZMO_AXIS.y; minDist = 0;
+        }
+        // Z Axis
+        else if (self._pickArrow(UE_GIZMO_AXIS.z, centerPos, scale, mx, my, minDist)) {
+          self.hoveredAxis = UE_GIZMO_AXIS.z; minDist = 0;
+        }
+      }
+    }
+    else if (self.mode == "scale") {
+      // X Axis
+      if (self._pickArrow(UE_GIZMO_AXIS.x, centerPos, scale, mx, my, minDist)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.x; minDist = 0;
+      }
+      // Y Axis
+      else if (self._pickArrow(UE_GIZMO_AXIS.y, centerPos, scale, mx, my, minDist)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.y; minDist = 0;
+      }
+      // Z Axis
+      else if (self._pickArrow(UE_GIZMO_AXIS.z, centerPos, scale, mx, my, minDist)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.z; minDist = 0;
+      }
+    }
+    else if (self.mode == "rotate") {
+      // Use Cached Rings for Picking
+      if (self._pickRing(UE_GIZMO_AXIS.x, mx, my, minDist)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.x; minDist = 0;
+      } else if (self._pickRing(UE_GIZMO_AXIS.y, mx, my, minDist)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.y; minDist = 0;
+      } else if (self._pickRing(UE_GIZMO_AXIS.z, mx, my, minDist)) {
+        self.hoveredAxis = UE_GIZMO_AXIS.z; minDist = 0;
+      }
+    }
+  }
+
+  /**
+   * Draws the gizmo.
+   * Should be called in Draw GUI event.
+   */
+  function render() {
+    if (!self.object || !self.enabled) return;
+
+    // Ensure matrices are fresh for rendering frame
+    if (variable_struct_exists(self.camera, "updateMatrixWorld")) self.camera.updateMatrixWorld();
+
+    matrix_multiply(self.camera.matrixWorldInverse, self.camera.projectionMatrix, self._matViewProj);
+
+    self.object.getWorldPosition(self._vec0);
+    var centerPos = vec3_clone(self._vec0);
+    var scale = self._computeGizmoScale(centerPos);
+
+    var origin2D = self._worldToScreen(centerPos, self._matViewProj);
+    if (origin2D == undefined) return;
+
+    // Draw Modes
+    if (self.mode == "move") {
+      // Draw Planes
+      // Gizmo usually draws axes on top of planes.
+      self._drawPlaneHandle(UE_GIZMO_AXIS.yz, centerPos, scale, origin2D); // Red
+      self._drawPlaneHandle(UE_GIZMO_AXIS.xz, centerPos, scale, origin2D); // Blue
+      self._drawPlaneHandle(UE_GIZMO_AXIS.xy, centerPos, scale, origin2D); // Green
+
+      self._drawArrow(UE_GIZMO_AXIS.x, centerPos, scale, origin2D);
+      self._drawArrow(UE_GIZMO_AXIS.y, centerPos, scale, origin2D);
+      self._drawArrow(UE_GIZMO_AXIS.z, centerPos, scale, origin2D);
+    } else if (self.mode == "scale") {
+      self._drawScaleHandle(UE_GIZMO_AXIS.x, centerPos, scale, origin2D);
+      self._drawScaleHandle(UE_GIZMO_AXIS.y, centerPos, scale, origin2D);
+      self._drawScaleHandle(UE_GIZMO_AXIS.z, centerPos, scale, origin2D);
+    } else if (self.mode == "rotate") {
+      self._drawRing(UE_GIZMO_AXIS.x);
+      self._drawRing(UE_GIZMO_AXIS.y);
+      self._drawRing(UE_GIZMO_AXIS.z);
+    }
+  }
+
+  // --- DRAG HANDLERS ---
+
+  function _startDrag(mx, my, centerPos, scale) {
+    self.dragging = true;
+    self.selectedAxis = self.hoveredAxis;
+    self.axis = self.hoveredAxis;
+
+    // Store Start State
+    vec3_copy(self._dragStartPoint, self.object.position);
+    quat_copy(self._dragStartRot, self.object.rotation);
+    vec3_copy(self._dragStartScale, self.object.scale);
+
+    if (self.mode == "move") {
+      if (self.axis == UE_GIZMO_AXIS.xy || self.axis == UE_GIZMO_AXIS.xz || self.axis == UE_GIZMO_AXIS.yz) {
+        // Plane Drag
+        var normal = self._vec1;
+        self._getAxisVector(self.axis, normal); // Returns proper normal for plane enums
+
+        var hit = self._computePlaneIntersection(mx, my, centerPos, normal);
+        if (hit != undefined) {
+          self._dragOffsetVec = vec3_clone(hit);
+          vec3_sub(self._dragOffsetVec, self.object.position);
+        } else {
+          self.dragging = false; // Failed to hit plane??
+        }
+      } else {
+        // Axis Drag
+        self._dragOffset = self._computeAxisProjection(mx, my, centerPos, self.axis);
+        if (self._dragOffset == undefined) self.dragging = false;
+      }
+    } else if (self.mode == "scale") {
+      // Project initial mouse hit onto axis line
+      self._dragOffset = self._computeAxisProjection(mx, my, centerPos, self.axis);
+    } else if (self.mode == "rotate") {
+      // Compute Initial Angle on Screen relative to center
+      var origin2D = self._worldToScreen(centerPos, self._matViewProj);
+      if (origin2D != undefined) {
+        self._dragAngleStart = arctan2(my - origin2D[1], mx - origin2D[0]);
+      }
+    }
+  }
+
+  function _handleDrag(mx, my, centerPos, scale) {
+    if (self.mode == "move") {
+
+      if (self.axis == UE_GIZMO_AXIS.xy || self.axis == UE_GIZMO_AXIS.xz || self.axis == UE_GIZMO_AXIS.yz) {
+        // Plane Logic
+        var normal = self._vec1;
+        self._getAxisVector(self.axis, normal);
+
+        var hit = self._computePlaneIntersection(mx, my, centerPos, normal);
+        if (hit == undefined) return;
+
+        var newPos = vec3_clone(hit);
+        vec3_sub(newPos, self._dragOffsetVec); // Apply offset
+
+        // Apply to Object
+        // If parent exists, transform to local?
+        if (self.object.parent != undefined) {
+          var parentInv = mat4_clone(self.object.parent.matrixWorld);
+          mat4_invert(parentInv);
+          // We need to transform the World Position 'newPos' to Local Position
+          // vec3_apply_matrix4(newPos, parentInv) handles position transform
+          vec3_apply_matrix4(newPos, parentInv);
+        }
+
+        vec3_copy(self.object.position, newPos);
+        self.object.updateWorldMatrix(true, false);
+        return;
+      }
+
+      var currT = self._computeAxisProjection(mx, my, centerPos, self.axis);
+      if (currT == undefined || self._dragOffset == undefined) return;
+
+      var delta = currT - self._dragOffset;
+
+      // Apply Delta to Position
+      var axisVec = self._vec1;
+      self._getAxisVector(self.axis, axisVec);
+
+      var moveVec = vec3_clone(axisVec);
+      vec3_multiply_scalar(moveVec, delta);
+
+      // Transform to Local Space logic
+      if (self.space == "local") {
+        if (self.object.parent != undefined) {
+          var parentInv = mat4_clone(self.object.parent.matrixWorld);
+          mat4_invert(parentInv);
+          mat4_set_position(parentInv, 0, 0, 0);
+          vec3_apply_matrix4(moveVec, parentInv);
+        }
+        var newPos = vec3_clone(self._dragStartPoint);
+        vec3_add(newPos, moveVec);
+        vec3_copy(self.object.position, newPos);
+
+      } else { // World Space Axis
+        if (self.object.parent != undefined) {
+          var parentInv = mat4_clone(self.object.parent.matrixWorld);
+          mat4_invert(parentInv);
+          mat4_set_position(parentInv, 0, 0, 0);
+          vec3_apply_matrix4(moveVec, parentInv);
+        }
+        var newPos = vec3_clone(self._dragStartPoint);
+        vec3_add(newPos, moveVec);
+        vec3_copy(self.object.position, newPos);
+      }
+
+      // IMPORTANT: Immediately update world matrix to prevent jitter
+      self.object.updateWorldMatrix(true, false);
+
+    } else if (self.mode == "scale") {
+      var currT = self._computeAxisProjection(mx, my, centerPos, self.axis);
+      if (currT == undefined) return;
+
+      var delta = (currT - self._dragOffset) * 0.1; // Reduced sensitivity
+
+      var scaleAxis = (self.axis == UE_GIZMO_AXIS.x) ? 0 : ((self.axis == UE_GIZMO_AXIS.y) ? 1 : 2);
+      var newScale = vec3_clone(self._dragStartScale);
+
+      newScale[scaleAxis] += delta;
+      vec3_copy(self.object.scale, newScale);
+      self.object.updateWorldMatrix(true, false);
+
+    } else if (self.mode == "rotate") {
+      var origin2D = self._worldToScreen(centerPos, self._matViewProj);
+      if (origin2D != undefined) {
+        var currAngle = arctan2(my - origin2D[1], mx - origin2D[0]);
+        var deltaAngle = currAngle - self._dragAngleStart;
+
+        // Invert rotation if camera is looking "along" the axis
+        var camDir = global.UE_VEC3_TEMP2;
+        self.camera.getWorldDirection(camDir);
+        var axisVec = self._vec1;
+        self._getAxisVector(self.axis, axisVec);
+
+        // If angle between View and Axis is acute (<90), we are "behind" -> Flip
+        if (vec3_dot(camDir, axisVec) > 0) {
+          deltaAngle = -deltaAngle;
+        }
+
+        var qDelta = global.UE_QUAT_TEMP0;
+        quat_set_from_axis_angle(qDelta, axisVec, radtodeg(deltaAngle));
+
+        var newRot = quat_clone(self._dragStartRot);
+
+        if (self.space == "local") {
+          quat_multiply(newRot, qDelta);
+        } else {
+          quat_premultiply(newRot, qDelta);
+        }
+
+        quat_copy(self.object.rotation, newRot);
+        self.object.updateWorldMatrix(true, false);
+      }
+    }
+  }
+
+  function _computeAxisProjection(mx, my, centerPos, axisName) {
+    var axisVec = self._vec1;
+    self._getAxisVector(axisName, axisVec);
+
+    var camDir = global.UE_VEC3_TEMP2;
+    self.camera.getWorldDirection(camDir);
+
+    var planeNormal = vec3_clone(axisVec);
+    vec3_cross(planeNormal, camDir);
+    vec3_cross(planeNormal, axisVec);
+
+    if (vec3_length(planeNormal) < UE_EPSILON) return undefined;
+    vec3_normalize(planeNormal);
+
+    var rayOrigin = self.camera.position;
+    var rayDir = self._screenToWorldDir(mx, my);
+    if (rayDir == undefined) return undefined;
+
+    var denom = vec3_dot(rayDir, planeNormal);
+    if (abs(denom) < UE_EPSILON) return 0;
+
+    var p0lo = vec3_clone(centerPos);
+    vec3_sub(p0lo, rayOrigin);
+    var t = vec3_dot(p0lo, planeNormal) / denom;
+
+    var hitPoint = vec3_clone(rayDir);
+    vec3_multiply_scalar(hitPoint, t);
+    vec3_add(hitPoint, rayOrigin);
+
+    vec3_sub(hitPoint, centerPos);
+    return vec3_dot(hitPoint, axisVec);
+  }
+
+  // --- INTERNAL HELPERS ---
+
+  function _computeGizmoScale(pos) {
+    if (is_nan(pos[0]) || is_nan(pos[1]) || is_nan(pos[2])) return self.size;
+    var dist = vec3_distance_to(self.camera.position, pos);
+    if (is_nan(dist) || dist == infinity) return self.size;
+    return dist * 0.15 * self.size;
+  }
+
+  function _getAxisVector(axis, out) {
+    vec3_set(out, 0, 0, 0);
+    // Normals: X for YZ, Y for XZ, Z for XY
+    if (axis == UE_GIZMO_AXIS.x || axis == UE_GIZMO_AXIS.yz) out[0] = 1;
+    else if (axis == UE_GIZMO_AXIS.y || axis == UE_GIZMO_AXIS.xz) out[1] = 1;
+    else if (axis == UE_GIZMO_AXIS.z || axis == UE_GIZMO_AXIS.xy) out[2] = 1;
+
+    if (self.space == "local" && self.object) {
+      var q = global.UE_QUAT_TEMP0;
+      self.object.getWorldQuaternion(q);
+      vec3_apply_quaternion(out, q);
+    }
+
+    // Face towards camera
+    var camDir = global.UE_VEC3_TEMP2;
+    self.camera.getWorldDirection(camDir);
+
+    // If axis points away from camera → flip
+    if (vec3_dot(out, camDir) < 0) {
+      vec3_multiply_scalar(out, -1);
+    }
+
+    return out;
+  }
+
+  function _getAxisColor(axis) {
+    if (self.hoveredAxis == axis || self.selectedAxis == axis) return self.cYellow;
+    if (axis == UE_GIZMO_AXIS.x || axis == UE_GIZMO_AXIS.yz) return self.cRed;
+    if (axis == UE_GIZMO_AXIS.y || axis == UE_GIZMO_AXIS.xz) return self.cBlue;
+    if (axis == UE_GIZMO_AXIS.z || axis == UE_GIZMO_AXIS.xy) return self.cGreen;
+    return c_white;
+  }
+
+  function _drawArrow(axis, center, scale, origin2D) {
+    var endPos = vec3_clone(center);
+    self._getAxisVector(axis, self._vec1);
+    vec3_add_scaled_vector(endPos, self._vec1, self.axisLength * scale);
+
+    var end2D = self._worldToScreen(endPos, self._matViewProj);
+    if (end2D == undefined) return;
+
+    var col = self._getAxisColor(axis);
+
+    // Fake 3D Arrow (Triangle)
+    var dx = end2D[0] - origin2D[0];
+    var dy = end2D[1] - origin2D[1];
+    var len = sqrt(dx * dx + dy * dy);
+
+    // Draw line shorter to not overlap head
+    var headLen = self.lineWidth * 6.0;
+    var linePixels = len - headLen + 2; // +2 overlap 
+    if (linePixels < 0) linePixels = 0;
+
+    var lineEndX = origin2D[0];
+    var lineEndY = origin2D[1];
+
+    if (len > 0) {
+      dx /= len; dy /= len;
+      lineEndX = origin2D[0] + dx * linePixels;
+      lineEndY = origin2D[1] + dy * linePixels;
+
+      var headW = self.lineWidth * 3.0;
+      var bx = end2D[0] - dx * headLen;
+      var by = end2D[1] - dy * headLen;
+
+      var p1x = end2D[0];
+      var p1y = end2D[1];
+      var p2x = bx - dy * headW;
+      var p2y = by + dx * headW;
+      var p3x = bx + dy * headW;
+      var p3y = by - dx * headW;
+
+      draw_set_color(col);
+      draw_line_width(origin2D[0], origin2D[1], lineEndX, lineEndY, self.lineWidth);
+      draw_triangle(p1x, p1y, p2x, p2y, p3x, p3y, false);
+    }
+  }
+
+  function _pickArrow(axisName, center, scale, mx, my, threshold) {
+    var endPos = vec3_clone(center);
+    self._getAxisVector(axisName, self._vec1);
+    vec3_add_scaled_vector(endPos, self._vec1, self.axisLength * scale);
+
+    var origin2D = self._worldToScreen(center, self._matViewProj);
+    var end2D = self._worldToScreen(endPos, self._matViewProj);
+
+    if (origin2D != undefined && end2D != undefined) {
+      // Use Vector2 library function
+      var d = vec2_distance_to_segment([mx, my], origin2D, end2D);
+      return (d < threshold);
+    }
+    return false;
+  }
+
+  function _getPlaneBasis(axis, outRight, outUp) {
+    if (axis == UE_GIZMO_AXIS.yz) {
+      self._getAxisVector(UE_GIZMO_AXIS.y, outRight);
+      self._getAxisVector(UE_GIZMO_AXIS.z, outUp);
+    }
+    else if (axis == UE_GIZMO_AXIS.xz) {
+      self._getAxisVector(UE_GIZMO_AXIS.x, outRight);
+      self._getAxisVector(UE_GIZMO_AXIS.z, outUp);
+    }
+    else if (axis == UE_GIZMO_AXIS.xy) {
+      self._getAxisVector(UE_GIZMO_AXIS.x, outRight);
+      self._getAxisVector(UE_GIZMO_AXIS.y, outUp);
+    }
+  }
+
+  function _drawScaleHandle(axisName, center, scale, origin2D) {
+    var endPos = vec3_clone(center);
+    self._getAxisVector(axisName, self._vec1);
+    vec3_add_scaled_vector(endPos, self._vec1, self.axisLength * scale);
+
+    var end2D = self._worldToScreen(endPos, self._matViewProj);
+    if (end2D == undefined) return;
+
+    var col = self._getAxisColor(axisName);
+
+    draw_line_width_color(origin2D[0], origin2D[1], end2D[0], end2D[1], self.lineWidth, col, col);
+    // Box Tip
+    var s = self.lineWidth * 2.5;
+    draw_rectangle_color(end2D[0] - s, end2D[1] - s, end2D[0] + s, end2D[1] + s, col, col, col, col, false);
+  }
+
+  function _drawPlaneHandle(axis, center, scale, origin2D) {
+    // Planes:
+    // YZ (Red): Normal X. Spans Y, Z.
+    // XZ (Blue): Normal Y. Spans X, Z.
+    // XY (Green): Normal Z. Spans X, Y.
+
+    var size = self.axisLength * scale * 0.25;
+    var offset = 0;
+
+    var p0 = vec3_clone(center);
+    var p1 = vec3_clone(center);
+    var p2 = vec3_clone(center);
+    var p3 = vec3_clone(center);
+
+    var up = global.UE_VEC3_TEMP0;
+    var right = global.UE_VEC3_TEMP1;
+    vec3_set(up, 0, 0, 0);
+    vec3_set(right, 0, 0, 0);
+
+    self._getPlaneBasis(axis, right, up);
+
+    // Calculate 4 corners
+    // p0 = center + offset*right + offset*up
+    // p1 = center + (offset+size)*right + offset*up
+    // p2 = center + (offset+size)*right + (offset+size)*up
+    // p3 = center + offset*right + (offset+size)*up
+
+    var vOffsetRight = vec3_clone(right); vec3_multiply_scalar(vOffsetRight, offset);
+    var vOffsetUp = vec3_clone(up); vec3_multiply_scalar(vOffsetUp, offset);
+    var vSizeRight = vec3_clone(right); vec3_multiply_scalar(vSizeRight, size);
+    var vSizeUp = vec3_clone(up); vec3_multiply_scalar(vSizeUp, size);
+
+    // p0
+    vec3_add(p0, vOffsetRight); vec3_add(p0, vOffsetUp);
+    // p1
+    vec3_copy(p1, p0); vec3_add(p1, vSizeRight);
+    // p2
+    vec3_copy(p2, p1); vec3_add(p2, vSizeUp);
+    // p3
+    vec3_copy(p3, p0); vec3_add(p3, vSizeUp);
+
+    // Project
+    var s0 = self._worldToScreen(p0, self._matViewProj);
+    var s1 = self._worldToScreen(p1, self._matViewProj);
+    var s2 = self._worldToScreen(p2, self._matViewProj);
+    var s3 = self._worldToScreen(p3, self._matViewProj);
+
+    if (s0 == undefined || s1 == undefined || s2 == undefined || s3 == undefined) return;
+
+    var col = self._getAxisColor(axis);
+    draw_set_color(col);
+    draw_set_alpha(0.5); // Semi-transparent
+    draw_triangle(s0[0], s0[1], s1[0], s1[1], s2[0], s2[1], false);
+    draw_triangle(s0[0], s0[1], s2[0], s2[1], s3[0], s3[1], false);
+    draw_set_alpha(1.0);
+  }
+
+  function _pickPlaneHandle(axis, center, scale, mx, my) {
+    // Ideally reuse the projection logic from draw, but stripped down.
+    // Re-run the same point calc.
+    // NOTE: For optimization, we could cache these 2D quads too, but let's implement the logic first.
+
+    // ... (Same basis logic as draw) ... or Refactor "getPlanePoints" helper?
+    // Let's copy-paste for safety/simplicity to avoid huge diffs, then refactor.
+
+    var size = self.axisLength * scale * 0.3;
+    var offset = 0;
+
+    var p0 = vec3_clone(center);
+    var p1 = vec3_clone(center);
+    var p2 = vec3_clone(center);
+    var p3 = vec3_clone(center);
+
+    var up = global.UE_VEC3_TEMP0;
+    var right = global.UE_VEC3_TEMP1;
+    vec3_set(up, 0, 0, 0);
+    vec3_set(right, 0, 0, 0);
+
+    self._getPlaneBasis(axis, right, up);
+
+    var vOffsetRight = vec3_clone(right); vec3_multiply_scalar(vOffsetRight, offset);
+    var vOffsetUp = vec3_clone(up); vec3_multiply_scalar(vOffsetUp, offset);
+    var vSizeRight = vec3_clone(right); vec3_multiply_scalar(vSizeRight, size);
+    var vSizeUp = vec3_clone(up); vec3_multiply_scalar(vSizeUp, size);
+
+    vec3_add(p0, vOffsetRight); vec3_add(p0, vOffsetUp);
+    vec3_copy(p1, p0); vec3_add(p1, vSizeRight);
+    vec3_copy(p2, p1); vec3_add(p2, vSizeUp);
+    vec3_copy(p3, p0); vec3_add(p3, vSizeUp);
+
+    var s0 = self._worldToScreen(p0, self._matViewProj);
+    var s1 = self._worldToScreen(p1, self._matViewProj);
+    var s2 = self._worldToScreen(p2, self._matViewProj);
+    var s3 = self._worldToScreen(p3, self._matViewProj);
+
+    if (s0 == undefined || s1 == undefined || s2 == undefined || s3 == undefined) return false;
+
+    // Point in Triangle Check (Fan)
+    // Tri 1: s0, s1, s2
+    // Tri 2: s0, s2, s3
+    if (point_in_triangle(mx, my, s0[0], s0[1], s1[0], s1[1], s2[0], s2[1])) return true;
+    if (point_in_triangle(mx, my, s0[0], s0[1], s2[0], s2[1], s3[0], s3[1])) return true;
+
+    return false;
+  }
+
+  function _updateRingGeom(center, scale) {
+    self._ringCache[UE_GIZMO_AXIS.x] = self._getRingArcPoints(UE_GIZMO_AXIS.x, center, scale, 24);
+    self._ringCache[UE_GIZMO_AXIS.y] = self._getRingArcPoints(UE_GIZMO_AXIS.y, center, scale, 24);
+    self._ringCache[UE_GIZMO_AXIS.z] = self._getRingArcPoints(UE_GIZMO_AXIS.z, center, scale, 24);
+  }
+
+  function _getRingArcPoints(axis, center, scale, steps) {
+    var rotQ = global.UE_QUAT_TEMP0;
+    quat_set(rotQ, 0, 0, 0, 1);
+    if (axis == UE_GIZMO_AXIS.x) quat_set_from_axis_angle(rotQ, [0, 1, 0], 90);
+    else if (axis == UE_GIZMO_AXIS.y) quat_set_from_axis_angle(rotQ, [1, 0, 0], -90);
+    if (self.space == "local") {
+      var objQ = global.UE_QUAT_TEMP1;
+      self.object.getWorldQuaternion(objQ);
+      quat_multiply(rotQ, objQ);
+    }
+
+    // Calculate View Vector relative to center
+    // Reuse temp1 for viewDir
+    var viewDir = global.UE_VEC3_TEMP1;
+    vec3_copy(viewDir, self.camera.position);
+    vec3_sub(viewDir, center);
+
+    // Transform ViewDir into Ring Local Space (InvRot * ViewDir)
+    // Reuse temp2 for invRot
+    var invRot = global.UE_QUAT_TEMP2;
+    quat_copy(invRot, rotQ);
+    quat_invert(invRot);
+    vec3_apply_quaternion(viewDir, invRot);
+
+    // Arc Center Angle
+    var midAngle = arctan2(viewDir[1], viewDir[0]);
+
+    var points = [];
+    var r = self.axisLength * scale;
+
+    // Generate Semi-Circle (Pi)
+    var range = pi;
+    var stepRad = range / steps;
+    var startAngle = midAngle - range * 0.5;
+
+    for (var i = 0; i <= steps; i++) {
+      var a = startAngle + stepRad * i;
+
+      var p3 = [cos(a) * r, sin(a) * r, 0];
+      vec3_apply_quaternion(p3, rotQ);
+      vec3_add(p3, center);
+
+      var p2 = self._worldToScreen(p3, self._matViewProj);
+      if (p2 != undefined) array_push(points, p2);
+    }
+    return points;
+  }
+
+  function _drawRing(axis) {
+    if (self._ringCache == undefined) return;
+    var col = self._getAxisColor(axis);
+    var points2D = self._ringCache[axis];
+
+    if (points2D != undefined && array_length(points2D) > 1) {
+      draw_primitive_begin(pr_trianglestrip);
+      self._drawThickLineStrip(points2D, self.lineWidth, col);
+      draw_primitive_end();
+    }
+  }
+
+  function _pickRing(axis, mx, my, threshold) {
+    if (self._ringCache == undefined) return false;
+    var points2D = self._ringCache[axis];
+
+    if (points2D == undefined) return false;
+
+    var pMouse = [mx, my];
+    var prevP2 = undefined;
+    for (var i = 0, il = array_length(points2D); i < il; i++) {
+      var p2 = points2D[i];
+      if (prevP2 != undefined) {
+        var d = vec2_distance_to_segment(pMouse, prevP2, p2);
+        if (d < threshold) return true;
+      }
+      prevP2 = p2;
+    }
+    return false;
+  }
+
+  function _drawThickLineStrip(points, width, color) {
+    var halfW = width * 0.5;
+    draw_set_color(color);
+    for (var i = 0; i < array_length(points) - 1; i++) {
+      var p1 = points[i];
+      var p2 = points[i + 1];
+
+      var dirX = p2[0] - p1[0];
+      var dirY = p2[1] - p1[1];
+      var len = sqrt(dirX * dirX + dirY * dirY);
+      if (len == 0) continue;
+      dirX /= len; dirY /= len;
+
+      var perpX = -dirY * halfW;
+      var perpY = dirX * halfW;
+
+      draw_vertex(p1[0] + perpX, p1[1] + perpY);
+      draw_vertex(p1[0] - perpX, p1[1] - perpY);
+      draw_vertex(p2[0] + perpX, p2[1] + perpY);
+      draw_vertex(p2[0] - perpX, p2[1] - perpY);
+    }
+  }
+
+  function _worldToScreen(worldPos, viewProjMat) {
+    var _x = worldPos[0], _y = worldPos[1], _z = worldPos[2], _w = 1;
+
+    var m = viewProjMat;
+
+    var cx = m[0] * _x + m[4] * _y + m[8] * _z + m[12];
+    var cy = m[1] * _x + m[5] * _y + m[9] * _z + m[13];
+    var cz = m[2] * _x + m[6] * _y + m[10] * _z + m[14];
+    var cw = m[3] * _x + m[7] * _y + m[11] * _z + m[15];
+
+    if (cw <= 0) return undefined;
+
+    var ndcX = cx / cw;
+    var ndcY = cy / cw;
+
+    // NDC → VIEWPORT
+    var vx = view_xport[self.view];
+    var vy = view_yport[self.view];
+    var vw = view_wport[self.view];
+    var vh = view_hport[self.view];
+
+    var screenX = vx + (ndcX + 1) * 0.5 * vw;
+    var screenY = vy + ((ndcY + 1) * 0.5) * vh;
+
+    // Viewport → GUI
+    var guiW = display_get_gui_width();
+    var guiH = display_get_gui_height();
+    var winW = window_get_width();
+    var winH = window_get_height();
+
+    screenX *= guiW / winW;
+    screenY *= guiH / winH;
+
+    if (is_nan(screenX) || is_nan(screenY)) return undefined;
+
+    return [screenX, screenY];
+  }
+
+  function _screenToWorldDir(mx, my) {
+
+    var winW = window_get_width();
+    var winH = window_get_height();
+    var guiW = display_get_gui_width();
+    var guiH = display_get_gui_height();
+
+    var winX = mx * (winW / guiW);
+    var winY = my * (winH / guiH);
+
+    var vx = view_xport[self.view];
+    var vy = view_yport[self.view];
+    var vw = view_wport[self.view];
+    var vh = view_hport[self.view];
+
+    var localX = (winX - vx) / vw;
+    var localY = (winY - vy) / vh;
+
+    var ndcX = localX * 2 - 1;
+    var ndcY = localY * 2 - 1;
+
+    var invVP = mat4_clone(self._matViewProj);
+    mat4_invert(invVP);
+
+    var cx = ndcX;
+    var cy = ndcY;
+    var cz = 1;
+    var cw = 1;
+
+    var ox = invVP[0] * cx + invVP[4] * cy + invVP[8] * cz + invVP[12] * cw;
+    var oy = invVP[1] * cx + invVP[5] * cy + invVP[9] * cz + invVP[13] * cw;
+    var oz = invVP[2] * cx + invVP[6] * cy + invVP[10] * cz + invVP[14] * cw;
+    var ow = invVP[3] * cx + invVP[7] * cy + invVP[11] * cz + invVP[15] * cw;
+
+    if (ow != 0) { ox /= ow; oy /= ow; oz /= ow; }
+
+    var farPos = [ox, oy, oz];
+
+    var dir = vec3_create();
+    vec3_sub_vectors(dir, farPos, self.camera.position);
+    vec3_normalize(dir);
+
+    return dir;
+  }
+
+  // function _screenToWorldDirViewport(mx, my) {
+  //   var winW = window_get_width();
+  //   var winH = window_get_height();
+  //   var guiW = display_get_gui_width();
+  //   var guiH = display_get_gui_height();
+
+  //   var winX = mx * (winW / guiW);
+  //   var winY = my * (winH / guiH);
+
+  //   var vx = view_xport[self.view];
+  //   var vy = view_yport[self.view];
+  //   var vw = view_wport[self.view];
+  //   var vh = view_hport[self.view];
+
+  //   if (winX < vx || winX > vx + vw || winY < vy || winY > vy + vh)
+  //     return undefined;
+
+  //   // poi chiama la versione libera
+  //   return _screenToWorldDir(mx, my);
+  // }
+
+  function _computePlaneIntersection(mx, my, planeOrigin, planeNormal) {
+    var rayDir = self._screenToWorldDir(mx, my);
+    if (rayDir == undefined) return undefined;
+
+    // Use Unique Math Ray Intersection
+    var ray = global.UE_RAY_TEMP0;
+    ray_set(ray, self.camera.position, rayDir);
+
+    // Plane equation: dot(normal, x) + d = 0  => d = -dot(normal, planeOrigin)
+    var d = -vec3_dot(planeNormal, planeOrigin);
+    var plane = [planeNormal[0], planeNormal[1], planeNormal[2], d];
+
+    return ray_intersect_plane(ray, plane);
+  }
 }
