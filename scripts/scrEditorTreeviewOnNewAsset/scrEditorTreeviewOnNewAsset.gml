@@ -65,7 +65,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           box3_set_from_center_and_size(geometry.boundingBox, [0, 0, 0], [size, size, size]);
           
           // Set bounding sphere
-          geometry.boundingSphere = sphere_create(0, 0, 0, size * 0.866); // sqrt(3)/2 ≈ 0.866
+          geometry.boundingSphere = sphere_create(vec3_create(), size * 0.866); // sqrt(3)/2 ≈ 0.866
           
           asset = new UeStaticMesh(geometry);
           asset.geometry.__vbClone = geometry.cloneVb();

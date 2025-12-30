@@ -259,10 +259,10 @@ function UeAssimpLoader(data = {}) constructor {
     var minV = vec3_create(minX, minY, minZ);
     var maxV = vec3_create(maxX, maxY, maxZ);
 
-    geometry.boundingBox = box3_create(minV, maxV);
+    firstGeometry.boundingBox = box3_create(minV, maxV);
 
     var center = vec3_clone(minV); vec3_add(center, maxV); vec3_multiply_scalar(center, 0.5);
-    geometry.boundingSphere = sphere_create(center, vec3_distance_to(center, maxV));
+    firstGeometry.boundingSphere = sphere_create(center, vec3_distance_to(center, maxV));
   }
 
   function dispose() {
