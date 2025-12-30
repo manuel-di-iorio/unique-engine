@@ -372,12 +372,9 @@ function ProjectLoader() constructor {
 
       if (asset.type == "Mesh") {        
         asset.__matrixAutoUpdate = node[$ "matrixAutoUpdate"] ?? false;
-        if (struct_exists(node, "ex") && struct_exists(node, "ey") && struct_exists(node, "ez")) {
-          asset.__rotationEuler = euler_create(node[$ "ex"], node[$ "ey"], node[$ "ez"]);
-        } else {
-          asset.__rotationEuler = euler_create();
-          euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
-        }
+        
+        asset.__rotationEuler = euler_create();
+        euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
         
         var geometryPath = assetDir + "geometry.buf";
 

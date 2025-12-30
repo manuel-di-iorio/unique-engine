@@ -32,22 +32,10 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             matrixAutoUpdate,
             frustumCulled,
             
-            px: position[VEC3.x],
-            py: position[VEC3.y],
-            pz: position[VEC3.z],
-            
-            rx: rotation[QUAT.x],
-            ry: rotation[QUAT.y],
-            rz: rotation[QUAT.z],
-            rw: rotation[QUAT.w],
-            
-            sx: scale[VEC3.x],
-            sy: scale[VEC3.y],
-            sz: scale[VEC3.z],
-            
-            ux: up[VEC3.x],
-            uy: up[VEC3.y],
-            uz: up[VEC3.z],
+            position,
+            rotation,
+            scale,
+            up,
         };
     }
 
@@ -59,10 +47,17 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         renderOrder = data[$ "renderOrder"];
         layers.mask = data[$ "layers"];
         
-        vec3_set(position, data[$ "px"], data[$ "py"], data[$ "pz"]);
-        quat_set(rotation, data[$ "rx"], data[$ "ry"], data[$ "rz"], data[$ "rw"]);
-        vec3_set(scale, data[$ "sx"], data[$ "sy"], data[$ "sz"]);
-        vec3_set(up, data[$ "ux"], data[$ "uy"], data[$ "uz"]);
+        if (data[$ "position"] != undefined) vec3_copy(position, data.position);
+        else if (data[$ "px"] != undefined) vec3_set(position, data[$ "px"], data[$ "py"], data[$ "pz"]);
+
+        if (data[$ "rotation"] != undefined) quat_copy(rotation, data.rotation);
+        else if (data[$ "rx"] != undefined) quat_set(rotation, data[$ "rx"], data[$ "ry"], data[$ "rz"], data[$ "rw"]);
+
+        if (data[$ "scale"] != undefined) vec3_copy(scale, data.scale);
+        else if (data[$ "sx"] != undefined) vec3_set(scale, data[$ "sx"], data[$ "sy"], data[$ "sz"]);
+
+        if (data[$ "up"] != undefined) vec3_copy(up, data.up);
+        else if (data[$ "ux"] != undefined) vec3_set(up, data[$ "ux"], data[$ "uy"], data[$ "uz"]);
         
         if (geometry != undefined && data[$ "geometry"] != undefined) {
             geometry.fromJSON(data.geometry);

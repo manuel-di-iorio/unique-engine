@@ -1,76 +1,78 @@
 {
-  "geometry":{
-    "uuid":"ce1c2903-eaf4-4ccd-b567-6b4f142d9110",
-    "boundingBox":{
-      "min":{
-        "x":-26.259746551513672,
-        "y":0.0,
-        "z":-22.741558074951172
-      },
-      "max":{
-        "x":26.259746551513672,
-        "y":173.72793579101562,
-        "z":22.741558074951172
-      }
-    },
-    "name":null,
-    "type":"Geometry",
-    "boundingSphere":{
-      "radius":93.552667899840912,
-      "center":{
-        "x":0.0,
-        "y":86.863967895507812,
-        "z":0.0
-      }
-    },
-    "format":{
-      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
-      "name":"",
-      "type":"VertexFormat",
-      "attrs":[
-        {
-          "kind":0
-        },
-        {
-          "kind":1
-        },
-        {
-          "kind":2
-        },
-        {
-          "kind":3
+    "geometry": {
+        "uuid": "ce1c2903-eaf4-4ccd-b567-6b4f142d9110",
+        "boundingBox": [
+            -26.259746551513672,
+            0.0,
+            -22.741558074951172,
+            26.259746551513672,
+            173.72793579101562,
+            22.741558074951172
+        ],
+        "name": null,
+        "type": "Geometry",
+        "boundingSphere": [
+            0.0,
+            86.863967895507812,
+            0.0,
+            93.552667899840912
+        ],
+        "format": {
+            "uuid": "e8e5b18a-ff27-4f77-b92a-82a3f698d250",
+            "name": "",
+            "type": "VertexFormat",
+            "attrs": [
+                {
+                    "kind": 0
+                },
+                {
+                    "kind": 1
+                },
+                {
+                    "kind": 2
+                },
+                {
+                    "kind": 3
+                }
+            ]
         }
-      ]
-    }
-  },
-  "ex":90.0,
-  "visible":true,
-  "ey":0.0,
-  "frustumCulled":true,
-  "ez":0.0,
-  "eo":"XYZ",
-  "name":"oLantern",
-  "type":"Mesh",
-  "parent":null,
-  "uuid":"927da630-411d-41b9-9231-9a7478c3355a",
-  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-  "renderOrder":0.0,
-  "matrixAutoUpdate":false,
-  "layers":1.0,
-  "children":[
-  ],
-  "pz":0.0,
-  "py":0.0,
-  "px":0.0,
-  "rw":0.70710678118654757,
-  "rz":0.0,
-  "ry":0.0,
-  "rx":0.70710678118654757,
-  "sz":1.0,
-  "sy":1.0,
-  "sx":1.0,
-  "uz":-1.0,
-  "uy":0.0,
-  "ux":0.0,
-  "material":"38fc4d25-b5be-47c0-9f53-2d3f62db5e03"
+    },
+    "visible": true,
+    "frustumCulled": true,
+    "name": "oLantern",
+    "type": "Mesh",
+    "parent": null,
+    "uuid": "927da630-411d-41b9-9231-9a7478c3355a",
+    "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
+    "renderOrder": 0.0,
+    "matrixAutoUpdate": false,
+    "layers": 1.0,
+    "children": [],
+    "material": "38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
+    "position": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "rotation": [
+        0.70710678118654757,
+        0.0,
+        0.0,
+        0.70710678118654757
+    ],
+    "scale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "up": [
+        0.0,
+        0.0,
+        -1.0
+    ],
+    "rotationEuler": [
+        90.0,
+        0.0,
+        0.0
+    ]
 }

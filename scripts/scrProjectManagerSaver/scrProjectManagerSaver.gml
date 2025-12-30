@@ -184,11 +184,7 @@ function ProjectSaver() constructor {
         var metadata = is_callable(assetToJSON) ? assetToJSON() : asset;
         
         if (struct_exists(asset, "__rotationEuler") && asset[$ "__rotationEuler"] != undefined) {
-            var e = asset[$ "__rotationEuler"];
-            metadata[$ "ex"] = e[0];
-            metadata[$ "ey"] = e[1];
-            metadata[$ "ez"] = e[2];
-            metadata[$ "eo"] = "YXZ";
+            metadata[$ "rotationEuler"] = asset[$ "__rotationEuler"];
         }
         
         if (type == "Mesh" && struct_exists(asset, "__matrixAutoUpdate") && asset[$ "__matrixAutoUpdate"] != undefined) {

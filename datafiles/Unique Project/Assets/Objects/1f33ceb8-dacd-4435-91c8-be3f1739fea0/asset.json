@@ -1,76 +1,78 @@
 {
-  "material":"38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
-  "visible":true,
-  "geometry":{
-    "boundingSphere":{
-      "center":{
-        "x":0.0,
-        "y":10.0,
-        "z":0.0
-      },
-      "radius":30.0
+    "material": "38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
+    "visible": true,
+    "geometry": {
+        "boundingSphere": [
+            0.0,
+            10.0,
+            0.0,
+            30.0
+        ],
+        "name": null,
+        "format": {
+            "name": "",
+            "attrs": [
+                {
+                    "kind": 0
+                },
+                {
+                    "kind": 1
+                },
+                {
+                    "kind": 2
+                },
+                {
+                    "kind": 3
+                }
+            ],
+            "type": "VertexFormat",
+            "uuid": "e8e5b18a-ff27-4f77-b92a-82a3f698d250"
+        },
+        "uuid": "ea77aa7b-fcb8-4f9c-80e1-526d737e2305",
+        "type": "Geometry",
+        "boundingBox": [
+            -20.0,
+            0.0,
+            -20.0,
+            20.0,
+            20.0,
+            20.0
+        ]
     },
-    "name":null,
-    "format":{
-      "name":"",
-      "attrs":[
-        {
-          "kind":0
-        },
-        {
-          "kind":1
-        },
-        {
-          "kind":2
-        },
-        {
-          "kind":3
-        }
-      ],
-      "type":"VertexFormat",
-      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250"
-    },
-    "uuid":"ea77aa7b-fcb8-4f9c-80e1-526d737e2305",
-    "type":"Geometry",
-    "boundingBox":{
-      "min":{
-        "x":-20.0,
-        "y":0.0,
-        "z":-20.0
-      },
-      "max":{
-        "x":20.0,
-        "y":20.0,
-        "z":20.0
-      }
-    }
-  },
-  "frustumCulled":true,
-  "ex":0.0,
-  "ey":0.0,
-  "children":[
-  ],
-  "ez":0.0,
-  "eo":"XYZ",
-  "parent":"3157358e-90c0-46a4-82da-46158d75bee5",
-  "__parentUI":"3157358e-90c0-46a4-82da-46158d75bee5",
-  "matrixAutoUpdate":false,
-  "renderOrder":0.0,
-  "layers":1.0,
-  "type":"Mesh",
-  "pz":0.0,
-  "py":0.0,
-  "px":0.0,
-  "rw":1.0,
-  "rz":0.0,
-  "name":"oPresentBCube__Base",
-  "ry":0.0,
-  "rx":0.0,
-  "sz":1.0,
-  "sy":1.0,
-  "uuid":"1f33ceb8-dacd-4435-91c8-be3f1739fea0",
-  "sx":1.0,
-  "uz":-1.0,
-  "uy":0.0,
-  "ux":0.0
+    "frustumCulled": true,
+    "children": [],
+    "parent": "3157358e-90c0-46a4-82da-46158d75bee5",
+    "__parentUI": "3157358e-90c0-46a4-82da-46158d75bee5",
+    "matrixAutoUpdate": false,
+    "renderOrder": 0.0,
+    "layers": 1.0,
+    "type": "Mesh",
+    "name": "oPresentBCube__Base",
+    "uuid": "1f33ceb8-dacd-4435-91c8-be3f1739fea0",
+    "position": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+    ],
+    "scale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "up": [
+        0.0,
+        0.0,
+        -1.0
+    ],
+    "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+    ]
 }

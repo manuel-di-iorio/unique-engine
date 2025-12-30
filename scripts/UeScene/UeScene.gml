@@ -77,16 +77,13 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         
         // Apply transform
         if (data[$ "position"] != undefined) {
-            var pos = data.position;
-            vec3_set(instance.position, pos[0], pos[1], pos[2]);
+            vec3_copy(instance.position, data.position);
         }
         if (data[$ "rotation"] != undefined) {
-            var rot = data.rotation;
-            quat_set(instance.rotation, rot[0], rot[1], rot[2], rot[3]);
+            quat_copy(instance.rotation, data.rotation);
         }
         if (data[$ "scale"] != undefined) {
-            var scl = data.scale;
-            vec3_set(instance.scale, scl[0], scl[1], scl[2]);
+            vec3_copy(instance.scale, data.scale);
         }
         if (data[$ "visible"] != undefined) {
             instance.visible = data.visible;
@@ -99,8 +96,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         }
         
         // Initialize editor-specific rotation tracker
-        instance.__rotationEuler = euler_create();
-        euler_set_from_quaternion(instance.__rotationEuler, instance.rotation);
+        instance.__rotationEuler = euler_clone(instance.rotation);
         
         instance.updateMatrix();
         

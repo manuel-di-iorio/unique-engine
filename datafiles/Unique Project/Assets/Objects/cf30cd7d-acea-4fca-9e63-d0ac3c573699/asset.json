@@ -1,76 +1,78 @@
 {
-  "material":"38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
-  "visible":true,
-  "geometry":{
-    "boundingSphere":{
-      "center":{
-        "x":0.0,
-        "y":32.300003051757812,
-        "z":2.399566650390625
-      },
-      "radius":109.40761938928581
+    "material": "38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
+    "visible": true,
+    "geometry": {
+        "boundingSphere": [
+            0.0,
+            32.300003051757812,
+            2.399566650390625,
+            109.40761938928581
+        ],
+        "name": null,
+        "format": {
+            "name": "",
+            "attrs": [
+                {
+                    "kind": 0
+                },
+                {
+                    "kind": 1
+                },
+                {
+                    "kind": 2
+                },
+                {
+                    "kind": 3
+                }
+            ],
+            "type": "VertexFormat",
+            "uuid": "e8e5b18a-ff27-4f77-b92a-82a3f698d250"
+        },
+        "uuid": "ef53f216-1486-4c37-8d9a-af92237dd5bc",
+        "type": "Geometry",
+        "boundingBox": [
+            -76.957633972167969,
+            0.0,
+            -68.341224670410156,
+            76.957633972167969,
+            64.600006103515625,
+            73.140357971191406
+        ]
     },
-    "name":null,
-    "format":{
-      "name":"",
-      "attrs":[
-        {
-          "kind":0
-        },
-        {
-          "kind":1
-        },
-        {
-          "kind":2
-        },
-        {
-          "kind":3
-        }
-      ],
-      "type":"VertexFormat",
-      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250"
-    },
-    "uuid":"ef53f216-1486-4c37-8d9a-af92237dd5bc",
-    "type":"Geometry",
-    "boundingBox":{
-      "min":{
-        "x":-76.957633972167969,
-        "y":0.0,
-        "z":-68.341224670410156
-      },
-      "max":{
-        "x":76.957633972167969,
-        "y":64.600006103515625,
-        "z":73.140357971191406
-      }
-    }
-  },
-  "frustumCulled":true,
-  "ex":90.0,
-  "ey":0.0,
-  "children":[
-  ],
-  "ez":0.0,
-  "eo":"XYZ",
-  "parent":"2a354e10-29b0-4e78-a7a6-2f6bc8f53480",
-  "__parentUI":"78732855-ca0f-4637-b371-4ba580dc7e2d",
-  "matrixAutoUpdate":false,
-  "renderOrder":0.0,
-  "layers":1.0,
-  "type":"Mesh",
-  "pz":0.0,
-  "py":0.0,
-  "px":0.0,
-  "rw":0.70710678118654757,
-  "rz":0.0,
-  "name":"oRocksSmall",
-  "ry":0.0,
-  "rx":0.70710678118654757,
-  "sz":1.0,
-  "sy":1.0,
-  "uuid":"cf30cd7d-acea-4fca-9e63-d0ac3c573699",
-  "sx":1.0,
-  "uz":-1.0,
-  "uy":0.0,
-  "ux":0.0
+    "frustumCulled": true,
+    "children": [],
+    "parent": "2a354e10-29b0-4e78-a7a6-2f6bc8f53480",
+    "__parentUI": "78732855-ca0f-4637-b371-4ba580dc7e2d",
+    "matrixAutoUpdate": false,
+    "renderOrder": 0.0,
+    "layers": 1.0,
+    "type": "Mesh",
+    "name": "oRocksSmall",
+    "uuid": "cf30cd7d-acea-4fca-9e63-d0ac3c573699",
+    "position": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "rotation": [
+        0.70710678118654757,
+        0.0,
+        0.0,
+        0.70710678118654757
+    ],
+    "scale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "up": [
+        0.0,
+        0.0,
+        -1.0
+    ],
+    "rotationEuler": [
+        90.0,
+        0.0,
+        0.0
+    ]
 }

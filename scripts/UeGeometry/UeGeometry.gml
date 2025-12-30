@@ -140,20 +140,12 @@ function UeGeometry(data = {}) constructor {
             format: format.toJSON() 
         };
         if (boundingBox != undefined) {
-            res.boundingBox = {
-                minX: boundingBox[0], minY: boundingBox[1], minZ: boundingBox[2],
-                maxX: boundingBox[3], maxY: boundingBox[4], maxZ: boundingBox[5]
-            };
+            res.boundingBox = boundingBox;
         } else {
             res.boundingBox = undefined;
         }
         if (boundingSphere != undefined) {
-            res.boundingSphere = {
-                x: boundingSphere[0],
-                y: boundingSphere[1],
-                z: boundingSphere[2],
-                r: boundingSphere[3]
-            };
+            res.boundingSphere = boundingSphere;
         } else {
             res.boundingSphere = undefined;
         }
@@ -185,27 +177,10 @@ function UeGeometry(data = {}) constructor {
             }
         }
         if (data[$ "boundingBox"] != undefined) {
-            var b = data.boundingBox;
-            if (is_struct(b) && struct_exists(b, "minX")) {
-                boundingBox = box3_create(vec3_create(b.minX, b.minY, b.minZ), vec3_create(b.maxX, b.maxY, b.maxZ));
-            } else if (is_struct(b) && struct_exists(b, "min")) {
-                var _min = b.min;
-                var _max = b.max;
-                boundingBox = box3_create(vec3_create(_min.x, _min.y, _min.z), vec3_create(_max.x, _max.y, _max.z));
-            } else if (is_array(b)) {
-                boundingBox = box3_clone(b);
-            }
+            boundingBox = box3_clone(data.boundingBox);
         }
         if (data[$ "boundingSphere"] != undefined) {
-            var s = data.boundingSphere;
-            if (is_struct(s) && struct_exists(s, "x")) {
-                boundingSphere = sphere_create(vec3_create(s.x, s.y, s.z), s.r);
-            } else if (is_struct(s) && struct_exists(s, "center")) {
-                var c = s.center;
-                boundingSphere = sphere_create(vec3_create(c.x, c.y, c.z), s.radius ?? -1);
-            } else if (is_array(s)) {
-                boundingSphere = sphere_clone(s);
-            }
+            boundingSphere = sphere_clone(data.boundingSphere);
         }
         return self;
     }

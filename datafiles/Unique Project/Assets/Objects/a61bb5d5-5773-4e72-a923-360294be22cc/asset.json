@@ -1,76 +1,78 @@
 {
-  "geometry":{
-    "uuid":"44f3a284-36e3-4e90-b519-e74012509048",
-    "boundingBox":{
-      "min":{
-        "x":-56.052261352539062,
-        "y":0.0,
-        "z":-31.605449676513672
-      },
-      "max":{
-        "x":56.052261352539062,
-        "y":73.052719116210938,
-        "z":31.605445861816406
-      }
-    },
-    "name":null,
-    "type":"Geometry",
-    "boundingSphere":{
-      "radius":73.992805555613089,
-      "center":{
-        "x":0.0,
-        "y":36.526359558105469,
-        "z":-1.9073486328125e-06
-      }
-    },
-    "format":{
-      "uuid":"e8e5b18a-ff27-4f77-b92a-82a3f698d250",
-      "name":"",
-      "type":"VertexFormat",
-      "attrs":[
-        {
-          "kind":0.0
-        },
-        {
-          "kind":1.0
-        },
-        {
-          "kind":2.0
-        },
-        {
-          "kind":3.0
+    "geometry": {
+        "uuid": "44f3a284-36e3-4e90-b519-e74012509048",
+        "boundingBox": [
+            -56.052261352539062,
+            0.0,
+            -31.605449676513672,
+            56.052261352539062,
+            73.052719116210938,
+            31.605445861816406
+        ],
+        "name": null,
+        "type": "Geometry",
+        "boundingSphere": [
+            0.0,
+            36.526359558105469,
+            -1.9073486328125E-06,
+            73.992805555613089
+        ],
+        "format": {
+            "uuid": "e8e5b18a-ff27-4f77-b92a-82a3f698d250",
+            "name": "",
+            "type": "VertexFormat",
+            "attrs": [
+                {
+                    "kind": 0.0
+                },
+                {
+                    "kind": 1.0
+                },
+                {
+                    "kind": 2.0
+                },
+                {
+                    "kind": 3.0
+                }
+            ]
         }
-      ]
-    }
-  },
-  "ex":90.0,
-  "visible":true,
-  "ey":0.0,
-  "frustumCulled":true,
-  "ez":0.0,
-  "eo":"XYZ",
-  "name":"oBench",
-  "type":"Mesh",
-  "parent":null,
-  "uuid":"a61bb5d5-5773-4e72-a923-360294be22cc",
-  "__parentUI":"59a07d4a-a762-4269-b750-1c7010ee5f4e",
-  "renderOrder":0.0,
-  "matrixAutoUpdate":false,
-  "layers":1.0,
-  "children":[
-  ],
-  "pz":0.0,
-  "py":0.0,
-  "px":0.0,
-  "rw":0.70710678118654757,
-  "rz":0.0,
-  "ry":0.0,
-  "rx":0.70710678118654757,
-  "sz":1.0,
-  "sy":1.0,
-  "sx":1.0,
-  "uz":-1.0,
-  "uy":0.0,
-  "ux":0.0,
-  "material":"38fc4d25-b5be-47c0-9f53-2d3f62db5e03"
+    },
+    "visible": true,
+    "frustumCulled": true,
+    "name": "oBench",
+    "type": "Mesh",
+    "parent": null,
+    "uuid": "a61bb5d5-5773-4e72-a923-360294be22cc",
+    "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
+    "renderOrder": 0.0,
+    "matrixAutoUpdate": false,
+    "layers": 1.0,
+    "children": [],
+    "material": "38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
+    "position": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "rotation": [
+        0.70710678118654757,
+        0.0,
+        0.0,
+        0.70710678118654757
+    ],
+    "scale": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "up": [
+        0.0,
+        0.0,
+        -1.0
+    ],
+    "rotationEuler": [
+        90.0,
+        0.0,
+        0.0
+    ]
 }
