@@ -1,6 +1,6 @@
 {
   "$GMSprite":"v2",
-  "%Name":"sprUeMapTex",
+  "%Name":"sprUeBlackTex",
   "bboxMode":0,
   "bbox_bottom":0,
   "bbox_left":0,
@@ -21,19 +21,19 @@
   "layers":[
     {"$GMImageLayer":"","%Name":"0124334c-5a9d-42f0-baa4-fab63a071d51","blendMode":0,"displayName":"default","isLocked":false,"name":"0124334c-5a9d-42f0-baa4-fab63a071d51","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
   ],
-  "name":"sprUeMapTex",
+  "name":"sprUeBlackTex",
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"__internals",
-    "path":"folders/Packages/Unique Engine/__internals.yy",
+    "name":"DefaultTextures",
+    "path":"folders/Packages/Unique Engine/__internals/DefaultTextures.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
   "resourceVersion":"2.0",
   "sequence":{
     "$GMSequence":"v1",
-    "%Name":"sprUeMapTex",
+    "%Name":"sprUeBlackTex",
     "autoRecord":true,
     "backdropHeight":768,
     "backdropImageOpacity":0.5,
@@ -57,7 +57,7 @@
       "resourceType":"KeyframeStore<MomentsEventKeyframe>",
       "resourceVersion":"2.0",
     },
-    "name":"sprUeMapTex",
+    "name":"sprUeBlackTex",
     "playback":1,
     "playbackSpeed":30.0,
     "playbackSpeedType":0,
@@ -71,7 +71,7 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"71c9c6f1-2a82-467d-90ad-9a65831b8977","path":"sprites/sprUeMapTex/sprUeMapTex.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"71c9c6f1-2a82-467d-90ad-9a65831b8977","path":"sprites/sprUeBlackTex/sprUeBlackTex.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
               },"Disabled":false,"id":"54d9866b-17c7-461f-837d-d0a1bef0915b","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],

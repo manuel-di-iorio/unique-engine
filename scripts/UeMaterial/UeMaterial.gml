@@ -59,7 +59,7 @@ function UeMaterial(data = {}) constructor {
 
   // Textures
   textures = {
-    map: data[$ "map"] ?? global.UE_TEXTURE_MAP.clone(),
+    map: data[$ "map"] ?? global.UE_TEXTURE_DEFAULT_WHITE.clone(),
   };
   if (data[$ "normalMap"] != undefined) textures.normalMap = data[$ "normalMap"];
   if (data[$ "roughnessMap"] != undefined) textures.roughnessMap = data[$ "roughnessMap"];
@@ -389,10 +389,12 @@ function UeMaterial(data = {}) constructor {
             textures[$ textureName] = texturesByUUID[$ textureUUID];
           } else {
             // Check if it's a default texture
-            if (textureUUID == global.UE_TEXTURE_MAP.uuid) {
-              textures[$ textureName] = global.UE_TEXTURE_MAP;
-            } else if (textureUUID == global.UE_TEXTURE_EMISSIVE.uuid) {
-              textures[$ textureName] = global.UE_TEXTURE_EMISSIVE;
+            if (textureUUID == global.UE_TEXTURE_DEFAULT_WHITE.uuid) {
+              textures[$ textureName] = global.UE_TEXTURE_DEFAULT_WHITE;
+            } else if (textureUUID == global.UE_TEXTURE_DEFAULT_BLACK.uuid) {
+              textures[$ textureName] = global.UE_TEXTURE_DEFAULT_NORMAL;
+            } else if (textureUUID == global.UE_TEXTURE_DEFAULT_NORMAL.uuid) {
+              textures[$ textureName] = global.UE_TEXTURE_DEFAULT_NORMAL;
             } else {
               // Keep UUID for later linking (texture not found)
               textures[$ textureName] = textureUUID;

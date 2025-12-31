@@ -137,6 +137,29 @@ float calculateShadow(vec4 lightSpacePos, vec3 normal, vec3 lightDir) {
     return shadow;
 }
 
+// PBR Functions
+vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+float D_GGX(float NdotH, float roughness) {
+    float a = roughness * roughness;
+    float a2 = a * a;
+    float denom = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
+    return a2 / (3.1415 * denom * denom);
+}
+
+float G_SchlickGGX(float NdotV, float roughness) {
+    float r = roughness + 1.0;
+    float k = (r * r) / 8.0;
+    return NdotV / (NdotV * (1.0 - k) + k);
+}
+
+float G_Smith(float NdotV, float NdotL, float roughness) {
+    return G_SchlickGGX(NdotV, roughness) *
+           G_SchlickGGX(NdotL, roughness);
+}
+
 void main() 
 {
     // Base texture * vertex color

@@ -2,8 +2,9 @@ global.UE_OBJECT_ID = 0;
 global.UE_VERSION = "0.3.2";
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_POSITION_UV_VFORMAT = new UeVertexFormat().position().uv().build();
-global.UE_TEXTURE_MAP = new UeTexture(sprUeMapTex);
-global.UE_TEXTURE_EMISSIVE = new UeTexture(sprUeEmissiveTex);
+global.UE_TEXTURE_DEFAULT_WHITE = new UeTexture(sprUeWhiteTex);
+global.UE_TEXTURE_DEFAULT_BLACK = new UeTexture(sprUeBlackTex);
+global.UE_TEXTURE_DEFAULT_NORMAL = new UeTexture(sprUeNormalTex);
 global.UE_MOUSE = new UeMouse();
 
 // Uniform names configuration
@@ -35,6 +36,11 @@ global.UE_UNIFORM_NAMES_CONFIG = {
 global.UE_DEFAULT_MATERIAL = new UeMeshBasicMaterial();
 global.UE_FALLBACK_MATERIAL = new UeMeshBasicMaterial({ shader: sh_ue_fallback });
 global.UE_DEFAULT_MATERIAL_WIREFRAME = new UeMeshBasicMaterial();
+
+enum UE_NORMAL_MAP_TYPE {
+  TANGENT_SPACE_NORMAL_MAP,
+  OBJECT_SPACE_NORMAL_MAP
+}
 
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,
