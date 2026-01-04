@@ -28,7 +28,7 @@ function UeMaterial(data = {}) constructor {
   blendDstAlpha = data[$ "blendDstAlpha"] ?? bm_inv_src_alpha;
 
   // Shader
-  shader = sh_ue_basic;
+  shader = data[$ "shader"];
 
   // Uniforms
   uniforms = data[$ "uniforms"] ?? {};
@@ -82,7 +82,7 @@ function UeMaterial(data = {}) constructor {
   // Cache uniform/sampler locations
   function build() {
    gml_pragma("forceinline");
-
+   if (shader == undefined) return;
    var cfg = __uniformNamesConfig;
 
    // Cache the engine uniforms
@@ -473,5 +473,5 @@ function UeMaterial(data = {}) constructor {
     return { payload: toJSON() };
   }
   
-  //build();
+  build();
 }
