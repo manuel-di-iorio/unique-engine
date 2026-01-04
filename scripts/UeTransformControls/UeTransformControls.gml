@@ -219,7 +219,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     if (self.mode == "rotate" && origin2D != undefined) {
       var camPos = self.camera.getWorldPosition(self._vec0);
       var viewDir = self._vec6;
-      vec3_sub(viewDir, camPos, self._centerPos);
+      vec3_sub(viewDir, camPos);//, self._centerPos);
       vec3_normalize(viewDir);
 
       var objRot = self.object.getWorldQuaternion(self._quat2);

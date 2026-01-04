@@ -218,7 +218,7 @@ function UeProjectLoader(data = {}) constructor {
                 break;
                 
             case "Material":
-                asset = new UeMaterial();
+                asset = new UeMeshStandardMaterial();
                 asset.__metadata = metadata;
                 break;
  

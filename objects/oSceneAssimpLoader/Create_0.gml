@@ -4,8 +4,8 @@ camera = new UePerspectiveCamera({ x: 400, y: 300, z: 300 }).use();
 orbitControls = new UeOrbitControls(camera, { autoRotate: true });
 
 // Lighting
-var ambientLight = new UeAmbientLight(c_dkgray);
-var sunLight = new UeDirectionalLight(#FFFFC8, .8, { x: 90, y: 45 });
+var ambientLight = new UeAmbientLight(c_gray);
+var sunLight = new UeDirectionalLight(#FFFFC8, .8, { x: 90, y: 45, z: 100 });
 
 // Load the model
 assimpLoader = new UeAssimpLoader();

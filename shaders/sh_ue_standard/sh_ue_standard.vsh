@@ -1,27 +1,39 @@
-attribute vec3 in_Position;                  // (x,y,z)
-attribute vec3 in_Normal;                    // (x,y,z)
-attribute vec4 in_Colour;                    // (r,g,b,a)
-attribute vec2 in_TextureCoord;              // (u,v)
+attribute vec3 in_Position;
+attribute vec3 in_Normal;
+attribute vec4 in_Colour;
+attribute vec2 in_TextureCoord;
 
-varying vec3 v_vWorldPosition;
-varying vec3 v_vWorldNormal;
-varying vec2 v_vTexcoord;
-varying vec4 v_vColour;
-varying vec4 v_vLightSpacePos;               // Position in light space for shadow mapping
+varying vec3 vWorldPosition;
+varying vec3 vWorldNormal;
+varying vec2 vTexcoord;
+varying vec4 vColour;
+varying vec4 vLightSpacePos;
 
-uniform mat4 u_ueLightSpaceMatrix;           // Light projection * view matrix
+uniform mat4 u_ueLightSpaceMatrix;
 
-void main()
-{
-    vec4 worldPosition = gm_Matrices[MATRIX_WORLD] * vec4(in_Position.xyz, 1.0);
-    v_vWorldPosition = worldPosition.xyz;
-    v_vWorldNormal = normalize((gm_Matrices[MATRIX_WORLD] * vec4(in_Normal, 0.0)).xyz);
-    
-    v_vColour = in_Colour;
-    v_vTexcoord = in_TextureCoord;
-    
-    gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(in_Position.xyz, 1.0);
-    
-    // Calculate light space position
-    v_vLightSpacePos = u_ueLightSpaceMatrix * worldPosition;
+// Displacement (vertex only)
+// uniform sampler2D s_displacementMap;
+// uniform float u_ueDisplacementScale;
+// uniform float u_ueDisplacementBias;
+
+void main() {
+
+    vec3 pos = in_Position;
+
+    // Vertex displacement (safe: default map = black)
+    // if (abs(u_ueDisplacementScale) > 0.0001) {
+    //     float h = texture2D(s_displacementMap, in_TextureCoord).r;
+    //     pos += in_Normal * (h * u_ueDisplacementScale + u_ueDisplacementBias);
+    // }
+
+    vec4 worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
+
+    vWorldPosition = worldPos.xyz;
+    vWorldNormal   = normalize((gm_Matrices[MATRIX_WORLD] * vec4(in_Normal, 0.0)).xyz);
+    vTexcoord      = in_TextureCoord;
+    vColour        = in_Colour;
+
+    vLightSpacePos = u_ueLightSpaceMatrix * worldPos;
+
+    gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(pos, 1.0);
 }

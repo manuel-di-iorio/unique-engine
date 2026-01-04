@@ -6,7 +6,7 @@ camera.matrixAutoUpdate = false;
 // Add a mesh and lights to the scene for test
 var cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: c_fuchsia });
 var cubeMesh = new UeStaticMesh(cubeGeometry, new UeMeshStandardMaterial());
-var ambientLight = new UeAmbientLight(c_dkgray);
+var ambientLight = new UeAmbientLight(c_gray);
 var dirLight = new UeDirectionalLight(c_ltgray, 1, { x: 150, y: 80, z: 90 }); 
 scene.add(cubeMesh, ambientLight, dirLight);
 

@@ -3,6 +3,15 @@ function UeScene(data = {}): UeObject3D(data) constructor {
     type = "Scene";
     overrideMaterial = data[$ "overrideMaterial"];
     
+    // Fog configuration
+    self.fog = data[$ "fog"] ?? {
+        color: [0.5, 0.5, 0.5],
+        density: 0,
+        near: 1,
+        far: 1000,
+        enabled: false
+    };
+    
     /**
      * Helper function to serialize a ModelInstance recursively
      */

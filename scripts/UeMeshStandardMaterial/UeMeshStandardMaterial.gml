@@ -1,4 +1,8 @@
 function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
+  var cfg = __uniformNamesConfig;
+  
+  shader = sh_ue_standard;
+  
   // Color
   var _color = data[$ "color"];
   if (_color != undefined) {
@@ -6,7 +10,7 @@ function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
   } else {
       color = [1, 1, 1];
   }
-  uniforms.ueColor = { type: UE_UNIFORM_TYPE.ARRAY, value: color };
+  uniforms.ueColor = { type: UE_UNIFORM_TYPE.VEC3, value: color };
   
   // Emissive
   var _emissive = data[$ "emissive"];
@@ -15,11 +19,13 @@ function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
   } else {
       emissive = [0, 0, 0];
   }
-  uniforms.ueEmissive = { type: UE_UNIFORM_TYPE.ARRAY, value: emissive };
+  uniforms.ueEmissive = { type: UE_UNIFORM_TYPE.VEC3, value: emissive };
   uniforms.ueEmissiveIntensity = { type: UE_UNIFORM_TYPE.FLOAT, value: data[$ "emissiveIntensity"] ?? 0 };
 
   // AO
+  aoIntensity = data[$ "aoIntensity"] ?? 1;
   aoMapIntensity = data[$ "aoMapIntensity"] ?? 1;
+  uniforms.ueAoIntensity = { type: UE_UNIFORM_TYPE.FLOAT, value: aoIntensity };
   uniforms.ueAoMapIntensity = { type: UE_UNIFORM_TYPE.FLOAT, value: aoMapIntensity };
   
   // Bump
@@ -61,20 +67,19 @@ function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
   uniforms.ueFlatShading = { type: UE_UNIFORM_TYPE.FLOAT, value: flatShading };
 
   // Fog
-  fog = data[$ "fog "] ?? true;
-  uniforms.ueFog = { type: UE_UNIFORM_TYPE.FLOAT, value: fog };
+  fog = data[$ "fog"] ?? true;
 
   /** === Textures === */
   textures.emissiveMap = data[$ "emissiveMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
   textures.alphaMap = data[$ "alphaMap"] ?? global.UE_TEXTURE_DEFAULT_WHITE;
   textures.roughnessMap = data[$ "roughnessMap"] ?? global.UE_TEXTURE_DEFAULT_WHITE;
   textures.metalnessMap = data[$ "metalnessMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
-  textures.aoMap = data[$ "aoMap"] ?? global.UE_TEXTURE_DEFAULT_WHITE;
   textures.normalMap = data[$ "normalMap"] ?? global.UE_TEXTURE_DEFAULT_NORMAL;
-  textures.bumpMap = data[$ "bumpMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
-  textures.lightMap = data[$ "lightMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
-  textures.displacementMap = data[$ "displacementMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
-  textures.envMap = data[$ "envMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
+//   textures.aoMap = data[$ "aoMap"] ?? global.UE_TEXTURE_DEFAULT_WHITE;
+//   textures.bumpMap = data[$ "bumpMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
+//   textures.lightMap = data[$ "lightMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
+//   textures.displacementMap = data[$ "displacementMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
+//   textures.envMap = data[$ "envMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
   
   build();
 }

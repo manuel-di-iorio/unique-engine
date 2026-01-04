@@ -86,7 +86,7 @@ function UeMtlLoader() constructor {
             case "map_Kd":
                 if (current != undefined) {
                     var currentTex = current.textures[$ "map"];
-                    if (currentTex != undefined) currentTex.dispose();
+                    //if (currentTex != undefined) currentTex.dispose();
                     current.textures.map = _createTexture(tokens[1]);
                 }
                 break;
@@ -95,7 +95,7 @@ function UeMtlLoader() constructor {
             case "bump":
                 if (current != undefined) {
                     var currentTex = current.textures[$ "bump"];
-                    if (currentTex != undefined) currentTex.dispose();
+                    //if (currentTex != undefined) currentTex.dispose();
                     current.textures.bump = _createTexture(tokens[1]);
                 }
                 break;
@@ -103,7 +103,7 @@ function UeMtlLoader() constructor {
             case "map_Ks":
                 if (current != undefined) {
                     var currentTex = current.textures[$ "specular"];
-                    if (currentTex != undefined) currentTex.dispose();
+                    //if (currentTex != undefined) currentTex.dispose();
                     current.textures.specular = _createTexture(tokens[1]);
                 }
                 break;
@@ -111,7 +111,7 @@ function UeMtlLoader() constructor {
             case "map_d":
                 if (current != undefined) {
                     var currentTex = current.textures[$ "alpha"];
-                    if (currentTex != undefined) currentTex.dispose();
+                    //if (currentTex != undefined) currentTex.dispose();
                     current.textures.alpha = _createTexture(tokens[1]);
                     current.transparent = true;
                 }
@@ -122,7 +122,7 @@ function UeMtlLoader() constructor {
             case "map_displacement":
                 if (current != undefined) {
                     var currentTex = current.textures[$ "displacement"];
-                    if (currentTex != undefined) currentTex.dispose();
+                    //if (currentTex != undefined) currentTex.dispose();
                     current.textures.displacement = _createTexture(tokens[1]);
                 }
                 break;

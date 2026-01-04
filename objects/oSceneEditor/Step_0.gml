@@ -2,7 +2,6 @@ if (!enableUI) exit;
 
 var ui = global.UI;
 var uiMain = global.UI.Main;
-var uiScene = global.UI.Main.Scene;
 var uiOverlay = global.UI.Overlay;
 
 // Correctly resize the application surface to match the new window size
@@ -16,6 +15,8 @@ ui.update();
 
 // Exit early if project not loaded
 if (!projectManager.loaded) exit;
+
+var uiScene = global.UI.Main.Scene;
 
 var winMouseX = window_mouse_get_x();
 var winMouseY = window_mouse_get_y();

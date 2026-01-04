@@ -10,8 +10,12 @@ global.UE_MOUSE = new UeMouse();
 // Uniform names configuration
 global.UE_UNIFORM_NAMES_CONFIG = {
     modelPosition: "u_ueModelPosition",
+    worldMatrix: "u_ueWorldMatrix",
+    cameraPosition: "u_ueCameraPosition",
     ambient: "u_ueAmbient",
     emissiveIntensity: "u_ueEmissiveIntensity",
+    aoIntensity: "u_ueAoIntensity",
+    aoMapIntensity: "u_ueAoMapIntensity",
     
     // Shadow
     lightSpaceMatrix: "u_ueLightSpaceMatrix",
@@ -19,7 +23,7 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     receiveShadow: "u_ueReceiveShadow",
     shadowQuality: "u_ueShadowQuality",
     shadowTexelSize: "u_ueShadowTexelSize",
-    shadowMapSampler: "s_shadowMap", // Sampler
+    shadowMapSampler: "s_shadowMap",
     
     // Directional Light Prefixes
     dirLightDir: "u_ueDirLightDir",
@@ -30,7 +34,13 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     pointLightPosition: "u_uePointLightPosition",
     pointLightColor: "u_uePointLightColor",
     pointLightRange: "u_uePointLightRange",
-    pointLightIntensity: "u_uePointLightIntensity"
+    pointLightIntensity: "u_uePointLightIntensity",
+
+    // Fog
+    fogColor: "u_ueFogColor",
+    fogDensity: "u_ueFogDensity",
+    fogNear: "u_ueFogNear",
+    fogFar: "u_ueFogFar"
 };
 
 global.UE_DEFAULT_MATERIAL = new UeMeshBasicMaterial();
@@ -86,3 +96,12 @@ global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL] = array
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = 0;
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT] = array_create(2);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = 0;
+
+global.UE_RENDERER_CAMERA_POSITION = array_create(3, 0);
+global.UE_RENDERER_FOG_STATE = {
+    color: [0, 0, 0],
+    density: 0,
+    near: 1,
+    far: 1000,
+    enabled: false
+};

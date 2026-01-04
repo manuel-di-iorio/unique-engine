@@ -52,7 +52,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       break;
 
       case "Material":
-          asset = new UeMaterial();
+          asset = new UeMeshStandardMaterial();
           assetId = global.UI_ASSETS_MATERIALS_ID++;
       break;
       

@@ -9,8 +9,6 @@ void main()
 
     gl_Position = clip;
 
-    // For coordinate system with -Z as "up", depth calculation needs adjustment
-    // Using negative Z for depth since Z-up is inverted in this coordinate system
     float ndc = clip.z / clip.w;    
     v_depth = ndc * 0.5 + 0.5; 
 }

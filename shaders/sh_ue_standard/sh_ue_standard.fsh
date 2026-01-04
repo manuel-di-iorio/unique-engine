@@ -1,152 +1,110 @@
-varying vec3 v_vWorldPosition;
-varying vec3 v_vWorldNormal;
-varying vec2 v_vTexcoord;
-varying vec4 v_vColour;
-varying vec3 v_vNormal;
-varying vec4 v_vLightSpacePos;
+precision mediump float;
 
-uniform vec3 u_ueAmbient;
+varying vec3 vWorldPosition;
+varying vec3 vWorldNormal;
+varying vec2 vTexcoord;
+varying vec4 vColour;
+varying vec4 vLightSpacePos;
 
-// Directional Light 0
-uniform vec3 u_ueDirLightDir0;
-uniform vec3 u_ueDirLightColor0;
+// ===== Scene =====
+uniform vec3  u_ueCameraPosition;
+uniform vec3  u_ueAmbient;
+uniform mat4  u_ueWorldMatrix;
+
+// Fog
+uniform vec3  u_ueFogColor;
+uniform float u_ueFogDensity;
+uniform float u_ueFogNear;
+uniform float u_ueFogFar;
+
+// ===== Material =====
+uniform vec3  u_ueColor;
+uniform float u_ueMetalness;
+uniform float u_ueRoughness;
+uniform vec3  u_ueEmissive;
+uniform float u_ueEmissiveIntensity;
+uniform float u_ueAoIntensity;
+uniform float u_ueAoMapIntensity;
+uniform float u_ueNormalMapType; // 0 = Tangent, 1 = Object
+uniform vec2  u_ueNormalMapScale;
+uniform float u_ueFlatShading;
+uniform float u_ueBumpScale;
+uniform float u_ueLightMapIntensity;
+uniform float u_ueEnvMapIntensity;
+uniform vec3  u_ueEnvMapRotation;
+
+// ===== Textures =====
+uniform sampler2D s_alphaMap;
+uniform sampler2D s_metalnessMap;
+uniform sampler2D s_roughnessMap;
+uniform sampler2D s_aoMap;
+uniform sampler2D s_normalMap;
+uniform sampler2D s_emissiveMap;
+// uniform sampler2D s_bumpMap;
+// uniform sampler2D s_lightMap;
+// uniform sampler2D s_envMap;
+
+// ===== Lights =====
+// Directional
+uniform vec3  u_ueDirLightDir0;
+uniform vec3  u_ueDirLightColor0;
 uniform float u_ueDirLightIntensity0;
 
-// Directional Light 1
-uniform vec3 u_ueDirLightDir1;
-uniform vec3 u_ueDirLightColor1;
+uniform vec3  u_ueDirLightDir1;
+uniform vec3  u_ueDirLightColor1;
 uniform float u_ueDirLightIntensity1;
 
-// Point Light 0
-uniform vec3 u_uePointLightPosition0;
-uniform vec3 u_uePointLightRange0;
-uniform vec3 u_uePointLightColor0;
+// Point
+uniform vec3  u_uePointLightPosition0;
+uniform vec3  u_uePointLightColor0;
 uniform float u_uePointLightIntensity0;
+uniform vec3  u_uePointLightRange0;
 
-// Point Light 1
-uniform vec3 u_uePointLightPosition1;
-uniform vec3 u_uePointLightRange1;
-uniform vec3 u_uePointLightColor1;
+uniform vec3  u_uePointLightPosition1;
+uniform vec3  u_uePointLightColor1;
 uniform float u_uePointLightIntensity1;
+uniform vec3  u_uePointLightRange1;
 
-// Emissive
-uniform vec3 u_ueEmissive;
-uniform float u_ueEmissiveIntensity;
-
-// Textures
-uniform sampler2D s_map;
-uniform sampler2D s_emissiveMap;
-
-// Shadow mapping - Directional Light (semplificato)
+// ===== Shadow =====
 uniform sampler2D s_shadowMap;
 uniform float u_ueShadowEnabled;
 uniform float u_ueReceiveShadow;
-uniform float u_ueShadowQuality; // 0=LOW, 1=MEDIUM, 2=HIGH
-uniform float u_ueShadowTexelSize; // 1.0 / shadowMapWidth
+uniform float u_ueShadowTexelSize;
+uniform float u_ueShadowQuality;
 
-// Gamma correction (sRGB to Linear color space)
+// ===== Constants =====
+#define PI 3.14159265359
 #define GAMMA 2.2
+#define EPSILON 1e-6
 
-vec3 SRGBToLinear(vec3 inputColor) {
-    return pow(inputColor, vec3(GAMMA));
+#extension GL_OES_standard_derivatives : enable
+
+// ===== Color Space =====
+vec3 SRGBToLinear(vec3 c) { return pow(max(c, vec3(0.0)), vec3(GAMMA)); }
+vec3 LinearToSRGB(vec3 c) { return pow(max(c, vec3(0.0)), vec3(1.0 / GAMMA)); }
+
+// ===== TBN (no precomputed tangents) =====
+mat3 calculateTBN(vec3 N, vec3 pos, vec2 uv) {
+    vec3 dp1 = dFdx(pos);
+    vec3 dp2 = dFdy(pos);
+    vec2 duv1 = dFdx(uv);
+    vec2 duv2 = dFdy(uv);
+
+    float det = (duv1.x * duv2.y - duv1.y * duv2.x);
+    if (abs(det) < EPSILON) return mat3(vec3(1,0,0), vec3(0,1,0), N);
+
+    vec3 T = normalize(dp1 * duv2.y - dp2 * duv1.y);
+    vec3 B = normalize(dp2 * duv1.x - dp1 * duv2.x);
+
+    return mat3(T, B, N);
 }
 
-vec3 LinearToSRGB(vec3 inputColor) {
-    return pow(inputColor, vec3(1.0 / GAMMA));
-}
-
-// Light functions
-vec3 calculateDirectionalLight(vec3 lightDir, vec3 lightColor, float intensity, vec3 normal) {
-    float diff = max(dot(normal, lightDir), 0.0);
-    return SRGBToLinear(lightColor) * diff * intensity;
-}
-
-vec3 calculatePointLight(vec3 lightPos, vec3 lightColor, float intensity, vec3 range, vec3 normal, vec3 fragPos) {
-    vec3 toLight = lightPos - fragPos;
-    float dist = length(toLight);
-    vec3 lightDir = normalize(toLight);
-    float diff = max(dot(normal, lightDir), 0.0);
-    
-    float attenuation = 1.0 / (1.0 + 0.1 * dist + 0.01 * dist * dist);
-    attenuation *= 1.0 - clamp(dist / range.x, 0.0, 1.0);
-
-    return SRGBToLinear(lightColor) * diff * attenuation * intensity;
-}
-
-// Helper function to get Poisson disk sample (GLSL ES compatible)
-vec2 getPoissonSample(int index) {
-    // Poisson disk sampling pattern for soft shadows
-    if(index == 0) return vec2(-0.94201624, -0.39906216);
-    if(index == 1) return vec2(0.94558609, -0.76890725);
-    if(index == 2) return vec2(-0.094184101, -0.92938870);
-    if(index == 3) return vec2(0.34495938, 0.29387760);
-    if(index == 4) return vec2(-0.91588581, 0.45771432);
-    if(index == 5) return vec2(-0.81544232, -0.87912464);
-    if(index == 6) return vec2(-0.38277543, 0.27676845);
-    if(index == 7) return vec2(0.97484398, 0.75648379);
-    if(index == 8) return vec2(0.44323325, -0.97511554);
-    if(index == 9) return vec2(0.53742981, -0.47373420);
-    if(index == 10) return vec2(-0.26496911, -0.41893023);
-    if(index == 11) return vec2(0.79197514, 0.19090188);
-    if(index == 12) return vec2(-0.24188840, 0.99706507);
-    if(index == 13) return vec2(-0.81409955, 0.91437590);
-    if(index == 14) return vec2(0.19984126, 0.78641367);
-    return vec2(0.14383161, -0.14100790); // index 15 or default
-}
-
-// Shadow calculation with quality-based PCF
-float calculateShadow(vec4 lightSpacePos, vec3 normal, vec3 lightDir) {
-    vec3 projCoords = lightSpacePos.xyz / lightSpacePos.w;
-    projCoords = projCoords * 0.5 + 0.5;
-
-    // Check if outside shadow map
-    if(projCoords.z > 1.0 || projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) return 0.0;
-    
-    float currentDepth = projCoords.z;
-    
-    // Dynamic bias based on surface angle (reduces shadow acne)
-    float bias = max(0.002 * (1.0 - dot(normal, lightDir)), 0.0005);
-    
-    float shadow = 0.0;
-    
-    // Quality level determines sample count and softness
-    int sampleCount = 1;      // LOW: hard shadows
-    float shadowRadius = 0.0; // LOW: no blur
-    
-    if (u_ueShadowQuality > 1.5) {
-        // HIGH: 16 samples, very soft shadows
-        sampleCount = 16;
-        shadowRadius = 1.5;
-    } else if (u_ueShadowQuality > 0.5) {
-        // MEDIUM: 4 samples, moderate softness
-        sampleCount = 4;
-        shadowRadius = 0.8;
-    }
-    
-    // Perform PCF sampling
-    for(int i = 0; i < 16; i++) {
-        if (i >= sampleCount) break;
-        
-        vec2 offset = getPoissonSample(i) * u_ueShadowTexelSize * shadowRadius;
-        float closestDepth = texture2D(s_shadowMap, projCoords.xy + offset).r;
-        shadow += currentDepth - bias > closestDepth ? 1.0 : 0.0;
-    }
-    
-    shadow /= float(sampleCount);
-    
-    return shadow;
-}
-
-// PBR Functions
-vec3 fresnelSchlick(float cosTheta, vec3 F0) {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-}
-
+// ===== GGX =====
 float D_GGX(float NdotH, float roughness) {
-    float a = roughness * roughness;
+    float a  = roughness * roughness;
     float a2 = a * a;
-    float denom = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
-    return a2 / (3.1415 * denom * denom);
+    float d  = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
+    return a2 / (PI * d * d);
 }
 
 float G_SchlickGGX(float NdotV, float roughness) {
@@ -160,46 +118,182 @@ float G_Smith(float NdotV, float NdotL, float roughness) {
            G_SchlickGGX(NdotL, roughness);
 }
 
-void main() 
-{
-    // Base texture * vertex color
-    vec4 baseColor = v_vColour * texture2D(s_map, v_vTexcoord);
-    baseColor.rgb = SRGBToLinear(baseColor.rgb); // Convert to linear space
+vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
 
-    vec3 normal = normalize(v_vWorldNormal);
-    vec3 lighting = u_ueAmbient;
+// ===== Shadow =====
+vec2 getPoisson(int i) {
+    if(i==0) return vec2(-0.94,-0.39);
+    if(i==1) return vec2( 0.94,-0.76);
+    if(i==2) return vec2(-0.09,-0.92);
+    if(i==3) return vec2( 0.34, 0.29);
+    return vec2(0.0);
+}
 
-    // === Directional Light ===
-    vec3 dirLight0 = calculateDirectionalLight(normalize(-u_ueDirLightDir0), u_ueDirLightColor0, u_ueDirLightIntensity0, normal);
-    vec3 dirLight1 = calculateDirectionalLight(normalize(-u_ueDirLightDir1), u_ueDirLightColor1, u_ueDirLightIntensity1, normal);
+float calculateShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
+    if (lightSpacePos.w < EPSILON) return 0.0;
+    vec3 p = lightSpacePos.xyz / lightSpacePos.w;
+    p = p * 0.5 + 0.5;
+
+    if (p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0 || p.z > 1.0) return 0.0;
+
+    float bias = max(0.002 * (1.0 - dot(N, L)), 0.0005);
+    float shadow = 0.0;
+
+    int samples = (u_ueShadowQuality > 0.5) ? 4 : 1;
+
+    for (int i = 0; i < 4; i++) {
+        if (i >= samples) break;
+        vec2 off = getPoisson(i) * u_ueShadowTexelSize;
+        float d = texture2D(s_shadowMap, p.xy + off).r;
+        shadow += (p.z - bias > d) ? 1.0 : 0.0;
+    }
+
+    return shadow / float(samples);
+}
+
+// ===== PBR Light =====
+vec3 BRDF_GGX(vec3 N, vec3 V, vec3 L, vec3 lightColor, float intensity,
+              vec3 albedo, vec3 F0, float roughness, float metalness) {
+
+    vec3 H = normalize(V + L);
+    float NdotL = max(dot(N, L), 0.0);
+    float NdotV = max(dot(N, V), EPSILON); // Avoid division by zero
+    float NdotH = max(dot(N, H), 0.0);
+    float VdotH = max(dot(V, H), 0.0);
+
+    if (NdotL <= 0.0) return vec3(0.0);
+
+    float D = D_GGX(NdotH, roughness);
+    float G = G_Smith(NdotV, NdotL, roughness);
+    vec3  F = fresnelSchlick(VdotH, F0);
+
+    vec3 spec = (D * G * F) / (4.0 * NdotV * NdotL + EPSILON);
+
+    vec3 kd = (1.0 - F) * (1.0 - metalness);
+    vec3 diff = kd * albedo / PI;
+
+    return (diff + spec) * lightColor * intensity * NdotL;
+}
+
+void main() {
+
+    // ===== Base =====
+    vec4 tex = texture2D(gm_BaseTexture, vTexcoord);
     
-    // Apply shadow to the first directional light
-    if (u_ueShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
-        vec3 lightDir = normalize(-u_ueDirLightDir0);
-        float shadow = calculateShadow(v_vLightSpacePos, normal, lightDir);
-        dirLight0 *= (1.0 - shadow);           
+    // Fallback if vertex color is black or transparent (often occurs if not provided)
+    vec4 vCol = vColour;
+    if (vCol.r + vCol.g + vCol.b < 0.001) vCol.rgb = vec3(1.0);
+    if (vCol.a < 0.001) vCol.a = 1.0;
+    
+    vec4 base = tex * vCol;
+    float alpha = base.a * texture2D(s_alphaMap, vTexcoord).r;
+    //if (alpha < 0.01) discard;
+
+    vec3 albedo = SRGBToLinear(base.rgb * u_ueColor);
+
+    float metalness = texture2D(s_metalnessMap, vTexcoord).r * u_ueMetalness;
+    float roughness = texture2D(s_roughnessMap, vTexcoord).r * u_ueRoughness;
+    roughness = clamp(roughness, 0.04, 1.0);
+
+     float ao = mix(1.0, texture2D(s_aoMap, vTexcoord).r, u_ueAoIntensity * u_ueAoMapIntensity);
+
+    // ===== Normal =====
+    vec3 N;
+    if (u_ueFlatShading > 0.5) {
+        N = normalize(cross(dFdx(vWorldPosition), dFdy(vWorldPosition)));
+    } else {
+        N = normalize(vWorldNormal);
+    }
+
+    vec3 nm = texture2D(s_normalMap, vTexcoord).rgb * 2.0 - 1.0;
+    nm.xy *= u_ueNormalMapScale;
+    
+    // Safety check for normal map sampling
+    if (length(nm) < 0.1) nm = vec3(0.0, 0.0, 1.0);
+    
+    if (u_ueNormalMapType > 0.5) {
+        // Object Space
+        N = normalize((u_ueWorldMatrix * vec4(nm, 0.0)).xyz);
+    } else {
+        // Tangent Space
+        mat3 TBN = calculateTBN(N, vWorldPosition, vTexcoord);
+        N = normalize(TBN * nm);
+    }
+
+    vec3 V = normalize(u_ueCameraPosition - vWorldPosition + vec3(EPSILON));
+
+    vec3 F0 = mix(vec3(0.04), albedo, metalness);
+
+    vec3 Lo = vec3(0.0);
+
+    // Directional 0
+    {
+        vec3 L = normalize(-u_ueDirLightDir0 + vec3(EPSILON));
+        float shadow = 0.0;
+        if (u_ueShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
+            shadow = calculateShadow(vLightSpacePos, N, L);
+        }
+        Lo += BRDF_GGX(N, V, L, SRGBToLinear(u_ueDirLightColor0),
+                       u_ueDirLightIntensity0, albedo, F0, roughness, metalness)
+              * (1.0 - shadow);
+    }
+
+    // Directional 1
+    {
+        vec3 L = normalize(-u_ueDirLightDir1 + vec3(EPSILON));
+        Lo += BRDF_GGX(N, V, L, SRGBToLinear(u_ueDirLightColor1),
+                       u_ueDirLightIntensity1, albedo, F0, roughness, metalness);
+    }
+
+    // Point 0
+    {
+        vec3 toL = u_uePointLightPosition0 - vWorldPosition;
+        float d2 = dot(toL, toL);
+        float d = sqrt(d2);
+        float att = 1.0 / (d2 + EPSILON);
+        att *= clamp(1.0 - d / max(u_uePointLightRange0.x, EPSILON), 0.0, 1.0);
+
+        Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor0),
+                       u_uePointLightIntensity0 * att, albedo, F0, roughness, metalness);
+    }
+
+    // Point 1
+    {
+        vec3 toL = u_uePointLightPosition1 - vWorldPosition;
+        float d2 = dot(toL, toL);
+        float d = sqrt(d2);
+        float att = 1.0 / (d2 + EPSILON);
+        att *= clamp(1.0 - d / max(u_uePointLightRange1.x, EPSILON), 0.0, 1.0);
+
+        Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor1),
+                       u_uePointLightIntensity1 * att, albedo, F0, roughness, metalness);
+    }
+
+    // Ambient
+    vec3 ambient = SRGBToLinear(u_ueAmbient + vec3(0.05)) * albedo * ao;
+
+    // Emissive
+    vec3 emissive = (SRGBToLinear(texture2D(s_emissiveMap, vTexcoord).rgb)
+                    + SRGBToLinear(u_ueEmissive)) * u_ueEmissiveIntensity;
+
+    vec3 color = ambient + Lo + emissive;
+
+    // ===== Fog =====
+    float dist = length(u_ueCameraPosition - vWorldPosition);
+    float fogFactor = 0.0;
+    
+    if (u_ueFogDensity > 0.0) {
+        // Exponential fog
+        fogFactor = 1.0 - exp(-dist * u_ueFogDensity);
+    } else if (u_ueFogFar > u_ueFogNear) {
+        // Linear fog
+        fogFactor = clamp((dist - u_ueFogNear) / (u_ueFogFar - u_ueFogNear), 0.0, 1.0);
     }
     
-    lighting += dirLight0;
-    lighting += dirLight1;
+    color = mix(color, SRGBToLinear(u_ueFogColor), fogFactor);
 
-    // === Point Light ===
-    vec3 pointLight0 = calculatePointLight(u_uePointLightPosition0, u_uePointLightColor0, u_uePointLightIntensity0, u_uePointLightRange0, normal, v_vWorldPosition);
-    vec3 pointLight1 = calculatePointLight(u_uePointLightPosition1, u_uePointLightColor1, u_uePointLightIntensity1, u_uePointLightRange1, normal, v_vWorldPosition);
-    
-    lighting += pointLight0;
-    lighting += pointLight1;
-
-    // === Final lit color ===
-    vec3 litColor = baseColor.rgb * lighting;
-
-    // === Emissive ===
-    vec3 emissiveTex = texture2D(s_emissiveMap, v_vTexcoord).rgb;
-    vec3 emissive = SRGBToLinear(emissiveTex + u_ueEmissive) * u_ueEmissiveIntensity;
-    litColor += emissive;
-
-    // === Back to sRGB color space ===
-    vec3 finalColor = LinearToSRGB(clamp(litColor, 0.0, 1.0));   
-    
-    gl_FragColor = vec4(finalColor, baseColor.a);
+    gl_FragColor = vec4(LinearToSRGB(color), alpha);
+    //gl_FragColor = vec4(texture2D(s_alphaMap, vTexcoord).rgb, 1.0);
 }

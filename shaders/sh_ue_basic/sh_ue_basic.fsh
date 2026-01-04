@@ -6,12 +6,11 @@ uniform vec3 u_ueEmissive;
 uniform float u_ueEmissiveIntensity;
 
 // Textures
-uniform sampler2D s_map;
 uniform sampler2D s_emissiveMap;
 
 void main()
 {
-    vec4 baseColor = v_vColour * texture2D(s_map, v_vTexcoord);
+    vec4 baseColor = v_vColour * texture2D(gm_BaseTexture, v_vTexcoord);
     
     // === Emissive ===
     vec3 emissiveTex = texture2D(s_emissiveMap, v_vTexcoord).rgb;

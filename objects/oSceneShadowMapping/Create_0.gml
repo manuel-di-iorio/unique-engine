@@ -13,7 +13,7 @@ cubeMesh3 = new UeMesh(cubeGeometry, _mat, { castShadow: true, receiveShadow: tr
 
 terrain = new UeMesh(new UePlaneGeometry(500, 500), _mat, { z: -25, receiveShadow: true });
 
-ambientLight = new UeAmbientLight(c_dkgray);
+ambientLight = new UeAmbientLight(c_gray);
 dirLight = new UeDirectionalLight(c_ltgray, .9, { z: 300, castShadow: true });
 dirLight.shadow.camera.left = -200;
 dirLight.shadow.camera.right = 200;

@@ -9,10 +9,10 @@ var texSand      = new UeTexture(spr_tex_sand);
 var texPalmTree  = new UeTexture(spr_tex_palm_tree, { generateMipmaps: true });
 
 // Materials
-var matSand     = new UeMaterial({ map: texSand, shader: sh_ue_standard });
-var matPyramid0 = new UeMaterial({ map: texPyramid, shader: sh_ue_standard });
-var matPyramid1 = new UeMaterial({ map: texPyramid, shader: sh_ue_standard });
-var matPyramid2 = new UeMaterial({ map: texPyramid, shader: sh_ue_standard });
+var matSand     = new UeMeshStandardMaterial({ map: texSand });
+var matPyramid0 = new UeMeshStandardMaterial({ map: texPyramid });
+var matPyramid1 = new UeMeshStandardMaterial({ map: texPyramid });
+var matPyramid2 = new UeMeshStandardMaterial({ map: texPyramid });
 matTree         = new UeSpriteMaterial({ map: texPalmTree });
 
 // Terrain

@@ -5,8 +5,6 @@ if (objMesh != undefined) {
     });
         
     ueStructEach(objLoader.materials, function(name, material) {
-        ueStructEach(material.textures, function(name, texture) {
-            if (sprite_exists(texture.sprite)) sprite_delete(texture.sprite);
-        });
-    })
+      material.textures.map.dispose();
+    });
 }

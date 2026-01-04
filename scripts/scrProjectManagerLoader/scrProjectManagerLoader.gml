@@ -358,7 +358,7 @@ function ProjectLoader() constructor {
 
     switch (type) {
       case "Texture": asset = new UeTexture(); break;
-      case "Material": asset = new UeMaterial(); break;
+      case "Material": asset = new UeMeshStandardMaterial(); break;
       case "Mesh": asset = new UeStaticMesh(); break;
       case "Scene": asset = new UeScene(); break;
       case "Light": asset = new UeLight(); break;

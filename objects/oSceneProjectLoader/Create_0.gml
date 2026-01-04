@@ -19,5 +19,5 @@ dirLight = new UeDirectionalLight(c_ltgray, 1, { x: -300, y: 300, z: 200 });
 dirLight.target = _tree;
 
 // Add the terrain and lights to the scene
-scene.add(_terrain, new UeAmbientLight(c_dkgray), dirLight);
+scene.add(_terrain, new UeAmbientLight(c_gray), dirLight);
 scene.updateMatrixWorld();

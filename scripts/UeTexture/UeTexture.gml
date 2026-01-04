@@ -167,6 +167,24 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         needsUpdate = false;
         return self;
     }
+  
+    /**
+     * Set the texture properties globally (internally used for albedo base textures)
+     */
+    function __useGlobal() {
+      gml_pragma("forceinline");
+        if (__cachedTexture == undefined) return;
+
+        if (matrixAutoUpdate && needsUpdate) update();
+
+        var repeatFlag = wrapS == UE_TEXTURE_WRAP.REPEAT || wrapT == UE_TEXTURE_WRAP.REPEAT;
+        gpu_set_texrepeat(repeatFlag);
+
+        gpu_set_texfilter(filter);
+        gpu_set_tex_mip_enable(generateMipmaps);
+
+        return self;
+    }
 
     /**
      * Bind this texture to a given sampler stage.

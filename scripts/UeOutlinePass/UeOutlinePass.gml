@@ -67,6 +67,8 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
     
     // Fullscreen quad for rendering the final composition
     self.__fullscreenQuad = undefined;
+  
+    self.__maskSampler = shader_get_sampler_index(sh_ue_outline_pass, "s_mask");
 
     /**
      * Build/initialize all resources.
@@ -192,10 +194,9 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         // Apply the outline material
         self.__outlineMaterial.use();
         
-        // Manually set the mask texture (UeMaterial skips textures without sprites)
-        var _maskSampler = shader_get_sampler_index(sh_ue_outline_pass, "s_mask");
+        // Set the mask texture
         var _maskTexture = surface_get_texture(self.__maskTarget.surface);
-        texture_set_stage(_maskSampler, _maskTexture);
+        texture_set_stage(self.__maskSampler, _maskTexture);
         
         // Now render the fullscreen quad (skip material.use since we already called it)
         self.__fullscreenQuad.render(_sceneTexture, true);

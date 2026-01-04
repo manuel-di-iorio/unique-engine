@@ -25,8 +25,8 @@
   "nineSlice":null,
   "origin":0,
   "parent":{
-    "name":"DefaultTextures",
-    "path":"folders/Packages/Unique Engine/__internals/DefaultTextures.yy",
+    "name":"Default Textures",
+    "path":"folders/Packages/Unique Engine/__internals/Default Textures.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
