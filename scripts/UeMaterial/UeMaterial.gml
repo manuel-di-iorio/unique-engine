@@ -69,7 +69,7 @@ function UeMaterial(data = {}) constructor {
   __uniformNamesConfig = global.UE_UNIFORM_NAMES_CONFIG;
 
   // Textures
-  __baseTexture = -1;
+  __baseTexture = global.UE_TEXTURE_DEFAULT_WHITE;
   textures = {
     map: data[$ "map"] ?? global.UE_TEXTURE_DEFAULT_WHITE,
   };
@@ -147,12 +147,12 @@ function UeMaterial(data = {}) constructor {
  
    __texturesCached = array_create(textureNamesCount);
    __texturesCachedCount = 0;
-   __baseTexture = -1;
+   __baseTexture = global.UE_TEXTURE_DEFAULT_WHITE;
  
    for (var t = 0; t < textureNamesCount; t++) {
     var textureName = textureNames[t];
     if (textureName == "map") {
-      __baseTexture = textures.map;
+      __baseTexture = textures.map ?? global.UE_TEXTURE_DEFAULT_WHITE;
       continue;
      }
     
@@ -384,7 +384,7 @@ function UeMaterial(data = {}) constructor {
       textures: ueStructMap(textures, function (name, texture) {
         return texture != undefined ? texture.uuid : undefined;
       }),
-      //shader: shader_get_name(shader),
+      shader: shader_get_name(shader),
       transparent,
       opacity,
       depthTest,
@@ -430,10 +430,10 @@ function UeMaterial(data = {}) constructor {
     lights = data[$ "lights"];
   
     // Load shader
-    //var shaderName = data[$ "shader"];
-    //if (shaderName != undefined && shaderName != "") {
-      //shader = asset_get_index(shaderName);
-    //}
+    var shaderName = data[$ "shader"];
+    if (shaderName != undefined && shaderName != "") {
+      shader = asset_get_index(shaderName);
+    }
   
     // Load textures
     var texturesData = data[$ "textures"];

@@ -10,7 +10,7 @@ Currently handles up to 2 directional lights and 2 point lights, but you can eas
 
 ---
 
-> NOTE: emissive, emissiveIntensity, emissiveMap are the actual properties that are currently implemented. We are adding support for other ones in the future. So e.g. if you pass "metalness", nothing will change for now.
+> NOTE: Most properties listed below are fully implemented in `sh_ue_standard`. Some advanced maps like `bumpMap`, `envMap` or `lightMap` are still in development.
 
 🧾 Material Properties
 
@@ -23,7 +23,7 @@ Currently handles up to 2 directional lights and 2 point lights, but you can eas
 | `roughness` | `float` | How rough the material appears. 0.0 means a smooth mirror reflection, 1.0 means fully diffuse. | `1` |
 | `aoMapIntensity` | `float` | Intensity of the ambient occlusion effect. | `1` |
 | `bumpScale` | `float` | How much the bump map affects the surface. | `1` |
-| `normalMapType` | `UE_NORMAL_MAP_TYPE` | The type of normal map. | `TANGENT_SPACE_NORMAL_MAP` |
+| `normalMapType` | `UE_NORMAL_MAP_TYPE` | The type of normal map. Can be `TANGENT_SPACE_NORMAL_MAP` or `OBJECT_SPACE_NORMAL_MAP`. | `TANGENT_SPACE_NORMAL_MAP` |
 | `normalMapScale` | `vec2` | How much the normal map affects the surface. | `[1, 1]` |
 | `displacementScale` | `float` | How much the displacement map affects the mesh. | `0` |
 | `displacementBias` | `float` | Offset of the displacement map values. | `0` |
@@ -31,7 +31,7 @@ Currently handles up to 2 directional lights and 2 point lights, but you can eas
 | `envMapIntensity` | `float` | Intensity of the environment map. | `1` |
 | `envMapRotation` | `vec3` | Rotation of the environment map (Euler angles). | `[0, 0, 0]` |
 | `flatShading` | `boolean` | Whether the material is rendered with flat shading. | `false` |
-| `fog` | `boolean` | Whether the material is affected by fog. | `true` |
+| `fog` | `boolean` | Whether the material is affected by fog (Linear and Exponential are supported). | `true` |
 
 ---
 
@@ -42,11 +42,9 @@ Currently handles up to 2 directional lights and 2 point lights, but you can eas
 | `textures.map` | `UeTexture` | The main diffuse/albedo texture. | `global.UE_TEXTURE_DEFAULT_WHITE` |
 | `textures.emissiveMap` | `UeTexture` | Texture used to modulate the emissive color. | `global.UE_TEXTURE_DEFAULT_BLACK` |
 | `textures.alphaMap` | `UeTexture` | Texture used to control the alpha (transparency) per pixel. | `global.UE_TEXTURE_DEFAULT_WHITE` |
-| `textures.roughnessMap` | `UeTexture` | Texture used to modulate the roughness. | `global.UE_TEXTURE_DEFAULT_WHITE` |
-| `textures.metalnessMap` | `UeTexture` | Texture used to modulate the metalness. | `global.UE_TEXTURE_DEFAULT_BLACK` |
-| `textures.aoMap` | `UeTexture` | Ambient occlusion map. | `global.UE_TEXTURE_DEFAULT_WHITE` |
+| `textures.ormMap` | `UeTexture` | Packed texture for **O**cclusion, **R**oughness, and **M**etalness. Color channel mapping: R = Ambient Occlusion, G = Roughness, B = Metalness. | `global.UE_TEXTURE_DEFAULT_ORM` |
 | `textures.normalMap` | `UeTexture` | Normal map for adding surface detail. | `global.UE_TEXTURE_DEFAULT_NORMAL` |
-| `textures.bumpMap` | `UeTexture` | Bump map for adding surface detail. | `global.UE_TEXTURE_DEFAULT_BLACK` |
-| `textures.lightMap` | `UeTexture` | Pre-baked light map. | `global.UE_TEXTURE_DEFAULT_BLACK` |
+<!-- | `textures.bumpMap` | `UeTexture` | Bump map for adding surface detail. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->
+<!-- | `textures.lightMap` | `UeTexture` | Pre-baked light map. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->
 | `textures.displacementMap` | `UeTexture` | Displacement map for deforming the mesh. | `global.UE_TEXTURE_DEFAULT_BLACK` |
-| `textures.envMap` | `UeTexture` | Environment map for reflections. | `global.UE_TEXTURE_DEFAULT_BLACK` |
+<!-- | `textures.envMap` | `UeTexture` | Environment map for reflections. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->

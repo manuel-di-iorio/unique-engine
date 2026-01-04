@@ -51,10 +51,9 @@ Textures are assigned via the textures object:
 
 - **map**: Base diffuse texture (by default it is `global.UE_DEFAULT_TEXTURE`, a white-colored 1x1 texture)
 - **normalMap**: Normal mapping
-- **roughnessMap**: For roughness (PBR)
-- **metalnessMap**: For metallic (PBR)
-- **aoMap**: Ambient occlusion
+- **ormMap**: Packed texture for **O**cclusion, **R**oughness, and **M**etalness (R=AO, G=Roughness, B=Metalness)
 - **emissiveMap**: Emissive light contribution
+- **displacementMap**: Displacement mapping for height effects
 
 Each texture must be a UeTexture.
 

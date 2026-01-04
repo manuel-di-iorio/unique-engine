@@ -6,7 +6,9 @@ sidebar_position: 1
 
 Import a 3D model and its materials by using an integrated Assimp extension, which supports a variety of 3D formats (obj,3ds,etc..).
 
-> STATUS: **ALPHA** - Many things may not work correctly, eg. you may need to manually add the textures to the mesh's materials, also some tests with the importer's flags are needed. Animations are not supported yet from the engine.
+It automatically generates tangents and bitangents for the imported geometry, which are required for normal mapping.
+
+> STATUS: **BETA** - Many things may not work correctly, eg. you may need to manually add the textures to the mesh's materials. Animations are not supported yet from the engine.
 
 ---
 

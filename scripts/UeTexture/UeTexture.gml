@@ -73,8 +73,8 @@ function UeTexture(sprite = undefined, data = {}) constructor {
     function updateMatrix() {
       gml_pragma("forceinline");
   
-      var tx = -center.x;
-      var ty = -center.y;
+      var tx = -center[VEC2.x];
+      var ty = -center[VEC2.y];
 
       var repeatVec = self[$ "repeat"];
       var sx = repeatVec[VEC2.x] * (flipX ? -1 : 1);
@@ -176,7 +176,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
       gml_pragma("forceinline");
         if (__cachedTexture == undefined) return;
 
-        if (matrixAutoUpdate && needsUpdate) update();
+        // if (matrixAutoUpdate && needsUpdate) update();
 
         var repeatFlag = wrapS == UE_TEXTURE_WRAP.REPEAT || wrapT == UE_TEXTURE_WRAP.REPEAT;
         gpu_set_texrepeat(repeatFlag);
@@ -286,6 +286,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
 
         userData = data.userData ?? {};
 
+        // needsUpdate = true;
         return self;
     }
 

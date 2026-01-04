@@ -78,8 +78,8 @@ function UeAssimpLoader(data = {}) constructor {
 
     var materialTypes = [
       { name: "map", type: ASSIMP_TEXTURE_TYPE.DIFFUSE },
-      { name: "normalsMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
-      { name: "ambientOcclusionMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
+      { name: "normalMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
+      { name: "aoMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
       { name: "emissiveMap", type: ASSIMP_TEXTURE_TYPE.EMISSIVE },
       { name: "reflectionMap", type: ASSIMP_TEXTURE_TYPE.REFLECTION },
       { name: "ambientMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT },
@@ -193,8 +193,8 @@ function UeAssimpLoader(data = {}) constructor {
 
         vertex_normal(vb, ASSIMP_GetMeshNormalX(v), ASSIMP_GetMeshNormalY(v), ASSIMP_GetMeshNormalZ(v));
         
-        //vertex_float3(vb, ASSIMP_GetMeshTangentX(), ASSIMP_GetMeshTangentY(), ASSIMP_GetMeshTangentZ());
-        //vertex_float3(vb, ASSIMP_GetMeshBitangentX(), ASSIMP_GetMeshBitangentY(), ASSIMP_GetMeshBitangentZ());
+        // vertex_float3(vb, ASSIMP_GetMeshTangentX(v), ASSIMP_GetMeshTangentY(v), ASSIMP_GetMeshTangentZ(v));
+        // vertex_float3(vb, ASSIMP_GetMeshBitangentX(v), ASSIMP_GetMeshBitangentY(v), ASSIMP_GetMeshBitangentZ(v));
 
         vertex_texcoord(vb,
           meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordU(v, 0) : 0,
