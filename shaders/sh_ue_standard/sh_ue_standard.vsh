@@ -1,5 +1,7 @@
 attribute vec3 in_Position;
 attribute vec3 in_Normal;
+//attribute vec3 in_Tangent;
+//attribute vec3 in_Bitangent;
 attribute vec4 in_Colour;
 attribute vec2 in_TextureCoord;
 

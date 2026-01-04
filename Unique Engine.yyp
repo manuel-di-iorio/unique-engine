@@ -247,6 +247,7 @@
     {"id":{"name":"UeControls","path":"scripts/UeControls/UeControls.yy",},},
     {"id":{"name":"UeCylinderGeometry","path":"scripts/UeCylinderGeometry/UeCylinderGeometry.yy",},},
     {"id":{"name":"UeDirectionalLight","path":"scripts/UeDirectionalLight/UeDirectionalLight.yy",},},
+    {"id":{"name":"UeDirectionalLightHelper","path":"scripts/UeDirectionalLightHelper/UeDirectionalLightHelper.yy",},},
     {"id":{"name":"UeDirectionalLightShadow","path":"scripts/UeDirectionalLightShadow/UeDirectionalLightShadow.yy",},},
     {"id":{"name":"UeEffectComposer","path":"scripts/UeEffectComposer/UeEffectComposer.yy",},},
     {"id":{"name":"ueError","path":"scripts/ueError/ueError.yy",},},

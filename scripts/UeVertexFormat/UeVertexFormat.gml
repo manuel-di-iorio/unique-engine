@@ -17,6 +17,13 @@ function UeVertexFormat(data = {}) constructor {
         array_push(attrs, { kind: UE_FORMAT_ATTR.NORMAL });
         return self;
     }
+  
+    function tangent() {
+        gml_pragma("forceinline");
+        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "tangent", type: vertex_type_float3 });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "bitangent", type: vertex_type_float3 });
+        return self;
+    }
 
     function uv() {
         gml_pragma("forceinline");

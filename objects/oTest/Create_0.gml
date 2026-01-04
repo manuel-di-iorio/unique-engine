@@ -24,7 +24,7 @@ scenes = [
     { name: "Project Loader", obj: oSceneProjectLoader, bg: #147FCC }, // 8
     { name: "Shadow Mapping", obj: oSceneShadowMapping, bg: #147FCC }, // 9
     { name: "Post Processing", obj: oScenePostprocessing, bg: c_black }, // 10
-    { name: "PBR", obj: oScenePBR, bg: #147FCC }, // 11
+    { name: "PBR Material", obj: oScenePBR, bg: c_ltgray }, // 11
 ];
 
 setScene = function(idx) {

@@ -38,6 +38,11 @@ normal()
 Adds a normal vector attribute.
 
 ```js
+tangent()
+```
+Adds a tangent vector attribute (float4).
+
+```js
 uv()
 ```
 Adds a UV texture coordinate attribute.
@@ -71,8 +76,10 @@ toJSON()
 
 Returns an object representing this entity's properties. Not all props may be included.
 
-### Default format in Unique Engine:
+### Default formats in Unique Engine:
 
 ```js
 global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
+global.UE_ASSIMP_VERTEX_FORMAT = new UeVertexFormat().position().normal().tangent().uv().color().build();
+global.UE_POSITION_UV_VFORMAT = new UeVertexFormat().position().uv().build();
 ```

@@ -210,6 +210,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         var m = global.UE_MAT4_TEMP0;
         mat4_look_at(m, position, target, up);
         quat_set_from_rotation_matrix(rotation, m);
+        quat_conjugate(rotation);
 
         return self;
     }

@@ -62,6 +62,7 @@ function UeGeometry(data = {}) constructor {
                             else if (attr.type == vertex_type_float3) stride = 3;
                             else if (attr.type == vertex_type_float4) stride = 4;
                             else if (attr.type == vertex_type_ubyte4) stride = 4;
+                          
                             var ci = vi * stride;
                             if (attr.type == vertex_type_float1) vertex_float1(vb, val[ci]);
                             else if (attr.type == vertex_type_float2) vertex_float2(vb, val[ci], val[ci+1]);

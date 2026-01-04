@@ -8,20 +8,10 @@ function UeAssimpLoader(data = {}) constructor {
     gml_pragma("forceinline");
     var check = ASSIMP_ReadFile(fname,
       ASSIMP_PP.GEN_BOUNDING_BOXES |
-
       ASSIMP_PP.FLIP_UVS |
       ASSIMP_PP.FLIP_WINDING_ORDER |
-
-      // Fast
-      // ASSIMP_PP.CALC_TANGENT_SPACE |
-      ASSIMP_PP.GEN_NORMALS |
-      // ASSIMP_PP.JOIN_IDENTICAL_VERTICES |
-      // ASSIMP_PP.GEN_UV_COORDS |
-      // ASSIMP_PP.SORT_BY_PTYPE |
-
-      // Quality
       ASSIMP_PP.CALC_TANGENT_SPACE |
-      //ASSIMP_PP.GEN_SMOOTH_NORMALS | // Not needed probably
+      ASSIMP_PP.GEN_SMOOTH_NORMALS |
       ASSIMP_PP.JOIN_IDENTICAL_VERTICES |
       ASSIMP_PP.IMPROVE_CACHE_LOCALITY |
       //ASSIMP_PP.LIMIT_BONE_WEIGHTS | // @todo: test
@@ -115,6 +105,8 @@ function UeAssimpLoader(data = {}) constructor {
 
       var txtName = ASSIMP_GetMaterialTextureName(materialType.type, 0);
       if (txtName == "") continue;
+      
+      ASSIMP_MeshHasTangents()
 
       var fileName = filename_name(txtName);
       var txt = undefined;
@@ -180,7 +172,7 @@ function UeAssimpLoader(data = {}) constructor {
 
   function _buildMesh() {
     gml_pragma("forceinline");
-    var mesh = new UeMesh(new UeGeometry({ canFreeze: false }));
+    var mesh = new UeMesh(new UeGeometry({ canFreeze: false }));//, format: global.UE_ASSIMP_VERTEX_FORMAT }));
     mesh.name = ASSIMP_GetMeshName();
     var geometry = mesh.geometry;
     var vb = vertex_create_buffer();
@@ -200,6 +192,9 @@ function UeAssimpLoader(data = {}) constructor {
         vertex_position_3d(vb, ASSIMP_GetMeshVertexX(v), ASSIMP_GetMeshVertexY(v), ASSIMP_GetMeshVertexZ(v));
 
         vertex_normal(vb, ASSIMP_GetMeshNormalX(v), ASSIMP_GetMeshNormalY(v), ASSIMP_GetMeshNormalZ(v));
+        
+        //vertex_float3(vb, ASSIMP_GetMeshTangentX(), ASSIMP_GetMeshTangentY(), ASSIMP_GetMeshTangentZ());
+        //vertex_float3(vb, ASSIMP_GetMeshBitangentX(), ASSIMP_GetMeshBitangentY(), ASSIMP_GetMeshBitangentZ());
 
         vertex_texcoord(vb,
           meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordU(v, 0) : 0,

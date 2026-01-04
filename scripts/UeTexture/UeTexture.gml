@@ -44,7 +44,8 @@ function UeTexture(sprite = undefined, data = {}) constructor {
     filter = data[$ "filter"] ?? true;
 
     // Enable mipmaps generation
-    generateMipmaps = data[$ "generateMipmaps"] ?? mip_markedonly;
+    // @todo doc to align
+    generateMipmaps = data[$ "generateMipmaps"] ?? mip_on;
 
     // 4x4 transformation matrix for UVs
     matrix = mat4_create()
