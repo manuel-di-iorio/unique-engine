@@ -70,7 +70,6 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           asset = new UeStaticMesh(geometry);
           asset.geometry.__vbClone = geometry.cloneVb();
           geometry.freeze();
-          asset.material = undefined;
           asset.__rotationEuler = euler_create();
           asset.__matrixAutoUpdate = false; // Internal field for export (false = static mesh)
           assetId = global.UI_ASSETS_MODELS_ID++;

@@ -170,7 +170,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
     }
   
     /**
-     * Set the texture properties globally (internally used for albedo base textures)
+     * Set the texture properties globally (internally used for base textures)
      */
     function __useGlobal() {
       gml_pragma("forceinline");

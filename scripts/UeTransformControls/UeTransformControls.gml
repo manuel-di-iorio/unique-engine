@@ -805,7 +805,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     // XZ (Blue): Normal Y. Spans X, Z.
     // XY (Green): Normal Z. Spans X, Y.
 
-    var size = self.axisLength * scale * 0.3;
+    var size = self.axisLength * scale * 0.2;
     var offset = 0;
 
     var p0 = self._vec2;

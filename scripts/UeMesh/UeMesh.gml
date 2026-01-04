@@ -13,12 +13,8 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       matrix_set(matrix_world, matrixWorld);
 
       // Submit the vertex buffer
-      if (material[$ "__baseTexture"] != undefined) {
-        material.__baseTexture.__useGlobal();
-        vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, material.__baseTexture.__cachedTexture); 
-      } else {
-        vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, -1); 
-      }
+      material.__baseTexture.__useGlobal();
+      vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, material.__baseTexture.__cachedTexture); 
     }
     
     function toJSON() {

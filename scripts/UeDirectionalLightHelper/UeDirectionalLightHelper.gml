@@ -83,7 +83,4 @@ function UeDirectionalLightHelper(light, size = 1, color = undefined, data = {})
         self.targetLine.material.dispose();
         return self;
     }
-    
-    // Initial update
-    //update();
 }

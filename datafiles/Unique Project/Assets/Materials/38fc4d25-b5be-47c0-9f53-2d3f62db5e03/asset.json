@@ -18,8 +18,7 @@
   "blendDst":6.0,
   "blendSrcAlpha":2.0,
   "textures":{
-    "map":"f4485e71-90a3-4771-b107-98c7347ec348",
-    "emissiveMap":"8cd414ef-93bd-4c24-a73a-f6ac6d3fc813"
+    "map":"f4485e71-90a3-4771-b107-98c7347ec348"
   },
   "blendDstAlpha":6.0,
   "uniforms":{
