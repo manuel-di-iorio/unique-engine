@@ -35,9 +35,7 @@ uniform vec3  u_ueEnvMapRotation;
 
 // ===== Textures =====
 uniform sampler2D s_alphaMap;
-uniform sampler2D s_metalnessMap;
-uniform sampler2D s_roughnessMap;
-uniform sampler2D s_aoMap;
+uniform sampler2D s_ormMap;
 uniform sampler2D s_normalMap;
 uniform sampler2D s_emissiveMap;
 // uniform sampler2D s_bumpMap;
@@ -76,8 +74,6 @@ uniform float u_ueShadowQuality;
 #define PI 3.14159265359
 #define GAMMA 2.2
 #define EPSILON 1e-6
-
-#extension GL_OES_standard_derivatives : enable
 
 // ===== Color Space =====
 vec3 SRGBToLinear(vec3 c) { return pow(max(c, vec3(0.0)), vec3(GAMMA)); }
@@ -193,11 +189,12 @@ void main() {
 
     vec3 albedo = SRGBToLinear(base.rgb * u_ueColor);
 
-    float metalness = texture2D(s_metalnessMap, vTexcoord).r * u_ueMetalness;
-    float roughness = texture2D(s_roughnessMap, vTexcoord).r * u_ueRoughness;
-    roughness = clamp(roughness, 0.04, 1.0);
+    vec3 orm = texture2D(s_ormMap, vTexcoord).rgb;
+    float ao = mix(1.0, orm.r, u_ueAoIntensity * u_ueAoMapIntensity);
+    float roughness = orm.g * u_ueRoughness;
+    float metalness = orm.b * u_ueMetalness;
 
-     float ao = mix(1.0, texture2D(s_aoMap, vTexcoord).r, u_ueAoIntensity * u_ueAoMapIntensity);
+    roughness = clamp(roughness, 0.04, 1.0);
 
     // ===== Normal =====
     vec3 N;
@@ -295,5 +292,4 @@ void main() {
     color = mix(color, SRGBToLinear(u_ueFogColor), fogFactor);
 
     gl_FragColor = vec4(LinearToSRGB(color), alpha);
-    //gl_FragColor = vec4(texture2D(s_alphaMap, vTexcoord).rgb, 1.0);
 }

@@ -358,6 +358,7 @@ function UeMaterial(data = {}) constructor {
   
   /**
    * Set the texture given the name
+   * @todo check if this is documented
    */
   function setTexture(name, value) {
     gml_pragma("forceinline");

@@ -47,10 +47,10 @@ function UeAssimpLoader(data = {}) constructor {
     var textures = [];
     var textureCache = {};
     var materials = _addMaterials(fname, textures, textureCache);
-    var model = _addMeshes(materials);
+    var model = _addMeshes(materials.list);
     return {
       textures,
-      materials,
+      materials: materials.map,
       model
     };
   }
@@ -63,7 +63,8 @@ function UeAssimpLoader(data = {}) constructor {
     // Get the materials
     var materialsCount = ASSIMP_GetMaterialNum();
     var materials = array_create(materialsCount);
-
+    var materialsMap = {};
+    
     for (var i = 0; i < materialsCount; i++) {
       ASSIMP_BindMaterial(i);
       var material = new UeMeshStandardMaterial(_addTextures(modelPath, textures, textureCache));
@@ -72,9 +73,13 @@ function UeAssimpLoader(data = {}) constructor {
       material.opacity = ASSIMP_GetMaterialOpacity();
       material.transparent = material.opacity < 1;
       materials[i] = material;
+      materialsMap[$ material.name] = material;
     }
 
-    return materials;
+    return {
+      list: materials,
+      map: materialsMap
+    };
   }
 
   function _addTextures(modelPath, globalTextures, textureCache) {

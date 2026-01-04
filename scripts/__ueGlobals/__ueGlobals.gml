@@ -5,6 +5,7 @@ global.UE_POSITION_UV_VFORMAT = new UeVertexFormat().position().uv().build();
 global.UE_TEXTURE_DEFAULT_WHITE = new UeTexture(sprUeWhiteTex);
 global.UE_TEXTURE_DEFAULT_BLACK = new UeTexture(sprUeBlackTex);
 global.UE_TEXTURE_DEFAULT_NORMAL = new UeTexture(sprUeNormalTex);
+global.UE_TEXTURE_DEFAULT_ORM = new UeTexture(sprUeOrmTex);
 global.UE_MOUSE = new UeMouse();
 
 // Uniform names configuration

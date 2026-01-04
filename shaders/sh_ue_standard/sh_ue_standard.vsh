@@ -12,19 +12,19 @@ varying vec4 vLightSpacePos;
 uniform mat4 u_ueLightSpaceMatrix;
 
 // Displacement (vertex only)
-// uniform sampler2D s_displacementMap;
-// uniform float u_ueDisplacementScale;
-// uniform float u_ueDisplacementBias;
+uniform sampler2D s_displacementMap;
+uniform float u_ueDisplacementScale;
+uniform float u_ueDisplacementBias;
 
 void main() {
 
     vec3 pos = in_Position;
 
     // Vertex displacement (safe: default map = black)
-    // if (abs(u_ueDisplacementScale) > 0.0001) {
-    //     float h = texture2D(s_displacementMap, in_TextureCoord).r;
-    //     pos += in_Normal * (h * u_ueDisplacementScale + u_ueDisplacementBias);
-    // }
+    if (abs(u_ueDisplacementScale) > 0.0001) {
+        float h = texture2D(s_displacementMap, in_TextureCoord).r;
+        pos += in_Normal * (h * u_ueDisplacementScale + u_ueDisplacementBias);
+    }
 
     vec4 worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
 

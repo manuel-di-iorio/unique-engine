@@ -7,15 +7,19 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
     self.isSprite = false;
     
     function render(wireframe = false) {
-         gml_pragma("forceinline");
-        
-         // Set the world matrix
-         matrix_set(matrix_world, matrixWorld);
+      gml_pragma("forceinline");
+      
+      // Set the world matrix
+      matrix_set(matrix_world, matrixWorld);
 
-         // Submit the vertex buffer
-         material.__baseTexture.__useGlobal();
-         vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, material.__baseTexture.__cachedTexture); 
-     }
+      // Submit the vertex buffer
+      if (material[$ "__baseTexture"] != undefined) {
+        material.__baseTexture.__useGlobal();
+        vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, material.__baseTexture.__cachedTexture); 
+      } else {
+        vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, -1); 
+      }
+    }
     
     function toJSON() {
         gml_pragma("forceinline");

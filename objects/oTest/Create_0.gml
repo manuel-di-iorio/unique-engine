@@ -24,6 +24,7 @@ scenes = [
     { name: "Project Loader", obj: oSceneProjectLoader, bg: #147FCC }, // 8
     { name: "Shadow Mapping", obj: oSceneShadowMapping, bg: #147FCC }, // 9
     { name: "Post Processing", obj: oScenePostprocessing, bg: c_black }, // 10
+    { name: "PBR", obj: oScenePBR, bg: #147FCC }, // 11
 ];
 
 setScene = function(idx) {
@@ -39,4 +40,4 @@ setScene = function(idx) {
     instance_create_layer(0, 0, "Instances", currentDemo.obj); 
 }
 
-setScene(0);
+setScene(11);

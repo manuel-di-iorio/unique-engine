@@ -72,13 +72,11 @@ function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
   /** === Textures === */
   textures.emissiveMap = data[$ "emissiveMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
   textures.alphaMap = data[$ "alphaMap"] ?? global.UE_TEXTURE_DEFAULT_WHITE;
-  textures.roughnessMap = data[$ "roughnessMap"] ?? global.UE_TEXTURE_DEFAULT_WHITE;
-  textures.metalnessMap = data[$ "metalnessMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
-  textures.normalMap = data[$ "normalMap"] ?? global.UE_TEXTURE_DEFAULT_NORMAL;
-//   textures.aoMap = data[$ "aoMap"] ?? global.UE_TEXTURE_DEFAULT_WHITE;
+  textures.normalMap = data[$ "normalMap"] ?? global.UE_TEXTURE_DEFAULT_NORMAL;  
+  textures.ormMap = data[$ "ormMap"] ?? global.UE_TEXTURE_DEFAULT_ORM;
 //   textures.bumpMap = data[$ "bumpMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
 //   textures.lightMap = data[$ "lightMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
-//   textures.displacementMap = data[$ "displacementMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
+  textures.displacementMap = data[$ "displacementMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
 //   textures.envMap = data[$ "envMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
   
   build();
