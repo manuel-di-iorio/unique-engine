@@ -5,13 +5,15 @@ function UeGeometry(data = {}) constructor {
     name = data[$ "name"] ?? undefined;
     
     // Core attributes
-    position = data[$ "position"] ?? undefined;
-    normal   = data[$ "normal"]   ?? undefined;
-    uv       = data[$ "uv"]       ?? undefined;
-    color    = data[$ "color"]    ?? undefined;
-    index    = data[$ "index"]    ?? undefined;
+    position  = data[$ "position"]  ?? undefined;
+    normal    = data[$ "normal"]    ?? undefined;
+    uv        = data[$ "uv"]        ?? undefined;
+    tangent   = data[$ "tangent"]   ?? undefined;
+    bitangent = data[$ "bitangent"] ?? undefined;
+    color     = data[$ "color"]     ?? undefined;
+    index     = data[$ "index"]     ?? undefined;
     
-    format = data[$ "format"] ?? global.UE_DEFAULT_VERTEX_FORMAT;
+    format = data[$ "format"] ?? global.UE_VFORMAT_PNUC;
     vb = undefined;
     canFreeze = data[$ "canFreeze"] ?? true;
 

@@ -172,7 +172,7 @@ function UeAssimpLoader(data = {}) constructor {
 
   function _buildMesh() {
     gml_pragma("forceinline");
-    var mesh = new UeMesh(new UeGeometry({ canFreeze: false }));//, format: global.UE_ASSIMP_VERTEX_FORMAT }));
+    var mesh = new UeMesh(new UeGeometry({ canFreeze: false, format: global.UE_VFORMAT_PNUCT }));
     mesh.name = ASSIMP_GetMeshName();
     var geometry = mesh.geometry;
     var vb = vertex_create_buffer();
@@ -192,9 +192,6 @@ function UeAssimpLoader(data = {}) constructor {
         vertex_position_3d(vb, ASSIMP_GetMeshVertexX(v), ASSIMP_GetMeshVertexY(v), ASSIMP_GetMeshVertexZ(v));
 
         vertex_normal(vb, ASSIMP_GetMeshNormalX(v), ASSIMP_GetMeshNormalY(v), ASSIMP_GetMeshNormalZ(v));
-        
-        // vertex_float3(vb, ASSIMP_GetMeshTangentX(v), ASSIMP_GetMeshTangentY(v), ASSIMP_GetMeshTangentZ(v));
-        // vertex_float3(vb, ASSIMP_GetMeshBitangentX(v), ASSIMP_GetMeshBitangentY(v), ASSIMP_GetMeshBitangentZ(v));
 
         vertex_texcoord(vb,
           meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordU(v, 0) : 0,
@@ -204,6 +201,9 @@ function UeAssimpLoader(data = {}) constructor {
         vertex_color(vb,
           meshChannelNumColor > 0 ? make_color_rgb(ASSIMP_GetMeshVertexColorGM(v, 0), ASSIMP_GetMeshVertexColorGM(v, 1), ASSIMP_GetMeshVertexColorGM(v, 2)) : c_white,
           meshChannelNumColor > 0 ? ASSIMP_GetMeshVertexAlpha(v, 0) : 1);
+        
+        vertex_float3(vb, ASSIMP_GetMeshTangentX(v), ASSIMP_GetMeshTangentY(v), ASSIMP_GetMeshTangentZ(v));
+        vertex_float3(vb, ASSIMP_GetMeshBitangentX(v), ASSIMP_GetMeshBitangentY(v), ASSIMP_GetMeshBitangentZ(v));
       }
     }
     vertex_end(vb);

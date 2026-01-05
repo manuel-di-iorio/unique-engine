@@ -1,9 +1,9 @@
 attribute vec3 in_Position;
 attribute vec3 in_Normal;
-//attribute vec3 in_Tangent;
-//attribute vec3 in_Bitangent;
+attribute vec2 in_TextureCoord0;
 attribute vec4 in_Colour;
-attribute vec2 in_TextureCoord;
+attribute vec2 in_TextureCoord1;
+attribute vec2 in_TextureCoord2;
 
 varying vec3 vWorldPosition;
 varying vec3 vWorldNormal;
@@ -24,7 +24,7 @@ void main() {
 
     // Vertex displacement (safe: default map = black)
     if (abs(u_ueDisplacementScale) > 0.0001) {
-        float h = texture2D(s_displacementMap, in_TextureCoord).r;
+        float h = texture2D(s_displacementMap, in_TextureCoord0).r;
         pos += in_Normal * (h * u_ueDisplacementScale + u_ueDisplacementBias);
     }
 
@@ -32,7 +32,7 @@ void main() {
 
     vWorldPosition = worldPos.xyz;
     vWorldNormal   = normalize((gm_Matrices[MATRIX_WORLD] * vec4(in_Normal, 0.0)).xyz);
-    vTexcoord      = in_TextureCoord;
+    vTexcoord      = in_TextureCoord0;
     vColour        = in_Colour;
 
     vLightSpacePos = u_ueLightSpaceMatrix * worldPos;

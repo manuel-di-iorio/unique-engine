@@ -21,7 +21,7 @@ new UeGeometry(data = {})
 | `uv`       | `array`          | `undefined`                       | Array of texture coordinates [u,v, ...]             |
 | `color`    | `array`          | `undefined`                       | Array of vertex colors [col, alpha, col, alpha, ...]|
 | `index`    | `array` / `null` | `undefined`                       | Optional index buffer for reusing verts             |
-| `format`   | `VertexFormat`   | `global.UE_DEFAULT_VERTEX_FORMAT` | Vertex layout format                                |
+| `format`   | `VertexFormat`   | `global.UE_VFORMAT_PNUC` | Vertex layout format                                |
 | `canFreeze`| `boolean`        | `true`                            | Whether to freeze the vertex buffer after the build |
 | `boundingBox`                 | `UeBox3`                          | Axis-aligned bounding box                           |
 | `boundingSphere`              | `UeSphere`                        | Bounding sphere                                     |

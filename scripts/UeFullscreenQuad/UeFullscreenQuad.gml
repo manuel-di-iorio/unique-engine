@@ -11,7 +11,7 @@ function UeQuadGeometry(data = {}): UeGeometry(data) constructor {
     type = "QuadGeometry";
     
     // This is lighter than the default format (no normals/color needed for fullscreen quad)
-    self.format = global.UE_POSITION_UV_VFORMAT;
+    self.format = global.UE_VFORMAT_PU;
     
     // Optimization: Single large triangle covering the entire NDC space
     // The triangle vertices are:

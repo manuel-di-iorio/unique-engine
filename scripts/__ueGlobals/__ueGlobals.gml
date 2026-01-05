@@ -1,8 +1,8 @@
 global.UE_OBJECT_ID = 0;
-global.UE_VERSION = "0.3.2";
-global.UE_DEFAULT_VERTEX_FORMAT = new UeVertexFormat().position().normal().uv().color().build();
-global.UE_ASSIMP_VERTEX_FORMAT = new UeVertexFormat().position().normal().tangent().uv().color().build();
-global.UE_POSITION_UV_VFORMAT = new UeVertexFormat().position().uv().build();
+global.UE_VERSION = "0.4.0";
+global.UE_VFORMAT_PNUC = new UeVertexFormat().position().normal().uv().color().build();
+global.UE_VFORMAT_PNUCT = new UeVertexFormat().position().normal().uv().color().tangent().build();
+global.UE_VFORMAT_PU = new UeVertexFormat().position().uv().build();
 global.UE_TEXTURE_DEFAULT_WHITE = new UeTexture(sprUeWhiteTex);
 global.UE_TEXTURE_DEFAULT_BLACK = new UeTexture(sprUeBlackTex);
 global.UE_TEXTURE_DEFAULT_NORMAL = new UeTexture(sprUeNormalTex);
