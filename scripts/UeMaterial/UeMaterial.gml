@@ -409,8 +409,7 @@ function UeMaterial(data = {}) constructor {
   function fromJSON(data, texturesByUUID = {}) {
     gml_pragma("forceinline");
     uuid = data[$ "uuid"];
-    name = data[$ "name"];
-    uniforms = data[$ "uniforms"];
+    name = data[$ "name"];   
     transparent = data[$ "transparent"];
     opacity = data[$ "opacity"];
     side = data[$ "side"];
@@ -428,6 +427,17 @@ function UeMaterial(data = {}) constructor {
     blendSrcAlpha = data[$ "blendSrcAlpha"];
     blendDstAlpha = data[$ "blendDstAlpha"];
     lights = data[$ "lights"];
+
+    // Merge uniforms instead of replacing them to preserve defaults
+    var _loadedUniforms = data[$ "uniforms"];
+    if (_loadedUniforms != undefined) {
+        var _names = variable_struct_get_names(_loadedUniforms);
+        var _len = array_length(_names);
+        for (var i = 0; i < _len; i++) {
+            var _name = _names[i];
+            uniforms[$ _name] = _loadedUniforms[$ _name];
+        }
+    }
   
     // Load shader
     var shaderName = data[$ "shader"];
