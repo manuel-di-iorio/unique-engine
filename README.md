@@ -29,6 +29,6 @@ Links to the free 3D models used in the examples:
 
 ### Useful Links
 
-- [Documentation](https://manuel-diiorio.github.io/unique-engine/docs)
+- [Documentation](https://manuel-di-iorio.github.io/unique-engine/)
 - [Game Maker Official Website](https://gamemaker.io)
 - [Game Maker Italia Community](https://gamemakeritalia.it)
