@@ -131,6 +131,7 @@
     {"name":"UeStaticMesh","order":1,"path":"scripts/UeStaticMesh/UeStaticMesh.yy",},
     {"name":"ueStructEach","order":2,"path":"scripts/ueStructEach/ueStructEach.yy",},
     {"name":"ueStructMap","order":3,"path":"scripts/ueStructMap/ueStructMap.yy",},
+    {"name":"ueStructMerge","order":8,"path":"scripts/ueStructMerge/ueStructMerge.yy",},
     {"name":"UeTexture","order":6,"path":"scripts/UeTexture/UeTexture.yy",},
     {"name":"UeTexturePass","order":3,"path":"scripts/UeTexturePass/UeTexturePass.yy",},
     {"name":"UeTorusGeometry","order":10,"path":"scripts/UeTorusGeometry/UeTorusGeometry.yy",},

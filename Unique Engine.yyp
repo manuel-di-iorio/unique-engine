@@ -298,6 +298,7 @@
     {"id":{"name":"UeStaticMesh","path":"scripts/UeStaticMesh/UeStaticMesh.yy",},},
     {"id":{"name":"ueStructEach","path":"scripts/ueStructEach/ueStructEach.yy",},},
     {"id":{"name":"ueStructMap","path":"scripts/ueStructMap/ueStructMap.yy",},},
+    {"id":{"name":"ueStructMerge","path":"scripts/ueStructMerge/ueStructMerge.yy",},},
     {"id":{"name":"UeTexture","path":"scripts/UeTexture/UeTexture.yy",},},
     {"id":{"name":"UeTexturePass","path":"scripts/UeTexturePass/UeTexturePass.yy",},},
     {"id":{"name":"UeTorusGeometry","path":"scripts/UeTorusGeometry/UeTorusGeometry.yy",},},

@@ -429,15 +429,7 @@ function UeMaterial(data = {}) constructor {
     lights = data[$ "lights"];
 
     // Merge uniforms instead of replacing them to preserve defaults
-    var _loadedUniforms = data[$ "uniforms"];
-    if (_loadedUniforms != undefined) {
-        var _names = variable_struct_get_names(_loadedUniforms);
-        var _len = array_length(_names);
-        for (var i = 0; i < _len; i++) {
-            var _name = _names[i];
-            uniforms[$ _name] = _loadedUniforms[$ _name];
-        }
-    }
+    ueStructMerge(uniforms, data[$ "uniforms"]);
   
     // Load shader
     var shaderName = data[$ "shader"];
