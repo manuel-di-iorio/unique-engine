@@ -46,8 +46,8 @@ new UeArrowHelper(dir, origin, length, color, headLength, headWidth)
 ## Usage
 
 ```js
-var dir = new UeVector3(0, 1, 0);
-var origin = new UeVector3(10, 0, 0);
+var dir = vec3_create(0, 1, 0);
+var origin = vec3_create(10, 0, 0);
 var arrow = new UeArrowHelper(dir, origin, 100, c_lime);
 scene.add(arrow);
 ```

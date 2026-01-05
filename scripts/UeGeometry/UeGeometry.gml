@@ -138,6 +138,8 @@ function UeGeometry(data = {}) constructor {
             position: position, 
             normal: normal, 
             uv: uv, 
+            tangent: tangent,
+            bitangent: bitangent,
             color: color, 
             index: index, 
             format: format.toJSON() 
@@ -169,6 +171,8 @@ function UeGeometry(data = {}) constructor {
         position = data[$ "position"];
         normal = data[$ "normal"];
         uv = data[$ "uv"];
+        tangent = data[$ "tangent"];
+        bitangent = data[$ "bitangent"];
         color = data[$ "color"];
         index = data[$ "index"];
         format = new UeVertexFormat().fromJSON(data[$ "format"]);
@@ -257,16 +261,43 @@ function UeGeometry(data = {}) constructor {
             position[i+2] = matrix[2]*vx + matrix[6]*vy + matrix[10]*vz + matrix[14];
         }
         
-        if (normal != undefined) {
+        if (normal != undefined || tangent != undefined || bitangent != undefined) {
             var normalMatrix = mat4_clone(matrix); mat4_invert(normalMatrix); mat4_transpose(normalMatrix);
-            for (var i = 0, l = array_length(normal); i < l; i += 3) {
-                var nx = normal[i], ny = normal[i+1], nz = normal[i+2];
-                normal[i]   = normalMatrix[0]*nx + normalMatrix[4]*ny + normalMatrix[8]*nz;
-                normal[i+1] = normalMatrix[1]*nx + normalMatrix[5]*ny + normalMatrix[9]*nz;
-                normal[i+2] = normalMatrix[2]*nx + normalMatrix[6]*ny + normalMatrix[10]*nz;
-                
-                var d = sqrt(normal[i]*normal[i] + normal[i+1]*normal[i+1] + normal[i+2]*normal[i+2]);
-                if (d > 0) { normal[i] /= d; normal[i+1] /= d; normal[i+2] /= d; }
+            
+            if (normal != undefined) {
+                for (var i = 0, l = array_length(normal); i < l; i += 3) {
+                    var nx = normal[i], ny = normal[i+1], nz = normal[i+2];
+                    normal[i]   = normalMatrix[0]*nx + normalMatrix[4]*ny + normalMatrix[8]*nz;
+                    normal[i+1] = normalMatrix[1]*nx + normalMatrix[5]*ny + normalMatrix[9]*nz;
+                    normal[i+2] = normalMatrix[2]*nx + normalMatrix[6]*ny + normalMatrix[10]*nz;
+                    
+                    var d = sqrt(normal[i]*normal[i] + normal[i+1]*normal[i+1] + normal[i+2]*normal[i+2]);
+                    if (d > 0) { normal[i] /= d; normal[i+1] /= d; normal[i+2] /= d; }
+                }
+            }
+
+            if (tangent != undefined) {
+                for (var i = 0, l = array_length(tangent); i < l; i += 3) {
+                    var tx = tangent[i], ty = tangent[i+1], tz = tangent[i+2];
+                    tangent[i]   = normalMatrix[0]*tx + normalMatrix[4]*ty + normalMatrix[8]*tz;
+                    tangent[i+1] = normalMatrix[1]*tx + normalMatrix[5]*ty + normalMatrix[9]*tz;
+                    tangent[i+2] = normalMatrix[2]*tx + normalMatrix[6]*ty + normalMatrix[10]*tz;
+                    
+                    var d = sqrt(tangent[i]*tangent[i] + tangent[i+1]*tangent[i+1] + tangent[i+2]*tangent[i+2]);
+                    if (d > 0) { tangent[i] /= d; tangent[i+1] /= d; tangent[i+2] /= d; }
+                }
+            }
+
+            if (bitangent != undefined) {
+                for (var i = 0, l = array_length(bitangent); i < l; i += 3) {
+                    var bx = bitangent[i], by = bitangent[i+1], bz = bitangent[i+2];
+                    bitangent[i]   = normalMatrix[0]*bx + normalMatrix[4]*by + normalMatrix[8]*bz;
+                    bitangent[i+1] = normalMatrix[1]*bx + normalMatrix[5]*by + normalMatrix[9]*bz;
+                    bitangent[i+2] = normalMatrix[2]*bx + normalMatrix[6]*by + normalMatrix[10]*bz;
+                    
+                    var d = sqrt(bitangent[i]*bitangent[i] + bitangent[i+1]*bitangent[i+1] + bitangent[i+2]*bitangent[i+2]);
+                    if (d > 0) { bitangent[i] /= d; bitangent[i+1] /= d; bitangent[i+2] /= d; }
+                }
             }
         }
         
@@ -287,7 +318,7 @@ function UeGeometry(data = {}) constructor {
         // Assuming all geometries have the same format as the first one
         res.format = geometries[0].format;
         
-        var pos = [], norm = [], _uv = [], col = [], idx = [];
+        var pos = [], norm = [], _uv = [], col = [], tan = [], bitan = [], idx = [];
         var offset = 0;
         
         for (var i = 0, il = array_length(geometries); i < il; i++) {
@@ -298,6 +329,8 @@ function UeGeometry(data = {}) constructor {
             if (g.normal != undefined) norm = array_concat(norm, g.normal);
             if (g.uv != undefined) _uv = array_concat(_uv, g.uv);
             if (g.color != undefined) col = array_concat(col, g.color);
+            if (g.tangent != undefined) tan = array_concat(tan, g.tangent);
+            if (g.bitangent != undefined) bitan = array_concat(bitan, g.bitangent);
             
             if (g.index != undefined) {
                 for (var j = 0; j < array_length(g.index); j++) {
@@ -312,6 +345,8 @@ function UeGeometry(data = {}) constructor {
         if (array_length(norm) > 0) res.normal = norm;
         if (array_length(_uv) > 0) res.uv = _uv;
         if (array_length(col) > 0) res.color = col;
+        if (array_length(tan) > 0) res.tangent = tan;
+        if (array_length(bitan) > 0) res.bitangent = bitan;
         if (array_length(idx) > 0) res.index = idx;
         
         res.build();

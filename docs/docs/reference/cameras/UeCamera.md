@@ -65,11 +65,6 @@ updateProjectionMatrix()
 Updates the camera's projection matrix.  
 This is an abstract method that must be implemented by subclasses.
 
-:::caution
-Calling this method on the base `UeCamera` class will throw an error.  
-Subclasses must implement their own version.
-:::
-
 ### dispose()
 ```js
 dispose()

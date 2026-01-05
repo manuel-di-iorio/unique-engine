@@ -49,7 +49,7 @@ new UeMaterial(data = {})
 
 Textures are assigned via the textures object:
 
-- **map**: Base diffuse texture (by default it is `global.UE_DEFAULT_TEXTURE`, a white-colored 1x1 texture)
+- **map**: Base diffuse texture (by default it is `global.UE_TEXTURE_DEFAULT_WHITE`, a white-colored 1x1 texture)
 - **normalMap**: Normal mapping
 - **ormMap**: Packed texture for **O**cclusion, **R**oughness, and **M**etalness (R=AO, G=Roughness, B=Metalness)
 - **emissiveMap**: Emissive light contribution

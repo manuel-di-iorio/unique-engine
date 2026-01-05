@@ -9,7 +9,7 @@ Works with both perspective and orthographic cameras.
 ### Constructor
 
 ```js
-UeRaycaster(origin = new UeVector3(), direction = new UeVector3(0, 0, -1), near = 0, far = infinity)
+UeRaycaster(origin = vec3_create(), direction = vec3_create(0, 0, -1), near = 0, far = infinity)
 ```
 
 ### Properties

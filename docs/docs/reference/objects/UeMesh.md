@@ -32,6 +32,6 @@ new UeMesh(geometry, material = UeMeshStandardMaterial(), data = {})
 
 | Method                           | Returns | Description                                                                                                |
 | -------------------------------- | ------- | ------------------------------------------------------------------------------------------------------     |
-| `createInstance()`               | `UeMesh`| Creates a new instance of this mesh that shares the same geometry and material references (experimental)                 |
+| `createInstance()`               | `UeMesh`| Creates a new instance of this mesh that shares the same geometry and material references                |
 | `raycast(raycaster, intersects)` | `self`  | Tests the ray from `raycaster` against this object's bounding box and appends hits to `intersects`. The bounding sphere is checked first for optimization purposes |
 | `toJSON()`                       | `struct`| Returns an object representing this entity's properties. Not all props may be included                     |

@@ -46,7 +46,7 @@ Your 3D scene will usually include:
 Add this code in the create event of your object
 
 ```js
-renderer = new UeRenderer();
+renderer = new UeRenderer({ sortObjects: false });
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 50, y: -100, z: 50 }).use();
 camera.matrixAutoUpdate = false;
@@ -54,7 +54,7 @@ camera.matrixAutoUpdate = false;
 cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: c_fuchsia });
 cubeMesh = new UeStaticMesh(cubeGeometry, new UeMeshStandardMaterial());
 
-ambientLight = new UeAmbientLight(c_dkgray);
+ambientLight = new UeAmbientLight(c_gray);
 dirLight = new UeDirectionalLight(c_ltgray, 1, { x: 150, y: 80, z: 90 }); 
 
 scene.add(cubeMesh, ambientLight, dirLight);

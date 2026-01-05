@@ -181,7 +181,7 @@ The `render(scene, camera)` method:
 4. Clears internal queues.
 5. Collects objects and lights from scene graph.
 6. Sorts renderables by sort key.
-7. **Renders shadow maps** (if `shadowMap.enabled`).
+7. Renders shadow maps (if `shadowMap.enabled`).
 8. Builds the light state.
 9. Renders all objects in sorted order.
 10. Resets shader and world matrix.

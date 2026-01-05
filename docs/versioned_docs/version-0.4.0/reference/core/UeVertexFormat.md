@@ -40,7 +40,7 @@ Adds a normal vector attribute.
 ```js
 tangent()
 ```
-Adds a tangent vector attribute (float4).
+Adds a tangent and bitangent vector attributes (two float3).
 
 ```js
 uv()

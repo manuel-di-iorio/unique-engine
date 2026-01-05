@@ -81,7 +81,7 @@ var material = new UeMaterial({
 });
 
 var sphere = new UeMesh(new UeSphereGeometry(), material, { 
-  position: new UeVector3(0, 0, 0) 
+  position: vec3_create(0, 0, 0) 
 });
 ```
 

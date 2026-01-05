@@ -6,6 +6,10 @@ The `UeBufferLoader` class provides functionality to deserialize scenes or meshe
 
 It reconstructs object hierarchies, resolves UUID references, and rebuilds the complete scene graph with all dependencies.
 
+:::caution
+This loader has not been tested recently and may not work correctly.
+:::
+
 ### Constructor
 ```js
 new UeBufferLoader()

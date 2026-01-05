@@ -155,7 +155,7 @@ When building a scene graph, you can nest children arbitrarily using .add() and 
 
 ## Globals
 
-`UE_OBJECT3D_DEFAULT_UP = new UeVector3(0, 0, -1)`   Default up vector for objects (applied on the `up` property)
+`UE_OBJECT3D_DEFAULT_UP = vec3_create(0, 0, -1)`   Default up vector for objects (applied on the `up` property)
 
 `UE_OBJECT3D_DEFAULT_MATRIX_AUTO_UPDATE = true`   Default value for all new created objects
 

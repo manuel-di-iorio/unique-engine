@@ -44,7 +44,8 @@ Currently handles up to 2 directional lights and 2 point lights, but you can eas
 | `textures.alphaMap` | `UeTexture` | Texture used to control the alpha (transparency) per pixel. | `global.UE_TEXTURE_DEFAULT_WHITE` |
 | `textures.ormMap` | `UeTexture` | Packed texture for **O**cclusion, **R**oughness, and **M**etalness. Color channel mapping: R = Ambient Occlusion, G = Roughness, B = Metalness. | `global.UE_TEXTURE_DEFAULT_ORM` |
 | `textures.normalMap` | `UeTexture` | Normal map for adding surface detail. | `global.UE_TEXTURE_DEFAULT_NORMAL` |
+| `textures.displacementMap` | `UeTexture` | Displacement map for deforming the mesh. | `global.UE_TEXTURE_DEFAULT_BLACK` |
+
 <!-- | `textures.bumpMap` | `UeTexture` | Bump map for adding surface detail. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->
 <!-- | `textures.lightMap` | `UeTexture` | Pre-baked light map. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->
-| `textures.displacementMap` | `UeTexture` | Displacement map for deforming the mesh. | `global.UE_TEXTURE_DEFAULT_BLACK` |
 <!-- | `textures.envMap` | `UeTexture` | Environment map for reflections. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->

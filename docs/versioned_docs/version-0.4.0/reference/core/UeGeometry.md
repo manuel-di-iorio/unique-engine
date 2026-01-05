@@ -65,7 +65,7 @@ new UeGeometry(data = {})
 
 ## Notes
 
-The geometric data is stored in separate flat arrays (e.g., `position`, `normal`, `uv`) rather than vertex structs.
+The geometric data is stored in separate flat arrays (e.g., `position`, `normal`, `uv`).
 
 If `index` is provided, it must be an array of indices pointing into these attribute arrays.
 

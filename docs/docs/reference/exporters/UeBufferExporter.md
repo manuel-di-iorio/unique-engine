@@ -6,6 +6,10 @@ The `UeBufferExporter` class provides functionality to serialize scenes or meshe
 
 It recursively processes object hierarchies, compiles their data, and optionally compresses the resulting buffer.
 
+:::caution
+This exporter has not been tested recently and may not work correctly.
+:::
+
 ### Constructor
 ```js
 new UeBufferExporter()
