@@ -226,7 +226,7 @@ function ProjectLoader() constructor {
     var objectsByUUID = {};
     
     var textures = assetManager.getAssetsByType("Texture");
-    for (var i = 0; i < array_length(textures); i++) {
+    for (var i = 0, il = array_length(textures); i < il; i++) {
         var texture = textures[i];
         texturesByUUID[$ texture.uuid] = texture;
         if (struct_exists(texture, "__metadata") && texture.__metadata != undefined) {
@@ -236,7 +236,7 @@ function ProjectLoader() constructor {
     }
     
     var meshes = assetManager.getAssetsByType("Mesh");
-    for (var i = 0; i < array_length(meshes); i++) {
+    for (var i = 0, il = array_length(meshes); i < il; i++) {
         var mesh = meshes[i];
         objectsByUUID[$ mesh.uuid] = mesh;
         if (struct_exists(mesh, "__metadata") && mesh.__metadata != undefined) {
@@ -244,9 +244,28 @@ function ProjectLoader() constructor {
         }
     }
     
+    var lights = assetManager.getAssetsByType("Light");
+    for (var i = 0, il = array_length(lights); i < il; i++) {
+        var light = lights[i];
+        objectsByUUID[$ light.uuid] = light;
+        if (struct_exists(light, "__metadata") && light.__metadata != undefined) {
+            light.fromJSON(light.__metadata);
+            delete light.__metadata;
+        }
+    }
+    
+    var cameras = assetManager.getAssetsByType("Camera");
+    for (var i = 0, il = array_length(cameras); i < il; i++) {
+        var camera = cameras[i];
+        objectsByUUID[$ camera.uuid] = camera;
+        if (struct_exists(camera, "__metadata") && camera.__metadata != undefined) {
+            delete camera.__metadata;
+        }
+    }
+    
     var materials = assetManager.getAssetsByType("Material");
     var materialsByUUID = {};
-    for (var i = 0; i < array_length(materials); i++) {
+    for (var i = 0, il = array_length(materials); i < il; i++) {
         var material = materials[i];
         materialsByUUID[$ material.uuid] = material;
         if (struct_exists(material, "__metadata") && material.__metadata != undefined) {
@@ -255,7 +274,7 @@ function ProjectLoader() constructor {
         }
     }
     
-    for (var i = 0; i < array_length(meshes); i++) {
+    for (var i = 0, il = array_length(meshes); i < il; i++) {
         var mesh = meshes[i];
         if (struct_exists(mesh, "__metadata") && mesh.__metadata != undefined) {
             var materialUUID = mesh.__metadata[$ "material"];
@@ -267,7 +286,7 @@ function ProjectLoader() constructor {
     }
 
     var scenes = assetManager.getAssetsByType("Scene");
-    for (var i = 0; i < array_length(scenes); i++) {
+    for (var i = 0, il = array_length(scenes); i < il; i++) {
         var scene = scenes[i];
         if (struct_exists(scene, "__metadata") && scene.__metadata != undefined) {
             scene.fromJSON(scene.__metadata, objectsByUUID);
@@ -337,7 +356,7 @@ function ProjectLoader() constructor {
       oSceneEditor.assetManager.addAsset(instance.type, instance);
       
       // Recursively add children
-      for (var i = 0; i < array_length(instance.children); i++) {
+      for (var i = 0, il = array_length(instance.children); i < il; i++) {
           var child = instance.children[i];
           if (child[$ "type"] == "ModelInstance") {
               self.__buildTreeviewForInstance(child, tvItem, treeview);

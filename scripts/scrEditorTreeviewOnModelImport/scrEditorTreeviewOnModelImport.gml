@@ -86,7 +86,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
     
     // 2. Add materials to project and treeview (inside folder)
     var materialNames = variable_struct_get_names(materials);
-    for (var i = 0; i < array_length(materialNames); i++) {
+    for (var i = 0, il = array_length(materialNames); i < il; i++) {
         var mat = materials[$ materialNames[i]];
         
         // Add to project

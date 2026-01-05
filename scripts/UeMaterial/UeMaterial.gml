@@ -455,6 +455,8 @@ function UeMaterial(data = {}) constructor {
               textures[$ textureName] = global.UE_TEXTURE_DEFAULT_BLACK;
             } else if (textureUUID == global.UE_TEXTURE_DEFAULT_NORMAL.uuid) {
               textures[$ textureName] = global.UE_TEXTURE_DEFAULT_NORMAL;
+            } else if (textureUUID == global.UE_TEXTURE_DEFAULT_ORM.uuid) {
+              textures[$ textureName] = global.UE_TEXTURE_DEFAULT_ORM;
             } else {
               // Keep UUID for later linking (texture not found)
               textures[$ textureName] = textureUUID;
@@ -465,6 +467,7 @@ function UeMaterial(data = {}) constructor {
     }
   
     build();
+    
     return self;
   }
   
