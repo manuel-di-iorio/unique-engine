@@ -85,8 +85,9 @@ function editorTreeviewOnModelImport(treeviewItem) {
     }
     
     // 2. Add materials to project and treeview (inside folder)
-    for (var i = 0; i < array_length(materials); i++) {
-        var mat = materials[i];
+    var materialNames = variable_struct_get_names(materials);
+    for (var i = 0; i < array_length(materialNames); i++) {
+        var mat = materials[$ materialNames[i]];
         
         // Add to project
         var materialId = global.UI_ASSETS_MATERIALS_ID++;
@@ -117,7 +118,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
     
     // 3. Add model to project and treeview (with hierarchy, inside folder)
 
-    // Initialize all nodes (but don't set __parentUI yet - submeshes will get their parent mesh)
+    // Initialize all nodes
     model.traverse(function(node) {
         node.name = node.name == undefined || node.name == "" ?
          "Object" + string(global.UI_ASSETS_MODELS_ID++) : node.name;
@@ -142,7 +143,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
     // Overwrite the parent UI of the root model with the correct folder asset
     folder.add(model);
     
-    // Create main model treeview item inside folder (must be done before addAsset)
+    // Create main model treeview item inside folder
     var modelTreeviewItem = new UiTreeviewItem({
         name: "UiTreeview.Item",
     }, {
