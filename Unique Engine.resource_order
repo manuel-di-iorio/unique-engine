@@ -1,6 +1,7 @@
 {
   "FolderOrderSettings":[
     {"name":"Demo","order":3,"path":"folders/Demo.yy",},
+    {"name":"Audio","order":8,"path":"folders/Demo/Audio.yy",},
     {"name":"Scenes","order":2,"path":"folders/Demo/Scenes.yy",},
     {"name":"Textures","order":3,"path":"folders/Demo/Textures.yy",},
     {"name":"Packages","order":1,"path":"folders/Packages.yy",},
@@ -35,6 +36,7 @@
   ],
   "ResourceOrderSettings":[
     {"name":"assimp_extension","order":4,"path":"extensions/assimp_extension/assimp_extension.yy",},
+    {"name":"fDemoUI","order":7,"path":"fonts/fDemoUI/fDemoUI.yy",},
     {"name":"fTextItalic","order":1,"path":"fonts/fTextItalic/fTextItalic.yy",},
     {"name":"fTextSmall","order":2,"path":"fonts/fTextSmall/fTextSmall.yy",},
     {"name":"oSceneAssimpLoader","order":5,"path":"objects/oSceneAssimpLoader/oSceneAssimpLoader.yy",},
@@ -100,6 +102,7 @@
     {"name":"UeFullscreenQuad","order":1,"path":"scripts/UeFullscreenQuad/UeFullscreenQuad.yy",},
     {"name":"UeGeometry","order":2,"path":"scripts/UeGeometry/UeGeometry.yy",},
     {"name":"UeGridHelper","order":3,"path":"scripts/UeGridHelper/UeGridHelper.yy",},
+    {"name":"UeIcosahedronGeometry","order":12,"path":"scripts/UeIcosahedronGeometry/UeIcosahedronGeometry.yy",},
     {"name":"UeInstanceList","order":9,"path":"scripts/UeInstanceList/UeInstanceList.yy",},
     {"name":"UeLayers","order":8,"path":"scripts/UeLayers/UeLayers.yy",},
     {"name":"UeLine","order":2,"path":"scripts/UeLine/UeLine.yy",},
@@ -167,6 +170,10 @@
     {"name":"sh_ue_shadow_map","order":6,"path":"shaders/sh_ue_shadow_map/sh_ue_shadow_map.yy",},
     {"name":"sh_ue_sprite","order":3,"path":"shaders/sh_ue_sprite/sh_ue_sprite.yy",},
     {"name":"sh_ue_standard","order":2,"path":"shaders/sh_ue_standard/sh_ue_standard.yy",},
+    {"name":"sndDemoPlatformBG","order":3,"path":"sounds/sndDemoPlatformBG/sndDemoPlatformBG.yy",},
+    {"name":"sndDemoPlatformFalling","order":2,"path":"sounds/sndDemoPlatformFalling/sndDemoPlatformFalling.yy",},
+    {"name":"sndDemoPlatformJump","order":1,"path":"sounds/sndDemoPlatformJump/sndDemoPlatformJump.yy",},
+    {"name":"sndDemoPlatformWin","order":4,"path":"sounds/sndDemoPlatformWin/sndDemoPlatformWin.yy",},
     {"name":"spr_tex_box","order":3,"path":"sprites/spr_tex_box/spr_tex_box.yy",},
     {"name":"spr_tex_palm_tree","order":2,"path":"sprites/spr_tex_palm_tree/spr_tex_palm_tree.yy",},
     {"name":"spr_tex_pyramid","order":1,"path":"sprites/spr_tex_pyramid/spr_tex_pyramid.yy",},

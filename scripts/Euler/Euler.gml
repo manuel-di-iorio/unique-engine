@@ -1,6 +1,10 @@
 /// @desc Euler functions using arrays [x, y, z]
 /// Angles are in DEGREES. Rotation order: "YXZ".
 
+enum EULER {
+  x, y, z
+}
+
 function euler_create(x = 0, y = 0, z = 0) {
     gml_pragma("forceinline");
     return [x, y, z];

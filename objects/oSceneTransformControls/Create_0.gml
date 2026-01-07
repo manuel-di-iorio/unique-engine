@@ -13,7 +13,7 @@ box3_set_from_center_and_size(box3, vec3_create(0, 0, 0), vec3_create(boxSize, b
 boxGeometry.boundingBox = box3;
 boxGeometry.boundingSphere = sphere_create(vec3_create(0, 0, 0), boxSize);
 box = new UeMesh(boxGeometry, new UeMeshStandardMaterial());
-box.material.textures.map = new UeTexture(spr_tex_box, { generateMipmaps: true });
+box.material.textures.map = new UeTexture(spr_tex_box);
 box.material.build();
 scene.add(box);
 

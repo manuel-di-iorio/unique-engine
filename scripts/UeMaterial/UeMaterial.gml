@@ -149,22 +149,39 @@ function UeMaterial(data = {}) constructor {
    __texturesCachedCount = 0;
    __baseTexture = global.UE_TEXTURE_DEFAULT_WHITE;
  
-   for (var t = 0; t < textureNamesCount; t++) {
-    var textureName = textureNames[t];
-    if (textureName == "map") {
-      __baseTexture = textures.map ?? global.UE_TEXTURE_DEFAULT_WHITE;
-      continue;
-     }
-    
+    for (var t = 0; t < textureNamesCount; t++) {
+     var textureName = textureNames[t];
+     var texture = textures[$ textureName];
+     
+     if (textureName == "map") {
+       __baseTexture = texture ?? global.UE_TEXTURE_DEFAULT_WHITE;
+       continue;
+      }
+     
     var samplerIdx = shader_get_sampler_index(shader, $"s_{textureName}");
-    if (samplerIdx != -1) {
-      __texturesCached[__texturesCachedCount] = [
-        textures[$ textureName],
-        samplerIdx
-      ];
-      __texturesCachedCount++;
-    }
-  }
+     if (samplerIdx != -1) {
+       // Fallback to default textures if undefined
+       if (texture == undefined || !is_struct(texture)) {
+           switch (textureName) {
+               case "normalMap": texture = global.UE_TEXTURE_DEFAULT_NORMAL; break;
+               case "ormMap": texture = global.UE_TEXTURE_DEFAULT_ORM; break;
+               case "emissiveMap": 
+               case "displacementMap": 
+               case "bumpMap":
+               case "lightMap":
+                   texture = global.UE_TEXTURE_DEFAULT_BLACK; break;
+               case "alphaMap": 
+               default: texture = global.UE_TEXTURE_DEFAULT_WHITE; break;
+           }
+       }
+
+       __texturesCached[__texturesCachedCount] = [
+         texture,
+         samplerIdx
+       ];
+       __texturesCachedCount++;
+     }
+   }
  
   return self;
  }

@@ -27,6 +27,13 @@ Links to the free 3D models used in the examples:
 - https://sketchfab.com/3d-models/pbr-mech-practice-be1e6f50f2c34a5199fd73291389ca20
 - https://kenney.nl/assets/holiday-kit (for the snow scene)
 
+Music included in the Platform demo scene (Pixabay.com):
+- Background Music by Ihor Koliako
+- Jump sound by Crunchpix Studio
+- Collect sound by LIECIO
+- Falling sound by Universfield
+- Win sound by floraphonic
+
 ### Useful Links
 
 - [Documentation](https://manuel-di-iorio.github.io/unique-engine/)

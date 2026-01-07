@@ -5,6 +5,7 @@ if (display_aa >= 8) {
     display_reset(4, true);
 }
 
+randomize();
 currentDemo = undefined;
 bgLayer = layer_background_get_id("Background");
 selectorW = view_xport[0];
@@ -25,10 +26,12 @@ scenes = [
     { name: "Shadow Mapping", obj: oSceneShadowMapping, bg: #147FCC }, // 9
     { name: "Post Processing", obj: oScenePostprocessing, bg: c_black }, // 10
     { name: "PBR Material", obj: oScenePBR, bg: c_ltgray }, // 11
-    { name: "Platform Game", obj: oScenePlatformGame, bg: c_ltgray }, // 12
+    { name: "Platform Game", obj: oScenePlatformGame, bg: #66DDDD }, // 12
 ];
 
 setScene = function(idx) {
+    audio_stop_all();
+  
     if (currentDemo != undefined) {
         var oldSceneObj = currentDemo.obj;
         oldSceneObj.camera.dispose();

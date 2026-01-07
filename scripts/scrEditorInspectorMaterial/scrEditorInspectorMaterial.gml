@@ -1,3 +1,34 @@
+function __scrEditorInspectorMaterialGetTextures(searchValue) {
+    var allTextures = oSceneEditor.assetManager.getAssetsByType("Texture");
+    
+    var uniqueTextures = [];
+    var seen = {};
+    for (var i = 0, l = array_length(allTextures); i < l; i++) {
+        var _asset = allTextures[i];
+        var _key = string(ptr(_asset));
+        if (variable_struct_get(seen, _key) == undefined) {
+            variable_struct_set(seen, _key, true);
+            array_push(uniqueTextures, _asset);
+        }
+    }
+    
+    var textures = array_filter(uniqueTextures, method({ searchValue }, function(texture) {
+        if (searchValue == "") return true;
+        return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
+    }));
+    
+    var mapped = array_map(textures, function(texture) {
+        return {
+            label: texture.name, 
+            value: texture
+        };
+    });
+    
+    array_insert(mapped, 0, { label: "Default", value: undefined });
+
+    return mapped;
+}
+
 function scrEditorInspectorMaterial() {
   return [
       { 
@@ -6,27 +37,6 @@ function scrEditorInspectorMaterial() {
           label: "Name", 
           type: "text"
       },
-    //   { 
-    //       id: "shader",
-    //       field: "shader",
-    //       label: "Shader", 
-    //       type: "dropdown",
-    //       tooltip: "Select the shader program to use for rendering",
-    //       items: [
-    //           { label: "None", value: undefined, tooltip: "No shader" },
-    //           { label: "Standard", value: sh_ue_standard, tooltip: "Shader with lighting support" },
-    //           { label: "Basic (unlit)", value: sh_ue_basic, tooltip: "Simple unlit shader" },
-    //           { label: "Line", value: sh_ue_line, tooltip: "Shader for rendering lines" },
-    //           { label: "Sprite", value: sh_ue_sprite, tooltip: "Shader for rendering sprites" },
-    //           { label: "Normals", value: sh_ue_normals, tooltip: "Shader for showing normals" }
-    //       ],
-    //       onAfterChange: function() {
-    //           self.asset.build();
-              
-    //           // Track the change in asset manager
-    //           oSceneEditor.assetManager.editAsset(self.asset);
-    //       }
-    //   },
   
       { 
           type: "section",
@@ -36,49 +46,93 @@ function scrEditorInspectorMaterial() {
               { 
                   id: "texturesMap",
                   field: "textures",
-                  label: "Diffuse", 
+                  label: "Albedo", 
                   type: "dropdown",
                   tooltip: "Base color/albedo texture",
                   search: "Search texture..",
                   subKey: "map",
-                  itemsGetter: function(searchValue) {
-                      var allTextures = oSceneEditor.assetManager.getAssetsByType("Texture");
-                      
-                      var uniqueTextures = [];
-                      var seen = {};
-                      for (var i = 0; i < array_length(allTextures); i++) {
-                          var _asset = allTextures[i];
-                          var _key = string(ptr(_asset));
-                          if (seen[$ _key] == undefined) {
-                              seen[$ _key] = true;
-                              array_push(uniqueTextures, _asset);
-                          }
-                      }
-                      
-                      var textures = array_filter(uniqueTextures, method({ searchValue }, function(texture) {
-                          if (searchValue == "") return true;
-                          return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
-                      }));
-                      
-                      var mapped = array_map(textures, function(texture) {
-                          return {
-                              label: texture.name, 
-                              value: texture
-                          };
-                      });
-                      
-                      array_insert(mapped, 0, { label: "<None>", value: undefined });
-
-                      return mapped;
-                  },
+                  itemsGetter: __scrEditorInspectorMaterialGetTextures,
                   onChange: function(value, input) {
-                      self.asset.textures[$ "map"] = value;
+                      variable_struct_set(self.asset.textures, "map", value);
                       self.asset.build();
-                      
-                      // Track the change in asset manager
                       oSceneEditor.assetManager.editAsset(self.asset);
                   }
-              }
+              },
+              { 
+                id: "texturesNormalMap",
+                field: "textures",
+                label: "Normal", 
+                type: "dropdown",
+                tooltip: "Normal map (tangent space)",
+                search: "Search texture..",
+                subKey: "normalMap",
+                itemsGetter: __scrEditorInspectorMaterialGetTextures,
+                onChange: function(value, input) {
+                    variable_struct_set(self.asset.textures, "normalMap", value);
+                    self.asset.build();
+                    oSceneEditor.assetManager.editAsset(self.asset);
+                }
+            },
+            { 
+                id: "texturesOrmMap",
+                field: "textures",
+                label: "ORM", 
+                type: "dropdown",
+                tooltip: "ORM map - Occlusion (Red), Roughness (Green), Metalness (Blue)",
+                search: "Search texture..",
+                subKey: "ormMap",
+                itemsGetter: __scrEditorInspectorMaterialGetTextures,
+                onChange: function(value, input) {
+                    variable_struct_set(self.asset.textures, "ormMap", value);
+                    self.asset.build();
+                    oSceneEditor.assetManager.editAsset(self.asset);
+                }
+            },
+            { 
+                id: "texturesEmissiveMap",
+                field: "textures",
+                label: "Emissive", 
+                type: "dropdown",
+                tooltip: "Emissive color map",
+                search: "Search texture..",
+                subKey: "emissiveMap",
+                itemsGetter: __scrEditorInspectorMaterialGetTextures,
+                onChange: function(value, input) {
+                    variable_struct_set(self.asset.textures, "emissiveMap", value);
+                    self.asset.build();
+                    oSceneEditor.assetManager.editAsset(self.asset);
+                }
+            },
+            { 
+                id: "texturesAlphaMap",
+                field: "textures",
+                label: "Alpha", 
+                type: "dropdown",
+                tooltip: "Alpha map for transparency",
+                search: "Search texture..",
+                subKey: "alphaMap",
+                itemsGetter: __scrEditorInspectorMaterialGetTextures,
+                onChange: function(value, input) {
+                    variable_struct_set(self.asset.textures, "alphaMap", value);
+                    self.asset.build();
+                    oSceneEditor.assetManager.editAsset(self.asset);
+                }
+            },
+            { 
+                id: "texturesDisplacementMap",
+                field: "textures",
+                label: "Displacement", 
+                type: "dropdown",
+                tooltip: "Displacement map for height",
+                search: "Search texture..",
+                subKey: "displacementMap",
+                itemsGetter: __scrEditorInspectorMaterialGetTextures,
+                onChange: function(value, input) {
+                    variable_struct_set(self.asset.textures, "displacementMap", value);
+                    self.asset.build();
+                    oSceneEditor.assetManager.editAsset(self.asset);
+                }
+            }
           ]
       },
   
@@ -87,7 +141,7 @@ function scrEditorInspectorMaterial() {
           label: "Basic Properties",
           collapsed: false,
           children: [
-             { 
+              { 
                   id: "transparent",
                   field: "transparent",
                   label: "Transparent", 
@@ -249,7 +303,8 @@ function scrEditorInspectorMaterial() {
                       { label: "Destination Color", value: bm_dest_colour, tooltip: "Multiply by destination color" },
                       { label: "Inverse Destination Color", value: bm_inv_dest_colour, tooltip: "Multiply by (1 - destination color)" },
                   ]
-              },
+              }
           ]
-      },];
+      }
+  ];
 }

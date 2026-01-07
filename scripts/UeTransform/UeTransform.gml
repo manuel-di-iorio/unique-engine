@@ -249,7 +249,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
     function rotate(x, y, z) {
         gml_pragma("forceinline");
 
-        var q = global.__QUAT_TEMP;
+        var q = global.UE_QUAT_TEMP0;
         quat_set_from_euler(q, x, y, z);
         quat_multiply(rotation, q);
 
@@ -263,7 +263,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         var axis = global.UE_VEC3_TEMP0;
         vec3_set(axis, 1, 0, 0);
 
-        var q = global.__QUAT_TEMP;
+        var q = global.UE_QUAT_TEMP0;
         quat_set_from_axis_angle(q, axis, value);
         quat_multiply(rotation, q);
 

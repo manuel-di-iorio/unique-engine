@@ -1,5 +1,5 @@
 global.UE_OBJECT_ID = 0;
-global.UE_VERSION = "0.4.0";
+global.UE_VERSION = "0.5.0";
 global.UE_VFORMAT_PNUC = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_VFORMAT_PNUCT = new UeVertexFormat().position().normal().uv().color().tangent().build();
 global.UE_VFORMAT_PU = new UeVertexFormat().position().uv().build();

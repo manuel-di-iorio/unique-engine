@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"sndDemoPlatformBG",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":3,
+  "compressionQuality":4,
+  "conversionMode":0,
+  "duration":138.7102,
+  "exportDir":"",
+  "name":"sndDemoPlatformBG",
+  "parent":{
+    "name":"Audio",
+    "path":"folders/Demo/Audio.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"sndDemoPlatformBG.mp3",
+  "volume":1.0,
+}

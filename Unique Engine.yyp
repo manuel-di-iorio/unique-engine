@@ -11,6 +11,7 @@
   "defaultScriptType":1,
   "Folders":[
     {"$GMFolder":"","%Name":"Demo","folderPath":"folders/Demo.yy","name":"Demo","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Audio","folderPath":"folders/Demo/Audio.yy","name":"Audio","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Scenes","folderPath":"folders/Demo/Scenes.yy","name":"Scenes","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Textures","folderPath":"folders/Demo/Textures.yy","name":"Textures","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Packages","folderPath":"folders/Packages.yy","name":"Packages","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -168,6 +169,7 @@
   "resources":[
     {"id":{"name":"assimp_extension","path":"extensions/assimp_extension/assimp_extension.yy",},},
     {"id":{"name":"window_command_hook","path":"extensions/window_command_hook/window_command_hook.yy",},},
+    {"id":{"name":"fDemoUI","path":"fonts/fDemoUI/fDemoUI.yy",},},
     {"id":{"name":"fText","path":"fonts/fText/fText.yy",},},
     {"id":{"name":"fTextItalic","path":"fonts/fTextItalic/fTextItalic.yy",},},
     {"id":{"name":"fTextSmall","path":"fonts/fTextSmall/fTextSmall.yy",},},
@@ -258,6 +260,7 @@
     {"id":{"name":"UeFullscreenQuad","path":"scripts/UeFullscreenQuad/UeFullscreenQuad.yy",},},
     {"id":{"name":"UeGeometry","path":"scripts/UeGeometry/UeGeometry.yy",},},
     {"id":{"name":"UeGridHelper","path":"scripts/UeGridHelper/UeGridHelper.yy",},},
+    {"id":{"name":"UeIcosahedronGeometry","path":"scripts/UeIcosahedronGeometry/UeIcosahedronGeometry.yy",},},
     {"id":{"name":"UeInstanceList","path":"scripts/UeInstanceList/UeInstanceList.yy",},},
     {"id":{"name":"UeLayers","path":"scripts/UeLayers/UeLayers.yy",},},
     {"id":{"name":"UeLight","path":"scripts/UeLight/UeLight.yy",},},
@@ -337,6 +340,11 @@
     {"id":{"name":"sh_ue_shadow_map","path":"shaders/sh_ue_shadow_map/sh_ue_shadow_map.yy",},},
     {"id":{"name":"sh_ue_sprite","path":"shaders/sh_ue_sprite/sh_ue_sprite.yy",},},
     {"id":{"name":"sh_ue_standard","path":"shaders/sh_ue_standard/sh_ue_standard.yy",},},
+    {"id":{"name":"sndDemoPlatformBG","path":"sounds/sndDemoPlatformBG/sndDemoPlatformBG.yy",},},
+    {"id":{"name":"sndDemoPlatformCollect","path":"sounds/sndDemoPlatformCollect/sndDemoPlatformCollect.yy",},},
+    {"id":{"name":"sndDemoPlatformFalling","path":"sounds/sndDemoPlatformFalling/sndDemoPlatformFalling.yy",},},
+    {"id":{"name":"sndDemoPlatformJump","path":"sounds/sndDemoPlatformJump/sndDemoPlatformJump.yy",},},
+    {"id":{"name":"sndDemoPlatformWin","path":"sounds/sndDemoPlatformWin/sndDemoPlatformWin.yy",},},
     {"id":{"name":"spr_tex_box","path":"sprites/spr_tex_box/spr_tex_box.yy",},},
     {"id":{"name":"spr_tex_palm_tree","path":"sprites/spr_tex_palm_tree/spr_tex_palm_tree.yy",},},
     {"id":{"name":"spr_tex_pyramid","path":"sprites/spr_tex_pyramid/spr_tex_pyramid.yy",},},
@@ -383,8 +391,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
     {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
+    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

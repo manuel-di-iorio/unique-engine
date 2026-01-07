@@ -82,63 +82,57 @@ function capsule_translate(c, v) {
 	return c;
 }
 
-/// @func capsule_intersects_box(c, box)
-/// @desc Returns true if the given bounding box intersects with this capsule.
+/// @func capsule_intersects_box(c, box, out = undefined)
+/// @desc Returns true if the given bounding box intersects with this capsule. If 'out' is provided, it will contain the resolution vector (strongest axis).
 /// @param {Array<Real>} c The capsule
 /// @param {Array<Real>} box The bounding box to test
+/// @param {Array<Real>} [out] Optional output vector for resolution [x, y, z]
 /// @returns {Bool} Whether the given bounding box intersects with this capsule
-function capsule_intersects_box(c, box) {
+function capsule_intersects_box(c, box, out = undefined) {
 	gml_pragma("forceinline");
 	
-	// Get the closest point on the line segment (capsule axis) to the box
-	var point = array_create(3);
+	var dx = c[3] - c[0], dy = c[4] - c[1], dz = c[5] - c[2];
+	var lenSq = dx*dx + dy*dy + dz*dz;
+	var boxCenter = box3_get_center(box);
 	
-	// Clamp the line segment finishpoints to the box
-	box3_clamp_point(box, [c[0], c[1], c[2]], point);
-	var distToStart = vec3_distance_to_squared(point, [c[0], c[1], c[2]]);
+	// Project box center onto line segment
+	var t = (lenSq == 0) ? 0 : clamp(((boxCenter[0] - c[0]) * dx + (boxCenter[1] - c[1]) * dy + (boxCenter[2] - c[2]) * dz) / lenSq, 0, 1);
 	
-	box3_clamp_point(box, [c[3], c[4], c[5]], point);
-	var distTofinish = vec3_distance_to_squared(point, [c[3], c[4], c[5]]);
+	// Get closest point on segment to box center
+	var closestOnSegX = c[0] + t * dx;
+	var closestOnSegY = c[1] + t * dy;
+	var closestOnSegZ = c[2] + t * dz;
+	var closestOnSeg = [closestOnSegX, closestOnSegY, closestOnSegZ];
 	
-	// If either finishpoint is within radius distance of the box, they intersect
-	var radiusSq = c[6] * c[6];
-	if (distToStart <= radiusSq || distTofinish <= radiusSq) {
+	// Get closest point on box to the point on segment
+	var closestOnBox = [0, 0, 0];
+	box3_clamp_point(box, closestOnSeg, closestOnBox);
+	
+	var diffX = closestOnSegX - closestOnBox[0];
+	var diffY = closestOnSegY - closestOnBox[1];
+	var diffZ = closestOnSegZ - closestOnBox[2];
+	var distSq = diffX*diffX + diffY*diffY + diffZ*diffZ;
+	
+	if (distSq < c[6] * c[6]) {
+		if (out != undefined) {
+			var dist = sqrt(distSq);
+			var penetration = c[6] - dist;
+			
+			if (dist == 0) { diffZ = 1; dist = 1; }
+			
+			var nx = diffX / dist, ny = diffY / dist, nz = diffZ / dist;
+			var ax = abs(nx), ay = abs(ny), az = abs(nz);
+			
+			// Risolviamo SOLO l'asse più forte per evitare incastri diagonali
+			vec3_set(out, 0, 0, 0);
+			if (ax > ay && ax > az)      { out[0] = sign(nx) * penetration; }
+			else if (ay > az)            { out[1] = sign(ny) * penetration; }
+			else                         { out[2] = sign(nz) * penetration; }
+		}
 		return true;
 	}
 	
-	// Check if the line segment passes close enough to the box
-	// Get the capsule's direction vector
-	var dx = c[3] - c[0];
-	var dy = c[4] - c[1];
-	var dz = c[5] - c[2];
-	var lengthSq = dx*dx + dy*dy + dz*dz;
-	
-	if (lengthSq == 0) {
-		// Degenerate capsule (start == finish), treat as sphere
-		var boxCenter = box3_get_center(box);
-		var dist = box3_distance_to_point(box, boxCenter);
-		return dist <= c[6];
-	}
-	
-	// Get box center
-	var boxCenter = box3_get_center(box);
-	
-	// Project box center onto the line segment
-	var t = ((boxCenter[0] - c[0]) * dx + 
-	         (boxCenter[1] - c[1]) * dy + 
-	         (boxCenter[2] - c[2]) * dz) / lengthSq;
-	t = clamp(t, 0, 1);
-	
-	// Get the closest point on the segment to the box center
-	var closestX = c[0] + t * dx;
-	var closestY = c[1] + t * dy;
-	var closestZ = c[2] + t * dz;
-	var closest = [closestX, closestY, closestZ];
-	
-	// Distance from this point to the box
-	var dist = box3_distance_to_point(box, closest);
-	
-	return dist <= c[6];
+	return false;
 }
 
 /// @func capsule_equals(c, c2)
