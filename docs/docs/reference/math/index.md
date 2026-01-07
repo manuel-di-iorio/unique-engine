@@ -22,6 +22,7 @@ The complete Unique Math documentation can be viewed to a dedicated documentatio
 - [Sphere](https://manuel-di-iorio.github.io/unique-math/docs/Math/Sphere)
 - [Frustum](https://manuel-di-iorio.github.io/unique-math/docs/Math/Frustum)
 - [Euler](https://manuel-di-iorio.github.io/unique-math/docs/Math/Euler)
+- [Capsule](https://manuel-di-iorio.github.io/unique-math/docs/Math/Capsule)
 
 ## Unique Engine Extensions
 

@@ -5,6 +5,8 @@
 
 // Global temp matrix for temporary operations
 global.UE_MAT3_TEMP0 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+global.UE_MAT3_TEMP1 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+global.UE_MAT3_TEMP2 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 
 /// @func mat3_create()
 /// @desc Creates a new identity 3x3 matrix.

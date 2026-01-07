@@ -4,6 +4,8 @@
 
 // Global dummy array for temporary operations - reuse to avoid allocations
 global.UE_VEC2_TEMP0 = [0, 0];
+global.UE_VEC2_TEMP1 = [0, 0];
+global.UE_VEC2_TEMP2 = [0, 0];
 
 enum VEC2 {
     x, y

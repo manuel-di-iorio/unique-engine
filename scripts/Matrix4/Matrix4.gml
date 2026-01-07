@@ -6,6 +6,8 @@
 // Global temp matrix for temporary operations
 global.UE_MAT4_IDENTITY = matrix_build_identity();
 global.UE_MAT4_TEMP0 = matrix_build_identity();
+global.UE_MAT4_TEMP1 = matrix_build_identity();
+global.UE_MAT4_TEMP2 = matrix_build_identity();
 
 /// @func mat4_create()
 /// @desc Creates a new identity 4x4 matrix.

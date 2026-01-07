@@ -25,6 +25,7 @@ scenes = [
     { name: "Shadow Mapping", obj: oSceneShadowMapping, bg: #147FCC }, // 9
     { name: "Post Processing", obj: oScenePostprocessing, bg: c_black }, // 10
     { name: "PBR Material", obj: oScenePBR, bg: c_ltgray }, // 11
+    { name: "Platform Game", obj: oScenePlatformGame, bg: c_ltgray }, // 12
 ];
 
 setScene = function(idx) {
@@ -40,4 +41,4 @@ setScene = function(idx) {
     instance_create_layer(0, 0, "Instances", currentDemo.obj); 
 }
 
-setScene(0);
+setScene(12);

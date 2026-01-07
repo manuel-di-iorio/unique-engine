@@ -1,4 +1,4 @@
-function UeControls(data = {}) constructor {
+function UeControls(data = {}): UeEventDispatcher() constructor {
     self.enabled = true;
     
     // @undocumented @todo

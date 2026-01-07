@@ -1,6 +1,8 @@
 /// @desc Box3 functions [minX, minY, minZ, maxX, maxY, maxZ]
 
 global.UE_BOX3_TEMP0 = box3_create();
+global.UE_BOX3_TEMP1 = box3_create();
+global.UE_BOX3_TEMP2 = box3_create();
 
 enum BOX3 {
   minX, minY, minZ, maxX, maxY, maxZ

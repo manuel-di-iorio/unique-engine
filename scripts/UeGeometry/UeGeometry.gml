@@ -318,7 +318,7 @@ function UeGeometry(data = {}) constructor {
         // Assuming all geometries have the same format as the first one
         res.format = geometries[0].format;
         
-        var pos = [], norm = [], _uv = [], col = [], tan = [], bitan = [], idx = [];
+        var pos = [], norm = [], _uv = [], col = [], _tan = [], bitan = [], idx = [];
         var offset = 0;
         
         for (var i = 0, il = array_length(geometries); i < il; i++) {
@@ -329,7 +329,7 @@ function UeGeometry(data = {}) constructor {
             if (g.normal != undefined) norm = array_concat(norm, g.normal);
             if (g.uv != undefined) _uv = array_concat(_uv, g.uv);
             if (g.color != undefined) col = array_concat(col, g.color);
-            if (g.tangent != undefined) tan = array_concat(tan, g.tangent);
+            if (g.tangent != undefined) _tan = array_concat(_tan, g.tangent);
             if (g.bitangent != undefined) bitan = array_concat(bitan, g.bitangent);
             
             if (g.index != undefined) {
@@ -345,7 +345,7 @@ function UeGeometry(data = {}) constructor {
         if (array_length(norm) > 0) res.normal = norm;
         if (array_length(_uv) > 0) res.uv = _uv;
         if (array_length(col) > 0) res.color = col;
-        if (array_length(tan) > 0) res.tangent = tan;
+        if (array_length(tan) > 0) res.tangent = _tan;
         if (array_length(bitan) > 0) res.bitangent = bitan;
         if (array_length(idx) > 0) res.index = idx;
         

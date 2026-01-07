@@ -1,6 +1,8 @@
 /// @desc Ray functions using arrays [ox, oy, oz, dx, dy, dz]
 
 global.UE_RAY_TEMP0 = ray_create();
+global.UE_RAY_TEMP1 = ray_create();
+global.UE_RAY_TEMP2 = ray_create();
 
 enum RAY {
   origX,

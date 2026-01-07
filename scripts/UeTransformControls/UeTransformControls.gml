@@ -745,7 +745,6 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     var end2D = self._worldToScreen(endPos, self._matViewProj, self._vec2D_2);
 
     if (origin2D != undefined && end2D != undefined) {
-      // Use Vector2 library function
       var d = vec2_distance_to_segment([mx, my], origin2D, end2D);
       return (d < threshold);
     }
