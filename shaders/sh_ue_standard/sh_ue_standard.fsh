@@ -205,9 +205,8 @@ vec3 AgXToneMapping(vec3 color) {
         -0.099029744, -0.0989611761, 1.1510736126
     );
     vec3 x = AgXInputMatrix * color;
-    x = clamp((log2(max(x, 1e-10)) + 10.0) / 16.0, 0.0, 1.0);
-    vec3 val = ((15.5 * x - 40.14) * x + 39.96) * x - 19.48;
-    val = (val * x + 4.12) * x + 0.01;
+    x = clamp((log2(max(x, 1e-10)) + 12.47393) / 16.53692, 0.0, 1.0);
+    vec3 val = x * x * x * (x * (x * 6.0 - 15.0) + 10.0);
     return AgXOutputMatrix * val;
 }
 
@@ -216,12 +215,16 @@ vec3 NeutralToneMapping(vec3 color) {
     color *= u_ueToneMappingExposure;
     const float startCompression = 0.8;
     const float desaturation = 0.15;
+    float x = min(color.r, min(color.g, color.b));
+    float offset = x < 0.08 ? x - 6.25 * x * x : 0.04 - 0.04 / (12.5 * x + 1.0);
+    color -= offset;
     float peak = max(color.r, max(color.g, color.b));
     if (peak < startCompression) return color;
     float d = 1.0 - startCompression;
     float newPeak = 1.0 - d * d / (peak + d - startCompression);
     color *= newPeak / peak;
-    return color;
+    float g = 1.0 - 1.0 / (desaturation * (peak - newPeak) + 1.0);
+    return mix(color, vec3(newPeak), g);
 }
 
 void main() {
@@ -344,12 +347,13 @@ void main() {
 
     // ===== Tone Mapping =====
     if (u_ueToneMapped > 0.5) {
-        if (u_ueToneMapping == 1.0) color = ReinhardToneMapping(color);
-        else if (u_ueToneMapping == 2.0) color = CineonToneMapping(color);
-        else if (u_ueToneMapping == 3.0) color = ACESFilmicToneMapping(color);
-        else if (u_ueToneMapping == 4.0) color = AgXToneMapping(color);
-        else if (u_ueToneMapping == 5.0) color = NeutralToneMapping(color);
-        else color = LinearToneMapping(color);
+        if (u_ueToneMapping == 1.0) color = LinearToneMapping(color);
+        else if (u_ueToneMapping == 2.0) color = ReinhardToneMapping(color);
+        else if (u_ueToneMapping == 3.0) color = CineonToneMapping(color);
+        else if (u_ueToneMapping == 4.0) color = ACESFilmicToneMapping(color);
+        else if (u_ueToneMapping == 5.0) color = AgXToneMapping(color);
+        else if (u_ueToneMapping == 6.0) color = NeutralToneMapping(color);
+        // If 0 (NONE), we do nothing and keep raw color
     }
 
     gl_FragColor = vec4(LinearToSRGB(color), alpha);

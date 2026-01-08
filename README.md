@@ -28,7 +28,7 @@ Links to the free 3D models used in the examples:
 - https://kenney.nl/assets/holiday-kit (for the snow scene)
 
 Music included in the Platform demo scene (Pixabay.com):
-- Background Music by Ievgen Poltavskyi
+- Background Music by its_tigri
 - Jump sound by Crunchpix Studio
 - Collect sound by LIECIO
 - Falling sound by Universfield

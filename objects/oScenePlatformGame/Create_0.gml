@@ -1,6 +1,7 @@
 // --- Sistema ed Engine ---
 renderer = new UeRenderer({ 
-  toneMapping: UE_TONE_MAPPING.NEUTRAL
+  shadowMap: { enabled: true },
+  toneMapping: UE_TONE_MAPPING.REINHARD
 });
 scene = new UeScene();
 camera = new UePerspectiveCamera().use();

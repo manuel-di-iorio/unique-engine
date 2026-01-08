@@ -91,6 +91,7 @@ enum UE_SHADOW_QUALITY {
 
 enum UE_TONE_MAPPING {
     NONE,
+    LINEAR,
     REINHARD,
     CINEON,
     ACES,
