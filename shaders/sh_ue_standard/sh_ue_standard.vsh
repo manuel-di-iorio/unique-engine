@@ -17,13 +17,14 @@ uniform mat4 u_ueLightSpaceMatrix;
 uniform sampler2D s_displacementMap;
 uniform float u_ueDisplacementScale;
 uniform float u_ueDisplacementBias;
+uniform float u_ueHasDisplacementMap;
 
 void main() {
 
     vec3 pos = in_Position;
 
     // Vertex displacement (safe: default map = black)
-    if (abs(u_ueDisplacementScale) > 0.0001) {
+    if (u_ueHasDisplacementMap > 0.5 && abs(u_ueDisplacementScale) > 0.0001) {
         float h = texture2D(s_displacementMap, in_TextureCoord0).r;
         pos += in_Normal * (h * u_ueDisplacementScale + u_ueDisplacementBias);
     }

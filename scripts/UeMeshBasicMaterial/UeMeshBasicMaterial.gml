@@ -12,7 +12,7 @@ function UeMeshBasicMaterial(data = {}): UeMaterial(data) constructor {
     uniforms.ueEmissiveIntensity = { type: UE_UNIFORM_TYPE.FLOAT, value: data[$ "emissiveIntensity"] ?? 0 };
     
     /** === Textures === */
-    textures.emissiveMap = data[$ "emissiveMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
+    textures.emissiveMap = data[$ "emissiveMap"];
     
     build();
 }

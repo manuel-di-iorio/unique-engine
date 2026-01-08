@@ -50,6 +50,22 @@ function UeMaterial(data = {}) constructor {
   __uniformToneMappingExposureLoc = undefined;
   __uniformToneMappedLoc = undefined;
 
+  // Has maps uniforms
+  __uniformHasMapLoc = undefined;
+  __uniformHasAlphaMapLoc = undefined;
+  __uniformHasOrmMapLoc = undefined;
+  __uniformHasNormalMapLoc = undefined;
+  __uniformHasEmissiveMapLoc = undefined;
+  __uniformHasDisplacementMapLoc = undefined;
+  __hasMapsFlags = {
+    map: 0,
+    alphaMap: 0,
+    ormMap: 0,
+    normalMap: 0,
+    emissiveMap: 0,
+    displacementMap: 0
+  };
+
   // Fog uniforms
   __uniformFogColorLoc = undefined;
   __uniformFogDensityLoc = undefined;
@@ -71,9 +87,9 @@ function UeMaterial(data = {}) constructor {
   __uniformNamesConfig = global.UE_UNIFORM_NAMES_CONFIG;
 
   // Textures
-  __baseTexture = global.UE_TEXTURE_DEFAULT_WHITE;
+  __baseTexture = undefined;
   textures = {
-    map: data[$ "map"] ?? global.UE_TEXTURE_DEFAULT_WHITE,
+    map: data[$ "map"],
   };
 
   emissiveIntensity = data[$ "emissiveIntensity"] ?? 0;
@@ -104,6 +120,14 @@ function UeMaterial(data = {}) constructor {
    __uniformToneMappingLoc = shader_get_uniform(shader, cfg.toneMapping);
    __uniformToneMappingExposureLoc = shader_get_uniform(shader, cfg.toneMappingExposure);
    __uniformToneMappedLoc = shader_get_uniform(shader, cfg.toneMapped);
+
+   // Cache has maps uniforms
+   __uniformHasMapLoc = shader_get_uniform(shader, cfg.hasMap);
+   __uniformHasAlphaMapLoc = shader_get_uniform(shader, cfg.hasAlphaMap);
+   __uniformHasOrmMapLoc = shader_get_uniform(shader, cfg.hasOrmMap);
+   __uniformHasNormalMapLoc = shader_get_uniform(shader, cfg.hasNormalMap);
+   __uniformHasEmissiveMapLoc = shader_get_uniform(shader, cfg.hasEmissiveMap);
+   __uniformHasDisplacementMapLoc = shader_get_uniform(shader, cfg.hasDisplacementMap);
 
    // Cache fog uniforms
    __uniformFogColorLoc = shader_get_uniform(shader, cfg.fogColor);
@@ -149,42 +173,57 @@ function UeMaterial(data = {}) constructor {
    var textureNamesCount = array_length(textureNames);
  
    __texturesCached = array_create(textureNamesCount);
-   __texturesCachedCount = 0;
-   __baseTexture = global.UE_TEXTURE_DEFAULT_WHITE;
- 
-    for (var t = 0; t < textureNamesCount; t++) {
-     var textureName = textureNames[t];
-     var texture = textures[$ textureName];
-     
-     if (textureName == "map") {
-       __baseTexture = texture ?? global.UE_TEXTURE_DEFAULT_WHITE;
-       continue;
-      }
-     
-    var samplerIdx = shader_get_sampler_index(shader, $"s_{textureName}");
-     if (samplerIdx != -1) {
-       // Fallback to default textures if undefined
-       if (texture == undefined || !is_struct(texture)) {
-           switch (textureName) {
-               case "normalMap": texture = global.UE_TEXTURE_DEFAULT_NORMAL; break;
-               case "ormMap": texture = global.UE_TEXTURE_DEFAULT_ORM; break;
-               case "emissiveMap": 
-               case "displacementMap": 
-               case "bumpMap":
-               case "lightMap":
-                   texture = global.UE_TEXTURE_DEFAULT_BLACK; break;
-               case "alphaMap": 
-               default: texture = global.UE_TEXTURE_DEFAULT_WHITE; break;
-           }
-       }
+  __texturesCachedCount = 0;
+  __baseTexture = undefined;
+  
+  // Reset has maps flags
+  __hasMapsFlags.map = 0;
+  __hasMapsFlags.alphaMap = 0;
+  __hasMapsFlags.ormMap = 0;
+  __hasMapsFlags.normalMap = 0;
+  __hasMapsFlags.emissiveMap = 0;
+  __hasMapsFlags.displacementMap = 0;
 
-       __texturesCached[__texturesCachedCount] = [
-         texture,
-         samplerIdx
-       ];
-       __texturesCachedCount++;
-     }
-   }
+   for (var t = 0; t < textureNamesCount; t++) {
+    var textureName = textureNames[t];
+    var texture = textures[$ textureName];
+    
+    var isDefault = false;
+
+    // Special case for base map
+    if (textureName == "map") {
+      __baseTexture = texture;
+      __hasMapsFlags.map = (texture == undefined) ? 0 : 1;
+      continue;
+    }
+
+    var samplerIdx = shader_get_sampler_index(shader, $"s_{textureName}");
+    if (samplerIdx != -1) {
+      // If texture is undefined or not a struct (invalid), it's considered default
+      if (texture == undefined || !is_struct(texture)) {
+        isDefault = true;
+      }
+
+      // Set the "hasMap" flag for known maps
+      if (variable_struct_exists(__hasMapsFlags, textureName)) {
+          __hasMapsFlags[$ textureName] = isDefault ? 0 : 1;
+      }
+
+      // Special case for displacement map in vertex shader
+      if (textureName == "displacementMap") {
+          __hasMapsFlags.displacementMap = isDefault ? 0 : 1;
+      }
+
+      // Only cache for texture_set_stage if it's NOT a default texture
+      if (!isDefault) {
+          __texturesCached[__texturesCachedCount] = [
+            texture,
+            samplerIdx
+          ];
+          __texturesCachedCount++;
+      }
+    }
+  }
  
   return self;
  }
@@ -307,6 +346,14 @@ function UeMaterial(data = {}) constructor {
     if (__uniformToneMappedLoc != undefined) {
       shader_set_uniform_f(__uniformToneMappedLoc, toneMapped ? 1.0 : 0.0);
     }
+
+    // Set has maps uniforms
+    if (__uniformHasMapLoc != undefined) shader_set_uniform_f(__uniformHasMapLoc, __hasMapsFlags.map);
+    if (__uniformHasAlphaMapLoc != undefined) shader_set_uniform_f(__uniformHasAlphaMapLoc, __hasMapsFlags.alphaMap);
+    if (__uniformHasOrmMapLoc != undefined) shader_set_uniform_f(__uniformHasOrmMapLoc, __hasMapsFlags.ormMap);
+    if (__uniformHasNormalMapLoc != undefined) shader_set_uniform_f(__uniformHasNormalMapLoc, __hasMapsFlags.normalMap);
+    if (__uniformHasEmissiveMapLoc != undefined) shader_set_uniform_f(__uniformHasEmissiveMapLoc, __hasMapsFlags.emissiveMap);
+    if (__uniformHasDisplacementMapLoc != undefined) shader_set_uniform_f(__uniformHasDisplacementMapLoc, __hasMapsFlags.displacementMap);
 
     // Apply the uniforms on the shader
     for (var u = 0; u < __uniformsCachedCount; u++) {
@@ -477,19 +524,8 @@ function UeMaterial(data = {}) constructor {
             // Link to existing texture object
             textures[$ textureName] = texturesByUUID[$ textureUUID];
           } else {
-            // Check if it's a default texture
-            if (textureUUID == global.UE_TEXTURE_DEFAULT_WHITE.uuid) {
-              textures[$ textureName] = global.UE_TEXTURE_DEFAULT_WHITE;
-            } else if (textureUUID == global.UE_TEXTURE_DEFAULT_BLACK.uuid) {
-              textures[$ textureName] = global.UE_TEXTURE_DEFAULT_BLACK;
-            } else if (textureUUID == global.UE_TEXTURE_DEFAULT_NORMAL.uuid) {
-              textures[$ textureName] = global.UE_TEXTURE_DEFAULT_NORMAL;
-            } else if (textureUUID == global.UE_TEXTURE_DEFAULT_ORM.uuid) {
-              textures[$ textureName] = global.UE_TEXTURE_DEFAULT_ORM;
-            } else {
-              // Keep UUID for later linking (texture not found)
-              textures[$ textureName] = textureUUID;
-            }
+            // Remove textures not found
+            delete textures[$ textureName];
           }
         }
       }

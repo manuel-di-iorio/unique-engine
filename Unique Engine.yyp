@@ -17,7 +17,6 @@
     {"$GMFolder":"","%Name":"Packages","folderPath":"folders/Packages.yy","name":"Packages","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Unique Engine","folderPath":"folders/Packages/Unique Engine.yy","name":"Unique Engine","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"__internals","folderPath":"folders/Packages/Unique Engine/__internals.yy","name":"__internals","resourceType":"GMFolder","resourceVersion":"2.0",},
-    {"$GMFolder":"","%Name":"Default Textures","folderPath":"folders/Packages/Unique Engine/__internals/Default Textures.yy","name":"Default Textures","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Cameras","folderPath":"folders/Packages/Unique Engine/Cameras.yy","name":"Cameras","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Controls","folderPath":"folders/Packages/Unique Engine/Controls.yy","name":"Controls","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Core","folderPath":"folders/Packages/Unique Engine/Core.yy","name":"Core","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -359,10 +358,6 @@
     {"id":{"name":"spr_tex_sand","path":"sprites/spr_tex_sand/spr_tex_sand.yy",},},
     {"id":{"name":"spr_tex_snow","path":"sprites/spr_tex_snow/spr_tex_snow.yy",},},
     {"id":{"name":"sprDemoLogo","path":"sprites/sprDemoLogo/sprDemoLogo.yy",},},
-    {"id":{"name":"sprUeBlackTex","path":"sprites/sprUeBlackTex/sprUeBlackTex.yy",},},
-    {"id":{"name":"sprUeNormalTex","path":"sprites/sprUeNormalTex/sprUeNormalTex.yy",},},
-    {"id":{"name":"sprUeOrmTex","path":"sprites/sprUeOrmTex/sprUeOrmTex.yy",},},
-    {"id":{"name":"sprUeWhiteTex","path":"sprites/sprUeWhiteTex/sprUeWhiteTex.yy",},},
     {"id":{"name":"sprUiCamera","path":"sprites/sprUiCamera/sprUiCamera.yy",},},
     {"id":{"name":"sprUiCenter","path":"sprites/sprUiCenter/sprUiCenter.yy",},},
     {"id":{"name":"sprUiCheckTick","path":"sprites/sprUiCheckTick/sprUiCheckTick.yy",},},
@@ -399,8 +394,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
     {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
+    {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

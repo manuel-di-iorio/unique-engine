@@ -56,7 +56,7 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
         camera_apply(_shadowCameraView);
         
         // Light space matrix = Projection * View
-        mat4_multiply_matrices(lightSpaceMatrix, camera.projectionMatrix, camera.matrixWorldInverse);
+        matrix_multiply(camera.matrixWorldInverse, camera.projectionMatrix, lightSpaceMatrix);
         
         return self;
     }

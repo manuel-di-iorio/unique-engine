@@ -3,10 +3,6 @@ global.UE_VERSION = "0.6.0";
 global.UE_VFORMAT_PNUC = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_VFORMAT_PNUCT = new UeVertexFormat().position().normal().uv().color().tangent().build();
 global.UE_VFORMAT_PU = new UeVertexFormat().position().uv().build();
-global.UE_TEXTURE_DEFAULT_WHITE = new UeTexture(sprUeWhiteTex);
-global.UE_TEXTURE_DEFAULT_BLACK = new UeTexture(sprUeBlackTex);
-global.UE_TEXTURE_DEFAULT_NORMAL = new UeTexture(sprUeNormalTex);
-global.UE_TEXTURE_DEFAULT_ORM = new UeTexture(sprUeOrmTex);
 global.UE_MOUSE = new UeMouse();
 
 // Uniform names configuration
@@ -47,7 +43,15 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     // Tone Mapping
     toneMapping: "u_ueToneMapping",
     toneMappingExposure: "u_ueToneMappingExposure",
-    toneMapped: "u_ueToneMapped"
+    toneMapped: "u_ueToneMapped",
+    
+    // Has maps
+    hasMap: "u_ueHasMap",
+    hasAlphaMap: "u_ueHasAlphaMap",
+    hasOrmMap: "u_ueHasOrmMap",
+    hasNormalMap: "u_ueHasNormalMap",
+    hasEmissiveMap: "u_ueHasEmissiveMap",
+    hasDisplacementMap: "u_ueHasDisplacementMap"
 };
 
 global.UE_DEFAULT_MATERIAL = new UeMeshStandardMaterial();

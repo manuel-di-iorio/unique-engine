@@ -42,6 +42,12 @@ uniform sampler2D s_emissiveMap;
 // uniform sampler2D s_lightMap;
 // uniform sampler2D s_envMap;
 
+uniform float u_ueHasMap;
+uniform float u_ueHasAlphaMap;
+uniform float u_ueHasOrmMap;
+uniform float u_ueHasNormalMap;
+uniform float u_ueHasEmissiveMap;
+
 // ===== Lights =====
 // Directional
 uniform vec3  u_ueDirLightDir0;
@@ -230,7 +236,7 @@ vec3 NeutralToneMapping(vec3 color) {
 void main() {
 
     // ===== Base =====
-    vec4 tex = texture2D(gm_BaseTexture, vTexcoord);
+    vec4 tex = (u_ueHasMap > 0.5) ? texture2D(gm_BaseTexture, vTexcoord) : vec4(1.0);
     
     // Fallback if vertex color is black or transparent (often occurs if not provided)
     vec4 vCol = vColour;
@@ -238,12 +244,13 @@ void main() {
     if (vCol.a < 0.001) vCol.a = 1.0;
     
     vec4 base = tex * vCol;
-    float alpha = base.a * texture2D(s_alphaMap, vTexcoord).r;
+    float alphaMap = (u_ueHasAlphaMap > 0.5) ? texture2D(s_alphaMap, vTexcoord).r : 1.0;
+    float alpha = base.a * alphaMap;
     //if (alpha < 0.01) discard;
 
     vec3 albedo = SRGBToLinear(base.rgb * u_ueColor);
 
-    vec3 orm = texture2D(s_ormMap, vTexcoord).rgb;
+    vec3 orm = (u_ueHasOrmMap > 0.5) ? texture2D(s_ormMap, vTexcoord).rgb : vec3(1.0, 1.0, 0.0);
     float ao = mix(1.0, orm.r, u_ueAoIntensity * u_ueAoMapIntensity);
     float roughness = orm.g * u_ueRoughness;
     float metalness = orm.b * u_ueMetalness;
@@ -258,7 +265,8 @@ void main() {
         N = normalize(vWorldNormal);
     }
 
-    vec3 nm = texture2D(s_normalMap, vTexcoord).rgb * 2.0 - 1.0;
+    vec3 normalMapSample = (u_ueHasNormalMap > 0.5) ? texture2D(s_normalMap, vTexcoord).rgb : vec3(0.5, 0.5, 1.0);
+    vec3 nm = normalMapSample * 2.0 - 1.0;
     nm.xy *= u_ueNormalMapScale;
     
     // Safety check for normal map sampling
@@ -326,8 +334,8 @@ void main() {
     vec3 ambient = SRGBToLinear(u_ueAmbient + vec3(0.05)) * albedo * ao;
 
     // Emissive
-    vec3 emissive = (SRGBToLinear(texture2D(s_emissiveMap, vTexcoord).rgb)
-                    + SRGBToLinear(u_ueEmissive)) * u_ueEmissiveIntensity;
+    vec3 emissiveMapColor = (u_ueHasEmissiveMap > 0.5) ? SRGBToLinear(texture2D(s_emissiveMap, vTexcoord).rgb) : vec3(0.0);
+    vec3 emissive = (emissiveMapColor + SRGBToLinear(u_ueEmissive)) * u_ueEmissiveIntensity;
 
     vec3 color = ambient + Lo + emissive;
 
