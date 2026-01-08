@@ -49,14 +49,12 @@ function UeMaterial(data = {}) constructor {
   __uniformToneMappingLoc = undefined;
   __uniformToneMappingExposureLoc = undefined;
   __uniformToneMappedLoc = undefined;
-  //__uniformAoIntensityLoc = undefined;
-  //__uniformAoMapIntensityLoc = undefined;
 
   // Fog uniforms
-  //__uniformFogColorLoc = undefined;
-  //__uniformFogDensityLoc = undefined;
-  //__uniformFogNearLoc = undefined;
-  //__uniformFogFarLoc = undefined;
+  __uniformFogColorLoc = undefined;
+  __uniformFogDensityLoc = undefined;
+  __uniformFogNearLoc = undefined;
+  __uniformFogFarLoc = undefined;
 
   // Light uniforms
   lights = data[$ "lights"] ?? 2;
@@ -78,8 +76,6 @@ function UeMaterial(data = {}) constructor {
     map: data[$ "map"] ?? global.UE_TEXTURE_DEFAULT_WHITE,
   };
 
-  //aoIntensity = data[$ "aoIntensity"] ?? 1;
-  //aoMapIntensity = data[$ "aoMapIntensity"] ?? 1;
   emissiveIntensity = data[$ "emissiveIntensity"] ?? 0;
   receiveShadow = data[$ "receiveShadow"] ?? true;
 
@@ -95,8 +91,6 @@ function UeMaterial(data = {}) constructor {
    __uniformCameraPositionLoc = shader_get_uniform(shader, cfg.cameraPosition);
    __uniformLightsAmbientLoc = shader_get_uniform(shader, cfg.ambient);
    __uniformEmissiveIntensityLoc = shader_get_uniform(shader, cfg.emissiveIntensity);
-   //__uniformAoIntensityLoc = shader_get_uniform(shader, cfg.aoIntensity);
-   //__uniformAoMapIntensityLoc = shader_get_uniform(shader, cfg.aoMapIntensity);
 
    // Cache shadow uniforms
    __uniformLightSpaceMatrixLoc = shader_get_uniform(shader, cfg.lightSpaceMatrix);
@@ -112,10 +106,10 @@ function UeMaterial(data = {}) constructor {
    __uniformToneMappedLoc = shader_get_uniform(shader, cfg.toneMapped);
 
    // Cache fog uniforms
-   //__uniformFogColorLoc = shader_get_uniform(shader, cfg.fogColor);
-   //__uniformFogDensityLoc = shader_get_uniform(shader, cfg.fogDensity);
-   //__uniformFogNearLoc = shader_get_uniform(shader, cfg.fogNear);
-   //__uniformFogFarLoc = shader_get_uniform(shader, cfg.fogFar);
+   __uniformFogColorLoc = shader_get_uniform(shader, cfg.fogColor);
+   __uniformFogDensityLoc = shader_get_uniform(shader, cfg.fogDensity);
+   __uniformFogNearLoc = shader_get_uniform(shader, cfg.fogNear);
+   __uniformFogFarLoc = shader_get_uniform(shader, cfg.fogFar);
  
    __uniformLightsDir = array_create(lights);
    __uniformLightsPos = array_create(lights);
@@ -284,19 +278,19 @@ function UeMaterial(data = {}) constructor {
     }
 
     // Set fog uniforms
-    //var fogState = global.UE_RENDERER_FOG_STATE;
-    //var materialFogEnabled = self[$ "fog"] ?? true;
-//
-    //if (fogState.enabled && materialFogEnabled) {
-      //if (__uniformFogColorLoc != undefined) shader_set_uniform_f_array(__uniformFogColorLoc, fogState.color);
-      //if (__uniformFogDensityLoc != undefined) shader_set_uniform_f(__uniformFogDensityLoc, fogState.density);
-      //if (__uniformFogNearLoc != undefined) shader_set_uniform_f(__uniformFogNearLoc, fogState.near);
-      //if (__uniformFogFarLoc != undefined) shader_set_uniform_f(__uniformFogFarLoc, fogState.far);
-    //} else {
-      //// Disable fog by setting density to 0 or far plane to infinity
-      //if (__uniformFogDensityLoc != undefined) shader_set_uniform_f(__uniformFogDensityLoc, 0);
-      //if (__uniformFogFarLoc != undefined) shader_set_uniform_f(__uniformFogFarLoc, 0);
-    //}
+    var fogState = global.UE_RENDERER_FOG_STATE;
+    var materialFogEnabled = self[$ "fog"] ?? true;
+
+    if (fogState.enabled && materialFogEnabled) {
+      if (__uniformFogColorLoc != undefined) shader_set_uniform_f_array(__uniformFogColorLoc, fogState.color);
+      if (__uniformFogDensityLoc != undefined) shader_set_uniform_f(__uniformFogDensityLoc, fogState.density);
+      if (__uniformFogNearLoc != undefined) shader_set_uniform_f(__uniformFogNearLoc, fogState.near);
+      if (__uniformFogFarLoc != undefined) shader_set_uniform_f(__uniformFogFarLoc, fogState.far);
+    } else {
+      // Disable fog by setting density to 0 or far plane to infinity
+      if (__uniformFogDensityLoc != undefined) shader_set_uniform_f(__uniformFogDensityLoc, 0);
+      if (__uniformFogFarLoc != undefined) shader_set_uniform_f(__uniformFogFarLoc, 0);
+    }
   
     // Reset emissive uniforms
     if (__uniformEmissiveIntensityLoc != undefined) {
@@ -313,12 +307,6 @@ function UeMaterial(data = {}) constructor {
     if (__uniformToneMappedLoc != undefined) {
       shader_set_uniform_f(__uniformToneMappedLoc, toneMapped ? 1.0 : 0.0);
     }
-    //if (__uniformAoIntensityLoc != undefined) {
-      //shader_set_uniform_f(__uniformAoIntensityLoc, aoIntensity);
-    //}
-    //if (__uniformAoMapIntensityLoc != undefined) {
-      //shader_set_uniform_f(__uniformAoMapIntensityLoc, aoMapIntensity);
-    //}
 
     // Apply the uniforms on the shader
     for (var u = 0; u < __uniformsCachedCount; u++) {

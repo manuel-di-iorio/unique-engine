@@ -53,7 +53,6 @@ for(var i = 0; i < nCubes; i++) {
     box3_copy(box, c.geometry.boundingBox);
     box3_translate(box, c.position);
     
-    // Risoluzione integrata nella funzione
     if (capsule_intersects_box(capsule, box, push)) {
         player.position[VEC3.x] += push[VEC3.x];
         player.position[VEC3.y] += push[VEC3.y];
