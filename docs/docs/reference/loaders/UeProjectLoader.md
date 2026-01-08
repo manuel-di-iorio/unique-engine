@@ -301,3 +301,4 @@ loadLevel(1);
 - Assets are cached by both UUID and name for efficient lookup
 - Model instances created by `setScene()` include position, rotation, and scale transforms from the scene data
 - Assets marked as `isLoaded = true` are skipped on subsequent load attempts
+- **Format Compatibility**: When loading geometry, the loader uses the `UeVertexFormat` defined in the asset's metadata. This ensures that projects exported with different engine versions (e.g., with or without tangents) are loaded correctly.

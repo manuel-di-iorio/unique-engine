@@ -42,6 +42,28 @@ function UeVertexFormat(data = {}) constructor {
         return self;
     }
 
+    function getStride() {
+        gml_pragma("forceinline");
+        var s = 0;
+        for (var i = 0, len = array_length(attrs); i < len; i++) {
+            var a = attrs[i];
+            switch (a.kind) {
+                case UE_FORMAT_ATTR.POSITION: s += 12; break; // float3
+                case UE_FORMAT_ATTR.NORMAL: s += 12; break;   // float3
+                case UE_FORMAT_ATTR.UV: s += 8; break;        // float2
+                case UE_FORMAT_ATTR.COLOR: s += 4; break;     // ubyte4 (RGBA8)
+                case UE_FORMAT_ATTR.CUSTOM:
+                    if (a.type == vertex_type_float1) s += 4;
+                    else if (a.type == vertex_type_float2) s += 8;
+                    else if (a.type == vertex_type_float3) s += 12;
+                    else if (a.type == vertex_type_float4) s += 16;
+                    else if (a.type == vertex_type_ubyte4) s += 4;
+                    break;
+            }
+        }
+        return s;
+    }
+
     function build() {
         gml_pragma("forceinline");
         vertex_format_begin();

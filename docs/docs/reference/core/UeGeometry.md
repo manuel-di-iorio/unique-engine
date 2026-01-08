@@ -19,11 +19,10 @@ new UeGeometry(data = {})
 | `position` | `array`          | `undefined`                       | Array of vertex positions [x,y,z, x,y,z, ...]      |
 | `normal`   | `array`          | `undefined`                       | Array of vertex normals [nx,ny,nz, ...]             |
 | `uv`       | `array`          | `undefined`                       | Array of texture coordinates [u,v, ...]             |
-| `tangent`  | `array`          | `undefined`                       | Array of vertex tangents [tx,ty,tz, ...]            |
-| `bitangent`| `array`          | `undefined`                       | Array of vertex bitangents [bx,by,bz, ...]          |
+| `tangent`  | `array`          | `undefined`                       | Array of vertex tangents [tx,ty,tz,tw, ...] (float4)|
 | `color`    | `array`          | `undefined`                       | Array of vertex colors [col, alpha, col, alpha, ...]|
 | `index`    | `array` | `undefined`                       | Optional index buffer for reusing verts             |
-| `format`   | `VertexFormat`   | `global.UE_VFORMAT_PNUC` | Vertex layout format                                |
+| `format`   | `VertexFormat`   | `global.UE_VFORMAT_PNUTC`| Vertex layout format                                |
 | `canFreeze`| `boolean`        | `true`                            | Whether to freeze the vertex buffer after the build |
 | `boundingBox`                 | `UeBox3`                          | Axis-aligned bounding box                           |
 | `boundingSphere`              | `UeSphere`                        | Bounding sphere                                     |
@@ -39,8 +38,7 @@ new UeGeometry(data = {})
 | `position`         | `Array`                | Vertex position data array                                  |
 | `normal`           | `Array`                | Vertex normal data array                                  |
 | `uv`               | `Array`                | Vertex UV data array                                      |
-| `tangent`          | `Array`                | Vertex tangent data array                                 |
-| `bitangent`        | `Array`                | Vertex bitangent data array                               |
+| `tangent`          | `Array`                | Vertex tangent data array (float4)                        |
 | `color`            | `Array`                | Vertex color data array                                   |
 | `index`            | `Array` or `undefined` | Optional index array                                        |
 | `format`           | `Object`               | Vertex format descriptor                                    |

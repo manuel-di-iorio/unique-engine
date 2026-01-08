@@ -1,6 +1,11 @@
 /// @description Scene Manager - Manages 3D scene, camera, renderer, and controls
 function SceneManager() constructor {
-    self.renderer = new UeRenderer();
+    self.renderer = new UeRenderer({
+      toneMapping: UE_TONE_MAPPING.REINHARD,
+      shadowMap: {
+        enabled: true
+      }
+    });
     self.camera = new UePerspectiveCamera({ x: 100, y: -300, z: 70, far: 10000, view: 1 }).use();
     self.orbit = new UeOrbitControls(self.camera, {
         shouldHandleInput: function() {
@@ -43,7 +48,7 @@ function SceneManager() constructor {
     global.UE_MOUSE.view = 1;
     
     // Test lights
-    var dirLight = new UeDirectionalLight(c_ltgray, 1, { x: -300, y: 300, z: 200 });
+    var dirLight = new UeDirectionalLight(c_ltgray, 1, { x: -300, y: 300, z: 200, castShadow: true });
     self.scene.add(new UeAmbientLight(c_gray, { name: "UeAmbientLight", matrixAutoUpdate: false }), dirLight);
 
     // Create raycaster and set from camera

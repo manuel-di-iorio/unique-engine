@@ -68,6 +68,8 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           geometry.boundingSphere = sphere_create(vec3_create(), size * 0.866); // sqrt(3)/2 ≈ 0.866
           
           asset = new UeStaticMesh(geometry);
+          asset.castShadow = true;
+          asset.receiveShadow = true;
           asset.geometry.__vbClone = geometry.cloneVb();
           geometry.freeze();
           asset.__rotationEuler = euler_create();

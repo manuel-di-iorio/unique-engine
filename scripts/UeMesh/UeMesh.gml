@@ -37,6 +37,8 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
             layers: layers.mask,
             matrixAutoUpdate,
             frustumCulled,
+            castShadow,
+            receiveShadow,
             
             position,
             rotation,
@@ -71,6 +73,8 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
 
         matrixAutoUpdate = data[$ "matrixAutoUpdate"];
         frustumCulled = data[$ "frustumCulled"];
+        castShadow = data[$ "castShadow"] ?? false;
+        receiveShadow = data[$ "receiveShadow"] ?? false;
         
         return self;
     }

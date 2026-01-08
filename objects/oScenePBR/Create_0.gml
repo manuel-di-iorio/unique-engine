@@ -1,4 +1,4 @@
-renderer = new UeRenderer();
+renderer = new UeRenderer({ toneMapping: UE_TONE_MAPPING.NEUTRAL });
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 400, y: 300, z: 300 }).use();
 orbitControls = new UeOrbitControls(camera);

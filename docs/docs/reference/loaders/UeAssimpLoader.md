@@ -22,3 +22,11 @@ new UeAssimpLoader(data = undefined)
 | ---------------- | ----------- | ------------------------------------------------------------------- |
 | `load(filename)` | `struct`    | Returns a struct `{ textures, materials, model }` containing the loaded assets. |
 | `dispose()`      | `self`      | Clean the internal importer resource                                |
+
+---
+
+## 🧠 Notes
+
+- The loader uses the `global.UE_VFORMAT_PNUTC` vertex format, which includes tangents for PBR rendering.
+- Tangent data is automatically extracted from the source file if available.
+- If the source file contains multiple meshes, they are combined into a single `UeMesh` as children.

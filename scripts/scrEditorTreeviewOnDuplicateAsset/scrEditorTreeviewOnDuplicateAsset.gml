@@ -81,6 +81,14 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
         if (variable_struct_exists(asset, "matrixAutoUpdate") && asset[$ "__matrixAutoUpdate"] == undefined) {
              asset.__matrixAutoUpdate = asset.matrixAutoUpdate;
         }
+
+        // Shadows
+        if (variable_struct_exists(asset, "castShadow") && asset.castShadow) {
+            asset.castShadow = true;
+        }
+        if (variable_struct_exists(asset, "receiveShadow") && asset.receiveShadow) {
+            asset.receiveShadow = true;
+        }
         
         // Clear UI references
         asset.__treeviewItem = undefined;

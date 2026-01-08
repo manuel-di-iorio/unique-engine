@@ -198,7 +198,27 @@ function UeAssimpLoader(data = {}) constructor {
           meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordV(v, 0) : 0
         );
 
-        vertex_float4(vb, ASSIMP_GetMeshTangentX(v), ASSIMP_GetMeshTangentY(v), ASSIMP_GetMeshTangentZ(v), 1.0);
+        // Tangent & Handedness (W)
+        var tx = ASSIMP_GetMeshTangentX(v);
+        var ty = ASSIMP_GetMeshTangentY(v);
+        var tz = ASSIMP_GetMeshTangentZ(v);
+        
+        var nx = ASSIMP_GetMeshNormalX(v);
+        var ny = ASSIMP_GetMeshNormalY(v);
+        var nz = ASSIMP_GetMeshNormalZ(v);
+        
+        var bx = ASSIMP_GetMeshBitangentX(v);
+        var by = ASSIMP_GetMeshBitangentY(v);
+        var bz = ASSIMP_GetMeshBitangentZ(v);
+        
+        // Handedness: dot(cross(N, T), B) < 0 ? -1 : 1
+        var cx = ny * tz - nz * ty;
+        var cy = nz * tx - nx * tz;
+        var cz = nx * ty - ny * tx;
+        var dot = cx * bx + cy * by + cz * bz;
+        var w = (dot < 0) ? -1.0 : 1.0;
+
+        vertex_float4(vb, tx, ty, tz, w);
 
         vertex_color(vb,
           meshChannelNumColor > 0 ? make_color_rgb(ASSIMP_GetMeshVertexColorGM(v, 0), ASSIMP_GetMeshVertexColorGM(v, 1), ASSIMP_GetMeshVertexColorGM(v, 2)) : c_white,

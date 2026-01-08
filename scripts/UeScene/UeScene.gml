@@ -24,7 +24,9 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             position: instance.position,
             rotation: instance.rotation,
             scale: instance.scale,
-            visible: instance.visible
+            visible: instance.visible,
+            castShadow: instance.castShadow,
+            receiveShadow: instance.receiveShadow
         };
         
         // Recursively serialize children (submeshes)
@@ -97,6 +99,10 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         if (data[$ "visible"] != undefined) {
             instance.visible = data.visible;
         }
+        
+        instance.castShadow = data[$ "castShadow"] ?? false;
+        instance.receiveShadow = data[$ "receiveShadow"] ?? false;
+
         if (data[$ "matrixAutoUpdate"] != undefined) {
             instance.matrixAutoUpdate = data.matrixAutoUpdate;
         }

@@ -21,6 +21,20 @@ function scrEditorInspectorModelInstance() {
           type: "checkbox",
           tooltip: "Enable instance visibility",
     },
+    { 
+          id: "castShadow",
+          field: "castShadow",
+          label: "Cast Shadow", 
+          type: "checkbox",
+          tooltip: "Whether the instance casts shadows"
+    },
+    { 
+          id: "receiveShadow",
+          field: "receiveShadow",
+          label: "Receive Shadows", 
+          type: "checkbox",
+          tooltip: "Whether the instance receives shadows"
+    },
   //    { 
   //         id: "static",
   //         field: "matrixAutoUpdate",

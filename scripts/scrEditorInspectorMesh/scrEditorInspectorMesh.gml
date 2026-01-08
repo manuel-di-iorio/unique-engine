@@ -30,6 +30,20 @@ function scrEditorInspectorMesh() {
           tooltip: "Enable frustum culling (skip rendering when outside camera view)"
     },           
     { 
+          id: "castShadow",
+          field: "castShadow",
+          label: "Cast Shadow", 
+          type: "checkbox",
+          tooltip: "Whether the mesh casts shadows"
+    },
+    { 
+          id: "receiveShadow",
+          field: "receiveShadow",
+          label: "Receive Shadows", 
+          type: "checkbox",
+          tooltip: "Whether the mesh receives shadows"
+    },
+    { 
           id: "material",
           field: "material",
           label: "Material", 

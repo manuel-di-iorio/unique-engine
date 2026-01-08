@@ -13,44 +13,51 @@ new UeVertexFormat()
 ### 🛠️ Usage Example
 
 ```js
-const format = new UeVertexFormat().position().normal().uv().color().build();
+// Create the standard PNUTC format (Position, Normal, UV, Tangent, Color)
+const format = new UeVertexFormat().position().normal().uv().tangent().color().build();
 ```
 
-### Properties
+### Global Formats
 
-| Property          | Type         | Default          | Description                            |
-| -------------     | ------------ | -------          | ----------------------------           |
-| `isVertexFormat`  | `boolean`    | true             | Indicates that this is a vertex format |
-| `type`            | `string`     | `"VertexFormat"` | Object type                            |
-| `name`            | `string`     | ""               | Object name (optional)                 |
-| `uuid`            | `string`     |                  | Resource UUID                          |
+Unique Engine provides pre-defined global vertex formats for common use cases:
+
+- `global.UE_VFORMAT_PNUTC`: Standard format with Position, Normal, UV, Tangent (float4), and Color.
+- `global.UE_VFORMAT_PNUC`: Format with Position, Normal, UV, and Color (no tangents).
+- `global.UE_VFORMAT_PU`: Minimal format with Position and UV.
+
+---
 
 ## 🧩 Methods
+
 ```js
 position()
 ```
 
-Adds a 3D position attribute.
+Adds a 3D position attribute (`vertex_format_add_position_3d`).
 
 ```js
 normal()
 ```
-Adds a normal vector attribute.
 
-```js
-tangent()
-```
-Adds a tangent and bitangent vector attributes (two float3).
+Adds a normal vector attribute (`vertex_format_add_normal`).
 
 ```js
 uv()
 ```
-Adds a UV texture coordinate attribute.
+
+Adds a UV texture coordinate attribute (`vertex_format_add_texcoord`).
+
+```js
+tangent()
+```
+
+Adds a tangent vector attribute as a custom `float4` (XYZ for direction, W for handedness). This is required for PBR materials and normal mapping.
 
 ```js
 color()
 ```
-Adds a vertex color attribute.
+
+Adds a vertex color attribute (`vertex_format_add_color`).
 
 ```js
 custom(name, type)

@@ -233,7 +233,60 @@ function UeGeometry(data = {}) constructor {
     
     function import(fname) {
         var buf = buffer_load(fname);
-        vb = vertex_create_buffer_from_buffer(buf, format.vf);
+        var bufSize = buffer_get_size(buf);
+        
+        // Fallback: Se il buffer ha uno stride di 36 (PNUC), lo promuoviamo a PNUTC (52)
+        // Indipendentemente dal formato caricato dal JSON, perché il nostro renderer ora richiede PNUTC per il PBR.
+        if (bufSize > 0 && bufSize % 36 == 0 && (format.getStride() == 36 || format.getStride() == 52)) {
+            var vertexCount = bufSize / 36;
+            
+            // Se lo stride del buffer è 36, dobbiamo promuoverlo a PNUTC (52)
+            if (bufSize % 36 == 0 && bufSize % 52 != 0) {
+                var newVb = vertex_create_buffer();
+                // Usiamo il formato PNUTC globale per assicurarci la compatibilità PBR
+                vertex_begin(newVb, global.UE_VFORMAT_PNUTC.vf);
+                
+                buffer_seek(buf, buffer_seek_start, 0);
+                repeat(vertexCount) {
+                    // Leggi PNUC (36 byte)
+                    var px = buffer_read(buf, buffer_f32);
+                    var py = buffer_read(buf, buffer_f32);
+                    var pz = buffer_read(buf, buffer_f32);
+                    
+                    var nx = buffer_read(buf, buffer_f32);
+                    var ny = buffer_read(buf, buffer_f32);
+                    var nz = buffer_read(buf, buffer_f32);
+                    
+                    var u = buffer_read(buf, buffer_f32);
+                    var v = buffer_read(buf, buffer_f32);
+                    
+                    var col = buffer_read(buf, buffer_u32);
+                    
+                    // Scrivi PNUTC (52 byte)
+                    vertex_position_3d(newVb, px, py, pz);
+                    vertex_normal(newVb, nx, ny, nz);
+                    vertex_texcoord(newVb, u, v);
+                    vertex_float4(newVb, 1.0, 0.0, 0.0, 1.0); // Tangente di fallback
+                    vertex_colour(newVb, col & 0xFFFFFF, (col >> 24) / 255.0);
+                }
+                vertex_end(newVb);
+                
+                if (vb != undefined) vertex_delete_buffer(vb);
+                vb = newVb;
+                
+                // Aggiorniamo il formato della geometria a PNUTC
+                format = global.UE_VFORMAT_PNUTC;
+            } else {
+                // Se è già a 52 byte o altro, importazione standard
+                if (vb != undefined) vertex_delete_buffer(vb);
+                vb = vertex_create_buffer_from_buffer(buf, format.vf);
+            }
+        } else {
+            // Importazione standard per altri formati (es. PU o custom)
+            if (vb != undefined) vertex_delete_buffer(vb);
+            vb = vertex_create_buffer_from_buffer(buf, format.vf);
+        }
+        
         buffer_delete(buf);
         return self;
     }

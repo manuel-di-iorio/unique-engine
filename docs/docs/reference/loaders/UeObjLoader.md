@@ -45,7 +45,11 @@ scene.add(mesh);
 
 - Faces are triangulated automatically if needed.
 
-- Materials are not loaded automatically; use UeMtlLoader.
+- The loader uses the `global.UE_VFORMAT_PNUTC` vertex format.
+
+- Since OBJ files do not natively store tangent data, default tangents (`1, 0, 0, 1`) are generated for compatibility with PBR shaders.
+
+- Materials are not loaded automatically; use `UeMtlLoader`.
 
 - No vertex deduplication is performed (each face defines separate vertices).
 

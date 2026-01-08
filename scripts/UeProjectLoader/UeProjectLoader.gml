@@ -3,7 +3,7 @@
  * @description Runtime project loader for loading and managing game assets from the exported project structure.
  */
 function UeProjectLoader(data = {}) constructor {
-    self.renderer = data[$ "renderer"] ?? new UeRenderer();
+    self.renderer = data[$ "renderer"] ?? new UeRenderer({ toneMapping: UE_TONE_MAPPING.REINHARD });
     self.autoLoad = data[$ "autoLoad"] ?? true;
     
     self.scene = new UeScene();
@@ -54,7 +54,7 @@ function UeProjectLoader(data = {}) constructor {
         }
 
         if (self.autoLoad) {
-            self.loadAssets();
+            self.loadAssetsByUuid();
             
             var sceneNames = [];
             var assetNames = struct_get_names(self.assetsByName);
@@ -243,6 +243,20 @@ function UeProjectLoader(data = {}) constructor {
                 asset = new UeScene();
                 asset.fromJSON(metadata);
                 asset.__metadata = metadata;
+                break;
+
+            case "Light":
+                var ltype = metadata[$ "lightType"];
+                if (ltype == "DirectionalLight") {
+                    asset = new UeDirectionalLight();
+                } else if (ltype == "PointLight") {
+                    asset = new UePointLight();
+                } else if (ltype == "AmbientLight") {
+                    asset = new UeAmbientLight();
+                } else {
+                    asset = new UeLight();
+                }
+                asset.fromJSON(metadata);
                 break;
         }
         

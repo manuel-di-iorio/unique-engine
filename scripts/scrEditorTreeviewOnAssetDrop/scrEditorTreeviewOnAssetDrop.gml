@@ -196,6 +196,8 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         else if (dropAction == "instance") {
             // Instantiate a new instance of the model in the scene
             var instanceAsset = draggedItem.asset.createInstance();
+            instanceAsset.castShadow = true;
+            instanceAsset.receiveShadow = true;
             
             // Set type and __rotationEuler for all children recursively using a class-level function
             __editorTreeview_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType);
