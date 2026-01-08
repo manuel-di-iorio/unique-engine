@@ -411,3 +411,29 @@ function box3_intersects_triangle(b, a, c, d) {
     return box3_intersects_box(b, triBox);
 }
 
+/// @func box3_set_from_sphere(b, sphere)
+/// @desc Sets the box to enclose the given sphere.
+/// @param {Array<Real>} b The box to modify
+/// @param {Array<Real>} sphere The sphere [x, y, z, r]
+/// @returns {Array<Real>} The modified box
+function box3_set_from_sphere(b, sphere) {
+    gml_pragma("forceinline");
+    var _x = sphere[0], _y = sphere[1], _z = sphere[2], r = sphere[3];
+    b[0] = _x - r; b[1] = _y - r; b[2] = _z - r;
+    b[3] = _x + r; b[4] = _y + r; b[5] = _z + r;
+    return b;
+}
+
+/// @func box3_expand_by_sphere(b, sphere)
+/// @desc Expands the box to include the given sphere.
+/// @param {Array<Real>} b The box to modify
+/// @param {Array<Real>} sphere The sphere [x, y, z, r]
+/// @returns {Array<Real>} The modified box
+function box3_expand_by_sphere(b, sphere) {
+    gml_pragma("forceinline");
+    var _x = sphere[0], _y = sphere[1], _z = sphere[2], r = sphere[3];
+    b[0] = min(b[0], _x - r); b[1] = min(b[1], _y - r); b[2] = min(b[2], _z - r);
+    b[3] = max(b[3], _x + r); b[4] = max(b[4], _y + r); b[5] = max(b[5], _z + r);
+    return b;
+}
+

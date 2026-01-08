@@ -90,78 +90,65 @@ function euler_set_from_vector3(e, v) {
 }
 
 /// @func euler_set_from_rotation_matrix(e, m)
-/// @desc Sets euler angles from a rotation matrix.
-/// @param {Array<Real>} e The euler array to modify
-/// @param {Array<Real>} m The rotation matrix
-/// @returns {Array<Real>} The modified euler array
+/// @desc Sets euler angles from a rotation matrix (YXZ CW).
 function euler_set_from_rotation_matrix(e, m) {
     gml_pragma("forceinline");
     
-    // Clamp matrix elements to [-1, 1] to avoid NaNs from asin/acos?
-    // GML's darcsin/darccos handle inputs naturally but clamping is safer for floats
-    
+    // Extraction for YXZ Clockwise matrix
     var m11 = m[0], m12 = m[4], m13 = m[8];
     var m21 = m[1], m22 = m[5], m23 = m[9];
     var m31 = m[2], m32 = m[6], m33 = m[10];
     
-    var _x, _y, _z;
-    _x = darcsin(-clamp(m23, -1, 1));
+    // In CW YXZ:
+    // m23 = sin(x)
+    e[0] = darcsin(clamp(m23, -1, 1));
+    
     if (abs(m23) < 0.9999999) {
-        _y = darctan2(m13, m33);
-        _z = darctan2(m21, m22);
+        // m13 = -sin(y)cos(x), m33 = cos(y)cos(x)
+        e[1] = darctan2(-m13, m33);
+        // m21 = -sin(z)cos(x), m22 = cos(z)cos(x)
+        e[2] = darctan2(-m21, m22);
     } else {
-        _y = darctan2(-m31, m11);
-        _z = 0;
+        // gimbal lock
+        e[1] = darctan2(m31, m11);
+        e[2] = 0;
     }
     
-    e[0] = _x;
-    e[1] = _y;
-    e[2] = _z;
     return e;
 }
 
 /// @func euler_set_from_quaternion(e, q)
-/// @desc Sets euler angles from a quaternion.
-/// @param {Array<Real>} e The euler array to modify
-/// @param {Array<Real>} q The quaternion [x, y, z, w]
-/// @returns {Array<Real>} The modified euler array
+/// @desc Sets euler angles from a quaternion (YXZ CW).
 function euler_set_from_quaternion(e, q) {
     gml_pragma("forceinline");
-    // Matrix conversion is often easier/robust
-    // We can build a rotation matrix from quaternion then extract euler
-    
     var _x = q[0], _y = q[1], _z = q[2], _w = q[3];
     var x2 = _x + _x, y2 = _y + _y, z2 = _z + _z;
     var xx = _x * x2, xy = _x * y2, xz = _x * z2;
     var yy = _y * y2, yz = _y * z2, zz = _z * z2;
     var wx = _w * x2, wy = _w * y2, wz = _w * z2;
     
-    // Matrix elements
+    // Matrix elements (CW)
     var m11 = 1 - (yy + zz);
-    var m12 = xy - wz;
-    var m13 = xz + wy;
+    var m12 = xy + wz; // Changed sign for CW
+    var m13 = xz - wy; // Changed sign for CW
     
-    var m21 = xy + wz;
+    var m21 = xy - wz; // Changed sign for CW
     var m22 = 1 - (xx + zz);
-    var m23 = yz - wx;
+    var m23 = yz + wx; // Changed sign for CW
     
-    var m31 = xz - wy;
-    var m32 = yz + wx;
+    var m31 = xz + wy; // Changed sign for CW
+    var m32 = yz - wx; // Changed sign for CW
     var m33 = 1 - (xx + yy);
     
-    var ex, ey, ez;
-    ex = darcsin(-clamp(m23, -1, 1));
+    e[0] = darcsin(clamp(m23, -1, 1));
     if (abs(m23) < 0.9999999) {
-        ey = darctan2(m13, m33);
-        ez = darctan2(m21, m22);
+        e[1] = darctan2(-m13, m33);
+        e[2] = darctan2(-m21, m22);
     } else {
-        ey = darctan2(-m31, m11);
-        ez = 0;
+        e[1] = darctan2(m31, m11);
+        e[2] = 0;
     }
     
-    e[0] = ex;
-    e[1] = ey;
-    e[2] = ez;
     return e;
 }
 

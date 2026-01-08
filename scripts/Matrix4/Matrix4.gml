@@ -287,20 +287,22 @@ function mat4_make_rotation_z(m, angle) {
 /// @returns {Array<Real>} The modified matrix
 function mat4_make_rotation_axis(m, axis, angle) {
   gml_pragma("forceinline");
+  // CW rotation matrix:
   var c = dcos(angle);
   var s = dsin(angle);
   var t = 1 - c;
   var _x = axis[0], _y = axis[1], _z = axis[2];
 
-  m[0] = t * _x * _x + c; m[1] = t * _x * _y + s * _z; m[2] = t * _x * _z - s * _y; m[3] = 0;
-  m[4] = t * _x * _y - s * _z; m[5] = t * _y * _y + c; m[6] = t * _y * _z + s * _x; m[7] = 0;
-  m[8] = t * _x * _z + s * _y; m[9] = t * _y * _z - s * _x; m[10] = t * _z * _z + c; m[11] = 0;
+  // Modified from Right-Handed to Clockwise (Left-Handed style in GM)
+  m[0] = t * _x * _x + c;      m[1] = t * _x * _y - s * _z; m[2] = t * _x * _z + s * _y; m[3] = 0;
+  m[4] = t * _x * _y + s * _z; m[5] = t * _y * _y + c;      m[6] = t * _y * _z - s * _x; m[7] = 0;
+  m[8] = t * _x * _z - s * _y; m[9] = t * _y * _z + s * _x; m[10] = t * _z * _z + c;     m[11] = 0;
   m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
   return m;
 }
 
 /// @func mat4_make_rotation_from_euler(m, rx, ry, rz)
-/// @desc Sets the rotation component from Euler angles (XYZ order by default).
+/// @desc Sets the rotation component from Euler angles (YXZ order, Clockwise).
 /// @param {Array<Real>} m The matrix to modify
 /// @param {Real} rx Rotation around X in degrees
 /// @param {Real} ry Rotation around Y in degrees
@@ -325,9 +327,9 @@ function mat4_make_rotation_from_quaternion(m, q) {
   var yy = _y * y2, yz = _y * z2, zz = _z * z2;
   var wx = _w * x2, wy = _w * y2, wz = _w * z2;
 
-  m[0] = 1 - (yy + zz); m[1] = xy + wz; m[2] = xz - wy; m[3] = 0;
-  m[4] = xy - wz; m[5] = 1 - (xx + zz); m[6] = yz + wx; m[7] = 0;
-  m[8] = xz + wy; m[9] = yz - wx; m[10] = 1 - (xx + yy); m[11] = 0;
+  m[0] = 1 - (yy + zz); m[1] = xy - wz; m[2] = xz + wy; m[3] = 0;
+  m[4] = xy + wz; m[5] = 1 - (xx + zz); m[6] = yz - wx; m[7] = 0;
+  m[8] = xz - wy; m[9] = yz + wx; m[10] = 1 - (xx + yy); m[11] = 0;
   m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
   return m;
 }

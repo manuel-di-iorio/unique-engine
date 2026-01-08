@@ -352,9 +352,11 @@ function vec3_cross(vec, v) {
 /// @returns {Array<Real>} The modified vector
 function vec3_cross_vectors(vec, a, b) {
     gml_pragma("forceinline");
-    vec[0] = a[1] * b[2] - a[2] * b[1];
-    vec[1] = a[2] * b[0] - a[0] * b[2];
-    vec[2] = a[0] * b[1] - a[1] * b[0];
+    var ax = a[0], ay = a[1], az = a[2];
+    var bx = b[0], by = b[1], bz = b[2];
+    vec[0] = ay * bz - az * by;
+    vec[1] = az * bx - ax * bz;
+    vec[2] = ax * by - ay * bx;
     return vec;
 }
 

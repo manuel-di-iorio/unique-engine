@@ -339,6 +339,7 @@ The engine implements various tone mapping algorithms to convert HDR (High Dynam
 | Algorithm | Constant | Description |
 | --- | --- | --- |
 | **None** | `UE_TONE_MAPPING.NONE` | No transformation, values are clamped. |
+| **Linear** | `UE_TONE_MAPPING.LINEAR` | Linear tone mapping. |
 | **Reinhard** | `UE_TONE_MAPPING.REINHARD` | Classic Reinhard operator: `L / (1 + L)`. Good for most scenes. |
 | **Cineon** | `UE_TONE_MAPPING.CINEON` | Mimics modern film response with a softer plateau. |
 | **ACES** | `UE_TONE_MAPPING.ACES` | High-contrast, cinematic look based on the Academy standards. |

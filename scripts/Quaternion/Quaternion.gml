@@ -88,19 +88,10 @@ function quat_copy(q, src) {
 // FROM ...
 // ============================================================================
 
-/// @func quat_set_from_euler(q, x, y, z, order)
-/// @desc Sets quaternion from Euler angles (in degrees). Rotation order is YXZ
-/// @param {Array<Real>} q The quaternion to modify
-/// @param {Real} x Rotation around X in degrees
-/// @param {Real} y Rotation around Y in degrees
-/// @param {Real} z Rotation around Z in degrees
-/// @param {String} [order="XYZ"] Rotation order
-/// @returns {Array<Real>} The modified quaternion
+/// @func quat_set_from_euler(q, x, y, z)
+/// @desc Sets quaternion from Euler angles (YXZ order, CW).
 function quat_set_from_euler(q, x, y, z) {
     gml_pragma("forceinline");
-    // http://www.mathworks.com/matlabcentral/fileexchange/
-    // 	20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
-    //	content/SpinCalc.m
     
     var c1 = dcos(x * 0.5);
     var c2 = dcos(y * 0.5);
@@ -110,10 +101,12 @@ function quat_set_from_euler(q, x, y, z) {
     var s2 = dsin(y * 0.5);
     var s3 = dsin(z * 0.5);
     
-    q[0] = s1 * c2 * c3 + c1 * s2 * s3;
-    q[1] = c1 * s2 * c3 - s1 * c2 * s3;
-    q[2] = c1 * c2 * s3 - s1 * s2 * c3;
-    q[3] = c1 * c2 * c3 + s1 * s2 * s3;
+    // YXZ CW: replace s with -s in standard CCW YXZ
+    q[0] = -s1 * c2 * c3 + c1 * s2 * s3;
+    q[1] = -c1 * s2 * c3 - s1 * c2 * s3;
+    q[2] = -c1 * c2 * s3 - s1 * s2 * c3;
+    q[3] =  c1 * c2 * c3 - s1 * s2 * s3;
+    
     return q;
 }
 
@@ -139,15 +132,10 @@ function quat_set_from_axis_angle(q, axis, angle) {
 }
 
 /// @func quat_set_from_rotation_matrix(q, m)
-/// @desc Sets this quaternion from rotation component of a 4x4 matrix.
-/// @param {Array<Real>} q The quaternion to modify
-/// @param {Array<Real>} m The rotation matrix
-/// @returns {Array<Real>} The modified quaternion
+/// @desc Sets quaternion from a rotation matrix (CW).
 function quat_set_from_rotation_matrix(q, m) {
     gml_pragma("forceinline");
-    // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
     
-    // Assume matrix is pure rotation (or extract scale first, but for now take upper 3x3)
     var m11 = m[0], m12 = m[4], m13 = m[8];
     var m21 = m[1], m22 = m[5], m23 = m[9];
     var m31 = m[2], m32 = m[6], m33 = m[10];
@@ -157,24 +145,24 @@ function quat_set_from_rotation_matrix(q, m) {
     if (trace > 0) {
         var s = 0.5 / sqrt(trace + 1.0);
         q[3] = 0.25 / s;
-        q[0] = (m32 - m23) * s;
-        q[1] = (m13 - m31) * s;
-        q[2] = (m21 - m12) * s;
+        q[0] = (m23 - m32) * s;
+        q[1] = (m31 - m13) * s;
+        q[2] = (m12 - m21) * s;
     } else if (m11 > m22 && m11 > m33) {
         var s = 2.0 * sqrt(1.0 + m11 - m22 - m33);
-        q[3] = (m32 - m23) / s;
+        q[3] = (m23 - m32) / s;
         q[0] = 0.25 * s;
         q[1] = (m12 + m21) / s;
         q[2] = (m13 + m31) / s;
     } else if (m22 > m33) {
         var s = 2.0 * sqrt(1.0 + m22 - m11 - m33);
-        q[3] = (m13 - m31) / s;
+        q[3] = (m31 - m13) / s;
         q[0] = (m12 + m21) / s;
         q[1] = 0.25 * s;
         q[2] = (m23 + m32) / s;
     } else {
         var s = 2.0 * sqrt(1.0 + m33 - m11 - m22);
-        q[3] = (m21 - m12) / s;
+        q[3] = (m12 - m21) / s;
         q[0] = (m13 + m31) / s;
         q[1] = (m23 + m32) / s;
         q[2] = 0.25 * s;

@@ -9,4 +9,4 @@ cubeMesh = new UeStaticMesh(cubeGeometry, new UeMeshStandardMaterial());
 ambientLight = new UeAmbientLight(c_gray);
 dirLight = new UeDirectionalLight(c_ltgray, 1, { x: 150, y: 80, z: 90 }); 
 
-scene.add(ambientLight, dirLight);
+scene.add(cubeMesh, ambientLight, dirLight);

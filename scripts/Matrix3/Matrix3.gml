@@ -423,22 +423,22 @@ function mat3_set_from_basis(m, xAxis, yAxis, zAxis) {
 /// @returns {Array<Real>} The modified matrix
 function mat3_set_from_quaternion(m, q) {
     gml_pragma("forceinline");
-    var _x = q[0], _y = q[1], z = q[2], w = q[3];
-    var x2 = _x + _x, y2 = _x + _y, z2 = z + z;
+    var _x = q[0], _y = q[1], _z = q[2], _w = q[3];
+    var x2 = _x + _x, y2 = _y + _y, z2 = _z + _z;
     var xx = _x * x2, xy = _x * y2, xz = _x * z2;
-    var yy = _y * y2, yz = _y * z2, zz = z * z2;
-    var wx = w * x2, wy = w * y2, wz = w * z2;
+    var yy = _y * y2, yz = _y * z2, zz = _z * z2;
+    var wx = _w * x2, wy = _w * y2, wz = _w * z2;
 
     m[0] = 1 - (yy + zz);
-    m[3] = xy - wz;
-    m[6] = xz + wy;
+    m[1] = xy - wz;
+    m[2] = xz + wy;
 
-    m[1] = xy + wz;
+    m[3] = xy + wz;
     m[4] = 1 - (xx + zz);
-    m[7] = yz - wx;
+    m[5] = yz - wx;
 
-    m[2] = xz - wy;
-    m[5] = yz + wx;
+    m[6] = xz - wy;
+    m[7] = yz + wx;
     m[8] = 1 - (xx + yy);
     return m;
 }
