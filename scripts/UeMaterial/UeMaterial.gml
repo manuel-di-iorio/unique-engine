@@ -16,6 +16,7 @@ function UeMaterial(data = {}) constructor {
   colorWrite = data[$ "colorWrite"] ?? true;
   wireframe = data[$ "wireframe"] ?? false;
   allowOverride = data[$ "allowOverride"] ?? true;
+  toneMapped = data[$ "toneMapped"] ?? true;
   userData = {};
 
   // Blending
@@ -45,6 +46,9 @@ function UeMaterial(data = {}) constructor {
   __uniformReceiveShadowLoc = undefined;
   __samplerShadowMapIdx = undefined;
   __uniformEmissiveIntensityLoc = undefined;
+  __uniformToneMappingLoc = undefined;
+  __uniformToneMappingExposureLoc = undefined;
+  __uniformToneMappedLoc = undefined;
   //__uniformAoIntensityLoc = undefined;
   //__uniformAoMapIntensityLoc = undefined;
 
@@ -101,6 +105,11 @@ function UeMaterial(data = {}) constructor {
    __uniformShadowQualityLoc = shader_get_uniform(shader, cfg.shadowQuality);
    __uniformShadowTexelSizeLoc = shader_get_uniform(shader, cfg.shadowTexelSize);
    __samplerShadowMapIdx = shader_get_sampler_index(shader, cfg.shadowMapSampler);
+   
+   // Cache tone mapping uniforms
+   __uniformToneMappingLoc = shader_get_uniform(shader, cfg.toneMapping);
+   __uniformToneMappingExposureLoc = shader_get_uniform(shader, cfg.toneMappingExposure);
+   __uniformToneMappedLoc = shader_get_uniform(shader, cfg.toneMapped);
 
    // Cache fog uniforms
    //__uniformFogColorLoc = shader_get_uniform(shader, cfg.fogColor);
@@ -293,6 +302,17 @@ function UeMaterial(data = {}) constructor {
     if (__uniformEmissiveIntensityLoc != undefined) {
       shader_set_uniform_f(__uniformEmissiveIntensityLoc, emissiveIntensity);
     }
+
+    // Set tone mapping uniforms
+    if (__uniformToneMappingLoc != undefined) {
+      shader_set_uniform_f(__uniformToneMappingLoc, global.UE_RENDERER_TONE_MAPPING);
+    }
+    if (__uniformToneMappingExposureLoc != undefined) {
+      shader_set_uniform_f(__uniformToneMappingExposureLoc, global.UE_RENDERER_TONE_MAPPING_EXPOSURE);
+    }
+    if (__uniformToneMappedLoc != undefined) {
+      shader_set_uniform_f(__uniformToneMappedLoc, toneMapped ? 1.0 : 0.0);
+    }
     //if (__uniformAoIntensityLoc != undefined) {
       //shader_set_uniform_f(__uniformAoIntensityLoc, aoIntensity);
     //}
@@ -420,6 +440,7 @@ function UeMaterial(data = {}) constructor {
       blendSrcAlpha,
       blendDstAlpha,
       lights,
+      toneMapped,
     };
   }
   
@@ -444,6 +465,7 @@ function UeMaterial(data = {}) constructor {
     blendSrcAlpha = data[$ "blendSrcAlpha"];
     blendDstAlpha = data[$ "blendDstAlpha"];
     lights = data[$ "lights"];
+    toneMapped = data[$ "toneMapped"];
 
     // Merge uniforms instead of replacing them to preserve defaults
     ueStructMerge(uniforms, data[$ "uniforms"]);

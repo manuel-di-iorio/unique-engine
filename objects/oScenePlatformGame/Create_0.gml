@@ -1,5 +1,7 @@
 // --- Sistema ed Engine ---
-renderer = new UeRenderer({ shadowMap: { enabled: true } });
+renderer = new UeRenderer({ 
+  toneMapping: UE_TONE_MAPPING.NEUTRAL
+});
 scene = new UeScene();
 camera = new UePerspectiveCamera().use();
 controls = new UePointerLockControls(camera, { sensitivityX: 0.1, sensitivityY: 0.1 });

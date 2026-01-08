@@ -18,6 +18,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   shadowMap.autoUpdate = shadowMap[$ "autoUpdate"] ?? true;
   shadowMap.needsUpdate = shadowMap[$ "needsUpdate"] ?? false;
 
+  // Tone Mapping
+  toneMapping = data[$ "toneMapping"] ?? UE_TONE_MAPPING.NONE;
+  toneMappingExposure = data[$ "toneMappingExposure"] ?? 1.0;
+
   function setSize(width, height) {
     gml_pragma("forceinline");
     self.width = width;
@@ -370,8 +374,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // Build the light state after shadow maps so matrices and textures are current
     __buildLightState();
 
-    // Set camera position and fog state for materials
+    // Set camera position and tone mapping state for materials
     global.UE_RENDERER_CAMERA_POSITION = camera.position;
+    global.UE_RENDERER_TONE_MAPPING = self.toneMapping;
+    global.UE_RENDERER_TONE_MAPPING_EXPOSURE = self.toneMappingExposure;
     
     var sceneFog = scene[$ "fog"];
     if (sceneFog != undefined) {

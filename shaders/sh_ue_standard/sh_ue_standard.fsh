@@ -69,6 +69,9 @@ uniform float u_ueShadowEnabled;
 uniform float u_ueReceiveShadow;
 uniform float u_ueShadowTexelSize;
 uniform float u_ueShadowQuality;
+uniform float u_ueToneMapping;
+uniform float u_ueToneMappingExposure;
+uniform float u_ueToneMapped;
 
 // ===== Constants =====
 #define PI 3.14159265359
@@ -165,6 +168,60 @@ vec3 BRDF_GGX(vec3 N, vec3 V, vec3 L, vec3 lightColor, float intensity,
     vec3 diff = kd * albedo / PI;
 
     return (diff + spec) * lightColor * intensity * NdotL;
+}
+
+// ===== Tone Mapping =====
+vec3 LinearToneMapping(vec3 color) {
+    return color * u_ueToneMappingExposure;
+}
+
+vec3 ReinhardToneMapping(vec3 color) {
+    color *= u_ueToneMappingExposure;
+    return color / (vec3(1.0) + color);
+}
+
+vec3 CineonToneMapping(vec3 color) {
+    color *= u_ueToneMappingExposure;
+    color = max(vec3(0.0), color - 0.004);
+    return pow((color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06), vec3(2.2));
+}
+
+vec3 ACESFilmicToneMapping(vec3 color) {
+    color *= u_ueToneMappingExposure;
+    return clamp((color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14), 0.0, 1.0);
+}
+
+// AgX Tone Mapping
+vec3 AgXToneMapping(vec3 color) {
+    color *= u_ueToneMappingExposure;
+    const mat3 AgXInputMatrix = mat3(
+        0.8424790622, 0.0423282422, 0.042375654,
+        0.0784351618, 0.8784686364, 0.0784314393,
+        0.0792237451, 0.0791661274, 0.8791429737
+    );
+    const mat3 AgXOutputMatrix = mat3(
+        1.1968790059, -0.0528968517, -0.0529716355,
+        -0.0980208811, 1.1519031299, -0.0980434501,
+        -0.099029744, -0.0989611761, 1.1510736126
+    );
+    vec3 x = AgXInputMatrix * color;
+    x = clamp((log2(max(x, 1e-10)) + 10.0) / 16.0, 0.0, 1.0);
+    vec3 val = ((15.5 * x - 40.14) * x + 39.96) * x - 19.48;
+    val = (val * x + 4.12) * x + 0.01;
+    return AgXOutputMatrix * val;
+}
+
+// Khronos PBR Neutral Tone Mapping
+vec3 NeutralToneMapping(vec3 color) {
+    color *= u_ueToneMappingExposure;
+    const float startCompression = 0.8;
+    const float desaturation = 0.15;
+    float peak = max(color.r, max(color.g, color.b));
+    if (peak < startCompression) return color;
+    float d = 1.0 - startCompression;
+    float newPeak = 1.0 - d * d / (peak + d - startCompression);
+    color *= newPeak / peak;
+    return color;
 }
 
 void main() {
@@ -284,6 +341,16 @@ void main() {
     }
     
     color = mix(color, SRGBToLinear(u_ueFogColor), fogFactor);
+
+    // ===== Tone Mapping =====
+    if (u_ueToneMapped > 0.5) {
+        if (u_ueToneMapping == 1.0) color = ReinhardToneMapping(color);
+        else if (u_ueToneMapping == 2.0) color = CineonToneMapping(color);
+        else if (u_ueToneMapping == 3.0) color = ACESFilmicToneMapping(color);
+        else if (u_ueToneMapping == 4.0) color = AgXToneMapping(color);
+        else if (u_ueToneMapping == 5.0) color = NeutralToneMapping(color);
+        else color = LinearToneMapping(color);
+    }
 
     gl_FragColor = vec4(LinearToSRGB(color), alpha);
 }

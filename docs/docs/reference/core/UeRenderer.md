@@ -19,6 +19,8 @@ new UeRenderer(data = {})
 | `height`              | `number`  | `display_get_height()` | Default render height (viewport) |
 | `shadowMap.enabled`   | `boolean` | `false` | Enable shadow map rendering                    |
 | `shadowMap.autoUpdate`| `boolean` | `true`  | Automatically update shadows every frame       |
+| `toneMapping`         | `number`  | `UE_TONE_MAPPING.NONE` | HDR to LDR mapping algorithm |
+| `toneMappingExposure` | `number`  | `1.0`   | Global exposure for tone mapping |
 
 ### Properties
 
@@ -31,6 +33,8 @@ new UeRenderer(data = {})
 | `height`      | `number`  | `display`   | Current render height                       |
 | `sortObjects` | `boolean` | `true`      | Whether to sort the objects on render phase |
 | `shadowMap`   | `struct`  | `{enabled: false, autoUpdate: true, needsUpdate: false}` | Shadow rendering configuration |
+| `toneMapping` | `number`  | `UE_TONE_MAPPING.NONE` | Active tone mapping algorithm |
+| `toneMappingExposure` | `number` | `1.0` | Active exposure level |
 
 ## 🔧 Internal Logic
 
@@ -322,4 +326,43 @@ scene.add(mesh);
 
 // Render with shadows
 renderer.render(scene, camera);
+```
+
+---
+
+## 🎨 Tone Mapping System
+
+The engine implements various tone mapping algorithms to convert HDR (High Dynamic Range) lighting into LDR (Low Dynamic Range) values suitable for display.
+
+### Available Algorithms
+
+| Algorithm | Constant | Description |
+| --- | --- | --- |
+| **None** | `UE_TONE_MAPPING.NONE` | No transformation, values are clamped. |
+| **Reinhard** | `UE_TONE_MAPPING.REINHARD` | Classic Reinhard operator: `L / (1 + L)`. Good for most scenes. |
+| **Cineon** | `UE_TONE_MAPPING.CINEON` | Mimics modern film response with a softer plateau. |
+| **ACES** | `UE_TONE_MAPPING.ACES` | High-contrast, cinematic look based on the Academy standards. |
+| **AgX** | `UE_TONE_MAPPING.AGX` | Modern cinematic look with superior handling of bright colors and highlights. |
+| **Neutral** | `UE_TONE_MAPPING.NEUTRAL` | Balanced color response based on the PBR Neutral standard. |
+
+### Configuration
+
+You can set the tone mapping globally in the renderer:
+
+```js
+const renderer = new UeRenderer({
+    toneMapping: UE_TONE_MAPPING.ACES,
+    toneMappingExposure: 1.2 // Adjust brightness before mapping
+});
+```
+
+### Material Participation
+
+By default, all materials using standard shaders participate in tone mapping. You can toggle this on a per-material basis:
+
+```js
+const material = new UeMeshStandardMaterial({
+    color: c_white,
+    toneMapped: false // Skip tone mapping for this material
+});
 ```
