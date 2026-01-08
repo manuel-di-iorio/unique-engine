@@ -121,36 +121,44 @@ function euler_set_from_rotation_matrix(e, m) {
 /// @desc Sets euler angles from a quaternion (YXZ CW).
 function euler_set_from_quaternion(e, q) {
     gml_pragma("forceinline");
-    var _x = q[0], _y = q[1], _z = q[2], _w = q[3];
+
+    var _x = q[0], _y = q[1], _z = q[2], w = q[3];
+
     var x2 = _x + _x, y2 = _y + _y, z2 = _z + _z;
     var xx = _x * x2, xy = _x * y2, xz = _x * z2;
     var yy = _y * y2, yz = _y * z2, zz = _z * z2;
-    var wx = _w * x2, wy = _w * y2, wz = _w * z2;
-    
-    // Matrix elements (CW)
+    var wx = w * _x + w * _x, wy = w * _y + w * _y, wz = w * _z + w * _z;
+
+    // Rotation matrix (YXZ, CW, RH)
     var m11 = 1 - (yy + zz);
-    var m12 = xy + wz; // Changed sign for CW
-    var m13 = xz - wy; // Changed sign for CW
-    
-    var m21 = xy - wz; // Changed sign for CW
+    var m12 = xy - wz;
+    var m13 = xz + wy;
+
+    var m21 = xy + wz;
     var m22 = 1 - (xx + zz);
-    var m23 = yz + wx; // Changed sign for CW
-    
-    var m31 = xz + wy; // Changed sign for CW
-    var m32 = yz - wx; // Changed sign for CW
+    var m23 = yz - wx;
+
+    var m31 = xz - wy;
+    var m32 = yz + wx;
     var m33 = 1 - (xx + yy);
-    
-    e[0] = darcsin(clamp(m23, -1, 1));
+
+    // X (pitch)
+    e[0] = darcsin(clamp(-m23, -1, 1));
+
     if (abs(m23) < 0.9999999) {
-        e[1] = darctan2(-m13, m33);
-        e[2] = darctan2(-m21, m22);
+        // Y (yaw)
+        e[1] = darctan2(m13, m33);
+        // Z (roll)
+        e[2] = darctan2(m21, m22);
     } else {
-        e[1] = darctan2(m31, m11);
+        // gimbal lock
+        e[1] = darctan2(-m31, m11);
         e[2] = 0;
     }
-    
+
     return e;
 }
+
 
 function euler_equals(e1, e2) {
     gml_pragma("forceinline");

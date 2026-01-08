@@ -177,17 +177,34 @@ function EditorUiInspector(ui) constructor {
                         max: assetField[$ "max"],
                         negative: assetField[$ "negative"],
                         disabled: assetField[$ "disabled"],
-                        value: self.asset[$ assetField.field],
+                        value: assetField[$ "field"] != undefined ? self.asset[$ assetField.field] : undefined,
                         valueGetter,
                         onBlur: method(scope, function(value, input) {
-                            if (value == "") {
-                                input.value = self.asset[$ self.assetField.field];
-                                return;
+                            var field = self.assetField[$ "field"];
+                            var format = self.assetField[$ "format"];
+                            
+                            // 1. Numeric conversion if needed
+                            var finalValue = value;
+                            if (format == "float" || format == "integer") {
+                                if (value == "" || value == "-" || value == ".") {
+                                    finalValue = 0;
+                                } else {
+                                    finalValue = real(value);
+                                }
                             }
                             
-                            self.asset[$ self.assetField.field] = value;
+                            // 2. Update field if it exists
+                            if (field != undefined) {
+                                self.asset[$ field] = finalValue;
+                            }
                             
-                            // Track the change in asset manager
+                            // 3. Call custom onBlur if it exists
+                            var _onBlur = self.assetField[$ "onBlur"];
+                            if (_onBlur != undefined) {
+                                method(self, _onBlur)(finalValue, input);
+                            }
+                            
+                            // 4. Track the change in asset manager
                             oSceneEditor.assetManager.editAsset(self.asset);
                         })
                     });

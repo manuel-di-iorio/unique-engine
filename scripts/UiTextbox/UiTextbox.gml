@@ -345,6 +345,10 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             var filteredText = "";
             for (var i = 1; i <= string_length(newText); i++) {
                 var char = string_char_at(newText, i);
+                
+                // Auto-convert comma to dot for float format
+                if (format == "float" && char == ",") char = ".";
+                
                 var testText = string_insert(char, currentText, self.cursorPos + string_length(filteredText) + 1);
                 
                 if (self.isValidCharacter(char, currentText, self.cursorPos + string_length(filteredText))) {
@@ -792,7 +796,8 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                     if (charCode >= ord("0") && charCode <= ord("9")) {
                         return true;
                     }
-                    if (char == "." && string_count(".", currentText) == 0) {
+                    // Allow both dot and comma (comma is handled in insertText)
+                    if ((char == "." || char == ",") && string_count(".", currentText) == 0 && string_count(",", currentText) == 0) {
                         return true;
                     }
                     if (char == "-" && self.parent.negative && cursorPos == 0 && string_pos("-", currentText) == 0) {
@@ -851,14 +856,8 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             var value = self.parent.value;
             
             if (format == "integer" || format == "float") {
-                // Remove trailing decimal point or minus sign
-                if (string_char_at(value, string_length(value)) == "." || 
-                    string_char_at(value, string_length(value)) == "-") {
-                    value = string_copy(value, 1, string_length(value) - 1);
-                }
-                
                 // If empty, set to 0 or min value if specified
-                if (value == "") {
+                if (value == "" || value == "-" || value == ".") {
                     if (self.parent.min != undefined) {
                         value = string(self.parent.min);
                     } else {
@@ -866,20 +865,33 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                     }
                 }
                 
-                // Clamp to min/max range
+                // Parse the numeric value
                 var numValue = real(value);
-                if (self.parent.min != undefined && numValue < self.parent.min) {
-                    numValue = self.parent.min;
+                
+                // Clamp to min/max range
+                var clampedValue = numValue;
+                if (self.parent.min != undefined && clampedValue < self.parent.min) {
+                    clampedValue = self.parent.min;
                 }
-                if (self.parent.max != undefined && numValue > self.parent.max) {
-                    numValue = self.parent.max;
+                if (self.parent.max != undefined && clampedValue > self.parent.max) {
+                    clampedValue = self.parent.max;
                 }
                 
-                // Format the final value
-                if (format == "integer") {
-                    value = string(floor(numValue));
+                // If the value was modified by clamping or if it's an integer format, re-format it
+                // Otherwise, keep the user's string representation if it's a valid float
+                if (clampedValue != numValue || format == "integer") {
+                    if (format == "integer") {
+                        value = string(floor(clampedValue));
+                    } else {
+                        value = string(clampedValue);
+                    }
                 } else {
-                    value = string(numValue);
+                    // It's a valid float and within range. 
+                    // We only remove a trailing dot if it's not needed, but we don't force string() 
+                    // conversion which would clear "1.0" to "1".
+                    if (string_char_at(value, string_length(value)) == ".") {
+                        value = string_copy(value, 1, string_length(value) - 1);
+                    }
                 }
                 
                 self.parent.value = value;
@@ -894,7 +906,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     
     // Update value from external source
     self.onStep(function() {
-        if (self.valueGetter != undefined) self.value = self.valueGetter();
+        if (self.valueGetter != undefined && !self.Input.focused) self.value = self.valueGetter();
     });
     
     // Draw label if present

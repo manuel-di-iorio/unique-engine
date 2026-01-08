@@ -25,7 +25,8 @@ function SceneManager() constructor {
     self.transformControls = new UeTransformControls(self.camera, {
         view: 1,
         onDrag: function() {
-            oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object);
+            // Force Euler sync when dragging the gizmo to update the inspector
+            oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object, false, true);
         },
         onDragEnd: function() {
             global.UI.needsRedraw = true;

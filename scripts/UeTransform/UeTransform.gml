@@ -58,6 +58,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         gml_pragma("forceinline");
 
         mat4_compose(matrix, position, rotation, scale);
+        
         matrixWorldNeedsUpdate = true;
 
         return self;

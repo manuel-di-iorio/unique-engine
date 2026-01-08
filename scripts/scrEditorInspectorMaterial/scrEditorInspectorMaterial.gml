@@ -24,29 +24,31 @@ function __scrEditorInspectorMaterialGetTextures(searchValue) {
         };
     });
     
-    array_insert(mapped, 0, { label: "Default", value: undefined });
+    array_insert(mapped, 0, { label: "<None>", value: undefined });
 
     return mapped;
 }
 
 function scrEditorInspectorMaterial() {
   return [
+      // === SECTION: GENERAL ===
       { 
           id: "name",
           field: "name",
           label: "Name", 
           type: "text"
       },
-  
+
+      // === SECTION: TEXTURE MAPS ===
       { 
           type: "section",
-          label: "Textures",
+          label: "Texture Maps",
           collapsed: false,
           children: [
               { 
                   id: "texturesMap",
                   field: "textures",
-                  label: "Albedo", 
+                  label: "Albedo (Map)", 
                   type: "dropdown",
                   tooltip: "Base color/albedo texture",
                   search: "Search texture..",
@@ -61,7 +63,7 @@ function scrEditorInspectorMaterial() {
               { 
                 id: "texturesNormalMap",
                 field: "textures",
-                label: "Normal", 
+                label: "Normal Map", 
                 type: "dropdown",
                 tooltip: "Normal map (tangent space)",
                 search: "Search texture..",
@@ -76,7 +78,7 @@ function scrEditorInspectorMaterial() {
             { 
                 id: "texturesOrmMap",
                 field: "textures",
-                label: "ORM", 
+                label: "ORM Map", 
                 type: "dropdown",
                 tooltip: "ORM map - Occlusion (Red), Roughness (Green), Metalness (Blue)",
                 search: "Search texture..",
@@ -91,7 +93,7 @@ function scrEditorInspectorMaterial() {
             { 
                 id: "texturesEmissiveMap",
                 field: "textures",
-                label: "Emissive", 
+                label: "Emissive Map", 
                 type: "dropdown",
                 tooltip: "Emissive color map",
                 search: "Search texture..",
@@ -106,7 +108,7 @@ function scrEditorInspectorMaterial() {
             { 
                 id: "texturesAlphaMap",
                 field: "textures",
-                label: "Alpha", 
+                label: "Alpha Map", 
                 type: "dropdown",
                 tooltip: "Alpha map for transparency",
                 search: "Search texture..",
@@ -121,7 +123,7 @@ function scrEditorInspectorMaterial() {
             { 
                 id: "texturesDisplacementMap",
                 field: "textures",
-                label: "Displacement", 
+                label: "Displacement Map", 
                 type: "dropdown",
                 tooltip: "Displacement map for height",
                 search: "Search texture..",
@@ -135,11 +137,116 @@ function scrEditorInspectorMaterial() {
             }
           ]
       },
+
+      // === SECTION: SURFACE PROPERTIES ===
+      {
+          type: "section",
+          label: "Surface Properties",
+          collapsed: true,
+          children: [
+              { 
+                  id: "metalness",
+                  label: "Metalness (0-1)", 
+                  type: "text",
+                  format: "float",
+                  min: 0,
+                  max: 1,
+                  step: 0.0001,
+                  tooltip: "How much the material is like a metal",
+                  valueGetter: function() { return self.asset.uniforms.ueMetalness.value; },
+                  onBlur: function(value) {
+                      self.asset.setUniform("ueMetalness", value);
+                      oSceneEditor.assetManager.editAsset(self.asset);
+                  }
+              },
+              { 
+                  id: "roughness",
+                  label: "Roughness (0-1)", 
+                  type: "text",
+                  format: "float",
+                  min: 0,
+                  max: 1,
+                  step: 0.0001,
+                  tooltip: "How rough the material is",
+                  valueGetter: function() { return self.asset.uniforms.ueRoughness.value; },
+                  onBlur: function(value) {
+                      self.asset.setUniform("ueRoughness", value);
+                      oSceneEditor.assetManager.editAsset(self.asset);
+                  }
+              },
+              { 
+                  id: "opacity",
+                  field: "opacity",
+                  label: "Opacity (0-1)", 
+                  type: "text",
+                  format: "float",
+                  min: 0,
+                  max: 1,
+                  step: 0.0001,
+                  tooltip: "The opacity of the material"
+              },
+              { 
+                  id: "emissiveIntensity",
+                  label: "Emissive Intensity (0-1)", 
+                  type: "text",
+                  format: "float",
+                  min: 0,
+                  max: 10,
+                  step: 0.0001,
+                  tooltip: "Intensity of the emissive light",
+                  valueGetter: function() { return self.asset.uniforms.ueEmissiveIntensity.value; },
+                  onBlur: function(value) {
+                      self.asset.setUniform("ueEmissiveIntensity", value);
+                      oSceneEditor.assetManager.editAsset(self.asset);
+                  }
+              }
+          ]
+      },
+
+      // === SECTION: AMBIENT OCCLUSION ===
+      {
+          type: "section",
+          label: "Ambient Occlusion",
+          collapsed: true,
+          children: [
+              { 
+                  id: "aoIntensity",
+                  label: "AO Intensity (0-1)", 
+                  type: "text",
+                  format: "float",
+                  min: 0,
+                  max: 1,
+                  step: 0.0001,
+                  tooltip: "Intensity of the ambient occlusion",
+                  valueGetter: function() { return self.asset.uniforms.ueAoIntensity.value; },
+                  onBlur: function(value) {
+                      self.asset.setUniform("ueAoIntensity", value);
+                      oSceneEditor.assetManager.editAsset(self.asset);
+                  }
+              },
+              { 
+                  id: "aoMapIntensity",
+                  label: "AO Map Intensity (0-1)", 
+                  type: "text",
+                  format: "float",
+                  min: 0,
+                  max: 1,
+                  step: 0.0001,
+                  tooltip: "Intensity of the ambient occlusion map",
+                  valueGetter: function() { return self.asset.uniforms.ueAoMapIntensity.value; },
+                  onBlur: function(value) {
+                      self.asset.setUniform("ueAoMapIntensity", value);
+                      oSceneEditor.assetManager.editAsset(self.asset);
+                  }
+              }
+          ]
+      },
   
+      // === SECTION: RENDERING & TRANSPARENCY ===
       { 
           type: "section",
-          label: "Basic Properties",
-          collapsed: false,
+          label: "Rendering & Transparency",
+          collapsed: true,
           children: [
               { 
                   id: "transparent",
@@ -156,20 +263,32 @@ function scrEditorInspectorMaterial() {
                   tooltip: "Render only the edges of polygons"
               },
               { 
-                  id: "lights",
-                  field: "lights",
-                  label: "Receive Lights",
+                  id: "forceSinglePass",
+                  field: "forceSinglePass",
+                  label: "Force Single Pass", 
                   type: "checkbox",
-                  tooltip: "Enable lighting calculations for this material",
-                  onChange: function(value) {
-                      self.asset.lights = value ? 2 : 0;
-                      self.asset.build();
-                      
-                      // Track the change in asset manager
-                      oSceneEditor.assetManager.editAsset(self.asset);
-                  }
+                  tooltip: "Force rendering in a single pass (disable multi-pass for transparent objects)"
               },
               { 
+                  id: "alphaTest",
+                  field: "alphaTest",
+                  label: "Alpha Test (0-255)", 
+                  type: "text",
+                  format: "integer",
+                  min: 0,
+                  max: 255,
+                  tooltip: "Discard pixels with alpha below this threshold"
+              }
+          ]
+      },
+  
+      // === SECTION: ADVANCED (DEPTH & BLENDING) ===
+      { 
+          type: "section",
+          label: "Advanced (Depth & Blending)",
+          collapsed: true,
+          children: [
+             { 
                   id: "side",
                   field: "side",
                   label: "Backface Culling", 
@@ -180,15 +299,7 @@ function scrEditorInspectorMaterial() {
                       { label: "Counter Clockwise", value: cull_counterclockwise, tooltip: "Cull counter-clockwise faces" },
                       { label: "Clockwise", value: cull_clockwise, tooltip: "Cull clockwise faces" },
                   ]
-              }
-          ]
-      },
-  
-      { 
-          type: "section",
-          label: "Advanced Properties",
-          collapsed: true,
-          children: [
+              },
               { 
                   id: "depthTest",
                   field: "depthTest",
@@ -219,24 +330,6 @@ function scrEditorInspectorMaterial() {
                       { label: "Never", value: cmpfunc_never, tooltip: "Never pass depth test" },
                       { label: "Not Equal", value: cmpfunc_notequal, tooltip: "Pass if depth not equal" },
                   ]
-              },
-              
-              { 
-                  id: "alphaTest",
-                  field: "alphaTest",
-                  label: "Alpha Test (0-255)", 
-                  type: "text",
-                  format: "integer",
-                  min: 0,
-                  max: 255,
-                  tooltip: "Discard pixels with alpha below this threshold"
-              },
-              {
-                  id: "forceSinglePass",
-                  field: "forceSinglePass",
-                  label: "Force Single Pass", 
-                  type: "checkbox",
-                  tooltip: "Force rendering in a single pass (disable multi-pass for transparent objects)"
               },
               { 
                   id: "colorWrite",

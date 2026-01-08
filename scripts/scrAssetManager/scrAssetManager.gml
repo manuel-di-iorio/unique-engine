@@ -115,13 +115,15 @@ function AssetManager() constructor {
     /**
      * Mark an asset as edited (triggers unsaved changes)
      * @param {Struct} asset - The asset that was modified
+     * @param {Bool} [recursive=false] - Whether to update children recursively
+     * @param {Bool} [syncEuler=false] - Whether to sync euler angles from quaternion
      */
-    function editAsset(asset) {
+    function editAsset(asset, recursive = false, syncEuler = false) {
         self.__trackChange("edit", asset);
         
         // Rebuild the box in the next frame in order to wait first for the matrix updates
         if (asset.type == "Mesh" || asset.type == "ModelInstance") {
-            self.updateAssetMatrix(asset);
+            self.updateAssetMatrix(asset, recursive, syncEuler);
         }
     }
     
@@ -219,10 +221,11 @@ function AssetManager() constructor {
      * The update is scheduled in the next frame in order to wait for box helper update
      * @param {Struct} asset - The asset to update
      * @param {Bool} [recursive=false] - Whether to update children recursively
+     * @param {Bool} [syncEuler=false] - Whether to sync euler angles from quaternion
      */
-    function updateAssetMatrix(asset, recursive = false) {
-        // Sync rotation euler if it exists (for editor inspector)
-        if (variable_struct_exists(asset, "__rotationEuler")) {
+    function updateAssetMatrix(asset, recursive = false, syncEuler = false) {
+        // Sync rotation euler ONLY if explicitly requested (e.g. from gizmo)
+        if (syncEuler && variable_struct_exists(asset, "__rotationEuler")) {
             euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
         }
 
