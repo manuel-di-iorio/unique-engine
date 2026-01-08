@@ -47,15 +47,20 @@ new UeMaterial(data = {})
 
 ## Textures
 
-Textures are assigned via the textures object:
+Textures are assigned via the textures object. By default, most textures are `undefined`. When a texture is `undefined`, the engine automatically:
+1. Skips binding the texture to the GPU.
+2. Sets a shader flag (e.g., `u_ueHasMap`) to `0`.
+3. The shader uses optimized logic to avoid sampling the texture, using default values instead (e.g., white for the base map, a neutral normal for the normal map).
 
-- **map**: Base diffuse texture (by default it is `global.UE_TEXTURE_DEFAULT_WHITE`, a white-colored 1x1 texture)
-- **normalMap**: Normal mapping
-- **ormMap**: Packed texture for **O**cclusion, **R**oughness, and **M**etalness (R=AO, G=Roughness, B=Metalness)
-- **emissiveMap**: Emissive light contribution
-- **displacementMap**: Displacement mapping for height effects
+This approach reduces memory usage and improves GPU performance by avoiding unnecessary texture operations.
 
-Each texture must be a UeTexture.
+- **map**: Base diffuse texture.
+- **normalMap**: Normal mapping.
+- **ormMap**: Packed texture for **O**cclusion, **R**oughness, and **M**etalness (R=AO, G=Roughness, B=Metalness).
+- **emissiveMap**: Emissive light contribution.
+- **displacementMap**: Displacement mapping for height effects.
+
+Each texture must be a [UeTexture](/docs/reference/core/UeTexture).
 
 ## Uniforms
 Uniforms must be defined as objects like:

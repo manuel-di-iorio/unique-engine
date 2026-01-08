@@ -1,7 +1,8 @@
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec3 in_Normal;                    // (x,y,z)
-attribute vec4 in_Colour;                    // (r,g,b,a)
 attribute vec2 in_TextureCoord;              // (u,v)
+attribute vec4 in_TextureCoord1;             // (tangent)
+attribute vec4 in_Colour;                    // (r,g,b,a)
 
 uniform vec3 u_ueModelPosition;
 

@@ -6,7 +6,7 @@ function UeCylinderGeometry(radius = 1, height = 1, radialSegments = 32, data = 
     var _alpha = data[$ "alpha"] ?? 1;
     var halfHeight = _height * 0.5;
     
-    var pos = [], norm = [], uvs = [], cols = [];
+    var pos = [], norm = [], tang = [], uvs = [], cols = [];
     
     // We'll use flat arrays to store the ring vertices temporarily to avoid struct overhead
     // ringPosition: [x, y, z, u, v] per segment
@@ -51,15 +51,22 @@ function UeCylinderGeometry(radius = 1, height = 1, radialSegments = 32, data = 
         
         var u1 = i / _radialSegments, u2 = (i + 1) / _radialSegments;
         
+        // Tangent for sides: along the circumference
+        // T = (0, -sin(a), cos(a)) = (0, -nz, ny)
+        var tx = 0, ty = -nz, tz = ny;
+        var w = -1.0; // Because v goes from +X to -X
+
         // Face 1
         array_push(pos, r1x, r1y, r1z,  l1x, l1y, l1z,  l2x, l2y, l2z);
         array_push(norm, 0, ny, nz,  0, ny, nz,  0, ny, nz);
+        array_push(tang, tx, ty, tz, w,  tx, ty, tz, w,  tx, ty, tz, w);
         array_push(uvs, u1, 0,  u1, 1,  u2, 1);
         array_push(cols, _color, _alpha, _color, _alpha, _color, _alpha);
         
         // Face 2
         array_push(pos, r1x, r1y, r1z,  l2x, l2y, l2z,  r2x, r2y, r2z);
         array_push(norm, 0, ny, nz,  0, ny, nz,  0, ny, nz);
+        array_push(tang, tx, ty, tz, w,  tx, ty, tz, w,  tx, ty, tz, w);
         array_push(uvs, u1, 0,  u2, 1,  u2, 0);
         array_push(cols, _color, _alpha, _color, _alpha, _color, _alpha);
     }
@@ -70,6 +77,7 @@ function UeCylinderGeometry(radius = 1, height = 1, radialSegments = 32, data = 
         var idx2 = (i + 1) * 5;
         array_push(pos, halfHeight, 0, 0,  rightRing[idx1], rightRing[idx1+1], rightRing[idx1+2],  rightRing[idx2], rightRing[idx2+1], rightRing[idx2+2]);
         array_push(norm, 1, 0, 0,  1, 0, 0,  1, 0, 0);
+        array_push(tang, 0, 1, 0, 1,  0, 1, 0, 1,  0, 1, 0, 1);
         array_push(uvs, 0.5, 0.5,  rightRing[idx1+3], rightRing[idx1+4],  rightRing[idx2+3], rightRing[idx2+4]);
         array_push(cols, _color, _alpha, _color, _alpha, _color, _alpha);
     }
@@ -80,12 +88,14 @@ function UeCylinderGeometry(radius = 1, height = 1, radialSegments = 32, data = 
         var idx2 = (i + 1) * 5;
         array_push(pos, -halfHeight, 0, 0,  leftRing[idx2], leftRing[idx2+1], leftRing[idx2+2],  leftRing[idx1], leftRing[idx1+1], leftRing[idx1+2]);
         array_push(norm, -1, 0, 0,  -1, 0, 0,  -1, 0, 0);
+        array_push(tang, 0, 1, 0, -1,  0, 1, 0, -1,  0, 1, 0, -1);
         array_push(uvs, 0.5, 0.5,  leftRing[idx2+3], leftRing[idx2+4],  leftRing[idx1+3], leftRing[idx1+4]);
         array_push(cols, _color, _alpha, _color, _alpha, _color, _alpha);
     }
     
     self.position = pos;
     self.normal = norm;
+    self.tangent = tang;
     self.uv = uvs;
     self.color = cols;
     build();

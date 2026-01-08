@@ -80,6 +80,20 @@ It uses the shader `sh_ue_sprite` under the hood and does not support lighting.
 
 You can assign the `shader` property or extend `UeMaterial` to create a full custom material.
 
+### 🧵 Working with Textures
+
+Textures are assigned to materials via the `textures` object. Unique Engine uses an optimized texture system:
+
+- **Undefined by Default**: Most texture slots are `undefined` by default. 
+- **GPU Optimization**: When a texture is `undefined`, the engine skips binding it and tells the shader (via `u_ueHas*Map` uniforms) to skip the sampling process.
+- **Performance**: This reduces texture swaps and memory bandwidth usage on the GPU.
+
+To set a texture:
+```js
+material.setTexture("map", new UeTexture("my_texture.png"));
+material.build(); // Always call build() after updating textures or uniforms
+```
+
 ---
 
 ## 🧵 Working with Uniforms

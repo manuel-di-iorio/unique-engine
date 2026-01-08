@@ -73,6 +73,7 @@ function UeIcosahedronGeometry(radius = 1, detail = 0, data = {}): UeGeometry(da
     // Build Flat-Shaded Non-Indexed Geometry
     var pos = [];
     var norm = [];
+    var tang = [];
     var uvs = [];
     var cols = [];
 
@@ -111,6 +112,15 @@ function UeIcosahedronGeometry(radius = 1, detail = 0, data = {}): UeGeometry(da
             array_push(pos, vx * _radius, vy * _radius, vz * _radius);
             array_push(norm, nx, ny, nz);
             
+            // Tangent: horizontal rotation around Z
+            var tx = -vy;
+            var ty = vx;
+            var tz = 0;
+            var tl = sqrt(tx*tx + ty*ty);
+            if (tl > 0) { tx /= tl; ty /= tl; }
+            else { tx = 1; ty = 0; }
+            array_push(tang, tx, ty, tz, 1.0);
+
             // UVs based on spherical mapping
             var _u = 0.5 + (arctan2(vx, vy) / (2 * pi));
             var _v = 0.5 - (arcsin(vz) / pi);
@@ -121,6 +131,7 @@ function UeIcosahedronGeometry(radius = 1, detail = 0, data = {}): UeGeometry(da
 
     self.position = pos;
     self.normal   = norm;
+    self.tangent  = tang;
     self.uv       = uvs;
     self.color    = cols;
     self.index    = undefined; // Non-indexed for flat shading

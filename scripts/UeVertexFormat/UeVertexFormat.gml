@@ -20,8 +20,7 @@ function UeVertexFormat(data = {}) constructor {
   
     function tangent() {
         gml_pragma("forceinline");
-        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "tangent", type: vertex_type_float3 });
-        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "bitangent", type: vertex_type_float3 });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "tangent", type: vertex_type_float4 });
         return self;
     }
 

@@ -78,8 +78,8 @@ function UeAssimpLoader(data = {}) constructor {
 
     var materialTypes = [
       { name: "map", type: ASSIMP_TEXTURE_TYPE.DIFFUSE },
-      { name: "normalMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
-      { name: "aoMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
+      { name: "normalsMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
+      { name: "ambientOcclusionMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
       { name: "emissiveMap", type: ASSIMP_TEXTURE_TYPE.EMISSIVE },
       { name: "reflectionMap", type: ASSIMP_TEXTURE_TYPE.REFLECTION },
       { name: "ambientMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT },
@@ -89,7 +89,7 @@ function UeAssimpLoader(data = {}) constructor {
       { name: "heightMap", type: ASSIMP_TEXTURE_TYPE.HEIGHT },
       { name: "opacityMap", type: ASSIMP_TEXTURE_TYPE.OPACITY },
       { name: "specularMap", type: ASSIMP_TEXTURE_TYPE.SPECULAR },
-      { name: "baseColor", type: ASSIMP_TEXTURE_TYPE.BASE_COLOR },
+      { name: "baseColorMap", type: ASSIMP_TEXTURE_TYPE.BASE_COLOR },
       { name: "clearCotMap", type: ASSIMP_TEXTURE_TYPE.CLEARCOAT },
       { name: "diffuseRoughnessMap", type: ASSIMP_TEXTURE_TYPE.DIFFUSE_ROUGHNESS },
       { name: "emissionColorMap", type: ASSIMP_TEXTURE_TYPE.EMISSION_COLOR },
@@ -172,7 +172,7 @@ function UeAssimpLoader(data = {}) constructor {
 
   function _buildMesh() {
     gml_pragma("forceinline");
-    var mesh = new UeMesh(new UeGeometry({ canFreeze: false, format: global.UE_VFORMAT_PNUCT }));
+    var mesh = new UeMesh(new UeGeometry({ canFreeze: false }));
     mesh.name = ASSIMP_GetMeshName();
     var geometry = mesh.geometry;
     var vb = vertex_create_buffer();
@@ -198,12 +198,12 @@ function UeAssimpLoader(data = {}) constructor {
           meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordV(v, 0) : 0
         );
 
+        vertex_float4(vb, ASSIMP_GetMeshTangentX(v), ASSIMP_GetMeshTangentY(v), ASSIMP_GetMeshTangentZ(v), 1.0);
+
         vertex_color(vb,
           meshChannelNumColor > 0 ? make_color_rgb(ASSIMP_GetMeshVertexColorGM(v, 0), ASSIMP_GetMeshVertexColorGM(v, 1), ASSIMP_GetMeshVertexColorGM(v, 2)) : c_white,
           meshChannelNumColor > 0 ? ASSIMP_GetMeshVertexAlpha(v, 0) : 1);
         
-        vertex_float3(vb, ASSIMP_GetMeshTangentX(v), ASSIMP_GetMeshTangentY(v), ASSIMP_GetMeshTangentZ(v));
-        vertex_float3(vb, ASSIMP_GetMeshBitangentX(v), ASSIMP_GetMeshBitangentY(v), ASSIMP_GetMeshBitangentZ(v));
       }
     }
     vertex_end(vb);

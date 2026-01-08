@@ -23,7 +23,6 @@ Currently handles up to 2 directional lights and 2 point lights, but you can eas
 | `roughness` | `float` | How rough the material appears. 0.0 means a smooth mirror reflection, 1.0 means fully diffuse. | `1` |
 | `aoMapIntensity` | `float` | Intensity of the ambient occlusion effect. | `1` |
 | `bumpScale` | `float` | How much the bump map affects the surface. | `1` |
-| `normalMapType` | `UE_NORMAL_MAP_TYPE` | The type of normal map. Can be `TANGENT_SPACE_NORMAL_MAP` or `OBJECT_SPACE_NORMAL_MAP`. | `TANGENT_SPACE_NORMAL_MAP` |
 | `normalMapScale` | `vec2` | How much the normal map affects the surface. | `[1, 1]` |
 | `displacementScale` | `float` | How much the displacement map affects the mesh. | `0` |
 | `displacementBias` | `float` | Offset of the displacement map values. | `0` |
@@ -39,12 +38,12 @@ Currently handles up to 2 directional lights and 2 point lights, but you can eas
 
 | Property | Type | Description | Default |
 | --- | --- | --- | --- |
-| `textures.map` | `UeTexture` | The main diffuse/albedo texture. | `global.UE_TEXTURE_DEFAULT_WHITE` |
-| `textures.emissiveMap` | `UeTexture` | Texture used to modulate the emissive color. | `global.UE_TEXTURE_DEFAULT_BLACK` |
-| `textures.alphaMap` | `UeTexture` | Texture used to control the alpha (transparency) per pixel. | `global.UE_TEXTURE_DEFAULT_WHITE` |
-| `textures.ormMap` | `UeTexture` | Packed texture for **O**cclusion, **R**oughness, and **M**etalness. Color channel mapping: R = Ambient Occlusion, G = Roughness, B = Metalness. | `global.UE_TEXTURE_DEFAULT_ORM` |
-| `textures.normalMap` | `UeTexture` | Normal map for adding surface detail. | `global.UE_TEXTURE_DEFAULT_NORMAL` |
-| `textures.displacementMap` | `UeTexture` | Displacement map for deforming the mesh. | `global.UE_TEXTURE_DEFAULT_BLACK` |
+| `textures.map` | `UeTexture` | The main diffuse/albedo texture. | `undefined` |
+| `textures.emissiveMap` | `UeTexture` | Texture used to modulate the emissive color. | `undefined` |
+| `textures.alphaMap` | `UeTexture` | Texture used to control the alpha (transparency) per pixel. | `undefined` |
+| `textures.ormMap` | `UeTexture` | Packed texture for **O**cclusion, **R**oughness, and **M**etalness. Color channel mapping: R = Ambient Occlusion, G = Roughness, B = Metalness. | `undefined` |
+| `textures.normalMap` | `UeTexture` | Normal map for adding surface detail. | `undefined` |
+| `textures.displacementMap` | `UeTexture` | Displacement map for deforming the mesh. | `undefined` |
 
 <!-- | `textures.bumpMap` | `UeTexture` | Bump map for adding surface detail. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->
 <!-- | `textures.lightMap` | `UeTexture` | Pre-baked light map. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->

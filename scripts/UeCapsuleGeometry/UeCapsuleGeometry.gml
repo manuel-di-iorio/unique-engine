@@ -9,6 +9,7 @@ function UeCapsuleGeometry(radius = 1, height = 1, capSegments = 4, radialSegmen
 
     var pos = [];
     var norm = [];
+    var tang = [];
     var uvs = [];
     var cols = [];
     var idx = [];
@@ -83,12 +84,18 @@ function UeCapsuleGeometry(radius = 1, height = 1, capSegments = 4, radialSegmen
             var ny = nx2 * sp;
             var nz = nz2;
 
+            // Tangent
+            var tx = -sp;
+            var ty = cp;
+            var tz = 0;
+
             // UV
             var u = j / _radialSegments;
             var v = i / (profileCount - 1);
 
             array_push(pos, _x, _y, _z);
             array_push(norm, nx, ny, nz);
+            array_push(tang, tx, ty, tz, 1.0);
             array_push(uvs, u, 1 - v);
             array_push(cols, _color, _alpha);
         }
@@ -112,6 +119,7 @@ function UeCapsuleGeometry(radius = 1, height = 1, capSegments = 4, radialSegmen
 
     self.position = pos;
     self.normal   = norm;
+    self.tangent  = tang;
     self.uv       = uvs;
     self.color    = cols;
     self.index    = idx;

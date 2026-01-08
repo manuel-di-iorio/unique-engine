@@ -1,7 +1,7 @@
 global.UE_OBJECT_ID = 0;
 global.UE_VERSION = "0.6.0";
 global.UE_VFORMAT_PNUC = new UeVertexFormat().position().normal().uv().color().build();
-global.UE_VFORMAT_PNUCT = new UeVertexFormat().position().normal().uv().color().tangent().build();
+global.UE_VFORMAT_PNUTC = new UeVertexFormat().position().normal().uv().tangent().color().build();
 global.UE_VFORMAT_PU = new UeVertexFormat().position().uv().build();
 global.UE_MOUSE = new UeMouse();
 
@@ -57,11 +57,6 @@ global.UE_UNIFORM_NAMES_CONFIG = {
 global.UE_DEFAULT_MATERIAL = new UeMeshStandardMaterial();
 global.UE_FALLBACK_MATERIAL = new UeMeshBasicMaterial({ shader: sh_ue_fallback });
 global.UE_DEFAULT_MATERIAL_WIREFRAME = new UeMeshBasicMaterial();
-
-enum UE_NORMAL_MAP_TYPE {
-  TANGENT_SPACE_NORMAL_MAP,
-  OBJECT_SPACE_NORMAL_MAP
-}
 
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,

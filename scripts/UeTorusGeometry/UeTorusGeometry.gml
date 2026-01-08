@@ -14,6 +14,7 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
     
     var _pos = [];
     var _norm = [];
+    var _tang = [];
     var _uvs = [];
     var _col = [];
 
@@ -38,6 +39,12 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
             var n3 = __calculateTorusNormal(u2, v2);
             var n4 = __calculateTorusNormal(u1, v2);
             
+            // Calculate tangents for each vertex
+            var t1 = __calculateTorusTangent(u1, v1);
+            var t2 = __calculateTorusTangent(u2, v1);
+            var t3 = __calculateTorusTangent(u2, v2);
+            var t4 = __calculateTorusTangent(u1, v2);
+            
             // UV coordinates
             var uv1_u = i / _tubularSegments;
             var uv1_v = j / _radialSegments;
@@ -51,12 +58,14 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
             // First triangle (p1, p2, p3)
             array_push(_pos, p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z);
             array_push(_norm, n1.nx, n1.ny, n1.nz,  n2.nx, n2.ny, n2.nz,  n3.nx, n3.ny, n3.nz);
+            array_push(_tang, t1.tx, t1.ty, t1.tz, 1,  t2.tx, t2.ty, t2.tz, 1,  t3.tx, t3.ty, t3.tz, 1);
             array_push(_uvs, uv1_u, uv1_v, uv2_u, uv2_v, uv3_u, uv3_v);
             array_push(_col, _color, _alpha, _color, _alpha, _color, _alpha);
             
             // Second triangle (p1, p3, p4)
             array_push(_pos, p1.x, p1.y, p1.z, p3.x, p3.y, p3.z, p4.x, p4.y, p4.z);
             array_push(_norm, n1.nx, n1.ny, n1.nz,  n3.nx, n3.ny, n3.nz,  n4.nx, n4.ny, n4.nz);
+            array_push(_tang, t1.tx, t1.ty, t1.tz, 1,  t3.tx, t3.ty, t3.tz, 1,  t4.tx, t4.ty, t4.tz, 1);
             array_push(_uvs, uv1_u, uv1_v, uv3_u, uv3_v, uv4_u, uv4_v);
             array_push(_col, _color, _alpha, _color, _alpha, _color, _alpha);
         }
@@ -64,6 +73,7 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
     
     self.position = _pos;
     self.normal = _norm;
+    self.tangent = _tang;
     self.uv = _uvs;
     self.color = _col;
 
@@ -94,6 +104,15 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
             nx: cosv * cosu,
             ny: cosv * sinu,
             nz: sinv
+        };
+    }
+
+    /// @desc Calculate tangent vector at torus surface point
+    function __calculateTorusTangent(u, v) {
+        return {
+            tx: -sin(u),
+            ty: cos(u),
+            tz: 0
         };
     }
 }

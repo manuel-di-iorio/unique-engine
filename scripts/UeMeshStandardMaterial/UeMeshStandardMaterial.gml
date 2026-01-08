@@ -51,9 +51,7 @@ function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
   uniforms.ueRoughness = { type: UE_UNIFORM_TYPE.FLOAT, value: roughness };
 
   // Normal Map
-  normalMapType = data[$ "normalMapType"] ?? UE_NORMAL_MAP_TYPE.TANGENT_SPACE_NORMAL_MAP;
   normalMapScale = data[$ "normalMapScale"] ?? vec2_create(1, 1);
-  uniforms.ueNormalMapType = { type: UE_UNIFORM_TYPE.FLOAT, value: normalMapType };
   uniforms.ueNormalMapScale = { type: UE_UNIFORM_TYPE.VEC2, value: normalMapScale };
   
   // Env Map

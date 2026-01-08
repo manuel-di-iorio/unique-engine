@@ -2,6 +2,7 @@ precision mediump float;
 
 varying vec3 vWorldPosition;
 varying vec3 vWorldNormal;
+varying vec4 vWorldTangent;
 varying vec2 vTexcoord;
 varying vec4 vColour;
 varying vec4 vLightSpacePos;
@@ -25,7 +26,6 @@ uniform vec3  u_ueEmissive;
 uniform float u_ueEmissiveIntensity;
 uniform float u_ueAoIntensity;
 uniform float u_ueAoMapIntensity;
-uniform float u_ueNormalMapType; // 0 = Tangent, 1 = Object
 uniform vec2  u_ueNormalMapScale;
 uniform float u_ueFlatShading;
 uniform float u_ueBumpScale;
@@ -88,18 +88,32 @@ uniform float u_ueToneMapped;
 vec3 SRGBToLinear(vec3 c) { return pow(max(c, vec3(0.0)), vec3(GAMMA)); }
 vec3 LinearToSRGB(vec3 c) { return pow(max(c, vec3(0.0)), vec3(1.0 / GAMMA)); }
 
-// ===== TBN (no precomputed tangents) =====
-mat3 calculateTBN(vec3 N, vec3 pos, vec2 uv) {
+// ===== TBN (use precomputed tangents or fallback to derivatives) =====
+mat3 calculateTBN(vec3 N, vec3 pos, vec2 uv, vec4 vT) {
+    // Check if precomputed tangents are valid
+    if (length(vT.xyz) > 0.1) {
+        vec3 T = normalize(vT.xyz);
+        // Re-orthogonalize T with respect to N
+        T = normalize(T - dot(T, N) * N);
+        // Reconstruct Bitangent
+        vec3 B = cross(N, T) * vT.w;
+        return mat3(T, B, N);
+    }
+
+    // Fallback: Calculate TBN using derivatives (dFdx/dFdy)
     vec3 dp1 = dFdx(pos);
     vec3 dp2 = dFdy(pos);
     vec2 duv1 = dFdx(uv);
     vec2 duv2 = dFdy(uv);
 
     float det = (duv1.x * duv2.y - duv1.y * duv2.x);
-    if (abs(det) < EPSILON) return mat3(vec3(1,0,0), vec3(0,1,0), N);
+    if (abs(det) < EPSILON) return mat3(vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), N);
 
     vec3 T = normalize(dp1 * duv2.y - dp2 * duv1.y);
     vec3 B = normalize(dp2 * duv1.x - dp1 * duv2.x);
+
+    // Re-orthogonalize T
+    T = normalize(T - dot(T, N) * N);
 
     return mat3(T, B, N);
 }
@@ -246,7 +260,6 @@ void main() {
     vec4 base = tex * vCol;
     float alphaMap = (u_ueHasAlphaMap > 0.5) ? texture2D(s_alphaMap, vTexcoord).r : 1.0;
     float alpha = base.a * alphaMap;
-    //if (alpha < 0.01) discard;
 
     vec3 albedo = SRGBToLinear(base.rgb * u_ueColor);
 
@@ -272,14 +285,9 @@ void main() {
     // Safety check for normal map sampling
     if (length(nm) < 0.1) nm = vec3(0.0, 0.0, 1.0);
     
-    if (u_ueNormalMapType > 0.5) {
-        // Object Space
-        N = normalize((u_ueWorldMatrix * vec4(nm, 0.0)).xyz);
-    } else {
-        // Tangent Space
-        mat3 TBN = calculateTBN(N, vWorldPosition, vTexcoord);
-        N = normalize(TBN * nm);
-    }
+    // Tangent Space Normal Mapping
+    mat3 TBN = calculateTBN(N, vWorldPosition, vTexcoord, vWorldTangent);
+    N = normalize(TBN * nm);
 
     vec3 V = normalize(u_ueCameraPosition - vWorldPosition + vec3(EPSILON));
 

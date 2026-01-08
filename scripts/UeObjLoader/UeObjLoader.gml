@@ -161,6 +161,7 @@ function UeObjLoader() constructor {
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
             }
         } else if (count == 4) {
@@ -171,18 +172,21 @@ function UeObjLoader() constructor {
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 v = faceVertices[3];
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 v = faceVertices[1];
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 // Secondo triangolo: 1,3,2
@@ -190,18 +194,21 @@ function UeObjLoader() constructor {
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 v = faceVertices[3];
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 v = faceVertices[2];
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
             } else {
                 // Primo triangolo: 0,1,3
@@ -209,18 +216,21 @@ function UeObjLoader() constructor {
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 v = faceVertices[1];
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 v = faceVertices[3];
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 // Secondo triangolo: 1,2,3
@@ -228,18 +238,21 @@ function UeObjLoader() constructor {
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 v = faceVertices[2];
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
                 
                 v = faceVertices[3];
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
+                vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
             }
         } else {
@@ -252,6 +265,7 @@ function UeObjLoader() constructor {
                     vertex_position_3d(vb, v.x, v.y, v.z);
                     vertex_normal(vb, v.nx, v.ny, v.nz);
                     vertex_texcoord(vb, v.u, v.v);
+                    vertex_float4(vb, 1, 0, 0, 1);
                     vertex_color(vb, v.color, 1.0);
                 }
             }

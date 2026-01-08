@@ -6,6 +6,7 @@ function UeSphereGeometry(_radius = 40, data = {}): UeGeometry(data) constructor
 
     var _pos = [];
     var _norm = [];
+    var _tang = [];
     var _uvs = [];
     var _colArr = [];
 
@@ -44,10 +45,24 @@ function UeSphereGeometry(_radius = 40, data = {}): UeGeometry(data) constructor
 
                 // Spherical UV mapping
                 var u = 0.5 + arctan2(p[2], p[0]) / (2 * pi);
-                var v = 0.5 - dsin(p[1]) / pi;
+                var v = lat / _lats; // Simple lat/lon UV for now, fixed from weird dsin
+                if (i == 1 || i == 3 || i == 5) v = (lat + 1) / _lats;
+
+                // Tangent calculation
+                var tx = -nz;
+                var ty = 0;
+                var tz = nx;
+                var mag = sqrt(tx*tx + tz*tz);
+                if (mag > 0) {
+                    tx /= mag;
+                    tz /= mag;
+                } else {
+                    tx = 1; ty = 0; tz = 0;
+                }
 
                 array_push(_pos, p[0] * _radius, p[1] * _radius, p[2] * _radius);
                 array_push(_norm, nx, ny, nz);
+                array_push(_tang, tx, ty, tz, 1.0);
                 array_push(_uvs, u, v);
                 array_push(_colArr, _color, _alpha);
             }
@@ -56,6 +71,7 @@ function UeSphereGeometry(_radius = 40, data = {}): UeGeometry(data) constructor
     
     self.position = _pos;
     self.normal = _norm;
+    self.tangent = _tang;
     self.uv = _uvs;
     self.color = _colArr;
 

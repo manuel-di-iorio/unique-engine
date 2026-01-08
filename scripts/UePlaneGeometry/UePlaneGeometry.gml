@@ -31,6 +31,15 @@ function UePlaneGeometry(width = 1, height = 1, data = {}): UeGeometry(data) con
         0, 1
     ];
 
+    self.tangent = [
+        1, 0, 0, 1,
+        1, 0, 0, 1,
+        1, 0, 0, 1,
+        1, 0, 0, 1,
+        1, 0, 0, 1,
+        1, 0, 0, 1
+    ];
+
     self.color = [
         color, alpha,
         color, alpha,
