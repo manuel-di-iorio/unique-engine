@@ -118,15 +118,6 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-// ===== Shadow =====
-vec2 getPoisson(int i) {
-    if(i==0) return vec2(-0.94,-0.39);
-    if(i==1) return vec2( 0.94,-0.76);
-    if(i==2) return vec2(-0.09,-0.92);
-    if(i==3) return vec2( 0.34, 0.29);
-    return vec2(0.0);
-}
-
 float calculateShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
     if (lightSpacePos.w < EPSILON) return 0.0;
     vec3 p = lightSpacePos.xyz / lightSpacePos.w;
@@ -134,19 +125,22 @@ float calculateShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
 
     if (p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0 || p.z > 1.0) return 0.0;
 
-    float bias = max(0.002 * (1.0 - dot(N, L)), 0.0005);
+    float bias = max(0.0015 * (1.0 - dot(N, L)), 0.0004);
     float shadow = 0.0;
 
-    int samples = (u_ueShadowQuality > 0.5) ? 4 : 1;
-
-    for (int i = 0; i < 4; i++) {
-        if (i >= samples) break;
-        vec2 off = getPoisson(i) * u_ueShadowTexelSize;
-        float d = texture2D(s_shadowMap, p.xy + off).r;
-        shadow += (p.z - bias > d) ? 1.0 : 0.0;
+    // 5-tap PCF (Center + corners)
+    if (u_ueShadowQuality > 0.5) {
+        vec2 texelSize = vec2(u_ueShadowTexelSize);
+        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy).r) ? 1.0 : 0.0;
+        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy + vec2(-0.7, -0.7) * texelSize).r) ? 1.0 : 0.0;
+        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy + vec2( 0.7, -0.7) * texelSize).r) ? 1.0 : 0.0;
+        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy + vec2(-0.7,  0.7) * texelSize).r) ? 1.0 : 0.0;
+        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy + vec2( 0.7,  0.7) * texelSize).r) ? 1.0 : 0.0;
+        return shadow / 5.0;
+    } else {
+        float d = texture2D(s_shadowMap, p.xy).r;
+        return (p.z - bias > d) ? 1.0 : 0.0;
     }
-
-    return shadow / float(samples);
 }
 
 // ===== PBR Light =====

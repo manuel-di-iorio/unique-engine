@@ -63,6 +63,20 @@ function UeCamera(data = {}): UeObject3D(data) constructor {
         return self;
     }
     
+    // Frustum for culling
+    frustum = frustum_create();
+    
+    /**
+     * Returns the camera's frustum, updating it from current matrices.
+     * @returns {Array<Array<Real>>}
+     */
+    function getFrustum() {
+        gml_pragma("forceinline");
+        matrix_multiply(matrixWorldInverse, projectionMatrix, global.UE_MAT4_TEMP0);
+        frustum_set_from_matrix(frustum, global.UE_MAT4_TEMP0);
+        return frustum;
+    }
+
     // Initialize position
     setPosition(data[$ "x"] ?? 0, data[$ "y"] ?? -100, data[$ "z"] ?? 0);
     

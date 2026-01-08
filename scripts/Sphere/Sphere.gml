@@ -4,6 +4,10 @@ enum SPHERE {
   x, y, z, r
 }
 
+global.UE_SPHERE_TEMP0 = sphere_create([0,0,0], 0);
+global.UE_SPHERE_TEMP1 = sphere_create([0,0,0], 0);
+global.UE_SPHERE_TEMP2 = sphere_create([0,0,0], 0);
+
 function sphere_create(center, r = -1) {
   gml_pragma("forceinline");
   center ??= vec3_create();

@@ -10,7 +10,7 @@
   "compression":3,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":138.7102,
+  "duration":0.0,
   "exportDir":"",
   "name":"sndDemoPlatformBG",
   "parent":{

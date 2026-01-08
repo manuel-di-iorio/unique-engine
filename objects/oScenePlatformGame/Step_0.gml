@@ -30,7 +30,7 @@ if (jump && coyoteTimer > 0) {
 vec3_add(player.position, playerVelocity);
 isOnGround = false;
 
-// Broad-phase + Resolution (Ottimizzato)
+// Broad-phase + Resolution
 var radius = 15;
 var cyHeight = 25; 
 var capsule = global.UE_CAPSULE_TEMP0;
@@ -53,12 +53,13 @@ for(var i = 0; i < nCubes; i++) {
     box3_copy(box, c.geometry.boundingBox);
     box3_translate(box, c.position);
     
-    // Risoluzione integrata nella funzione (come richiesto)
+    // Risoluzione integrata nella funzione
     if (capsule_intersects_box(capsule, box, push)) {
         player.position[VEC3.x] += push[VEC3.x];
         player.position[VEC3.y] += push[VEC3.y];
         player.position[VEC3.z] += push[VEC3.z];
         if (push[VEC3.z] > 0) isOnGround = true;
+        else if (push[VEC3.z] < 0 && playerVelocity[VEC3.z] > 0) playerVelocity[VEC3.z] = 0;
         
         // Aggiorna capsula per collisioni successive nello stesso frame
         capsule[0] = player.position[VEC3.x]; capsule[1] = player.position[VEC3.y]; capsule[2] = player.position[VEC3.z] - cyHeight;
@@ -76,10 +77,10 @@ if (player.position[VEC3.z] < 40) {
 if (isOnGround) playerVelocity[VEC3.z] = 0;
 
 // Out of bounds check
-if (player.position[VEC3.x] < -750) player.position[VEC3.x] = -750;
-if (player.position[VEC3.y] < -750) player.position[VEC3.y] = -750;
-if (player.position[VEC3.x] > 750) player.position[VEC3.x] = 750;
-if (player.position[VEC3.y] > 750) player.position[VEC3.y] = 750;
+if (player.position[VEC3.x] < -1250) player.position[VEC3.x] = -1250;
+if (player.position[VEC3.y] < -1250) player.position[VEC3.y] = -1250;
+if (player.position[VEC3.x] > 1250) player.position[VEC3.x] = 1250;
+if (player.position[VEC3.y] > 1250) player.position[VEC3.y] = 1250;
 
 // 3. Raccolta Collezionabili
 var pBox = global.UE_BOX3_TEMP1;
@@ -91,11 +92,11 @@ for (var i = array_length(collectibles) - 1; i >= 0; i--) {
     var ico = collectibles[i];
     ico.rotateX(0.7); ico.rotateZ(1.1); // Animazione rotazione
     
-    var iBox = global.UE_BOX3_TEMP0;
-    box3_copy(iBox, ico.geometry.boundingBox);
-    box3_translate(iBox, ico.position);
+    var iSphere = global.UE_SPHERE_TEMP0;
+    sphere_copy(iSphere, ico.geometry.boundingSphere);
+    sphere_translate(iSphere, ico.position);
     
-    if (box3_intersects_box(pBox, iBox)) {
+    if (sphere_intersects_box(iSphere, pBox)) {
         scene.remove(ico);
         array_delete(collectibles, i, 1);
         collectedCount++;

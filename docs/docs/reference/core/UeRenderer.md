@@ -36,13 +36,10 @@ new UeRenderer(data = {})
 
 **1️⃣ Object Collection**
 
-Rendering starts by recursively walking the scene graph:
+Rendering starts by recursively walking the scene graph to extract lights and meshes. Since the same scene graph is used for both shadow passes and the main camera pass, the collection is decoupled into two phases:
 
-- Lights are stored into an internal array (__lights).
-- Meshes (objects with geometry) are added to the main __queue.
-- Frustum culling is applied when frustumCulled == true.
-- For each mesh, a sort key is computed (see below).
-- Collected objects are then rendered in a single unified pass.
+- **Recursive Traversal**: Lights are stored into an internal array (`__lights`), and all visible meshes are added to a main queue (`__queue`) regardless of their visibility to the camera frustum (to ensure they can cast shadows even if the caster is off-camera).
+- **Visibility Filtering**: To prevent shadow popping, all objects are initially collected for the shadow pass. After sorting the main render queue, a visibility check is performed against the camera's frustum. Objects marked with `frustumCulled == true` that are not visible to the camera are removed before the main rendering phase.
 
 **2️⃣ Sort Key (52-bit Packed Integer)**
 
@@ -141,12 +138,12 @@ Before rendering, the renderer collects all lights into a global light state:
 When `shadowMap.enabled` is true, the renderer performs shadow map rendering before the main scene pass:
 
 1. **Shadow Pass (for each shadow-casting light):**
-   - Sets shadow map surface as render target
-   - Positions shadow camera at light position/direction
-   - Updates light space transformation matrix
-   - Clears shadow map to white (maximum depth)
-   - Renders scene from light's perspective using `sh_ue_shadow_map` shader
-   - Stores depth values in `r32float` surface
+   - Sets shadow map surface as render target.
+   - Positions shadow camera and updates light space transformation matrix.
+   - Frustum Culling: Shadow maps implement their own culling pass using the shadow camera's frustum. This ensures only objects within the light's reach are rendered, optimizing performance without causing shadows to "pop" when the proejcting object is outside the main camera's view.
+   - Clears shadow map to white (maximum depth).
+   - Renders scene from light's perspective using `sh_ue_shadow_map` shader.
+   - Stores depth values in `r32float` surface.
 
 2. **Supported Shadow Types:**
    - **DirectionalLight:** Uses orthographic shadow camera, single shadow map

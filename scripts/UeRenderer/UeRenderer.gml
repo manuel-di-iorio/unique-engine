@@ -110,17 +110,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       /* Frustum intersection && sort key calculation */
       if (object.visible) {
         if (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined) {
-          // Test the frustum intersection
-          if (object[$ "isMesh"] && object.frustumCulled) {
-            var _boundingSphere = object[$ "__intersectionSphere"];
-
-            if (_boundingSphere != undefined &&
-              !sphere_is_visible(_boundingSphere[SPHERE.x], _boundingSphere[SPHERE.y],
-                _boundingSphere[SPHERE.z], _boundingSphere[SPHERE.r])) {
-              continue;
-            }
-          }
-
           // ** Precompute the sort hash **
 
           // --- MATERIAL & TRANSPARENCY -------------------------------------------------
@@ -357,19 +346,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     if (self.__renderTarget == undefined && view_current != camera.view) return;
 
     var _gpuState = gpu_get_state();
-    //var _gpuZTestEnable = gpu_get_ztestenable();
-    //var _gpuZWriteEnable = gpu_get_zwriteenable();
-    //var _gpuZFunc = gpu_get_zfunc();
-    //var _gpuAlphaTestEnable = gpu_get_alphatestenable();
-    //var _gpuAlphaTestRef = gpu_get_alphatestref();
-    //var _gpuColorWriteEnable = gpu_get_colorwriteenable();
-    //var _gpuBlendEnable = gpu_get_blendenable();
-    //var _gpuBlendEquationSepAlpha = gpu_get_blendequation_sepalpha();
-    //var _gpuBlendModeExtSepAlpha = gpu_get_blendmode_ext_sepalpha();
-    //var _gpuCullMode = gpu_get_cullmode();
-    //var _gpuTexRepeat = gpu_get_texrepeat();
-    //var _gpuTexFilter = gpu_get_texfilter();
-    //var _gpuTexMipEnable = gpu_get_tex_mip_enable();
 
     // Auto clear
     if (self.autoClear) {
@@ -381,7 +357,8 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
     __lightIdx = 0;
     __queueIdx = 0;
-    __collectObjectQueues(scene.children, camera);
+    // Collect all renderable objects for shadow pass (no camera frustum culling)
+    __collectObjectQueues(scene.children, camera, false);
     __shadowIdx = __queueIdx;
 
     // **PASS 1: Render shadow maps for shadow-casting lights**
@@ -409,6 +386,28 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // Sort both queues before rendering
     if (sortObjects) __quickSortObjects(0, __queueIdx - 1);
 
+    // Visibility filtering for the main camera pass.
+    // This removes objects that are not visible to the camera, but were kept for the shadow pass.
+    // Performed after sorting to maintain consistent indexing for subsequent operations.
+    var _writeIdx = 0;
+    for (var i = 0; i < __queueIdx; i++){
+        var _obj = __queue[i];
+
+        // Test the frustum intersection
+        if (_obj[$ "isMesh"] && _obj.frustumCulled) {
+          var _boundingSphere = _obj[$ "__intersectionSphere"];
+
+          if (_boundingSphere != undefined &&
+            !sphere_is_visible(_boundingSphere[SPHERE.x], _boundingSphere[SPHERE.y],
+              _boundingSphere[SPHERE.z], _boundingSphere[SPHERE.r])) {
+            continue;
+          }
+        }
+
+        __queue[_writeIdx++] = _obj;
+    }
+    __queueIdx = _writeIdx;
+
     // **PASS 2: Render the main scene**
     __renderObjects(scene);
 
@@ -416,19 +415,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     __boundMaterial = undefined;
     shader_reset();
     matrix_set(matrix_world, global.UE_MAT4_IDENTITY);
-    
-    //gpu_set_ztestenable(_gpuZTestEnable);
-    //gpu_set_zwriteenable(_gpuZWriteEnable);
-    //gpu_set_zfunc(_gpuZFunc);
-    //gpu_set_alphatestenable(_gpuAlphaTestEnable);
-    //gpu_set_alphatestref(_gpuAlphaTestRef);
-    //gpu_set_colorwriteenable(_gpuColorWriteEnable);
-    //gpu_set_blendenable(_gpuBlendEnable);
-    //gpu_set_blendequation_sepalpha(_gpuBlendEquationSepAlpha[0], _gpuBlendEquationSepAlpha[1]);
-    //gpu_set_blendmode_ext_sepalpha(_gpuBlendModeExtSepAlpha[0], _gpuBlendModeExtSepAlpha[1], _gpuBlendModeExtSepAlpha[2], _gpuBlendModeExtSepAlpha[3]);
-    //gpu_set_texrepeat(_gpuTexRepeat);
-    //gpu_set_texfilter(_gpuTexFilter);
-    //gpu_set_tex_mip_enable(_gpuTexMipEnable);
     gpu_set_state(_gpuState);
 
     return self;

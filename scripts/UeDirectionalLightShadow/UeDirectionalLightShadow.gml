@@ -7,10 +7,11 @@
 function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
     // Shadow camera (orthographic for directional light)
     camera = new UeOrthographicCamera({
-        left: -1000,
-        right: 1000,
-        top: -1000,
-        bottom: 1000
+        left: data[$ "left"] ?? -1000,
+        right: data[$ "right"] ?? 1000,
+        top: data[$ "top"] ?? -1000,
+        bottom: data[$ "bottom"] ?? 1000,
+        far: data[$ "far"] ?? 2000
     });
 
     // Shadow map / render target

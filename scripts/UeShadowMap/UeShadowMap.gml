@@ -46,9 +46,19 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
         shader_set(sh_ue_shadow_map);
 
         // Render objects from the pre-collected queue
+        var _shadowFrustum = _shadow.camera.getFrustum();
         for (var i = 0; i < __shadowIdx; i++) {
             var object = __queue[i];
             if (!object.castShadow) continue;
+            
+            // Culling based on shadow camera frustum
+            if (object.frustumCulled && object[$ "isMesh"]) {
+                var s = object.__intersectionSphere;
+                if (s != undefined && !frustum_intersects_sphere(_shadowFrustum, s)) {
+                    continue;
+                }
+            }
+            
             var _onBeforeShadow = object[$ "onBeforeShadow"];
             var _onAfterShadow = object[$ "onAfterShadow"];
             

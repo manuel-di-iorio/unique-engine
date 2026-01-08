@@ -11,12 +11,23 @@ player = new UeMesh(new UeCapsuleGeometry(playerRadius, playerHeight, 8, 12, 1, 
     color: make_color_rgb(32, 67, 240)
 }), undefined, { castShadow: true, receiveShadow: true });
 player.geometry.computeBoundingBox();
+player.geometry.computeBoundingSphere();
 
 // --- Luci ---
 ambientLight = new UeAmbientLight(make_color_rgb(120, 160, 180), { intensity: 0.35 });
-dirLight = new UeDirectionalLight(make_color_rgb(255, 245, 230), 1.0, { castShadow: true });
-// Direzione desiderata: (-0.4, -1, -0.3). La luce punta verso l'origine, quindi posizioniamola a -direzione * distanza
-vec3_set(dirLight.position, 400, 1000, 300);
+dirLight = new UeDirectionalLight(make_color_rgb(255, 245, 230), 1.0, {
+  castShadow: true,
+  shadow: {
+    left: -1000,
+    right: 1000,
+    top: -1000,
+    bottom: 1000,
+    far: 3000,
+    mapWidth: 2048,
+    mapHeight: 2048
+  }
+});
+vec3_set(dirLight.position, 400, 800, 300);
 scene.add(ambientLight, dirLight, player);
 
 // --- Fisica ---
@@ -28,7 +39,7 @@ acceleration = 1.5;
 _friction = 0.8;
 isOnGround = false;
 coyoteTimer = 0;
-coyoteTimeMax = 10;
+coyoteTimeMax = 15;
 
 // --- Generazione Mondo ---
 platformCubes = [];
@@ -38,16 +49,14 @@ cubeColors = [
     make_color_rgb(186, 104, 200), make_color_rgb(77, 182, 172)
 ];
 
-function checkOverlap(nx, ny, nz, size, pPos) {
-    var margin = 50;
-    if (point_distance_3d(nx, ny, nz, pPos[0], pPos[1], pPos[2]) < (size + playerRadius + margin)) return true;
+function checkOverlap(nx, ny, nz, radius, pPos) {
+    var margin = 60; // Slightly increased for non-uniform shapes
+    if (point_distance_3d(nx, ny, nz, pPos[0], pPos[1], pPos[2]) < (radius + playerRadius + margin)) return true;
     for (var i = 0, il = array_length(platformCubes); i < il; i++) {
         var c = platformCubes[i];
-        var bbox = c.geometry.boundingBox;
-        var cSize = (bbox[3] - bbox[0]) * 0.5;
-        if (abs(nx - c.position[0]) < (size + cSize + margin) &&
-            abs(ny - c.position[1]) < (size + cSize + margin) &&
-            abs(nz - c.position[2]) < (size + cSize + margin)) return true;
+        var bSphere = c.geometry.boundingSphere;
+        var rSum = radius + bSphere[SPHERE.r] + margin;
+        if (point_distance_3d(nx, ny, nz, c.position[0], c.position[1], c.position[2]) < rSum) return true;
     }
     return false;
 }
@@ -74,14 +83,20 @@ for (var i = 0; i < numCubes; i++) {
     var placed = false;
     var attempts = 0;
     while (!placed && attempts < maxAttempts) {
-        var cubeSize = irandom_range(40, 100);
-        var halfSize = cubeSize * 0.5;
+        attempts++;
+        var w = irandom_range(60, 150);
+        var d = irandom_range(60, 150);
+        var h = irandom_range(40, 100);
+        
+        // Correct bounding radius for non-uniform box
+        var radius = 0.5 * sqrt(w*w + d*d + h*h);
+        
         var cubeX = irandom_range(-maxPosition, maxPosition);
         var cubeY = irandom_range(-maxPosition, maxPosition);
-        var cubeZ = irandom_range(playerHeight, 800);
+        var cubeZ = irandom_range(playerHeight + 20, 700);
 
-        if (!checkOverlap(cubeX, cubeY, cubeZ, halfSize, player.position)) {
-            var cube = new UeStaticMesh(new UeBoxGeometry(cubeSize, cubeSize, cubeSize, { color: cubeColors[irandom(7)] }), cubeMat, { castShadow: true, receiveShadow: true });
+        if (!checkOverlap(cubeX, cubeY, cubeZ, radius, player.position)) {
+            var cube = new UeStaticMesh(new UeBoxGeometry(w, d, h, { color: cubeColors[irandom(7)] }), cubeMat, { castShadow: true, receiveShadow: true });
             vec3_set(cube.position, cubeX, cubeY, cubeZ);
 
             // Varietà: Evita allineamenti perfetti (±2°)
@@ -92,6 +107,7 @@ for (var i = 0; i < numCubes; i++) {
             vec3_set(cube.scale, s, s, s);
 
             cube.geometry.computeBoundingBox();
+            cube.geometry.computeBoundingSphere();
             cube.updateMatrix();
             cube.updateWorldMatrix();
             scene.add(cube);
@@ -125,6 +141,7 @@ if (nPlats > 0) {
         var top = cube.position[2] + (bbox[3] - bbox[0]) * 0.5;
         vec3_set(ico.position, cube.position[0], cube.position[1], top + 35);
         ico.geometry.computeBoundingBox();
+        ico.geometry.computeBoundingSphere();
         scene.add(ico);
         array_push(collectibles, ico);
     }

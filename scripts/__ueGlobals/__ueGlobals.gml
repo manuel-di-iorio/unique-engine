@@ -42,7 +42,12 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     fogColor: "u_ueFogColor",
     fogDensity: "u_ueFogDensity",
     fogNear: "u_ueFogNear",
-    fogFar: "u_ueFogFar"
+    fogFar: "u_ueFogFar",
+    
+    // Tone Mapping
+    toneMapping: "u_ueToneMapping",
+    toneMappingExposure: "u_ueToneMappingExposure",
+    toneMapped: "u_ueToneMapped"
 };
 
 global.UE_DEFAULT_MATERIAL = new UeMeshStandardMaterial();
@@ -82,6 +87,13 @@ enum UE_SHADOW_QUALITY {
     LOW = 0,    // No PCF, hard shadows (1 sample)
     MEDIUM = 1, // Light PCF, soft shadows (4 samples)
     HIGH = 2    // Full PCF, very soft shadows (16 samples)
+}
+
+enum UE_TONE_MAPPING {
+    NONE,
+    REINHARD,
+    CINEON,
+    ACES
 }
 
 // Internal globals
