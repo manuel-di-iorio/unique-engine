@@ -8,45 +8,34 @@ function UeCameraHelper(camera, color = c_yellow): UeLineSegments() constructor 
     material.forceSinglePass = true;
     material.side = cull_noculling;
 
+    // The helper should follow the camera's world matrix
     mat4_copy(matrixWorld, self.camera.matrixWorld);
-    var mRot = global.UE_MAT4_TEMP0;
-    mat4_make_rotation_z(mRot, 180);
-    mat4_multiply(matrixWorld, mRot);
-    mat4_make_rotation_y(mRot, 180);
-    mat4_multiply(matrixWorld, mRot);
     matrixAutoUpdate = false;
     
     geometry = new UeLineSegmentsGeometry({ color });
     
-    // Build
+    // Build local geometry
     var ndcPoints = [
-        [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]  // far plane
+        [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]  // far plane corners in NDC
     ];
     
     var segments = [];
-
-    var rotFix = global.UE_DUMMY_MATRIX4;
-    rotFix.makeRotationFromEuler(90, 180, 180);
-
     var farPoints = [];
 
     for (var i = 0; i < 4; i++) {
-        var ndcPoint = ndcPoints[i];
-        var v = vec3_create(ndcPoint[0], ndcPoint[1], ndcPoint[2]);
-        vec3_unproject(v, camera);
-        vec3_apply_matrix4(v, rotFix);
+        var v = vec3_create(ndcPoints[i][0], ndcPoints[i][1], ndcPoints[i][2]);
+        // Unproject from NDC to local view space using only projectionMatrixInverse
+        vec3_apply_matrix4(v, camera.projectionMatrixInverse);
         array_push(farPoints, v);
     }
 
-    var camPos = camera.position;
-
-    // From camera position to far plane corners
+    // From local origin (0,0,0) to far plane corners
     for (var i = 0; i < 4; i++) {
         var p = farPoints[i];
-        array_push(segments, camPos[0], camPos[1], camPos[2],  p[0], p[1], p[2]);
+        array_push(segments, 0, 0, 0,  p[0], p[1], p[2]);
     }
 
-    // Far plane square
+    // Far plane edges
     for (var i = 0; i < 4; i++) {
         var a = farPoints[i];
         var b = farPoints[(i + 1) % 4];

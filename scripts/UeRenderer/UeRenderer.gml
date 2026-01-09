@@ -103,13 +103,13 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       var object = objects[i];
       if (!object.layers.test(cameraLayers)) continue;
 
+      // Update matrices for dynamic objects
+      if (object.matrixAutoUpdate && object.matrixWorldAutoUpdate) object.updateMatrixWorld();
+
       if (object[$ "isLight"]) {
         __lights[__lightIdx++] = object;
         continue;
       }
-
-      // Update matrices for dynamic objects
-      if (object.matrixAutoUpdate && object.matrixWorldAutoUpdate) object.updateMatrixWorld();
 
       /* Frustum intersection && sort key calculation */
       if (object.visible) {
@@ -230,7 +230,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     gpu_set_ztestenable(true);
     gpu_set_zwriteenable(true);
     gpu_set_blendenable(false);
-    var _resetSurf = false;
 
     for (var i = 0; i < __lightIdx; i++) {
       var light = __lights[i];
@@ -239,13 +238,15 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       switch (light.lightType) {
         case "DirectionalLight":
           light.shadow.map.render(light, scene, camera, __queue, __shadowIdx);
-          _resetSurf = true;
+          break;
+
+        case "PointLight":
+          light.shadow.render(light, scene, camera, __queue, __shadowIdx);
           break;
       }
     }
 
     // Restore previous GPU state
-    if (_resetSurf) surface_reset_target();
     shader_reset();
     gpu_set_cullmode(_prevCull);
     gpu_set_ztestenable(_prevZTest);

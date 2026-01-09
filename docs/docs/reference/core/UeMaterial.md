@@ -88,8 +88,10 @@ uniforms: {
 - ueModelPosition (only for sprite objects)
 - ueAmbient
 - ueDirLight* / uePointLight* (if lights > 0)
-- ueLightSpaceMatrix, ueShadowEnabled, ueReceiveShadow (shadow uniforms)
-- ueShadowQuality, ueShadowTexelSize (shadow quality control)
+- ueDirShadowMatrix, ueDirShadowEnabled, ueReceiveShadow (directional shadow uniforms)
+- ueDirShadowQuality, ueDirShadowTexelSize (directional shadow quality control)
+- uePointShadowEnabled, uePointShadowFar, uePointShadowNear, uePointShadowPos (point shadow uniforms)
+- s_dirShadowMap, s_pointShadowMap (samplers for shadows)
 
 ## Shadow Quality
 

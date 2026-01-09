@@ -15,8 +15,7 @@ function UePointLightHelper(light, sphereSize = 1, color = undefined, data = {})
         _col = light.color;
     }
     
-    // Create the octahedron mesh (two opposite pyramids)
-    // We use a UeOctahedronGeometry as requested
+    // Create the octahedron mesh
     var _geom = new UeOctahedronGeometry(sphereSize, 0);
     
     // Using a basic material for the helper (self-illuminated, no light interaction)

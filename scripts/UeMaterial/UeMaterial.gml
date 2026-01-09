@@ -41,10 +41,16 @@ function UeMaterial(data = {}) constructor {
   __uniformModelPositionLoc = undefined;
   __uniformWorldMatrixLoc = undefined;
   __uniformCameraPositionLoc = undefined;
-  __uniformLightSpaceMatrixLoc = undefined;
-  __uniformShadowEnabledLoc = undefined;
+  __uniformDirShadowMatrixLoc = undefined;
+  __uniformDirShadowEnabledLoc = undefined;
+  __uniformPointShadowEnabledLoc = undefined;
   __uniformReceiveShadowLoc = undefined;
-  __samplerShadowMapIdx = undefined;
+  __samplerDirShadowMapIdx = undefined;
+  __samplerPointShadowMapIdx = undefined;
+  __uniformPointShadowFarLoc = undefined;
+  __uniformPointShadowNearLoc = undefined;
+  __uniformPointShadowPosLoc = undefined;
+  __uniformDebugPointShadowLoc = undefined;
   __uniformEmissiveIntensityLoc = undefined;
   __uniformToneMappingLoc = undefined;
   __uniformToneMappingExposureLoc = undefined;
@@ -73,15 +79,15 @@ function UeMaterial(data = {}) constructor {
   __uniformFogFarLoc = undefined;
 
   // Light uniforms
-  lights = data[$ "lights"] ?? 2;
+  lights = data[$ "lights"] ?? true;
   __uniformLightsAmbientLoc = undefined;
   __uniformLightsDir = [];
   __uniformLightsPos = [];
 
   // Shadow quality
   shadowQuality = data[$ "shadowQuality"] ?? UE_SHADOW_QUALITY.HIGH;
-  __uniformShadowQualityLoc = undefined;
-  __uniformShadowTexelSizeLoc = undefined;
+  __uniformDirShadowQualityLoc = undefined;
+  __uniformDirShadowTexelSizeLoc = undefined;
 
   // Uniform names config
   __uniformNamesConfig = global.UE_UNIFORM_NAMES_CONFIG;
@@ -109,12 +115,21 @@ function UeMaterial(data = {}) constructor {
    __uniformEmissiveIntensityLoc = shader_get_uniform(shader, cfg.emissiveIntensity);
 
    // Cache shadow uniforms
-   __uniformLightSpaceMatrixLoc = shader_get_uniform(shader, cfg.lightSpaceMatrix);
-   __uniformShadowEnabledLoc = shader_get_uniform(shader, cfg.shadowEnabled);
+   __uniformDirShadowMatrixLoc = shader_get_uniform(shader, cfg.lightSpaceMatrix);
+   __uniformDirShadowEnabledLoc = shader_get_uniform(shader, cfg.shadowEnabled);
+   __uniformPointShadowEnabledLoc = shader_get_uniform(shader, cfg.pointShadowEnabled);
    __uniformReceiveShadowLoc = shader_get_uniform(shader, cfg.receiveShadow);
-   __uniformShadowQualityLoc = shader_get_uniform(shader, cfg.shadowQuality);
-   __uniformShadowTexelSizeLoc = shader_get_uniform(shader, cfg.shadowTexelSize);
-   __samplerShadowMapIdx = shader_get_sampler_index(shader, cfg.shadowMapSampler);
+   __uniformDirShadowQualityLoc = shader_get_uniform(shader, cfg.shadowQuality);
+   __uniformDirShadowTexelSizeLoc = shader_get_uniform(shader, cfg.shadowTexelSize);
+   __samplerDirShadowMapIdx = shader_get_sampler_index(shader, cfg.shadowMapSampler);
+   
+   __samplerPointShadowMapIdx = shader_get_sampler_index(shader, cfg.pointShadowMapSampler);
+   __uniformPointShadowFarLoc = shader_get_uniform(shader, cfg.pointShadowFar);
+   __uniformPointShadowNearLoc = shader_get_uniform(shader, cfg.pointShadowNear);
+   __uniformPointShadowPosLoc = shader_get_uniform(shader, cfg.pointShadowPos);
+   __uniformPointShadowTexelSizeLoc = shader_get_uniform(shader, cfg.pointShadowTexelSize);
+   __uniformPointShadowQualityLoc = shader_get_uniform(shader, cfg.pointShadowQuality);
+   __uniformDebugPointShadowLoc = shader_get_uniform(shader, "u_debugPointShadow");
    
    // Cache tone mapping uniforms
    __uniformToneMappingLoc = shader_get_uniform(shader, cfg.toneMapping);
@@ -135,21 +150,24 @@ function UeMaterial(data = {}) constructor {
    __uniformFogNearLoc = shader_get_uniform(shader, cfg.fogNear);
    __uniformFogFarLoc = shader_get_uniform(shader, cfg.fogFar);
  
-   __uniformLightsDir = array_create(lights);
-   __uniformLightsPos = array_create(lights);
- 
-   for (var l = 0; l < lights; l++) {
+   __uniformLightsDir = array_create(1);
+   __uniformLightsPos = array_create(8);
+
+   for (var l = 0; l < 1; l++) {
      __uniformLightsDir[l] = [
        shader_get_uniform(shader, $"{cfg.dirLightDir}{l}"),
        shader_get_uniform(shader, $"{cfg.dirLightColor}{l}"),
        shader_get_uniform(shader, $"{cfg.dirLightIntensity}{l}"),
      ];
- 
+   }
+
+   for (var l = 0; l < 8; l++) {
      __uniformLightsPos[l] = [
        shader_get_uniform(shader, $"{cfg.pointLightPosition}{l}"),
        shader_get_uniform(shader, $"{cfg.pointLightColor}{l}"),
        shader_get_uniform(shader, $"{cfg.pointLightRange}{l}"),
        shader_get_uniform(shader, $"{cfg.pointLightIntensity}{l}"),
+       shader_get_uniform(shader, $"{cfg.pointLightDecay}{l}"),
      ];
    }
  
@@ -242,8 +260,8 @@ function UeMaterial(data = {}) constructor {
  
    shader_set_uniform_f_array(__uniformLightsAmbientLoc, lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT]);
  
-   // Set directional lights
-   for (var i = 0; i < lights; i++) {
+   // Set directional lights (max 1)
+   for (var i = 0; i < 1; i++) {
      var lightLoc = __uniformLightsDir[i];
  
      if (i < directionalCount) {
@@ -272,34 +290,81 @@ function UeMaterial(data = {}) constructor {
    }
  
    if (shadowLight != undefined) {
-     shader_set_uniform_f(__uniformShadowEnabledLoc, 1.0);
-     shader_set_uniform_f(__uniformShadowQualityLoc, shadowQuality);
+     shader_set_uniform_f(__uniformDirShadowEnabledLoc, 1.0);
+     shader_set_uniform_f(__uniformDirShadowQualityLoc, shadowQuality);
  
      // Calculate texel size based on shadow map resolution
      var shadowMapWidth = shadowLight.shadow.map.width;
      var texelSize = 1.0 / shadowMapWidth;
-     shader_set_uniform_f(__uniformShadowTexelSizeLoc, texelSize);
+     shader_set_uniform_f(__uniformDirShadowTexelSizeLoc, texelSize);
  
-     shader_set_uniform_matrix_array(__uniformLightSpaceMatrixLoc, shadowLight.shadow.lightSpaceMatrix);
-     texture_set_stage(__samplerShadowMapIdx, shadowLight.shadow.map.getTexture());
-   } else {
-     shader_set_uniform_f(__uniformShadowEnabledLoc, 0.0);
+     shader_set_uniform_matrix_array(__uniformDirShadowMatrixLoc, shadowLight.shadow.lightSpaceMatrix);
+     texture_set_stage(__samplerDirShadowMapIdx, shadowLight.shadow.map.getTexture());
+   } else if (__uniformDirShadowEnabledLoc != undefined) {
+     shader_set_uniform_f(__uniformDirShadowEnabledLoc, 0.0);
    }
- 
-   // Set point lights
-   var lightColor;
-   for (var i = 0; i < lights; i++) {
-     var lightLoc = __uniformLightsPos[i];
- 
-     if (i < pointLightCount) {
-       var light = pointLightState[i];
-       shader_set_uniform_f_array(lightLoc[0], light.position);
-       shader_set_uniform_f_array(lightLoc[1], light.color);
-       shader_set_uniform_f(lightLoc[2], light.range);
-       shader_set_uniform_f(lightLoc[3], light.intensity);
-     } else {
+
+   // Set point shadow uniforms (from the first shadow-casting point light)
+  var pointShadowLight = undefined;
+  for (var i = 0; i < pointLightCount; i++) {
+    if (pointLightState[i].castShadow) {
+      pointShadowLight = pointLightState[i];
+      break;
+    }
+  }
+
+  if (pointShadowLight != undefined && __samplerPointShadowMapIdx != -1) {
+    shader_set_uniform_f(__uniformPointShadowEnabledLoc, 1.0);
+    shader_set_uniform_f(__uniformPointShadowFarLoc, pointShadowLight.shadow.cameras[0].far);
+    shader_set_uniform_f(__uniformPointShadowNearLoc, pointShadowLight.shadow.cameras[0].near);
+    
+    // Set texel size for point shadows
+    var pointShadowMapWidth = pointShadowLight.shadow.mapSize.width;
+    var pointShadowMapHeight = pointShadowLight.shadow.mapSize.height;
+    if (__uniformPointShadowTexelSizeLoc != undefined) {
+      shader_set_uniform_f(__uniformPointShadowTexelSizeLoc, 1.0 / (pointShadowMapWidth * 3.0), 1.0 / (pointShadowMapHeight * 2.0));
+    }
+    
+    if (__uniformPointShadowQualityLoc != undefined) {
+      shader_set_uniform_f(__uniformPointShadowQualityLoc, shadowQuality);
+    }
+    
+    // Use world position for point shadow origin
+    var worldPos = global.UE_VEC3_TEMP1;
+    pointShadowLight.getWorldPosition(worldPos);
+    shader_set_uniform_f_array(__uniformPointShadowPosLoc, worldPos);
+    
+    // Debug point shadow
+    if (__uniformDebugPointShadowLoc != undefined) {
+      shader_set_uniform_f(__uniformDebugPointShadowLoc, global[$ "UE_DEBUG_POINT_SHADOW"] ?? 0.0);
+    }
+    
+    texture_set_stage(__samplerPointShadowMapIdx, pointShadowLight.shadow.map.getTexture());
+  } else if (__uniformPointShadowEnabledLoc != undefined) {
+    shader_set_uniform_f(__uniformPointShadowEnabledLoc, 0.0);
+  }
+
+  // Set point lights (max 8)
+  for (var i = 0; i < 8; i++) {
+    var lightLoc = __uniformLightsPos[i];
+
+    if (i < pointLightCount) {
+      var light = pointLightState[i];
+      
+      // Get world position for the shader
+      var worldPos = global.UE_VEC3_TEMP1;
+      light.getWorldPosition(worldPos);
+      
+      shader_set_uniform_f_array(lightLoc[0], worldPos);
+      shader_set_uniform_f_array(lightLoc[1], light.color);
+      shader_set_uniform_f(lightLoc[2], light.distance);
+      shader_set_uniform_f(lightLoc[3], light.intensity);
+      shader_set_uniform_f(lightLoc[4], light.decay);
+    } else {
        // Reset unused light slots
-       shader_set_uniform_f(lightLoc[3], 0);
+       if (array_length(lightLoc) > 3) {
+         shader_set_uniform_f(lightLoc[3], 0);
+       }
      }
    }
  }

@@ -5,10 +5,11 @@
  * @param {number} width - Shadow map width (default: 1024)
  * @param {number} height - Shadow map height (default: 1024)
  */
-function UeShadowMap(width = 1024, height = 1024) constructor {
+function UeShadowMap(shader, width = 1024, height = 1024) constructor {
     self.width = width;
     self.height = height;
     self.surface = -1;
+    self.shader = shader;
     
     /**
      * Creates the shadow map surface.
@@ -39,11 +40,12 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
         // This positions the camera based on light direction and updates all matrices
         _shadow.updateMatrices(light);
         
-        // Clear to white (1.0) because it represents the farthest depth.
+        // Clear to white (1.0) because it represents the farthest depth (far plane).
+        // NOTE: If alpha testing is added to the shadow pass, this must remain far (1.0).
         draw_clear(c_white);
         
         // Set shadow depth shader to write depth values to color buffer
-        shader_set(sh_ue_shadow_map);
+        shader_set(self.shader);
 
         // Render objects from the pre-collected queue
         var _shadowFrustum = _shadow.camera.getFrustum();
@@ -52,7 +54,7 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
             if (!object.castShadow) continue;
             
             // Culling based on shadow camera frustum
-            if (object.frustumCulled && object[$ "isMesh"]) {
+            if (object.frustumCulled) {
                 var s = object.__intersectionSphere;
                 if (s != undefined && !frustum_intersects_sphere(_shadowFrustum, s)) {
                     continue;
@@ -66,6 +68,9 @@ function UeShadowMap(width = 1024, height = 1024) constructor {
             object.render();
             if (_onAfterShadow != undefined) _onAfterShadow();
         } 
+        
+        shader_reset();
+        surface_reset_target();
         return self;
     }
     

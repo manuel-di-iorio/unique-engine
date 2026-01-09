@@ -9,9 +9,18 @@ sidebar_position: 3
 ## Overview
 
 - Creates 6 `UePerspectiveCamera` instances with a 90° FOV (one per cube face).
-- Generates 6 `UeShadowMap` textures (one per face) with configurable size.
+- Generates a temporary surface atlas of 3x2 to render all faces in a single texture.
+- Provides a unified `s_pointShadowMap` sampler for shaders to sample the atlas.
 - Computes 6 `lightSpaceMatrix` (projection * view) matrices—one for each face.
 - Provides methods to update cameras based on the light position and to change shadow map resolution.
+
+## Implementation details (GameMaker)
+
+Unique Engine uses a custom approach to handle point shadows in GameMaker. Instead of multiple render target switches, the engine renders all 6 faces into a single 3x2 atlas using temporary surfaces and then copies them to the final shadow map. This ensures compatibility and performance.
+
+## Shader usage
+
+The standard shader `sh_ue_standard` automatically handles point shadows if enabled. It uses the `u_uePointShadowEnabled` uniform and the `s_pointShadowMap` sampler. The distance-based shadow is calculated using the light position and the far/near planes.
 
 ## API
 
@@ -38,7 +47,8 @@ Key methods:
 ## Example
 
 ```gml
-pointLight = new UePointLight(400, { castShadow: true });
+pointLight = new UePointLight(c_white, 1, 400);
+pointLight.castShadow = true;
 pointLight.position.set(0, 0, 50);
 pointLight.shadow.updateMapSize(512, 512);
 scene.add(pointLight);

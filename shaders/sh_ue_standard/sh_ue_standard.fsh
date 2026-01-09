@@ -5,7 +5,7 @@ varying vec3 vWorldNormal;
 varying vec4 vWorldTangent;
 varying vec2 vTexcoord;
 varying vec4 vColour;
-varying vec4 vLightSpacePos;
+varying vec4 vDirLightSpacePos;
 
 // ===== Scene =====
 uniform vec3  u_ueCameraPosition;
@@ -49,32 +49,77 @@ uniform float u_ueHasNormalMap;
 uniform float u_ueHasEmissiveMap;
 
 // ===== Lights =====
+
 // Directional
 uniform vec3  u_ueDirLightDir0;
 uniform vec3  u_ueDirLightColor0;
 uniform float u_ueDirLightIntensity0;
 
-uniform vec3  u_ueDirLightDir1;
-uniform vec3  u_ueDirLightColor1;
-uniform float u_ueDirLightIntensity1;
-
 // Point
 uniform vec3  u_uePointLightPosition0;
 uniform vec3  u_uePointLightColor0;
+uniform float u_uePointLightRange0;
 uniform float u_uePointLightIntensity0;
-uniform vec3  u_uePointLightRange0;
+uniform float u_uePointLightDecay0;
 
 uniform vec3  u_uePointLightPosition1;
 uniform vec3  u_uePointLightColor1;
+uniform float u_uePointLightRange1;
 uniform float u_uePointLightIntensity1;
-uniform vec3  u_uePointLightRange1;
+uniform float u_uePointLightDecay1;
+
+uniform vec3  u_uePointLightPosition2;
+uniform vec3  u_uePointLightColor2;
+uniform float u_uePointLightRange2;
+uniform float u_uePointLightIntensity2;
+uniform float u_uePointLightDecay2;
+
+uniform vec3  u_uePointLightPosition3;
+uniform vec3  u_uePointLightColor3;
+uniform float u_uePointLightRange3;
+uniform float u_uePointLightIntensity3;
+uniform float u_uePointLightDecay3;
+
+uniform vec3  u_uePointLightPosition4;
+uniform vec3  u_uePointLightColor4;
+uniform float u_uePointLightRange4;
+uniform float u_uePointLightIntensity4;
+uniform float u_uePointLightDecay4;
+
+uniform vec3  u_uePointLightPosition5;
+uniform vec3  u_uePointLightColor5;
+uniform float u_uePointLightRange5;
+uniform float u_uePointLightIntensity5;
+uniform float u_uePointLightDecay5;
+
+uniform vec3  u_uePointLightPosition6;
+uniform vec3  u_uePointLightColor6;
+uniform float u_uePointLightRange6;
+uniform float u_uePointLightIntensity6;
+uniform float u_uePointLightDecay6;
+
+uniform vec3  u_uePointLightPosition7;
+uniform vec3  u_uePointLightColor7;
+uniform float u_uePointLightRange7;
+uniform float u_uePointLightIntensity7;
+uniform float u_uePointLightDecay7;
 
 // ===== Shadow =====
-uniform sampler2D s_shadowMap;
-uniform float u_ueShadowEnabled;
+uniform sampler2D s_dirShadowMap;
+uniform sampler2D s_pointShadowMap;
+uniform float u_ueDirShadowEnabled;
+uniform float u_uePointShadowEnabled;
 uniform float u_ueReceiveShadow;
-uniform float u_ueShadowTexelSize;
-uniform float u_ueShadowQuality;
+uniform float u_ueDirShadowInvTexelSize;
+uniform vec2 u_uePointShadowInvTexelSize;
+uniform float u_ueDirShadowQuality;
+uniform float u_uePointShadowQuality;
+
+// Point shadow specific
+uniform float u_uePointShadowFar;
+uniform float u_uePointShadowNear;
+uniform float u_debugPointShadow; // 0: normal, 1: color-code faces
+uniform vec3  u_uePointShadowPos;
 uniform float u_ueToneMapping;
 uniform float u_ueToneMappingExposure;
 uniform float u_ueToneMapped;
@@ -141,7 +186,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-float calculateShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
+float calculateDirShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
     if (lightSpacePos.w < EPSILON) return 0.0;
     vec3 p = lightSpacePos.xyz / lightSpacePos.w;
     p = p * 0.5 + 0.5;
@@ -152,17 +197,100 @@ float calculateShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
     float shadow = 0.0;
 
     // 5-tap PCF (Center + corners)
-    if (u_ueShadowQuality > 0.5) {
-        vec2 texelSize = vec2(u_ueShadowTexelSize);
-        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy).r) ? 1.0 : 0.0;
-        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy + vec2(-0.7, -0.7) * texelSize).r) ? 1.0 : 0.0;
-        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy + vec2( 0.7, -0.7) * texelSize).r) ? 1.0 : 0.0;
-        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy + vec2(-0.7,  0.7) * texelSize).r) ? 1.0 : 0.0;
-        shadow += (p.z - bias > texture2D(s_shadowMap, p.xy + vec2( 0.7,  0.7) * texelSize).r) ? 1.0 : 0.0;
+    if (u_ueDirShadowQuality > 0.5) {
+        vec2 texelSize = vec2(u_ueDirShadowInvTexelSize);
+        shadow += (p.z - bias > texture2D(s_dirShadowMap, p.xy).r) ? 1.0 : 0.0;
+        shadow += (p.z - bias > texture2D(s_dirShadowMap, p.xy + vec2(-0.7, -0.7) * texelSize).r) ? 1.0 : 0.0;
+        shadow += (p.z - bias > texture2D(s_dirShadowMap, p.xy + vec2( 0.7, -0.7) * texelSize).r) ? 1.0 : 0.0;
+        shadow += (p.z - bias > texture2D(s_dirShadowMap, p.xy + vec2(-0.7,  0.7) * texelSize).r) ? 1.0 : 0.0;
+        shadow += (p.z - bias > texture2D(s_dirShadowMap, p.xy + vec2( 0.7,  0.7) * texelSize).r) ? 1.0 : 0.0;
         return shadow / 5.0;
     } else {
-        float d = texture2D(s_shadowMap, p.xy).r;
+        float d = texture2D(s_dirShadowMap, p.xy).r;
         return (p.z - bias > d) ? 1.0 : 0.0;
+    }
+}
+
+float calculatePointShadow(vec3 worldPos, vec3 N) {
+    vec3 dir = worldPos - u_uePointShadowPos;
+    float maxAxis = max(abs(dir.x), max(abs(dir.y), abs(dir.z)));
+    
+    vec2 uv;
+    float faceIndex;
+    
+    // Determine the major axis (which face we are looking at)
+    // Matches GML targets: 0:+Z, 1:-Z, 2:+Y, 3:-Y, 4:+X, 5:-X
+    if (abs(dir.z) >= abs(dir.x) && abs(dir.z) >= abs(dir.y)) {
+        // ±Z: Faces 0, 1
+        if (dir.z > 0.0) {
+            faceIndex = 0.0;
+            uv = vec2(-dir.x, dir.y);
+        } else {
+            faceIndex = 1.0;
+            uv = vec2(dir.x, dir.y);
+        }
+    }
+    else if (abs(dir.y) >= abs(dir.x) && abs(dir.y) >= abs(dir.z)) {
+        // ±Y: Faces 2, 3
+        if (dir.y > 0.0) {
+            faceIndex = 2.0;
+            uv = vec2(-dir.x, -dir.z);
+        } else {
+            faceIndex = 3.0;
+            uv = vec2(-dir.x, dir.z);
+        }
+    }
+    else {
+        // ±X: Faces 4, 5
+        if (dir.x > 0.0) {
+            faceIndex = 4.0;
+            uv = vec2(-dir.y, dir.z);
+        } else {
+            faceIndex = 5.0;
+            uv = vec2(dir.y, dir.z);
+        }
+    }
+    
+    // Normalize UV to [0, 1]
+    uv = (uv / maxAxis + 1.0) * 0.5;
+    
+    // Atlas offset (3x2 grid)
+    // In GLSL texture coords, (0,0) is bottom-left.
+    // Faces 0,1,2 (top row in GM surface) -> v in [0.5, 1.0] -> faceY = 1.0
+    // Faces 3,4,5 (bottom row in GM surface) -> v in [0.0, 0.5] -> faceY = 0.0
+    float faceX = mod(faceIndex, 3.0);
+    float faceY = 1.0 - floor(faceIndex / 3.0);
+    
+    // individual face UV.y inversion
+    // Since GameMaker surfaces are top-down, but GLSL textures are bottom-up:
+    vec2 mappedUV = vec2(uv.x, 1.0 - uv.y);
+     
+    // Linear depth reconstruction
+    float f = u_uePointShadowFar;
+    float n = u_uePointShadowNear;
+    float dist = length(dir);
+    float currentDepth = (dist - n) / (f - n);
+    
+    // Variable bias based on angle
+    float bias = max(0.002 * (1.0 - dot(N, normalize(-dir))), 0.0005);
+     
+     if (u_uePointShadowQuality > 0.5) {
+        float shadow = 0.0;
+        vec2 faceTexelSize = u_uePointShadowInvTexelSize * vec2(3.0, 2.0);
+        
+        for (float x = -1.0; x <= 1.0; x += 2.0) {
+            for (float y = -1.0; y <= 1.0; y += 2.0) {
+                vec2 pcfUV = mappedUV + vec2(x, y) * faceTexelSize * 0.5;
+                pcfUV = clamp(pcfUV, 0.002, 0.998); 
+                vec2 atlasUV = (pcfUV + vec2(faceX, faceY)) / vec2(3.0, 2.0);
+                shadow += (currentDepth - bias > texture2D(s_pointShadowMap, atlasUV).r) ? 1.0 : 0.0;
+            }
+        }
+        return shadow / 4.0;
+    } else {
+        mappedUV = clamp(mappedUV, 0.002, 0.998);
+        vec2 atlasUV = (mappedUV + vec2(faceX, faceY)) / vec2(3.0, 2.0);
+        return (currentDepth - bias > texture2D(s_pointShadowMap, atlasUV).r) ? 1.0 : 0.0;
     }
 }
 
@@ -299,19 +427,12 @@ void main() {
     {
         vec3 L = normalize(-u_ueDirLightDir0 + vec3(EPSILON));
         float shadow = 0.0;
-        if (u_ueShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
-            shadow = calculateShadow(vLightSpacePos, N, L);
+        if (u_ueDirShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
+            shadow = calculateDirShadow(vDirLightSpacePos, N, L);
         }
         Lo += BRDF_GGX(N, V, L, SRGBToLinear(u_ueDirLightColor0),
                        u_ueDirLightIntensity0, albedo, F0, roughness, metalness)
               * (1.0 - shadow);
-    }
-
-    // Directional 1
-    {
-        vec3 L = normalize(-u_ueDirLightDir1 + vec3(EPSILON));
-        Lo += BRDF_GGX(N, V, L, SRGBToLinear(u_ueDirLightColor1),
-                       u_ueDirLightIntensity1, albedo, F0, roughness, metalness);
     }
 
     // Point 0
@@ -319,23 +440,120 @@ void main() {
         vec3 toL = u_uePointLightPosition0 - vWorldPosition;
         float d2 = dot(toL, toL);
         float d = sqrt(d2);
-        float att = 1.0 / (d2 + EPSILON);
-        att *= clamp(1.0 - d / max(u_uePointLightRange0.x, EPSILON), 0.0, 1.0);
+        
+        // Attenuation based on decay
+        float att = 1.0 / (pow(d, u_uePointLightDecay0) + EPSILON);
+        
+        // Smooth cutoff if distance > 0
+        if (u_uePointLightRange0 > 0.0) {
+            att *= pow(clamp(1.0 - pow(d / u_uePointLightRange0, 4.0), 0.0, 1.0), 2.0);
+        }
+
+        float shadow = 0.0;
+        if (u_uePointShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
+            shadow = calculatePointShadow(vWorldPosition, N);
+            
+            // DEBUG: Color code faces
+            if (u_debugPointShadow > 0.5) {
+                vec3 dir = vWorldPosition - u_uePointShadowPos;
+                float maxAxis = max(abs(dir.x), max(abs(dir.y), abs(dir.z)));
+                if (maxAxis == abs(dir.x)) {
+                    Lo += (dir.x > 0.0) ? vec3(0.5, 0, 0) : vec3(0.2, 0, 0);
+                } else if (maxAxis == abs(dir.y)) {
+                    Lo += (dir.y > 0.0) ? vec3(0, 0.5, 0) : vec3(0, 0.2, 0);
+                } else {
+                    Lo += (dir.z > 0.0) ? vec3(0, 0, 0.5) : vec3(0, 0, 0.2);
+                }
+            }
+        }
 
         Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor0),
-                       u_uePointLightIntensity0 * att, albedo, F0, roughness, metalness);
+                       u_uePointLightIntensity0 * att, albedo, F0, roughness, metalness)
+              * (1.0 - shadow);
     }
 
     // Point 1
     {
         vec3 toL = u_uePointLightPosition1 - vWorldPosition;
-        float d2 = dot(toL, toL);
-        float d = sqrt(d2);
-        float att = 1.0 / (d2 + EPSILON);
-        att *= clamp(1.0 - d / max(u_uePointLightRange1.x, EPSILON), 0.0, 1.0);
-
+        float d = length(toL);
+        float att = 1.0 / (pow(d, u_uePointLightDecay1) + EPSILON);
+        if (u_uePointLightRange1 > 0.0) {
+            att *= pow(clamp(1.0 - pow(d / u_uePointLightRange1, 4.0), 0.0, 1.0), 2.0);
+        }
         Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor1),
                        u_uePointLightIntensity1 * att, albedo, F0, roughness, metalness);
+    }
+
+    // Point 2
+    {
+        vec3 toL = u_uePointLightPosition2 - vWorldPosition;
+        float d = length(toL);
+        float att = 1.0 / (pow(d, u_uePointLightDecay2) + EPSILON);
+        if (u_uePointLightRange2 > 0.0) {
+            att *= pow(clamp(1.0 - pow(d / u_uePointLightRange2, 4.0), 0.0, 1.0), 2.0);
+        }
+        Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor2),
+                       u_uePointLightIntensity2 * att, albedo, F0, roughness, metalness);
+    }
+
+    // Point 3
+    {
+        vec3 toL = u_uePointLightPosition3 - vWorldPosition;
+        float d = length(toL);
+        float att = 1.0 / (pow(d, u_uePointLightDecay3) + EPSILON);
+        if (u_uePointLightRange3 > 0.0) {
+            att *= pow(clamp(1.0 - pow(d / u_uePointLightRange3, 4.0), 0.0, 1.0), 2.0);
+        }
+        Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor3),
+                       u_uePointLightIntensity3 * att, albedo, F0, roughness, metalness);
+    }
+
+    // Point 4
+    {
+        vec3 toL = u_uePointLightPosition4 - vWorldPosition;
+        float d = length(toL);
+        float att = 1.0 / (pow(d, u_uePointLightDecay4) + EPSILON);
+        if (u_uePointLightRange4 > 0.0) {
+            att *= pow(clamp(1.0 - pow(d / u_uePointLightRange4, 4.0), 0.0, 1.0), 2.0);
+        }
+        Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor4),
+                       u_uePointLightIntensity4 * att, albedo, F0, roughness, metalness);
+    }
+
+    // Point 5
+    {
+        vec3 toL = u_uePointLightPosition5 - vWorldPosition;
+        float d = length(toL);
+        float att = 1.0 / (pow(d, u_uePointLightDecay5) + EPSILON);
+        if (u_uePointLightRange5 > 0.0) {
+            att *= pow(clamp(1.0 - pow(d / u_uePointLightRange5, 4.0), 0.0, 1.0), 2.0);
+        }
+        Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor5),
+                       u_uePointLightIntensity5 * att, albedo, F0, roughness, metalness);
+    }
+
+    // Point 6
+    {
+        vec3 toL = u_uePointLightPosition6 - vWorldPosition;
+        float d = length(toL);
+        float att = 1.0 / (pow(d, u_uePointLightDecay6) + EPSILON);
+        if (u_uePointLightRange6 > 0.0) {
+            att *= pow(clamp(1.0 - pow(d / u_uePointLightRange6, 4.0), 0.0, 1.0), 2.0);
+        }
+        Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor6),
+                       u_uePointLightIntensity6 * att, albedo, F0, roughness, metalness);
+    }
+
+    // Point 7
+    {
+        vec3 toL = u_uePointLightPosition7 - vWorldPosition;
+        float d = length(toL);
+        float att = 1.0 / (pow(d, u_uePointLightDecay7) + EPSILON);
+        if (u_uePointLightRange7 > 0.0) {
+            att *= pow(clamp(1.0 - pow(d / u_uePointLightRange7, 4.0), 0.0, 1.0), 2.0);
+        }
+        Lo += BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(u_uePointLightColor7),
+                       u_uePointLightIntensity7 * att, albedo, F0, roughness, metalness);
     }
 
     // Ambient

@@ -9,9 +9,9 @@ varying vec3 vWorldNormal;
 varying vec4 vWorldTangent;
 varying vec2 vTexcoord;
 varying vec4 vColour;
-varying vec4 vLightSpacePos;
+varying vec4 vDirLightSpacePos;
 
-uniform mat4 u_ueLightSpaceMatrix;
+uniform mat4 u_ueDirShadowMatrix;
 
 // Displacement
 uniform sampler2D s_displacementMap;
@@ -39,7 +39,7 @@ void main() {
     vWorldTangent.xyz = normalize((gm_Matrices[MATRIX_WORLD] * vec4(in_TextureCoord1.xyz, 0.0)).xyz);
     vWorldTangent.w   = in_TextureCoord1.w;
 
-    vLightSpacePos = u_ueLightSpaceMatrix * worldPos;
+    vDirLightSpacePos = u_ueDirShadowMatrix * worldPos;
 
     gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(pos, 1.0);
 }

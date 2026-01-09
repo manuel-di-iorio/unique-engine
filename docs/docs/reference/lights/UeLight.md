@@ -6,6 +6,8 @@ All lights in Unique Engine inherit from `UeLight`. These include `AmbientLight`
 
 Lights affect materials that have lighting enabled (e.g. `UeMeshStandardMaterial`) and are collected by the renderer from the scene.
 
+> Note: By default, the engine supports up to **1 Directional Light** and **8 Point Lights** simultaneously on the standard shader. Only 1 Directional and 1 Point light can cast shadows at the same time.
+
 ---
 
 ```js
@@ -24,7 +26,7 @@ new UeLight(data = {})
 | `lightType` | `string`  | `"Light"`   | Specific light type (`"AmbientLight"`, etc.)   |
 | `intensity` | `number`  | `1`         | Brightness multiplier for this light           |
 | `enabled`   | `boolean` | `true`      | Whether the light is currently active          |
-| `range`     | `number`  | `undefined` | (Only for point lights) max influence distance |
+| `distance`  | `number`  | `0`         | (Only for point lights) max influence distance |
 | `color`     | `array`   | `c_dkgray`  | RGB color as normalized array `[r, g, b]`      |
 
 ## Methods
@@ -77,32 +79,33 @@ scene.add(sun);
 💡 **UePointLight**
 
 ```js
-new UePointLight(range = 1000, data = {})
+new UePointLight(color = c_white, intensity = 1, distance = 0, decay = 2, data = {})
 ```
 Emits light in all directions from a single point, attenuated by distance. Supports omnidirectional shadow casting.
 
-**Data Parameters**
+**Constructor Parameters**
 
-| Key           | Type     | Default | Description                              |
-| ------------- | -------- | ------- | ---------------------------------------- |
-| `color`       | `color`  | `c_white` | Light color                            |
-| `shadowNear`  | `number` | `0.5`   | Near plane for shadow cameras            |
-| `shadowFar`   | `number` | `range` | Far plane for shadow cameras             |
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `color` | `c_white` | Light color |
+| `intensity` | `number` | `1` | The light's strength/intensity (candela) |
+| `distance` | `number` | `0` | Maximum range of the light. 0 means no limit. |
+| `decay` | `number` | `2` | The amount the light dims along the distance of the light. |
+| `data` | `struct` | `{}` | Additional data (e.g. `shadowNear`, `shadowFar`) |
 
 **Properties**
 
-| Property | Type                  | Default | Description                              |
-| -------- | --------------------- | ------- | ---------------------------------------- |
-| `range`  | `number`              | `1000`  | Maximum distance the light affects       |
-| `shadow` | `UePointLightShadow`  | Auto-created | Shadow configuration (6 cube faces) |
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| `distance` | `number` | `0` | Maximum distance the light affects. |
+| `decay` | `number` | `2` | The amount the light dims along the distance. |
+| `power` | `number` | | The light's power (luminous power in lumens). |
+| `isPointLight`| `boolean`| `true` | Read-only flag for type testing. |
+| `shadow` | `UePointLightShadow` | Auto-created | Shadow configuration (6 cube faces) |
 
 **Example:**
 ```js
-const lamp = new UePointLight(500, { 
-    color: c_yellow,
-    shadowNear: 1.0,
-    shadowFar: 500
-});
+const lamp = new UePointLight(c_yellow, 1.5, 500, 2);
 lamp.position.set(10, 50, 10);
 lamp.castShadow = true;
 scene.add(lamp);
@@ -115,8 +118,8 @@ Lights should be added to a UeScene using .add() and will be automatically colle
 
 ```js
 const ambient = new UeAmbientLight(c_gray);
-const sun = new UeDirectionalLight(0, 45, { color: c_white, intensity: 2 });
-const point = new UePointLight(500, { color: c_yellow });
+const sun = new UeDirectionalLight(c_white, 2);
+const point = new UePointLight(c_yellow, 1, 500);
 
 scene.add(ambient, sun, point);
 ```
@@ -125,7 +128,7 @@ Lights are passed to the material shader through uniforms like:
 
 - ueAmbient
 - ueDirLightDir0, ueDirLightColor0, ueDirLightIntensity0
-- uePointLightPosition0, uePointLightRange0, etc.
+- uePointLightPosition0, uePointLightRange0, uePointLightIntensity0, uePointLightDecay0, etc.
 
 ## Shadow Properties
 
@@ -169,7 +172,7 @@ sun.position.set(100, 200, 150);
 scene.add(sun);
 
 // Point light with omnidirectional shadows
-const lamp = new UePointLight(500, { color: c_yellow });
+const lamp = new UePointLight(c_yellow, 1, 500);
 lamp.castShadow = true;
 lamp.shadow.updateMapSize(1024, 1024);
 lamp.position.set(10, 50, 10);

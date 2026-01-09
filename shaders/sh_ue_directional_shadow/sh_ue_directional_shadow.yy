@@ -1,7 +1,7 @@
 {
   "$GMShader":"",
-  "%Name":"sh_ue_shadow_map",
-  "name":"sh_ue_shadow_map",
+  "%Name":"sh_ue_directional_shadow",
+  "name":"sh_ue_directional_shadow",
   "parent":{
     "name":"Shaders",
     "path":"folders/Packages/Unique Engine/Shaders.yy",

@@ -15,13 +15,22 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     aoIntensity: "u_ueAoIntensity",
     aoMapIntensity: "u_ueAoMapIntensity",
     
-    // Shadow
-    lightSpaceMatrix: "u_ueLightSpaceMatrix",
-    shadowEnabled: "u_ueShadowEnabled",
+    // Shadow (Directional)
+    lightSpaceMatrix: "u_ueDirShadowMatrix",
+    shadowEnabled: "u_ueDirShadowEnabled",
     receiveShadow: "u_ueReceiveShadow",
-    shadowQuality: "u_ueShadowQuality",
-    shadowTexelSize: "u_ueShadowTexelSize",
-    shadowMapSampler: "s_shadowMap",
+    shadowQuality: "u_ueDirShadowQuality",
+    shadowTexelSize: "u_ueDirShadowInvTexelSize",
+    shadowMapSampler: "s_dirShadowMap",
+    
+    // Shadow (Point)
+    pointShadowEnabled: "u_uePointShadowEnabled",
+    pointShadowFar: "u_uePointShadowFar",
+    pointShadowNear: "u_uePointShadowNear",
+    pointShadowPos: "u_uePointShadowPos",
+    pointShadowTexelSize: "u_uePointShadowInvTexelSize",
+    pointShadowQuality: "u_uePointShadowQuality",
+    pointShadowMapSampler: "s_pointShadowMap",
     
     // Directional Light Prefixes
     dirLightDir: "u_ueDirLightDir",
@@ -33,6 +42,7 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     pointLightColor: "u_uePointLightColor",
     pointLightRange: "u_uePointLightRange",
     pointLightIntensity: "u_uePointLightIntensity",
+    pointLightDecay: "u_uePointLightDecay",
 
     // Fog
     fogColor: "u_ueFogColor",
@@ -53,6 +63,8 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     hasEmissiveMap: "u_ueHasEmissiveMap",
     hasDisplacementMap: "u_ueHasDisplacementMap"
 };
+
+global.UE_DEBUG_POINT_SHADOW = 0;
 
 global.UE_DEFAULT_MATERIAL = new UeMeshStandardMaterial();
 global.UE_FALLBACK_MATERIAL = new UeMeshBasicMaterial({ shader: sh_ue_fallback });
@@ -108,9 +120,9 @@ enum UE_RENDERER_LIGHT_STATE_ENUM {
     POINT_LIGHT_COUNT 
 }
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT] = array_create(3, 0);
-global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL] = array_create(2);
+global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL] = array_create(1);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = 0;
-global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT] = array_create(2);
+global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT] = array_create(8);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = 0;
 
 global.UE_RENDERER_TONE_MAPPING = UE_TONE_MAPPING.NONE;

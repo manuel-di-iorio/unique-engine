@@ -149,19 +149,22 @@ function quat_set_from_rotation_matrix(q, m) {
         q[1] = (m31 - m13) * s;
         q[2] = (m12 - m21) * s;
     } else if (m11 > m22 && m11 > m33) {
-        var s = 2.0 * sqrt(1.0 + m11 - m22 - m33);
+        var val = 1.0 + m11 - m22 - m33;
+        var s = 2.0 * sqrt(max(0, val));
         q[3] = (m23 - m32) / s;
         q[0] = 0.25 * s;
         q[1] = (m12 + m21) / s;
         q[2] = (m13 + m31) / s;
     } else if (m22 > m33) {
-        var s = 2.0 * sqrt(1.0 + m22 - m11 - m33);
+        var val = 1.0 + m22 - m11 - m33;
+        var s = 2.0 * sqrt(max(0, val));
         q[3] = (m31 - m13) / s;
         q[0] = (m12 + m21) / s;
         q[1] = 0.25 * s;
         q[2] = (m23 + m32) / s;
     } else {
-        var s = 2.0 * sqrt(1.0 + m33 - m11 - m22);
+        var val = 1.0 + m33 - m11 - m22;
+        var s = 2.0 * sqrt(max(0, val));
         q[3] = (m12 - m21) / s;
         q[0] = (m13 + m31) / s;
         q[1] = (m23 + m32) / s;

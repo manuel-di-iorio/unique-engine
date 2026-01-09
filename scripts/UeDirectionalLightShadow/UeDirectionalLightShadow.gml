@@ -15,7 +15,7 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
     });
 
     // Shadow map / render target
-    map = new UeShadowMap(mapSize.width, mapSize.height);
+    map = new UeShadowMap(sh_ue_directional_shadow, mapSize.width, mapSize.height);
 
     // Light space transformation matrix
     lightSpaceMatrix = mat4_create();
