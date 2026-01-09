@@ -90,16 +90,16 @@ function quat_copy(q, src) {
 
 /// @func quat_set_from_euler(q, x, y, z)
 /// @desc Sets quaternion from Euler angles (YXZ order, CW).
-function quat_set_from_euler(q, x, y, z) {
+function quat_set_from_euler(q, _x, _y, _z) {
     gml_pragma("forceinline");
     
-    var c1 = dcos(x * 0.5);
-    var c2 = dcos(y * 0.5);
-    var c3 = dcos(z * 0.5);
+    var c1 = dcos(_x * 0.5);
+    var c2 = dcos(_y * 0.5);
+    var c3 = dcos(_z * 0.5);
     
-    var s1 = dsin(x * 0.5);
-    var s2 = dsin(y * 0.5);
-    var s3 = dsin(z * 0.5);
+    var s1 = dsin(_x * 0.5);
+    var s2 = dsin(_y * 0.5);
+    var s3 = dsin(_z * 0.5);
     
     // YXZ CW: replace s with -s in standard CCW YXZ
     q[0] = -s1 * c2 * c3 + c1 * s2 * s3;

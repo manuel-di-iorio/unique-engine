@@ -400,7 +400,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         var _obj = __queue[i];
 
         // Test the frustum intersection
-        if (_obj[$ "isMesh"] && _obj.frustumCulled) {
+        if (_obj[$ "frustumCulled"]) {
           var _boundingSphere = _obj[$ "__intersectionSphere"];
 
           if (_boundingSphere != undefined &&

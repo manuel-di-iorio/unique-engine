@@ -193,6 +193,16 @@ function EditorUiAssets(ui) constructor {
                     editorTreeviewOnModelImport(self.item);
                 })});
                 array_push(items, { separator: true });
+             } else if (treeviewItem.assetType == "Scene") {
+                // array_push(items, { label: "New Point Light", icon: sprUiPointLight, disabled: oSceneEditor.editorManager.activeScene == undefined, onClick: method({ treeview: self.treeview }, function() {
+                //     editorTreeviewOnNewAsset(undefined, "PointLight");
+                // })});
+                
+                // array_push(items, { label: "New Directional Light", icon: sprUiDirectionalLight, disabled: oSceneEditor.editorManager.activeScene == undefined, onClick: method({ treeview: self.treeview }, function() {
+                //     editorTreeviewOnNewAsset(undefined, "DirectionalLight");
+                // })});
+
+                array_push(items, { separator: true });
             }
             
             // Edit action

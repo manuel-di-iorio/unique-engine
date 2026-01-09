@@ -77,19 +77,33 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           assetId = global.UI_ASSETS_MODELS_ID++;
       break;
       
-      case "Light":
-          asset = new UeLight(); 
-          asset.__rotationEuler = euler_create();
-          assetId = global.UI_ASSETS_LIGHTS_ID++;
-      break;
+    //   case "PointLight":
+    //       asset = new UePointLight();
+    //       asset.__rotationEuler = euler_create();
+    //       assetId = global.UI_ASSETS_LIGHTS_ID++;
+          
+    //       var assetMesh = new UePointLightHelper();
+    //       assetMesh.geometry = new UePlaneGeometry(32, 32);
+    //       assetMesh.material = new UeSpriteMaterial({
+    //           map: new UeTexture(sprUiPointLight3D),
+    //       });
+    //       assetMesh.primitive = pr_trianglelist;
+    //       asset.addChild(assetMesh);
+    //   break;
       
-      case "Camera":
-          asset = new UeObject3D();
-          asset.isCamera = true;
-          asset.type = "Camera";
-          asset.__rotationEuler = euler_create();
-          assetId = global.UI_ASSETS_CAMERAS_ID++;
-      break;
+    //   case "DirectionalLight":
+    //       asset = new UeDirectionalLight();
+    //       asset.__rotationEuler = euler_create();
+    //       assetId = global.UI_ASSETS_LIGHTS_ID++;
+    //   break;
+      
+    //   case "Camera":
+    //       asset = new UeObject3D();
+    //       asset.isCamera = true;
+    //       asset.type = "Camera";
+    //       asset.__rotationEuler = euler_create();
+    //       assetId = global.UI_ASSETS_CAMERAS_ID++;
+    //   break;
       
       case "Scene":
           asset = new UeScene();
@@ -106,6 +120,8 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       case "Material": icon = sprUiMaterial; break;
       case "Mesh": icon = sprUiObject; break;
       case "Scene": icon = sprUiScene; break;
+    //   case "PointLight": icon = sprUiPointLight; break;
+    //   case "DirectionalLight": icon = sprUiDirectionalLight; break;
   }
   
   var newTreeviewItem = new UiTreeviewItem({ 
@@ -124,13 +140,56 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   
   // Determine the parent asset (only for 3D hierarchy, not folders)
   var parentAsset = undefined;
-  if (treeviewItem != undefined && treeviewItem.asset != undefined) {
+  var parentTreeviewItem = treeviewItem;
+
+  // Special case for lights: they must be children of a scene
+  /*if (assetType == "PointLight" || assetType == "DirectionalLight" || assetType == "Light") {
+      var foundSceneItem = undefined;
+      var currentItem = treeviewItem;
+      
+      // Look for the selected scene or the scene containing the selection
+      while (currentItem != undefined) {
+          if (currentItem.asset != undefined && currentItem.asset.type == "Scene") {
+              foundSceneItem = currentItem;
+              break;
+          }
+          // Move up in the treeview hierarchy
+          // UiTreeviewItem -> parent (UiTreeview.Items) -> parent (UiTreeviewItem or UiTreeview)
+          if (currentItem[$ "parent"] != undefined && currentItem.parent[$ "parent"] != undefined) {
+              currentItem = currentItem.parent.parent;
+              // Check if we reached the root treeview (which doesn't have a parent.parent)
+              if (currentItem == treeview) {
+                  currentItem = undefined;
+              }
+          } else {
+              currentItem = undefined;
+          }
+      }
+      
+      if (foundSceneItem != undefined) {
+          parentAsset = foundSceneItem.asset;
+          parentTreeviewItem = foundSceneItem;
+      } else {
+          // If no scene is selected, try to find the first scene in the project
+          var allAssets = assetManager.assets;
+          for (var i = 0; i < array_length(allAssets); i++) {
+              if (allAssets[i].type == "Scene") {
+                  parentAsset = allAssets[i];
+                  parentTreeviewItem = parentAsset.__treeviewItem;
+                  break;
+              }
+          }
+      }
+  } else */if (treeviewItem != undefined && treeviewItem.asset != undefined) {
       // Only set parent if it's NOT a folder (folders are UI organization only)
       if (treeviewItem.asset[$ "type"] != "Folder") {
           parentAsset = treeviewItem.asset;
       }
-      
-      treeviewItem.addChild(newTreeviewItem);
+  }
+
+  // Add to treeview
+  if (parentTreeviewItem != undefined) {
+      parentTreeviewItem.addChild(newTreeviewItem);
   } else {
       // Add to root
       treeview.Items.add(newTreeviewItem);
@@ -139,6 +198,22 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   // Add asset to asset manager AFTER treeview parent is set (so __treeviewItem.parent is available)
   var typeKey = assetType;
   assetManager.addAsset(typeKey, asset, parentAsset);
+
+  // Set visual representation for lights in editor
+//   if (assetType == "PointLight" || assetType == "DirectionalLight") {
+//       var icon = (assetType == "DirectionalLight") ? sprUiDirectionalLight3D : sprUiPointLight3D;
+//       asset.geometry = new UePlaneGeometry(32, 32);
+//       asset.material = new UeSpriteMaterial({
+//           map: new UeTexture(icon),
+//           color: make_color_rgb(asset.color[0] * 255, asset.color[1] * 255, asset.color[2] * 255),
+//       });
+//       asset.isSprite = true;
+//       asset.geometry.computeBoundingBox();
+//       asset.geometry.computeBoundingSphere();
+//       asset.primitive = pr_trianglelist;
+
+//       asset.render = UeMesh.render;
+//   }
   
   // Select the new item
   treeview.__onItemSelected(newTreeviewItem, true);

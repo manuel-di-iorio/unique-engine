@@ -1,78 +1,87 @@
 {
-    "geometry": {
-        "uuid": "d2638bf3-55ab-4cee-ad08-4c6505d750ac",
-        "boundingBox": [
-            -31.262475967407227,
-            0.0,
-            -62.011589050292969,
-            31.262475967407227,
-            112.16603851318359,
-            45.072364807128906
-        ],
-        "name": null,
-        "type": "Geometry",
-        "boundingSphere": [
-            0.0,
-            56.083019256591797,
-            -8.4696121215820312,
-            83.602576192259619
-        ],
-        "format": {
-            "uuid": "e8e5b18a-ff27-4f77-b92a-82a3f698d250",
-            "name": "",
-            "type": "VertexFormat",
-            "attrs": [
-                {
-                    "kind": 0
-                },
-                {
-                    "kind": 1
-                },
-                {
-                    "kind": 2
-                },
-                {
-                    "kind": 3
-                }
-            ]
+  "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
+  "castShadow": false,
+  "children": [
+  ],
+  "frustumCulled": true,
+  "geometry": {
+    "boundingBox": [
+      -31.26,
+      0,
+      -62.01,
+      31.26,
+      112.17,
+      45.07
+    ],
+    "boundingSphere": [
+      0,
+      56.08,
+      -8.47,
+      83.60
+    ],
+    "color": null,
+    "format": {
+      "attrs": [
+        {
+          "kind": 0
+        },
+        {
+          "kind": 1
+        },
+        {
+          "kind": 2
+        },
+        {
+          "kind": 3
         }
+      ],
+      "name": "",
+      "type": "VertexFormat",
+      "uuid": "e8e5b18a-ff27-4f77-b92a-82a3f698d250"
     },
-    "visible": true,
-    "frustumCulled": true,
-    "name": "oReindeer",
-    "type": "Mesh",
-    "parent": null,
-    "uuid": "66159d48-ba1f-412f-9fcb-a7ec849ee37e",
-    "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
-    "renderOrder": 0.0,
-    "matrixAutoUpdate": false,
-    "layers": 1.0,
-    "children": [],
-    "material": "38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
-    "position": [
-        0.0,
-        0.0,
-        0.0
-    ],
-    "rotation": [
-        0.70710678118654757,
-        0.0,
-        0.0,
-        0.70710678118654757
-    ],
-    "scale": [
-        1.0,
-        1.0,
-        1.0
-    ],
-    "up": [
-        0.0,
-        0.0,
-        -1.0
-    ],
-    "rotationEuler": [
-        90.0,
-        0.0,
-        0.0
-    ]
+    "index": null,
+    "name": null,
+    "normal": null,
+    "position": null,
+    "tangent": null,
+    "type": "Geometry",
+    "uuid": "d2638bf3-55ab-4cee-ad08-4c6505d750ac",
+    "uv": null
+  },
+  "layers": 1,
+  "material": "38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
+  "matrixAutoUpdate": false,
+  "name": "oReindeer",
+  "parent": null,
+  "position": [
+    0,
+    0,
+    0
+  ],
+  "receiveShadow": false,
+  "renderOrder": 0,
+  "rotation": [
+    0.71,
+    0,
+    0,
+    0.71
+  ],
+  "rotationEuler": [
+    -90,
+    0,
+    0
+  ],
+  "scale": [
+    1,
+    1,
+    1
+  ],
+  "type": "Mesh",
+  "up": [
+    0,
+    0,
+    -1
+  ],
+  "uuid": "66159d48-ba1f-412f-9fcb-a7ec849ee37e",
+  "visible": true
 }

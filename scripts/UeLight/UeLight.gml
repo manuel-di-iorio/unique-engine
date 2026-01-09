@@ -1,7 +1,7 @@
 function UeLight(data = {}): UeObject3D(data) constructor {
     isLight = true;
     type = "Light";
-    lightType = "Light"
+    lightType = "Light";
     intensity = data[$ "intensity"] ?? 1;
     enabled = data[$ "enabled"] ?? true;
     range = undefined;

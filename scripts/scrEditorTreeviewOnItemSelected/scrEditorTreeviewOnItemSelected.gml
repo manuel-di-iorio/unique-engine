@@ -4,6 +4,7 @@ function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
     switch (treeviewItem.asset.type) {
         case "ModelInstance":                
         case "Mesh":
+        // case "Light":
             var currentAsset = treeviewItem.asset;
             // Find the root for rendering (Scene or top-level Mesh)
             var rootAsset = currentAsset;

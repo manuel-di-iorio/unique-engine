@@ -1,43 +1,48 @@
 {
-  "__parentUI": "59a07d4a-a762-4269-b750-1c7010ee5f4e",
-  "castShadow": false,
+  "__parentUI": "855426d7-7661-4e99-9915-d0980137709c",
+  "castShadow": true,
   "children": [
   ],
   "frustumCulled": true,
   "geometry": {
     "boundingBox": [
-      -50.49,
+      -59.50,
       0,
-      -3.18,
-      50.49,
-      31.62,
-      3.18
+      -59.50,
+      59.50,
+      192.05,
+      59.50
     ],
     "boundingSphere": [
       0,
-      15.81,
+      96.02,
       0,
-      53.00
+      127.67
     ],
     "color": null,
     "format": {
       "attrs": [
         {
-          "kind": 0
+          "kind": "@i64@0$i64$"
         },
         {
-          "kind": 1
+          "kind": "@i64@1$i64$"
         },
         {
-          "kind": 2
+          "kind": "@i64@2$i64$"
         },
         {
-          "kind": 3
+          "kind": "@i64@4$i64$",
+          "name": "tangent",
+          "type": 4
+        },
+        {
+          "kind": "@i64@3$i64$"
         }
       ],
       "name": "",
       "type": "VertexFormat",
-      "uuid": "e8e5b18a-ff27-4f77-b92a-82a3f698d250"
+      "uuid": "aff274f5-1f4f-43ad-9313-4ad13c758d45"
     },
     "index": null,
     "name": null,
@@ -45,20 +50,20 @@
     "position": null,
     "tangent": null,
     "type": "Geometry",
-    "uuid": "a8459353-f7d0-40a5-a5cd-8f61118da8cd",
+    "uuid": "2de4e5f1-5875-481e-8f4c-588ebc1f75c4",
     "uv": null
   },
   "layers": 1,
   "material": "38fc4d25-b5be-47c0-9f53-2d3f62db5e03",
   "matrixAutoUpdate": false,
-  "name": "oLightsColored",
+  "name": "oTree",
   "parent": null,
   "position": [
     0,
     0,
     0
   ],
-  "receiveShadow": false,
+  "receiveShadow": true,
   "renderOrder": 0,
   "rotation": [
     0.71,
@@ -82,6 +87,6 @@
     0,
     -1
   ],
-  "uuid": "87255f18-afaf-46aa-99ce-a53c453a7466",
+  "uuid": "96964483-275e-4c06-a50a-ca66ed092c75",
   "visible": true
 }

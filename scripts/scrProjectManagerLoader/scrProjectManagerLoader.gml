@@ -180,8 +180,8 @@ function ProjectLoader() constructor {
           if (c[$ "textures"] != undefined) global.UI_ASSETS_TEXTURES_ID = c.textures;
           if (c[$ "materials"] != undefined) global.UI_ASSETS_MATERIALS_ID = c.materials;
           if (c[$ "models"] != undefined) global.UI_ASSETS_MODELS_ID = c.models;
-          if (c[$ "lights"] != undefined) global.UI_ASSETS_LIGHTS_ID = c.lights;
-          if (c[$ "cameras"] != undefined) global.UI_ASSETS_CAMERAS_ID = c.cameras;
+        //   if (c[$ "lights"] != undefined) global.UI_ASSETS_LIGHTS_ID = c.lights;
+        //   if (c[$ "cameras"] != undefined) global.UI_ASSETS_CAMERAS_ID = c.cameras;
           if (c[$ "scenes"] != undefined) global.UI_ASSETS_SCENES_ID = c.scenes;
           if (c[$ "instances"] != undefined) global.UI_ASSETS_INSTANCE_ID = c.instances;
           if (c[$ "folders"] != undefined) global.UI_ASSETS_FOLDERS_ID = c.folders;
@@ -241,25 +241,6 @@ function ProjectLoader() constructor {
         objectsByUUID[$ mesh.uuid] = mesh;
         if (struct_exists(mesh, "__metadata") && mesh.__metadata != undefined) {
             mesh.fromJSON(mesh.__metadata);
-        }
-    }
-    
-    var lights = assetManager.getAssetsByType("Light");
-    for (var i = 0, il = array_length(lights); i < il; i++) {
-        var light = lights[i];
-        objectsByUUID[$ light.uuid] = light;
-        if (struct_exists(light, "__metadata") && light.__metadata != undefined) {
-            light.fromJSON(light.__metadata);
-            delete light.__metadata;
-        }
-    }
-    
-    var cameras = assetManager.getAssetsByType("Camera");
-    for (var i = 0, il = array_length(cameras); i < il; i++) {
-        var camera = cameras[i];
-        objectsByUUID[$ camera.uuid] = camera;
-        if (struct_exists(camera, "__metadata") && camera.__metadata != undefined) {
-            delete camera.__metadata;
         }
     }
     
@@ -323,8 +304,8 @@ function ProjectLoader() constructor {
           case "Material": return "Materials";
           case "Mesh": return "Objects";
           case "Scene": return "Scenes";
-          case "Light": return "Objects";
-          case "Camera": return "Objects";
+        //   case "Light": return "Objects";
+        //   case "Camera": return "Objects";
       }
       return "Objects";
   };
@@ -380,7 +361,15 @@ function ProjectLoader() constructor {
       case "Material": asset = new UeMeshStandardMaterial(); break;
       case "Mesh": asset = new UeStaticMesh(); break;
       case "Scene": asset = new UeScene(); break;
-      case "Light": asset = new UeLight(); break;
+    //   case "Light": 
+    //     var lightType = node[$ "lightType"] ?? "PointLight";
+    //     switch (lightType) {
+    //         case "PointLight": asset = new UePointLight(); break;
+    //         case "DirectionalLight": asset = new UeDirectionalLight(); break;
+    //         case "AmbientLight": asset = new UeAmbientLight(); break;
+    //         default: asset = new UeLight(); break;
+    //     }
+    //     break;
       case "Camera": asset = new UeObject3D(); asset.isCamera = true; asset.type = "Camera"; break;
     }
 

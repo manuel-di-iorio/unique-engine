@@ -146,8 +146,9 @@ function __editorTreeviewOnDuplicateAsset__createUiRecursive(treeview, asset, pa
     else if (type == "Material") icon = sprUiMaterial;
     else if (type == "Texture") icon = sprUiTexture;
     else if (type == "Scene") icon = sprUiScene;
-    else if (type == "Light") icon = sprUiLight;
-    else if (type == "Camera") icon = sprUiCamera;
+    // else if (type == "PointLight") icon = sprUiPointLight;
+    // else if (type == "DirectionalLight") icon = sprUiDirectionalLight;
+    // else if (type == "Camera") icon = sprUiCamera;
     
     var newItem = new UiTreeviewItem({ name: "UiTreeview.Item" }, {
       treeview: treeview,

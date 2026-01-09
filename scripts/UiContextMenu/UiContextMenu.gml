@@ -36,7 +36,7 @@ function UiContextMenu(x, y, items) constructor {
             paddingVertical: 6,
             left: _x,
             top: _y,
-            minWidth: 160
+            minWidth: 210
         });
         
         with (self.Menu) {

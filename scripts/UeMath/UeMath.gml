@@ -12,7 +12,7 @@ function box3_set_from_object(b, object) {
         // Assicurati che la geometria abbia il bounding box
         if (geom[$ "boundingBox"] == undefined) {
             geom[$ "boundingBox"] = box3_create();
-            box3_set_from_array(geom[$ "boundingBox"], geom[$ "vertices"]);
+            box3_set_from_array(geom[$ "boundingBox"], geom[$ "position"] ?? []);
         }
         var localBox = box3_clone(geom[$ "boundingBox"]);
 
@@ -25,14 +25,53 @@ function box3_set_from_object(b, object) {
 
     // Richiama la stessa funzione sui figli
     var children = object[$ "children"];
-    var n = array_length(children);
-    for (var i = 0; i < n; i++) {
-      var childBox = box3_create();
-      box3_set_from_object(childBox, children[i]);
-      box3_union(b, childBox);
+    if (children != undefined) {
+        var n = array_length(children);
+        for (var i = 0; i < n; i++) {
+          var childBox = box3_create();
+          box3_set_from_object(childBox, children[i]);
+          box3_union(b, childBox);
+        }
     }
 
     return b;
+}
+
+function sphere_set_from_object(s, object) {
+    gml_pragma("forceinline");
+    sphere_make_empty(s);
+
+    // Se l'oggetto ha geometria
+    var geom = object[$ "geometry"];
+    if (geom != undefined) {
+        // Assicurati che la geometria abbia il bounding sphere
+        if (geom[$ "boundingSphere"] == undefined) {
+            geom.computeBoundingSphere();
+        }
+        
+        if (geom[$ "boundingSphere"] != undefined) {
+            var localSphere = sphere_clone(geom.boundingSphere);
+
+            // Trasforma nel world space
+            var m = object[$ "matrixWorld"];
+            if (m != undefined) sphere_apply_matrix4(localSphere, m);
+
+            sphere_union(s, localSphere);
+        }
+    }
+
+    // Richiama la stessa funzione sui figli
+    var children = object[$ "children"];
+    if (children != undefined) {
+        var n = array_length(children);
+        for (var i = 0; i < n; i++) {
+          var childSphere = sphere_create([0,0,0], -1);
+          sphere_set_from_object(childSphere, children[i]);
+          sphere_union(s, childSphere);
+        }
+    }
+
+    return s;
 }
 
 // ============================================================================
