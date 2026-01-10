@@ -1,7 +1,7 @@
 orbit.update();
 
 // Point light movement
-var moveSpeed = 1;
+var moveSpeed = 2;
 
 // Get camera direction (forward) projected on XY plane
 var camPos = camera.position;
@@ -37,20 +37,11 @@ if (len > 0) {
 if (keyboard_check(ord("U"))) pointLight.position[VEC3.z] += moveSpeed;
 if (keyboard_check(ord("O"))) pointLight.position[VEC3.z] -= moveSpeed;
 
-if (keyboard_check_pressed(ord("P"))) {
-    global.UE_DEBUG_POINT_SHADOW = (global[$ "UE_DEBUG_POINT_SHADOW"] ?? 0) > 0.5 ? 0 : 1;
-}
-
-// Update shadow camera helpers
-// for (var i = 0; i < array_length(shadowCameraHelpers); i++) {
-//     shadowCameraHelpers[i].update();
-// }
-
 orbit.update();
 pointLightHelper.update();
 
 // Directional
-// dirLightAngle = (dirLightAngle + .5) % 360;
-// dirLight.position[VEC3.x] = lengthdir_x(1000, dirLightAngle);
-// dirLight.position[VEC3.y] = lengthdir_y(1000, dirLightAngle);
-// dirLightHelper.update();
+ dirLightAngle = (dirLightAngle + .5) % 360;
+ dirLight.position[VEC3.x] = lengthdir_x(1000, dirLightAngle);
+ dirLight.position[VEC3.y] = lengthdir_y(1000, dirLightAngle);
+ dirLightHelper.update();

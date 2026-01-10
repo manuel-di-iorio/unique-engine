@@ -64,8 +64,6 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     hasDisplacementMap: "u_ueHasDisplacementMap"
 };
 
-global.UE_DEBUG_POINT_SHADOW = 0;
-
 global.UE_DEFAULT_MATERIAL = new UeMeshStandardMaterial();
 global.UE_FALLBACK_MATERIAL = new UeMeshBasicMaterial({ shader: sh_ue_fallback });
 global.UE_DEFAULT_MATERIAL_WIREFRAME = new UeMeshBasicMaterial();

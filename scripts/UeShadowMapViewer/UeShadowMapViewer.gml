@@ -26,7 +26,7 @@ function UeShadowMapViewer(light, data = {}) constructor {
         if (self.light[$ "isPointLight"]) {
             var faceW = (self.width / 3);
             var faceH = (self.height / 2);
-            var labels = ["+X", "-X", "+Y", "-Y", "+Z", "-Z"];
+            var labels = ["-Z", "+Z", "-Y", "+Y", "-X", "+X"];
             
             draw_set_halign(fa_center);
             draw_set_valign(fa_middle);

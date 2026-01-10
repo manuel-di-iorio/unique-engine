@@ -80,7 +80,7 @@ var groundMat = new UeMeshStandardMaterial({
   roughness: 0.8,
   metalness: 0.1
 });
-ground = new UeStaticMesh(new UePlaneGeometry(2500, 2500), groundMat, { receiveShadow: true });
+ground = new UeStaticMesh(new UePlaneGeometry(2500, 2500), groundMat, { receiveShadow: true, castShadow: true });
 scene.add(ground);
 
 var numCubes = 40;
