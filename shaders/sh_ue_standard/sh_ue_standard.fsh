@@ -120,6 +120,7 @@ uniform float u_uePointShadowFar;
 uniform float u_uePointShadowNear;
 uniform float u_debugPointShadow; // 0: normal, 1: color-code faces
 uniform vec3  u_uePointShadowPos;
+uniform mat4  u_uePointShadowMatrix;
 uniform float u_ueToneMapping;
 uniform float u_ueToneMappingExposure;
 uniform float u_ueToneMapped;
@@ -212,86 +213,31 @@ float calculateDirShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
 }
 
 float calculatePointShadow(vec3 worldPos, vec3 N) {
-    vec3 dir = worldPos - u_uePointShadowPos;
-    float maxAxis = max(abs(dir.x), max(abs(dir.y), abs(dir.z)));
+    // Trasformiamo il punto nel mondo nello spazio della luce (Light Space)
+    vec4 lightSpacePos = u_uePointShadowMatrix * vec4(worldPos, 1.0);
     
-    vec2 uv;
-    float faceIndex;
+    // Proiezione prospettica (NDC)
+    vec3 p = lightSpacePos.xyz / lightSpacePos.w;
     
-    // Determine the major axis (which face we are looking at)
-    // Matches GML targets: 0:+Z, 1:-Z, 2:+Y, 3:-Y, 4:+X, 5:-X
-    if (abs(dir.z) >= abs(dir.x) && abs(dir.z) >= abs(dir.y)) {
-        // ±Z: Faces 0, 1
-        if (dir.z > 0.0) {
-            faceIndex = 0.0;
-            uv = vec2(-dir.x, dir.y);
-        } else {
-            faceIndex = 1.0;
-            uv = vec2(dir.x, dir.y);
-        }
-    }
-    else if (abs(dir.y) >= abs(dir.x) && abs(dir.y) >= abs(dir.z)) {
-        // ±Y: Faces 2, 3
-        if (dir.y > 0.0) {
-            faceIndex = 2.0;
-            uv = vec2(-dir.x, -dir.z);
-        } else {
-            faceIndex = 3.0;
-            uv = vec2(-dir.x, dir.z);
-        }
-    }
-    else {
-        // ±X: Faces 4, 5
-        if (dir.x > 0.0) {
-            faceIndex = 4.0;
-            uv = vec2(-dir.y, dir.z);
-        } else {
-            faceIndex = 5.0;
-            uv = vec2(dir.y, dir.z);
-        }
-    }
+    // Rimappiamo da [-1, 1] a [0, 1] per le coordinate UV
+    p = p * 0.5 + 0.5;
     
-    // Normalize UV to [0, 1]
-    uv = (uv / maxAxis + 1.0) * 0.5;
+    // Se siamo fuori dal frustum della camera shadow, non c'è ombra (per ora gestiamo solo questa faccia)
+    if (p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0 || p.z > 1.0) return 0.0;
     
-    // Atlas offset (3x2 grid)
-    // In GLSL texture coords, (0,0) is bottom-left.
-    // Faces 0,1,2 (top row in GM surface) -> v in [0.5, 1.0] -> faceY = 1.0
-    // Faces 3,4,5 (bottom row in GM surface) -> v in [0.0, 0.5] -> faceY = 0.0
-    float faceX = mod(faceIndex, 3.0);
-    float faceY = 1.0 - floor(faceIndex / 3.0);
+    // Inversione Y per le superfici di GameMaker (già gestita dalla matrice o necessaria qui)
+    // Di solito p.y in GM va invertito se la matrice è standard OpenGL.
+    // Per le Directional Light non è necessario, quindi proviamo senza.
+    // p.y = 1.0 - p.y;
     
-    // individual face UV.y inversion
-    // Since GameMaker surfaces are top-down, but GLSL textures are bottom-up:
-    vec2 mappedUV = vec2(uv.x, 1.0 - uv.y);
-     
-    // Linear depth reconstruction
-    float f = u_uePointShadowFar;
-    float n = u_uePointShadowNear;
-    float dist = length(dir);
-    float currentDepth = (dist - n) / (f - n);
+    // Profondità lineare calcolata come distanza dalla luce (coerente con sh_ue_point_shadow)
+    float currentDepth = (distance(worldPos, u_uePointShadowPos) - u_uePointShadowNear) / (u_uePointShadowFar - u_uePointShadowNear);
     
-    // Variable bias based on angle
-    float bias = max(0.002 * (1.0 - dot(N, normalize(-dir))), 0.0005);
-     
-     if (u_uePointShadowQuality > 0.5) {
-        float shadow = 0.0;
-        vec2 faceTexelSize = u_uePointShadowInvTexelSize * vec2(3.0, 2.0);
-        
-        for (float x = -1.0; x <= 1.0; x += 2.0) {
-            for (float y = -1.0; y <= 1.0; y += 2.0) {
-                vec2 pcfUV = mappedUV + vec2(x, y) * faceTexelSize * 0.5;
-                pcfUV = clamp(pcfUV, 0.002, 0.998); 
-                vec2 atlasUV = (pcfUV + vec2(faceX, faceY)) / vec2(3.0, 2.0);
-                shadow += (currentDepth - bias > texture2D(s_pointShadowMap, atlasUV).r) ? 1.0 : 0.0;
-            }
-        }
-        return shadow / 4.0;
-    } else {
-        mappedUV = clamp(mappedUV, 0.002, 0.998);
-        vec2 atlasUV = (mappedUV + vec2(faceX, faceY)) / vec2(3.0, 2.0);
-        return (currentDepth - bias > texture2D(s_pointShadowMap, atlasUV).r) ? 1.0 : 0.0;
-    }
+    // Campionamento della shadow map
+    float shadowDepth = texture2D(s_pointShadowMap, p.xy).r;
+    
+    // Bias minimo per evitare shadow acne
+    return (currentDepth - 0.001 > shadowDepth) ? 1.0 : 0.0;
 }
 
 // ===== PBR Light =====
@@ -456,13 +402,9 @@ void main() {
             // DEBUG: Color code faces
             if (u_debugPointShadow > 0.5) {
                 vec3 dir = vWorldPosition - u_uePointShadowPos;
-                float maxAxis = max(abs(dir.x), max(abs(dir.y), abs(dir.z)));
-                if (maxAxis == abs(dir.x)) {
-                    Lo += (dir.x > 0.0) ? vec3(0.5, 0, 0) : vec3(0.2, 0, 0);
-                } else if (maxAxis == abs(dir.y)) {
-                    Lo += (dir.y > 0.0) ? vec3(0, 0.5, 0) : vec3(0, 0.2, 0);
-                } else {
-                    Lo += (dir.z > 0.0) ? vec3(0, 0, 0.5) : vec3(0, 0, 0.2);
+                // Mostra solo la faccia X+ (Red) dato che è l'unica attiva
+                if (dir.x > 0.0 && abs(dir.x) >= max(abs(dir.y), abs(dir.z))) {
+                    Lo += vec3(0.5, 0, 0); 
                 }
             }
         }

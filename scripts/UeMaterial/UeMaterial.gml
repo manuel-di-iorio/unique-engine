@@ -129,6 +129,7 @@ function UeMaterial(data = {}) constructor {
    __uniformPointShadowPosLoc = shader_get_uniform(shader, cfg.pointShadowPos);
    __uniformPointShadowTexelSizeLoc = shader_get_uniform(shader, cfg.pointShadowTexelSize);
    __uniformPointShadowQualityLoc = shader_get_uniform(shader, cfg.pointShadowQuality);
+   __uniformPointShadowMatrixLoc = shader_get_uniform(shader, "u_uePointShadowMatrix");
    __uniformDebugPointShadowLoc = shader_get_uniform(shader, "u_debugPointShadow");
    
    // Cache tone mapping uniforms
@@ -333,6 +334,14 @@ function UeMaterial(data = {}) constructor {
     var worldPos = global.UE_VEC3_TEMP1;
     pointShadowLight.getWorldPosition(worldPos);
     shader_set_uniform_f_array(__uniformPointShadowPosLoc, worldPos);
+    
+    // Set point shadow matrix (View * Projection)
+    if (__uniformPointShadowMatrixLoc != -1) {
+        var cam = pointShadowLight.shadow.cameras[0];
+        // Calculate LightSpaceMatrix = Projection * View
+        matrix_multiply(cam.matrixWorldInverse, cam.projectionMatrix, global.UE_MAT4_TEMP0);
+        shader_set_uniform_f_array(__uniformPointShadowMatrixLoc, global.UE_MAT4_TEMP0);
+    }
     
     // Debug point shadow
     if (__uniformDebugPointShadowLoc != undefined) {

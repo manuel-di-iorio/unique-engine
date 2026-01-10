@@ -2,7 +2,7 @@
  * @description A light that gets emitted from a single point in all directions.
  * @param {Real|Array} [_color=c_white] The light's color.
  * @param {Real} [_intensity=1] The light's strength/intensity.
- * @param {Real} [_distance=0] Maximum range of the light. 0 means no limit.
+ * @param {Real} [_distance=0] Maximum range of the light. 0 is an alias for 1000 (big "far" param).
  * @param {Real} [_decay=2] The amount the light dims along the distance of the light.
  * @param {Struct} [data={}] Additional configuration data.
  */

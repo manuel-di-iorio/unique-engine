@@ -19,7 +19,7 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
     }
     
     // Single shadow map (atlas) - 3x2 grid of faces
-    self.map = new UeShadowMap(sh_ue_point_shadow, mapSize.width * 3, mapSize.height * 2);
+    self.map = new UeShadowMap(sh_ue_point_shadow, mapSize.width, mapSize.height);
     
     // Temporary surface for rendering individual faces
     self.__faceSurface = -1;
@@ -29,18 +29,19 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
     self.__uNearLoc = shader_get_uniform(sh_ue_point_shadow, "u_near");
     self.__uFarLoc = shader_get_uniform(sh_ue_point_shadow, "u_far");
     
-    // Face directions (LookAt targets relative to light position)
+    // Face directions
+    // Ordered as: -Z, Z, -Y, Y, -X, X (User requested order)
     self.__targets = [
-        [0, 0, 1], [0, 0, -1], // 0, 1
-        [0, 1, 0], [0, -1, 0], // 2, 3
-        [1, 0, 0], [-1, 0, 0]  // 4, 5
+        [0, 0, -1], [0, 0, 1],   // 0, 1 (-Z, Z)
+        [0, -1, 0], [0, 1, 0],   // 2, 3 (-Y, Y)
+        [-1, 0, 0], [1, 0, 0]    // 4, 5 (-X, X)
     ];
     
-    // Up vectors for each face
+    // Up vectors for each face (matching world Up = [0, 0, -1])
     self.__ups = [
-        [0, 1, 0], [0, -1, 0], // Up vectors for the new Z-looking cameras (0,1)
-        [0, 0, 1], [0, 0, 1],  // Up vectors for Y cameras
-        [0, 0, 1], [0, 0, 1]   // Up vectors for the new X-looking cameras (4,5)
+        [0, 1, 0],  [0, -1, 0],  // For Z faces, Up is Y+ / Y-
+        [0, 0, -1], [0, 0, -1],  // For Y faces, Up is Z-
+        [0, 0, -1], [0, 0, -1]   // For X faces, Up is Z-
     ];
     
     /**
@@ -68,7 +69,7 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
     var lp = global.UE_VEC3_TEMP1;
     light.getWorldPosition(lp);
     
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 1; i++) {
           var cam = self.cameras[i];
           var targetRel = self.__targets[i];
           var upRel = self.__ups[i];
@@ -93,7 +94,7 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
     }
     
     /**
-     * Renders the 6 faces of the shadow map into the atlas.
+     * Renders the faces of the shadow map into the atlas.
      */
     function render(light, scene, camera, __queue, __shadowIdx) {
         gml_pragma("forceinline");
@@ -108,13 +109,10 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
         
         // Prepare the atlas surface
         surface_set_target(self.map.surface);
-        // NOTE: draw_clear(c_white) clears to 1.0 in R channel (max depth).
-        // If alpha test is added, clear should be maintained as 1.0 (far).
         draw_clear(c_white);
         surface_reset_target();
 
-        // Render each face into the temporary surface and copy it to the atlas
-        for (var i = 0; i < 6; i++) {
+        for (var i = 0; i < 1; i++) {
             var cam = self.cameras[i];
             
             // 1. Render face to temporary surface
@@ -134,13 +132,16 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
             }
             
             // Apply camera for this face
+            cam.updateProjectionMatrix(); // Assicuriamoci che la proiezione sia aggiornata
             camera_apply(cam.camera);
             
             // Render objects
             var _frustum = cam.getFrustum();
             for (var j = 0; j < __shadowIdx; j++) {
                 var object = __queue[j];
-                if (!object.castShadow) continue;
+                
+                // Se non proietta ombre o non ha una mesh, saltiamo
+                if (!object.castShadow || object.geometry == undefined) continue;
                 
                 // Frustum culling
                 if (object.frustumCulled) {
@@ -156,28 +157,16 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
             surface_reset_target(); 
             
             // 2. Copy the face to the atlas
-            // Calculate viewport in atlas (3x2 grid)
-            // Row 0 (Top): 0, 1, 2
-            // Row 1 (Bottom): 3, 4, 5
-            var faceX = i % 3;
-            var faceY = floor(i / 3);
-            
-            var vx = faceX * mapSize.width;
-            var vy = faceY * mapSize.height;
-            
             surface_set_target(self.map.surface);
-            
-            // Reset matrices for 2D top-left drawing
-            var totalW = mapSize.width * 3;
-            var totalH = mapSize.height * 2;
-            matrix_set(matrix_view, matrix_build_lookat(totalW/2, totalH/2, 1, totalW/2, totalH/2, 0, 0, 1, 0));
-            matrix_set(matrix_projection, matrix_build_projection_ortho(totalW, totalH, -1, 1));
             
             shader_reset(); 
             var _filter = gpu_get_tex_filter();
             gpu_set_tex_filter(false);
             gpu_set_blendenable(false);
-            draw_surface(self.__faceSurface, vx, vy);
+            
+            // Draw to full atlas size to use the entire surface for a single camera
+            draw_surface_stretched(self.__faceSurface, 0, 0, self.map.width, self.map.height);
+            
             gpu_set_blendenable(true);
             gpu_set_tex_filter(_filter);
             
