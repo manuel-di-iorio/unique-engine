@@ -10,8 +10,10 @@ varying vec4 vWorldTangent;
 varying vec2 vTexcoord;
 varying vec4 vColour;
 varying vec4 vDirLightSpacePos;
+varying vec4 vSpotLightSpacePos;
 
 uniform mat4 u_ueDirShadowMatrix;
+uniform mat4 u_ueSpotShadowMatrix;
 
 // Displacement
 uniform sampler2D s_displacementMap;
@@ -22,7 +24,7 @@ uniform float u_ueHasDisplacementMap;
 void main() {
     vec3 pos = in_Position;
 
-    // Vertex displacement (safe: default map = black)
+    // Vertex displacement
     if (u_ueHasDisplacementMap > 0.5 && abs(u_ueDisplacementScale) > 0.0001) {
         float h = texture2D(s_displacementMap, in_TextureCoord0).r;
         pos += in_Normal * (h * u_ueDisplacementScale + u_ueDisplacementBias);
@@ -40,6 +42,11 @@ void main() {
     vWorldTangent.w   = in_TextureCoord1.w;
 
     vDirLightSpacePos = u_ueDirShadowMatrix * worldPos;
+    
+    // Apply a small normal bias to the spot light shadow position to prevent acne
+    vec4 shadowWorldPos = worldPos;
+    shadowWorldPos.xyz += vWorldNormal * 0.15;
+    vSpotLightSpacePos = u_ueSpotShadowMatrix * shadowWorldPos;
 
     gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(pos, 1.0);
 }

@@ -243,6 +243,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         case "PointLight":
           light.shadow.render(light, scene, camera, __queue, __shadowIdx);
           break;
+
+        case "SpotLight":
+          light.shadow.render(light, scene, camera, __queue, __shadowIdx);
+          break;
       }
     }
 
@@ -267,9 +271,13 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
     var directionalState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL];
     var pointLightState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT];
+    var spotLightState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT];
+    var hemiLightState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT];
 
     var dIdx = 0;
     var pIdx = 0;
+    var sIdx = 0;
+    var hIdx = 0;
 
     for (var i = 0; i < __lightIdx; i++) {
       var l = lights[i];
@@ -290,11 +298,21 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         case "PointLight":
           pointLightState[pIdx++] = l;
           break;
+
+        case "SpotLight":
+          spotLightState[sIdx++] = l;
+          break;
+
+        case "HemisphereLight":
+          hemiLightState[hIdx++] = l;
+          break;
       }
     }
 
     global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = dIdx;
     global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = pIdx;
+    global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT_COUNT] = sIdx;
+    global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT_COUNT] = hIdx;
 
     // Clamp ambient light to prevent over-exposure
     ambientState[0] = clamp(ambientState[0], 0, 1);
@@ -376,6 +394,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     __buildLightState();
 
     // Set camera position and tone mapping state for materials
+    global.UE_RENDERER_ACTIVE_CAMERA = camera;
     global.UE_RENDERER_CAMERA_POSITION = camera.position;
     global.UE_RENDERER_TONE_MAPPING = self.toneMapping;
     global.UE_RENDERER_TONE_MAPPING_EXPOSURE = self.toneMappingExposure;

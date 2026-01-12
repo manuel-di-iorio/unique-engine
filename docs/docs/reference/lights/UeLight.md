@@ -98,6 +98,49 @@ Emits light in all directions from a single point, attenuated by distance. Suppo
 | Property | Type | Default | Description |
 | --- | --- | --- | --- |
 | `distance` | `number` | `0` | Maximum distance the light affects. |
+
+🔦 **UeSpotLight**
+
+```js
+new UeSpotLight(color = c_white, intensity = 1, distance = 500, angle = pi / 3, penumbra = 0, decay = 2, data = {})
+```
+Emits light from a single point in one direction, along a cone that increases in size as it gets further from the light.
+
+**Constructor Parameters**
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `color` | `c_white` | Light color |
+| `intensity` | `number` | `1` | The light's strength/intensity (candela) |
+| `distance` | `number` | `500` | Maximum range of the light. 0 means no limit. |
+| `angle` | `number` | `pi / 3` | Maximum extent of the spotlight, in radians, from its direction. |
+| `penumbra` | `number` | `0` | Percent of the spotlight cone that is attenuated due to penumbra. (0.0 to 1.0). |
+| `decay` | `number` | `2` | The amount the light dims along the distance of the light. |
+| `data` | `struct` | `{}` | Additional data (e.g. `shadowNear`, `shadowFar`) |
+
+**Properties**
+
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `UeObject3D`| Auto-created | Object3D that the light points at (default: origin) |
+| `angle` | `number` | `pi / 3` | Maximum extent of the spotlight. |
+| `penumbra` | `number` | `0` | Percent of the spotlight cone that is attenuated. |
+| `shadow` | `UeSpotLightShadow` | Auto-created | Shadow configuration and camera |
+
+**Methods:**
+
+- `getDirection()` - Returns normalized direction vector from position to target
+- `getPower()` - Returns the light's power (intensity * pi)
+- `setPower(power)` - Sets the light's intensity from power value
+
+**Example:**
+```js
+const spotlight = new UeSpotLight(c_white, 2, 600, degtorad(45), 0.2);
+spotlight.position.set(0, 100, 0);
+spotlight.target.position.set(0, 0, 0);
+spotlight.castShadow = true;
+scene.add(spotlight);
+```
 | `decay` | `number` | `2` | The amount the light dims along the distance. |
 | `power` | `number` | | The light's power (luminous power in lumens). |
 | `isPointLight`| `boolean`| `true` | Read-only flag for type testing. |

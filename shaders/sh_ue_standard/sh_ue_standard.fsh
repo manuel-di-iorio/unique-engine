@@ -1,4 +1,4 @@
-precision mediump float;
+precision highp float;
 
 varying vec3 vWorldPosition;
 varying vec3 vWorldNormal;
@@ -6,6 +6,7 @@ varying vec4 vWorldTangent;
 varying vec2 vTexcoord;
 varying vec4 vColour;
 varying vec4 vDirLightSpacePos;
+varying vec4 vSpotLightSpacePos;
 
 // ===== Scene =====
 uniform vec3  u_ueCameraPosition;
@@ -62,22 +63,48 @@ uniform float u_uePointLightRange[8];
 uniform float u_uePointLightIntensity[8];
 uniform float u_uePointLightDecay[8];
 
+// Spot
+uniform vec3  u_ueSpotLightPosition[4];
+uniform vec3  u_ueSpotLightDirection[4];
+uniform vec3  u_ueSpotLightColor[4];
+uniform float u_ueSpotLightRange[4];
+uniform float u_ueSpotLightIntensity[4];
+uniform float u_ueSpotLightDecay[4];
+uniform float u_ueSpotLightAngle[4];
+uniform float u_ueSpotLightPenumbra[4];
+
+// Hemisphere
+uniform vec3  u_ueHemiLightDirection;
+uniform vec3  u_ueHemiLightSkyColor;
+uniform vec3  u_ueHemiLightGroundColor;
+uniform float u_ueHemiLightIntensity;
+
 // ===== Shadow =====
 uniform sampler2D s_dirShadowMap;
 uniform sampler2D s_pointShadowMap;
+uniform sampler2D s_spotShadowMap;
 uniform float u_ueDirShadowEnabled;
 uniform float u_uePointShadowEnabled;
+uniform float u_ueSpotShadowEnabled;
 uniform float u_ueReceiveShadow;
 uniform float u_ueDirShadowInvTexelSize;
 uniform vec2 u_uePointShadowInvTexelSize;
+uniform float u_ueSpotShadowInvTexelSize;
 uniform float u_ueDirShadowQuality;
 uniform float u_uePointShadowQuality;
+uniform float u_ueSpotShadowQuality;
 
 // Point shadow specific
 uniform float u_uePointShadowFar;
 uniform float u_uePointShadowNear;
 uniform vec3  u_uePointShadowPos;
 uniform mat4  u_uePointShadowMatrix[6];
+
+// Spot shadow specific
+uniform float u_ueSpotShadowFar;
+uniform float u_ueSpotShadowNear;
+uniform vec3  u_ueSpotShadowPos;
+
 uniform float u_ueToneMapping;
 uniform float u_ueToneMappingExposure;
 uniform float u_ueToneMapped;
@@ -90,6 +117,14 @@ uniform float u_ueToneMapped;
 // ===== Color Space =====
 vec3 SRGBToLinear(vec3 c) { return pow(max(c, vec3(0.0)), vec3(GAMMA)); }
 vec3 LinearToSRGB(vec3 c) { return pow(max(c, vec3(0.0)), vec3(1.0 / GAMMA)); }
+
+float LinearizeDepth(float depth, float zparam) 
+{ 
+#if !defined(_YY_HLSL11_) 
+    depth = depth * 2.0 - 1.0; 
+#endif 
+    return 1.0 / ((1.0 - zparam) * depth + zparam); 
+}
 
 // ===== TBN (use precomputed tangents or fallback to derivatives) =====
 mat3 calculateTBN(vec3 N, vec3 pos, vec2 uv, vec4 vT) {
@@ -147,6 +182,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 float calculateDirShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
     if (lightSpacePos.w < EPSILON) return 0.0;
     vec3 p = lightSpacePos.xyz / lightSpacePos.w;
+    
     p = p * 0.5 + 0.5;
 
     if (p.x < 0.0 || p.x > 1.0 || p.y < 0.0 || p.y > 1.0 || p.z > 1.0) return 0.0;
@@ -252,6 +288,46 @@ float calculatePointShadow(vec3 worldPos, vec3 N) {
     return (currentDepth - bias > depth) ? 1.0 : 0.0;
 }
 
+float calculateSpotShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
+    if (lightSpacePos.w < EPSILON) return 0.0;
+    vec3 p = lightSpacePos.xyz / lightSpacePos.w;
+    
+    // Map NDC to UV for x and y
+    p.xy = p.xy * 0.5 + 0.5;
+    p.y = 1.0 - p.y; // Flip Y for GameMaker surfaces
+    
+    // Scarta fuori frustum
+    if (p.x < 0.0 || p.x > 1.0 ||
+        p.y < 0.0 || p.y > 1.0 ||
+        p.z < 0.0 || p.z > 1.0)
+    {
+        return 0.0;
+    }
+
+    float zparam = u_ueSpotShadowFar / u_ueSpotShadowNear;
+    float currentDepth = LinearizeDepth(p.z, zparam);
+
+    // Bias (slightly adjusted for linear depth)
+    float cosTheta = clamp(dot(N, L), 0.0, 1.0);
+    float bias = max(0.005 * (1.0 - cosTheta), 0.001);
+
+    float shadow = 0.0;
+
+    // 5-tap PCF (Center + corners)
+    if (u_ueSpotShadowQuality > 0.5) {
+        float texelSize = u_ueSpotShadowInvTexelSize;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy).r, zparam)) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2(-0.7, -0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2( 0.7, -0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2(-0.7,  0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2( 0.7,  0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
+        return shadow / 5.0;
+    } else {
+        float d = LinearizeDepth(texture2D(s_spotShadowMap, p.xy).r, zparam);
+        return (currentDepth - bias > d) ? 1.0 : 0.0;
+    }
+}
+
 vec3 BRDF_GGX(vec3 N, vec3 V, vec3 L, vec3 lightColor, float intensity,
               vec3 albedo, vec3 F0, float roughness, float metalness) {
 
@@ -287,6 +363,31 @@ vec3 calculatePointLight(vec3 pos, vec3 color, float range, float intensity, flo
     }
 
     return BRDF_GGX(N, V, normalize(toL + vec3(EPSILON)), SRGBToLinear(color), intensity * att, albedo, F0, roughness, metalness);
+}
+
+// ===== Spot Light =====
+vec3 calculateSpotLight(vec3 pos, vec3 dir, vec3 color, float range, float intensity, float decay, float angle, float penumbra, vec3 N, vec3 V, vec3 albedo, vec3 F0, float roughness, float metalness) {
+    vec3 toL = pos - vWorldPosition;
+    float d = length(toL);
+    if (intensity <= 0.0 || (range > 0.0 && d > range)) return vec3(0.0);
+
+    vec3 L = normalize(toL);
+    float theta = dot(L, normalize(-dir));
+    
+    if (theta < angle) return vec3(0.0);
+
+    float att = 1.0 / (pow(d, decay) + EPSILON);
+    if (range > 0.0) {
+        att *= pow(clamp(1.0 - pow(d / range, 4.0), 0.0, 1.0), 2.0);
+    }
+
+    float intensityFactor = 1.0;
+    if (abs(penumbra - angle) > EPSILON) {
+        intensityFactor = clamp((theta - angle) / (penumbra - angle), 0.0, 1.0);
+    }
+    att *= intensityFactor;
+
+    return BRDF_GGX(N, V, L, SRGBToLinear(color), intensity * att, albedo, F0, roughness, metalness);
 }
 
 // ===== Tone Mapping =====
@@ -422,8 +523,32 @@ void main() {
         Lo += calculatePointLight(u_uePointLightPosition[i], u_uePointLightColor[i], u_uePointLightRange[i], u_uePointLightIntensity[i], u_uePointLightDecay[i], N, V, albedo, F0, roughness, metalness);
     }
 
+    // Spot 0 (with shadows)
+    {
+        float shadow = 0.0;
+        vec3 L = normalize(u_ueSpotLightPosition[0] - vWorldPosition);
+        if (u_ueSpotShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
+            shadow = calculateSpotShadow(vSpotLightSpacePos, N, L);
+        }
+
+        Lo += calculateSpotLight(u_ueSpotLightPosition[0], u_ueSpotLightDirection[0], u_ueSpotLightColor[0], u_ueSpotLightRange[0], u_ueSpotLightIntensity[0], u_ueSpotLightDecay[0], u_ueSpotLightAngle[0], u_ueSpotLightPenumbra[0], N, V, albedo, F0, roughness, metalness)
+              * (1.0 - shadow);
+    }
+
+    // Spot 1-3
+    for (int i = 1; i < 4; i++) {
+        Lo += calculateSpotLight(u_ueSpotLightPosition[i], u_ueSpotLightDirection[i], u_ueSpotLightColor[i], u_ueSpotLightRange[i], u_ueSpotLightIntensity[i], u_ueSpotLightDecay[i], u_ueSpotLightAngle[i], u_ueSpotLightPenumbra[i], N, V, albedo, F0, roughness, metalness);
+    }
+
     // Ambient
     vec3 ambient = SRGBToLinear(u_ueAmbient + vec3(0.05)) * albedo * ao;
+
+    // Hemisphere
+    if (u_ueHemiLightIntensity > 0.0) {
+        float hemiWeight = 0.5 * dot(N, u_ueHemiLightDirection) + 0.5;
+        vec3 hemiColor = mix(SRGBToLinear(u_ueHemiLightGroundColor), SRGBToLinear(u_ueHemiLightSkyColor), hemiWeight);
+        ambient += hemiColor * u_ueHemiLightIntensity * albedo * ao;
+    }
 
     // Emissive
     vec3 emissiveMapColor = (u_ueHasEmissiveMap > 0.5) ? SRGBToLinear(texture2D(s_emissiveMap, vTexcoord).rgb) : vec3(0.0);

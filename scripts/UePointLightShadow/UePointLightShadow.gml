@@ -122,6 +122,7 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
 
       // Check if shader exists before setting
       if (shader_is_compiled(sh_ue_point_shadow)) {
+        global.UE_RENDERER_ACTIVE_SHADOW_SHADER = sh_ue_point_shadow;
         shader_set(sh_ue_point_shadow);
 
         // Set uniforms for linear depth
@@ -138,6 +139,8 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
 
       // Render objects
       var _frustum = cam.getFrustum();
+      global.UE_RENDERER_ACTIVE_SHADOW_CAMERA = cam;
+      
       for (var j = 0; j < __shadowIdx; j++) {
         var object = __queue[j];
 
@@ -152,7 +155,12 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
           }
         }
 
+        var _onBeforeShadow = object[$ "onBeforeShadow"];
+        var _onAfterShadow = object[$ "onAfterShadow"];
+        
+        if (_onBeforeShadow != undefined) _onBeforeShadow();
         object.render();
+        if (_onAfterShadow != undefined) _onAfterShadow();
       }
 
       surface_reset_target();

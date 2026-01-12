@@ -44,6 +44,26 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     pointLightIntensity: "u_uePointLightIntensity",
     pointLightDecay: "u_uePointLightDecay",
 
+    // Spot Light Prefixes
+    spotLightPosition: "u_ueSpotLightPosition",
+    spotLightDirection: "u_ueSpotLightDirection",
+    spotLightColor: "u_ueSpotLightColor",
+    spotLightRange: "u_ueSpotLightRange",
+    spotLightIntensity: "u_ueSpotLightIntensity",
+    spotLightDecay: "u_ueSpotLightDecay",
+    spotLightAngle: "u_ueSpotLightAngle",
+    spotLightPenumbra: "u_ueSpotLightPenumbra",
+
+    // Shadow (Spot)
+    spotShadowEnabled: "u_ueSpotShadowEnabled",
+    spotShadowMatrix: "u_ueSpotShadowMatrix",
+    spotShadowFar: "u_ueSpotShadowFar",
+    spotShadowNear: "u_ueSpotShadowNear",
+    spotShadowPos: "u_ueSpotShadowPos",
+    spotShadowQuality: "u_ueSpotShadowQuality",
+    spotShadowTexelSize: "u_ueSpotShadowInvTexelSize",
+    spotShadowMapSampler: "s_spotShadowMap",
+
     // Fog
     fogColor: "u_ueFogColor",
     fogDensity: "u_ueFogDensity",
@@ -109,19 +129,27 @@ enum UE_TONE_MAPPING {
 }
 
 // Internal globals
-global.UE_RENDERER_LIGHT_STATE = array_create(5);
+global.UE_RENDERER_LIGHT_STATE = array_create(9);
 enum UE_RENDERER_LIGHT_STATE_ENUM {
     AMBIENT,
     DIRECTIONAL,
     DIRECTIONAL_COUNT,
     POINT_LIGHT,
-    POINT_LIGHT_COUNT 
+    POINT_LIGHT_COUNT,
+    SPOT_LIGHT,
+    SPOT_LIGHT_COUNT,
+    HEMI_LIGHT,
+    HEMI_LIGHT_COUNT
 }
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT] = array_create(3, 0);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL] = array_create(1);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = 0;
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT] = array_create(8);
 global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = 0;
+global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT] = array_create(4);
+global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT_COUNT] = 0;
+global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT] = array_create(1);
+global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT_COUNT] = 0;
 
 global.UE_RENDERER_TONE_MAPPING = UE_TONE_MAPPING.NONE;
 global.UE_RENDERER_TONE_MAPPING_EXPOSURE = 1.0;

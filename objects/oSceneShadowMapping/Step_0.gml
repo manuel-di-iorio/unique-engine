@@ -39,9 +39,10 @@ if (keyboard_check(ord("O"))) pointLight.position[VEC3.z] -= moveSpeed;
 
 orbit.update();
 pointLightHelper.update();
+spotLightHelper.update();
 
 // Directional
- dirLightAngle = (dirLightAngle + .5) % 360;
- dirLight.position[VEC3.x] = lengthdir_x(1000, dirLightAngle);
- dirLight.position[VEC3.y] = lengthdir_y(1000, dirLightAngle);
- dirLightHelper.update();
+dirLightAngle = (dirLightAngle + .5) % 360;
+dirLight.position[VEC3.x] = lengthdir_x(1000, dirLightAngle);
+dirLight.position[VEC3.y] = lengthdir_y(1000, dirLightAngle);
+dirLightHelper.update();

@@ -20,7 +20,12 @@ function UeShadowMapViewer(light, data = {}) constructor {
         var _scale_y = self.height / _surface_height;
         
         // Draw the surface
-        draw_surface_ext(self.light.shadow.map.surface, x1, y1, _scale_x, _scale_y, 0, c_white, 1);
+        // Flip Y for spot lights
+        if(self.light[$ "isSpotLight"]) {
+            draw_surface_ext(self.light.shadow.map.surface, x1, y1 + self.height, _scale_x, -_scale_y, 0, c_white, 1);
+        } else {
+            draw_surface_ext(self.light.shadow.map.surface, x1, y1, _scale_x, _scale_y, 0, c_white, 1);
+        }
         
         // Draw labels for point lights
         if (self.light[$ "isPointLight"]) {

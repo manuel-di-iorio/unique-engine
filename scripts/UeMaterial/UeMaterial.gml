@@ -50,10 +50,32 @@ function UeMaterial(data = {}) constructor {
   __uniformPointShadowFarLoc = undefined;
   __uniformPointShadowNearLoc = undefined;
   __uniformPointShadowPosLoc = undefined;
+  __uniformSpotShadowEnabledLoc = undefined;
+  __uniformSpotShadowMatrixLoc = undefined;
+  __uniformSpotShadowQualityLoc = undefined;
+  __uniformSpotShadowTexelSizeLoc = undefined;
+  __uniformSpotShadowFarLoc = undefined;
+  __uniformSpotShadowNearLoc = undefined;
+  __uniformSpotShadowPosLoc = undefined;
+  __samplerSpotShadowMapIdx = -1;
+  __uniformHemiLightDirLoc = undefined;
+  __uniformHemiLightSkyColorLoc = undefined;
+  __uniformHemiLightGroundColorLoc = undefined;
+  __uniformHemiLightIntensityLoc = undefined;
   __uniformEmissiveIntensityLoc = undefined;
   __uniformToneMappingLoc = undefined;
   __uniformToneMappingExposureLoc = undefined;
   __uniformToneMappedLoc = undefined;
+
+  // Spot light uniforms
+  __uniformSpotLightsPos = undefined;
+  __uniformSpotLightsDir = undefined;
+  __uniformSpotLightsColor = undefined;
+  __uniformSpotLightsRange = undefined;
+  __uniformSpotLightsIntensity = undefined;
+  __uniformSpotLightsDecay = undefined;
+  __uniformSpotLightsAngle = undefined;
+  __uniformSpotLightsPenumbra = undefined;
 
   // Has maps uniforms
   __uniformHasMapLoc = undefined;
@@ -134,6 +156,15 @@ function UeMaterial(data = {}) constructor {
    __uniformPointShadowQualityLoc = shader_get_uniform(shader, cfg.pointShadowQuality);
    __uniformPointShadowMatrixLoc = shader_get_uniform(shader, "u_uePointShadowMatrix");
    
+   __uniformSpotShadowEnabledLoc = shader_get_uniform(shader, cfg.spotShadowEnabled);
+   __uniformSpotShadowMatrixLoc = shader_get_uniform(shader, cfg.spotShadowMatrix);
+   __samplerSpotShadowMapIdx = shader_get_sampler_index(shader, cfg.spotShadowMapSampler);
+   __uniformSpotShadowFarLoc = shader_get_uniform(shader, cfg.spotShadowFar);
+   __uniformSpotShadowNearLoc = shader_get_uniform(shader, cfg.spotShadowNear);
+   __uniformSpotShadowPosLoc = shader_get_uniform(shader, cfg.spotShadowPos);
+   __uniformSpotShadowTexelSizeLoc = shader_get_uniform(shader, cfg.spotShadowTexelSize);
+   __uniformSpotShadowQualityLoc = shader_get_uniform(shader, cfg.spotShadowQuality);
+
    // Cache tone mapping uniforms
    __uniformToneMappingLoc = shader_get_uniform(shader, cfg.toneMapping);
    __uniformToneMappingExposureLoc = shader_get_uniform(shader, cfg.toneMappingExposure);
@@ -167,9 +198,18 @@ function UeMaterial(data = {}) constructor {
    __uniformLightsColor = shader_get_uniform(shader, cfg.pointLightColor);
    __uniformLightsRange = shader_get_uniform(shader, cfg.pointLightRange);
    __uniformLightsIntensity = shader_get_uniform(shader, cfg.pointLightIntensity);
-   __uniformLightsDecay = shader_get_uniform(shader, cfg.pointLightDecay);
- 
-   // Cache the uniforms
+  __uniformLightsDecay = shader_get_uniform(shader, cfg.pointLightDecay);
+
+  __uniformSpotLightsPos = shader_get_uniform(shader, cfg.spotLightPosition);
+  __uniformSpotLightsDir = shader_get_uniform(shader, cfg.spotLightDirection);
+  __uniformSpotLightsColor = shader_get_uniform(shader, cfg.spotLightColor);
+  __uniformSpotLightsRange = shader_get_uniform(shader, cfg.spotLightRange);
+  __uniformSpotLightsIntensity = shader_get_uniform(shader, cfg.spotLightIntensity);
+  __uniformSpotLightsDecay = shader_get_uniform(shader, cfg.spotLightDecay);
+  __uniformSpotLightsAngle = shader_get_uniform(shader, cfg.spotLightAngle);
+  __uniformSpotLightsPenumbra = shader_get_uniform(shader, cfg.spotLightPenumbra);
+
+  // Cache the uniforms
    var uniformNames = variable_struct_get_names(uniforms);
    __uniformsCachedCount = array_length(uniformNames);
    __uniformsCached = array_create(__uniformsCachedCount);
@@ -253,10 +293,14 @@ function UeMaterial(data = {}) constructor {
  
    var directionalState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL];
    var directionalCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT];
-   var pointLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT];
-   var pointLightCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT];
- 
-   shader_set_uniform_f_array(__uniformLightsAmbientLoc, lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT]);
+  var pointLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT];
+  var pointLightCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT];
+  var spotLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT];
+  var spotLightCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT_COUNT];
+  var hemiLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT];
+  var hemiLightCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT_COUNT];
+
+  shader_set_uniform_f_array(__uniformLightsAmbientLoc, lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT]);
  
    // Set directional lights (max 1)
    for (var i = 0; i < 1; i++) {
@@ -384,6 +428,78 @@ function UeMaterial(data = {}) constructor {
   shader_set_uniform_f_array(__uniformLightsRange, rangeArr);
   shader_set_uniform_f_array(__uniformLightsIntensity, intensityArr);
   shader_set_uniform_f_array(__uniformLightsDecay, decayArr);
+
+  // Set spot shadow uniforms (from the first shadow-casting spot light)
+  var spotShadowLight = undefined;
+  for (var i = 0; i < spotLightCount; i++) {
+    if (spotLightState[i].castShadow) {
+      spotShadowLight = spotLightState[i];
+      break;
+    }
+  }
+
+  if (spotShadowLight != undefined && __samplerSpotShadowMapIdx != -1) {
+    shader_set_uniform_f(__uniformSpotShadowEnabledLoc, 1.0);
+    shader_set_uniform_matrix_array(__uniformSpotShadowMatrixLoc, spotShadowLight.shadow.lightSpaceMatrix);
+    
+    if (__uniformSpotShadowFarLoc != undefined) shader_set_uniform_f(__uniformSpotShadowFarLoc, spotShadowLight.shadow.camera.far);
+    if (__uniformSpotShadowNearLoc != undefined) shader_set_uniform_f(__uniformSpotShadowNearLoc, spotShadowLight.shadow.camera.near);
+    if (__uniformSpotShadowPosLoc != undefined) shader_set_uniform_f(__uniformSpotShadowPosLoc, spotShadowLight.position[0], spotShadowLight.position[1], spotShadowLight.position[2]);
+    if (__uniformSpotShadowTexelSizeLoc != undefined) shader_set_uniform_f(__uniformSpotShadowTexelSizeLoc, 1.0 / spotShadowLight.shadow.mapSize.width);
+    if (__uniformSpotShadowQualityLoc != undefined) shader_set_uniform_f(__uniformSpotShadowQualityLoc, shadowQuality);
+
+    texture_set_stage(__samplerSpotShadowMapIdx, spotShadowLight.shadow.map.getDepthTexture());
+  } else if (__uniformSpotShadowEnabledLoc != undefined) {
+    shader_set_uniform_f(__uniformSpotShadowEnabledLoc, 0.0);
+  }
+
+  // Set spot lights (max 4)
+  var sPosArr = array_create(4 * 3, 0);
+  var sDirArr = array_create(4 * 3, 0);
+  var sColorArr = array_create(4 * 3, 0);
+  var sRangeArr = array_create(4, 0);
+  var sIntensityArr = array_create(4, 0);
+  var sDecayArr = array_create(4, 0);
+  var sAngleArr = array_create(4, 0);
+  var sPenumbraArr = array_create(4, 0);
+
+  for (var i = 0; i < 4; i++) {
+    if (i < spotLightCount) {
+      var light = spotLightState[i];
+      
+      var worldPos = global.UE_VEC3_TEMP1;
+      light.getWorldPosition(worldPos);
+      sPosArr[i * 3 + 0] = worldPos[0];
+      sPosArr[i * 3 + 1] = worldPos[1];
+      sPosArr[i * 3 + 2] = worldPos[2];
+      
+      var worldDir = light.getDirection();
+      sDirArr[i * 3 + 0] = worldDir[0];
+      sDirArr[i * 3 + 1] = worldDir[1];
+      sDirArr[i * 3 + 2] = worldDir[2];
+      
+      sColorArr[i * 3 + 0] = light.color[0];
+      sColorArr[i * 3 + 1] = light.color[1];
+      sColorArr[i * 3 + 2] = light.color[2];
+      
+      sRangeArr[i] = light.distance;
+      sIntensityArr[i] = light.intensity;
+      sDecayArr[i] = light.decay;
+      sAngleArr[i] = dcos(light.angle); // Send cosine for easier shader math
+      sPenumbraArr[i] = dcos(light.angle * (1.0 - light.penumbra));
+    }
+  }
+
+  if (__uniformSpotLightsPos != undefined) {
+    shader_set_uniform_f_array(__uniformSpotLightsPos, sPosArr);
+    shader_set_uniform_f_array(__uniformSpotLightsDir, sDirArr);
+    shader_set_uniform_f_array(__uniformSpotLightsColor, sColorArr);
+    shader_set_uniform_f_array(__uniformSpotLightsRange, sRangeArr);
+    shader_set_uniform_f_array(__uniformSpotLightsIntensity, sIntensityArr);
+    shader_set_uniform_f_array(__uniformSpotLightsDecay, sDecayArr);
+    shader_set_uniform_f_array(__uniformSpotLightsAngle, sAngleArr);
+    shader_set_uniform_f_array(__uniformSpotLightsPenumbra, sPenumbraArr);
+  }
  }
 
   /// Apply material before drawing
@@ -481,7 +597,7 @@ function UeMaterial(data = {}) constructor {
     gml_pragma("forceinline");
   
     // Update the shader's model position uniform (for billboard sprites)
-    if (mesh.isSprite) {
+    if (mesh[$ "isSprite"]) {
       shader_set_uniform_f_array(__uniformModelPositionLoc, mesh.position);
     }
 
