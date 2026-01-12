@@ -3,7 +3,13 @@ function UeParticleGravity(gx, gy, gz) : UeParticleModule() constructor {
     self.gy = gy;
     self.gz = gz;
 
-    function onUpdate(p, i, dt) {
+    onRegister = function(pool) {
+        pool.registerAttribute("velX", 0);
+        pool.registerAttribute("velY", 0);
+        pool.registerAttribute("velZ", 0);
+    }
+
+    onUpdate = function(p, i, dt) {
         gml_pragma("forceinline");
         p.velX[i] += self.gx * dt;
         p.velY[i] += self.gy * dt;

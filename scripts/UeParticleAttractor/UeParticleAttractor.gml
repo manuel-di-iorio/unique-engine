@@ -2,7 +2,7 @@ function UeParticleAttractor(pos, strength) : UeParticleModule() constructor {
     self.pos = pos;
     self.strength = strength;
 
-    function onUpdate(p, i, dt) {
+    onUpdate = function(p, i, dt) {
         gml_pragma("forceinline");
         var dx = self.pos[0] - p.posX[i];
         var dy = self.pos[1] - p.posY[i];

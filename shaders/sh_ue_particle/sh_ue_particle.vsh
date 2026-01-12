@@ -1,31 +1,28 @@
 attribute vec3 in_Position;                  // (x,y,z) center position
 attribute vec4 in_Colour;                    // (r,g,b,a)
-attribute vec2 in_TextureCoord;              // (u,v)
+attribute vec2 in_TextureCoord;              // (u,v) - Local UVs (0..2)
 attribute vec3 in_Normal;                    // size, rotation, 0
-// attribute vec4 in_TextureCoord1;          // Not needed anymore
 
-varying vec2 v_vTexcoord;
+varying vec2 v_vTexcoord;    // Atlas UVs
+varying vec2 v_vLocalUV;     // Local UVs (for discard)
 varying vec4 v_vColour;
-varying vec4 v_vShadowCoord;
+// varying vec4 v_vShadowCoord;
 varying float v_vDepth;
 
 uniform vec3 u_ueCameraRight;
 uniform vec3 u_ueCameraUp;
-uniform mat4 u_ueDirShadowMatrix;
+// uniform mat4 u_ueDirShadowMatrix;
+uniform vec4 u_ueUVRegion;   // x, y, w, h on texture page (for atlas mapping)
 
 void main()
 {
     float size = in_Normal.x;
     float rotation = in_Normal.y;
     
-    // Determine corner offset based on UV
-    // UV (0,0) -> (-0.5,  0.5)
-    // UV (1,0) -> ( 0.5,  0.5)
-    // UV (0,1) -> (-0.5, -0.5)
-    // UV (1,1) -> ( 0.5, -0.5)
+    // 1. Calculate Local Offset for Billboarding in Camera Plane
     vec2 corner = vec2(in_TextureCoord.x - 0.5, 0.5 - in_TextureCoord.y);
 
-    // Rotate the corner
+    // 2. Rotate in camera plane
     float cosR = cos(rotation);
     float sinR = sin(rotation);
     vec2 rotatedCorner = vec2(
@@ -33,7 +30,7 @@ void main()
         corner.x * sinR + corner.y * cosR
     );
 
-    // Calculate billboard world position
+    // 3. Expand World Position
     vec3 worldPos = in_Position.xyz;
     worldPos += u_ueCameraRight * rotatedCorner.x * size;
     worldPos += u_ueCameraUp * rotatedCorner.y * size;
@@ -41,10 +38,13 @@ void main()
     vec4 mvpPos = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(worldPos, 1.0);
     gl_Position = mvpPos;
     
-    v_vTexcoord = in_TextureCoord;
+    // 4. Map Local UV [0..2] to Atlas UV
+    v_vLocalUV = in_TextureCoord;
+    v_vTexcoord = u_ueUVRegion.xy + (in_TextureCoord * u_ueUVRegion.zw);
+    
     v_vColour = in_Colour;
     v_vDepth = mvpPos.z / mvpPos.w;
     
-    // Shadow coordinates
-    v_vShadowCoord = u_ueDirShadowMatrix * vec4(worldPos, 1.0);
+    // Shadow logic commented out
+    // v_vShadowCoord = u_ueDirShadowMatrix * vec4(worldPos, 1.0);
 }

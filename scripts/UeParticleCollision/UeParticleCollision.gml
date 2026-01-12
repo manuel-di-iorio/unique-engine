@@ -1,12 +1,12 @@
-function UeParticleCollision(planeY, bounce = 0.5) : UeParticleModule() constructor {
-    self.planeY = planeY;
+function UeParticleCollision(planeZ, bounce = 0.5) : UeParticleModule() constructor {
+    self.planeZ = planeZ;
     self.bounce = bounce;
 
-    function onUpdate(p, i, dt) {
+    onUpdate = function(p, i, dt) {
         gml_pragma("forceinline");
-        if (p.posY[i] < self.planeY) {
-            p.posY[i] = self.planeY;
-            p.velY[i] = -p.velY[i] * self.bounce;
+        if (p.posZ[i] < self.planeZ) {
+            p.posZ[i] = self.planeZ;
+            p.velZ[i] = -p.velZ[i] * self.bounce;
         }
     }
 }

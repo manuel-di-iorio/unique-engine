@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"UeParticleLife",
+  "%Name":"UeParticleAccelerationModule",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"UeParticleLife",
+  "name":"UeParticleAccelerationModule",
   "parent":{
     "name":"Modules",
     "path":"folders/Packages/Unique Engine/Particles/Modules.yy",

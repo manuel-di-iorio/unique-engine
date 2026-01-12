@@ -1,8 +1,8 @@
 /**
- * @description Handles particle spawning based on a UeParticleType and a shape.
+ * @description Handles particle spawning and initial positioning.
+ * All initial state (life, velocity, etc.) should be handled by modules via onSpawn.
  */
-function UeParticleEmitter(type, data = {}) constructor {
-    self.type = type;
+function UeParticleEmitter(data = {}) constructor {
     self.system = undefined;
     
     // Emission properties
@@ -18,7 +18,7 @@ function UeParticleEmitter(type, data = {}) constructor {
     self.shape = data[$ "shape"] ?? "point"; // "point", "box", "sphere"
     self.shapeSize = data[$ "shapeSize"] ?? [0, 0, 0]; // For box: [w, h, d], For sphere: [radius]
 
-    // Shadow flags (can be used to override system settings or as defaults)
+    // Shadow flags
     self.castShadow = data[$ "castShadow"] ?? false;
     self.receiveShadow = data[$ "receiveShadow"] ?? false;
 
@@ -42,14 +42,13 @@ function UeParticleEmitter(type, data = {}) constructor {
     }
 
     /**
-     * Spawns a single particle.
+     * Spawns a single particle and sets its initial position.
      */
     function spawn() {
         var p = self.system.pool;
         if (p.aliveCount >= p.maxCount) return;
         
         var i = p.aliveCount++;
-        var t = self.type;
         
         // --- Spawn Position ---
         var sx = self.position[0];
@@ -76,37 +75,9 @@ function UeParticleEmitter(type, data = {}) constructor {
         p.posY[i] = sy;
         p.posZ[i] = sz;
 
-        // --- Spawn Life ---
-        p.age[i] = 0;
-        p.life[i] = random_range(t.life[0], t.life[1]);
-
-        // --- Spawn Velocity ---
-        var spd = random_range(t.speed[0], t.speed[1]);
-        var dir = random_range(t.direction[0], t.direction[1]);
-        var pitch = random_range(t.pitch[0], t.pitch[1]);
-        
-        // Z-Up Spherical to Cartesian
-        var radDir = degtorad(dir);
-        var radPitch = degtorad(pitch);
-        
-        // In this system:
-        // Z is Up (elevation, pitch)
-        // dir is rotation around Z axis in XY plane
-        p.velX[i] = spd * cos(radPitch) * cos(radDir);
-        p.velY[i] = spd * cos(radPitch) * sin(radDir);
-        p.velZ[i] = spd * sin(radPitch);
-
-        // --- Spawn Appearance ---
-        p.size[i] = random_range(t.size[0], t.size[1]);
-        p.rotation[i] = random_range(t.rotation[0], t.rotation[1]);
-        
-        p.colorR[i] = t.colorStart[0];
-        p.colorG[i] = t.colorStart[1];
-        p.colorB[i] = t.colorStart[2];
-        p.alpha[i]  = t.alphaStart;
-        
-        // --- Custom Spawn Logic (Modules) ---
-        for (var m = 0, ml = array_length(self.system.modules); m < ml; m++) {
+        // --- Modules Initializations ---
+        var ml = array_length(self.system.modules);
+        for (var m = 0; m < ml; m++) {
             self.system.modules[m].onSpawn(p, i);
         }
     }

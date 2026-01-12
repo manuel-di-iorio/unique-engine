@@ -1,9 +1,9 @@
 /**
  * @description Manages a group of particles and their emitters.
  */
-function UeParticleSystem(pool, data = {}): UeObject3D(data) constructor {
+function UeParticleSystem(maxCount = 1000, data = {}) constructor {
     self.type = "ParticleSystem";
-    self.pool = pool;
+    self.pool = new UeParticlePool(maxCount);
     self.emitters = [];
     self.modules  = [];
     
@@ -15,14 +15,6 @@ function UeParticleSystem(pool, data = {}): UeObject3D(data) constructor {
     self.castShadow = data[$ "castShadow"] ?? false;
     self.receiveShadow = data[$ "receiveShadow"] ?? false;
     
-    // Mock geometry for UeRenderer collection
-    self.geometry = { vb: true }; 
-    self.frustumCulled = false; // Usually particles have dynamic bounds, disable culling for now
-    
-    // We need a reference to the renderer. 
-    // In a real scenario, this could be a global or passed.
-    self.renderer = undefined; 
-
     /**
      * Adds an emitter to the system.
      */
@@ -37,34 +29,25 @@ function UeParticleSystem(pool, data = {}): UeObject3D(data) constructor {
      */
     function addModule(module) {
         array_push(self.modules, module);
+        
+        // Let the module register its requirements on the pool
+        if (variable_struct_exists(module, "onRegister")) {
+            module.onRegister(self.pool);
+        }
+        
         return module;
     }
     
     /**
-     * Renders the system. Called by UeRenderer.
+     * Renders the system.
      */
-    function render() {
-        var isShadowPass = (variable_global_exists("UE_RENDERER_ACTIVE_SHADOW_CAMERA") && global.UE_RENDERER_ACTIVE_SHADOW_CAMERA != undefined);
-        
+    function render(renderer, camera, texture = -1, depthTexture = undefined, shadowConfig = undefined, isShadowPass = false) {
         if (isShadowPass && !self.castShadow) return;
-
-        if (self.renderer == undefined) {
-            // Lazy-init global particle renderer if not provided
-            if (!variable_global_exists("__ue_global_particle_renderer")) {
-                global.__ue_global_particle_renderer = new UeParticleRenderer();
-            }
-            self.renderer = global.__ue_global_particle_renderer;
-        }
         
-        var cam = isShadowPass ? global.UE_RENDERER_ACTIVE_SHADOW_CAMERA : global.UE_RENDERER_ACTIVE_CAMERA;
-        if (cam != undefined) {
-            self.renderer.render(self, cam, -1, isShadowPass);
-            
-            // If it was a shadow pass, we must restore the engine's shadow shader
-            if (isShadowPass && variable_global_exists("UE_RENDERER_ACTIVE_SHADOW_SHADER")) {
-                shader_set(global.UE_RENDERER_ACTIVE_SHADOW_SHADER);
-            }
-        }
+        if (renderer == undefined) return;
+        
+        // Render
+        renderer.render(self, camera, texture, depthTexture, shadowConfig, isShadowPass);
     }
 
     /**
@@ -81,50 +64,36 @@ function UeParticleSystem(pool, data = {}): UeObject3D(data) constructor {
             self.emitters[i].update(_dt);
         }
 
-        // 1. Life Cycle & Age
-        var i = 0;
-        while (i < p.aliveCount) {
-            p.age[i] += _dt;
-            if (p.age[i] >= p.life[i]) {
-                kill(i);
-                continue; 
-            }
-            i++;
-        }
-
-        // 2. Modules (Batch Processing)
-        // Ideally modules should implement a process() method. 
-        // For backward compatibility we check, otherwise loop.
-        for (var m = 0, ml = array_length(self.modules); m < ml; m++) {
-            var module = self.modules[m];
-            if (variable_struct_exists(module, "process")) {
-                module.process(p, p.aliveCount, _dt);
-            } else {
-                // Fallback for legacy modules
-                for (var j = 0; j < p.aliveCount; j++) {
-                    module.onUpdate(p, j, _dt);
+        // Modules (Per-Particle Processing)
+        // This now handles EVERYTHING: life cycle, motion, behaviors.
+        var ml = array_length(self.modules);
+        if (ml > 0) {
+            var i = 0;
+            while (i < p.aliveCount) {
+                var killed = false;
+                for (var m = 0; m < ml; m++) {
+                    // Modules can return true to stop processing this particle (e.g. if it was killed)
+                    if (self.modules[m].onUpdate(p, i, _dt) == true) {
+                        killed = true;
+                        break;
+                    }
                 }
+                if (!killed) i++;
             }
         }
 
-        // 3. Physics Integration
-        var count = p.aliveCount;
-        for (var j = 0; j < count; j++) {
-            p.posX[j] += p.velX[j] * _dt;
-            p.posY[j] += p.velY[j] * _dt;
-            p.posZ[j] += p.velZ[j] * _dt;
-            
-            // Sorting Key Calculation (if needed)
-            if (self.sorted && camera != undefined) {
-                var camPos = camera.position;
-                var dx = p.posX[j] - camPos[0];
-                var dy = p.posY[j] - camPos[1];
-                var dz = p.posZ[j] - camPos[2];
+        // Sorting (if needed)
+        if (self.sorted && camera != undefined) {
+            // Calculate sort keys if sorted
+            var camX = camera.position[0];
+            var camY = camera.position[1];
+            var camZ = camera.position[2];
+            for (var j = 0; j < p.aliveCount; j++) {
+                var dx = p.posX[j] - camX;
+                var dy = p.posY[j] - camY;
+                var dz = p.posZ[j] - camZ;
                 p.sortKey[j] = dx*dx + dy*dy + dz*dz;
             }
-        }
-
-        if (self.sorted) {
             depthSort();
         }
     }
@@ -155,11 +124,11 @@ function UeParticleSystem(pool, data = {}): UeObject3D(data) constructor {
         var sortArray = array_create(count);
         array_copy(sortArray, 0, temp, 0, count);
         
-        global.__ue_particle_pool_ref = p;
-        array_sort(sortArray, function(a, b) {
-            var pool = global.__ue_particle_pool_ref;
+        // Use method to bind 'pool' to the sort function context
+        // This is engine-agnostic and thread-safe (in theory for GML) and doesn't rely on globals.
+        array_sort(sortArray, method({ pool: p }, function(a, b) {
             return pool.sortKey[b] - pool.sortKey[a];
-        });
+        }));
         
         // Copy the sorted indices back to the pool
         array_copy(p.indices, 0, sortArray, 0, count);

@@ -37,11 +37,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   }
 
   __boundMaterial = undefined; // Material that is currently bound
-  __lightIdx = 0;
-  __queueIdx = 0;
-  __lights = array_create(2);
-  __queue = array_create(512);
-  __shadowIdx = 0;
+  __lights = [];
+  __queueShadow = [];
+  __queueOpaque = [];
+  __queueTransparent = [];
 
   function clear(color = true, depth = true, stencil = true) {
     if (color) draw_clear_alpha(self.__clearColor, self.__clearAlpha);
@@ -94,123 +93,72 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   }
 
   // Recursively collect renderable objects and precompute their sort key
-  function __collectObjectQueues(objects, camera) {
+  function __collectObjectQueues(objects, camera, frustum = undefined) {
     gml_pragma("forceinline");
     var cameraPos = camera.position;
     var cameraLayers = camera.layers;
+    var _maxDistSq = camera.far * camera.far;
 
     for (var i = 0, len = array_length(objects); i < len; i++) {
       var object = objects[i];
-      if (!object.layers.test(cameraLayers)) continue;
+      
+      // Skip invisible objects and their children
+      if (!object.visible || !object.layers.test(cameraLayers)) continue;
 
       // Update matrices for dynamic objects
       if (object.matrixAutoUpdate && object.matrixWorldAutoUpdate) object.updateMatrixWorld();
 
       if (object[$ "isLight"]) {
-        __lights[__lightIdx++] = object;
+        array_push(__lights, object);
         continue;
       }
-
+      
       /* Frustum intersection && sort key calculation */
-      if (object.visible) {
-        if (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined) {
-          // ** Precompute the sort hash **
-
-          // --- MATERIAL & TRANSPARENCY -------------------------------------------------
-          // Determine whether the material is transparent.
-          // Transparent objects must be rendered *after* opaque ones,
-          // and sorted back-to-front inside their own group.
-          var _material = object[$ "material"] ?? global.UE_FALLBACK_MATERIAL;
-          var _transparent = _material.transparent;
-
-          // Material ID (12-bit)
-          var _materialId = _material.id;
-
-          // --- DEPTH QUANTIZATION (31 bits) -------------------------------------------
-          // We convert the object distance into a normalized value (0..1),
-          // then map it into a 31-bit integer range (0..2^31-1).
-          //
-          // Why quantize instead of using the raw float distance?
-          // - Floating-point precision becomes poor for large distances.
-          // - Sorting with floats introduces instability and z-fighting-like errors.
-          // - By converting to a 31-bit integer, we guarantee a stable and uniform
-          //   precision distribution across the whole range.
-          var _nd = clamp(vec3_distance_to_squared(object.position, cameraPos) / 32000, 0, 1);
-          var _quantDepth = floor(_nd * 0x7FFFFFFF);  // 31-bit integer depth value
-
-          // --- DEPTH INVERSION FOR TRANSPARENT OBJECTS --------------------------------
-          // Transparent objects must be sorted *back-to-front*, while opaque objects
-          // are sorted *front-to-back*.
-          //
-          // Instead of using two different sort passes, we invert the depth integer
-          // when the object is transparent.
-          //
-          // Bitwise trick:
-          //     _quantDepth ^= mask
-          //
-          // The mask is (0x7FFFFFFF) when the object is transparent,
-          // and (0) when opaque. This works because:
-          //
-          //     -_transparent  →  0xFFFFFFFF when true, 0x00000000 when false
-          //     & 0x7FFFFFFF   →  either full-mask or zero-mask
-          //
-          // Result: all 31 bits of depth are flipped only when needed.
-          _quantDepth ^= (-_transparent & 0x7FFFFFFF);
-
-          // --- SORT KEY COMPOSITION (52 bits) ------------------------------------------
-          // We pack all sorting criteria into a single integer key.
-          // Higher-order bits have higher sorting priority.
-          //
-          // Bit layout (from MSB → LSB):
-          //
-          //  [51]        : 1 bit   → transparency flag (opaque first, transparent later)
-          //  [50..43]    : 8 bits  → renderOrder (explicit user sorting)
-          //  [42..31]    : 12 bits → material ID (minimizes shader/material switches)
-          //  [30..0]     : 31 bits → quantized depth (front-to-back or inverted)
-          //
-          // The final 52-bit key ensures a single fast integer comparison for sorting.
-          var _sortKey = 0;
-          _sortKey |= (_transparent ? 1 : 0) << 51;      // 1 bit  transparency flag
-          _sortKey |= (object.renderOrder & 0xFF) << 43; // 8 bits renderOrder
-          _sortKey |= (_materialId & 0xFFF) << 31;       // 12 bits material ID
-          _sortKey |= _quantDepth;                       // 31 bits depth
-          object.__sortKey = _sortKey;
-
-          __queue[__queueIdx++] = object;
+      var _isRenderable = (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined);
+      if (_isRenderable) {
+        // 1. Shadow Pass Collection (All shadow casters)
+        // We collect them here, but the actual frustum culling per light happens in __renderShadowMaps
+        if (object.castShadow) {
+           array_push(__queueShadow, object);
         }
 
-        // Traverse child objects
-        __collectObjectQueues(object.children, camera);
+        // 2. Camera Pass Collection (Frustum Culling)
+        if (object.frustumCulled) {
+          var _s = object.__intersectionSphere;
+          if (_s != undefined && !sphere_is_visible(_s[0], _s[1], _s[2], _s[3])) continue;
+        }
+
+        var _material = object[$ "material"] ?? global.UE_FALLBACK_MATERIAL;
+
+        if (_material.transparent) {
+          // ---- TRANSPARENT ----
+          // 16 bit renderOrder | 32 bit inverted depth
+          var nd = clamp(vec3_distance_to_squared(object.position, cameraPos) / _maxDistSq, 0, 1);
+          var depth32 = floor(nd * 0xFFFFFFFF);
+          
+            // back-to-front → invert
+          depth32 = 0xFFFFFFFF - depth32;
+          
+          object.__transparentSortKey =
+              ((object.renderOrder & 0xFFFF) << 32) |
+              depth32;
+          
+          array_push(__queueTransparent, object);
+          
+        } else { 
+          // ---- OPAQUE ----
+          // 16 bit renderOrder | 16 bit materialId
+          object.__opaqueSortKey =
+            ((object.renderOrder & 0xFFFF) << 16) |
+            (_material.id & 0xFFFF);
+        
+          array_push(__queueOpaque, object);
+        }
       }
+
+      // Traverse child objects
+      if (array_length(object.children) > 0) __collectObjectQueues(object.children, camera, frustum);
     }
-  }
-
-  function __quickSortObjects(left, right) {
-    gml_pragma("forceinline");
-    if (left >= right) return;
-
-    var array = __queue;
-    var pivot = array[right].__sortKey;
-    var i = left - 1;
-    var tmp;
-
-    for (var j = left; j < right; j++) {
-      if (array[j].__sortKey < pivot) {
-        i++;
-        tmp = array[i];
-        array[i] = array[j];
-        array[j] = tmp;
-      }
-    }
-
-    tmp = array[i + 1];
-    array[i + 1] = array[right];
-    array[right] = tmp;
-
-    var pivotIndex = i + 1;
-
-    __quickSortObjects(left, pivotIndex - 1);
-    __quickSortObjects(pivotIndex + 1, right);
   }
 
   /**
@@ -231,21 +179,22 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     gpu_set_zwriteenable(true);
     gpu_set_blendenable(false);
 
-    for (var i = 0; i < __lightIdx; i++) {
+    var _shadowCount = array_length(__queueShadow);
+    for (var i = 0, len = array_length(__lights); i < len; i++) {
       var light = __lights[i];
       if (!light.castShadow) continue;
 
       switch (light.lightType) {
         case "DirectionalLight":
-          light.shadow.map.render(light, scene, camera, __queue, __shadowIdx);
+          light.shadow.map.render(light, scene, camera, __queueShadow, _shadowCount);
           break;
 
         case "PointLight":
-          light.shadow.render(light, scene, camera, __queue, __shadowIdx);
+          light.shadow.render(light, scene, camera, __queueShadow, _shadowCount);
           break;
 
         case "SpotLight":
-          light.shadow.render(light, scene, camera, __queue, __shadowIdx);
+          light.shadow.render(light, scene, camera, __queueShadow, _shadowCount);
           break;
       }
     }
@@ -279,7 +228,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     var sIdx = 0;
     var hIdx = 0;
 
-    for (var i = 0; i < __lightIdx; i++) {
+    for (var i = 0, len = array_length(lights); i < len; i++) {
       var l = lights[i];
       if (!l.enabled) continue;
 
@@ -321,14 +270,14 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   }
 
   /**
-   * Render the main scene
+   * Render a specific queue of objects
    */
-  function __renderObjects(scene) {
+  function __renderQueue(queue, scene) {
     gml_pragma("forceinline");
     var overrideMaterial = scene[$ "overrideMaterial"];
 
-    for (var i = 0; i < __queueIdx; i++) {
-      var _object = __queue[i];
+    for (var i = 0, len = array_length(queue); i < len; i++) {
+      var _object = queue[i];
       var _onBeforeRender = _object[$ "onBeforeRender"];
       var _onAfterRender = _object[$ "onAfterRender"];
       var _material = _object[$ "material"] ?? global.UE_FALLBACK_MATERIAL;
@@ -378,11 +327,16 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // Collect and classify all renderable objects
     if (camera.matrixAutoUpdate) camera.updateMatrixWorld();
 
-    __lightIdx = 0;
-    __queueIdx = 0;
-    // Collect all renderable objects for shadow pass (no camera frustum culling)
-    __collectObjectQueues(scene.children, camera, false);
-    __shadowIdx = __queueIdx;
+    array_resize(__lights, 0);
+    array_resize(__queueShadow, 0);
+    array_resize(__queueOpaque, 0);
+    array_resize(__queueTransparent, 0);
+    
+    // Get camera frustum for culling
+    var _frustum = camera.getFrustum();
+    
+    // Collect all renderable objects
+    __collectObjectQueues(scene.children, camera, _frustum);
 
     // **PASS 1: Render shadow maps for shadow-casting lights**
     if (shadowMap.enabled && (shadowMap.autoUpdate || shadowMap.needsUpdate)) {
@@ -410,32 +364,23 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     }
 
     // Sort both queues before rendering
-    if (sortObjects) __quickSortObjects(0, __queueIdx - 1);
-
-    // Visibility filtering for the main camera pass.
-    // This removes objects that are not visible to the camera, but were kept for the shadow pass.
-    // Performed after sorting to maintain consistent indexing for subsequent operations.
-    var _writeIdx = 0;
-    for (var i = 0; i < __queueIdx; i++){
-        var _obj = __queue[i];
-
-        // Test the frustum intersection
-        if (_obj[$ "frustumCulled"]) {
-          var _boundingSphere = _obj[$ "__intersectionSphere"];
-
-          if (_boundingSphere != undefined &&
-            !sphere_is_visible(_boundingSphere[SPHERE.x], _boundingSphere[SPHERE.y],
-              _boundingSphere[SPHERE.z], _boundingSphere[SPHERE.r])) {
-            continue;
-          }
-        }
-
-        __queue[_writeIdx++] = _obj;
+    if (sortObjects) {
+      // OPAQUE
+      array_sort(__queueOpaque, function(a, b) {
+        return a.__opaqueSortKey - b.__opaqueSortKey;
+      });
+       
+      // TRANSPARENT
+      array_sort(__queueTransparent, function(a, b) {
+        return a.__transparentSortKey - b.__transparentSortKey;
+      });
     }
-    __queueIdx = _writeIdx;
 
-    // **PASS 2: Render the main scene**
-    __renderObjects(scene);
+    // **PASS 2: Main camera pass (Opaque objects)**
+    __renderQueue(__queueOpaque, scene);
+    
+    // **PASS 3: Transparent objects**
+    __renderQueue(__queueTransparent, scene);
 
     // Reset the world after rendering
     __boundMaterial = undefined;

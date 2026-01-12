@@ -140,7 +140,6 @@
     {"name":"UeParticlePool","order":1,"path":"scripts/UeParticlePool/UeParticlePool.yy",},
     {"name":"UeParticleRenderer","order":3,"path":"scripts/UeParticleRenderer/UeParticleRenderer.yy",},
     {"name":"UeParticleSystem","order":2,"path":"scripts/UeParticleSystem/UeParticleSystem.yy",},
-    {"name":"UeParticleVelocity","order":1,"path":"scripts/UeParticleVelocity/UeParticleVelocity.yy",},
     {"name":"UePerspectiveCamera","order":1,"path":"scripts/UePerspectiveCamera/UePerspectiveCamera.yy",},
     {"name":"UePointerLockControls","order":4,"path":"scripts/UePointerLockControls/UePointerLockControls.yy",},
     {"name":"UePointLight","order":3,"path":"scripts/UePointLight/UePointLight.yy",},
