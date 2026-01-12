@@ -1,7 +1,9 @@
 scene = new UeScene();
-camera = new UePerspectiveCamera({ y: 5, z: 15, yt: 2 });
+camera = new UePerspectiveCamera({ x: -10, y: -100, z: 50 });
 
 renderer = new UeRenderer({
+  autoClear: true,
+  autoClearColor: c_black,
   shadowMap: {
     enabled: true
   }
@@ -18,64 +20,66 @@ vec3_set(dirLight.position, 10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-scene.add(new UeAxesHelper(50));
+scene.add(new UeAxesHelper(10));
 
 // Ground
-var groundGeo = new UePlaneGeometry(20, 20);
+var groundGeo = new UePlaneGeometry(50, 50);
 var groundMat = new UeMeshStandardMaterial({ color: #222222 });
 var ground = new UeMesh(groundGeo, groundMat);
 ground.receiveShadow = true;
 scene.add(ground);
 
-scene.add(new UeGridHelper(20, 20));
+scene.add(new UeGridHelper(50, 50));
 
 // --- Particle Systems ---
 fireSystem = new UeParticleSystem(new UeParticlePool(500));
-fireSystem.softFactor = 5.0;
+fireSystem.softFactor = 0.0;
 fireSystem.castShadow = true;
 scene.add(fireSystem);
 
 smokeSystem = new UeParticleSystem(new UeParticlePool(200));
-smokeSystem.softFactor = 5.0;
+smokeSystem.softFactor = 0.0;
 smokeSystem.castShadow = false;
 scene.add(smokeSystem);
 
 // 1. Fire Type
 fireType = new UeParticleType()
-  .setLife(0.5, 1.0)
-  .setSpeed(2.0, 4.0)
-  .setDirection(85, 95)
-  .setSize(0.4, 0.8, -0.2)
-  .setAlpha(1.0, 0.5, 0)
+  .setLife(0.4, 0.8)
+  .setSpeed(3.0, 6.0)
+  .setDirection(0, 360)
+  .setPitch(80, 100)
+  .setSize(0.5, 1.2, -0.5)
+  .setAlpha(1.0, 0.8, 0)
   .setColor(#FFCC00, #FF4400, #220000);
 fireType.useColorMix = true;
 fireType.useAlphaMix = true;
 
 // 2. Smoke Type
 smokeType = new UeParticleType()
-  .setLife(2.0, 4.0)
-  .setSpeed(1.0, 2.0)
-  .setDirection(80, 100)
-  .setSize(0.8, 1.5, 0.5)
-  .setAlpha(0, 0.4, 0)
+  .setLife(1.5, 3.0)
+  .setSpeed(2.0, 4.0)
+  .setDirection(0, 360)
+  .setPitch(70, 110)
+  .setSize(1.0, 2.5, 1.0)
+  .setAlpha(0, 0.3, 0)
   .setColor(#444444, #222222, #111111);
 smokeType.useColorMix = true;
 smokeType.useAlphaMix = true;
 
 // 3. Emitters
 fireEmitter = new UeParticleEmitter(fireType, {
-  rate: 120,
+  rate: 400,
   shape: "sphere",
-  shapeSize: [0.3],
+  shapeSize: [0.5],
   position: [0, 0.1, 0],
   castShadow: true,
   receiveShadow: false
 });
 
 smokeEmitter = new UeParticleEmitter(smokeType, {
-  rate: 30,
+  rate: 100,
   shape: "sphere",
-  shapeSize: [0.6],
+  shapeSize: [1.0],
   position: [0, 1.2, 0],
   castShadow: false,
   receiveShadow: true

@@ -114,4 +114,13 @@ function UeParticleType() constructor {
         self.rotationIncr = _incr;
         return self;
     };
+
+    self.pitch = [-90, 90];
+    self.pitchIncr = 0;
+    
+    self.setPitch = function(_min, _max, _incr = 0) {
+        self.pitch = [_min, _max];
+        self.pitchIncr = _incr;
+        return self;
+    };
 }

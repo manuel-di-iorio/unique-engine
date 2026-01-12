@@ -1,6 +1,6 @@
 renderer = new UeRenderer();
 scene = new UeScene();
-camera = new UePerspectiveCamera({ x: -10, z: 50 }).use();
+camera = new UePerspectiveCamera({ x: -10, y: -100, z: 50 }).use();
 camera.matrixAutoUpdate = false;
 
 // Create the raycaster

@@ -83,14 +83,18 @@ function UeParticleEmitter(type, data = {}) constructor {
         // --- Spawn Velocity ---
         var spd = random_range(t.speed[0], t.speed[1]);
         var dir = random_range(t.direction[0], t.direction[1]);
-        var pitch = random_range(-90, 90); // Default 3D spread
+        var pitch = random_range(t.pitch[0], t.pitch[1]);
         
-        // Simple spherical to cartesian for 3D velocity
+        // Z-Up Spherical to Cartesian
         var radDir = degtorad(dir);
         var radPitch = degtorad(pitch);
+        
+        // In this system:
+        // Z is Up (elevation, pitch)
+        // dir is rotation around Z axis in XY plane
         p.velX[i] = spd * cos(radPitch) * cos(radDir);
-        p.velY[i] = spd * sin(radPitch);
-        p.velZ[i] = spd * cos(radPitch) * sin(radDir);
+        p.velY[i] = spd * cos(radPitch) * sin(radDir);
+        p.velZ[i] = spd * sin(radPitch);
 
         // --- Spawn Appearance ---
         p.size[i] = random_range(t.size[0], t.size[1]);

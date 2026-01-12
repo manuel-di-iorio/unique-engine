@@ -337,7 +337,7 @@ function UeMaterial(data = {}) constructor {
      }
    }
  
-   if (shadowLight != undefined) {
+   if (shadowLight != undefined && surface_exists(shadowLight.shadow.map.surface)) {
      shader_set_uniform_f(__uniformDirShadowEnabledLoc, 1.0);
      shader_set_uniform_f(__uniformDirShadowQualityLoc, shadowQuality);
  

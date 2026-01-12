@@ -26,7 +26,7 @@ player.geometry.computeBoundingBox();
 player.geometry.computeBoundingSphere();
 
 // --- Luci ---
-ambientLight = new UeAmbientLight(make_color_rgb(120, 160, 180), { intensity: 0.35 });
+ambientLight = new UeHemisphereLight(make_color_rgb(120, 160, 180), make_color_rgb(100, 140, 100), 0.55);
 dirLight = new UeDirectionalLight(make_color_rgb(255, 245, 230), 1.0, {
   castShadow: true,
   shadow: {

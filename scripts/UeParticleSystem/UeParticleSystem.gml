@@ -81,38 +81,47 @@ function UeParticleSystem(pool, data = {}): UeObject3D(data) constructor {
             self.emitters[i].update(_dt);
         }
 
-        // Update particles
+        // 1. Life Cycle & Age
         var i = 0;
         while (i < p.aliveCount) {
-            // Update age
             p.age[i] += _dt;
-            
-            // Check life
             if (p.age[i] >= p.life[i]) {
                 kill(i);
-                continue; // Don't increment i, swap happened
+                continue; 
             }
+            i++;
+        }
 
-            // Apply modules
-            for (var m = 0, ml = array_length(self.modules); m < ml; m++) {
-                self.modules[m].onUpdate(p, i, _dt);
+        // 2. Modules (Batch Processing)
+        // Ideally modules should implement a process() method. 
+        // For backward compatibility we check, otherwise loop.
+        for (var m = 0, ml = array_length(self.modules); m < ml; m++) {
+            var module = self.modules[m];
+            if (variable_struct_exists(module, "process")) {
+                module.process(p, p.aliveCount, _dt);
+            } else {
+                // Fallback for legacy modules
+                for (var j = 0; j < p.aliveCount; j++) {
+                    module.onUpdate(p, j, _dt);
+                }
             }
+        }
 
-            // Basic Physics Integration
-            p.posX[i] += p.velX[i] * _dt;
-            p.posY[i] += p.velY[i] * _dt;
-            p.posZ[i] += p.velZ[i] * _dt;
-
-            // Sorting Key Calculation
+        // 3. Physics Integration
+        var count = p.aliveCount;
+        for (var j = 0; j < count; j++) {
+            p.posX[j] += p.velX[j] * _dt;
+            p.posY[j] += p.velY[j] * _dt;
+            p.posZ[j] += p.velZ[j] * _dt;
+            
+            // Sorting Key Calculation (if needed)
             if (self.sorted && camera != undefined) {
                 var camPos = camera.position;
-                var dx = p.posX[i] - camPos[0];
-                var dy = p.posY[i] - camPos[1];
-                var dz = p.posZ[i] - camPos[2];
-                p.sortKey[i] = dx*dx + dy*dy + dz*dz; // Distance squared for sorting
+                var dx = p.posX[j] - camPos[0];
+                var dy = p.posY[j] - camPos[1];
+                var dz = p.posZ[j] - camPos[2];
+                p.sortKey[j] = dx*dx + dy*dy + dz*dz;
             }
-
-            i++;
         }
 
         if (self.sorted) {

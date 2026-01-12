@@ -12,8 +12,8 @@ function UeAxesHelper(size = 1, data = {}): UeLineSegments(undefined, undefined,
 
     // Line segment positions for axes: [x1, y1, z1, x2, y2, z2]
     var positions = [
-        0, 0, 0, -size, 0, 0,   // X axis
-        0, 0, 0, 0, -size, 0,   // Y axis
+        0, 0, 0, size, 0, 0,   // X axis
+        0, 0, 0, 0, size, 0,   // Y axis
         0, 0, 0, 0, 0, size    // Z axis
     ];
 

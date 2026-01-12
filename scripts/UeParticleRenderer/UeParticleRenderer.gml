@@ -7,7 +7,7 @@ function UeParticleRenderer() constructor {
     vertex_format_add_position_3d(); // x, y, z (center position)
     vertex_format_add_colour();      // color (rgba)
     vertex_format_add_texcoord();    // uv
-    vertex_format_add_normal();      // size, rotation, 0
+    vertex_format_add_custom(vertex_type_float3, vertex_usage_normal); // size, rotation, 0 (Use custom to avoid compression)
     self.format = vertex_format_end();
 
     self.vbuffer = vertex_create_buffer();
@@ -65,38 +65,38 @@ function UeParticleRenderer() constructor {
             vertex_position_3d(self.vbuffer, px, py, pz);
             vertex_color(self.vbuffer, col, alpha);
             vertex_texcoord(self.vbuffer, 0, 0);
-            vertex_normal(self.vbuffer, size, rot, 0);
+            vertex_float3(self.vbuffer, size, rot, 0);
 
             // Corner 2: Top-Right (UV: 1,0)
             vertex_position_3d(self.vbuffer, px, py, pz);
             vertex_color(self.vbuffer, col, alpha);
             vertex_texcoord(self.vbuffer, 1, 0);
-            vertex_normal(self.vbuffer, size, rot, 0);
+            vertex_float3(self.vbuffer, size, rot, 0);
 
             // Corner 3: Bottom-Left (UV: 0,1)
             vertex_position_3d(self.vbuffer, px, py, pz);
             vertex_color(self.vbuffer, col, alpha);
             vertex_texcoord(self.vbuffer, 0, 1);
-            vertex_normal(self.vbuffer, size, rot, 0);
+            vertex_float3(self.vbuffer, size, rot, 0);
 
             // Triangle 2
             // Corner 3: Bottom-Left (UV: 0,1)
             vertex_position_3d(self.vbuffer, px, py, pz);
             vertex_color(self.vbuffer, col, alpha);
             vertex_texcoord(self.vbuffer, 0, 1);
-            vertex_normal(self.vbuffer, size, rot, 0);
+            vertex_float3(self.vbuffer, size, rot, 0);
 
             // Corner 2: Top-Right (UV: 1,0)
             vertex_position_3d(self.vbuffer, px, py, pz);
             vertex_color(self.vbuffer, col, alpha);
             vertex_texcoord(self.vbuffer, 1, 0);
-            vertex_normal(self.vbuffer, size, rot, 0);
+            vertex_float3(self.vbuffer, size, rot, 0);
 
             // Corner 4: Bottom-Right (UV: 1,1)
             vertex_position_3d(self.vbuffer, px, py, pz);
             vertex_color(self.vbuffer, col, alpha);
             vertex_texcoord(self.vbuffer, 1, 1);
-            vertex_normal(self.vbuffer, size, rot, 0);
+            vertex_float3(self.vbuffer, size, rot, 0);
         }
         vertex_end(self.vbuffer);
 
@@ -104,6 +104,19 @@ function UeParticleRenderer() constructor {
         var sh = isShadowPass ? self.shaderShadow : self.shader;
         shader_set(sh);
         
+        var _prevBlend = gpu_get_blendenable();
+        var _prevSrc = gpu_get_blendmode_src();
+        var _prevDst = gpu_get_blendmode_dest();
+        var _prevCull = gpu_get_cullmode();
+        var _prevZWrite = gpu_get_zwriteenable();
+        
+        if (!isShadowPass) {
+             gpu_set_blendenable(true);
+             gpu_set_blendmode(bm_normal);
+             gpu_set_cullmode(cull_noculling);
+             gpu_set_zwriteenable(false);
+        }
+
         if (isShadowPass) {
             shader_set_uniform_f(self.uRightShadow, rx, ry, rz);
             shader_set_uniform_f(self.uUpShadow, ux, uy, uz);
@@ -131,7 +144,7 @@ function UeParticleRenderer() constructor {
                 var dirLightCount = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT];
                 if (dirLightCount > 0) {
                     var dirLight = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL][0];
-                    if (dirLight != undefined && dirLight.castShadow) {
+                    if (dirLight != undefined && dirLight.castShadow && surface_exists(dirLight.shadow.map.surface)) {
                         texture_set_stage(self.uShadowMap, dirLight.shadow.map.getTexture());
                         shader_set_uniform_f_array(self.uShadowMatrix, dirLight.shadow.lightSpaceMatrix);
                     }
@@ -143,6 +156,12 @@ function UeParticleRenderer() constructor {
         
         var tex = (texture == -1) ? sprite_get_texture(sprUiPointLight, 0) : texture;
         vertex_submit(self.vbuffer, pr_trianglelist, tex);
+        
+        // Restore state
+        gpu_set_blendenable(_prevBlend);
+        gpu_set_blendmode_ext(_prevSrc, _prevDst);
+        gpu_set_cullmode(_prevCull);
+        gpu_set_zwriteenable(_prevZWrite);
         
         shader_reset();
     }
