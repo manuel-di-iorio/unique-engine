@@ -64,6 +64,12 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     spotShadowTexelSize: "u_ueSpotShadowInvTexelSize",
     spotShadowMapSampler: "s_spotShadowMap",
 
+    // Hemisphere Light
+    hemiLightDirection: "u_ueHemiLightDirection",
+    hemiLightSkyColor: "u_ueHemiLightSkyColor",
+    hemiLightGroundColor: "u_ueHemiLightGroundColor",
+    hemiLightIntensity: "u_ueHemiLightIntensity",
+
     // Fog
     fogColor: "u_ueFogColor",
     fogDensity: "u_ueFogDensity",

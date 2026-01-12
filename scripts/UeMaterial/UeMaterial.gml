@@ -209,6 +209,12 @@ function UeMaterial(data = {}) constructor {
   __uniformSpotLightsAngle = shader_get_uniform(shader, cfg.spotLightAngle);
   __uniformSpotLightsPenumbra = shader_get_uniform(shader, cfg.spotLightPenumbra);
 
+  // Cache hemisphere light uniforms
+  __uniformHemiLightDirLoc = shader_get_uniform(shader, cfg.hemiLightDirection);
+  __uniformHemiLightSkyColorLoc = shader_get_uniform(shader, cfg.hemiLightSkyColor);
+  __uniformHemiLightGroundColorLoc = shader_get_uniform(shader, cfg.hemiLightGroundColor);
+  __uniformHemiLightIntensityLoc = shader_get_uniform(shader, cfg.hemiLightIntensity);
+
   // Cache the uniforms
    var uniformNames = variable_struct_get_names(uniforms);
    __uniformsCachedCount = array_length(uniformNames);
@@ -499,6 +505,23 @@ function UeMaterial(data = {}) constructor {
     shader_set_uniform_f_array(__uniformSpotLightsDecay, sDecayArr);
     shader_set_uniform_f_array(__uniformSpotLightsAngle, sAngleArr);
     shader_set_uniform_f_array(__uniformSpotLightsPenumbra, sPenumbraArr);
+  }
+
+  // Set hemisphere light (max 1)
+  if (hemiLightCount > 0 && __uniformHemiLightIntensityLoc != undefined) {
+    var light = hemiLightState[0];
+    
+    // Direction is normalized position
+    var dir = global.UE_VEC3_TEMP1;
+    vec3_copy(dir, light.position);
+    vec3_normalize(dir);
+    
+    shader_set_uniform_f(__uniformHemiLightDirLoc, dir[0], dir[1], dir[2]);
+    shader_set_uniform_f_array(__uniformHemiLightSkyColorLoc, light.skyColor);
+    shader_set_uniform_f_array(__uniformHemiLightGroundColorLoc, light.groundColor);
+    shader_set_uniform_f(__uniformHemiLightIntensityLoc, light.intensity);
+  } else if (__uniformHemiLightIntensityLoc != undefined) {
+    shader_set_uniform_f(__uniformHemiLightIntensityLoc, 0.0);
   }
  }
 

@@ -88,6 +88,10 @@ Lights bring depth and realism to the scene. Currently supported types:
 
 - Directional: simulates distant light sources like the sun, with parallel rays from a fixed direction. Position doesn't affect intensity, only the direction matters (defined by position and target).
 
+- Spot: A spot light emits light in a specific direction from a point in 3D space. It has a defined cone angle, where the light is strongest and falls off gradually outside that cone. Spotlights are commonly used for simulating flashlight effects, torchlights, or any other light source with a limited range.
+
+- Hemisphere: A light source positioned directly above the scene, with color fading from the sky color to the ground color. This light cannot be used to cast shadows.
+
 Example:
 
 ```js

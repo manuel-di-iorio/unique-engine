@@ -54,7 +54,19 @@ function UeMtlLoader() constructor {
                 materials[$ name] = current;
                 break;
 
-            case "Ka": case "Kd": case "Ks": case "Ke": case "Tf":
+            case "Kd":
+                if (current != undefined) {
+                    var r = real(tokens[1]);
+                    var g = real(tokens[2]);
+                    var b = real(tokens[3]);
+                    current.color = [r, g, b];
+                    if (current.uniforms[$ "ueColor"] != undefined) {
+                        current.uniforms.ueColor.value = current.color;
+                    }
+                }
+                break;
+
+            case "Ka": case "Ks": case "Ke": case "Tf":
                 var color = make_color_rgb(real(tokens[1]) * 255, real(tokens[2]) * 255, real(tokens[3]) * 255);
                 if (current != undefined) current[$ type] = color;
                 break;
@@ -73,13 +85,16 @@ function UeMtlLoader() constructor {
 
             case "d": // dissolve (alpha)
                 if (current != undefined) {
-                    current.alpha = real(tokens[1]);
-                    if (current.alpha != 1) current.transparent = true;
+                    current.opacity = real(tokens[1]);
+                    if (current.opacity < 1) current.transparent = true;
                 }
                 break;
 
             case "Tr": // transparency (inverted alpha)
-                if (current != undefined) current.alpha = 1 - real(tokens[1]);
+                if (current != undefined) {
+                    current.opacity = 1 - real(tokens[1]);
+                    if (current.opacity < 1) current.transparent = true;
+                }
                 break;
 
             case "map_Ka":

@@ -2,12 +2,15 @@
 
 A light source positioned directly above the scene, with color fading from the sky color to the ground color.
 
+The light's direction is determined by its `position` relative to the origin `(0, 0, 0)`. By default, the position is `(0, 0, 100)`, meaning the light comes from above (along the Z axis).
+
 This light cannot be used to cast shadows.
 
 ## Code Example
 
 ```gml
 var light = new UeHemisphereLight(0xffffbb, 0x080820, 1);
+vec3_set(light.position, 0, 0, 100);
 scene.add(light);
 ```
 
@@ -32,6 +35,9 @@ The light's ground color as an array `[r, g, b]`.
 
 ### `.intensity`
 The light's strength/intensity.
+
+### `.position`
+The light's position. The vector from `(0, 0, 0)` to this position defines the direction of the sky color.
 
 ### `.isHemisphereLight` (readonly)
 This flag can be used for type testing. Default is `true`.

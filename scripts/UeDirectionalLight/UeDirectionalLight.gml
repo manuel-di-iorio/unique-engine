@@ -15,7 +15,7 @@ function UeDirectionalLight(color = c_white, intensity = 1, data = {}): UeLight(
     self.intensity = intensity;
     
     // Target is an Object3D that the light points at (default: origin)
-    target = new UeObject3D();
+    target = new UeObject3D({ x: data[$ "xt"] ?? 0, y: data[$ "yt"] ?? 0, z: data[$ "zt"] ?? 0 });
     
     // Shadow configuration
     shadow = new UeDirectionalLightShadow(data[$ "shadow"] ?? {});

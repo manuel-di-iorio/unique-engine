@@ -46,6 +46,7 @@ function UeDirectionalLightHelper(light, size = 1, color = undefined, data = {})
         
         // Get world positions for accurate visualization
         light.getWorldPosition(_lightPos);
+        light.target.updateWorldMatrix(false, false);
         light.target.getWorldPosition(_targetPos);
         
         // Update helper position to match light position
