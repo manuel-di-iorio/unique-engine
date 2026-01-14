@@ -66,11 +66,10 @@ function UeMaterial(data = {}) constructor {
   function build(targetShader = undefined) {
     gml_pragma("forceinline");
     var _shader = targetShader ?? self.shader;
-    if (_shader == undefined) return;
+    if (_shader == undefined) return self;
 
-    var _shaderIdx = string(_shader);
-    if (variable_struct_exists(__caches, _shaderIdx)) {
-      __currentCache = __caches[$ _shaderIdx];
+    var __currentCache = __caches[$ _shader];
+    if (__currentCache != undefined) {
       return self;
     }
 
@@ -96,7 +95,7 @@ function UeMaterial(data = {}) constructor {
       uniformPointShadowPosLoc: shader_get_uniform(_shader, cfg.pointShadowPos),
       uniformPointShadowTexelSizeLoc: shader_get_uniform(_shader, cfg.pointShadowTexelSize),
       uniformPointShadowQualityLoc: shader_get_uniform(_shader, cfg.pointShadowQuality),
-      uniformPointShadowMatrixLoc: shader_get_uniform(_shader, "u_uePointShadowMatrix"),
+      uniformPointShadowMatrixLoc: shader_get_uniform(_shader, cfg.pointShadowMatrix),
 
       uniformSpotShadowEnabledLoc: shader_get_uniform(_shader, cfg.spotShadowEnabled),
       uniformSpotShadowMatrixLoc: shader_get_uniform(_shader, cfg.spotShadowMatrix),
@@ -195,7 +194,7 @@ function UeMaterial(data = {}) constructor {
       }
     }
 
-    __caches[$ _shaderIdx] = cache;
+    __caches[$ _shader] = cache;
     __currentCache = cache;
     return self;
   }
@@ -435,25 +434,10 @@ function UeMaterial(data = {}) constructor {
     }
   }
 
-  function use(arg1 = undefined, arg2 = undefined) {
+  function use(renderer = undefined, _targetShader = undefined) {
     gml_pragma("forceinline");
 
-    var renderer = undefined;
-    var _shader = undefined;
-
-    if (arg1 != undefined) {
-      if (is_struct(arg1) && (arg1[$ "isRenderer"] ?? false)) {
-        renderer = arg1;
-        _shader = arg2 ?? self.shader;
-      } else {
-        _shader = arg1;
-      }
-    } else {
-      _shader = self.shader;
-    }
-
-    if (_shader == undefined) return;
-
+    var _shader = _targetShader ?? self.shader;
     shader_set(_shader);
 
     // Ensure we have the correct cache for this shader
@@ -516,24 +500,12 @@ function UeMaterial(data = {}) constructor {
       var type = uObj[$ "type"] ?? UE_UNIFORM_TYPE.FLOAT;
 
       switch (type) {
-        case UE_UNIFORM_TYPE.FLOAT:
-          shader_set_uniform_f(loc, val);
-          break;
-        case UE_UNIFORM_TYPE.VEC2:
-          shader_set_uniform_f(loc, val[0], val[1]);
-          break;
-        case UE_UNIFORM_TYPE.VEC3:
-          shader_set_uniform_f(loc, val[0], val[1], val[2]);
-          break;
-        case UE_UNIFORM_TYPE.VEC4:
-          shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]);
-          break;
-        case UE_UNIFORM_TYPE.MAT4:
-          shader_set_uniform_matrix_array(loc, val);
-          break;
-        case UE_UNIFORM_TYPE.ARRAY:
-          shader_set_uniform_f_array(loc, val);
-          break;
+        case UE_UNIFORM_TYPE.FLOAT: shader_set_uniform_f(loc, val); break;
+        case UE_UNIFORM_TYPE.VEC2: shader_set_uniform_f(loc, val[0], val[1]); break;
+        case UE_UNIFORM_TYPE.VEC3: shader_set_uniform_f(loc, val[0], val[1], val[2]); break;
+        case UE_UNIFORM_TYPE.VEC4: shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]); break;
+        case UE_UNIFORM_TYPE.MAT4: shader_set_uniform_matrix_array(loc, val); break;
+        case UE_UNIFORM_TYPE.ARRAY: shader_set_uniform_f_array(loc, val); break;
         case UE_UNIFORM_TYPE.BUFFER:
           shader_set_uniform_f_buffer(loc, val, uObj[$ "offset"] ?? 0, uObj[$ "count"] ?? array_length(val));
           break;

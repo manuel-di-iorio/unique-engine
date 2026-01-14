@@ -59,6 +59,9 @@ function UeFullscreenQuad(material = undefined) constructor {
     if (!skipMaterial) self.material.use();
 
     var _cull = gpu_get_cullmode();
+    var _ztest = gpu_get_ztestenable();
+    var _zwrite = gpu_get_zwriteenable();
+
     gpu_set_ztestenable(false);
     gpu_set_zwriteenable(false);
     gpu_set_cullmode(cull_noculling);
@@ -70,6 +73,9 @@ function UeFullscreenQuad(material = undefined) constructor {
     vertex_submit(self.geometry.vb, pr_trianglelist, texture);
 
     gpu_set_cullmode(_cull);
+    gpu_set_ztestenable(_ztest);
+    gpu_set_zwriteenable(_zwrite);
+
     return self;
   }
 }

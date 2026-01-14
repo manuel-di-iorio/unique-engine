@@ -317,6 +317,7 @@
     {"id":{"name":"UePyramidGeometry","path":"scripts/UePyramidGeometry/UePyramidGeometry.yy",},},
     {"id":{"name":"UeRaycaster","path":"scripts/UeRaycaster/UeRaycaster.yy",},},
     {"id":{"name":"UeRenderer","path":"scripts/UeRenderer/UeRenderer.yy",},},
+    {"id":{"name":"UeRendererDeferred","path":"scripts/UeRendererDeferred/UeRendererDeferred.yy",},},
     {"id":{"name":"UeRenderPass","path":"scripts/UeRenderPass/UeRenderPass.yy",},},
     {"id":{"name":"UeRenderTarget","path":"scripts/UeRenderTarget/UeRenderTarget.yy",},},
     {"id":{"name":"UeScene","path":"scripts/UeScene/UeScene.yy",},},

@@ -104,16 +104,14 @@ void main() {
     gl_FragData[0] = vec4(albedo, alpha);
     
     // Target 1: Normal (RGB) + Metalness (A)
-    // Normal is mapped from [-1, 1] to [0, 1]
     gl_FragData[1] = vec4(N * 0.5 + 0.5, metalness);
     
-    // Target 2: Position (RGB) + Roughness (A)
-    gl_FragData[2] = vec4(vWorldPosition, roughness);
-    
-    // Target 3: Emissive (RGB) + AO (A)
-    // AO is stored in A, but we can also pack receiveShadow here if needed
-    // For now, let's just use a simple packing: if receiveShadow is false, AO is negative
+    // Target 2: Roughness (R) + AO/Shadow (G)
+    // We pack AO and ReceiveShadow into the G channel
     float aoFinal = ao;
-    if (u_ueReceiveShadow < 0.5) aoFinal = -aoFinal - 0.001; // Negative to indicate no shadow
-    gl_FragData[3] = vec4(emissive, aoFinal);
+    if (u_ueReceiveShadow < 0.5) aoFinal = -aoFinal - 0.001;
+    gl_FragData[2] = vec4(roughness, aoFinal, 0.0, 1.0);
+    
+    // Target 3: Emissive (RGB)
+    gl_FragData[3] = vec4(emissive, 1.0);
 }

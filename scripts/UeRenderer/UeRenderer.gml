@@ -24,35 +24,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
   self.renderPath = data[$ "renderPath"] ?? UE_RENDER_PATH.FORWARD;
 
-  // G-Buffer (for Deferred Rendering)
-  self.__gbuffer = undefined;
-  self.__gbufferMaterial = new UeMaterial({ shader: sh_ue_gbuffer });
-  self.__deferredLightingMaterial = new UeMaterial({ shader: sh_ue_deferred_lighting });
-  self.__fullscreenQuad = new UeFullscreenQuad(self.__deferredLightingMaterial);
-
-  function __initGBuffer() {
-    gml_pragma("forceinline");
-    if (self.__gbuffer != undefined) return;
-
-    self.__gbuffer = {
-      albedoAlpha: new UeRenderTarget(self.width, self.height),
-      normalMetal: new UeRenderTarget(self.width, self.height, { internalFormat: surface_rgba16float }),
-      positionRough: new UeRenderTarget(self.width, self.height, { internalFormat: surface_rgba32float }),
-      emissiveAO: new UeRenderTarget(self.width, self.height, { internalFormat: surface_rgba16float })
-    };
-  }
-
   function setSize(width, height) {
     gml_pragma("forceinline");
     self.width = width;
     self.height = height;
-
-    if (self.__gbuffer != undefined) {
-      self.__gbuffer.albedoAlpha.setSize(width, height);
-      self.__gbuffer.normalMetal.setSize(width, height);
-      self.__gbuffer.positionRough.setSize(width, height);
-      self.__gbuffer.emissiveAO.setSize(width, height);
-    }
   }
 
   function getSize(target = undefined) {
@@ -326,18 +301,11 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
       // Use the material
       if (_material.visible) {
-        if (self.renderPath == UE_RENDER_PATH.DEFERRED && !isTransparentPass) {
-          // Use G-Buffer shader but keep material settings
-          _material.use(self, sh_ue_gbuffer);
-          _material.useByMesh(_object);
-          __boundMaterial = undefined; // Force re-bind for other passes
-        } else {
-          if (_material != __boundMaterial) {
-            __boundMaterial = _material;
-            _material.use(self);
-          }
-          _material.useByMesh(_object);
+        if (_material != __boundMaterial) {
+          __boundMaterial = _material;
+          _material.use(self);
         }
+        _material.useByMesh(_object);
       }
 
       if (_onBeforeRender != undefined) _onBeforeRender();
@@ -366,20 +334,12 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     shader_reset();
   }
 
-  /// Render the scene
-  function render(scene, camera) {
+  function __prepareFrame(scene, camera) {
     gml_pragma("forceinline");
 
     // When rendering to a surface (render target), skip the view check since
     // there's no active view. Otherwise, ensure we're on the correct view.
-    if (self.__renderTarget == undefined && view_current != camera.view) return;
-
-    var _gpuState = gpu_get_state();
-
-    // Auto clear
-    if (self.autoClear) {
-      self.clear(self.autoClearColor, self.autoClearDepth, self.autoClearStencil);
-    }
+    if (self.__renderTarget == undefined && view_current != camera.view) return false;
 
     // Collect and classify all renderable objects
     if (camera.matrixAutoUpdate) camera.updateMatrixWorld();
@@ -433,59 +393,25 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       });
     }
 
-    // **PASS 2: Main camera pass**
-    if (self.renderPath == UE_RENDER_PATH.DEFERRED) {
-      // --- DEFERRED PATH ---
-      self.__initGBuffer();
-      var _oldRT = self.getRenderTarget();
-
-      // Ensure all G-buffer surfaces exist (they can be freed by GameMaker at any time)
-      if (!surface_exists(self.__gbuffer.albedoAlpha.surface)) self.__gbuffer.albedoAlpha.create();
-      if (!surface_exists(self.__gbuffer.normalMetal.surface)) self.__gbuffer.normalMetal.create();
-      if (!surface_exists(self.__gbuffer.positionRough.surface)) self.__gbuffer.positionRough.create();
-      if (!surface_exists(self.__gbuffer.emissiveAO.surface)) self.__gbuffer.emissiveAO.create();
-
-      // 1. G-Buffer Pass (Opaque objects)
-      surface_set_target_ext(0, self.__gbuffer.albedoAlpha.surface);
-      surface_set_target_ext(1, self.__gbuffer.normalMetal.surface);
-      surface_set_target_ext(2, self.__gbuffer.positionRough.surface);
-      surface_set_target_ext(3, self.__gbuffer.emissiveAO.surface);
-
-      self.clear(true, true, true);
-      camera_apply(camera.camera);
-
-      self.__renderQueue(__queueOpaque, scene, false);
-
-      surface_reset_target();
-
-      // 2. Lighting Pass
-      self.setRenderTarget(_oldRT);
-      if (self.autoClear) self.clear(self.autoClearColor, self.autoClearDepth, self.autoClearStencil);
-
-      var _lm = self.__deferredLightingMaterial;
-      _lm.textures[$ "gbufferAlbedo"] = self.__gbuffer.albedoAlpha;
-      _lm.textures[$ "gbufferNormal"] = self.__gbuffer.normalMetal;
-      _lm.textures[$ "gbufferPosition"] = self.__gbuffer.positionRough;
-      _lm.textures[$ "gbufferORM"] = self.__gbuffer.emissiveAO;
-
-      // Apply camera matrices for lighting pass (though it uses identity internally, some uniforms might need it)
-      _lm.use(self);
-      self.__fullscreenQuad.render(-1);
-
-      // 3. Forward Pass (Transparent objects)
-      camera_apply(camera.camera);
-      if (array_length(__queueTransparent) > 0) {
-        self.__restoreDepth(__queueOpaque);
-      }
-      
-
-      self.__renderQueue(__queueTransparent, scene, true);
-
-    } else {
-      // --- FORWARD PATH ---
-      __renderQueue(__queueOpaque, scene);
-      __renderQueue(__queueTransparent, scene);
+    // Auto clear
+    if (self.autoClear) {
+      self.clear(self.autoClearColor, self.autoClearDepth, self.autoClearStencil);
     }
+
+    return true;
+  }
+
+  /// Render the scene
+  function render(scene, camera) {
+    gml_pragma("forceinline");
+
+    if (!self.__prepareFrame(scene, camera)) return self;
+
+    var _gpuState = gpu_get_state();
+
+    // **PASS 2: Main camera pass**
+    __renderQueue(__queueOpaque, scene);
+    __renderQueue(__queueTransparent, scene);
 
     // Reset the world after rendering
     __boundMaterial = undefined;

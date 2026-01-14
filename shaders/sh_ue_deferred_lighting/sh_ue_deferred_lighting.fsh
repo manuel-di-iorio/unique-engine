@@ -5,12 +5,14 @@ varying vec2 vTexcoord;
 // ===== G-Buffer Samplers =====
 uniform sampler2D s_gbufferAlbedo;
 uniform sampler2D s_gbufferNormal;
-uniform sampler2D s_gbufferPosition;
-uniform sampler2D s_gbufferORM;
+uniform sampler2D s_gbufferRoughnessAO;
+uniform sampler2D s_gbufferEmissive;
+uniform sampler2D s_gbufferDepth;
 
 // ===== Scene =====
 uniform vec3  u_ueCameraPosition;
 uniform vec3  u_ueAmbient;
+uniform mat4  u_ueInvViewProj;
 
 // Fog
 uniform vec3  u_ueFogColor;
@@ -269,18 +271,24 @@ void main() {
     if (gAlbedo.a < 0.1) discard; // Sky or background
 
     vec4 gNormal = texture2D(s_gbufferNormal, vTexcoord);
-    vec4 gPos = texture2D(s_gbufferPosition, vTexcoord);
-    vec4 gORM = texture2D(s_gbufferORM, vTexcoord);
+    vec4 gRoughAO = texture2D(s_gbufferRoughnessAO, vTexcoord);
+    vec4 gEmissive = texture2D(s_gbufferEmissive, vTexcoord);
+    float depth = texture2D(s_gbufferDepth, vTexcoord).r;
 
+    // 1. Position Reconstruction from Depth
+    vec4 clipPos = vec4(vTexcoord * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    vec4 worldPos4 = u_ueInvViewProj * clipPos;
+    vec3 worldPos = worldPos4.xyz / worldPos4.w;
+
+    // 2. Extract surface properties
     vec3 albedo = SRGBToLinear(gAlbedo.rgb);
     vec3 N = normalize(gNormal.rgb * 2.0 - 1.0);
-    vec3 worldPos = gPos.rgb;
     float metalness = gNormal.a;
-    float roughness = gPos.a;
-    vec3 emissive = gORM.rgb;
+    float roughness = gRoughAO.r;
+    vec3 emissive = gEmissive.rgb;
     
     // Decode AO and receiveShadow
-    float rawAO = gORM.a;
+    float rawAO = gRoughAO.g;
     float receiveShadow = 1.0;
     float ao = rawAO;
     if (rawAO < 0.0) {
