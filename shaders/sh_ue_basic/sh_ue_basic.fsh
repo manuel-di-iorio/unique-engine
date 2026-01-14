@@ -3,12 +3,23 @@ varying vec4 v_vColour;
 
 // Emissive
 uniform vec3 u_ueEmissive;
-uniform float u_ueEmissiveIntensity;
+uniform vec4 u_ueMaterialData; // [emissiveIntensity, toneMapping, toneMappingExposure, toneMapped]
+#define u_ueEmissiveIntensity   u_ueMaterialData.x
+#define u_ueToneMapping         u_ueMaterialData.y
+#define u_ueToneMappingExposure u_ueMaterialData.z
+#define u_ueToneMapped          u_ueMaterialData.w
 
 // Textures
 uniform sampler2D s_emissiveMap;
-uniform float u_ueHasMap;
-uniform float u_ueHasEmissiveMap;
+uniform vec4 u_ueMapFlags;  // [hasMap, hasAlphaMap, hasOrmMap, hasNormalMap]
+#define u_ueHasMap              u_ueMapFlags.x
+#define u_ueHasAlphaMap         u_ueMapFlags.y
+#define u_ueHasOrmMap           u_ueMapFlags.z
+#define u_ueHasNormalMap        u_ueMapFlags.w
+
+uniform vec4 u_ueMapFlags2; // [hasEmissiveMap, hasDisplacementMap, 0, 0]
+#define u_ueHasEmissiveMap      u_ueMapFlags2.x
+#define u_ueHasDisplacementMap  u_ueMapFlags2.y
 
 void main()
 {

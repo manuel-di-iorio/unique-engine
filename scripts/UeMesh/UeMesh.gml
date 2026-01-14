@@ -14,12 +14,13 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
 
       // Submit the vertex buffer
       var tex = -1;
-      if (material.__baseTexture != undefined) {
-          if (is_struct(material.__baseTexture) && variable_struct_exists(material.__baseTexture, "isTexture")) {
-              material.__baseTexture.__useGlobal();
-              tex = material.__baseTexture.__cachedTexture;
+      var materialMap = material.textures[$ "map"];
+      if (materialMap != undefined) {
+          if (is_struct(materialMap) && variable_struct_exists(materialMap, "isTexture")) {
+              materialMap.__useGlobal();
+              tex = materialMap.__cachedTexture;
           } else {
-              tex = material.__baseTexture;
+              tex = materialMap;
           }
       }
       

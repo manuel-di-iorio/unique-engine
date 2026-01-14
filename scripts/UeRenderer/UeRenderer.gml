@@ -214,29 +214,33 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     camera_apply(camera.camera);
   }
 
+  __lightStateVersion = 0;
+
   // Aggregate light data from scene lights
   function __buildLightState() {
     gml_pragma("forceinline");
+    var lights = self.__lights;
+    var len = array_length(lights);
+    var lightState = global.UE_RENDERER_LIGHT_STATE;
+    
+    // Check if something changed (simple version for now: count and types)
+    // In a more complex engine, we'd check positions/colors too.
+    var _oldHash = string(len); 
 
-    var lights = __lights;
-    var ambientState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT];
-    ambientState[0] = 0;
-    ambientState[1] = 0;
-    ambientState[2] = 0;
+    var ambientState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT];
+    ambientState[0] = 0; ambientState[1] = 0; ambientState[2] = 0;
 
-    var directionalState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL];
-    var pointLightState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT];
-    var spotLightState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT];
-    var hemiLightState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT];
+    var directionalState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL];
+    var pointLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT];
+    var spotLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT];
+    var hemiLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT];
 
-    var dIdx = 0;
-    var pIdx = 0;
-    var sIdx = 0;
-    var hIdx = 0;
+    var dIdx = 0, pIdx = 0, sIdx = 0, hIdx = 0;
 
-    for (var i = 0, len = array_length(lights); i < len; i++) {
+    for (var i = 0; i < len; i++) {
       var l = lights[i];
       if (!l.enabled) continue;
+      _oldHash += l.lightType + string(l.id);
 
       switch (l.lightType) {
         case "AmbientLight":
@@ -246,21 +250,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
           ambientState[2] += l.color[2] * l.intensity;
           break;
 
-        case "DirectionalLight":
-          directionalState[dIdx++] = l;
-          break;
-
-        case "PointLight":
-          pointLightState[pIdx++] = l;
-          break;
-
-        case "SpotLight":
-          spotLightState[sIdx++] = l;
-          break;
-
-        case "HemisphereLight":
-          hemiLightState[hIdx++] = l;
-          break;
+        case "DirectionalLight": directionalState[dIdx++] = l; break;
+        case "PointLight": pointLightState[pIdx++] = l; break;
+        case "SpotLight": spotLightState[sIdx++] = l; break;
+        case "HemisphereLight": hemiLightState[hIdx++] = l; break;
       }
     }
 
@@ -303,6 +296,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       if (_material.visible) {
         if (_material != __boundMaterial) {
           __boundMaterial = _material;
+          shader_set(_material.shader);
           _material.use(self);
         }
         _material.useByMesh(_object);
@@ -323,13 +317,13 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     gpu_set_zwriteenable(true);
     gpu_set_ztestenable(true);
     gpu_set_cullmode(cull_counterclockwise);
-    
+
     for (var i = 0, len = array_length(queue); i < len; i++) {
-        var _object = queue[i];
-        if (_object.geometry == undefined) continue;
-        _object.render(false);
+      var _object = queue[i];
+      if (_object.geometry == undefined) continue;
+      _object.render(false);
     }
-    
+
     gpu_set_colorwriteenable(true, true, true, true);
     shader_reset();
   }
@@ -370,15 +364,65 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     global.UE_RENDERER_TONE_MAPPING = self.toneMapping;
     global.UE_RENDERER_TONE_MAPPING_EXPOSURE = self.toneMappingExposure;
 
-    var sceneFog = scene[$ "fog"];
-    if (sceneFog != undefined) {
-      var fogState = global.UE_RENDERER_FOG_STATE;
-      fogState.enabled = sceneFog.enabled;
-      fogState.color = sceneFog.color;
-      fogState.density = sceneFog.density;
-      fogState.near = sceneFog.near;
-      fogState.far = sceneFog.far;
+    // Pack Scene Data into a single array for shaders
+    var sceneFog = scene.fog;
+    var fogEnabled = sceneFog != undefined ? sceneFog.enabled : false;
+    var fogColor = sceneFog != undefined ? sceneFog.color : c_black;
+    var fogDensity = fogEnabled ? sceneFog.density : 0;
+    var fogNear = fogEnabled ? sceneFog.near : 0;
+    var fogFar = fogEnabled ? sceneFog.far : 0;
+
+    // Scene Data [3] vec4
+    var sceneData = global.UE_SCENE_DATA_BUFFER; // Use a pre-allocated array to avoid GC
+
+    // [0] CameraPos.xyz, FogDensity
+    sceneData[0] = camera.position[0];
+    sceneData[1] = camera.position[1];
+    sceneData[2] = camera.position[2];
+    sceneData[3] = fogDensity;
+
+    // [1] Ambient.rgb, FogNear
+    var _ambientState = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT];
+    sceneData[4] = _ambientState[0];
+    sceneData[5] = _ambientState[1];
+    sceneData[6] = _ambientState[2];
+    sceneData[7] = fogNear;
+
+    // [2] FogColor.rgb, FogFar
+    var fogLinear;
+    if (is_array(fogColor)) {
+      fogLinear = [fogColor[0], fogColor[1], fogColor[2]];
+    } else {
+      fogLinear = [color_get_red(fogColor) / 255, color_get_green(fogColor) / 255, color_get_blue(fogColor) / 255];
     }
+    sceneData[8] = fogLinear[0];
+    sceneData[9] = fogLinear[1];
+    sceneData[10] = fogLinear[2];
+    sceneData[11] = fogFar;
+
+    // [3] Dir Light Dir + Intensity
+    var _dlCount = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT];
+    var _dl = (_dlCount > 0) ? global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL][0] : undefined;
+
+    if (_dl != undefined) {
+      var _dir = _dl.getDirection();
+      sceneData[12] = _dir[0];
+      sceneData[13] = _dir[1];
+      sceneData[14] = _dir[2];
+      sceneData[15] = _dl.intensity;
+
+      // [4] Dir Light Color
+      sceneData[16] = _dl.color[0];
+      sceneData[17] = _dl.color[1];
+      sceneData[18] = _dl.color[2];
+      sceneData[19] = 1.0; // shadow enabled? 1.0 if yes, 0.0 if no
+    } else {
+      // No directional light, set default values
+      sceneData[12] = 0; sceneData[13] = -1; sceneData[14] = 0; sceneData[15] = 0;
+      sceneData[16] = 0; sceneData[17] = 0; sceneData[18] = 0; sceneData[19] = 0;
+    }
+
+    global.UE_RENDERER_SCENE_DATA = sceneData;
 
     // Sort both queues before rendering
     if (sortObjects) {

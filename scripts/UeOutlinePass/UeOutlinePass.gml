@@ -35,9 +35,9 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
     // Outline visual parameters
     self.visibleEdgeColor = [1, 1, 1];  // White outline by default
     self.edgeGlow = 1;                   // Glow/blur amount (0 = sharp)
-    self.edgeStrength = 10;              // Intensity multiplier
-    self.thickness = 2;                  // Edge thickness in pixels
-    self.normalEdgeStrength = 1.0;       // Strength of internal edges from normals
+    self.edgeStrength = 1;              // Intensity multiplier
+    self.thickness = 1;                  // Edge thickness in pixels
+    self.normalEdgeStrength = 0.0;       // Strength of internal edges from normals
     self.hiddenEdgeColor = [0.1, 0.04, 0.02]; // For future hidden edge support
     
     // ========================================
@@ -171,7 +171,6 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
                 renderedCount++;
             }
         }
-        show_debug_message("UeOutlinePass: Mask pass rendered " + string(renderedCount) + " objects");
         
         // Restore previous render target
         renderer.setRenderTarget(_oldRT);
@@ -192,7 +191,6 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         _texelSize[@ 0] = 1 / readTarget.width;
         _texelSize[@ 1] = 1 / readTarget.height;
         
-        show_debug_message("UeOutlinePass: Composition pass starting");
         var _useGBuffer = 0.0;
         if (renderer[$ "__gbuffer"] != undefined) {
             var gbuffer = renderer.__gbuffer;
@@ -223,6 +221,7 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         }
         
         // Apply the outline material
+        shader_set(self.__outlineMaterial.shader);
         self.__outlineMaterial.use(renderer);
         
         // Use the global quad for rendering

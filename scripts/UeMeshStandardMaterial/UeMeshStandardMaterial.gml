@@ -1,6 +1,4 @@
 function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
-  var cfg = __uniformNamesConfig;
-  
   shader = sh_ue_standard;
   
   // Color

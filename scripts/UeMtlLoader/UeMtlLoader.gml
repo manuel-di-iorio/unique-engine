@@ -100,34 +100,26 @@ function UeMtlLoader() constructor {
             case "map_Ka":
             case "map_Kd":
                 if (current != undefined) {
-                    var currentTex = current.textures[$ "map"];
-                    //if (currentTex != undefined) currentTex.dispose();
-                    current.textures.map = _createTexture(tokens[1]);
+                    current.setTexture("map", _createTexture(tokens[1]));
                 }
                 break;
 
             case "map_bump":
             case "bump":
                 if (current != undefined) {
-                    var currentTex = current.textures[$ "bump"];
-                    //if (currentTex != undefined) currentTex.dispose();
-                    current.textures.bump = _createTexture(tokens[1]);
+                    current.setTexture("normalMap", _createTexture(tokens[1]));
                 }
                 break;
             
             case "map_Ks":
                 if (current != undefined) {
-                    var currentTex = current.textures[$ "specular"];
-                    //if (currentTex != undefined) currentTex.dispose();
-                    current.textures.specular = _createTexture(tokens[1]);
+                    current.setTexture("ormMap", _createTexture(tokens[1])); // MTL specular map often maps to ORM/Roughness in PBR
                 }
                 break;
             
             case "map_d":
                 if (current != undefined) {
-                    var currentTex = current.textures[$ "alpha"];
-                    //if (currentTex != undefined) currentTex.dispose();
-                    current.textures.alpha = _createTexture(tokens[1]);
+                    current.setTexture("alphaMap", _createTexture(tokens[1]));
                     current.transparent = true;
                 }
                 break;
@@ -136,9 +128,7 @@ function UeMtlLoader() constructor {
             case "map_disp":
             case "map_displacement":
                 if (current != undefined) {
-                    var currentTex = current.textures[$ "displacement"];
-                    //if (currentTex != undefined) currentTex.dispose();
-                    current.textures.displacement = _createTexture(tokens[1]);
+                    current.setTexture("displacementMap", _createTexture(tokens[1]));
                 }
                 break;
         }

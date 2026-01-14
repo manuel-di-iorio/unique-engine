@@ -8,8 +8,13 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
   // G-Buffer (for Deferred Rendering)
   self.__gbuffer = undefined;
   self.__gbufferMaterial = new UeMaterial({ shader: sh_ue_gbuffer });
-  self.__deferredLightingMaterial = new UeMaterial({ shader: sh_ue_deferred_lighting });
-  
+  self.__deferredLightingMaterial = new UeMaterial({
+    shader: sh_ue_deferred_lighting,
+    uniforms: {
+      ueInvViewProj: { type: UE_UNIFORM_TYPE.MAT4 }
+    }
+  });
+
   function __initGBuffer() {
     gml_pragma("forceinline");
     if (self.__gbuffer != undefined) return;
@@ -115,7 +120,7 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
 
     // 2. Lighting Pass
     self.setRenderTarget(_oldRT);
-    
+
     if (self.autoClear) self.clear(self.autoClearColor, self.autoClearDepth, self.autoClearStencil);
 
     var _lm = self.__deferredLightingMaterial;
@@ -123,7 +128,7 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
     _lm.textures[$ "gbufferNormal"] = self.__gbuffer.normalMetal;
     _lm.textures[$ "gbufferRoughnessAO"] = self.__gbuffer.roughnessAO;
     _lm.textures[$ "gbufferEmissive"] = self.__gbuffer.emissive;
-    
+
     // Pass Depth Texture (of the first G-Buffer target, which holds the shared depth buffer)
     var _depthTex = surface_get_texture_depth(self.__gbuffer.albedoAlpha.surface);
     _lm.textures[$ "gbufferDepth"] = _depthTex;
@@ -131,7 +136,7 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
     // Pass Inverse View-Projection Matrix for position reconstruction
     // We can multiply the pre-calculated inverses from the camera
     matrix_multiply(camera.projectionMatrixInverse, camera.matrixWorld, global.UE_MAT4_TEMP0);
-    _lm.uniforms[$ "u_ueInvViewProj"] = global.UE_MAT4_TEMP0;
+    _lm.uniforms[$ "ueInvViewProj"].value = global.UE_MAT4_TEMP0;
 
     // Apply camera matrices for lighting pass
     _lm.use(self);

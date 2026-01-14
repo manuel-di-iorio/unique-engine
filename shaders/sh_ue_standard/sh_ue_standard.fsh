@@ -9,22 +9,25 @@ varying vec4 vDirLightSpacePos;
 varying vec4 vSpotLightSpacePos;
 
 // ===== Scene =====
-uniform vec3  u_ueCameraPosition;
-uniform vec3  u_ueAmbient;
 uniform mat4  u_ueWorldMatrix;
-
-// Fog
-uniform vec3  u_ueFogColor;
-uniform float u_ueFogDensity;
-uniform float u_ueFogNear;
-uniform float u_ueFogFar;
+uniform vec4  u_ueSceneData[5];
+// Row 0: camPos.xyz, fogDensity
+// Row 1: ambient.rgb, fogNear
+// Row 2: fogColor.rgb, fogFar
+// Row 3: dirLightDir.xyz, dirLightIntensity
+// Row 4: dirLightColor.rgb, [unused]
 
 // ===== Material =====
 uniform vec3  u_ueColor;
 uniform float u_ueMetalness;
 uniform float u_ueRoughness;
 uniform vec3  u_ueEmissive;
-uniform float u_ueEmissiveIntensity;
+uniform vec4  u_ueMaterialData; // [emissiveIntensity, toneMapping, toneMappingExposure, toneMapped]
+#define u_ueEmissiveIntensity   u_ueMaterialData.x
+#define u_ueToneMapping         u_ueMaterialData.y
+#define u_ueToneMappingExposure u_ueMaterialData.z
+#define u_ueToneMapped          u_ueMaterialData.w
+
 uniform float u_ueAoIntensity;
 uniform float u_ueAoMapIntensity;
 uniform vec2  u_ueNormalMapScale;
@@ -43,37 +46,32 @@ uniform sampler2D s_emissiveMap;
 // uniform sampler2D s_lightMap;
 // uniform sampler2D s_envMap;
 
-uniform float u_ueHasMap;
-uniform float u_ueHasAlphaMap;
-uniform float u_ueHasOrmMap;
-uniform float u_ueHasNormalMap;
-uniform float u_ueHasEmissiveMap;
+uniform vec4 u_ueMapFlags;  // [hasMap, hasAlphaMap, hasOrmMap, hasNormalMap]
+#define u_ueHasMap              u_ueMapFlags.x
+#define u_ueHasAlphaMap         u_ueMapFlags.y
+#define u_ueHasOrmMap           u_ueMapFlags.z
+#define u_ueHasNormalMap        u_ueMapFlags.w
+
+uniform vec4 u_ueMapFlags2; // [hasEmissiveMap, hasDisplacementMap, 0, 0]
+#define u_ueHasEmissiveMap      u_ueMapFlags2.x
+#define u_ueHasDisplacementMap  u_ueMapFlags2.y
 
 // ===== Lights =====
 
-// Directional
-uniform vec3  u_ueDirLightDir0;
-uniform vec3  u_ueDirLightColor0;
-uniform float u_ueDirLightIntensity0;
+// Point Lights (Packed in Mat4)
+// Row 0: pos.xyz, range
+// Row 1: color.rgb, intensity
+// Row 2: decay, 0.0, 0.0, 0.0
+uniform mat4  u_uePointLightsData[8];
 
-// Point
-uniform vec3  u_uePointLightPosition[8];
-uniform vec3  u_uePointLightColor[8];
-uniform float u_uePointLightRange[8];
-uniform float u_uePointLightIntensity[8];
-uniform float u_uePointLightDecay[8];
+// Spot Lights (Packed in Mat4)
+// Row 0: pos.xyz, range
+// Row 1: color.rgb, intensity
+// Row 2: dir.xyz, decay
+// Row 3: angle, penumbra, 0.0, 0.0
+uniform mat4  u_ueSpotLightsData[8];
 
-// Spot
-uniform vec3  u_ueSpotLightPosition[4];
-uniform vec3  u_ueSpotLightDirection[4];
-uniform vec3  u_ueSpotLightColor[4];
-uniform float u_ueSpotLightRange[4];
-uniform float u_ueSpotLightIntensity[4];
-uniform float u_ueSpotLightDecay[4];
-uniform float u_ueSpotLightAngle[4];
-uniform float u_ueSpotLightPenumbra[4];
-
-// Hemisphere
+// Hemisphere Light
 uniform vec3  u_ueHemiLightDirection;
 uniform vec3  u_ueHemiLightSkyColor;
 uniform vec3  u_ueHemiLightGroundColor;
@@ -104,10 +102,6 @@ uniform mat4  u_uePointShadowMatrix[6];
 uniform float u_ueSpotShadowFar;
 uniform float u_ueSpotShadowNear;
 uniform vec3  u_ueSpotShadowPos;
-
-uniform float u_ueToneMapping;
-uniform float u_ueToneMappingExposure;
-uniform float u_ueToneMapped;
 
 // ===== Constants =====
 #define PI 3.14159265359
@@ -397,40 +391,45 @@ vec3 LinearToneMapping(vec3 color) {
 
 vec3 ReinhardToneMapping(vec3 color) {
     color *= u_ueToneMappingExposure;
-    return color / (vec3(1.0) + color);
+    return color / (1.0 + color);
 }
 
 vec3 CineonToneMapping(vec3 color) {
     color *= u_ueToneMappingExposure;
     color = max(vec3(0.0), color - 0.004);
-    return pow((color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06), vec3(2.2));
+    return (color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06);
 }
 
 vec3 ACESFilmicToneMapping(vec3 color) {
     color *= u_ueToneMappingExposure;
-    return clamp((color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14), 0.0, 1.0);
+    float a = 2.51;
+    float b = 0.03;
+    float c = 2.43;
+    float d = 0.59;
+    float e = 0.14;
+    return clamp((color * (a * color + b)) / (color * (c * color + d) + e), 0.0, 1.0);
 }
 
 // AgX Tone Mapping
 vec3 AgXToneMapping(vec3 color) {
     color *= u_ueToneMappingExposure;
-    const mat3 AgXInputMatrix = mat3(
-        0.8424790622, 0.0423282422, 0.042375654,
-        0.0784351618, 0.8784686364, 0.0784314393,
-        0.0792237451, 0.0791661274, 0.8791429737
+    const mat3 AgX_In = mat3(
+        0.8424790622537815, 0.0423282422610123, 0.0429093763853347,
+        0.0784351724105776, 0.8784686364697723, 0.0784314393537293,
+        0.0792237451475514, 0.0791661274605167, 0.8784297143940141
     );
-    const mat3 AgXOutputMatrix = mat3(
-        1.1968790059, -0.0528968517, -0.0529716355,
-        -0.0980208811, 1.1519031299, -0.0980434501,
-        -0.099029744, -0.0989611761, 1.1510736126
+    color = AgX_In * color;
+    color = clamp(log2(color + 1e-10), -10.0, 2.0);
+    color = clamp((color + 10.0) / 12.0, 0.0, 1.0);
+    color = color * color * (3.0 - 2.0 * color); // Cubic sigmoid
+    const mat3 AgX_Out = mat3(
+        1.1968790351201026, -0.0528968517574562, -0.0529716355144604,
+        -0.0980208811401368, 1.1519031299041722, -0.0980434501171241,
+        -0.099044710128318, -0.0989611756130454, 1.1510731034335441
     );
-    vec3 x = AgXInputMatrix * color;
-    x = clamp((log2(max(x, 1e-10)) + 12.47393) / 16.53692, 0.0, 1.0);
-    vec3 val = x * x * x * (x * (x * 6.0 - 15.0) + 10.0);
-    return AgXOutputMatrix * val;
+    return AgX_Out * color;
 }
 
-// Khronos PBR Neutral Tone Mapping
 vec3 NeutralToneMapping(vec3 color) {
     color *= u_ueToneMappingExposure;
     const float startCompression = 0.8;
@@ -449,10 +448,8 @@ vec3 NeutralToneMapping(vec3 color) {
 
 void main() {
 
-    // ===== Base =====
+    // Base Albedo & Alpha
     vec4 tex = (u_ueHasMap > 0.5) ? texture2D(gm_BaseTexture, vTexcoord) : vec4(1.0);
-    
-    // Fallback if vertex color is black or transparent (often occurs if not provided)
     vec4 vCol = vColour;
     if (vCol.r + vCol.g + vCol.b < 0.001) vCol.rgb = vec3(1.0);
     if (vCol.a < 0.001) vCol.a = 1.0;
@@ -461,16 +458,18 @@ void main() {
     float alphaMap = (u_ueHasAlphaMap > 0.5) ? texture2D(s_alphaMap, vTexcoord).r : 1.0;
     float alpha = base.a * alphaMap;
 
+    // Discard if transparent (for Opaque pass, we can use alpha testing)
+    // if (alpha < 0.5) discard;
+
     vec3 albedo = SRGBToLinear(base.rgb * u_ueColor);
 
+    // ORM Map
     vec3 orm = (u_ueHasOrmMap > 0.5) ? texture2D(s_ormMap, vTexcoord).rgb : vec3(1.0, 1.0, 0.0);
     float ao = mix(1.0, orm.r, u_ueAoIntensity * u_ueAoMapIntensity);
     float roughness = orm.g * u_ueRoughness;
     float metalness = orm.b * u_ueMetalness;
 
-    roughness = clamp(roughness, 0.04, 1.0);
-
-    // ===== Normal =====
+    // Normal Mapping
     vec3 N;
     if (u_ueFlatShading > 0.5) {
         N = normalize(cross(dFdx(vWorldPosition), dFdy(vWorldPosition)));
@@ -489,7 +488,18 @@ void main() {
     mat3 TBN = calculateTBN(N, vWorldPosition, vTexcoord, vWorldTangent);
     N = normalize(TBN * nm);
 
-    vec3 V = normalize(u_ueCameraPosition - vWorldPosition + vec3(EPSILON));
+    // Extract scene data
+    vec3 _u_ueCameraPosition = u_ueSceneData[0].xyz;
+    float _u_ueFogDensity = u_ueSceneData[0].w;
+    vec3 u_ueAmbient = u_ueSceneData[1].xyz;
+    float _u_ueFogNear = u_ueSceneData[1].w;
+    vec3 u_ueFogColor = u_ueSceneData[2].xyz;
+    float _u_ueFogFar = u_ueSceneData[2].w;
+    vec3 u_ueDirLightDir0 = u_ueSceneData[3].xyz;
+    float u_ueDirLightIntensity0 = u_ueSceneData[3].w;
+    vec3 u_ueDirLightColor0 = u_ueSceneData[4].xyz;
+
+    vec3 V = normalize(_u_ueCameraPosition - vWorldPosition + vec3(EPSILON));
 
     vec3 F0 = mix(vec3(0.04), albedo, metalness);
 
@@ -507,70 +517,81 @@ void main() {
               * (1.0 - shadow);
     }
 
-    // Point 0 (with shadows)
-    {
+    // Point Lights
+    for (int i = 0; i < 8; i++) {
+        mat4 lp = u_uePointLightsData[i];
+        vec3 pPos = lp[0].xyz;
+        float pRange = lp[0].w;
+        vec3 pColor = lp[1].xyz;
+        float pIntensity = lp[1].w;
+        float pDecay = lp[2].x;
+
+        if (pIntensity <= 0.0) continue;
+
         float shadow = 0.0;
-        if (u_uePointShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
+        if (i == 0 && u_uePointShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
             shadow = calculatePointShadow(vWorldPosition, N);
         }
 
-        Lo += calculatePointLight(u_uePointLightPosition[0], u_uePointLightColor[0], u_uePointLightRange[0], u_uePointLightIntensity[0], u_uePointLightDecay[0], N, V, albedo, F0, roughness, metalness)
+        Lo += calculatePointLight(pPos, pColor, pRange, pIntensity, pDecay, N, V, albedo, F0, roughness, metalness)
               * (1.0 - shadow);
     }
 
-    // Point 1-7
-    for (int i = 1; i < 8; i++) {
-        Lo += calculatePointLight(u_uePointLightPosition[i], u_uePointLightColor[i], u_uePointLightRange[i], u_uePointLightIntensity[i], u_uePointLightDecay[i], N, V, albedo, F0, roughness, metalness);
-    }
+    // Spot Lights
+    for (int i = 0; i < 8; i++) {
+        mat4 ls = u_ueSpotLightsData[i];
+        vec3 sPos = ls[0].xyz;
+        float sRange = ls[0].w;
+        vec3 sColor = ls[1].xyz;
+        float sIntensity = ls[1].w;
+        vec3 sDir = ls[2].xyz;
+        float sDecay = ls[2].w;
+        float sAngle = ls[3].x;
+        float sPenumbra = ls[3].y;
 
-    // Spot 0 (with shadows)
-    {
+        if (sIntensity <= 0.0) continue;
+
         float shadow = 0.0;
-        vec3 L = normalize(u_ueSpotLightPosition[0] - vWorldPosition);
-        if (u_ueSpotShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
+        vec3 L = normalize(sPos - vWorldPosition);
+        if (i == 0 && u_ueSpotShadowEnabled > 0.5 && u_ueReceiveShadow > 0.5) {
             shadow = calculateSpotShadow(vSpotLightSpacePos, N, L);
         }
 
-        Lo += calculateSpotLight(u_ueSpotLightPosition[0], u_ueSpotLightDirection[0], u_ueSpotLightColor[0], u_ueSpotLightRange[0], u_ueSpotLightIntensity[0], u_ueSpotLightDecay[0], u_ueSpotLightAngle[0], u_ueSpotLightPenumbra[0], N, V, albedo, F0, roughness, metalness)
+        Lo += calculateSpotLight(sPos, sDir, sColor, sRange, sIntensity, sDecay, sAngle, sPenumbra, N, V, albedo, F0, roughness, metalness)
               * (1.0 - shadow);
     }
 
-    // Spot 1-3
-    for (int i = 1; i < 4; i++) {
-        Lo += calculateSpotLight(u_ueSpotLightPosition[i], u_ueSpotLightDirection[i], u_ueSpotLightColor[i], u_ueSpotLightRange[i], u_ueSpotLightIntensity[i], u_ueSpotLightDecay[i], u_ueSpotLightAngle[i], u_ueSpotLightPenumbra[i], N, V, albedo, F0, roughness, metalness);
-    }
-
     // Ambient
-    vec3 ambient = SRGBToLinear(u_ueAmbient + vec3(0.05)) * albedo * ao;
+    vec3 _ambient = u_ueAmbient * albedo * ao;
 
     // Hemisphere
     if (u_ueHemiLightIntensity > 0.0) {
         float hemiWeight = 0.5 * dot(N, u_ueHemiLightDirection) + 0.5;
         vec3 hemiColor = mix(SRGBToLinear(u_ueHemiLightGroundColor), SRGBToLinear(u_ueHemiLightSkyColor), hemiWeight);
-        ambient += hemiColor * u_ueHemiLightIntensity * albedo * ao;
+        _ambient += hemiColor * u_ueHemiLightIntensity * albedo * ao;
     }
 
     // Emissive
     vec3 emissiveMapColor = (u_ueHasEmissiveMap > 0.5) ? SRGBToLinear(texture2D(s_emissiveMap, vTexcoord).rgb) : vec3(0.0);
     vec3 emissive = (emissiveMapColor + SRGBToLinear(u_ueEmissive)) * u_ueEmissiveIntensity;
 
-    vec3 color = ambient + Lo + emissive;
+    vec3 color = _ambient + Lo + emissive;
 
     // ===== Fog =====
-    float dist = length(u_ueCameraPosition - vWorldPosition);
+    float dist = length(_u_ueCameraPosition - vWorldPosition);
     float fogFactor = 0.0;
     
-    if (u_ueFogDensity > 0.0) {
+    if (_u_ueFogDensity > 0.0) {
         // Exponential fog
-        fogFactor = 1.0 - exp(-dist * u_ueFogDensity);
-    } else if (u_ueFogFar > u_ueFogNear) {
+        fogFactor = 1.0 - exp(-dist * _u_ueFogDensity);
+    } else if (_u_ueFogFar > _u_ueFogNear) {
         // Linear fog
-        fogFactor = clamp((dist - u_ueFogNear) / (u_ueFogFar - u_ueFogNear), 0.0, 1.0);
+        fogFactor = clamp((dist - _u_ueFogNear) / (_u_ueFogFar - _u_ueFogNear), 0.0, 1.0);
     }
     
     color = mix(color, SRGBToLinear(u_ueFogColor), fogFactor);
 
-    // ===== Tone Mapping =====
+    // Final color
     if (u_ueToneMapped > 0.5) {
         if (u_ueToneMapping == 1.0) color = LinearToneMapping(color);
         else if (u_ueToneMapping == 2.0) color = ReinhardToneMapping(color);
@@ -578,7 +599,6 @@ void main() {
         else if (u_ueToneMapping == 4.0) color = ACESFilmicToneMapping(color);
         else if (u_ueToneMapping == 5.0) color = AgXToneMapping(color);
         else if (u_ueToneMapping == 6.0) color = NeutralToneMapping(color);
-        // If 0 (NONE), we do nothing and keep raw color
     }
 
     gl_FragColor = vec4(LinearToSRGB(color), alpha);

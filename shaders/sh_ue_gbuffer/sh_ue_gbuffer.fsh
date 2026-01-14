@@ -7,14 +7,20 @@ varying vec2 vTexcoord;
 varying vec4 vColour;
 
 // ===== Scene =====
-uniform vec3  u_ueCameraPosition;
+uniform vec4  u_ueSceneData[5];
+#define u_ueCameraPosition u_ueSceneData[0].xyz
 
 // ===== Material =====
 uniform vec3  u_ueColor;
 uniform float u_ueMetalness;
 uniform float u_ueRoughness;
 uniform vec3  u_ueEmissive;
-uniform float u_ueEmissiveIntensity;
+uniform vec4  u_ueMaterialData; // [emissiveIntensity, toneMapping, toneMappingExposure, toneMapped]
+#define u_ueEmissiveIntensity   u_ueMaterialData.x
+#define u_ueToneMapping         u_ueMaterialData.y
+#define u_ueToneMappingExposure u_ueMaterialData.z
+#define u_ueToneMapped          u_ueMaterialData.w
+
 uniform float u_ueAoIntensity;
 uniform float u_ueAoMapIntensity;
 uniform vec2  u_ueNormalMapScale;
@@ -27,11 +33,15 @@ uniform sampler2D s_ormMap;
 uniform sampler2D s_normalMap;
 uniform sampler2D s_emissiveMap;
 
-uniform float u_ueHasMap;
-uniform float u_ueHasAlphaMap;
-uniform float u_ueHasOrmMap;
-uniform float u_ueHasNormalMap;
-uniform float u_ueHasEmissiveMap;
+uniform vec4 u_ueMapFlags;  // [hasMap, hasAlphaMap, hasOrmMap, hasNormalMap]
+#define u_ueHasMap              u_ueMapFlags.x
+#define u_ueHasAlphaMap         u_ueMapFlags.y
+#define u_ueHasOrmMap           u_ueMapFlags.z
+#define u_ueHasNormalMap        u_ueMapFlags.w
+
+uniform vec4 u_ueMapFlags2; // [hasEmissiveMap, hasDisplacementMap, 0, 0]
+#define u_ueHasEmissiveMap      u_ueMapFlags2.x
+#define u_ueHasDisplacementMap  u_ueMapFlags2.y
 
 #define EPSILON 1e-6
 

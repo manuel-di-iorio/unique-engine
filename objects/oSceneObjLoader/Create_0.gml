@@ -4,7 +4,7 @@ camera = new UePerspectiveCamera({ x: 450, y: -300, z: 300 }).use();
 orbitControls = new UeOrbitControls(camera, { zt: 150 });
 
 // Lighting
-var hemiLight = new UeHemisphereLight(#AAFFAA, c_maroon, 0.8);
+var hemiLight = new UeAmbientLight(#AAFFAA);
 var sunLight = new UeDirectionalLight(#FFFFC8, 1, { x: 160, y: 150, z: 185, zt: 130 });
 scene.add(hemiLight, sunLight);
 

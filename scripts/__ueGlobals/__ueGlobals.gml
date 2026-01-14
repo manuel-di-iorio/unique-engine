@@ -9,20 +9,23 @@ global.UE_MOUSE = new UeMouse();
 global.UE_UNIFORM_NAMES_CONFIG = {
     modelPosition: "u_ueModelPosition",
     worldMatrix: "u_ueWorldMatrix",
-    cameraPosition: "u_ueCameraPosition",
-    ambient: "u_ueAmbient",
-    emissiveIntensity: "u_ueEmissiveIntensity",
-    aoIntensity: "u_ueAoIntensity",
-    aoMapIntensity: "u_ueAoMapIntensity",
-    
+
+    // Scene Data (Packed)
+    sceneData: "u_ueSceneData",
+
+    // Material Data (Packed)
+    materialData: "u_ueMaterialData", // [emissiveIntensity, toneMapping, toneMappingExposure, toneMapped]
+    mapFlags: "u_ueMapFlags",         // [hasMap, hasAlphaMap, hasOrmMap, hasNormalMap]
+    mapFlags2: "u_ueMapFlags2",       // [hasEmissiveMap, hasDisplacementMap, 0, 0]
+
     // Shadow (Directional)
-    lightSpaceMatrix: "u_ueDirShadowMatrix",
-    shadowEnabled: "u_ueDirShadowEnabled",
+    dirShadowMatrix: "u_ueDirShadowMatrix",
+    dirShadowEnabled: "u_ueDirShadowEnabled",
     receiveShadow: "u_ueReceiveShadow",
-    shadowQuality: "u_ueDirShadowQuality",
-    shadowTexelSize: "u_ueDirShadowInvTexelSize",
-    shadowMapSampler: "s_dirShadowMap",
-    
+    dirShadowQuality: "u_ueDirShadowQuality",
+    dirShadowTexelSize: "u_ueDirShadowInvTexelSize",
+    dirShadowMap: "s_dirShadowMap",
+
     // Shadow (Point)
     pointShadowEnabled: "u_uePointShadowEnabled",
     pointShadowMatrix: "u_uePointShadowMatrix",
@@ -31,29 +34,13 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     pointShadowPos: "u_uePointShadowPos",
     pointShadowTexelSize: "u_uePointShadowInvTexelSize",
     pointShadowQuality: "u_uePointShadowQuality",
-    pointShadowMapSampler: "s_pointShadowMap",
-    
-    // Directional Light Prefixes
-    dirLightDir: "u_ueDirLightDir",
-    dirLightColor: "u_ueDirLightColor",
-    dirLightIntensity: "u_ueDirLightIntensity",
-    
-    // Point Light Prefixes
-    pointLightPosition: "u_uePointLightPosition",
-    pointLightColor: "u_uePointLightColor",
-    pointLightRange: "u_uePointLightRange",
-    pointLightIntensity: "u_uePointLightIntensity",
-    pointLightDecay: "u_uePointLightDecay",
+    pointShadowMap: "s_pointShadowMap",
 
-    // Spot Light Prefixes
-    spotLightPosition: "u_ueSpotLightPosition",
-    spotLightDirection: "u_ueSpotLightDirection",
-    spotLightColor: "u_ueSpotLightColor",
-    spotLightRange: "u_ueSpotLightRange",
-    spotLightIntensity: "u_ueSpotLightIntensity",
-    spotLightDecay: "u_ueSpotLightDecay",
-    spotLightAngle: "u_ueSpotLightAngle",
-    spotLightPenumbra: "u_ueSpotLightPenumbra",
+    // Point Light (Packed)
+    pointLightsData: "u_uePointLightsData",
+
+    // Spot Light (Packed)
+    spotLightsData: "u_ueSpotLightsData",
 
     // Shadow (Spot)
     spotShadowEnabled: "u_ueSpotShadowEnabled",
@@ -63,32 +50,13 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     spotShadowPos: "u_ueSpotShadowPos",
     spotShadowQuality: "u_ueSpotShadowQuality",
     spotShadowTexelSize: "u_ueSpotShadowInvTexelSize",
-    spotShadowMapSampler: "s_spotShadowMap",
+    spotShadowMap: "s_spotShadowMap",
 
     // Hemisphere Light
-    hemiLightDirection: "u_ueHemiLightDirection",
+    hemiLightDir: "u_ueHemiLightDirection",
     hemiLightSkyColor: "u_ueHemiLightSkyColor",
     hemiLightGroundColor: "u_ueHemiLightGroundColor",
     hemiLightIntensity: "u_ueHemiLightIntensity",
-
-    // Fog
-    fogColor: "u_ueFogColor",
-    fogDensity: "u_ueFogDensity",
-    fogNear: "u_ueFogNear",
-    fogFar: "u_ueFogFar",
-    
-    // Tone Mapping
-    toneMapping: "u_ueToneMapping",
-    toneMappingExposure: "u_ueToneMappingExposure",
-    toneMapped: "u_ueToneMapped",
-    
-    // Has maps
-    hasMap: "u_ueHasMap",
-    hasAlphaMap: "u_ueHasAlphaMap",
-    hasOrmMap: "u_ueHasOrmMap",
-    hasNormalMap: "u_ueHasNormalMap",
-    hasEmissiveMap: "u_ueHasEmissiveMap",
-    hasDisplacementMap: "u_ueHasDisplacementMap"
 };
 
 global.UE_DEFAULT_MATERIAL = new UeMeshStandardMaterial();
@@ -144,6 +112,7 @@ enum UE_RENDER_PATH {
 
 // Internal globals
 global.UE_RENDERER_LIGHT_STATE = array_create(9);
+
 enum UE_RENDERER_LIGHT_STATE_ENUM {
     AMBIENT,
     DIRECTIONAL,
@@ -168,10 +137,9 @@ global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT_COUNT] = 
 global.UE_RENDERER_TONE_MAPPING = UE_TONE_MAPPING.NONE;
 global.UE_RENDERER_TONE_MAPPING_EXPOSURE = 1.0;
 global.UE_RENDERER_CAMERA_POSITION = array_create(3, 0);
-global.UE_RENDERER_FOG_STATE = {
-    color: [0, 0, 0],
-    density: 0,
-    near: 1,
-    far: 1000,
-    enabled: false
-};
+// Pre-allocated buffer for packed scene data [5 * 4 values]
+global.UE_SCENE_DATA_BUFFER = array_create(20, 0);
+global.UE_RENDERER_SCENE_DATA = undefined;
+
+// Global Uniform Caching
+global.UE_CURRENT_SHADER = -1;
