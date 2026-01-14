@@ -68,9 +68,6 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
     self.__gbufferNormalTexture = new UeTexture();
     self.__gbufferDepthTexture = new UeTexture();
     
-    // Fullscreen quad for rendering the final composition
-    self.__fullscreenQuad = undefined;
-  
     self.__maskSampler = shader_get_sampler_index(sh_ue_outline_pass, "s_mask");
     self.__gbufferNormalSampler = shader_get_sampler_index(sh_ue_outline_pass, "s_gbufferNormal");
 
@@ -101,9 +98,6 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         // Build materials
         self.__maskMaterial.build();
         self.__outlineMaterial.build();
-        
-        // Create fullscreen quad for the composition pass
-        self.__fullscreenQuad = new UeFullscreenQuad(self.__outlineMaterial);
         
         return self;
     }
@@ -203,11 +197,17 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         if (renderer[$ "__gbuffer"] != undefined) {
             var gbuffer = renderer.__gbuffer;
             if (surface_exists(gbuffer.normalMetal.surface)) {
-                self.__gbufferNormalTexture.__cachedTexture = surface_get_texture(gbuffer.normalMetal.surface);
+                var _newNormalTex = surface_get_texture(gbuffer.normalMetal.surface);
+                if (self.__gbufferNormalTexture.__cachedTexture != _newNormalTex) {
+                    self.__gbufferNormalTexture.__cachedTexture = _newNormalTex;
+                }
                 _useGBuffer = 1.0;
             }
             if (surface_exists(gbuffer.positionRough.surface)) {
-                self.__gbufferDepthTexture.__cachedTexture = surface_get_texture(gbuffer.positionRough.surface);
+                var _newDepthTex = surface_get_texture(gbuffer.positionRough.surface);
+                if (self.__gbufferDepthTexture.__cachedTexture != _newDepthTex) {
+                    self.__gbufferDepthTexture.__cachedTexture = _newDepthTex;
+                }
             }
         }
         _uniforms[$ "useGBuffer"].value = _useGBuffer;
@@ -217,13 +217,17 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         var _sceneTexture = surface_get_texture(readTarget.surface);
         
         // Update the mask texture resource
-        self.__maskTexture.__cachedTexture = surface_get_texture(self.__maskTarget.surface);
+        var _newMaskTex = surface_get_texture(self.__maskTarget.surface);
+        if (self.__maskTexture.__cachedTexture != _newMaskTex) {
+            self.__maskTexture.__cachedTexture = _newMaskTex;
+        }
         
         // Apply the outline material
         self.__outlineMaterial.use(renderer);
         
-        // Now render the fullscreen quad (material.use already handled all bindings)
-        self.__fullscreenQuad.render(_sceneTexture, true);
+        // Use the global quad for rendering
+        global.UE_FULLSCREEN_QUAD.material = self.__outlineMaterial;
+        global.UE_FULLSCREEN_QUAD.render(_sceneTexture, true);
         
         // Restore previous render target
         renderer.setRenderTarget(_oldRT);
@@ -237,10 +241,6 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
     function dispose() {
         gml_pragma("forceinline");
         
-        if (self.__fullscreenQuad != undefined) {
-            self.__fullscreenQuad.dispose();
-            self.__fullscreenQuad = undefined;
-        }
         if (self.__maskTarget != undefined) {
             self.__maskTarget.dispose();
             self.__maskTarget = undefined;

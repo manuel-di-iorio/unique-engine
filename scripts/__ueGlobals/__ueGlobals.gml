@@ -95,6 +95,8 @@ global.UE_DEFAULT_MATERIAL = new UeMeshStandardMaterial();
 global.UE_FALLBACK_MATERIAL = new UeMeshBasicMaterial({ shader: sh_ue_fallback });
 global.UE_DEFAULT_MATERIAL_WIREFRAME = new UeMeshBasicMaterial();
 
+global.UE_FULLSCREEN_QUAD = new UeFullscreenQuad();
+
 enum UE_UNIFORM_TYPE {
     FLOAT = 0,
     VEC2 = 1,

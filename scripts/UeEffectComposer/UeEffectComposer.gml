@@ -17,19 +17,19 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
     self.writeTarget = renderTarget.clone();
   
     // Internal
-    self.__cachedPassesLen = -1;
+    self.__passesCount = 0;
 
     function addPass(pass) {
         gml_pragma("forceinline");
         array_push(self.passes, pass);
-        self.__cachedPassesLen++;
+        self.__passesCount++;
         return self;        
     }
     
     function insertPass(pass, index) {
         gml_pragma("forceinline");
         array_insert(self.passes, index, pass);
-        self.__cachedPassesLen++;
+        self.__passesCount++;
         return self;        
     }
     
@@ -38,8 +38,10 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
         var index = array_find_index(self.passes, function(el) { 
             return el == pass;
         });
-        array_delete(self.passes, index, 1);
-        self.__cachedPassesLen--;
+        if (index != -1) {
+            array_delete(self.passes, index, 1);
+            self.__passesCount--;
+        }
         return self;
     }
     
@@ -47,7 +49,7 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
     function isLastEnabledPass(index) {
         gml_pragma("forceinline");
         
-        for (var i = self.__cachedPassesLen; i >= 0; i--) {
+        for (var i = self.__passesCount - 1; i >= 0; i--) {
             if (self.passes[i].enabled) {
                 return index == i;
             }
@@ -76,7 +78,7 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
 
         var _gpuState = gpu_get_state();
         
-        for (var i = 0, il = array_length(self.passes); i < il; i++) {
+        for (var i = 0, il = self.__passesCount; i < il; i++) {
             var pass = self.passes[i];            
             if (!pass.enabled) continue;
             

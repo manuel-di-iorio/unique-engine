@@ -39,7 +39,7 @@ function UeQuadGeometry(data = {}): UeGeometry(data) constructor {
  * 
  * A utility class for rendering fullscreen post-processing effects.
  */
-function UeFullscreenQuad(material) constructor {
+function UeFullscreenQuad(material = undefined) constructor {
   self.material = material;
   self.geometry = new UeQuadGeometry();
 
@@ -53,7 +53,7 @@ function UeFullscreenQuad(material) constructor {
     return self;
   }
 
-  function render(texture, skipMaterial = false) {
+  function render(texture = -1, skipMaterial = false) {
     gml_pragma("forceinline");
 
     if (!skipMaterial) self.material.use();
