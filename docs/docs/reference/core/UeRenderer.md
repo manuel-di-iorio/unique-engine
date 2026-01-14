@@ -53,6 +53,10 @@ The default rendering path. Each object is rendered in a single pass, calculatin
 
 ### 2️⃣ Deferred Rendering (`UE_RENDER_PATH.DEFERRED`)
 
+:::caution
+Deferred Rendering is **experimental** and not working correctly yet.
+:::
+
 A more advanced path that decouples geometry rendering from lighting calculations. It uses a **G-Buffer** (Geometry Buffer) to store surface properties.
 
 **How it works:**

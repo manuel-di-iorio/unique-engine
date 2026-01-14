@@ -3,8 +3,8 @@
   "%Name":"sh_ue_outline_mask",
   "name":"sh_ue_outline_mask",
   "parent":{
-    "name":"Shaders",
-    "path":"folders/Packages/Unique Engine/Shaders.yy",
+    "name":"Post Processing",
+    "path":"folders/Packages/Unique Engine/Shaders/Post Processing.yy",
   },
   "resourceType":"GMShader",
   "resourceVersion":"2.0",

@@ -139,8 +139,6 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
             return self;
         }
         
-        show_debug_message("UeOutlinePass: Rendering " + string(array_length(self.selectedObjects)) + " objects");
-        
         // ========================================
         // STEP 1: MASK PASS
         // Render selected objects as white silhouettes
@@ -149,7 +147,6 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         // Ensure mask target exists and matches the size
         if (self.__maskTarget == undefined || self.__maskTarget.width != readTarget.width || self.__maskTarget.height != readTarget.height) {
             self.setSize(readTarget.width, readTarget.height);
-            show_debug_message("UeOutlinePass: Created mask target " + string(readTarget.width) + "x" + string(readTarget.height));
         }
         
         // Set the mask as render target

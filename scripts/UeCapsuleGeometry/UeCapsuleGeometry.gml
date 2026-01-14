@@ -95,7 +95,7 @@ function UeCapsuleGeometry(radius = 1, height = 1, capSegments = 4, radialSegmen
 
             array_push(pos, _x, _y, _z);
             array_push(norm, nx, ny, nz);
-            array_push(tang, tx, ty, tz, 1.0);
+            array_push(tang, tx, ty, tz, -1.0);
             array_push(uvs, u, 1 - v);
             array_push(cols, _color, _alpha);
         }
@@ -112,8 +112,8 @@ function UeCapsuleGeometry(radius = 1, height = 1, capSegments = 4, radialSegmen
             var p3 = (j + 1) * stride + (i + 1);
             var p4 = j * stride + (i + 1);
 
-            array_push(idx, p1, p2, p4);
-            array_push(idx, p2, p3, p4);
+            array_push(idx, p1, p4, p2);
+            array_push(idx, p2, p4, p3);
         }
     }
 

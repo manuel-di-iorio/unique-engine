@@ -16,7 +16,7 @@ var terrain = new UeStaticMesh(new UePlaneGeometry(500, 500), undefined, { z: -2
 
 var ambientLight = new UeAmbientLight(c_dkgray);
 
-dirLight = new UeDirectionalLight(c_gray, .8, { 
+dirLight = new UeDirectionalLight(c_ltgray, .8, { 
  z: 300, 
  castShadow: true,
  shadow: {

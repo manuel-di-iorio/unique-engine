@@ -22,18 +22,18 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   toneMapping = data[$ "toneMapping"] ?? UE_TONE_MAPPING.NONE;
   toneMappingExposure = data[$ "toneMappingExposure"] ?? 1.0;
 
-  self.renderPath = data[$ "renderPath"] ?? UE_RENDER_PATH.DEFERRED;
-  
-  // G-Buffer (for Deferred Rendering)
-   self.__gbuffer = undefined;
-   self.__gbufferMaterial = new UeMaterial({ shader: sh_ue_gbuffer });
-   self.__deferredLightingMaterial = new UeMaterial({ shader: sh_ue_deferred_lighting });
-   self.__fullscreenQuad = new UeFullscreenQuad(self.__deferredLightingMaterial);
+  self.renderPath = data[$ "renderPath"] ?? UE_RENDER_PATH.FORWARD;
 
-   function __initGBuffer() {
+  // G-Buffer (for Deferred Rendering)
+  self.__gbuffer = undefined;
+  self.__gbufferMaterial = new UeMaterial({ shader: sh_ue_gbuffer });
+  self.__deferredLightingMaterial = new UeMaterial({ shader: sh_ue_deferred_lighting });
+  self.__fullscreenQuad = new UeFullscreenQuad(self.__deferredLightingMaterial);
+
+  function __initGBuffer() {
     gml_pragma("forceinline");
     if (self.__gbuffer != undefined) return;
-    
+
     self.__gbuffer = {
       albedoAlpha: new UeRenderTarget(self.width, self.height),
       normalMetal: new UeRenderTarget(self.width, self.height, { internalFormat: surface_rgba16float }),
@@ -46,12 +46,12 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     gml_pragma("forceinline");
     self.width = width;
     self.height = height;
-    
+
     if (self.__gbuffer != undefined) {
-        self.__gbuffer.albedoAlpha.setSize(width, height);
-        self.__gbuffer.normalMetal.setSize(width, height);
-        self.__gbuffer.positionRough.setSize(width, height);
-        self.__gbuffer.emissiveAO.setSize(width, height);
+      self.__gbuffer.albedoAlpha.setSize(width, height);
+      self.__gbuffer.normalMetal.setSize(width, height);
+      self.__gbuffer.positionRough.setSize(width, height);
+      self.__gbuffer.emissiveAO.setSize(width, height);
     }
   }
 
@@ -105,11 +105,15 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   }
 
   function setRenderTarget(target) {
+    // If we currently have a target, we need to reset it first
+    if (self.__renderTarget != undefined) {
+      surface_reset_target();
+    }
+
+    // Now set the new target if provided
     if (target != undefined) {
       if (!surface_exists(target.surface)) target.create();
       surface_set_target(target.surface);
-    } else if (self.__renderTarget != undefined) {
-      surface_reset_target();
     }
 
     self.__renderTarget = target;
@@ -128,7 +132,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
     for (var i = 0, len = array_length(objects); i < len; i++) {
       var object = objects[i];
-      
+
       // Skip invisible objects and their children
       if (!object.visible || !object.layers.test(cameraLayers)) continue;
 
@@ -139,14 +143,14 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         array_push(__lights, object);
         continue;
       }
-      
+
       /* Frustum intersection && sort key calculation */
       var _isRenderable = (object[$ "geometry"] != undefined && object.geometry[$ "vb"] != undefined);
       if (_isRenderable) {
         // 1. Shadow Pass Collection (All shadow casters)
         // We collect them here, but the actual frustum culling per light happens in __renderShadowMaps
         if (object.castShadow) {
-           array_push(__queueShadow, object);
+          array_push(__queueShadow, object);
         }
 
         // 2. Camera Pass Collection (Frustum Culling)
@@ -162,23 +166,23 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
           // 16 bit renderOrder | 32 bit inverted depth
           var nd = clamp(vec3_distance_to_squared(object.position, cameraPos) / _maxDistSq, 0, 1);
           var depth32 = floor(nd * 0xFFFFFFFF);
-          
-            // back-to-front → invert
+
+          // back-to-front → invert
           depth32 = 0xFFFFFFFF - depth32;
-          
+
           object.__transparentSortKey =
-              ((object.renderOrder & 0xFFFF) << 32) |
-              depth32;
-          
+            ((object.renderOrder & 0xFFFF) << 32) |
+            depth32;
+
           array_push(__queueTransparent, object);
-          
-        } else { 
+
+        } else {
           // ---- OPAQUE ----
           // 16 bit renderOrder | 16 bit materialId
           object.__opaqueSortKey =
             ((object.renderOrder & 0xFFFF) << 16) |
             (_material.id & 0xFFFF);
-        
+
           array_push(__queueOpaque, object);
         }
       }
@@ -323,16 +327,16 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       // Use the material
       if (_material.visible) {
         if (self.renderPath == UE_RENDER_PATH.DEFERRED && !isTransparentPass) {
-            // Use G-Buffer shader but keep material settings
-            _material.use(self, sh_ue_gbuffer);
-            _material.useByMesh(_object);
-            __boundMaterial = undefined; // Force re-bind for other passes
+          // Use G-Buffer shader but keep material settings
+          _material.use(self, sh_ue_gbuffer);
+          _material.useByMesh(_object);
+          __boundMaterial = undefined; // Force re-bind for other passes
         } else {
-            if (_material != __boundMaterial) {
-              __boundMaterial = _material;
-              _material.use(self);
-            }
-            _material.useByMesh(_object);
+          if (_material != __boundMaterial) {
+            __boundMaterial = _material;
+            _material.use(self);
+          }
+          _material.useByMesh(_object);
         }
       }
 
@@ -340,6 +344,26 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       _object.render(_wireframe);
       if (_onAfterRender != undefined) _onAfterRender();
     }
+  }
+
+  function __restoreDepth(queue) {
+    gml_pragma("forceinline");
+    if (array_length(queue) == 0) return;
+
+    shader_set(sh_ue_depth_restoration);
+    gpu_set_colorwriteenable(false, false, false, false);
+    gpu_set_zwriteenable(true);
+    gpu_set_ztestenable(true);
+    gpu_set_cullmode(cull_counterclockwise);
+    
+    for (var i = 0, len = array_length(queue); i < len; i++) {
+        var _object = queue[i];
+        if (_object.geometry == undefined) continue;
+        _object.render(false);
+    }
+    
+    gpu_set_colorwriteenable(true, true, true, true);
+    shader_reset();
   }
 
   /// Render the scene
@@ -364,10 +388,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     array_resize(__queueShadow, 0);
     array_resize(__queueOpaque, 0);
     array_resize(__queueTransparent, 0);
-    
+
     // Get camera frustum for culling
     var _frustum = camera.getFrustum();
-    
+
     // Collect all renderable objects
     __collectObjectQueues(scene.children, camera, _frustum);
 
@@ -385,77 +409,82 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     global.UE_RENDERER_CAMERA_POSITION = camera.position;
     global.UE_RENDERER_TONE_MAPPING = self.toneMapping;
     global.UE_RENDERER_TONE_MAPPING_EXPOSURE = self.toneMappingExposure;
-    
+
     var sceneFog = scene[$ "fog"];
     if (sceneFog != undefined) {
-        var fogState = global.UE_RENDERER_FOG_STATE;
-        fogState.enabled = sceneFog.enabled;
-        fogState.color = sceneFog.color;
-        fogState.density = sceneFog.density;
-        fogState.near = sceneFog.near;
-        fogState.far = sceneFog.far;
+      var fogState = global.UE_RENDERER_FOG_STATE;
+      fogState.enabled = sceneFog.enabled;
+      fogState.color = sceneFog.color;
+      fogState.density = sceneFog.density;
+      fogState.near = sceneFog.near;
+      fogState.far = sceneFog.far;
     }
 
     // Sort both queues before rendering
     if (sortObjects) {
       // OPAQUE
-      array_sort(__queueOpaque, function(a, b) {
+      array_sort(__queueOpaque, function (a, b) {
         return a.__opaqueSortKey - b.__opaqueSortKey;
       });
-       
+
       // TRANSPARENT
-      array_sort(__queueTransparent, function(a, b) {
+      array_sort(__queueTransparent, function (a, b) {
         return a.__transparentSortKey - b.__transparentSortKey;
       });
     }
 
     // **PASS 2: Main camera pass**
     if (self.renderPath == UE_RENDER_PATH.DEFERRED) {
-        // --- DEFERRED PATH ---
-        self.__initGBuffer();
-        var _oldRT = self.getRenderTarget();
-        
-        // Ensure all G-buffer surfaces exist (they can be freed by GameMaker at any time)
-        if (!surface_exists(self.__gbuffer.albedoAlpha.surface)) self.__gbuffer.albedoAlpha.create();
-        if (!surface_exists(self.__gbuffer.normalMetal.surface)) self.__gbuffer.normalMetal.create();
-        if (!surface_exists(self.__gbuffer.positionRough.surface)) self.__gbuffer.positionRough.create();
-        if (!surface_exists(self.__gbuffer.emissiveAO.surface)) self.__gbuffer.emissiveAO.create();
-        
-        // 1. G-Buffer Pass (Opaque objects)
-        surface_set_target_ext(0, self.__gbuffer.albedoAlpha.surface);
-        surface_set_target_ext(1, self.__gbuffer.normalMetal.surface);
-        surface_set_target_ext(2, self.__gbuffer.positionRough.surface);
-        surface_set_target_ext(3, self.__gbuffer.emissiveAO.surface);
-        
-        self.clear(true, true, true);
-        camera_apply(camera.camera);
-        
-        self.__renderQueue(__queueOpaque, scene, false);
-        
-        surface_reset_target();
-        
-        // 2. Lighting Pass
-        self.setRenderTarget(_oldRT);
-        if (self.autoClear) self.clear(self.autoClearColor, self.autoClearDepth, self.autoClearStencil);
-        
-        var _lm = self.__deferredLightingMaterial;
-        _lm.textures[$ "gbufferAlbedoAlpha"] = self.__gbuffer.albedoAlpha;
-        _lm.textures[$ "gbufferNormalMetal"] = self.__gbuffer.normalMetal;
-        _lm.textures[$ "gbufferPositionRough"] = self.__gbuffer.positionRough;
-        _lm.textures[$ "gbufferEmissiveAO"] = self.__gbuffer.emissiveAO;
-        
-        // Apply camera matrices for lighting pass (though it uses identity internally, some uniforms might need it)
-        _lm.use(self);
-        self.__fullscreenQuad.render(-1);
-        
-        // 3. Forward Pass (Transparent objects)
-        camera_apply(camera.camera);
-        self.__renderQueue(__queueTransparent, scene, true);
-        
+      // --- DEFERRED PATH ---
+      self.__initGBuffer();
+      var _oldRT = self.getRenderTarget();
+
+      // Ensure all G-buffer surfaces exist (they can be freed by GameMaker at any time)
+      if (!surface_exists(self.__gbuffer.albedoAlpha.surface)) self.__gbuffer.albedoAlpha.create();
+      if (!surface_exists(self.__gbuffer.normalMetal.surface)) self.__gbuffer.normalMetal.create();
+      if (!surface_exists(self.__gbuffer.positionRough.surface)) self.__gbuffer.positionRough.create();
+      if (!surface_exists(self.__gbuffer.emissiveAO.surface)) self.__gbuffer.emissiveAO.create();
+
+      // 1. G-Buffer Pass (Opaque objects)
+      surface_set_target_ext(0, self.__gbuffer.albedoAlpha.surface);
+      surface_set_target_ext(1, self.__gbuffer.normalMetal.surface);
+      surface_set_target_ext(2, self.__gbuffer.positionRough.surface);
+      surface_set_target_ext(3, self.__gbuffer.emissiveAO.surface);
+
+      self.clear(true, true, true);
+      camera_apply(camera.camera);
+
+      self.__renderQueue(__queueOpaque, scene, false);
+
+      surface_reset_target();
+
+      // 2. Lighting Pass
+      self.setRenderTarget(_oldRT);
+      if (self.autoClear) self.clear(self.autoClearColor, self.autoClearDepth, self.autoClearStencil);
+
+      var _lm = self.__deferredLightingMaterial;
+      _lm.textures[$ "gbufferAlbedo"] = self.__gbuffer.albedoAlpha;
+      _lm.textures[$ "gbufferNormal"] = self.__gbuffer.normalMetal;
+      _lm.textures[$ "gbufferPosition"] = self.__gbuffer.positionRough;
+      _lm.textures[$ "gbufferORM"] = self.__gbuffer.emissiveAO;
+
+      // Apply camera matrices for lighting pass (though it uses identity internally, some uniforms might need it)
+      _lm.use(self);
+      self.__fullscreenQuad.render(-1);
+
+      // 3. Forward Pass (Transparent objects)
+      camera_apply(camera.camera);
+      if (array_length(__queueTransparent) > 0) {
+        self.__restoreDepth(__queueOpaque);
+      }
+      
+
+      self.__renderQueue(__queueTransparent, scene, true);
+
     } else {
-        // --- FORWARD PATH ---
-        __renderQueue(__queueOpaque, scene);
-        __renderQueue(__queueTransparent, scene);
+      // --- FORWARD PATH ---
+      __renderQueue(__queueOpaque, scene);
+      __renderQueue(__queueTransparent, scene);
     }
 
     // Reset the world after rendering
