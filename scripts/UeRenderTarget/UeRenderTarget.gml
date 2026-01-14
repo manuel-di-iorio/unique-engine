@@ -45,6 +45,12 @@ function UeRenderTarget(width, height, options = {}) constructor {
         return self;
     }
 
+    function getTexture() {
+        gml_pragma("forceinline");
+        if (!surface_exists(self.surface)) self.create();
+        return surface_get_texture(self.surface);
+    }
+
     // Initially create the surface
     self.create();
 }

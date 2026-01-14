@@ -1,136 +1,153 @@
-/**
- * @description Manages a group of particles and their emitters.
- */
-function UeParticleSystem(maxCount = 1000, data = {}) constructor {
-    self.type = "ParticleSystem";
-    self.pool = new UeParticlePool(maxCount);
+/** 
+* @description Manages a group of particle emitters and handles high-level culling and LOD.
+*/
+function UeParticleSystem() constructor {
+  gml_pragma("forceinline");
+  self.emitters = [];
+  self.renderer = global.UE_PARTICLE_RENDERER;
+  self.enabled = true;
+
+  self.lodEnabled = true;
+  self.frustumCulling = true;
+  self.sortingEnabled = false; 
+
+  self.positionX = 0;
+  self.positionY = 0;
+  self.positionZ = 0;
+
+  /**
+   * @description Sets the position point to move all new particles for all emitters.
+   * @param {real} px Position X.
+   * @param {real} py Position Y.
+   * @param {real} pz Position Z.
+   */
+  static setPosition = function (px, py, pz) {
+    self.positionX = px;
+    self.positionY = py;
+    self.positionZ = pz;
+  }
+
+  /** 
+  * @description Registers an emitter within this system.
+  * @param {UeParticleEmitter} emitter The emitter instance.
+  * @returns {UeParticleEmitter}
+  */ 
+  static addEmitter = function (emitter) {
+    gml_pragma("forceinline");
+    array_push(self.emitters, emitter);
+    return emitter;
+  }
+
+  /** 
+  * @description Updates all managed emitters. Handles LOD calculations and emission.
+  * @param {real} dt Delta time in seconds (optional).
+  * @param {real} cx Camera X position for LOD (optional).
+  * @param {real} cy Camera Y position for LOD (optional).
+  * @param {real} cz Camera Z position for LOD (optional).
+  */ 
+  static update = function (dt = undefined, cx = undefined, cy = undefined, cz = undefined) {
+    gml_pragma("forceinline");
+    if (!self.enabled) return;
+
+    if (dt == undefined) { 
+      static _dtCache = 0; static _lastFrame = -1;
+      if (current_time != _lastFrame) {
+        _dtCache = delta_time / 1000000; _lastFrame = current_time;
+      }
+      dt = _dtCache;
+    }
+
+    var emitters = self.emitters;
+    var lod = self.lodEnabled && (cx != undefined);
+
+    for (var i = 0, il = array_length(emitters); i < il; i++) {
+      var emitter = emitters[i];
+      if (lod) emitter.updateLOD(cx, cy, cz, self.positionX, self.positionY, self.positionZ);
+      emitter.update(dt, self.positionX, self.positionY, self.positionZ);
+    }
+  }
+
+  /** 
+  * @description Calls render on all visible emitters. Handles blend modes automatically.
+  * @param {resource.camera} camera Camera index to use for billboarding extraction.
+  * @param {texture} depthTex Optional depth texture for soft particles.
+  * @param {real} softness Amount of softness (default 100).
+  * @param {real} near Near plane (optional, for linearization).
+  * @param {real} far Far plane (optional, for linearization).
+  * @param {texture} shadowTex Optional shadow map texture.
+  * @param {array} shadowMatrix 4x4 matrix for shadow projection.
+  * @param {real} shadowStrength Amount of shadowing (0-1).
+  * @param {real} shadowBias Bias to avoid shadow acne.
+  */ 
+  static render = function (camera = undefined, depthTex = undefined, softness = 100, near = 0.1, far = 1000, shadowTex = undefined, shadowMatrix = undefined, shadowStrength = 0.5, shadowBias = 0.001) {
+    gml_pragma("forceinline");
+    if (!self.enabled) return;
+    camera ??= view_camera[0];
+
+    var emitters = self.emitters;
+    var culling = self.frustumCulling;
+    var _bm = gpu_get_blendmode();
+    var _depthParams = [near, far, softness];
+    var _shadowParams = [shadowStrength, shadowBias, 0]; // Resolution not used for now
+
+    for (var i = 0, il = array_length(emitters); i < il; i++) {
+      var emitter = emitters[i];
+      
+      // Perform Frustum Culling via GameMaker's native sphere visibility check
+      if (culling) {
+          emitter.visible = sphere_is_visible(emitter.centerX, emitter.centerY, emitter.centerZ, emitter.cullingRadius);
+      } else { 
+          emitter.visible = true; 
+      }
+
+      if (emitter.visible && emitter.pool.aliveCount > 0) {
+        var type = emitter.streamType;
+        if (type != undefined) {
+            gpu_set_blendmode(type.additive ? bm_add : bm_normal);
+            emitter.render(camera, depthTex, _depthParams, shadowTex, shadowMatrix, _shadowParams);
+        }
+      }
+    }
+    gpu_set_blendmode(_bm);
+  }
+
+  /** 
+  * @description Returns the total number of active particles across all emitters.
+  * @returns {real}
+  */ 
+  static getTotalParticles = function () {
+    var total = 0;
+    for (var i = 0, il = array_length(self.emitters); i < il; i++) {
+      total += self.emitters[i].pool.aliveCount;
+    }
+    return total;
+  }
+
+  /** 
+  * @description Removes all emitters from the system and destroys their buffers.
+  */ 
+  static clear = function () {
+    for (var i = 0, il = array_length(self.emitters); i < il; i++) {
+        self.emitters[i].destroy();
+    }
     self.emitters = [];
-    self.modules  = [];
-    
-    // Global properties
-    self.timeScale = data[$ "timeScale"] ?? 1.0;
-    self.autoUpdate = data[$ "autoUpdate"] ?? true;
-    self.sorted = data[$ "sorted"] ?? false;
-    self.softFactor = data[$ "softFactor"] ?? 0.0; // 0.0 means disabled
-    self.castShadow = data[$ "castShadow"] ?? false;
-    self.receiveShadow = data[$ "receiveShadow"] ?? false;
-    
-    /**
-     * Adds an emitter to the system.
-     */
-    function addEmitter(emitter) {
-        array_push(self.emitters, emitter);
-        emitter.system = self;
-        return emitter;
-    }
+  }
 
-    /**
-     * Adds a behavior module to the system.
-     */
-    function addModule(module) {
-        array_push(self.modules, module);
-        
-        // Let the module register its requirements on the pool
-        if (variable_struct_exists(module, "onRegister")) {
-            module.onRegister(self.pool);
-        }
-        
-        return module;
-    }
-    
-    /**
-     * Renders the system.
-     */
-    function render(renderer, camera, texture = -1, depthTexture = undefined, shadowConfig = undefined, isShadowPass = false) {
-        if (isShadowPass && !self.castShadow) return;
-        
-        if (renderer == undefined) return;
-        
-        // Render
-        renderer.render(self, camera, texture, depthTexture, shadowConfig, isShadowPass);
-    }
+  /** 
+  * @description Performs final cleanup of all emitters.
+  */ 
+  static destroy = function () {
+    self.clear();
+  }
 
-    /**
-     * Updates all particles in the system.
-     */
-    function update(dt, camera = undefined) {
-        gml_pragma("forceinline");
-        
-        var _dt = dt * self.timeScale;
-        var p = self.pool;
-        
-        // Update emitters
-        for (var i = 0, il = array_length(self.emitters); i < il; i++) {
-            self.emitters[i].update(_dt);
-        }
-
-        // Modules (Per-Particle Processing)
-        // This now handles EVERYTHING: life cycle, motion, behaviors.
-        var ml = array_length(self.modules);
-        if (ml > 0) {
-            var i = 0;
-            while (i < p.aliveCount) {
-                var killed = false;
-                for (var m = 0; m < ml; m++) {
-                    // Modules can return true to stop processing this particle (e.g. if it was killed)
-                    if (self.modules[m].onUpdate(p, i, _dt) == true) {
-                        killed = true;
-                        break;
-                    }
-                }
-                if (!killed) i++;
-            }
-        }
-
-        // Sorting (if needed)
-        if (self.sorted && camera != undefined) {
-            // Calculate sort keys if sorted
-            var camX = camera.position[0];
-            var camY = camera.position[1];
-            var camZ = camera.position[2];
-            for (var j = 0; j < p.aliveCount; j++) {
-                var dx = p.posX[j] - camX;
-                var dy = p.posY[j] - camY;
-                var dz = p.posZ[j] - camZ;
-                p.sortKey[j] = dx*dx + dy*dy + dz*dz;
-            }
-            depthSort();
-        }
+  /**
+  * @description Bursts particles on all emitters that have a streamType.
+  * @param {int} count
+  */
+  static burst = function (count) {
+    for (var i = 0, il = array_length(self.emitters); i < il; i++) {
+        var e = self.emitters[i];
+        if (e.streamType != undefined) e.burst(e.streamType, count);
     }
-
-    /**
-     * Kills a particle at the given index by swapping it with the last alive one.
-     */
-    function kill(index) {
-        gml_pragma("forceinline");
-        self.pool.aliveCount--;
-        if (index < self.pool.aliveCount) {
-            self.pool.swap(index, self.pool.aliveCount);
-        }
-    }
-
-    /**
-     * Sorts particles based on their sortKey (back-to-front).
-     */
-    function depthSort() {
-        var p = self.pool;
-        var count = p.aliveCount;
-        if (count <= 1) return;
-        
-        // Use the pool's scratch array to avoid allocation
-        var temp = p.indicesScratch;
-        for (var j = 0; j < count; j++) temp[j] = j;
-        
-        var sortArray = array_create(count);
-        array_copy(sortArray, 0, temp, 0, count);
-        
-        // Use method to bind 'pool' to the sort function context
-        // This is engine-agnostic and thread-safe (in theory for GML) and doesn't rely on globals.
-        array_sort(sortArray, method({ pool: p }, function(a, b) {
-            return pool.sortKey[b] - pool.sortKey[a];
-        }));
-        
-        // Copy the sorted indices back to the pool
-        array_copy(p.indices, 0, sortArray, 0, count);
-    }
+  }
 }

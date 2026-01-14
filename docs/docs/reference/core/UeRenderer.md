@@ -19,6 +19,7 @@ new UeRenderer(data = {})
 | `height`              | `number`  | `display_get_height()` | Default render height (viewport) |
 | `shadowMap.enabled`   | `boolean` | `false` | Enable shadow map rendering                    |
 | `shadowMap.autoUpdate`| `boolean` | `true`  | Automatically update shadows every frame       |
+| `renderPath`          | `number`  | `UE_RENDER_PATH.FORWARD` | The rendering path to use (`FORWARD` or `DEFERRED`) |
 | `toneMapping`         | `number`  | `UE_TONE_MAPPING.NONE` | HDR to LDR mapping algorithm |
 | `toneMappingExposure` | `number`  | `1.0`   | Global exposure for tone mapping |
 
@@ -32,9 +33,43 @@ new UeRenderer(data = {})
 | `width`       | `number`  | `display`   | Current render width                        |
 | `height`      | `number`  | `display`   | Current render height                       |
 | `sortObjects` | `boolean` | `true`      | Whether to sort the objects on render phase |
+| `renderPath`  | `number`  | `UE_RENDER_PATH.FORWARD` | Active rendering path (`FORWARD` or `DEFERRED`) |
 | `shadowMap`   | `struct`  | `{enabled: false, autoUpdate: true, needsUpdate: false}` | Shadow rendering configuration |
 | `toneMapping` | `number`  | `UE_TONE_MAPPING.NONE` | Active tone mapping algorithm |
 | `toneMappingExposure` | `number` | `1.0` | Active exposure level |
+
+---
+
+## 🏗️ Rendering Paths
+
+Unique Engine supports two main rendering paths, each with its own strengths and use cases.
+
+### 1️⃣ Forward Rendering (`UE_RENDER_PATH.FORWARD`)
+
+The default rendering path. Each object is rendered in a single pass, calculating all lighting and shadows directly in its fragment shader.
+
+- **Pros**: Low memory overhead, supports any number of transparent objects, easy to understand.
+- **Cons**: Lighting cost increases linearly with the number of lights per object (`lights` property in material).
+
+### 2️⃣ Deferred Rendering (`UE_RENDER_PATH.DEFERRED`)
+
+A more advanced path that decouples geometry rendering from lighting calculations. It uses a **G-Buffer** (Geometry Buffer) to store surface properties.
+
+**How it works:**
+1. **G-Buffer Pass**: All opaque objects are rendered once to multiple targets (Albedo, Normals, Positions, Emissive/AO).
+2. **Lighting Pass**: A single fullscreen quad is rendered, sampling the G-Buffer to calculate lighting for the entire screen at once.
+3. **Transparent Pass**: Transparent objects are rendered using Forward rendering on top of the deferred result.
+
+**G-Buffer Layout:**
+- **Target 0 (Albedo/Alpha)**: `surface_rgba8unorm` - RGB Albedo and Alpha mask.
+- **Target 1 (Normal/Metal)**: `surface_rgba16float` - RGB World Normals (mapped -1 to 1) and Metalness.
+- **Target 2 (Position/Rough)**: `surface_rgba32float` - RGB World Position and Roughness.
+- **Target 3 (Emissive/AO)**: `surface_rgba16float` - RGB Emissive color and Ambient Occlusion.
+
+**Pros**: Lighting cost is independent of geometry complexity, supports a very high number of lights, enables advanced post-processing effects (like Screen Space Reflections or better Outlines).
+**Cons**: Higher memory usage (VRAM), requires hardware support for multiple render targets (MRT) and floating-point surfaces.
+
+---
 
 ## 🔧 Internal Logic
 

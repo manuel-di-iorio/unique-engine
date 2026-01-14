@@ -1,7 +1,7 @@
 {
   "$GMShader":"",
-  "%Name":"sh_ue_particle_shadow",
-  "name":"sh_ue_particle_shadow",
+  "%Name":"sh_ue_gbuffer",
+  "name":"sh_ue_gbuffer",
   "parent":{
     "name":"Shaders",
     "path":"folders/Packages/Unique Engine/Shaders.yy",

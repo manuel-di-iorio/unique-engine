@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UeParticleRenderer",
   "parent":{
-    "name":"Particles",
-    "path":"folders/Packages/Unique Engine/Particles.yy",
+    "name":"Unique Particles",
+    "path":"folders/Packages/Unique Particles.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

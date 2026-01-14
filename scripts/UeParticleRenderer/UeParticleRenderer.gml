@@ -1,163 +1,160 @@
+global.UE_PARTICLE_VERSION = "1.2.1";
+global.UE_PARTICLE_RENDER_FORMAT = undefined;
+
 /**
- * @description Efficient renderer for particle systems using vertex batching and a dedicated shader.
- * CLEAN VERSION: Shadow logic commented out for testing.
+ * @description State-of-the-art GPU Particle Renderer. 
+ * Orchestrates shaders, uniforms, and procedural textures.
  */
 function UeParticleRenderer(_shaders = {}) constructor {
-    // Vertex format for particles
+  gml_pragma("forceinline");
+
+  // ===== Vertex Format (52 bytes) =====
+  if (global.UE_PARTICLE_RENDER_FORMAT == undefined) {
     vertex_format_begin();
-    vertex_format_add_position_3d(); // x, y, z (center position)
-    vertex_format_add_colour();      // color (rgba)
-    vertex_format_add_texcoord();    // uv (local 0..2)
-    vertex_format_add_custom(vertex_type_float3, vertex_usage_normal); // size, rotation, 0
-    self.format = vertex_format_end();
+    vertex_format_add_position_3d();                                      // in_Position (SpawnPos)
+    vertex_format_add_colour();                                           // in_Colour (Start)
+    vertex_format_add_custom(vertex_type_float2, vertex_usage_texcoord);   // in_TextureCoord (CornerXY)
+    vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord);   // in_TextureCoord1 (VelXYZ + SpawnTime)
+    vertex_format_add_custom(vertex_type_float3, vertex_usage_texcoord);   // in_TextureCoord2 (MaxLife, sStart, rStart)
+    global.UE_PARTICLE_RENDER_FORMAT = vertex_format_end();
+  }
+  self.format = global.UE_PARTICLE_RENDER_FORMAT;
 
-    self.vbuffer = vertex_create_buffer();
-    
-    // Configurable shaders
-    var _mainShader = _shaders[$ "main"] ?? asset_get_index("sh_ue_particle");
-    // var _shadowShader = _shaders[$ "shadow"] ?? asset_get_index("sh_ue_particle_shadow");
+  self.shader = _shaders[$ "main"] ?? sh_ue_particle;
+  self.uRight = shader_get_uniform(self.shader, "u_ueCameraRight");
+  self.uUp = shader_get_uniform(self.shader, "u_ueCameraUp");
+  self.uUVRegion = shader_get_uniform(self.shader, "u_ueUVRegion");
+  self.uTime = shader_get_uniform(self.shader, "u_ueTime");
+  
+  self.uGrav   = shader_get_uniform(self.shader, "u_ueGravity");
+  self.uSizeE  = shader_get_uniform(self.shader, "u_ueSizeEnd");
+  
+  self.uColM   = shader_get_uniform(self.shader, "u_ueColorMid");
+  self.uColE   = shader_get_uniform(self.shader, "u_ueColorEnd");
+  self.uColT   = shader_get_uniform(self.shader, "u_ueColorTimes"); // x: midTime, y: glow
+  
+  self.uRotSpd = shader_get_uniform(self.shader, "u_ueRotSpeed");
+  self.uDrag   = shader_get_uniform(self.shader, "u_ueDrag");
+  self.uAnim   = shader_get_uniform(self.shader, "u_ueAnimData"); // x: framesX, y: framesY, z: animSpeed
+  
+  self.uDepthTex = shader_get_sampler_index(self.shader, "u_ueDepthTex");
+  self.uDepthParams = shader_get_uniform(self.shader, "u_ueDepthParams");
 
-    self.shader = _mainShader;
-    // self.shaderShadow = _shadowShader;
-    
-    // Cached uniform locations (Main Shader)
-    if (self.shader != -1) {
-        self.uRight = shader_get_uniform(self.shader, "u_ueCameraRight");
-        self.uUp    = shader_get_uniform(self.shader, "u_ueCameraUp");
-        self.uUVRegion = shader_get_uniform(self.shader, "u_ueUVRegion");
-        self.uSoftFactor = shader_get_uniform(self.shader, "u_ueSoftFactor");
-        self.uDepthTex = shader_get_sampler_index(self.shader, "u_ueDepthTexture");
-        self.uNear = shader_get_uniform(self.shader, "u_ueNear");
-        self.uFar = shader_get_uniform(self.shader, "u_ueFar");
-        // self.uReceiveShadow = shader_get_uniform(self.shader, "u_ueReceiveShadow");
-        // self.uShadowMap = shader_get_sampler_index(self.shader, "s_dirShadowMap");
-        // self.uShadowMatrix = shader_get_uniform(self.shader, "u_ueDirShadowMatrix");
-    }
+  self.uShadowTex = shader_get_sampler_index(self.shader, "u_ueShadowTex");
+  self.uShadowMatrix = shader_get_uniform(self.shader, "u_ueShadowMatrix");
+  self.uShadowParams = shader_get_uniform(self.shader, "u_ueShadowParams");
 
-    /*
-    // Cached uniform locations (Shadow Shader)
-    if (self.shaderShadow != -1) {
-        self.uRightShadow = shader_get_uniform(self.shaderShadow, "u_ueCameraRight");
-        self.uUpShadow    = shader_get_uniform(self.shaderShadow, "u_ueCameraUp");
-    }
-    */
+  // ===== Procedural Shape Generator =====
+  self.shapes = {};
+  
+  /**
+   * @description Internal helper to create textured procedural shapes.
+   * @param {string} _name Identifier for the shape.
+   * @param {function} _drawFunc Function that draws the shape on a surface.
+   * @returns {struct} Struct containing texture and UV data.
+   * @private
+   */
+  static __createShape = function (_name, _drawFunc) {
+    var _res = 64;
+    var _surf = surface_create(_res, _res);
+    if (!surface_exists(_surf)) return undefined;
+    surface_set_target(_surf);
+    draw_clear_alpha(c_black, 0); _drawFunc(_res);
+    surface_reset_target();
+    var _spr = sprite_create_from_surface(_surf, 0, 0, _res, _res, false, false, _res/2, _res/2);
+    surface_free(_surf);
+    var _tex = sprite_get_texture(_spr, 0), _uvs = texture_get_uvs(_tex);
+    self.shapes[$ _name] = { sprite: _spr, texture: _tex, uvs: [_uvs[0], _uvs[1], _uvs[2]-_uvs[0], _uvs[3]-_uvs[1]] };
+    return self.shapes[$ _name];
+  };
 
-    /**
-     * Renders a particle system.
-     */
-    function render(system, camera, texture = -1, depthTexture = undefined, shadowConfig = undefined, isShadowPass = false) {
-        gml_pragma("forceinline");
-        
-        // Skip rendering if shadow pass (shadows disabled for now)
-        // if (isShadowPass) return;
-        
-        var pool = system.pool;
-        var count = pool.aliveCount;
-        if (count == 0 || self.shader == -1) return;
+  // Build standard shape library
+  self.__createShape("point", function(r) { draw_circle(r/2, r/2, r/2-2, false); });
+  self.__createShape("sphere", function(r) {
+    gpu_set_blendmode(bm_add);
+    for(var i=0; i<r/2; i++) { draw_set_alpha((1-i/(r/2))*0.5); draw_circle(r/2, r/2, i, false); }
+    gpu_set_blendmode(bm_normal); draw_set_alpha(1.0);
+  });
+  self.__createShape("smoke", function(r) {
+      draw_set_alpha(0.3);
+      var m = r/2;
+      for(var i=0; i<8; i++) {
+          var ang = i * 45;
+          var dist = random_range(2, r/4);
+          draw_circle(m + lengthdir_x(dist, ang), m + lengthdir_y(dist, ang), random_range(r/4, r/2.5), false);
+      }
+      draw_set_alpha(1);
+  });
+  self.__createShape("flare", function(r) {
+      var m = r/2; draw_set_alpha(0.5);
+      for(var i=0; i<r/2; i++) { draw_line_width(m-i, m, m+i, m, 2); draw_line_width(m, m-i, m, m+i, 2); }
+      draw_set_alpha(1); draw_circle(m, m, r/6, false);
+  });
+  self.__createShape("square", function(r) { draw_rectangle(4, 4, r-5, r-5, false); });
+  self.__createShape("box", function(r) { draw_rectangle(4, 4, r-5, r-5, true); });
+  self.__createShape("disk", function(r) { draw_circle(r/2, r/2, r/2-2, false); });
+  self.__createShape("ring", function(r) {
+      draw_set_circle_precision(32);
+      draw_circle(r/2, r/2, r/2-2, true);
+      draw_circle(r/2, r/2, r/2-3, true); 
+  });
 
-        // --- Billboarding Vectors ---
-        var rx, ry, rz, ux, uy, uz;
-        if (variable_struct_exists(camera, "matrixWorld")) {
-            var m = camera.matrixWorld;
-            rx = m[0]; ry = m[1]; rz = m[2]; 
-            ux = m[4]; uy = m[5]; uz = m[6]; 
-        } else {
-            var vm = matrix_get(matrix_view);
-            rx = vm[0]; ry = vm[4]; rz = vm[8];
-            ux = vm[1]; uy = vm[5]; uz = vm[9];
-        }
+  self.fallbackTexture = self.shapes.sphere.texture;
 
-        // Rebuild Buffer
-        vertex_begin(self.vbuffer, self.format);
-        var sorted = system.sorted; // && !isShadowPass;
-        
-        // Fallback arrays for missing attributes
-        var fallbackZero = array_create(count, 0);
-        var fallbackOne  = array_create(count, 1);
-        
-        var _posX = pool[$ "posX"] ?? fallbackZero;
-        var _posY = pool[$ "posY"] ?? fallbackZero;
-        var _posZ = pool[$ "posZ"] ?? fallbackZero;
-        var _size = pool[$ "size"] ?? fallbackOne;
-        var _rot  = pool[$ "rotation"] ?? fallbackZero;
-        var _alpha = pool[$ "alpha"] ?? fallbackOne;
-        var _colR = pool[$ "colorR"] ?? fallbackOne;
-        var _colG = pool[$ "colorG"] ?? fallbackOne;
-        var _colB = pool[$ "colorB"] ?? fallbackOne;
-        var _indices = pool.indices;
+  /**
+   * @description Low-level submission of a vertex buffer to the GPU.
+   * Handles uniform updates and shader state.
+   * @param {UeParticleEmitter} emitter The emitter whose buffer will be submitted.
+   * @param {resource.camera} camera Reference camera for billboarding.
+   * @param {struct} type The particle type containing visual data (texture, uvs).
+   * @param {texture} depthTex Optional depth texture for soft particles.
+   * @param {array} depthParams [near, far, softness, enabled]
+   * @param {texture} shadowTex Optional shadow map texture.
+   * @param {array} shadowMatrix 4x4 matrix for shadow projection.
+   * @param {array} shadowParams [strength, bias, resolution, enabled]
+   */
+  static submit = function(emitter, camera, type, depthTex = undefined, depthParams = undefined, shadowTex = undefined, shadowMatrix = undefined, shadowParams = undefined) {
+      gml_pragma("forceinline");
+      shader_set(self.shader);
+      var vm = camera_get_view_mat(camera);
+      shader_set_uniform_f(self.uTime, current_time / 1000.0);
+      shader_set_uniform_f_array(self.uUVRegion, type.uvs);
+      shader_set_uniform_f(self.uRight, vm[0], vm[4], vm[8]);
+      shader_set_uniform_f(self.uUp, vm[1], vm[5], vm[9]);
+      
+      shader_set_uniform_f(self.uGrav, type.gravX, type.gravY, type.zGravAmount);
+      shader_set_uniform_f(self.uSizeE, type.sizeMin + type.sizeIncr * type.lifeMax);
+      
+      shader_set_uniform_f(self.uColM, type.colorMid[0], type.colorMid[1], type.colorMid[2]);
+      shader_set_uniform_f(self.uColE, type.colorEnd[0], type.colorEnd[1], type.colorEnd[2], type.alphaEnd);
+      shader_set_uniform_f(self.uColT, type.colorMidTime, type.glow);
+      
+      shader_set_uniform_f(self.uRotSpd, type.rotIncr);
+      shader_set_uniform_f(self.uDrag, type.drag);
+      shader_set_uniform_f(self.uAnim, type.animFramesX, type.animFramesY, type.animSpeed);
 
-        for (var n = 0; n < count; n++) {
-            var i = sorted ? _indices[n] : n;
-            var px = _posX[i], py = _posY[i], pz = _posZ[i];
-            var size = _size[i];
-            var rot = degtorad(_rot[i]); 
-            var col = make_color_rgb(_colR[i] * 255, _colG[i] * 255, _colB[i] * 255);
-            var alpha = _alpha[i];
+      if (depthTex != undefined && depthParams != undefined) {
+          texture_set_stage(self.uDepthTex, depthTex);
+          shader_set_uniform_f(self.uDepthParams, depthParams[0], depthParams[1], depthParams[2], 1.0);
+      } else {
+          shader_set_uniform_f(self.uDepthParams, 0, 0, 0, 0);
+      }
 
-            // Big Triangle
-            vertex_position_3d(self.vbuffer, px, py, pz); vertex_color(self.vbuffer, col, alpha); vertex_texcoord(self.vbuffer, 0, 0); vertex_float3(self.vbuffer, size, rot, 0);
-            vertex_position_3d(self.vbuffer, px, py, pz); vertex_color(self.vbuffer, col, alpha); vertex_texcoord(self.vbuffer, 2, 0); vertex_float3(self.vbuffer, size, rot, 0);
-            vertex_position_3d(self.vbuffer, px, py, pz); vertex_color(self.vbuffer, col, alpha); vertex_texcoord(self.vbuffer, 0, 2); vertex_float3(self.vbuffer, size, rot, 0);
-        }
-        vertex_end(self.vbuffer);
+      if (shadowTex != undefined && shadowMatrix != undefined && shadowParams != undefined) {
+          texture_set_stage(self.uShadowTex, shadowTex);
+          shader_set_uniform_matrix_array(self.uShadowMatrix, shadowMatrix);
+          shader_set_uniform_f(self.uShadowParams, shadowParams[0], shadowParams[1], shadowParams[2], 1.0);
+      } else {
+          static identity = matrix_build_identity();
+          shader_set_uniform_matrix_array(self.uShadowMatrix, identity);
+          shader_set_uniform_f(self.uShadowParams, 0, 0, 0, 0);
+      }
 
-        // Submit
-        shader_set(self.shader);
-        
-        var tex = texture;
-        if (tex == -1) {
-            var _sprIdx = asset_get_index("sprparticletest");
-            if (_sprIdx > -1) tex = sprite_get_texture(_sprIdx, 0);
-        }
-        
-        // Atlas mapping
-        var uvs = texture_get_uvs(tex);
-        shader_set_uniform_f(self.uUVRegion, uvs[0], uvs[1], uvs[2]-uvs[0], uvs[3]-uvs[1]);
-        
-        shader_set_uniform_f(self.uRight, rx, ry, rz);
-        shader_set_uniform_f(self.uUp, ux, uy, uz);
-        
-        // Soft Particles
-        // shader_set_uniform_f(self.uSoftFactor, system.softFactor);
-        // if (system.softFactor > 0) {
-        //     shader_set_uniform_f(self.uNear, camera.near);
-        //     shader_set_uniform_f(self.uFar, camera.far);
-        //     if (depthTexture != undefined) texture_set_stage(self.uDepthTex, depthTexture);
-        // }
-        
-        /*
-        // Shadow Receiving (Disabled)
-        if (system.receiveShadow && shadowConfig != undefined) {
-            shader_set_uniform_f(self.uReceiveShadow, 1.0);
-            texture_set_stage(self.uShadowMap, shadowConfig.texture);
-            shader_set_uniform_f_array(self.uShadowMatrix, shadowConfig.matrix);
-        } else {
-            shader_set_uniform_f(self.uReceiveShadow, 0.0);
-        }
-        */
-        
-        var _prevBlend = gpu_get_blendenable();
-        var _prevCull = gpu_get_cullmode();
-        var _prevZWrite = gpu_get_zwriteenable();
-        var _prevZTest = gpu_get_ztestenable();
-        
-        gpu_set_blendenable(true);
-        gpu_set_blendmode(bm_normal);
-        gpu_set_cullmode(cull_noculling);
-        gpu_set_ztestenable(true); 
-        gpu_set_zwriteenable(false);
-
-        vertex_submit(self.vbuffer, pr_trianglelist, tex);
-        
-        gpu_set_blendenable(_prevBlend);
-        gpu_set_cullmode(_prevCull);
-        gpu_set_zwriteenable(_prevZWrite);
-        gpu_set_ztestenable(_prevZTest);
-        
-        shader_reset();
-    }
-
-    function dispose() {
-        vertex_delete_buffer(self.vbuffer);
-    }
+      gpu_set_zwriteenable(false);
+      vertex_submit(emitter.vbuffer, pr_trianglelist, type.texture);
+      gpu_set_zwriteenable(true);
+      shader_reset();
+  }
 }
+
+global.UE_PARTICLE_RENDERER = new UeParticleRenderer();

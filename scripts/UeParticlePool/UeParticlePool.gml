@@ -1,73 +1,94 @@
-/**
- * @description Data-oriented container for particles.
- * Stores particle properties in separate arrays (SoA) for better performance in GML.
- */
+/** 
+* @description Ultra-performance SoA (Structure of Arrays) pool for GPU-simulated particles. 
+* Stores birth data and manages a zero-allocation free list with O(1) operations.
+*/
 function UeParticlePool(maxCount) constructor {
-    self.maxCount = maxCount;
-    self.aliveCount = 0;
+  gml_pragma("forceinline");
+  self.maxCount = maxCount;
+  self.aliveCount = 0;
 
-    // Dynamic attribute storage
-    self.attributes = {};
-    self.attributeNames = [];
+  // --- SoA Arrays (Birth Data) ---
+  self.spawnX = array_create(maxCount, 0);
+  self.spawnY = array_create(maxCount, 0);
+  self.spawnZ = array_create(maxCount, 0);
+  
+  self.initVelX = array_create(maxCount, 0);
+  self.initVelY = array_create(maxCount, 0);
+  self.initVelZ = array_create(maxCount, 0);
+  
+  self.gravityX = array_create(maxCount, 0);
+  self.gravityY = array_create(maxCount, 0);
+  self.gravityZ = array_create(maxCount, 0);
+  
+  self.life = array_create(maxCount, 0);
+  self.maxLife = array_create(maxCount, 0);
+  
+  self.sizeStart = array_create(maxCount, 0);
+  self.sizeEnd = array_create(maxCount, 0);
+  
+  self.colorStart = array_create(maxCount, 0); // 32bit BGRA
+  self.colorEnd = array_create(maxCount, 0);   // 32bit BGRA
+  
+  self.rotStart = array_create(maxCount, 0);
+  self.rotSpeed = array_create(maxCount, 0);
+  
+  self.seed = array_create(maxCount, 0); 
 
-    // Base attributes that are ALWAYS needed for rendering and lifecycle
-    self.registerAttribute("posX", 0);
-    self.registerAttribute("posY", 0);
-    self.registerAttribute("posZ", 0);
+  // --- Management Lists ---
+  self.activeIndices = array_create(maxCount, 0);
+  self.freeIndices = array_create(maxCount, 0);
+  self.freeCount = maxCount;
+
+  // Initialize free list stack
+  for (var i = 0; i < maxCount; i++) self.freeIndices[i] = i;
+
+  /** 
+  * @description Pops an index from the free list and moves it to the active list.
+  * @returns {real} The physical index in the SoA arrays, or -1 if full.
+  */ 
+  static allocate = function () {
+    gml_pragma("forceinline");
+    if (self.freeCount == 0) return -1;
+    var idx = self.freeIndices[--self.freeCount];
+    self.activeIndices[self.aliveCount++] = idx;
+    return idx;
+  }
+
+  /**
+  * @description Releases an active particle back to the free list.
+  * @param {real} activeIndex The position in the activeIndices array (not the physical index).
+  */
+  static free = function (activeIndex) {
+    gml_pragma("forceinline");
+    var realIdx = self.activeIndices[activeIndex];
+    self.freeIndices[self.freeCount++] = realIdx;
+    self.aliveCount--;
+    self.activeIndices[activeIndex] = self.activeIndices[self.aliveCount];
+  }
+  
+  /**
+  * @description Efficiently decrements particle life and kills expired particles using swap-remove.
+  * @param {real} dt Delta time in seconds.
+  */
+  static updateLife = function(dt) {
+    gml_pragma("forceinline");
+    var count = self.aliveCount;
+    if (count <= 0) return;
     
-    // Sorting/Rendering (these are internal, not dynamic attributes in the same sense but handled similarly)
-    self.sortKey = array_create(maxCount, 0);
-    self.indices = array_create(maxCount, 0);
-    for (var i = 0; i < maxCount; i++) self.indices[i] = i;
-    self.indicesScratch = array_create(maxCount, 0);
-
-    /**
-     * Registers a new attribute if it doesn't exist.
-     * @param {String} name
-     * @param {Any} defaultValue
-     */
-    function registerAttribute(name, defaultValue = 0) {
-        if (variable_struct_exists(self.attributes, name)) return;
-        
-        var arr = array_create(self.maxCount, defaultValue);
-        self.attributes[$ name] = arr;
-        array_push(self.attributeNames, name);
-        
-        // Expose directly on the pool struct for performance (self.posX instead of self.attributes.posX)
-        self[$ name] = arr;
-    }
-
-    /**
-     * Resets a particle at the given index.
-     */
-    function reset(index) {
-        gml_pragma("forceinline");
-        var names = self.attributeNames;
-        for (var i = 0, il = array_length(names); i < il; i++) {
-            var attr = self.attributes[$ names[i]];
-            attr[index] = 0; // Default reset to 0, maybe store actual default values?
+    var active = self.activeIndices;
+    var lifeArr = self.life;
+    var i = 0;
+    while (i < count) {
+        var idx = active[i];
+        lifeArr[idx] -= dt;
+        if (lifeArr[idx] <= 0) {
+            self.freeIndices[self.freeCount++] = idx;
+            count--;
+            active[i] = active[count];
+        } else {
+            i++;
         }
     }
-
-    /**
-     * Swaps two particles in the container.
-     */
-    function swap(i, j) {
-        gml_pragma("forceinline");
-        var names = self.attributeNames;
-        var nl = array_length(names);
-        var attrs = self.attributes;
-        
-        for (var n = 0; n < nl; n++) {
-            var arr = attrs[$ names[n]];
-            var tmp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = tmp;
-        }
-        
-        // Also swap sortKey
-        var tmpKey = self.sortKey[i];
-        self.sortKey[i] = self.sortKey[j];
-        self.sortKey[j] = tmpKey;
-    }
+    self.aliveCount = count;
+  }
 }

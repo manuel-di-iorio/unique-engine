@@ -3,6 +3,7 @@ function UeSpriteMaterial(data = {}): UeMaterial(data) constructor {
   shader = sh_ue_sprite;
   transparent = data[$ "transparent"] ?? true;
   blending = transparent;
+  side = data[$ "side"] ?? cull_noculling;
   
   var _color = data[$ "color"] ?? c_white;
   color = [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255];

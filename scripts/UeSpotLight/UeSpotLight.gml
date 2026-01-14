@@ -49,11 +49,11 @@ function UeSpotLight(_color = c_white, _intensity = 100, _distance = 20, _angle 
 
     /**
      * Gets the current light direction (normalized vector from position to target).
+     * @params {Array} v - Output vector (vec3)
      * @returns {Array} Normalized direction vector (vec3)
      */
-    function getDirection() {
+    function getDirection(v = global.UE_VEC3_TEMP0) {
         gml_pragma("forceinline");
-        var v = global.UE_VEC3_TEMP0;
         vec3_copy(v, target.position);
         vec3_sub(v, position);
         vec3_normalize(v);

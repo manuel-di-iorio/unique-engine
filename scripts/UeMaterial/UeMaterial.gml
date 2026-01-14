@@ -31,59 +31,14 @@ function UeMaterial(data = {}) constructor {
   // Shader
   shader = data[$ "shader"];
 
+  // Cache management
+  __caches = {}; // Stores cached uniform/sampler locations per shader
+  __currentCache = undefined;
+
   // Uniforms
   uniforms = data[$ "uniforms"] ?? {};
-  __uniformsCached = [];
-  __uniformsCachedCount = 0;
-  __texturesCached = [];
-  __texturesCachedCount = 0;
 
-  __uniformModelPositionLoc = undefined;
-  __uniformWorldMatrixLoc = undefined;
-  __uniformCameraPositionLoc = undefined;
-  __uniformDirShadowMatrixLoc = undefined;
-  __uniformDirShadowEnabledLoc = undefined;
-  __uniformPointShadowEnabledLoc = undefined;
-  __uniformReceiveShadowLoc = undefined;
-  __samplerDirShadowMapIdx = undefined;
-  __samplerPointShadowMapIdx = undefined;
-  __uniformPointShadowFarLoc = undefined;
-  __uniformPointShadowNearLoc = undefined;
-  __uniformPointShadowPosLoc = undefined;
-  __uniformSpotShadowEnabledLoc = undefined;
-  __uniformSpotShadowMatrixLoc = undefined;
-  __uniformSpotShadowQualityLoc = undefined;
-  __uniformSpotShadowTexelSizeLoc = undefined;
-  __uniformSpotShadowFarLoc = undefined;
-  __uniformSpotShadowNearLoc = undefined;
-  __uniformSpotShadowPosLoc = undefined;
-  __samplerSpotShadowMapIdx = -1;
-  __uniformHemiLightDirLoc = undefined;
-  __uniformHemiLightSkyColorLoc = undefined;
-  __uniformHemiLightGroundColorLoc = undefined;
-  __uniformHemiLightIntensityLoc = undefined;
-  __uniformEmissiveIntensityLoc = undefined;
-  __uniformToneMappingLoc = undefined;
-  __uniformToneMappingExposureLoc = undefined;
-  __uniformToneMappedLoc = undefined;
-
-  // Spot light uniforms
-  __uniformSpotLightsPos = undefined;
-  __uniformSpotLightsDir = undefined;
-  __uniformSpotLightsColor = undefined;
-  __uniformSpotLightsRange = undefined;
-  __uniformSpotLightsIntensity = undefined;
-  __uniformSpotLightsDecay = undefined;
-  __uniformSpotLightsAngle = undefined;
-  __uniformSpotLightsPenumbra = undefined;
-
-  // Has maps uniforms
-  __uniformHasMapLoc = undefined;
-  __uniformHasAlphaMapLoc = undefined;
-  __uniformHasOrmMapLoc = undefined;
-  __uniformHasNormalMapLoc = undefined;
-  __uniformHasEmissiveMapLoc = undefined;
-  __uniformHasDisplacementMapLoc = undefined;
+  // Has maps flags
   __hasMapsFlags = {
     map: 0,
     alphaMap: 0,
@@ -92,27 +47,6 @@ function UeMaterial(data = {}) constructor {
     emissiveMap: 0,
     displacementMap: 0
   };
-
-  // Fog uniforms
-  __uniformFogColorLoc = undefined;
-  __uniformFogDensityLoc = undefined;
-  __uniformFogNearLoc = undefined;
-  __uniformFogFarLoc = undefined;
-
-  // Light uniforms
-  lights = data[$ "lights"] ?? true;
-  __uniformLightsAmbientLoc = undefined;
-  __uniformLightsDir = [];
-  __uniformLightsPos = undefined;
-  __uniformLightsColor = undefined;
-  __uniformLightsRange = undefined;
-  __uniformLightsIntensity = undefined;
-  __uniformLightsDecay = undefined;
-
-  // Shadow quality
-  shadowQuality = data[$ "shadowQuality"] ?? UE_SHADOW_QUALITY.HIGH;
-  __uniformDirShadowQualityLoc = undefined;
-  __uniformDirShadowTexelSizeLoc = undefined;
 
   // Uniform names config
   __uniformNamesConfig = global.UE_UNIFORM_NAMES_CONFIG;
@@ -125,172 +59,148 @@ function UeMaterial(data = {}) constructor {
 
   emissiveIntensity = data[$ "emissiveIntensity"] ?? 0;
   receiveShadow = data[$ "receiveShadow"] ?? true;
+  lights = data[$ "lights"] ?? true;
+  shadowQuality = data[$ "shadowQuality"] ?? UE_SHADOW_QUALITY.HIGH;
 
   // Cache uniform/sampler locations
-  function build() {
+  function build(targetShader = undefined) {
    gml_pragma("forceinline");
-   if (shader == undefined) return;
+   var _shader = targetShader ?? self.shader;
+   if (_shader == undefined) return;
+   
+   var _shaderIdx = string(_shader);
+   if (variable_struct_exists(__caches, _shaderIdx)) {
+       __currentCache = __caches[$ _shaderIdx];
+       return self;
+   }
+
    var cfg = __uniformNamesConfig;
+   var cache = {
+       uniformModelPositionLoc: shader_get_uniform(_shader, cfg.modelPosition),
+       uniformWorldMatrixLoc: shader_get_uniform(_shader, cfg.worldMatrix),
+       uniformCameraPositionLoc: shader_get_uniform(_shader, cfg.cameraPosition),
+       uniformLightsAmbientLoc: shader_get_uniform(_shader, cfg.ambient),
+       uniformEmissiveIntensityLoc: shader_get_uniform(_shader, cfg.emissiveIntensity),
 
-   // Cache the engine uniforms
-   __uniformModelPositionLoc = shader_get_uniform(shader, cfg.modelPosition);
-   __uniformWorldMatrixLoc = shader_get_uniform(shader, cfg.worldMatrix);
-   __uniformCameraPositionLoc = shader_get_uniform(shader, cfg.cameraPosition);
-   __uniformLightsAmbientLoc = shader_get_uniform(shader, cfg.ambient);
-   __uniformEmissiveIntensityLoc = shader_get_uniform(shader, cfg.emissiveIntensity);
+       uniformDirShadowMatrixLoc: shader_get_uniform(_shader, cfg.lightSpaceMatrix),
+       uniformDirShadowEnabledLoc: shader_get_uniform(_shader, cfg.shadowEnabled),
+       uniformPointShadowEnabledLoc: shader_get_uniform(_shader, cfg.pointShadowEnabled),
+       uniformReceiveShadowLoc: shader_get_uniform(_shader, cfg.receiveShadow),
+       uniformDirShadowQualityLoc: shader_get_uniform(_shader, cfg.shadowQuality),
+       uniformDirShadowTexelSizeLoc: shader_get_uniform(_shader, cfg.shadowTexelSize),
+       samplerDirShadowMapIdx: shader_get_sampler_index(_shader, cfg.shadowMapSampler),
+       
+       samplerPointShadowMapIdx: shader_get_sampler_index(_shader, cfg.pointShadowMapSampler),
+       uniformPointShadowFarLoc: shader_get_uniform(_shader, cfg.pointShadowFar),
+       uniformPointShadowNearLoc: shader_get_uniform(_shader, cfg.pointShadowNear),
+       uniformPointShadowPosLoc: shader_get_uniform(_shader, cfg.pointShadowPos),
+       uniformPointShadowTexelSizeLoc: shader_get_uniform(_shader, cfg.pointShadowTexelSize),
+       uniformPointShadowQualityLoc: shader_get_uniform(_shader, cfg.pointShadowQuality),
+       uniformPointShadowMatrixLoc: shader_get_uniform(_shader, "u_uePointShadowMatrix"),
+       
+       uniformSpotShadowEnabledLoc: shader_get_uniform(_shader, cfg.spotShadowEnabled),
+       uniformSpotShadowMatrixLoc: shader_get_uniform(_shader, cfg.spotShadowMatrix),
+       samplerSpotShadowMapIdx: shader_get_sampler_index(_shader, cfg.spotShadowMapSampler),
+       uniformSpotShadowFarLoc: shader_get_uniform(_shader, cfg.spotShadowFar),
+       uniformSpotShadowNearLoc: shader_get_uniform(_shader, cfg.spotShadowNear),
+       uniformSpotShadowPosLoc: shader_get_uniform(_shader, cfg.spotShadowPos),
+       uniformSpotShadowTexelSizeLoc: shader_get_uniform(_shader, cfg.spotShadowTexelSize),
+       uniformSpotShadowQualityLoc: shader_get_uniform(_shader, cfg.spotShadowQuality),
 
-   // Cache shadow uniforms
-   __uniformDirShadowMatrixLoc = shader_get_uniform(shader, cfg.lightSpaceMatrix);
-   __uniformDirShadowEnabledLoc = shader_get_uniform(shader, cfg.shadowEnabled);
-   __uniformPointShadowEnabledLoc = shader_get_uniform(shader, cfg.pointShadowEnabled);
-   __uniformReceiveShadowLoc = shader_get_uniform(shader, cfg.receiveShadow);
-   __uniformDirShadowQualityLoc = shader_get_uniform(shader, cfg.shadowQuality);
-   __uniformDirShadowTexelSizeLoc = shader_get_uniform(shader, cfg.shadowTexelSize);
-   __samplerDirShadowMapIdx = shader_get_sampler_index(shader, cfg.shadowMapSampler);
-   
-   __samplerPointShadowMapIdx = shader_get_sampler_index(shader, cfg.pointShadowMapSampler);
-   __uniformPointShadowFarLoc = shader_get_uniform(shader, cfg.pointShadowFar);
-   __uniformPointShadowNearLoc = shader_get_uniform(shader, cfg.pointShadowNear);
-   __uniformPointShadowPosLoc = shader_get_uniform(shader, cfg.pointShadowPos);
-   __uniformPointShadowTexelSizeLoc = shader_get_uniform(shader, cfg.pointShadowTexelSize);
-   __uniformPointShadowQualityLoc = shader_get_uniform(shader, cfg.pointShadowQuality);
-   __uniformPointShadowMatrixLoc = shader_get_uniform(shader, "u_uePointShadowMatrix");
-   
-   __uniformSpotShadowEnabledLoc = shader_get_uniform(shader, cfg.spotShadowEnabled);
-   __uniformSpotShadowMatrixLoc = shader_get_uniform(shader, cfg.spotShadowMatrix);
-   __samplerSpotShadowMapIdx = shader_get_sampler_index(shader, cfg.spotShadowMapSampler);
-   __uniformSpotShadowFarLoc = shader_get_uniform(shader, cfg.spotShadowFar);
-   __uniformSpotShadowNearLoc = shader_get_uniform(shader, cfg.spotShadowNear);
-   __uniformSpotShadowPosLoc = shader_get_uniform(shader, cfg.spotShadowPos);
-   __uniformSpotShadowTexelSizeLoc = shader_get_uniform(shader, cfg.spotShadowTexelSize);
-   __uniformSpotShadowQualityLoc = shader_get_uniform(shader, cfg.spotShadowQuality);
+       uniformToneMappingLoc: shader_get_uniform(_shader, cfg.toneMapping),
+       uniformToneMappingExposureLoc: shader_get_uniform(_shader, cfg.toneMappingExposure),
+       uniformToneMappedLoc: shader_get_uniform(_shader, cfg.toneMapped),
 
-   // Cache tone mapping uniforms
-   __uniformToneMappingLoc = shader_get_uniform(shader, cfg.toneMapping);
-   __uniformToneMappingExposureLoc = shader_get_uniform(shader, cfg.toneMappingExposure);
-   __uniformToneMappedLoc = shader_get_uniform(shader, cfg.toneMapped);
+       uniformHasMapLoc: shader_get_uniform(_shader, cfg.hasMap),
+       uniformHasAlphaMapLoc: shader_get_uniform(_shader, cfg.hasAlphaMap),
+       uniformHasOrmMapLoc: shader_get_uniform(_shader, cfg.hasOrmMap),
+       uniformHasNormalMapLoc: shader_get_uniform(_shader, cfg.hasNormalMap),
+       uniformHasEmissiveMapLoc: shader_get_uniform(_shader, cfg.hasEmissiveMap),
+       uniformHasDisplacementMapLoc: shader_get_uniform(_shader, cfg.hasDisplacementMap),
 
-   // Cache has maps uniforms
-   __uniformHasMapLoc = shader_get_uniform(shader, cfg.hasMap);
-   __uniformHasAlphaMapLoc = shader_get_uniform(shader, cfg.hasAlphaMap);
-   __uniformHasOrmMapLoc = shader_get_uniform(shader, cfg.hasOrmMap);
-   __uniformHasNormalMapLoc = shader_get_uniform(shader, cfg.hasNormalMap);
-   __uniformHasEmissiveMapLoc = shader_get_uniform(shader, cfg.hasEmissiveMap);
-   __uniformHasDisplacementMapLoc = shader_get_uniform(shader, cfg.hasDisplacementMap);
+       uniformFogColorLoc: shader_get_uniform(_shader, cfg.fogColor),
+       uniformFogDensityLoc: shader_get_uniform(_shader, cfg.fogDensity),
+       uniformFogNearLoc: shader_get_uniform(_shader, cfg.fogNear),
+       uniformFogFarLoc: shader_get_uniform(_shader, cfg.fogFar),
+       
+       uniformLightsDir: array_create(1),
+       uniformSpotLightsPos: shader_get_uniform(_shader, cfg.spotLightPosition),
+       uniformSpotLightsDir: shader_get_uniform(_shader, cfg.spotLightDirection),
+       uniformSpotLightsColor: shader_get_uniform(_shader, cfg.spotLightColor),
+       uniformSpotLightsRange: shader_get_uniform(_shader, cfg.spotLightRange),
+       uniformSpotLightsIntensity: shader_get_uniform(_shader, cfg.spotLightIntensity),
+       uniformSpotLightsDecay: shader_get_uniform(_shader, cfg.spotLightDecay),
+       uniformSpotLightsAngle: shader_get_uniform(_shader, cfg.spotLightAngle),
+       uniformSpotLightsPenumbra: shader_get_uniform(_shader, cfg.spotLightPenumbra),
 
-   // Cache fog uniforms
-   __uniformFogColorLoc = shader_get_uniform(shader, cfg.fogColor);
-   __uniformFogDensityLoc = shader_get_uniform(shader, cfg.fogDensity);
-   __uniformFogNearLoc = shader_get_uniform(shader, cfg.fogNear);
-   __uniformFogFarLoc = shader_get_uniform(shader, cfg.fogFar);
- 
-   __uniformLightsDir = array_create(1);
-   
+       uniformHemiLightDirLoc: shader_get_uniform(_shader, cfg.hemiLightDirection),
+       uniformHemiLightSkyColorLoc: shader_get_uniform(_shader, cfg.hemiLightSkyColor),
+       uniformHemiLightGroundColorLoc: shader_get_uniform(_shader, cfg.hemiLightGroundColor),
+       uniformHemiLightIntensityLoc: shader_get_uniform(_shader, cfg.hemiLightIntensity),
+
+       uniformLightsPos: shader_get_uniform(_shader, cfg.pointLightPosition),
+       uniformLightsColor: shader_get_uniform(_shader, cfg.pointLightColor),
+       uniformLightsRange: shader_get_uniform(_shader, cfg.pointLightRange),
+       uniformLightsIntensity: shader_get_uniform(_shader, cfg.pointLightIntensity),
+       uniformLightsDecay: shader_get_uniform(_shader, cfg.pointLightDecay),
+       
+       uniformsCached: [],
+       texturesCached: [],
+       hasMapsFlags: {
+           map: 0, alphaMap: 0, ormMap: 0, normalMap: 0, emissiveMap: 0, displacementMap: 0
+       }
+   };
+
    for (var l = 0; l < 1; l++) {
-     __uniformLightsDir[l] = [
-       shader_get_uniform(shader, $"{cfg.dirLightDir}{l}"),
-       shader_get_uniform(shader, $"{cfg.dirLightColor}{l}"),
-       shader_get_uniform(shader, $"{cfg.dirLightIntensity}{l}"),
+     cache.uniformLightsDir[l] = [
+       shader_get_uniform(_shader, $"{cfg.dirLightDir}{l}"),
+       shader_get_uniform(_shader, $"{cfg.dirLightColor}{l}"),
+       shader_get_uniform(_shader, $"{cfg.dirLightIntensity}{l}"),
      ];
    }
 
-   __uniformLightsPos = shader_get_uniform(shader, cfg.pointLightPosition);
-   __uniformLightsColor = shader_get_uniform(shader, cfg.pointLightColor);
-   __uniformLightsRange = shader_get_uniform(shader, cfg.pointLightRange);
-   __uniformLightsIntensity = shader_get_uniform(shader, cfg.pointLightIntensity);
-  __uniformLightsDecay = shader_get_uniform(shader, cfg.pointLightDecay);
-
-  __uniformSpotLightsPos = shader_get_uniform(shader, cfg.spotLightPosition);
-  __uniformSpotLightsDir = shader_get_uniform(shader, cfg.spotLightDirection);
-  __uniformSpotLightsColor = shader_get_uniform(shader, cfg.spotLightColor);
-  __uniformSpotLightsRange = shader_get_uniform(shader, cfg.spotLightRange);
-  __uniformSpotLightsIntensity = shader_get_uniform(shader, cfg.spotLightIntensity);
-  __uniformSpotLightsDecay = shader_get_uniform(shader, cfg.spotLightDecay);
-  __uniformSpotLightsAngle = shader_get_uniform(shader, cfg.spotLightAngle);
-  __uniformSpotLightsPenumbra = shader_get_uniform(shader, cfg.spotLightPenumbra);
-
-  // Cache hemisphere light uniforms
-  __uniformHemiLightDirLoc = shader_get_uniform(shader, cfg.hemiLightDirection);
-  __uniformHemiLightSkyColorLoc = shader_get_uniform(shader, cfg.hemiLightSkyColor);
-  __uniformHemiLightGroundColorLoc = shader_get_uniform(shader, cfg.hemiLightGroundColor);
-  __uniformHemiLightIntensityLoc = shader_get_uniform(shader, cfg.hemiLightIntensity);
-
-  // Cache the uniforms
+   // Cache the uniforms
    var uniformNames = variable_struct_get_names(uniforms);
-   __uniformsCachedCount = array_length(uniformNames);
-   __uniformsCached = array_create(__uniformsCachedCount);
+   var uCount = array_length(uniformNames);
+   cache.uniformsCached = array_create(uCount);
  
-   for (var u = 0; u < __uniformsCachedCount; u++) {
+   for (var u = 0; u < uCount; u++) {
      var uniformName = uniformNames[u];
-     var uniformLoc = shader_get_uniform(shader, $"u_{uniformName}");
- 
-     __uniformsCached[u] = [
+     cache.uniformsCached[u] = [
        uniforms[$ uniformName],
-       uniformLoc
+       shader_get_uniform(_shader, $"u_{uniformName}")
      ];
    }
  
    // Cache the textures
    var textureNames = variable_struct_get_names(textures);
-   var textureNamesCount = array_length(textureNames);
- 
-   __texturesCached = array_create(textureNamesCount);
-  __texturesCachedCount = 0;
-  __baseTexture = undefined;
-  
-  // Reset has maps flags
-  __hasMapsFlags.map = 0;
-  __hasMapsFlags.alphaMap = 0;
-  __hasMapsFlags.ormMap = 0;
-  __hasMapsFlags.normalMap = 0;
-  __hasMapsFlags.emissiveMap = 0;
-  __hasMapsFlags.displacementMap = 0;
-
-   for (var t = 0; t < textureNamesCount; t++) {
+   var tCount = array_length(textureNames);
+   cache.texturesCached = [];
+   
+   for (var t = 0; t < tCount; t++) {
     var textureName = textureNames[t];
     var texture = textures[$ textureName];
-    
-    var isDefault = false;
-
-    // Special case for base map
     if (textureName == "map") {
-      __baseTexture = texture;
-      __hasMapsFlags.map = (texture == undefined) ? 0 : 1;
-      continue;
+        cache.hasMapsFlags.map = (texture == undefined) ? 0 : 1;
+        continue;
     }
-
-    var samplerIdx = shader_get_sampler_index(shader, $"s_{textureName}");
+    var samplerIdx = shader_get_sampler_index(_shader, $"s_{textureName}");
     if (samplerIdx != -1) {
-      // If texture is undefined or not a struct (invalid), it's considered default
-      if (texture == undefined || !is_struct(texture)) {
-        isDefault = true;
+      if (variable_struct_exists(cache.hasMapsFlags, textureName)) {
+          cache.hasMapsFlags[$ textureName] = (texture == undefined || !is_struct(texture)) ? 0 : 1;
       }
-
-      // Set the "hasMap" flag for known maps
-      if (variable_struct_exists(__hasMapsFlags, textureName)) {
-          __hasMapsFlags[$ textureName] = isDefault ? 0 : 1;
-      }
-
-      // Special case for displacement map in vertex shader
-      if (textureName == "displacementMap") {
-          __hasMapsFlags.displacementMap = isDefault ? 0 : 1;
-      }
-
-      // Only cache for texture_set_stage if it's NOT a default texture
-      if (!isDefault) {
-          __texturesCached[__texturesCachedCount] = [
-            texture,
-            samplerIdx
-          ];
-          __texturesCachedCount++;
+      if (texture != undefined && is_struct(texture)) {
+          array_push(cache.texturesCached, [texture, samplerIdx]);
       }
     }
   }
  
+  __caches[$ _shaderIdx] = cache;
+  __currentCache = cache;
   return self;
  }
 
- function __setLightsUniforms() {
+ function __setLightsUniforms(cache) {
    gml_pragma("forceinline");
    if (!lights) return;
  
@@ -306,19 +216,19 @@ function UeMaterial(data = {}) constructor {
   var hemiLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT];
   var hemiLightCount = lightState[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT_COUNT];
 
-  shader_set_uniform_f_array(__uniformLightsAmbientLoc, lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT]);
+  // Set ambient light
+  shader_set_uniform_f_array(cache.uniformLightsAmbientLoc, lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT]);
  
    // Set directional lights (max 1)
    for (var i = 0; i < 1; i++) {
-     var lightLoc = __uniformLightsDir[i];
+     var lightLoc = cache.uniformLightsDir[i];
  
      if (i < directionalCount) {
        var light = directionalState[i];
  
        // Get light direction (from position to target)
-       light.getDirection();
-       shader_set_uniform_f_array(lightLoc[0], uniformsCache);
- 
+       light.getDirection(uniformsCache);
+       shader_set_uniform_f_array(lightLoc[0], uniformsCache); 
        shader_set_uniform_f_array(lightLoc[1], light.color);
        shader_set_uniform_f(lightLoc[2], light.intensity);
  
@@ -338,21 +248,22 @@ function UeMaterial(data = {}) constructor {
    }
  
    if (shadowLight != undefined && surface_exists(shadowLight.shadow.map.surface)) {
-     shader_set_uniform_f(__uniformDirShadowEnabledLoc, 1.0);
-     shader_set_uniform_f(__uniformDirShadowQualityLoc, shadowQuality);
+     shader_set_uniform_f(cache.uniformDirShadowEnabledLoc, 1.0);
+     shader_set_uniform_f(cache.uniformDirShadowQualityLoc, shadowQuality);
  
      // Calculate texel size based on shadow map resolution
      var shadowMapWidth = shadowLight.shadow.map.width;
      var texelSize = 1.0 / shadowMapWidth;
-     shader_set_uniform_f(__uniformDirShadowTexelSizeLoc, texelSize);
+     shader_set_uniform_f(cache.uniformDirShadowTexelSizeLoc, texelSize);
  
-     shader_set_uniform_matrix_array(__uniformDirShadowMatrixLoc, shadowLight.shadow.lightSpaceMatrix);
-     texture_set_stage(__samplerDirShadowMapIdx, shadowLight.shadow.map.getTexture());
-   } else if (__uniformDirShadowEnabledLoc != undefined) {
-     shader_set_uniform_f(__uniformDirShadowEnabledLoc, 0.0);
+     shader_set_uniform_matrix_array(cache.uniformDirShadowMatrixLoc, shadowLight.shadow.lightSpaceMatrix);
+     
+     texture_set_stage(cache.samplerDirShadowMapIdx, shadowLight.shadow.map.getTexture());
+   } else if (cache.uniformDirShadowEnabledLoc != undefined) {
+     shader_set_uniform_f(cache.uniformDirShadowEnabledLoc, 0.0);
    }
 
-   // Set point shadow uniforms (from the first shadow-casting point light)
+  // Set point shadow uniforms (from the first shadow-casting point light)
   var pointShadowLight = undefined;
   for (var i = 0; i < pointLightCount; i++) {
     if (pointLightState[i].castShadow) {
@@ -361,29 +272,27 @@ function UeMaterial(data = {}) constructor {
     }
   }
 
-  if (pointShadowLight != undefined && __samplerPointShadowMapIdx != -1) {
-    shader_set_uniform_f(__uniformPointShadowEnabledLoc, 1.0);
-    shader_set_uniform_f(__uniformPointShadowFarLoc, pointShadowLight.shadow.cameras[0].far);
-    shader_set_uniform_f(__uniformPointShadowNearLoc, pointShadowLight.shadow.cameras[0].near);
+  if (pointShadowLight != undefined && cache.samplerPointShadowMapIdx != -1) {
+    shader_set_uniform_f(cache.uniformPointShadowEnabledLoc, 1.0);
+    shader_set_uniform_f(cache.uniformPointShadowFarLoc, pointShadowLight.shadow.cameras[0].far);
+    shader_set_uniform_f(cache.uniformPointShadowNearLoc, pointShadowLight.shadow.cameras[0].near);
     
-    // Set texel size for point shadows
     var pointShadowMapWidth = pointShadowLight.shadow.mapSize.width;
     var pointShadowMapHeight = pointShadowLight.shadow.mapSize.height;
-    if (__uniformPointShadowTexelSizeLoc != undefined) {
-      shader_set_uniform_f(__uniformPointShadowTexelSizeLoc, 1.0 / (pointShadowMapWidth * 3.0), 1.0 / (pointShadowMapHeight * 2.0));
+    if (cache.uniformPointShadowTexelSizeLoc != undefined) {
+      shader_set_uniform_f(cache.uniformPointShadowTexelSizeLoc, 1.0 / (pointShadowMapWidth * 3.0), 1.0 / (pointShadowMapHeight * 2.0));
     }
     
-    if (__uniformPointShadowQualityLoc != undefined) {
-      shader_set_uniform_f(__uniformPointShadowQualityLoc, shadowQuality);
+    if (cache.uniformPointShadowQualityLoc != undefined) {
+      shader_set_uniform_f(cache.uniformPointShadowQualityLoc, shadowQuality);
     }
     
     // Use world position for point shadow origin
-    var worldPos = global.UE_VEC3_TEMP1;
-    pointShadowLight.getWorldPosition(worldPos);
-    shader_set_uniform_f_array(__uniformPointShadowPosLoc, worldPos);
+    pointShadowLight.getWorldPosition(uniformsCache);
+    shader_set_uniform_f_array(cache.uniformPointShadowPosLoc, uniformsCache);
     
     // Set point shadow matrices (6 faces)
-    if (__uniformPointShadowMatrixLoc != -1) {
+    if (cache.uniformPointShadowMatrixLoc != -1) {
         var matrices = array_create(16 * 6);
         for (var i = 0; i < 6; i++) {
             var cam = pointShadowLight.shadow.cameras[i];
@@ -392,12 +301,12 @@ function UeMaterial(data = {}) constructor {
                 matrices[i * 16 + m] = global.UE_MAT4_TEMP0[m];
             }
         }
-        shader_set_uniform_f_array(__uniformPointShadowMatrixLoc, matrices);
+        shader_set_uniform_f_array(cache.uniformPointShadowMatrixLoc, matrices);
     }
     
-    texture_set_stage(__samplerPointShadowMapIdx, pointShadowLight.shadow.map.getTexture());
-  } else if (__uniformPointShadowEnabledLoc != undefined) {
-    shader_set_uniform_f(__uniformPointShadowEnabledLoc, 0.0);
+    texture_set_stage(cache.samplerPointShadowMapIdx, pointShadowLight.shadow.map.getTexture());
+  } else if (cache.uniformPointShadowEnabledLoc != undefined) {
+    shader_set_uniform_f(cache.uniformPointShadowEnabledLoc, 0.0);
   }
 
   // Set point lights (max 8) using uniform arrays
@@ -412,12 +321,11 @@ function UeMaterial(data = {}) constructor {
       var light = pointLightState[i];
       
       // Get world position for the shader
-      var worldPos = global.UE_VEC3_TEMP1;
-      light.getWorldPosition(worldPos);
+      light.getWorldPosition(uniformsCache);
       
-      posArr[i * 3 + 0] = worldPos[0];
-      posArr[i * 3 + 1] = worldPos[1];
-      posArr[i * 3 + 2] = worldPos[2];
+      posArr[i * 3 + 0] = uniformsCache[0];
+      posArr[i * 3 + 1] = uniformsCache[1];
+      posArr[i * 3 + 2] = uniformsCache[2];
       
       colorArr[i * 3 + 0] = light.color[0];
       colorArr[i * 3 + 1] = light.color[1];
@@ -429,11 +337,11 @@ function UeMaterial(data = {}) constructor {
     }
   }
 
-  shader_set_uniform_f_array(__uniformLightsPos, posArr);
-  shader_set_uniform_f_array(__uniformLightsColor, colorArr);
-  shader_set_uniform_f_array(__uniformLightsRange, rangeArr);
-  shader_set_uniform_f_array(__uniformLightsIntensity, intensityArr);
-  shader_set_uniform_f_array(__uniformLightsDecay, decayArr);
+  shader_set_uniform_f_array(cache.uniformLightsPos, posArr);
+  shader_set_uniform_f_array(cache.uniformLightsColor, colorArr);
+  shader_set_uniform_f_array(cache.uniformLightsRange, rangeArr);
+  shader_set_uniform_f_array(cache.uniformLightsIntensity, intensityArr);
+  shader_set_uniform_f_array(cache.uniformLightsDecay, decayArr);
 
   // Set spot shadow uniforms (from the first shadow-casting spot light)
   var spotShadowLight = undefined;
@@ -444,19 +352,19 @@ function UeMaterial(data = {}) constructor {
     }
   }
 
-  if (spotShadowLight != undefined && __samplerSpotShadowMapIdx != -1) {
-    shader_set_uniform_f(__uniformSpotShadowEnabledLoc, 1.0);
-    shader_set_uniform_matrix_array(__uniformSpotShadowMatrixLoc, spotShadowLight.shadow.lightSpaceMatrix);
+  if (spotShadowLight != undefined && cache.samplerSpotShadowMapIdx != -1) {
+    shader_set_uniform_f(cache.uniformSpotShadowEnabledLoc, 1.0);
+    shader_set_uniform_matrix_array(cache.uniformSpotShadowMatrixLoc, spotShadowLight.shadow.lightSpaceMatrix);
     
-    if (__uniformSpotShadowFarLoc != undefined) shader_set_uniform_f(__uniformSpotShadowFarLoc, spotShadowLight.shadow.camera.far);
-    if (__uniformSpotShadowNearLoc != undefined) shader_set_uniform_f(__uniformSpotShadowNearLoc, spotShadowLight.shadow.camera.near);
-    if (__uniformSpotShadowPosLoc != undefined) shader_set_uniform_f(__uniformSpotShadowPosLoc, spotShadowLight.position[0], spotShadowLight.position[1], spotShadowLight.position[2]);
-    if (__uniformSpotShadowTexelSizeLoc != undefined) shader_set_uniform_f(__uniformSpotShadowTexelSizeLoc, 1.0 / spotShadowLight.shadow.mapSize.width);
-    if (__uniformSpotShadowQualityLoc != undefined) shader_set_uniform_f(__uniformSpotShadowQualityLoc, shadowQuality);
+    if (cache.uniformSpotShadowFarLoc != undefined) shader_set_uniform_f(cache.uniformSpotShadowFarLoc, spotShadowLight.shadow.camera.far);
+    if (cache.uniformSpotShadowNearLoc != undefined) shader_set_uniform_f(cache.uniformSpotShadowNearLoc, spotShadowLight.shadow.camera.near);
+    if (cache.uniformSpotShadowPosLoc != undefined) shader_set_uniform_f(cache.uniformSpotShadowPosLoc, spotShadowLight.position[0], spotShadowLight.position[1], spotShadowLight.position[2]);
+    if (cache.uniformSpotShadowTexelSizeLoc != undefined) shader_set_uniform_f(cache.uniformSpotShadowTexelSizeLoc, 1.0 / spotShadowLight.shadow.mapSize.width);
+    if (cache.uniformSpotShadowQualityLoc != undefined) shader_set_uniform_f(cache.uniformSpotShadowQualityLoc, shadowQuality);
 
-    texture_set_stage(__samplerSpotShadowMapIdx, spotShadowLight.shadow.map.getDepthTexture());
-  } else if (__uniformSpotShadowEnabledLoc != undefined) {
-    shader_set_uniform_f(__uniformSpotShadowEnabledLoc, 0.0);
+    texture_set_stage(cache.samplerSpotShadowMapIdx, spotShadowLight.shadow.map.getDepthTexture());
+  } else if (cache.uniformSpotShadowEnabledLoc != undefined) {
+    shader_set_uniform_f(cache.uniformSpotShadowEnabledLoc, 0.0);
   }
 
   // Set spot lights (max 4)
@@ -475,15 +383,17 @@ function UeMaterial(data = {}) constructor {
       
       var worldPos = global.UE_VEC3_TEMP1;
       light.getWorldPosition(worldPos);
+      
       sPosArr[i * 3 + 0] = worldPos[0];
       sPosArr[i * 3 + 1] = worldPos[1];
       sPosArr[i * 3 + 2] = worldPos[2];
       
-      var worldDir = light.getDirection();
-      sDirArr[i * 3 + 0] = worldDir[0];
-      sDirArr[i * 3 + 1] = worldDir[1];
-      sDirArr[i * 3 + 2] = worldDir[2];
-      
+      // getDirection() returns result in UE_VEC3_TEMP0
+      var lightDir = light.getDirection();
+      sDirArr[i * 3 + 0] = lightDir[0];
+      sDirArr[i * 3 + 1] = lightDir[1];
+      sDirArr[i * 3 + 2] = lightDir[2];
+
       sColorArr[i * 3 + 0] = light.color[0];
       sColorArr[i * 3 + 1] = light.color[1];
       sColorArr[i * 3 + 2] = light.color[2];
@@ -491,24 +401,24 @@ function UeMaterial(data = {}) constructor {
       sRangeArr[i] = light.distance;
       sIntensityArr[i] = light.intensity;
       sDecayArr[i] = light.decay;
-      sAngleArr[i] = dcos(light.angle); // Send cosine for easier shader math
-      sPenumbraArr[i] = dcos(light.angle * (1.0 - light.penumbra));
+      sAngleArr[i] = cos(light.angle);
+      sPenumbraArr[i] = cos(light.angle * (1.0 - light.penumbra));
     }
   }
 
-  if (__uniformSpotLightsPos != undefined) {
-    shader_set_uniform_f_array(__uniformSpotLightsPos, sPosArr);
-    shader_set_uniform_f_array(__uniformSpotLightsDir, sDirArr);
-    shader_set_uniform_f_array(__uniformSpotLightsColor, sColorArr);
-    shader_set_uniform_f_array(__uniformSpotLightsRange, sRangeArr);
-    shader_set_uniform_f_array(__uniformSpotLightsIntensity, sIntensityArr);
-    shader_set_uniform_f_array(__uniformSpotLightsDecay, sDecayArr);
-    shader_set_uniform_f_array(__uniformSpotLightsAngle, sAngleArr);
-    shader_set_uniform_f_array(__uniformSpotLightsPenumbra, sPenumbraArr);
+  if (cache.uniformSpotLightsPos != undefined) {
+    shader_set_uniform_f_array(cache.uniformSpotLightsPos, sPosArr);
+    shader_set_uniform_f_array(cache.uniformSpotLightsDir, sDirArr);
+    shader_set_uniform_f_array(cache.uniformSpotLightsColor, sColorArr);
+    shader_set_uniform_f_array(cache.uniformSpotLightsRange, sRangeArr);
+    shader_set_uniform_f_array(cache.uniformSpotLightsIntensity, sIntensityArr);
+    shader_set_uniform_f_array(cache.uniformSpotLightsDecay, sDecayArr);
+    shader_set_uniform_f_array(cache.uniformSpotLightsAngle, sAngleArr);
+    shader_set_uniform_f_array(cache.uniformSpotLightsPenumbra, sPenumbraArr);
   }
 
   // Set hemisphere light (max 1)
-  if (hemiLightCount > 0 && __uniformHemiLightIntensityLoc != undefined) {
+  if (hemiLightCount > 0 && cache.uniformHemiLightIntensityLoc != undefined) {
     var light = hemiLightState[0];
     
     // Direction is normalized position
@@ -516,122 +426,200 @@ function UeMaterial(data = {}) constructor {
     vec3_copy(dir, light.position);
     vec3_normalize(dir);
     
-    shader_set_uniform_f(__uniformHemiLightDirLoc, dir[0], dir[1], dir[2]);
-    shader_set_uniform_f_array(__uniformHemiLightSkyColorLoc, light.skyColor);
-    shader_set_uniform_f_array(__uniformHemiLightGroundColorLoc, light.groundColor);
-    shader_set_uniform_f(__uniformHemiLightIntensityLoc, light.intensity);
-  } else if (__uniformHemiLightIntensityLoc != undefined) {
-    shader_set_uniform_f(__uniformHemiLightIntensityLoc, 0.0);
+    shader_set_uniform_f(cache.uniformHemiLightDirLoc, dir[0], dir[1], dir[2]);
+    shader_set_uniform_f_array(cache.uniformHemiLightSkyColorLoc, light.skyColor);
+    shader_set_uniform_f_array(cache.uniformHemiLightGroundColorLoc, light.groundColor);
+    shader_set_uniform_f(cache.uniformHemiLightIntensityLoc, light.intensity);
+  } else if (cache.uniformHemiLightIntensityLoc != undefined) {
+    shader_set_uniform_f(cache.uniformHemiLightIntensityLoc, 0.0);
   }
  }
 
-  /// Apply material before drawing
-  function use() {
+  function use(arg1 = undefined, arg2 = undefined) {
     gml_pragma("forceinline");
-  
-    shader_set(shader);
-    __setLightsUniforms();
-
-    // Set camera position
-    if (__uniformCameraPositionLoc != undefined) {
-      shader_set_uniform_f_array(__uniformCameraPositionLoc, global.UE_RENDERER_CAMERA_POSITION);
-    }
-
-    // Set fog uniforms
-    var fogState = global.UE_RENDERER_FOG_STATE;
-    var materialFogEnabled = self[$ "fog"] ?? true;
-
-    if (fogState.enabled && materialFogEnabled) {
-      if (__uniformFogColorLoc != undefined) shader_set_uniform_f_array(__uniformFogColorLoc, fogState.color);
-      if (__uniformFogDensityLoc != undefined) shader_set_uniform_f(__uniformFogDensityLoc, fogState.density);
-      if (__uniformFogNearLoc != undefined) shader_set_uniform_f(__uniformFogNearLoc, fogState.near);
-      if (__uniformFogFarLoc != undefined) shader_set_uniform_f(__uniformFogFarLoc, fogState.far);
+    
+    var renderer = undefined;
+    var _shader = undefined;
+    
+    if (arg1 != undefined) {
+        if (is_struct(arg1) && (arg1[$ "isRenderer"] ?? false)) {
+            renderer = arg1;
+            _shader = arg2 ?? self.shader;
+        } else {
+            _shader = arg1;
+        }
     } else {
-      // Disable fog by setting density to 0 or far plane to infinity
-      if (__uniformFogDensityLoc != undefined) shader_set_uniform_f(__uniformFogDensityLoc, 0);
-      if (__uniformFogFarLoc != undefined) shader_set_uniform_f(__uniformFogFarLoc, 0);
+        _shader = self.shader;
     }
-  
-    // Reset emissive uniforms
-    if (__uniformEmissiveIntensityLoc != undefined) {
-      shader_set_uniform_f(__uniformEmissiveIntensityLoc, emissiveIntensity);
+
+    if (_shader == undefined) return;
+
+    shader_set(_shader);
+    
+    // Ensure we have the correct cache for this shader
+    self.build(_shader);
+    var cache = __currentCache;
+
+    // Set standard uniforms
+    if (cache.uniformCameraPositionLoc != -1) {
+        var camPos = global.UE_RENDERER_CAMERA_POSITION;
+        shader_set_uniform_f(cache.uniformCameraPositionLoc, camPos[0], camPos[1], camPos[2]);
+    }
+    
+    if (cache.uniformEmissiveIntensityLoc != -1) {
+        shader_set_uniform_f(cache.uniformEmissiveIntensityLoc, self.emissiveIntensity);
+    }
+    
+    if (cache.uniformReceiveShadowLoc != -1) {
+        shader_set_uniform_f(cache.uniformReceiveShadowLoc, self.receiveShadow ? 1.0 : 0.0);
     }
 
     // Set tone mapping uniforms
-    if (__uniformToneMappingLoc != undefined) {
-      shader_set_uniform_f(__uniformToneMappingLoc, global.UE_RENDERER_TONE_MAPPING);
-    }
-    if (__uniformToneMappingExposureLoc != undefined) {
-      shader_set_uniform_f(__uniformToneMappingExposureLoc, global.UE_RENDERER_TONE_MAPPING_EXPOSURE);
-    }
-    if (__uniformToneMappedLoc != undefined) {
-      shader_set_uniform_f(__uniformToneMappedLoc, toneMapped ? 1.0 : 0.0);
+    if (cache.uniformToneMappingLoc != -1) {
+        var toneMapping = (renderer != undefined) ? renderer.toneMapping : global.UE_RENDERER_TONE_MAPPING;
+        var exposure = (renderer != undefined) ? renderer.toneMappingExposure : global.UE_RENDERER_TONE_MAPPING_EXPOSURE;
+        
+        shader_set_uniform_f(cache.uniformToneMappingLoc, toneMapping);
+        shader_set_uniform_f(cache.uniformToneMappingExposureLoc, exposure);
+        shader_set_uniform_f(cache.uniformToneMappedLoc, (toneMapped && toneMapping != UE_TONE_MAPPING.NONE) ? 1.0 : 0.0);
     }
 
-    // Set has maps uniforms
-    if (__uniformHasMapLoc != undefined) shader_set_uniform_f(__uniformHasMapLoc, __hasMapsFlags.map);
-    if (__uniformHasAlphaMapLoc != undefined) shader_set_uniform_f(__uniformHasAlphaMapLoc, __hasMapsFlags.alphaMap);
-    if (__uniformHasOrmMapLoc != undefined) shader_set_uniform_f(__uniformHasOrmMapLoc, __hasMapsFlags.ormMap);
-    if (__uniformHasNormalMapLoc != undefined) shader_set_uniform_f(__uniformHasNormalMapLoc, __hasMapsFlags.normalMap);
-    if (__uniformHasEmissiveMapLoc != undefined) shader_set_uniform_f(__uniformHasEmissiveMapLoc, __hasMapsFlags.emissiveMap);
-    if (__uniformHasDisplacementMapLoc != undefined) shader_set_uniform_f(__uniformHasDisplacementMapLoc, __hasMapsFlags.displacementMap);
+    // Set fog uniforms
+    if (cache.uniformFogDensityLoc != -1) {
+        var fog = global.UE_RENDERER_FOG_STATE;
+        var materialFogEnabled = self[$ "fog"] ?? true;
+        
+        if (fog.enabled && materialFogEnabled) {
+            shader_set_uniform_f_array(cache.uniformFogColorLoc, fog.color);
+            shader_set_uniform_f(cache.uniformFogDensityLoc, fog.density);
+            shader_set_uniform_f(cache.uniformFogNearLoc, fog.near);
+            shader_set_uniform_f(cache.uniformFogFarLoc, fog.far);
+        } else {
+            shader_set_uniform_f(cache.uniformFogDensityLoc, 0.0);
+            shader_set_uniform_f(cache.uniformFogFarLoc, 0.0);
+        }
+    }
 
-    // Apply the uniforms on the shader
-    for (var u = 0; u < __uniformsCachedCount; u++) {
-      var uniformCached = __uniformsCached[u];
-      var uniform = uniformCached[0];
-  
-      var val = uniform.value;
-      if (val == undefined) continue;
-  
-      var loc = uniformCached[1];
-      switch (uniform.type) {
-        case UE_UNIFORM_TYPE.FLOAT: shader_set_uniform_f(loc, val); break;
-        case UE_UNIFORM_TYPE.VEC2: shader_set_uniform_f(loc, val[0], val[1]); break;
-        case UE_UNIFORM_TYPE.VEC3: shader_set_uniform_f(loc, val[0], val[1], val[2]); break;
-        case UE_UNIFORM_TYPE.VEC4: shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]); break;
-        case UE_UNIFORM_TYPE.MAT4: shader_set_uniform_matrix_array(loc, val); break;
-        case UE_UNIFORM_TYPE.ARRAY: shader_set_uniform_f_array(loc, val); break;
-        case UE_UNIFORM_TYPE.BUFFER: shader_set_uniform_f_buffer(loc, val, uniform.offset, uniform.count); break;
+    // Set lights uniforms
+    self.__setLightsUniforms(cache);
+
+    // Set custom uniforms
+    var uCached = cache.uniformsCached;
+    for (var i = 0, il = array_length(uCached); i < il; i++) {
+      var uData = uCached[i];
+      var uObj = uData[0];
+      var loc = uData[1];
+      
+      if (loc == -1) continue;
+      
+      var val = uObj.value;
+      var type = uObj[$ "type"] ?? UE_UNIFORM_TYPE.FLOAT;
+
+      switch (type) {
+        case UE_UNIFORM_TYPE.FLOAT:
+          shader_set_uniform_f(loc, val);
+          break;
+        case UE_UNIFORM_TYPE.VEC2:
+          shader_set_uniform_f(loc, val[0], val[1]);
+          break;
+        case UE_UNIFORM_TYPE.VEC3:
+          shader_set_uniform_f(loc, val[0], val[1], val[2]);
+          break;
+        case UE_UNIFORM_TYPE.VEC4:
+          shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]);
+          break;
+        case UE_UNIFORM_TYPE.MAT4:
+          shader_set_uniform_matrix_array(loc, val);
+          break;
+        case UE_UNIFORM_TYPE.ARRAY:
+          shader_set_uniform_f_array(loc, val);
+          break;
+        case UE_UNIFORM_TYPE.BUFFER:
+          shader_set_uniform_f_buffer(loc, val, uObj[$ "offset"] ?? 0, uObj[$ "count"] ?? array_length(val));
+          break;
       }
     }
-  
-    // Set the texture samplers
-    for (var t = 0; t < __texturesCachedCount; t++) {
-      var textureCached = __texturesCached[t];
-      if (textureCached == undefined) continue;
-      textureCached[0].__use(textureCached[1]);
+
+    // Set textures
+    var texKeys = variable_struct_get_names(self.textures);
+    
+    // Update hasMaps flags
+    __hasMapsFlags.map = (self.textures[$ "map"] != undefined) ? 1.0 : 0.0;
+    __hasMapsFlags.alphaMap = (self.textures[$ "alphaMap"] != undefined) ? 1.0 : 0.0;
+    __hasMapsFlags.ormMap = (self.textures[$ "ormMap"] != undefined) ? 1.0 : 0.0;
+    __hasMapsFlags.normalMap = (self.textures[$ "normalMap"] != undefined) ? 1.0 : 0.0;
+    __hasMapsFlags.emissiveMap = (self.textures[$ "emissiveMap"] != undefined) ? 1.0 : 0.0;
+    __hasMapsFlags.displacementMap = (self.textures[$ "displacementMap"] != undefined) ? 1.0 : 0.0;
+
+    if (cache.uniformHasMapLoc != -1) {
+        shader_set_uniform_f(cache.uniformHasMapLoc, __hasMapsFlags.map);
+        shader_set_uniform_f(cache.uniformHasAlphaMapLoc, __hasMapsFlags.alphaMap);
+        shader_set_uniform_f(cache.uniformHasOrmMapLoc, __hasMapsFlags.ormMap);
+        shader_set_uniform_f(cache.uniformHasNormalMapLoc, __hasMapsFlags.normalMap);
+        shader_set_uniform_f(cache.uniformHasEmissiveMapLoc, __hasMapsFlags.emissiveMap);
+        shader_set_uniform_f(cache.uniformHasDisplacementMapLoc, __hasMapsFlags.displacementMap);
     }
-  
+
+    // Base texture (map)
+    __baseTexture = self.textures[$ "map"];
+
+    for (var i = 0; i < array_length(texKeys); i++) {
+      var key = texKeys[i];
+      if (key == "map") continue; // Already handled as base texture
+      
+      var tex = self.textures[$ key];
+      if (tex == undefined) continue;
+      
+      var sampler = shader_get_sampler_index(_shader, $"s_{key}");
+      if (sampler == -1) continue;
+      
+      if (is_struct(tex) && variable_struct_exists(tex, "__use")) {
+        tex.__use(sampler);
+      } else if (is_struct(tex) && variable_struct_exists(tex, "getTexture")) {
+        texture_set_stage(sampler, tex.getTexture());
+      } else {
+        texture_set_stage(sampler, tex);
+      }
+    }
+    
+    // Set GPU State
     gpu_set_ztestenable(depthTest);
-    gpu_set_zwriteenable(transparent ? false : depthWrite);
+    gpu_set_zwriteenable(depthWrite);
     gpu_set_zfunc(depthFunc);
-    gpu_set_alphatestenable(transparent);
+    gpu_set_alphatestenable(alphaTest > 0);
     gpu_set_alphatestref(alphaTest);
+    
+    if (blending) {
+        gpu_set_blendenable(true);
+        gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
+        gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha);
+    } else {
+        gpu_set_blendenable(false);
+    }
+    
     gpu_set_colorwriteenable(colorWrite, colorWrite, colorWrite, colorWrite);
-    gpu_set_blendenable(blending);
-    gpu_set_blendequation_sepalpha(blendEquation, blendEquationAlpha);
-    gpu_set_blendmode_ext_sepalpha(blendSrc, blendDst, blendSrcAlpha, blendDstAlpha);
-  
+    
     return self;
   }
   
   function useByMesh(mesh, renderSide = undefined) {
     gml_pragma("forceinline");
-  
+    var cache = __currentCache;
+    if (cache == undefined) return;
+
     // Update the shader's model position uniform (for billboard sprites)
-    if (mesh[$ "isSprite"]) {
-      shader_set_uniform_f_array(__uniformModelPositionLoc, mesh.position);
+    if (mesh[$ "isSprite"] && cache.uniformModelPositionLoc != -1) {
+      shader_set_uniform_f_array(cache.uniformModelPositionLoc, mesh.position);
     }
 
     // Set world matrix
-    if (__uniformWorldMatrixLoc != undefined) {
-      shader_set_uniform_matrix_array(__uniformWorldMatrixLoc, mesh.matrixWorld);
+    if (cache.uniformWorldMatrixLoc != -1) {
+      shader_set_uniform_matrix_array(cache.uniformWorldMatrixLoc, mesh.matrixWorld);
     }
   
     // Set receive shadow uniform
-    if (__uniformReceiveShadowLoc != undefined) {
-      shader_set_uniform_f(__uniformReceiveShadowLoc, mesh.receiveShadow ? 1.0 : 0.0);
+    if (cache.uniformReceiveShadowLoc != -1) {
+      shader_set_uniform_f(cache.uniformReceiveShadowLoc, mesh.receiveShadow ? 1.0 : 0.0);
     }
   
     // Set the culling mode (can be overwritten by argument for transparent objects)

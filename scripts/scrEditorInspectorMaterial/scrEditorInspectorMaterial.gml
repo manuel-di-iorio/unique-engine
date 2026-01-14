@@ -48,7 +48,7 @@ function scrEditorInspectorMaterial() {
               { 
                   id: "texturesMap",
                   field: "textures",
-                  label: "Albedo (Map)", 
+                  label: "Albedo", 
                   type: "dropdown",
                   tooltip: "Base color/albedo texture",
                   search: "Search texture..",
@@ -63,7 +63,7 @@ function scrEditorInspectorMaterial() {
               { 
                 id: "texturesNormalMap",
                 field: "textures",
-                label: "Normal Map", 
+                label: "Normal", 
                 type: "dropdown",
                 tooltip: "Normal map (tangent space)",
                 search: "Search texture..",
@@ -78,7 +78,7 @@ function scrEditorInspectorMaterial() {
             { 
                 id: "texturesOrmMap",
                 field: "textures",
-                label: "ORM Map", 
+                label: "ORM", 
                 type: "dropdown",
                 tooltip: "ORM map - Occlusion (Red), Roughness (Green), Metalness (Blue)",
                 search: "Search texture..",
@@ -93,7 +93,7 @@ function scrEditorInspectorMaterial() {
             { 
                 id: "texturesEmissiveMap",
                 field: "textures",
-                label: "Emissive Map", 
+                label: "Emissive", 
                 type: "dropdown",
                 tooltip: "Emissive color map",
                 search: "Search texture..",
@@ -108,7 +108,7 @@ function scrEditorInspectorMaterial() {
             { 
                 id: "texturesAlphaMap",
                 field: "textures",
-                label: "Alpha Map", 
+                label: "Alpha", 
                 type: "dropdown",
                 tooltip: "Alpha map for transparency",
                 search: "Search texture..",
@@ -123,7 +123,7 @@ function scrEditorInspectorMaterial() {
             { 
                 id: "texturesDisplacementMap",
                 field: "textures",
-                label: "Displacement Map", 
+                label: "Displacement", 
                 type: "dropdown",
                 tooltip: "Displacement map for height",
                 search: "Search texture..",

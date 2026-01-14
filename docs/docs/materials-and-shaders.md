@@ -60,7 +60,9 @@ A material with a flat color and a simple diffuse texture, that does not receive
 
 ### 🧱 UeMeshStandardMaterial
 
-A ready-to-use material with built-in lighting support (ambient, point, directional), shadows and texture handling.
+A ready-to-use material with built-in lighting support (ambient, point, directional), shadows and texture handling. 
+
+In **Deferred Rendering** mode, this material automatically supports the G-Buffer pass, outputting its properties (Albedo, Normals, etc.) to the renderer's internal surfaces.
 
 **Example:**
 ```js

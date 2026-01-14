@@ -25,6 +25,7 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     
     // Shadow (Point)
     pointShadowEnabled: "u_uePointShadowEnabled",
+    pointShadowMatrix: "u_uePointShadowMatrix",
     pointShadowFar: "u_uePointShadowFar",
     pointShadowNear: "u_uePointShadowNear",
     pointShadowPos: "u_uePointShadowPos",
@@ -132,6 +133,11 @@ enum UE_TONE_MAPPING {
     ACES,
     AGX,
     NEUTRAL
+}
+
+enum UE_RENDER_PATH {
+    FORWARD,
+    DEFERRED
 }
 
 // Internal globals

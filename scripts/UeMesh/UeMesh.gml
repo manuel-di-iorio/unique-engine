@@ -15,8 +15,12 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       // Submit the vertex buffer
       var tex = -1;
       if (material.__baseTexture != undefined) {
-          material.__baseTexture.__useGlobal();
-          tex = material.__baseTexture.__cachedTexture;
+          if (is_struct(material.__baseTexture) && variable_struct_exists(material.__baseTexture, "isTexture")) {
+              material.__baseTexture.__useGlobal();
+              tex = material.__baseTexture.__cachedTexture;
+          } else {
+              tex = material.__baseTexture;
+          }
       }
       
       vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, tex); 

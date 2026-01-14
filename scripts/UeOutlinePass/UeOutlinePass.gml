@@ -35,8 +35,9 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
     // Outline visual parameters
     self.visibleEdgeColor = [1, 1, 1];  // White outline by default
     self.edgeGlow = 1;                   // Glow/blur amount (0 = sharp)
-    self.edgeStrength = 3;               // Intensity multiplier
-    self.thickness = 1;                  // Edge thickness in pixels
+    self.edgeStrength = 10;              // Intensity multiplier
+    self.thickness = 2;                  // Edge thickness in pixels
+    self.normalEdgeStrength = 1.0;       // Strength of internal edges from normals
     self.hiddenEdgeColor = [0.1, 0.04, 0.02]; // For future hidden edge support
     
     // ========================================
@@ -62,13 +63,16 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         blending: false,
     });
     
-    // Texture reference for the mask (used by the outline shader)
+    // Texture resources
     self.__maskTexture = new UeTexture();
+    self.__gbufferNormalTexture = new UeTexture();
+    self.__gbufferDepthTexture = new UeTexture();
     
     // Fullscreen quad for rendering the final composition
     self.__fullscreenQuad = undefined;
   
     self.__maskSampler = shader_get_sampler_index(sh_ue_outline_pass, "s_mask");
+    self.__gbufferNormalSampler = shader_get_sampler_index(sh_ue_outline_pass, "s_gbufferNormal");
 
     /**
      * Build/initialize all resources.
@@ -79,17 +83,20 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         
         // Setup outline material uniforms
         var _uniforms = {};
-        _uniforms[$ "visibleEdgeColor"] = { type: UE_UNIFORM_TYPE.ARRAY, value: self.visibleEdgeColor };
+        _uniforms[$ "visibleEdgeColor"] = { type: UE_UNIFORM_TYPE.VEC3, value: self.visibleEdgeColor };
         _uniforms[$ "thickness"] = { type: UE_UNIFORM_TYPE.FLOAT, value: self.thickness };
         _uniforms[$ "edgeStrength"] = { type: UE_UNIFORM_TYPE.FLOAT, value: self.edgeStrength };
         _uniforms[$ "edgeGlow"] = { type: UE_UNIFORM_TYPE.FLOAT, value: self.edgeGlow };
         _uniforms[$ "texelSize"] = { type: UE_UNIFORM_TYPE.VEC2, value: [1, 1] };
+        _uniforms[$ "useGBuffer"] = { type: UE_UNIFORM_TYPE.FLOAT, value: 0.0 };
+        _uniforms[$ "normalEdgeStrength"] = { type: UE_UNIFORM_TYPE.FLOAT, value: self.normalEdgeStrength };
         
         self.__outlineMaterial.uniforms = _uniforms;
         
-        // Register the mask texture with the material
-        // The shader will sample this as 's_mask'
+        // Register textures with the material
         self.__outlineMaterial.textures[$ "mask"] = self.__maskTexture;
+        self.__outlineMaterial.textures[$ "gbufferNormal"] = self.__gbufferNormalTexture;
+        self.__outlineMaterial.textures[$ "gbufferDepth"] = self.__gbufferDepthTexture;
         
         // Build materials
         self.__maskMaterial.build();
@@ -132,14 +139,17 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
             return self;
         }
         
+        show_debug_message("UeOutlinePass: Rendering " + string(array_length(self.selectedObjects)) + " objects");
+        
         // ========================================
         // STEP 1: MASK PASS
         // Render selected objects as white silhouettes
         // ========================================
         
         // Ensure mask target exists and matches the size
-        if (self.__maskTarget == undefined) {
-            self.__maskTarget = new UeRenderTarget(readTarget.width, readTarget.height);
+        if (self.__maskTarget == undefined || self.__maskTarget.width != readTarget.width || self.__maskTarget.height != readTarget.height) {
+            self.setSize(readTarget.width, readTarget.height);
+            show_debug_message("UeOutlinePass: Created mask target " + string(readTarget.width) + "x" + string(readTarget.height));
         }
         
         // Set the mask as render target
@@ -154,22 +164,29 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         camera_apply(self.renderCamera.camera);
         
         // Apply mask material (solid white shader)
-        self.__maskMaterial.use();
+        self.__maskMaterial.use(renderer);
         
         // Render each selected object
+        var renderedCount = 0;
         for (var i = 0, len = array_length(self.selectedObjects); i < len; i++) {
             var obj = self.selectedObjects[i];
-            if (obj != undefined && obj[$ "geometry"] != undefined && obj.geometry[$ "vb"] != undefined) {
-                // Set world matrix for this object
-                matrix_set(matrix_world, obj.matrixWorld);
-                // Submit the geometry
-                vertex_submit(obj.geometry.vb, obj.primitive ?? pr_trianglelist, -1);
+            if (obj != undefined) {
+                // Ensure matrix is up to date
+                obj.matrixAutoUpdate = true; // Force it for the mask pass
+                if (obj.matrixAutoUpdate) obj.updateMatrixWorld();
+                
+                // Render the object (submits geometry with current shader/material states)
+                obj.render();
+                renderedCount++;
             }
         }
+        show_debug_message("UeOutlinePass: Mask pass rendered " + string(renderedCount) + " objects");
+        
+        // Restore previous render target
+        renderer.setRenderTarget(_oldRT);
         
         // ========================================
         // STEP 2: EDGE DETECTION & COMPOSITION
-        // Apply Sobel filter on mask and overlay on scene
         // ========================================
         
         // Set output render target
@@ -179,26 +196,36 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         // (The scene is already in the target from previous passes)
         
         // Update uniforms
-        var _texelSize = self.__outlineMaterial.uniforms[$ "texelSize"].value;
+        var _uniforms = self.__outlineMaterial.uniforms;
+        var _texelSize = _uniforms[$ "texelSize"].value;
         _texelSize[@ 0] = 1 / readTarget.width;
         _texelSize[@ 1] = 1 / readTarget.height;
         
+        show_debug_message("UeOutlinePass: Composition pass starting");
+        var _useGBuffer = 0.0;
+        if (renderer[$ "__gbuffer"] != undefined) {
+            var gbuffer = renderer.__gbuffer;
+            if (surface_exists(gbuffer.normalMetal.surface)) {
+                self.__gbufferNormalTexture.__cachedTexture = surface_get_texture(gbuffer.normalMetal.surface);
+                _useGBuffer = 1.0;
+            }
+            if (surface_exists(gbuffer.positionRough.surface)) {
+                self.__gbufferDepthTexture.__cachedTexture = surface_get_texture(gbuffer.positionRough.surface);
+            }
+        }
+        _uniforms[$ "useGBuffer"].value = _useGBuffer;
+        _uniforms[$ "normalEdgeStrength"].value = self.normalEdgeStrength;
+        
         // Render fullscreen quad with the scene texture
-        // The shader will:
-        // - Sample the scene from gm_BaseTexture
-        // - Sample the mask from s_mask
-        // - Apply edge detection on the mask
-        // - Composite edges onto the scene
         var _sceneTexture = surface_get_texture(readTarget.surface);
         
+        // Update the mask texture resource
+        self.__maskTexture.__cachedTexture = surface_get_texture(self.__maskTarget.surface);
+        
         // Apply the outline material
-        self.__outlineMaterial.use();
+        self.__outlineMaterial.use(renderer);
         
-        // Set the mask texture
-        var _maskTexture = surface_get_texture(self.__maskTarget.surface);
-        texture_set_stage(self.__maskSampler, _maskTexture);
-        
-        // Now render the fullscreen quad (skip material.use since we already called it)
+        // Now render the fullscreen quad (material.use already handled all bindings)
         self.__fullscreenQuad.render(_sceneTexture, true);
         
         // Restore previous render target
@@ -232,6 +259,14 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         if (self.__maskTexture != undefined) {
             self.__maskTexture.dispose();
             self.__maskTexture = undefined;
+        }
+        if (self.__gbufferNormalTexture != undefined) {
+            self.__gbufferNormalTexture.dispose();
+            self.__gbufferNormalTexture = undefined;
+        }
+        if (self.__gbufferDepthTexture != undefined) {
+            self.__gbufferDepthTexture.dispose();
+            self.__gbufferDepthTexture = undefined;
         }
         
         return self;

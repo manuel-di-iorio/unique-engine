@@ -1,7 +1,7 @@
 renderer = new UeRenderer({ width: 723, height: 576, sortObjects: false });
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 50, y: -100, z: 50 }).use();
-camera.matrixAutoUpdate = false;
+camera.matrixAutoUpdate = true; // Enable auto update for testing
 
 // Add a mesh and lights to the scene for test
 var cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: c_fuchsia });

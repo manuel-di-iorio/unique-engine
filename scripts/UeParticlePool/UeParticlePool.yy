@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UeParticlePool",
   "parent":{
-    "name":"Particles",
-    "path":"folders/Packages/Unique Engine/Particles.yy",
+    "name":"Internal",
+    "path":"folders/Packages/Unique Particles/Internal.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

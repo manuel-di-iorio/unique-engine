@@ -23,18 +23,21 @@ uniform float u_edgeStrength;     // Intensity multiplier
 uniform float u_edgeGlow;         // Softening/glow factor
 uniform vec2 u_texelSize;         // 1.0 / texture dimensions
 
-// Mask texture containing selected objects as white silhouettes
-uniform sampler2D s_mask;
+// Optimization: G-Buffer support
+uniform float u_useGBuffer;       // 1.0 if we should use G-Buffer for better edges
+uniform float u_normalEdgeStrength; // Strength of edges from normal map
+
+// Textures
+uniform sampler2D s_mask;         // Mask texture containing selected objects
+uniform sampler2D s_gbufferNormal; // G-Buffer Normal map (optional)
+uniform sampler2D s_gbufferDepth;  // G-Buffer Depth/Position (optional)
 
 /**
  * Sobel edge detection on the mask texture.
- * Returns edge intensity (0 = no edge, higher = stronger edge).
  */
-float detectEdge(vec2 uv) {
+float detectMaskEdge(vec2 uv) {
     vec2 texel = u_texelSize * u_thickness;
     
-    // Sample 3x3 neighborhood from the MASK (not the scene)
-    // We only need the red channel since the mask is grayscale
     float tl = texture2D(s_mask, uv + vec2(-texel.x, -texel.y)).r;
     float t  = texture2D(s_mask, uv + vec2(0.0, -texel.y)).r;
     float tr = texture2D(s_mask, uv + vec2(texel.x, -texel.y)).r;
@@ -44,27 +47,53 @@ float detectEdge(vec2 uv) {
     float b  = texture2D(s_mask, uv + vec2(0.0, texel.y)).r;
     float br = texture2D(s_mask, uv + vec2(texel.x, texel.y)).r;
     
-    // Sobel kernels for gradient detection
-    // Horizontal gradient: detects vertical edges
     float gx = -tl - 2.0 * l - bl + tr + 2.0 * r + br;
-    // Vertical gradient: detects horizontal edges  
     float gy = -tl - 2.0 * t - tr + bl + 2.0 * b + br;
     
-    // Combined gradient magnitude
     return length(vec2(gx, gy));
+}
+
+/**
+ * Edge detection based on normals from G-Buffer.
+ */
+float detectNormalEdge(vec2 uv) {
+    vec2 texel = u_texelSize * u_thickness;
+    
+    vec3 n_t = texture2D(s_gbufferNormal, uv + vec2(0.0, -texel.y)).rgb * 2.0 - 1.0;
+    vec3 n_b = texture2D(s_gbufferNormal, uv + vec2(0.0, texel.y)).rgb * 2.0 - 1.0;
+    vec3 n_l = texture2D(s_gbufferNormal, uv + vec2(-texel.x, 0.0)).rgb * 2.0 - 1.0;
+    vec3 n_r = texture2D(s_gbufferNormal, uv + vec2(texel.x, 0.0)).rgb * 2.0 - 1.0;
+    
+    // Dot product difference between neighbors
+    float edge = 0.0;
+    edge += 1.0 - dot(n_t, n_b);
+    edge += 1.0 - dot(n_l, n_r);
+    
+    return edge;
 }
 
 void main() {
     // Sample the original scene color
     vec4 sceneColor = texture2D(gm_BaseTexture, v_vTexcoord);
     
-    // Detect edges on the mask
-    float edge = detectEdge(v_vTexcoord);
-    edge = edge * u_edgeStrength;
+    // Detect edges on the mask (silhouette of selected objects)
+    float maskEdge = detectMaskEdge(v_vTexcoord);
+    
+    // Detect edges from G-Buffer if available
+    float finalEdge = maskEdge * u_edgeStrength;
+    
+    if (u_useGBuffer > 0.5) {
+        float normalEdge = detectNormalEdge(v_vTexcoord);
+        
+        // We only apply normal edges where the mask is present (internal edges of selected objects)
+        // or globally if we want a full scene outline.
+        // For now, let's use the mask as a gate for normal edges to keep it focused on selection.
+        float maskVal = texture2D(s_mask, v_vTexcoord).r;
+        finalEdge += normalEdge * u_normalEdgeStrength * maskVal;
+    }
     
     // Apply glow/softening effect
-    // exp(-x) creates a smooth falloff; higher edgeGlow = more spread
-    float edgeAlpha = 1.0 - exp(-edge * (1.0 + u_edgeGlow));
+    float edgeAlpha = 1.0 - exp(-finalEdge * (1.0 + u_edgeGlow));
     
     // Blend: mix scene color with edge color based on edge intensity
     vec3 finalColor = mix(sceneColor.rgb, u_visibleEdgeColor, edgeAlpha);

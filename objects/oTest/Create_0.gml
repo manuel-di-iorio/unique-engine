@@ -27,7 +27,7 @@ scenes = [
     { name: "Post Processing", obj: oScenePostprocessing, bg: c_black }, // 10
     { name: "PBR Material", obj: oScenePBR, bg: c_ltgray }, // 11
     { name: "Platform Game", obj: oScenePlatformGame, bg: #66DDDD }, // 12
-    { name: "Particles", obj: oSceneParticles, bg: c_black }, // 13
+    { name: "Particles", obj: oSceneParticles, bg: #111111 }, // 13
 ];
 
 setScene = function(idx) {
@@ -45,4 +45,4 @@ setScene = function(idx) {
     instance_create_layer(0, 0, "Instances", currentDemo.obj); 
 }
 
-setScene(12);
+setScene(0);

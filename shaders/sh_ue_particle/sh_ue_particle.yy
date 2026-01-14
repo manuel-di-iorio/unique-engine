@@ -3,8 +3,8 @@
   "%Name":"sh_ue_particle",
   "name":"sh_ue_particle",
   "parent":{
-    "name":"Shaders",
-    "path":"folders/Packages/Unique Engine/Shaders.yy",
+    "name":"Internal",
+    "path":"folders/Packages/Unique Particles/Internal.yy",
   },
   "resourceType":"GMShader",
   "resourceVersion":"2.0",
