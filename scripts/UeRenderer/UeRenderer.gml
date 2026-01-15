@@ -114,6 +114,19 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       // Update matrices for dynamic objects
       if (object.matrixAutoUpdate && object.matrixWorldAutoUpdate) object.updateMatrixWorld();
 
+      // Precompute distance to camera for LOD and transparency sorting
+      // We use the world matrix position for accuracy even if parented
+      var _mw = object.matrixWorld;
+      var _ox = _mw[12], _oy = _mw[13], _oz = _mw[14];
+      var _cx = cameraPos[0], _cy = cameraPos[1], _cz = cameraPos[2];
+      var _distSq = (_ox - _cx) * (_ox - _cx) + (_oy - _cy) * (_oy - _cy) + (_oz - _cz) * (_oz - _cz);
+      object.__distanceToCameraSq = _distSq;
+      object.__distanceToCamera = sqrt(_distSq);
+
+      if (object[$ "isLOD"] && object.autoUpdate) {
+        object.update(camera);
+      }
+
       if (object[$ "isLight"]) {
         array_push(__lights, object);
         continue;
@@ -139,7 +152,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         if (_material.transparent) {
           // ---- TRANSPARENT ----
           // 16 bit renderOrder | 32 bit inverted depth
-          var nd = clamp(vec3_distance_to_squared(object.position, cameraPos) / _maxDistSq, 0, 1);
+          var nd = clamp(_distSq / _maxDistSq, 0, 1);
           var depth32 = floor(nd * 0xFFFFFFFF);
 
           // back-to-front → invert
