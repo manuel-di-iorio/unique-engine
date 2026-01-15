@@ -286,13 +286,23 @@ void main() {
 
     // 2. Extract surface properties
     vec3 albedo = SRGBToLinear(gAlbedo.rgb);
-    vec3 N = normalize(gNormal.rgb * 2.0 - 1.0 + vec3(EPSILON));
+    
+    vec3 normalRaw = gNormal.rgb;
+    vec3 N = normalize(normalRaw * 2.0 - 1.0 + vec3(EPSILON));
     float metalness = gNormal.a;
+    
     float roughness = gRoughAO.r;
     vec3 emissive = gEmissive.rgb;
     
     // Decode AO and receiveShadow
     float rawAO = gRoughAO.g;
+    
+    // Handle "cleared to black" defaults for Roughness and AO
+    if (length(gRoughAO.rgb) < 0.0001) {
+        roughness = 1.0;
+        rawAO = 1.0;
+    }
+    
     float receiveShadow = 1.0;
     float ao = rawAO;
     if (rawAO < 0.0) {

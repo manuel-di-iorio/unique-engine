@@ -1,6 +1,8 @@
 function UeDeferredGBufferMaterial(data = {}): UeMaterial(data) constructor {
   shader = sh_ue_gbuffer;
-
+  transparent = false; // G-Buffer is only for opaque objects
+  allowOverride = false;
+  
   // Color
   var _color = data[$ "color"];
   if (_color != undefined) {
@@ -47,6 +49,10 @@ function UeDeferredGBufferMaterial(data = {}): UeMaterial(data) constructor {
   // Flat Shading
   flatShading = data[$ "flatShading"] ?? false;
   uniforms.ueFlatShading = { type: UE_UNIFORM_TYPE.FLOAT, value: flatShading };
+
+  // Receive Shadow
+  receiveShadow = data[$ "receiveShadow"] ?? true;
+  uniforms.ueReceiveShadow = { type: UE_UNIFORM_TYPE.FLOAT, value: receiveShadow };
 
   /** === Textures === */
   textures.alphaMap = data[$ "alphaMap"];

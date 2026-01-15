@@ -40,6 +40,41 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
     }
   }
 
+  function __syncGBufferMaterial(source) {
+    gml_pragma("forceinline");
+    var target = self.__gbufferMaterial;
+    
+    // Copy textures
+    target.textures.map = source.textures.map;
+    target.textures.alphaMap = source.textures.alphaMap;
+    target.textures.ormMap = source.textures.ormMap;
+    target.textures.normalMap = source.textures.normalMap;
+    target.textures.emissiveMap = source.textures.emissiveMap;
+    target.textures.displacementMap = source.textures.displacementMap;
+    
+    // Copy uniforms (only if they exist in source)
+    var uS = source.uniforms;
+    var uT = target.uniforms;
+    
+    if (variable_struct_exists(uS, "ueColor")) uT.ueColor.value = uS.ueColor.value;
+    if (variable_struct_exists(uS, "ueEmissive")) uT.ueEmissive.value = uS.ueEmissive.value;
+    if (variable_struct_exists(uS, "ueMetalness")) uT.ueMetalness.value = uS.ueMetalness.value;
+    if (variable_struct_exists(uS, "ueRoughness")) uT.ueRoughness.value = uS.ueRoughness.value;
+    if (variable_struct_exists(uS, "ueAoIntensity")) uT.ueAoIntensity.value = uS.ueAoIntensity.value;
+    if (variable_struct_exists(uS, "ueAoMapIntensity")) uT.ueAoMapIntensity.value = uS.ueAoMapIntensity.value;
+    if (variable_struct_exists(uS, "ueNormalMapScale")) uT.ueNormalMapScale.value = uS.ueNormalMapScale.value;
+    if (variable_struct_exists(uS, "ueDisplacementScale")) uT.ueDisplacementScale.value = uS.ueDisplacementScale.value;
+    if (variable_struct_exists(uS, "ueDisplacementBias")) uT.ueDisplacementBias.value = uS.ueDisplacementBias.value;
+    if (variable_struct_exists(uS, "ueFlatShading")) uT.ueFlatShading.value = uS.ueFlatShading.value;
+    
+    // Some properties might be directly on the material instead of uniforms
+    if (variable_struct_exists(source, "receiveShadow")) uT.ueReceiveShadow.value = source.receiveShadow;
+    if (variable_struct_exists(source, "flatShading")) uT.ueFlatShading.value = source.flatShading;
+    
+    // We need to re-build to update flags and texture cache
+    target.build();
+  }
+
   /**
    * Render a specific queue of objects
    */
@@ -67,10 +102,9 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
       // Use the material
       if (_material.visible) {
         if (!isTransparentPass) {
-          // Use G-Buffer shader cache but keep material settings from the mesh material
-          _material.use(self, self.__gbufferMaterial);
-          _material.useByMesh(_object, undefined, self.__gbufferMaterial);
-          __boundMaterial = undefined; // Force re-bind for other passes
+          self.__syncGBufferMaterial(_material);
+          self.__gbufferMaterial.use(self);
+          self.__gbufferMaterial.useByMesh(_object);
         } else {
           if (_material != __boundMaterial) {
             __boundMaterial = _material;
@@ -112,27 +146,35 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
     surface_set_target_ext(3, self.__gbuffer.emissive.surface);
 
     // Clear G-Buffer
-    // We clear all targets to 0, except for the normal target which we want at neutral 0.5
-    // However, draw_clear clears ALL targets. So we clear to 0 and handle it.
     draw_clear_alpha(c_black, 0);
     draw_clear_depth(1);
-    
+
     camera_apply(camera.camera);
 
     self.__renderQueue(__queueOpaque, scene, false);
 
     surface_reset_target();
 
+    // Reset shader and bound material to prevent "texture bound as surface" errors
+    shader_reset();
+    __boundMaterial = undefined;
+
     // 2. Lighting Pass
     self.setRenderTarget(_oldRT);
 
     if (self.autoClear) self.clear(self.autoClearColor, self.autoClearDepth, self.autoClearStencil);
+
+    // DEBUG: If you see white, uncomment this to see only Albedo
+    // draw_surface(self.__gbuffer.albedoAlpha.surface, 0, 0); return self;
 
     var _lm = self.__deferredLightingMaterial;
     _lm.textures[$ "gbufferAlbedo"] = self.__gbuffer.albedoAlpha;
     _lm.textures[$ "gbufferNormal"] = self.__gbuffer.normalMetal;
     _lm.textures[$ "gbufferRoughnessAO"] = self.__gbuffer.roughnessAO;
     _lm.textures[$ "gbufferEmissive"] = self.__gbuffer.emissive;
+    
+    // IMPORTANT: Reset bound material to force lighting material to bind its own textures
+    __boundMaterial = undefined;
 
     // Pass Depth Texture (of the first G-Buffer target, which holds the shared depth buffer)
     var _depthTex = surface_get_texture_depth(self.__gbuffer.albedoAlpha.surface);
@@ -148,6 +190,8 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
 
     global.UE_FULLSCREEN_QUAD.material = _lm;
     global.UE_FULLSCREEN_QUAD.render(undefined, true);
+    
+    shader_reset(); // Reset lighting shader before forward pass
 
     // 3. Forward Pass (Transparent objects)
     camera_apply(camera.camera);

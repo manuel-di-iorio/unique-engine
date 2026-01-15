@@ -19,7 +19,8 @@ uniform mat4 u_ueSpotShadowMatrix;
 uniform sampler2D s_displacementMap;
 uniform float u_ueDisplacementScale;
 uniform float u_ueDisplacementBias;
-uniform float u_ueHasDisplacementMap;
+uniform vec4 u_ueMapFlags2;
+#define u_ueHasDisplacementMap u_ueMapFlags2.y
 
 void main() {
     vec3 pos = in_Position;
