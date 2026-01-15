@@ -72,7 +72,7 @@ void main() {
     // ===== Base =====
     vec4 tex = (u_ueHasMap > 0.5) ? texture2D(gm_BaseTexture, vTexcoord) : vec4(1.0);
     vec4 vCol = vColour;
-    if (vCol.r + vCol.g + vCol.b < 0.001) vCol.rgb = vec3(1.0);
+    if (length(vCol.rgb) < 0.001) vCol.rgb = vec3(1.0);
     if (vCol.a < 0.001) vCol.a = 1.0;
     
     vec4 base = tex * vCol;
@@ -82,7 +82,7 @@ void main() {
     // Discard if transparent (for Opaque pass, we can use alpha testing)
     if (alpha < 0.5) discard;
 
-    vec3 albedo = base.rgb * u_ueColor;
+    vec3 albedo = SRGBToLinear(base.rgb) * SRGBToLinear(u_ueColor);
 
     vec3 orm = (u_ueHasOrmMap > 0.5) ? texture2D(s_ormMap, vTexcoord).rgb : vec3(1.0, 1.0, 0.0);
     float ao = mix(1.0, orm.r, u_ueAoIntensity * u_ueAoMapIntensity);
@@ -118,9 +118,11 @@ void main() {
     
     // Target 2: Roughness (R) + AO/Shadow (G)
     // We pack AO and ReceiveShadow into the G channel
-    float aoFinal = ao;
-    if (u_ueReceiveShadow < 0.5) aoFinal = -aoFinal - 0.001;
-    gl_FragData[2] = vec4(roughness, aoFinal, 0.0, 1.0);
+    // Positive values = receive shadow, negative values = do not receive shadow
+    float aoOut = ao;
+    if (u_ueReceiveShadow < 0.5) aoOut = -ao - 0.001;
+    
+    gl_FragData[2] = vec4(roughness, aoOut, 0.0, 1.0);
     
     // Target 3: Emissive (RGB)
     gl_FragData[3] = vec4(emissive, 1.0);

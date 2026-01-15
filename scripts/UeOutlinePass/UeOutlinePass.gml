@@ -194,15 +194,20 @@ function UeOutlinePass(scene, camera, selectedObjects = []): UePass() constructo
         var _useGBuffer = 0.0;
         if (renderer[$ "__gbuffer"] != undefined) {
             var gbuffer = renderer.__gbuffer;
-            if (surface_exists(gbuffer.normalMetal.surface)) {
+            if (variable_struct_exists(gbuffer, "normalMetal") && surface_exists(gbuffer.normalMetal.surface)) {
                 var _newNormalTex = surface_get_texture(gbuffer.normalMetal.surface);
                 if (self.__gbufferNormalTexture.__cachedTexture != _newNormalTex) {
                     self.__gbufferNormalTexture.__cachedTexture = _newNormalTex;
                 }
                 _useGBuffer = 1.0;
             }
-            if (surface_exists(gbuffer.positionRough.surface)) {
+            if (variable_struct_exists(gbuffer, "positionRough") && surface_exists(gbuffer.positionRough.surface)) {
                 var _newDepthTex = surface_get_texture(gbuffer.positionRough.surface);
+                if (self.__gbufferDepthTexture.__cachedTexture != _newDepthTex) {
+                    self.__gbufferDepthTexture.__cachedTexture = _newDepthTex;
+                }
+            } else if (variable_struct_exists(gbuffer, "roughnessAO") && surface_exists(gbuffer.roughnessAO.surface)) {
+                var _newDepthTex = surface_get_texture(gbuffer.roughnessAO.surface);
                 if (self.__gbufferDepthTexture.__cachedTexture != _newDepthTex) {
                     self.__gbufferDepthTexture.__cachedTexture = _newDepthTex;
                 }
