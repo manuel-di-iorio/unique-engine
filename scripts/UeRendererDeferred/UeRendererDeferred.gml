@@ -7,7 +7,7 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
 
   // G-Buffer (for Deferred Rendering)
   self.__gbuffer = undefined;
-  self.__gbufferMaterial = new UeMaterial({ shader: sh_ue_gbuffer });
+  self.__gbufferMaterial = new UeDeferredGBufferMaterial();
   self.__deferredLightingMaterial = new UeMaterial({
     shader: sh_ue_deferred_lighting,
     uniforms: {
@@ -67,9 +67,9 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
       // Use the material
       if (_material.visible) {
         if (!isTransparentPass) {
-          // Use G-Buffer shader but keep material settings
-          _material.use(self, sh_ue_gbuffer);
-          _material.useByMesh(_object);
+          // Use G-Buffer shader cache but keep material settings from the mesh material
+          _material.use(self, self.__gbufferMaterial);
+          _material.useByMesh(_object, undefined, self.__gbufferMaterial);
           __boundMaterial = undefined; // Force re-bind for other passes
         } else {
           if (_material != __boundMaterial) {
@@ -111,7 +111,12 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
     surface_set_target_ext(2, self.__gbuffer.roughnessAO.surface);
     surface_set_target_ext(3, self.__gbuffer.emissive.surface);
 
-    self.clear(true, true, true);
+    // Clear G-Buffer
+    // We clear all targets to 0, except for the normal target which we want at neutral 0.5
+    // However, draw_clear clears ALL targets. So we clear to 0 and handle it.
+    draw_clear_alpha(c_black, 0);
+    draw_clear_depth(1);
+    
     camera_apply(camera.camera);
 
     self.__renderQueue(__queueOpaque, scene, false);
@@ -134,8 +139,8 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
     _lm.textures[$ "gbufferDepth"] = _depthTex;
 
     // Pass Inverse View-Projection Matrix for position reconstruction
-    // We can multiply the pre-calculated inverses from the camera
-    matrix_multiply(camera.projectionMatrixInverse, camera.matrixWorld, global.UE_MAT4_TEMP0);
+    // World = Vinv * Pinv * Clip
+    matrix_multiply(camera.matrixWorld, camera.projectionMatrixInverse, global.UE_MAT4_TEMP0);
     _lm.uniforms[$ "ueInvViewProj"].value = global.UE_MAT4_TEMP0;
 
     // Apply camera matrices for lighting pass

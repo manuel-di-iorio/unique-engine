@@ -71,9 +71,9 @@ function UeMaterial(data = {}) constructor {
 
     var _uCoreNames = ["modelPosition", "worldMatrix", "receiveShadow",
       "dirShadowEnabled", "dirShadowQuality", "dirShadowTexelSize", "dirShadowMatrix",
-      "pointShadowEnabled", "pointShadowFar", "pointShadowNear", "pointShadowPos", "pointShadowTexelSize", "pointShadowQuality", "pointShadowMatrix", 
-      "spotShadowEnabled", "spotShadowMatrix", "spotShadowFar", "spotShadowNear", "spotShadowPos", "spotShadowTexelSize", "spotShadowQuality", 
-      "pointLightsData", "spotLightsData", "hemiLightDir", "hemiLightSkyColor", "hemiLightGroundColor", "hemiLightIntensity", 
+      "pointShadowEnabled", "pointShadowFar", "pointShadowNear", "pointShadowPos", "pointShadowTexelSize", "pointShadowQuality", "pointShadowMatrix",
+      "spotShadowEnabled", "spotShadowMatrix", "spotShadowFar", "spotShadowNear", "spotShadowPos", "spotShadowTexelSize", "spotShadowQuality",
+      "pointLightsData", "spotLightsData", "hemiLightDir", "hemiLightSkyColor", "hemiLightGroundColor", "hemiLightIntensity",
       "sceneData", "materialData", "mapFlags", "mapFlags2"
     ];
     var _sCoreNames = ["dirShadowMap", "pointShadowMap", "spotShadowMap"];
@@ -88,7 +88,7 @@ function UeMaterial(data = {}) constructor {
       var cacheKey = "uniform" + string_upper(string_char_at(core, 1)) + string_delete(core, 1, 1) + "Loc";
       var loc = shader_get_uniform(shader, cfg[$ core]);
       __cache[$ cacheKey] = loc;
-      
+
       // Register standard uniforms for automatic handling in use()
       if (core == "sceneData") array_push(__cache.uniformsStandard, [loc, core, UE_UNIFORM_TYPE.ARRAY]);
       else if (core == "materialData") array_push(__cache.uniformsStandard, [loc, core, UE_UNIFORM_TYPE.VEC4]);
@@ -333,14 +333,17 @@ function UeMaterial(data = {}) constructor {
     }
   }
 
-  function use(renderer = undefined, targetShader = undefined) {
+  function use(renderer = undefined, targetMaterial = undefined) {
     gml_pragma("forceinline");
-    if (__cache == undefined) return self;
-    _shader = targetShader ?? self.shader;
+
+    _cache = targetMaterial != undefined ? targetMaterial.__cache : self.__cache;
+    if (_cache == undefined) return self;
+
+    _shader = targetMaterial != undefined ? targetMaterial.shader : self.shader;
     shader_set(_shader);
 
     // Set standard uniforms from the pre-built list
-    var stdU = __cache.uniformsStandard;
+    var stdU = _cache.uniformsStandard;
     for (var i = 0, sl = array_length(stdU); i < sl; i++) {
       var uInfo = stdU[i];
       var loc = uInfo[0];
@@ -357,10 +360,10 @@ function UeMaterial(data = {}) constructor {
           val = [self.emissiveIntensity, tm, _exp, tmEnabled];
           break;
         case "mapFlags":
-          val = [__cache.hasMapsFlags.map, __cache.hasMapsFlags.alphaMap, __cache.hasMapsFlags.ormMap, __cache.hasMapsFlags.normalMap];
+          val = [_cache.hasMapsFlags.map, _cache.hasMapsFlags.alphaMap, _cache.hasMapsFlags.ormMap, _cache.hasMapsFlags.normalMap];
           break;
         case "mapFlags2":
-          val = [__cache.hasMapsFlags.emissiveMap, __cache.hasMapsFlags.displacementMap, 0.0, 0.0];
+          val = [_cache.hasMapsFlags.emissiveMap, _cache.hasMapsFlags.displacementMap, 0.0, 0.0];
           break;
       }
 
@@ -370,10 +373,11 @@ function UeMaterial(data = {}) constructor {
         } else if (type == UE_UNIFORM_TYPE.VEC4) {
           shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]);
         } else if (type == UE_UNIFORM_TYPE.ARRAY) {
-          if (!is_array(val)) log(val)
-          if (is_array(val) && array_length(val) > 0) {
-            shader_set_uniform_f_array(loc, val);
-          }
+          shader_set_uniform_f_array(loc, val);
+          // if (!is_array(val)) log(val)
+          // if (is_array(val) && array_length(val) > 0) {
+          //   shader_set_uniform_f_array(loc, val);
+          // }
         }
       }
     }
@@ -451,23 +455,30 @@ function UeMaterial(data = {}) constructor {
     return self;
   }
 
-  function useByMesh(mesh, renderSide = undefined) {
+  function useByMesh(mesh, renderSide = undefined, targetMaterial = undefined) {
     gml_pragma("forceinline");
-    if (__cache == undefined) return;
+
+    var _cache = targetMaterial != undefined ? targetMaterial.__cache : self.__cache;
+    if (_cache == undefined) return;
 
     // Update the shader's model position uniform (for billboard sprites)
-    if (mesh[$ "isSprite"] && __cache.uniformModelPositionLoc != -1) {
-      shader_set_uniform_f_array(__cache.uniformModelPositionLoc, mesh.position);
+    if (mesh[$ "isSprite"]) {
+      var _cacheUniformModelPositionLoc = _cache[$ "uniformModelPositionLoc"];
+      if (_cacheUniformModelPositionLoc != undefined && _cacheUniformModelPositionLoc != -1) {
+        shader_set_uniform_f_array(_cacheUniformModelPositionLoc, mesh.position);
+      }
     }
 
     // Set world matrix
-    if (__cache.uniformWorldMatrixLoc != -1) {
-      shader_set_uniform_matrix_array(__cache.uniformWorldMatrixLoc, mesh.matrixWorld);
+    var _cacheUniformWorldMatrixLoc = _cache[$ "uniformWorldMatrixLoc"];
+    if (_cacheUniformWorldMatrixLoc != undefined && _cacheUniformWorldMatrixLoc != -1) {
+      shader_set_uniform_matrix_array(_cacheUniformWorldMatrixLoc, mesh.matrixWorld);
     }
 
     // Set receive shadow uniform
-    if (__cache.uniformReceiveShadowLoc != -1) {
-      shader_set_uniform_f(__cache.uniformReceiveShadowLoc, mesh.receiveShadow ? 1.0 : 0.0);
+    var _cacheUniformReceiveShadowLoc = _cache[$ "uniformReceiveShadowLoc"];
+    if (_cacheUniformReceiveShadowLoc != undefined && _cacheUniformReceiveShadowLoc != -1) {
+      shader_set_uniform_f(_cacheUniformReceiveShadowLoc, mesh.receiveShadow ? 1.0 : 0.0);
     }
 
     // Set the culling mode (can be overwritten by argument for transparent objects)

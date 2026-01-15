@@ -282,11 +282,11 @@ void main() {
     // 1. Position Reconstruction from Depth
     vec4 clipPos = vec4(vTexcoord * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
     vec4 worldPos4 = u_ueInvViewProj * clipPos;
-    vec3 worldPos = worldPos4.xyz / worldPos4.w;
+    vec3 worldPos = worldPos4.xyz / (worldPos4.w + EPSILON);
 
     // 2. Extract surface properties
     vec3 albedo = SRGBToLinear(gAlbedo.rgb);
-    vec3 N = normalize(gNormal.rgb * 2.0 - 1.0);
+    vec3 N = normalize(gNormal.rgb * 2.0 - 1.0 + vec3(EPSILON));
     float metalness = gNormal.a;
     float roughness = gRoughAO.r;
     vec3 emissive = gEmissive.rgb;

@@ -106,6 +106,7 @@
     {"name":"UeCircleGeometry","order":2,"path":"scripts/UeCircleGeometry/UeCircleGeometry.yy",},
     {"name":"UeConeGeometry","order":7,"path":"scripts/UeConeGeometry/UeConeGeometry.yy",},
     {"name":"UeCylinderGeometry","order":8,"path":"scripts/UeCylinderGeometry/UeCylinderGeometry.yy",},
+    {"name":"UeDeferredGBufferMaterial","order":5,"path":"scripts/UeDeferredGBufferMaterial/UeDeferredGBufferMaterial.yy",},
     {"name":"UeDirectionalLight","order":2,"path":"scripts/UeDirectionalLight/UeDirectionalLight.yy",},
     {"name":"UeDirectionalLightHelper","order":5,"path":"scripts/UeDirectionalLightHelper/UeDirectionalLightHelper.yy",},
     {"name":"UeDirectionalLightShadow","order":2,"path":"scripts/UeDirectionalLightShadow/UeDirectionalLightShadow.yy",},
