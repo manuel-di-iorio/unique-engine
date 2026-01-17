@@ -35,6 +35,13 @@ function UeVertexFormat(data = {}) constructor {
         array_push(attrs, { kind: UE_FORMAT_ATTR.COLOR });
         return self;
     }
+
+    function bones() {
+        gml_pragma("forceinline");
+        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "bone_indices", type: vertex_type_ubyte4 });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "bone_weights", type: vertex_type_float4 });
+        return self;
+    }
     
     function custom(name, type) {
         gml_pragma("forceinline");
@@ -114,5 +121,19 @@ function UeVertexFormat(data = {}) constructor {
     function _compileData(data) {
         gml_pragma("forceinline");
         return { payload: toJSON() };
+    }
+
+    /**
+     * Crea una copia profonda del formato del vertice.
+     * Il clone avrà un nuovo UUID e il puntatore al formato nativo (vf) verrà resettato,
+     * richiedendo una nuova chiamata a build() se si desidera utilizzarlo per creare buffer.
+     * @returns {Struct.UeVertexFormat} Una nuova istanza di UeVertexFormat.
+     */
+    function clone() {
+        gml_pragma("forceinline");
+        var _clone = variable_clone(self);
+        _clone.uuid = ueUuid();
+        _clone.vf = undefined;
+        return _clone;
     }
 }

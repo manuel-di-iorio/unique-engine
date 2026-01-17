@@ -1,8 +1,9 @@
 global.UE_OBJECT_ID = 0;
 global.UE_VERSION = "0.6.0";
+global.UE_VFORMAT_PU = new UeVertexFormat().position().uv().build();
 global.UE_VFORMAT_PNUC = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_VFORMAT_PNUTC = new UeVertexFormat().position().normal().uv().tangent().color().build();
-global.UE_VFORMAT_PU = new UeVertexFormat().position().uv().build();
+global.UE_VFORMAT_PNUTCB = new UeVertexFormat().position().normal().uv().tangent().color().bones().build();
 global.UE_MOUSE = new UeMouse();
 
 // Uniform names configuration
@@ -14,7 +15,7 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     sceneData: "u_ueSceneData",
 
     // Material Data (Packed)
-    materialData: "u_ueMaterialData", // [emissiveIntensity, toneMapping, toneMappingExposure, toneMapped]
+    materialData: "u_ueMaterialData", // [toneMapping, toneMappingExposure, toneMapped]
     mapFlags: "u_ueMapFlags",         // [hasMap, hasAlphaMap, hasOrmMap, hasNormalMap]
     mapFlags2: "u_ueMapFlags2",       // [hasEmissiveMap, hasDisplacementMap, 0, 0]
 

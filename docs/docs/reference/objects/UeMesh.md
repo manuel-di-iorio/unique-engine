@@ -4,6 +4,10 @@ sidebar_position: 1
 
 The `UeMesh` class is a renderable object in Unique Engine. It combines a geometry (vertex buffer) with a material and is placed in the scene graph via its transformation.
 
+:::warning
+Animations module is under costruction and do not works yet, so the properties skeleton, bindMode, bindMatrix, bindMatrixInverse do not have any effect.
+:::
+
 ## Constructor
 ```js
 new UeMesh(geometry, material = UeMeshStandardMaterial(), data = {})
@@ -26,6 +30,10 @@ new UeMesh(geometry, material = UeMeshStandardMaterial(), data = {})
 | `geometry`  | `UeGeometry` | **required**               | The geometry (vertex data)            |
 | `material`  | `UeMaterial`       | `UeMeshStandardMaterial()` | The material to use                   |
 | `primitive` | `number`           | `pr_trianglelist`          | GPU primitive mode                    |
+| `skeleton`  | `UeSkeleton`       | `undefined`                | The skeleton associated with this mesh for skinning |
+| `bindMode`  | `string`           | `"attached"`               | Bind mode: `"attached"` or `"skinned"` |
+| `bindMatrix`| `array`            | identity                   | Matrix of the mesh at the time of binding |
+| `bindMatrixInverse` | `array`    | identity                   | Inverse of the bind matrix |
 | `name`      | `string`           | ""                         | Object name (empty string by default) |
 
 ## Methods

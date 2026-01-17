@@ -29,6 +29,7 @@ scenes = [
     { name: "Platform Game", obj: oScenePlatformGame, bg: #66DDDD }, // 12
     { name: "Particles", obj: oSceneParticles, bg: #111111 }, // 13
     { name: "LODs", obj: oSceneLODs, bg: #111111 }, // 14
+    { name: "Animations", obj: oSceneAnimations, bg: #111111 }, // 15
 ];
 
 setScene = function(idx) {
@@ -46,4 +47,4 @@ setScene = function(idx) {
     instance_create_layer(0, 0, "Instances", currentDemo.obj); 
 }
 
-setScene(14);
+setScene(15);

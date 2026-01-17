@@ -6,6 +6,40 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
     self.primitive = data[$ "primitive"] ?? pr_trianglelist;
     self.isSprite = false;
     
+    /** @type {UeSkeleton} The skeleton associated with this mesh for skinning */
+    self.skeleton = data[$ "skeleton"];
+    
+    /**
+     * @type {string} Bind mode: "attached" (whole mesh to one bone) or "skinned" (vertex weights)
+     * Determines how the mesh is bound to the skeleton. "attached" means the entire mesh is
+     * transformed by the bind pose of the single bone it is attached to. "skinned" means each
+     * vertex is weighted to multiple bones, with the mesh's pose determined by a linear blend
+     * of those bones' transforms.
+     */
+    self.bindMode = data[$ "bindMode"] ?? "attached";
+    
+    /**
+     * @type {Array<real>} 4×4 transformation matrix that records the mesh's world pose at the instant
+     * it was bound to a skeleton.  This "bind pose" is used during skinning so that vertex
+     * positions can be transformed from the neutral bind-space into the animated skeleton-space.
+     * When no bindMatrix is supplied, an identity matrix is used, meaning the mesh is already
+     * authored in the coordinate system of its skeleton.
+     */
+    self.bindMatrix = data[$ "bindMatrix"] ?? matrix_build_identity();
+    
+    /**
+     * @type {Array<real>} Inverse of the bind matrix
+     * Used during skinning to transform vertex positions from the animated skeleton-space
+     * back into the neutral bind-space.
+     */
+    self.bindMatrixInverse = data[$ "bindMatrixInverse"] ?? matrix_build_identity();
+    
+    // === Methods ===
+
+    /**
+     * @description Renders the mesh using the current world matrix.
+     * @param {boolean} wireframe - Whether to render the mesh as wireframe.
+     */
     function render(wireframe = false) {
       gml_pragma("forceinline");
       
@@ -25,6 +59,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       }
       
       vertex_submit(geometry.vb, wireframe ? pr_linelist : primitive, tex); 
+      return self;
     }
     
     function toJSON() {
@@ -109,7 +144,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
         if (boundingSphere != undefined) {
             if (ray_intersect_sphere(localRay, boundingSphere) == -1) return self;
         }
-        
+      
         // --- 2. Precise Intersection Test (Triangles) ---
         // If precise raycasting is enabled for Mesh, we test every triangle
         var hitPrecise = false;

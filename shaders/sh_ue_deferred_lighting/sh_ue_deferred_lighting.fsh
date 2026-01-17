@@ -77,11 +77,10 @@ uniform float u_ueSpotShadowFar;
 uniform float u_ueSpotShadowNear;
 uniform vec3  u_ueSpotShadowPos;
 
-uniform vec4  u_ueMaterialData; // [emissiveIntensity, toneMapping, toneMappingExposure, toneMapped]
-#define u_ueEmissiveIntensity   u_ueMaterialData.x
-#define u_ueToneMapping         u_ueMaterialData.y
-#define u_ueToneMappingExposure u_ueMaterialData.z
-#define u_ueToneMapped          u_ueMaterialData.w
+uniform vec3  u_ueMaterialData; // [toneMapping, toneMappingExposure, toneMapped]
+#define u_ueToneMapping         u_ueMaterialData.x
+#define u_ueToneMappingExposure u_ueMaterialData.y
+#define u_ueToneMapped          u_ueMaterialData.z
 
 // ===== Constants =====
 #define PI 3.14159265359

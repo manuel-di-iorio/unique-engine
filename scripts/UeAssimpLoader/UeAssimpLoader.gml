@@ -4,6 +4,9 @@ function UeAssimpLoader(data = {}) constructor {
   importer = ASSIMP_CreateImporter();
   ASSIMP_BindImporter(importer);
 
+  nodeMap = {};
+  boneMap = {};
+
   function load(fname) {
     gml_pragma("forceinline");
     var check = ASSIMP_ReadFile(fname,
@@ -14,35 +17,104 @@ function UeAssimpLoader(data = {}) constructor {
       ASSIMP_PP.GEN_SMOOTH_NORMALS |
       ASSIMP_PP.JOIN_IDENTICAL_VERTICES |
       ASSIMP_PP.IMPROVE_CACHE_LOCALITY |
-      //ASSIMP_PP.LIMIT_BONE_WEIGHTS | // @todo: test
       ASSIMP_PP.TRIANGULATE |
       ASSIMP_PP.GEN_UV_COORDS |
       ASSIMP_PP.SORT_BY_PTYPE |
       ASSIMP_PP.FIND_DEGENERATES |
       ASSIMP_PP.FIND_INVALID_DATA
-
-      // Max quality
-      //ASSIMP_PP.FIND_INSTANCES | // @todo Random vertices count?? To test
-      //ASSIMP_PP.VALIDATE_DATA_STRUCTURE |
-      //ASSIMP_PP.OPTIMIZE_GRAPH | 
-      //ASSIMP_PP.OPTIMIZE_MESHES 
     );
 
-    // Check if the file is correctly loaded
     if (!check) {
       ueError($"{ASSIMP_GetImporterErrorString()}");
     }
 
     ASSIMP_BindScene();
+
+    // 1. Materials & Textures
     var textures = [];
     var textureCache = {};
     var materials = _addMaterials(fname, textures, textureCache);
-    var model = _addMeshes(materials.list);
+
+    // 2. Scene Graph & Node Map
+    nodeMap = {};
+    var model = _buildSceneGraph();
+
+    // 3. Meshes & Bone Data
+    boneMap = {};
+    var meshesResult = _addMeshes(materials.list);
+    var boneData = meshesResult.boneData;
+
+    // 4. Skeleton construction
+    var skeleton = undefined;
+    if (array_length(boneData) > 0) {
+      skeleton = _buildSkeleton(boneData, model);
+      _assignSkeletonToMeshes(meshesResult.meshes, skeleton);
+    }
+
+    // 5. Link meshes to scene graph nodes
+    _linkMeshesToGraph(model, meshesResult.meshes);
+
+    // 6. Calculate total bounds for the model (the root Object3D)
+    model.updateMatrixWorld(true);
+    self._calculateModelBounds(model, meshesResult.meshes);
+
+    // 7. Animations
+    var animations = _addAnimations();
+
     return {
       textures,
       materials: materials.map,
-      model
+      model,
+      skeleton,
+      animations
     };
+  }
+
+  function _assignSkeletonToMeshes(meshes, skeleton) {
+    for (var i = 0, il = array_length(meshes); i < il; i++) {
+      var mesh = meshes[i];
+      if (mesh.bindMode == "skinned") {
+        mesh.skeleton = skeleton;
+      }
+    }
+  }
+
+  function _getMatrix() {
+    gml_pragma("forceinline");
+    return [
+      ASSIMP_GetMatrixA1(), ASSIMP_GetMatrixB1(), ASSIMP_GetMatrixC1(), ASSIMP_GetMatrixD1(),
+      ASSIMP_GetMatrixA2(), ASSIMP_GetMatrixB2(), ASSIMP_GetMatrixC2(), ASSIMP_GetMatrixD2(),
+      ASSIMP_GetMatrixA3(), ASSIMP_GetMatrixB3(), ASSIMP_GetMatrixC3(), ASSIMP_GetMatrixD3(),
+      ASSIMP_GetMatrixA4(), ASSIMP_GetMatrixB4(), ASSIMP_GetMatrixC4(), ASSIMP_GetMatrixD4()
+    ];
+  }
+
+  function _buildSceneGraph(nodeId = -1) {
+    gml_pragma("forceinline");
+    if (nodeId == -1) {
+      ASSIMP_BindSceneNode();
+    } else {
+      ASSIMP_BindNodeChild(nodeId);
+    }
+
+    var name = ASSIMP_GetNodeName();
+    ASSIMP_BindNodeMatrix();
+    var matrix = _getMatrix();
+
+    var object = new UeObject3D();
+    object.name = name;
+    nodeMap[$ name] = object;
+
+    mat4_copy(object.matrix, matrix);
+    mat4_decompose(object.matrix, object.position, object.rotation, object.scale);
+
+    var childCount = ASSIMP_GetNodeChildrenNum();
+    for (var i = 0; i < childCount; i++) {
+      object.add(_buildSceneGraph(i));
+      ASSIMP_BindNodeParent();
+    }
+
+    return object;
   }
 
   function _addMaterials(fname, textures, textureCache) {
@@ -54,7 +126,7 @@ function UeAssimpLoader(data = {}) constructor {
     var materialsCount = ASSIMP_GetMaterialNum();
     var materials = array_create(materialsCount);
     var materialsMap = {};
-    
+
     for (var i = 0; i < materialsCount; i++) {
       ASSIMP_BindMaterial(i);
       var material = new UeMeshStandardMaterial(_addTextures(modelPath, textures, textureCache));
@@ -105,8 +177,6 @@ function UeAssimpLoader(data = {}) constructor {
 
       var txtName = ASSIMP_GetMaterialTextureName(materialType.type, 0);
       if (txtName == "") continue;
-      
-      ASSIMP_MeshHasTangents()
 
       var fileName = filename_name(txtName);
       var txt = undefined;
@@ -151,37 +221,84 @@ function UeAssimpLoader(data = {}) constructor {
 
   function _addMeshes(materials) {
     gml_pragma("forceinline");
-    var model = new UeMesh(new UeGeometry({ canFreeze: false }));
 
     var meshesCount = ASSIMP_GetMeshNum();
     var meshes = array_create(meshesCount);
+    var boneData = [];
+    boneMap = {}; // Reset bone map for this model
 
     for (var i = 0; i < meshesCount; i++) {
       ASSIMP_BindMesh(i);
-      var mesh = _buildMesh();
+      var meshResult = _buildMesh(boneData);
+      var mesh = meshResult.mesh;
       mesh.material = materials[ASSIMP_GetMeshMaterialIndex()];
-      model.add(mesh);
       meshes[i] = mesh;
     }
 
-    // Calculate model's overall bounding box and sphere based on all meshes
-    self._calculateModelBounds(model, meshes);
-
-    return model;
+    return {
+      meshes,
+      boneData
+    };
   }
 
-  function _buildMesh() {
+  function _buildMesh(globalBoneData) {
     gml_pragma("forceinline");
-    var mesh = new UeMesh(new UeGeometry({ canFreeze: false }));
+    var hasBones = ASSIMP_MeshHasBones();
+    var geometry = new UeGeometry({ canFreeze: false });
+
+    // Set up vertex format
+    var vformat = hasBones ? global.UE_VFORMAT_PNUTCB : global.UE_VFORMAT_PNUTC;
+
+    var mesh = new UeMesh(geometry);
     mesh.name = ASSIMP_GetMeshName();
-    var geometry = mesh.geometry;
+    mesh.bindMode = hasBones ? "skinned" : "attached";
+
     var vb = vertex_create_buffer();
     geometry.vb = vb;
-    vertex_begin(vb, geometry.format.vf);
+    vertex_begin(vb, vformat.vf);
 
     var meshFacenum = ASSIMP_GetMeshFacesNum();
     var meshChannelNumColor = ASSIMP_GetMeshColorChannelsNum();
     var meshChannelNumTexcoord = ASSIMP_GetMeshUVChannelsNum();
+    var vertexCount = ASSIMP_GetMeshVerticesNum();
+
+    // Collect bone weights for each vertex if mesh has bones
+    var vertBones = undefined;
+    if (hasBones) {
+      vertBones = array_create(vertexCount);
+      for (var v = 0; v < vertexCount; v++) {
+        vertBones[v] = { indices: [0, 0, 0, 0], weights: [0, 0, 0, 0], count: 0 };
+      }
+
+      var boneCount = ASSIMP_GetMeshBonesNum();
+      for (var b = 0; b < boneCount; b++) {
+        ASSIMP_BindMeshBone(b);
+        var boneName = ASSIMP_GetBoneName();
+
+        // Register bone in global list if not already there (using boneMap for O(1) lookup)
+        var boneIdx = boneMap[$ boneName];
+        if (boneIdx == undefined) {
+          ASSIMP_BindBoneMatrix();
+          var offsetMatrix = _getMatrix();
+          boneIdx = array_length(globalBoneData);
+          boneMap[$ boneName] = boneIdx;
+          array_push(globalBoneData, { name: boneName, offsetMatrix: offsetMatrix });
+        }
+
+        var weightsCount = ASSIMP_GetBoneNumWeights();
+        for (var w = 0; w < weightsCount; w++) {
+          var vIdx = ASSIMP_GetBoneVertexIndex(w);
+          var weight = ASSIMP_GetBoneVertexWeight(w);
+
+          var vbData = vertBones[vIdx];
+          if (vbData.count < 4) {
+            vbData.indices[vbData.count] = boneIdx;
+            vbData.weights[vbData.count] = weight;
+            vbData.count++;
+          }
+        }
+      }
+    }
 
     for (var f = 0; f < meshFacenum; f++) {
       var fn = ASSIMP_GetMeshFaceVerticesNum(f);
@@ -189,100 +306,246 @@ function UeAssimpLoader(data = {}) constructor {
       for (var fi = 0; fi < fn; fi++) {
         var v = ASSIMP_GetMeshFaceVertexIndex(f, fi);
 
-        vertex_position_3d(vb, ASSIMP_GetMeshVertexX(v), ASSIMP_GetMeshVertexY(v), ASSIMP_GetMeshVertexZ(v));
+        var vx = ASSIMP_GetMeshVertexX(v);
+        var vy = ASSIMP_GetMeshVertexY(v);
+        var vz = ASSIMP_GetMeshVertexZ(v);
+        vertex_position_3d(vb, vx, vy, vz);
 
-        vertex_normal(vb, ASSIMP_GetMeshNormalX(v), ASSIMP_GetMeshNormalY(v), ASSIMP_GetMeshNormalZ(v));
-
-        vertex_texcoord(vb,
-          meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordU(v, 0) : 0,
-          meshChannelNumTexcoord > 0 ? ASSIMP_GetMeshTexCoordV(v, 0) : 0
-        );
-
-        // Tangent & Handedness (W)
-        var tx = ASSIMP_GetMeshTangentX(v);
-        var ty = ASSIMP_GetMeshTangentY(v);
-        var tz = ASSIMP_GetMeshTangentZ(v);
-        
         var nx = ASSIMP_GetMeshNormalX(v);
         var ny = ASSIMP_GetMeshNormalY(v);
         var nz = ASSIMP_GetMeshNormalZ(v);
-        
-        var bx = ASSIMP_GetMeshBitangentX(v);
-        var by = ASSIMP_GetMeshBitangentY(v);
-        var bz = ASSIMP_GetMeshBitangentZ(v);
-        
+        vertex_normal(vb, nx, ny, nz);
+
+        var tx = 0, ty = 0, tz = 0;
+        if (meshChannelNumTexcoord > 0) {
+          tx = ASSIMP_GetMeshTexCoordU(v, 0);
+          ty = ASSIMP_GetMeshTexCoordV(v, 0);
+        }
+        vertex_texcoord(vb, tx, ty);
+
+        // Tangent & Handedness (W)
+        var tanX = ASSIMP_GetMeshTangentX(v);
+        var tanY = ASSIMP_GetMeshTangentY(v);
+        var tanZ = ASSIMP_GetMeshTangentZ(v);
+
+        var bitanX = ASSIMP_GetMeshBitangentX(v);
+        var bitanY = ASSIMP_GetMeshBitangentY(v);
+        var bitanZ = ASSIMP_GetMeshBitangentZ(v);
+
         // Handedness: dot(cross(N, T), B) < 0 ? -1 : 1
-        var cx = ny * tz - nz * ty;
-        var cy = nz * tx - nx * tz;
-        var cz = nx * ty - ny * tx;
-        var dot = cx * bx + cy * by + cz * bz;
+        var cx = ny * tanZ - nz * tanY;
+        var cy = nz * tanX - nx * tanZ;
+        var cz = nx * tanY - ny * tanX;
+        var dot = cx * bitanX + cy * bitanY + cz * bitanZ;
         var w = (dot < 0) ? -1.0 : 1.0;
+        vertex_float4(vb, tanX, tanY, tanZ, w);
 
-        vertex_float4(vb, tx, ty, tz, w);
+        if (meshChannelNumColor > 0) {
+          vertex_color(vb,
+            make_color_rgb(ASSIMP_GetMeshVertexColorGM(v, 0), ASSIMP_GetMeshVertexColorGM(v, 1), ASSIMP_GetMeshVertexColorGM(v, 2)),
+            ASSIMP_GetMeshVertexAlpha(v, 0)
+          );
+        } else {
+          vertex_color(vb, c_white, 1.0);
+        }
 
-        vertex_color(vb,
-          meshChannelNumColor > 0 ? make_color_rgb(ASSIMP_GetMeshVertexColorGM(v, 0), ASSIMP_GetMeshVertexColorGM(v, 1), ASSIMP_GetMeshVertexColorGM(v, 2)) : c_white,
-          meshChannelNumColor > 0 ? ASSIMP_GetMeshVertexAlpha(v, 0) : 1);
-        
+        if (hasBones) {
+          var vbData = vertBones[v];
+          vertex_ubyte4(vb, vbData.indices[0], vbData.indices[1], vbData.indices[2], vbData.indices[3]);
+          vertex_float4(vb, vbData.weights[0], vbData.weights[1], vbData.weights[2], vbData.weights[3]);
+        }
       }
     }
+
     vertex_end(vb);
 
     // Store the bounding box
-    var x1 = ASSIMP_GetMeshAABBMinX();
-    var y1 = ASSIMP_GetMeshAABBMinY();
-    var z1 = ASSIMP_GetMeshAABBMinZ();
-    var x2 = ASSIMP_GetMeshAABBMaxX();
-    var y2 = ASSIMP_GetMeshAABBMaxY();
-    var z2 = ASSIMP_GetMeshAABBMaxZ();
+    geometry.boundingBox = box3_create(
+      vec3_create(ASSIMP_GetMeshAABBMinX(), ASSIMP_GetMeshAABBMinY(), ASSIMP_GetMeshAABBMinZ()),
+      vec3_create(ASSIMP_GetMeshAABBMaxX(), ASSIMP_GetMeshAABBMaxY(), ASSIMP_GetMeshAABBMaxZ())
+    );
+    geometry.computeBoundingSphere();
 
-    var minV = vec3_create(x1, y1, z1);
-    var maxV = vec3_create(x2, y2, z2);
+    return { mesh, boneData: globalBoneData };
+  }
 
-    geometry.boundingBox = box3_create(minV, maxV);
+  function _linkMeshesToGraph(root, meshes) {
+    gml_pragma("forceinline");
 
-    var center = vec3_clone(minV); vec3_add(center, maxV); vec3_multiply_scalar(center, 0.5);
-    geometry.boundingSphere = sphere_create(center, vec3_distance_to(center, maxV));
+    // Instead of searching for each node by name, we traverse the Assimp scene 
+    // and use our nodeMap to find the corresponding UeObject3D.
+    ASSIMP_BindSceneNode();
+    _traverseAndLink(meshes);
+  }
 
-    return mesh;
+  function _traverseAndLink(meshes) {
+    var name = ASSIMP_GetNodeName();
+    var node = nodeMap[$ name];
+
+    if (node != undefined) {
+      var meshCount = ASSIMP_GetNodeMeshNum();
+      for (var i = 0; i < meshCount; i++) {
+        var meshIdx = ASSIMP_GetNodeMeshIndex(i);
+        if (meshIdx < array_length(meshes)) {
+          node.add(meshes[meshIdx]);
+        }
+      }
+    }
+
+    var childCount = ASSIMP_GetNodeChildrenNum();
+    for (var i = 0; i < childCount; i++) {
+      ASSIMP_BindNodeChild(i);
+      _traverseAndLink(meshes);
+      ASSIMP_BindNodeParent();
+    }
+  }
+
+  function _buildSkeleton(boneData, root) {
+    gml_pragma("forceinline");
+    var bones = [];
+
+    for (var i = 0, il = array_length(boneData); i < il; i++) {
+      var data = boneData[i];
+      var boneNode = nodeMap[$ data.name]; // Fast lookup using nodeMap
+
+      if (boneNode == undefined) {
+        ueWarning($"Bone node not found in hierarchy: {data.name}");
+        continue;
+      }
+
+      // Convert UeObject3D to UeBone
+      var bone = new UeBone({
+        name: data.name,
+        offsetMatrix: data.offsetMatrix,
+        index: i
+      });
+
+      // Copy transform
+      vec3_copy(bone.position, boneNode.position);
+      quat_copy(bone.rotation, boneNode.rotation);
+      vec3_copy(bone.scale, boneNode.scale);
+      mat4_copy(bone.matrix, boneNode.matrix);
+
+      // Replace node in hierarchy and in nodeMap
+      var parent = boneNode.parent;
+      if (parent != undefined) {
+        parent.remove(boneNode);
+        parent.add(bone);
+      }
+
+      nodeMap[$ data.name] = bone;
+
+      // Move children
+      var children = boneNode.children;
+      for (var j = 0, jl = array_length(children); j < jl; j++) {
+        bone.add(children[j]);
+      }
+
+      bones[i] = bone;
+    }
+
+    return new UeSkeleton(bones);
+  }
+
+  function _addAnimations() {
+    gml_pragma("forceinline");
+    var animCount = ASSIMP_GetAnimationNum();
+    var animations = [];
+
+    for (var i = 0; i < animCount; i++) {
+      ASSIMP_BindAnimation(i);
+      var animName = ASSIMP_GetAnimationName();
+      var duration = ASSIMP_GetAnimationDuration();
+      var tps = ASSIMP_GetAnimationTicksPerSecond();
+
+      if (tps == 0) {
+        ueWarning($"Animation '{animName}' has no TicksPerSecond defined. Using fallback (24).");
+        tps = 24;
+      }
+
+      var anim = new UeAnimation(animName, duration);
+      anim.ticksPerSecond = tps;
+
+      var channelCount = ASSIMP_GetAnimationNodeChannelsNum();
+      for (var c = 0; c < channelCount; c++) {
+        ASSIMP_BindNodeAnimation(c);
+        var nodeName = ASSIMP_GetNodeAnimNodeName();
+        var track = new UeAnimationTrack(nodeName);
+
+        // Position keys
+        var posCount = ASSIMP_GetNodeAnimPositionKeysNum();
+        for (var k = 0; k < posCount; k++) {
+          var time = ASSIMP_GetNodeAnimPositionKeyTime(k);
+          var val = vec3_create(
+            ASSIMP_GetNodeAnimPositionKeyValueX(k),
+            ASSIMP_GetNodeAnimPositionKeyValueY(k),
+            ASSIMP_GetNodeAnimPositionKeyValueZ(k)
+          );
+          array_push(track.positionKeys, [time, val]);
+        }
+
+        // Rotation keys
+        var rotCount = ASSIMP_GetNodeAnimRotationKeysNum();
+        for (var k = 0; k < rotCount; k++) {
+          var time = ASSIMP_GetNodeAnimRotationKeyTime(k);
+          var val = quat_create(
+            ASSIMP_GetNodeAnimRotationKeyQuaternionX(k),
+            ASSIMP_GetNodeAnimRotationKeyQuaternionY(k),
+            ASSIMP_GetNodeAnimRotationKeyQuaternionZ(k),
+            ASSIMP_GetNodeAnimRotationKeyQuaternionW(k)
+          );
+          array_push(track.rotationKeys, [time, val]);
+        }
+
+        // Scale keys
+        var scaleCount = ASSIMP_GetNodeAnimScalingKeysNum();
+        for (var k = 0; k < scaleCount; k++) {
+          var time = ASSIMP_GetNodeAnimScalingKeyTime(k);
+          var val = vec3_create(
+            ASSIMP_GetNodeAnimScalingKeyValueX(k),
+            ASSIMP_GetNodeAnimScalingKeyValueY(k),
+            ASSIMP_GetNodeAnimScalingKeyValueZ(k)
+          );
+          array_push(track.scaleKeys, [time, val]);
+        }
+
+        anim.addTrack(track);
+      }
+
+      animations[i] = anim;
+
+    }
+
+    return animations;
   }
 
   function _calculateModelBounds(model, meshes) {
     gml_pragma("forceinline");
-    if (array_length(meshes) == 0) return;
 
-    // Initialize with first mesh bounds
-    var firstGeometry = meshes[0].geometry;
-    if (firstGeometry.boundingBox == undefined) return;
+    // Ensure the model has bounding properties
+    model.boundingBox = box3_create();
+    model.boundingSphere = sphere_create([0, 0, 0], -1);
 
-    var minX = firstGeometry.boundingBox[BOX3.minX];
-    var minY = firstGeometry.boundingBox[BOX3.minY];
-    var minZ = firstGeometry.boundingBox[BOX3.minZ];
-    var maxX = firstGeometry.boundingBox[BOX3.maxX];
-    var maxY = firstGeometry.boundingBox[BOX3.maxY];
-    var maxZ = firstGeometry.boundingBox[BOX3.maxZ];
+    // Use the math helper to calculate total bounds from the hierarchy
+    box3_set_from_object(model.boundingBox, model);
 
-    // Expand bounds for all other meshes
-    for (var i = 1, il = array_length(meshes); i < il; i++) {
-      var geometry = meshes[i].geometry;
-      if (geometry.boundingBox == undefined) continue;
+    // Calculate bounding sphere from the box
+    var minX = model.boundingBox[BOX3.minX];
+    var minY = model.boundingBox[BOX3.minY];
+    var minZ = model.boundingBox[BOX3.minZ];
+    var maxX = model.boundingBox[BOX3.maxX];
+    var maxY = model.boundingBox[BOX3.maxY];
+    var maxZ = model.boundingBox[BOX3.maxZ];
 
-      minX = min(minX, geometry.boundingBox[BOX3.minX]);
-      minY = min(minY, geometry.boundingBox[BOX3.minY]);
-      minZ = min(minZ, geometry.boundingBox[BOX3.minZ]);
-      maxX = max(maxX, geometry.boundingBox[BOX3.maxX]);
-      maxY = max(maxY, geometry.boundingBox[BOX3.maxY]);
-      maxZ = max(maxZ, geometry.boundingBox[BOX3.maxZ]);
-    }
+    var minV = [minX, minY, minZ];
+    var maxV = [maxX, maxY, maxZ];
 
-    // Set model's overall bounding box
-    var minV = vec3_create(minX, minY, minZ);
-    var maxV = vec3_create(maxX, maxY, maxZ);
+    var center = vec3_clone(minV);
+    vec3_add(center, maxV);
+    vec3_multiply_scalar(center, 0.5);
 
-    firstGeometry.boundingBox = box3_create(minV, maxV);
-
-    var center = vec3_clone(minV); vec3_add(center, maxV); vec3_multiply_scalar(center, 0.5);
-    firstGeometry.boundingSphere = sphere_create(center, vec3_distance_to(center, maxV));
+    // Update the sphere
+    sphere_set(model.boundingSphere, center, vec3_distance_to(center, maxV));
   }
 
   function dispose() {

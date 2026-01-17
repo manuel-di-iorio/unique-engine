@@ -15,10 +15,12 @@ loadedModel = assimpLoader.load("pbr_mech/pbr_mech_practice.glb");
 
 var mesh = loadedModel.model;
 
+mesh.rotateX(90);
 mesh.rotateZ(90);
 mesh.setScale(200, 200, 200);
 
 mesh.traverse(function(submesh) {
+  if (submesh[$ "geometry"] == undefined) return;
   submesh.geometry.freeze();
   submesh.matrixAutoUpdate = false;
   submesh.updateMatrix();  

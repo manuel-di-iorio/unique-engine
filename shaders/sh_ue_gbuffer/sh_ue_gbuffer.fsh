@@ -15,11 +15,11 @@ uniform vec3  u_ueColor;
 uniform float u_ueMetalness;
 uniform float u_ueRoughness;
 uniform vec3  u_ueEmissive;
-uniform vec4  u_ueMaterialData; // [emissiveIntensity, toneMapping, toneMappingExposure, toneMapped]
-#define u_ueEmissiveIntensity   u_ueMaterialData.x
-#define u_ueToneMapping         u_ueMaterialData.y
-#define u_ueToneMappingExposure u_ueMaterialData.z
-#define u_ueToneMapped          u_ueMaterialData.w
+uniform float u_ueEmissiveIntensity;
+uniform vec3  u_ueMaterialData; // [toneMapping, toneMappingExposure, toneMapped]
+#define u_ueToneMapping         u_ueMaterialData.x
+#define u_ueToneMappingExposure u_ueMaterialData.y
+#define u_ueToneMapped          u_ueMaterialData.z
 
 uniform float u_ueAoIntensity;
 uniform float u_ueAoMapIntensity;

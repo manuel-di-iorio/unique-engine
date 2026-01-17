@@ -17,7 +17,9 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     frustumCulled = true;
     castShadow = data[$ "castShadow"] ?? false;
     receiveShadow = data[$ "receiveShadow"] ?? false;
-    //animations = []; // @todo
+    
+    /** @type {Array<UeAnimation>} List of animations associated with this node */
+    animations = [];
         
     // Instances management
     object = undefined;

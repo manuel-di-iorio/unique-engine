@@ -4,6 +4,10 @@ sidebar_position: 0
 
 The base class for all 3D entities in Unique Engine. Inherits from `UeTransform`, and acts as a hierarchical scene graph node.
 
+:::warning
+Animations module is under costruction and do not works yet, so the property "animations" doesn't have any effect.
+:::
+
 ### Constructor
 ```js
 new UeObject3D(data = {})
@@ -44,6 +48,7 @@ new UeObject3D(data = {})
 | `frustumCulled`  | `boolean` | `true`           | If true, only renders this object if within the camera frustum. Geometry needs to have a bounding sphere, otherwise the test will be skipped and the object will always be rendered |
 | `castShadow`     | `boolean` | `false`          | If true, this object will cast shadows when shadow mapping is enabled |
 | `receiveShadow`  | `boolean` | `false`          | If true, this object will receive shadows from shadow-casting lights |
+| `animations`     | `array`   | `[]`             | List of [UeAnimation](../animation/UeAnimation.md) associated with this node |
 | `object`         | `UeObject3D` | `undefined`     | Reference to the original object (if this is an instance). |
 | `instances`      | `UeInstanceList` |        | List of instances created from this object. |
 | `isInstance`     | `boolean`    | `false`         | Flag indicating if this object is an instance of another object. |

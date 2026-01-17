@@ -1,5 +1,5 @@
 renderer = new UeRenderer();
-camera = new UePerspectiveCamera({ x: 100, y: -100, z: 150 }).use();
+camera = new UePerspectiveCamera({ x: 100, y: -100, z: 100 }).use();
 controls = new UeOrbitControls(camera);
 scene = new UeScene();
 

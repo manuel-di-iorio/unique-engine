@@ -56,7 +56,6 @@ function UeMaterial(data = {}) constructor {
     return self;
   }
 
-  emissiveIntensity = data[$ "emissiveIntensity"] ?? 0;
   receiveShadow = data[$ "receiveShadow"] ?? true;
   lights = data[$ "lights"] ?? true;
   shadowQuality = data[$ "shadowQuality"] ?? UE_SHADOW_QUALITY.HIGH;
@@ -91,7 +90,7 @@ function UeMaterial(data = {}) constructor {
 
       // Register standard uniforms for automatic handling in use()
       if (core == "sceneData") array_push(__cache.uniformsStandard, [loc, core, UE_UNIFORM_TYPE.ARRAY]);
-      else if (core == "materialData") array_push(__cache.uniformsStandard, [loc, core, UE_UNIFORM_TYPE.VEC4]);
+      else if (core == "materialData") array_push(__cache.uniformsStandard, [loc, core, UE_UNIFORM_TYPE.VEC3]);
       else if (core == "mapFlags") array_push(__cache.uniformsStandard, [loc, core, UE_UNIFORM_TYPE.VEC4]);
       else if (core == "mapFlags2") array_push(__cache.uniformsStandard, [loc, core, UE_UNIFORM_TYPE.VEC4]);
     }
@@ -143,7 +142,7 @@ function UeMaterial(data = {}) constructor {
         }
       }
     }
-
+    
     return self;
   }
 
@@ -354,7 +353,7 @@ function UeMaterial(data = {}) constructor {
           var tm = (renderer != undefined) ? renderer.toneMapping : global.UE_RENDERER_TONE_MAPPING;
           var _exp = (renderer != undefined) ? renderer.toneMappingExposure : global.UE_RENDERER_TONE_MAPPING_EXPOSURE;
           var tmEnabled = (toneMapped && tm != UE_TONE_MAPPING.NONE) ? 1.0 : 0.0;
-          val = [self.emissiveIntensity, tm, _exp, tmEnabled];
+          val = [tm, _exp, tmEnabled];
           break;
         case "mapFlags":
           val = [__cache.hasMapsFlags.map, __cache.hasMapsFlags.alphaMap, __cache.hasMapsFlags.ormMap, __cache.hasMapsFlags.normalMap];
@@ -367,14 +366,12 @@ function UeMaterial(data = {}) constructor {
       if (val != undefined) {
         if (type == UE_UNIFORM_TYPE.FLOAT) {
           shader_set_uniform_f(loc, val);
+        } else if (type == UE_UNIFORM_TYPE.VEC3) {
+          shader_set_uniform_f(loc, val[0], val[1], val[2]);
         } else if (type == UE_UNIFORM_TYPE.VEC4) {
           shader_set_uniform_f(loc, val[0], val[1], val[2], val[3]);
         } else if (type == UE_UNIFORM_TYPE.ARRAY) {
           shader_set_uniform_f_array(loc, val);
-          // if (!is_array(val)) log(val)
-          // if (is_array(val) && array_length(val) > 0) {
-          //   shader_set_uniform_f_array(loc, val);
-          // }
         }
       }
     }

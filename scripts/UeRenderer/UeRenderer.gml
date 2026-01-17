@@ -121,7 +121,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       var _cx = cameraPos[0], _cy = cameraPos[1], _cz = cameraPos[2];
       var _distSq = (_ox - _cx) * (_ox - _cx) + (_oy - _cy) * (_oy - _cy) + (_oz - _cz) * (_oz - _cz);
       object.__distanceToCameraSq = _distSq;
-      object.__distanceToCamera = sqrt(_distSq);
 
       if (object[$ "isLOD"] && object.autoUpdate) {
         object.update(camera);

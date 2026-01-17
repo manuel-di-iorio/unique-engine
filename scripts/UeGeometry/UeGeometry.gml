@@ -292,6 +292,19 @@ function UeGeometry(data = {}) constructor {
     }
 
     /**
+     * Crea una copia profonda della geometria.
+     * Include la duplicazione di tutti gli attributi dei vertici e del vertex buffer.
+     * @returns {Struct.UeGeometry} Una nuova istanza di UeGeometry.
+     */
+    function clone() {
+        gml_pragma("forceinline");
+        var _clone = variable_clone(self);
+        _clone.uuid = ueUuid();
+        _clone.vb = cloneVb();
+        return _clone;
+    }
+
+    /**
      * Create a clone of the vertex buffer
      */
     function cloneVb() {

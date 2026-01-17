@@ -20,7 +20,7 @@ function UeDeferredGBufferMaterial(data = {}): UeMaterial(data) constructor {
       emissive = [0, 0, 0];
   }
   uniforms.ueEmissive = { type: UE_UNIFORM_TYPE.VEC3, value: emissive };
-  self.emissiveIntensity = data[$ "emissiveIntensity"] ?? 0;
+  uniforms.ueEmissiveIntensity = { type: UE_UNIFORM_TYPE.FLOAT, value: data[$ "emissiveIntensity"] ?? 0 };
 
   // Metalness
   metalness = data[$ "metalness"] ?? 0;
