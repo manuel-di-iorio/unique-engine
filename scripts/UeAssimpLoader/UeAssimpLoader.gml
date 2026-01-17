@@ -437,7 +437,8 @@ function UeAssimpLoader(data = {}) constructor {
 
       // Move children
       var children = boneNode.children;
-      for (var j = 0, jl = array_length(children); j < jl; j++) {
+      for (var j = array_length(children)-1; j >= 0; j--) {
+        log(j, array_length(children))
         bone.add(children[j]);
       }
 
