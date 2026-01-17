@@ -1,4 +1,4 @@
-renderer = new UeRendererDeferred({ sortObjects: false });
+renderer = new UeRenderer({ sortObjects: false });
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 50, y: -100, z: 50 }).use();
 camera.matrixAutoUpdate = false;

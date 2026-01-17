@@ -278,7 +278,7 @@ function UeAssimpLoader(data = {}) constructor {
         // Register bone in global list if not already there (using boneMap for O(1) lookup)
         var boneIdx = boneMap[$ boneName];
         if (boneIdx == undefined) {
-          ASSIMP_BindBoneMatrix();
+          ASSIMP_BindBoneOffsetMatrix();
           var offsetMatrix = _getMatrix();
           boneIdx = array_length(globalBoneData);
           boneMap[$ boneName] = boneIdx;

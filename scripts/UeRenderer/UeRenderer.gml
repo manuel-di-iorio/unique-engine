@@ -23,6 +23,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   toneMappingExposure = data[$ "toneMappingExposure"] ?? 1.0;
 
   self.renderPath = data[$ "renderPath"] ?? UE_RENDER_PATH.FORWARD;
+  self.shadowQuality = data[$ "shadowQuality"] ?? UE_SHADOW_QUALITY.HIGH;
 
   function setSize(width, height) {
     gml_pragma("forceinline");

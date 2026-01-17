@@ -61,6 +61,8 @@
     {"$GMIncludedFile":"","%Name":"11804_Airplane_v2_l2.obj","CopyToMask":-1,"filePath":"datafiles/airplane","name":"11804_Airplane_v2_l2.obj","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"AnimatedTriangle.gltf","CopyToMask":-1,"filePath":"datafiles","name":"AnimatedTriangle.gltf","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"ASSIMP_LICENSE","CopyToMask":-1,"filePath":"datafiles","name":"ASSIMP_LICENSE","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"BrainStem.gltf","CopyToMask":-1,"filePath":"datafiles","name":"BrainStem.gltf","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"BrainStem0.bin","CopyToMask":-1,"filePath":"datafiles","name":"BrainStem0.bin","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"12221_Cat_v1_l3.mtl","CopyToMask":-1,"filePath":"datafiles/cat","name":"12221_Cat_v1_l3.mtl","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"12221_Cat_v1_l3.obj","CopyToMask":-1,"filePath":"datafiles/cat","name":"12221_Cat_v1_l3.obj","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Cat_bump.jpg","CopyToMask":-1,"filePath":"datafiles/cat","name":"Cat_bump.jpg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},

@@ -11,7 +11,7 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
   self.__deferredLightingMaterial = new UeMaterial({
     shader: sh_ue_deferred_lighting,
     uniforms: {
-      ueInvViewProj: { type: UE_UNIFORM_TYPE.MAT4 }
+      ueInvViewProj: { type: UE_UNIFORM_TYPE.MAT4, value: mat4_create() }
     }
   });
 
@@ -194,68 +194,13 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
     // Pass Inverse View-Projection Matrix for position reconstruction
     // World = Vinv * Pinv * Clip
     matrix_multiply(camera.projectionMatrixInverse, camera.matrixWorld, global.UE_MAT4_TEMP0);
-    _lm.uniforms[$ "ueInvViewProj"].value = global.UE_MAT4_TEMP0;
+    _lm.setUniform("ueInvViewProj", global.UE_MAT4_TEMP0);
 
     // Add lighting uniforms for shadow calculation
-    var _dlCount = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT];
-    var _dl = (_dlCount > 0) ? global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL][0] : undefined;
-    if (_dl != undefined && _dl.castShadow) {
-        _lm.setUniform("ueDirShadowMatrix", _dl.shadow.lightSpaceMatrix);
-        _lm.setUniform("ueDirShadowEnabled", 1.0);
-        _lm.setUniform("ueDirShadowQuality", self.shadowQuality);
-        _lm.setUniform("ueDirShadowInvTexelSize", 1.0 / _dl.shadow.map.width);
-    } else {
-        _lm.setUniform("ueDirShadowEnabled", 0.0);
-    }
-    
-    // Point shadows (simplified for now, only 1st shadow light)
-    var _plCount = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT];
-    var _pl = undefined;
-    for (var i = 0; i < _plCount; i++) {
-        if (global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT][i].castShadow) {
-            _pl = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT][i];
-            break;
-        }
-    }
-    if (_pl != undefined) {
-        _lm.setUniform("uePointShadowEnabled", 1.0);
-        _lm.setUniform("uePointShadowFar", _pl.shadow.cameras[0].far);
-        _lm.setUniform("uePointShadowNear", _pl.shadow.cameras[0].near);
-        _lm.setUniform("uePointShadowPos", _pl.position);
-        _lm.setUniform("uePointShadowQuality", self.shadowQuality);
-        _lm.setUniform("uePointShadowInvTexelSize", [1.0 / (_pl.shadow.mapSize.width * 3.0), 1.0 / (_pl.shadow.mapSize.height * 2.0)]);
-        
-        var matrices = array_create(16 * 6);
-        for (var i = 0; i < 6; i++) {
-            var cam = _pl.shadow.cameras[i];
-            matrix_multiply(cam.matrixWorldInverse, cam.projectionMatrix, global.UE_MAT4_TEMP0);
-            for (var m = 0; m < 16; m++) matrices[i * 16 + m] = global.UE_MAT4_TEMP0[m];
-        }
-        _lm.setUniform("uePointShadowMatrix", matrices);
-    } else {
-        _lm.setUniform("uePointShadowEnabled", 0.0);
-    }
-
-    // Spot shadows
-    var _slCount = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT_COUNT];
-    var _sl = undefined;
-    for (var i = 0; i < _slCount; i++) {
-        if (global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT][i].castShadow) {
-            _sl = global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT][i];
-            break;
-        }
-    }
-    if (_sl != undefined) {
-        _lm.setUniform("ueSpotShadowEnabled", 1.0);
-        _lm.setUniform("ueSpotShadowMatrix", _sl.shadow.lightSpaceMatrix);
-        _lm.setUniform("ueSpotShadowFar", _sl.shadow.camera.far);
-        _lm.setUniform("ueSpotShadowNear", _sl.shadow.camera.near);
-        _lm.setUniform("ueSpotShadowPos", _sl.position);
-        _lm.setUniform("ueSpotShadowQuality", self.shadowQuality);
-        _lm.setUniform("ueSpotShadowInvTexelSize", 1.0 / _sl.shadow.mapSize.width);
-    } else {
-        _lm.setUniform("ueSpotShadowEnabled", 0.0);
-    }
+    // These are now mostly handled by UeMaterial.__setLightsUniforms() called in _lm.use()
+    // but we can still override them if needed or let it be.
+    // However, we MUST ensure the lighting material knows about the shadow quality.
+    _lm.shadowQuality = self.shadowQuality;
 
     // Re-build material to update texture bindings
     _lm.build();
