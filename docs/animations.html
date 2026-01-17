@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="generator" content="Docusaurus v3.9.2">
 <title data-rh="true">Animations | Unique Engine</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://manuel-di-iorio.github.io/unique-engine/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://manuel-di-iorio.github.io/unique-engine/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://manuel-di-iorio.github.io/unique-engine/docs/animations"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Animations | Unique Engine"><meta data-rh="true" name="description" content="Animations module is under costruction and do not works yet."><meta data-rh="true" property="og:description" content="Animations module is under costruction and do not works yet."><link data-rh="true" rel="icon" href="/unique-engine/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://manuel-di-iorio.github.io/unique-engine/docs/animations"><link data-rh="true" rel="alternate" href="https://manuel-di-iorio.github.io/unique-engine/docs/animations" hreflang="en"><link data-rh="true" rel="alternate" href="https://manuel-di-iorio.github.io/unique-engine/docs/animations" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Animations","item":"https://manuel-di-iorio.github.io/unique-engine/docs/animations"}]}</script><link rel="stylesheet" href="/unique-engine/assets/css/styles.40c4e00c.css">
-<script src="/unique-engine/assets/js/runtime~main.fda8efe1.js" defer="defer"></script>
+<script src="/unique-engine/assets/js/runtime~main.16254c51.js" defer="defer"></script>
 <script src="/unique-engine/assets/js/main.2c79ac16.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -33,9 +33,9 @@
 <h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="ueanimationtrack">UeAnimationTrack<a href="#ueanimationtrack" class="hash-link" aria-label="Direct link to UeAnimationTrack" title="Direct link to UeAnimationTrack" translate="no">​</a></h3>
 <p>A track consists of three keyframe arrays:</p>
 <ul>
-<li class=""><code>positionKeys</code>: <code>{ time, value: Vector3 }</code></li>
-<li class=""><code>rotationKeys</code>: <code>{ time, value: Quaternion }</code></li>
-<li class=""><code>scaleKeys</code>: <code>{ time, value: Vector3 }</code></li>
+<li class=""><code>positionKeys</code>: <code>[ time, value: Vector3 ]</code></li>
+<li class=""><code>rotationKeys</code>: <code>[ time, value: Quaternion ]</code></li>
+<li class=""><code>scaleKeys</code>: <code>[ time, value: Vector3 ]</code></li>
 </ul>
 <p>Interpolation occurs automatically between the nearest keyframes during the <code>evaluate()</code> call.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="skinning-and-matrices">Skinning and Matrices<a href="#skinning-and-matrices" class="hash-link" aria-label="Direct link to Skinning and Matrices" title="Direct link to Skinning and Matrices" translate="no">​</a></h2>
