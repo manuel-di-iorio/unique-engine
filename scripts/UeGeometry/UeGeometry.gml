@@ -12,7 +12,11 @@ function UeGeometry(data = {}) constructor {
     color     = data[$ "color"]     ?? undefined;
     index     = data[$ "index"]     ?? undefined;
     
-    format = data[$ "format"] ?? global.UE_VFORMAT_PNUTC;
+    // Bone data (for skinning fallback)
+    bone_indices = data[$ "bone_indices"] ?? undefined;
+    bone_weights = data[$ "bone_weights"] ?? undefined;
+    
+    format = data[$ "format"] ?? global.UE_VFORMAT_PNUTCB;
     vb = undefined;
     canFreeze = data[$ "canFreeze"] ?? true;
 

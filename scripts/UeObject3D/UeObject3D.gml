@@ -20,6 +20,10 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     
     /** @type {Array<UeAnimation>} List of animations associated with this node */
     animations = [];
+
+    /** @type {UeSkeleton} The skeleton associated with this object for skinning (
+     * @note This is not actually used in Object3D, only in Meshes) */
+    skeleton = undefined;
         
     // Instances management
     object = undefined;

@@ -73,7 +73,7 @@ function UeMaterial(data = {}) constructor {
       "pointShadowEnabled", "pointShadowFar", "pointShadowNear", "pointShadowPos", "pointShadowTexelSize", "pointShadowQuality", "pointShadowMatrix",
       "spotShadowEnabled", "spotShadowMatrix", "spotShadowFar", "spotShadowNear", "spotShadowPos", "spotShadowTexelSize", "spotShadowQuality",
       "pointLightsData", "spotLightsData", "hemiLightDir", "hemiLightSkyColor", "hemiLightGroundColor", "hemiLightIntensity",
-      "sceneData", "materialData", "mapFlags", "mapFlags2"
+      "sceneData", "materialData", "mapFlags", "mapFlags2", "boneMatrices", "numBones"
     ];
     var _sCoreNames = ["dirShadowMap", "pointShadowMap", "spotShadowMap"];
 
@@ -471,6 +471,23 @@ function UeMaterial(data = {}) constructor {
     var _cacheUniformReceiveShadowLoc = __cache[$ "uniformReceiveShadowLoc"];
     if (_cacheUniformReceiveShadowLoc != undefined && _cacheUniformReceiveShadowLoc != -1) {
       shader_set_uniform_f(_cacheUniformReceiveShadowLoc, mesh.receiveShadow ? 1.0 : 0.0);
+    }
+
+    // Set bone matrices for skinning
+    if (mesh.skeleton != undefined) {
+      var _cacheUniformBoneMatricesLoc = __cache[$ "uniformBoneMatricesLoc"];
+      if (_cacheUniformBoneMatricesLoc != undefined && _cacheUniformBoneMatricesLoc != -1) {
+        shader_set_uniform_f_array(_cacheUniformBoneMatricesLoc, mesh.skeleton.boneMatrices);
+      }
+      var _cacheUniformNumBonesLoc = __cache[$ "uniformNumBonesLoc"];
+      if (_cacheUniformNumBonesLoc != undefined && _cacheUniformNumBonesLoc != -1) {
+        shader_set_uniform_f(_cacheUniformNumBonesLoc, array_length(mesh.skeleton.bones));
+      }
+    } else {
+      var _cacheUniformNumBonesLoc = __cache[$ "uniformNumBonesLoc"];
+      if (_cacheUniformNumBonesLoc != undefined && _cacheUniformNumBonesLoc != -1) {
+        shader_set_uniform_f(_cacheUniformNumBonesLoc, 0.0);
+      }
     }
 
     // Set the culling mode (can be overwritten by argument for transparent objects)

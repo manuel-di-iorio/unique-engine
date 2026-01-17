@@ -77,6 +77,11 @@ function UeTorusGeometry(radius = 40, tubeRadius = 10, data = {}): UeGeometry(da
     self.uv = _uvs;
     self.color = _col;
 
+    // Bone data (empty for static geometry)
+    var vcount = array_length(_pos) / 3;
+    self.bone_indices = array_create(vcount * 4, 0);
+    self.bone_weights = array_create(vcount * 4, 0);
+
     build();
     
     /// @desc Calculate vertex position on torus surface

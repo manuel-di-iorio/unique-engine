@@ -12,7 +12,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
     /// Local position vector
     position = data[$ "position"] ?? vec3_create(data[$ "x"] ?? 0, data[$ "y"] ?? 0, data[$ "z"] ?? 0);
     rotation = data[$ "rotation"] ?? quat_create(data[$ "rx"] ?? 0, data[$ "ry"] ?? 0, data[$ "rz"] ?? 0);
-    scale    = data[$ "scale"]    ?? vec3_create(data[$ "sx"] ?? 1, data[$ "sy"] ?? 1, data[$ "sz"] ?? 1);
+    scale = data[$ "scale"]    ?? vec3_create(data[$ "sx"] ?? 1, data[$ "sy"] ?? 1, data[$ "sz"] ?? 1);
 
     /// Local up direction (used for lookAt and world direction)
     up = data[$ "up"] ?? global.UE_DEFAULT_UP;
@@ -58,7 +58,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         gml_pragma("forceinline");
 
         mat4_compose(matrix, position, rotation, scale);
-        
+
         matrixWorldNeedsUpdate = true;
 
         return self;
@@ -100,6 +100,11 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
             }
         }
 
+        // Update skeleton if present
+        if (self.skeleton != undefined) {
+            self.skeleton.update();
+        }
+
         // Propagate update to children
         for (var i = 0, len = array_length(children); i < len; i++) {
             children[i].updateMatrixWorld(force);
@@ -123,7 +128,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
             if (parent == undefined) {
                 mat4_copy(matrixWorld, matrix);
             } else {
-                matrix_multiply(matrix, parent.matrixWorld, matrixWorld); 
+                matrix_multiply(matrix, parent.matrixWorld, matrixWorld);
             }
 
             // Update cached world-space bounding sphere if geometry exists

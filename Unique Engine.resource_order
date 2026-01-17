@@ -24,6 +24,7 @@
     {"name":"Post Processing","order":10,"path":"folders/Packages/Unique Engine/Shaders/Post Processing.yy",},
     {"name":"Shadows","order":9,"path":"folders/Packages/Unique Engine/Shaders/Shadows.yy",},
     {"name":"Utils","order":13,"path":"folders/Packages/Unique Engine/Utils.yy",},
+    {"name":"Unique Math","order":1,"path":"folders/Packages/Unique Math.yy",},
     {"name":"Unique Particles","order":3,"path":"folders/Packages/Unique Particles.yy",},
     {"name":"Internal","order":4,"path":"folders/Packages/Unique Particles/Internal.yy",},
     {"name":"Unique UI","order":2,"path":"folders/Packages/Unique UI.yy",},
@@ -37,7 +38,6 @@
     {"name":"Treeview","order":6,"path":"folders/Scene Editor/Scripts/Treeview.yy",},
     {"name":"UI","order":3,"path":"folders/Scene Editor/UI.yy",},
     {"name":"Fonts","order":2,"path":"folders/Scene Editor/UI/Fonts.yy",},
-    {"name":"Unique Math","order":1,"path":"folders/Packages/Unique Math.yy",},
   ],
   "ResourceOrderSettings":[
     {"name":"assimp_extension","order":4,"path":"extensions/assimp_extension/assimp_extension.yy",},
@@ -164,6 +164,7 @@
     {"name":"UeShaderPass","order":2,"path":"scripts/UeShaderPass/UeShaderPass.yy",},
     {"name":"UeShadowMapViewer","order":2,"path":"scripts/UeShadowMapViewer/UeShadowMapViewer.yy",},
     {"name":"UeSkeleton","order":2,"path":"scripts/UeSkeleton/UeSkeleton.yy",},
+    {"name":"UeSkeletonHelper","order":9,"path":"scripts/UeSkeletonHelper/UeSkeletonHelper.yy",},
     {"name":"UeSphereGeometry","order":3,"path":"scripts/UeSphereGeometry/UeSphereGeometry.yy",},
     {"name":"UeSpotLight","order":4,"path":"scripts/UeSpotLight/UeSpotLight.yy",},
     {"name":"UeSpotLightHelper","order":7,"path":"scripts/UeSpotLightHelper/UeSpotLightHelper.yy",},

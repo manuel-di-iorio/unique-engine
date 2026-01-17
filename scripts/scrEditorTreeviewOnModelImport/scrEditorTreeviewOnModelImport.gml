@@ -12,7 +12,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
     // Add the related model resources to the project and treeview
     var textures = modelContainer.textures;
     var materials = modelContainer.materials;
-    var model = modelContainer.model;
+    var model = modelContainer.root;
     
     // Extract model name from file path or use progressive ID
     var fileName = filename_name(path);
@@ -129,7 +129,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
         node.__matrixAutoUpdate = false; // Internal field for export (false = static mesh)
 
         // Clone the geometry buffer (for export) and freeze the original one for rendering performance reasons
-        if (node.geometry[$ "vb"] != undefined) {
+        if (node[$ "geometry"] != undefined && node.geometry[$ "vb"] != undefined) {
           node.geometry.__vbClone = node.geometry.cloneVb();
           node.geometry.freeze();
         }

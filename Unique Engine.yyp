@@ -37,6 +37,7 @@
     {"$GMFolder":"","%Name":"Post Processing","folderPath":"folders/Packages/Unique Engine/Shaders/Post Processing.yy","name":"Post Processing","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Shadows","folderPath":"folders/Packages/Unique Engine/Shaders/Shadows.yy","name":"Shadows","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Utils","folderPath":"folders/Packages/Unique Engine/Utils.yy","name":"Utils","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"Unique Math","folderPath":"folders/Packages/Unique Math.yy","name":"Unique Math","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Unique Particles","folderPath":"folders/Packages/Unique Particles.yy","name":"Unique Particles","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Internal","folderPath":"folders/Packages/Unique Particles/Internal.yy","name":"Internal","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Unique UI","folderPath":"folders/Packages/Unique UI.yy","name":"Unique UI","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -52,7 +53,6 @@
     {"$GMFolder":"","%Name":"UI","folderPath":"folders/Scene Editor/UI.yy","name":"UI","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Fonts","folderPath":"folders/Scene Editor/UI/Fonts.yy","name":"Fonts","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Icons","folderPath":"folders/Scene Editor/UI/Icons.yy","name":"Icons","resourceType":"GMFolder","resourceVersion":"2.0",},
-    {"$GMFolder":"","%Name":"Unique Math","folderPath":"folders/Packages/Unique Math.yy","name":"Unique Math","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
@@ -340,6 +340,7 @@
     {"id":{"name":"UeShadowMap","path":"scripts/UeShadowMap/UeShadowMap.yy",},},
     {"id":{"name":"UeShadowMapViewer","path":"scripts/UeShadowMapViewer/UeShadowMapViewer.yy",},},
     {"id":{"name":"UeSkeleton","path":"scripts/UeSkeleton/UeSkeleton.yy",},},
+    {"id":{"name":"UeSkeletonHelper","path":"scripts/UeSkeletonHelper/UeSkeletonHelper.yy",},},
     {"id":{"name":"UeSphereGeometry","path":"scripts/UeSphereGeometry/UeSphereGeometry.yy",},},
     {"id":{"name":"UeSpotLight","path":"scripts/UeSpotLight/UeSpotLight.yy",},},
     {"id":{"name":"UeSpotLightHelper","path":"scripts/UeSpotLightHelper/UeSpotLightHelper.yy",},},

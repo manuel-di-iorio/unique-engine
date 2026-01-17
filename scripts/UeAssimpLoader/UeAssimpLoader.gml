@@ -37,7 +37,7 @@ function UeAssimpLoader(data = {}) constructor {
 
     // 2. Scene Graph & Node Map
     nodeMap = {};
-    var model = _buildSceneGraph();
+    var root = _buildSceneGraph();
 
     // 3. Meshes & Bone Data
     boneMap = {};
@@ -47,16 +47,16 @@ function UeAssimpLoader(data = {}) constructor {
     // 4. Skeleton construction
     var skeleton = undefined;
     if (array_length(boneData) > 0) {
-      skeleton = _buildSkeleton(boneData, model);
+      skeleton = _buildSkeleton(boneData, root);
       _assignSkeletonToMeshes(meshesResult.meshes, skeleton);
     }
 
     // 5. Link meshes to scene graph nodes
-    _linkMeshesToGraph(model, meshesResult.meshes);
+    _linkMeshesToGraph(root, meshesResult.meshes);
 
     // 6. Calculate total bounds for the model (the root Object3D)
-    model.updateMatrixWorld(true);
-    self._calculateModelBounds(model, meshesResult.meshes);
+    root.updateMatrixWorld(true);
+    self._calculateModelBounds(root, meshesResult.meshes);
 
     // 7. Animations
     var animations = _addAnimations();
@@ -64,9 +64,9 @@ function UeAssimpLoader(data = {}) constructor {
     return {
       textures,
       materials: materials.map,
-      model,
+      root,
       skeleton,
-      animations
+      animations: animations.map
     };
   }
 
@@ -247,15 +247,13 @@ function UeAssimpLoader(data = {}) constructor {
     var geometry = new UeGeometry({ canFreeze: false });
 
     // Set up vertex format
-    var vformat = hasBones ? global.UE_VFORMAT_PNUTCB : global.UE_VFORMAT_PNUTC;
-
     var mesh = new UeMesh(geometry);
     mesh.name = ASSIMP_GetMeshName();
     mesh.bindMode = hasBones ? "skinned" : "attached";
 
     var vb = vertex_create_buffer();
     geometry.vb = vb;
-    vertex_begin(vb, vformat.vf);
+    vertex_begin(vb, global.UE_VFORMAT_PNUTCB.vf);
 
     var meshFacenum = ASSIMP_GetMeshFacesNum();
     var meshChannelNumColor = ASSIMP_GetMeshColorChannelsNum();
@@ -353,6 +351,9 @@ function UeAssimpLoader(data = {}) constructor {
           var vbData = vertBones[v];
           vertex_ubyte4(vb, vbData.indices[0], vbData.indices[1], vbData.indices[2], vbData.indices[3]);
           vertex_float4(vb, vbData.weights[0], vbData.weights[1], vbData.weights[2], vbData.weights[3]);
+        } else {
+          vertex_ubyte4(vb, 0, 0, 0, 0);
+          vertex_float4(vb, 0, 0, 0, 0);
         }
       }
     }
@@ -437,8 +438,8 @@ function UeAssimpLoader(data = {}) constructor {
 
       // Move children
       var children = boneNode.children;
-      for (var j = array_length(children)-1; j >= 0; j--) {
-        log(j, array_length(children))
+      var jl = array_length(children) - 1;
+      for (var j = jl; j >= 0; j--) {
         bone.add(children[j]);
       }
 
@@ -452,20 +453,16 @@ function UeAssimpLoader(data = {}) constructor {
     gml_pragma("forceinline");
     var animCount = ASSIMP_GetAnimationNum();
     var animations = [];
+    var animationsMap = {};
 
     for (var i = 0; i < animCount; i++) {
       ASSIMP_BindAnimation(i);
       var animName = ASSIMP_GetAnimationName();
+      if (animName == "") animName = $"Animation{i}";
       var duration = ASSIMP_GetAnimationDuration();
-      var tps = ASSIMP_GetAnimationTicksPerSecond();
+      var tps = ASSIMP_GetAnimationTicksPerSecond() ?? 24;
 
-      if (tps == 0) {
-        ueWarning($"Animation '{animName}' has no TicksPerSecond defined. Using fallback (24).");
-        tps = 24;
-      }
-
-      var anim = new UeAnimation(animName, duration);
-      anim.ticksPerSecond = tps;
+      var anim = new UeAnimation(animName, duration, tps);
 
       var channelCount = ASSIMP_GetAnimationNodeChannelsNum();
       for (var c = 0; c < channelCount; c++) {
@@ -514,10 +511,13 @@ function UeAssimpLoader(data = {}) constructor {
       }
 
       animations[i] = anim;
-
+      animationsMap[$ animName] = anim;
     }
 
-    return animations;
+    return {
+      list: animations,
+      map: animationsMap
+    };
   }
 
   function _calculateModelBounds(model, meshes) {

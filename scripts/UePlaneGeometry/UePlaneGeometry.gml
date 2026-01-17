@@ -49,5 +49,10 @@ function UePlaneGeometry(width = 1, height = 1, data = {}): UeGeometry(data) con
         color, alpha
     ];
     
+    // Bone data (empty for static geometry)
+    var vcount = array_length(self.position) / 3;
+    self.bone_indices = array_create(vcount * 4, 0);
+    self.bone_weights = array_create(vcount * 4, 0);
+    
     build();
 }

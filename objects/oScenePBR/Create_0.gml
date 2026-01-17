@@ -13,7 +13,7 @@ sunLightAngle = 0;
 assimpLoader = new UeAssimpLoader();
 loadedModel = assimpLoader.load("pbr_mech/pbr_mech_practice.glb");
 
-var mesh = loadedModel.model;
+var mesh = loadedModel.root;
 
 mesh.rotateX(90);
 mesh.rotateZ(90);

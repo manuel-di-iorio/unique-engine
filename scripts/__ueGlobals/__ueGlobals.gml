@@ -53,6 +53,10 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     spotShadowTexelSize: "u_ueSpotShadowInvTexelSize",
     spotShadowMap: "s_spotShadowMap",
 
+    // Bone Matrices (Skinning)
+    boneMatrices: "u_ueBoneMatrices",
+    numBones: "u_ueNumBones",
+
     // Hemisphere Light
     hemiLightDir: "u_ueHemiLightDirection",
     hemiLightSkyColor: "u_ueHemiLightSkyColor",

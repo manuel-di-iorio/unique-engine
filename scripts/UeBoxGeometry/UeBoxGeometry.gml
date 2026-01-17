@@ -80,5 +80,10 @@ function UeBoxGeometry(width = 1, height = 1, depth = 1, data = {}): UeGeometry(
     self.color = _colorArray;
     self.tangent = _tangent;
     
+    // Bone data (empty for static geometry)
+    var vcount = array_length(_position) / 3;
+    self.bone_indices = array_create(vcount * 4, 0);
+    self.bone_weights = array_create(vcount * 4, 0);
+    
     build();
 }

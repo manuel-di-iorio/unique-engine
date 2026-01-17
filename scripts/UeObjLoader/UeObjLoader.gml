@@ -161,8 +161,10 @@ function UeObjLoader() constructor {
                 vertex_position_3d(vb, v.x, v.y, v.z);
                 vertex_normal(vb, v.nx, v.ny, v.nz);
                 vertex_texcoord(vb, v.u, v.v);
-                vertex_float4(vb, 1, 0, 0, 1);
+                vertex_float4(vb, 1, 0, 0, 1); // Tangent
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
             }
         } else if (count == 4) {
             // Quad - triangola in 2 triangoli
@@ -174,6 +176,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 v = faceVertices[3];
                 vertex_position_3d(vb, v.x, v.y, v.z);
@@ -181,6 +185,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 v = faceVertices[1];
                 vertex_position_3d(vb, v.x, v.y, v.z);
@@ -188,6 +194,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 // Secondo triangolo: 1,3,2
                 v = faceVertices[1];
@@ -196,6 +204,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 v = faceVertices[3];
                 vertex_position_3d(vb, v.x, v.y, v.z);
@@ -203,6 +213,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 v = faceVertices[2];
                 vertex_position_3d(vb, v.x, v.y, v.z);
@@ -210,6 +222,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
             } else {
                 // Primo triangolo: 0,1,3
                 var v = faceVertices[0];
@@ -218,6 +232,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 v = faceVertices[1];
                 vertex_position_3d(vb, v.x, v.y, v.z);
@@ -225,6 +241,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 v = faceVertices[3];
                 vertex_position_3d(vb, v.x, v.y, v.z);
@@ -232,6 +250,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 // Secondo triangolo: 1,2,3
                 v = faceVertices[1];
@@ -240,6 +260,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 v = faceVertices[2];
                 vertex_position_3d(vb, v.x, v.y, v.z);
@@ -247,6 +269,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 
                 v = faceVertices[3];
                 vertex_position_3d(vb, v.x, v.y, v.z);
@@ -254,6 +278,8 @@ function UeObjLoader() constructor {
                 vertex_texcoord(vb, v.u, v.v);
                 vertex_float4(vb, 1, 0, 0, 1);
                 vertex_color(vb, v.color, 1.0);
+                vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
             }
         } else {
             // N-gon (fan triangulation)
@@ -267,6 +293,8 @@ function UeObjLoader() constructor {
                     vertex_texcoord(vb, v.u, v.v);
                     vertex_float4(vb, 1, 0, 0, 1);
                     vertex_color(vb, v.color, 1.0);
+                    vertex_ubyte4(vb, 0, 0, 0, 0); // Bone Indices
+                    vertex_float4(vb, 0, 0, 0, 0); // Bone Weights
                 }
             }
         }

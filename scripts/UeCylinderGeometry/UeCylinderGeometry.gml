@@ -98,5 +98,11 @@ function UeCylinderGeometry(radius = 1, height = 1, radialSegments = 32, data = 
     self.tangent = tang;
     self.uv = uvs;
     self.color = cols;
+
+    // Bone data (empty for static geometry)
+    var vcount = array_length(pos) / 3;
+    self.bone_indices = array_create(vcount * 4, 0);
+    self.bone_weights = array_create(vcount * 4, 0);
+    
     build();
 }

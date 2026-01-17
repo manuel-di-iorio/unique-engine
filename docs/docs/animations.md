@@ -35,7 +35,7 @@ To play an animation on an imported model in GameMaker:
 model = loader.load("character.fbx");
 
 // Get the desired animation
-anim = model.animations[0];
+anim = model.animations[$ "Animation0"];
 currentTime = 0;
 
 // --- Step Event ---
