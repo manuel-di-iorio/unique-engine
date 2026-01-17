@@ -204,6 +204,18 @@ function box3_expand_by_vector(b, v) {
     return b;
 }
 
+/// @func box3_get_surface_area(b)
+/// @desc Calculates the surface area of the box.
+/// @param {Array<Real>} b The box
+/// @returns {Real} The surface area
+function box3_get_surface_area(b) {
+    gml_pragma("forceinline");
+    var dx = b[3] - b[0];
+    var dy = b[4] - b[1];
+    var dz = b[5] - b[2];
+    return 2 * (dx * dy + dy * dz + dz * dx);
+}
+
 /// @func box3_is_empty(b)
 /// @desc Checks if the box is empty (min > max).
 /// @param {Array<Real>} b The box

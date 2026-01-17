@@ -1,7 +1,7 @@
-global.UE_MATH_VERSION = "4.0.1";
+global.UE_MATH_VERSION = "4.1.0";
 #macro UE_EPSILON 0.00001
 
-/* Changelog
- * - Fixed quat_set_from_rotation_matrix()
- * - Fixed Octree .yy/.yyp files
+/** Changelog
+ * - Added modules: DualQuaternion, BVH, Dynamic AABB Tree.
+ * - Box3: added box3_get_surface_area()
  */

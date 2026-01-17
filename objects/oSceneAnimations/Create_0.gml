@@ -17,5 +17,8 @@ scene.add(terrainMesh);
 assimpLoader = new UeAssimpLoader();
 animatedTriangle = assimpLoader.load("AnimatedTriangle.gltf");
 
+anim0 = animatedTriangle.animations[0]
+currentTime = 0;
+
 scene.add(animatedTriangle.model);
 
