@@ -56,11 +56,8 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
     /// Recomputes the local matrix from position, rotation, and scale
     function updateMatrix() {
         gml_pragma("forceinline");
-
         mat4_compose(matrix, position, rotation, scale);
-
         matrixWorldNeedsUpdate = true;
-
         return self;
     }
 

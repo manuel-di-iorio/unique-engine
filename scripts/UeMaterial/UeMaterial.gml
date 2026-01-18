@@ -474,14 +474,17 @@ function UeMaterial(data = {}) constructor {
     }
 
     // Set bone matrices for skinning
-    if (mesh.skeleton != undefined) {
+    if (mesh.skeleton != undefined && mesh.bindMode == "skinned") {
       var _cacheUniformBoneMatricesLoc = __cache[$ "uniformBoneMatricesLoc"];
-      if (_cacheUniformBoneMatricesLoc != undefined && _cacheUniformBoneMatricesLoc != -1) {
-        shader_set_uniform_f_array(_cacheUniformBoneMatricesLoc, mesh.skeleton.boneMatrices);
-      }
       var _cacheUniformNumBonesLoc = __cache[$ "uniformNumBonesLoc"];
+      
+      if (_cacheUniformBoneMatricesLoc != undefined && _cacheUniformBoneMatricesLoc != -1) {
+        shader_set_uniform_matrix_array(_cacheUniformBoneMatricesLoc, mesh.skeleton.boneMatrices);
+      }
+
       if (_cacheUniformNumBonesLoc != undefined && _cacheUniformNumBonesLoc != -1) {
-        shader_set_uniform_f(_cacheUniformNumBonesLoc, array_length(mesh.skeleton.bones));
+        var _numBones = array_length(mesh.skeleton.bones);
+        shader_set_uniform_f(_cacheUniformNumBonesLoc, _numBones);
       }
     } else {
       var _cacheUniformNumBonesLoc = __cache[$ "uniformNumBonesLoc"];

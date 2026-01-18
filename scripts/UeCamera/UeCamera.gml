@@ -50,7 +50,6 @@ function UeCamera(data = {}): UeObject3D(data) constructor {
      */
     function updateProjectionMatrix() {
         // Abstract method - to be implemented by subclasses
-        show_debug_message("UeCamera.updateProjectionMatrix() is not implemented in the derived class.", true);
     }
     
     /**

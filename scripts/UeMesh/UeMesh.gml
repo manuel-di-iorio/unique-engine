@@ -44,7 +44,13 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       gml_pragma("forceinline");
       
       // Set the world matrix
-      matrix_set(matrix_world, matrixWorld);
+      // If we are using skeletal animation, the bone matrices already include the world transform.
+      // We set matrix_world to identity to avoid double-transforming.
+      if (self.skeleton != undefined && self.bindMode == "skinned") {
+          matrix_set(matrix_world, global.UE_MAT4_IDENTITY);
+      } else {
+          matrix_set(matrix_world, matrixWorld);
+      }
 
       // Submit the vertex buffer
       var tex = -1;

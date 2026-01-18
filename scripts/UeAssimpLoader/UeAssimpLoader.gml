@@ -17,15 +17,15 @@ function UeAssimpLoader(data = {}) constructor {
       ASSIMP_PP.GEN_SMOOTH_NORMALS |
       ASSIMP_PP.JOIN_IDENTICAL_VERTICES |
       ASSIMP_PP.IMPROVE_CACHE_LOCALITY |
-      ASSIMP_PP.LIMIT_BONE_WEIGHTS |
-      ASSIMP_PP.DEBONE |
       ASSIMP_PP.TRIANGULATE |
       ASSIMP_PP.GEN_UV_COORDS |
       ASSIMP_PP.SORT_BY_PTYPE |
-      ASSIMP_PP.FIND_DEGENERATES |
-      ASSIMP_PP.FIND_INVALID_DATA |
       ASSIMP_PP.LIMIT_BONE_WEIGHTS |
-      ASSIMP_PP.DEBONE
+      ASSIMP_PP.REMOVE_REDUNDANT_MATERIALS |
+      ASSIMP_PP.FIX_INFACING_NORMALS |
+      ASSIMP_PP.POPULATE_ARMATURE_DATA |
+      ASSIMP_PP.REMOVE_COMPONENT |
+      ASSIMP_PP.GLOBAL_SCALE
     );
 
     if (!check) {
@@ -254,7 +254,7 @@ function UeAssimpLoader(data = {}) constructor {
     var mesh = new UeMesh(geometry);
     mesh.name = ASSIMP_GetMeshName();
     mesh.bindMode = hasBones ? "skinned" : "attached";
-
+    
     var vb = vertex_create_buffer();
     geometry.vb = vb;
     vertex_begin(vb, global.UE_VFORMAT_PNUTCB.vf);
@@ -284,7 +284,7 @@ function UeAssimpLoader(data = {}) constructor {
           var offsetMatrix = _getMatrix();
           boneIdx = array_length(globalBoneData);
           boneMap[$ boneName] = boneIdx;
-          array_push(globalBoneData, { name: boneName, offsetMatrix: offsetMatrix });
+          array_push(globalBoneData, { name: boneName, offsetMatrix });
         }
 
         var weightsCount = ASSIMP_GetBoneNumWeights();

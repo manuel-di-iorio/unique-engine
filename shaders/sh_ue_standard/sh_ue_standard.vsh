@@ -19,7 +19,7 @@ uniform mat4 u_ueSpotShadowMatrix;
 
 // Uniforms
 uniform float u_ueNumBones;
-uniform mat4 u_ueBoneMatrices[96];
+uniform mat4 u_ueBoneMatrices[64];
 
 // Displacement
 uniform sampler2D s_displacementMap;
@@ -34,18 +34,29 @@ void main() {
 
     // Skinning
     if (u_ueNumBones > 0.5) {
-        ivec4 indices = ivec4(in_TextureCoord2 * 255.1);
+        ivec4 indices = ivec4(in_TextureCoord2 * 255.0 + 0.5);
         vec4 weights = in_TextureCoord3;
         
-        mat4 skinMatrix = 
-            u_ueBoneMatrices[indices.x] * weights.x +
-            u_ueBoneMatrices[indices.y] * weights.y +
-            u_ueBoneMatrices[indices.z] * weights.z +
-            u_ueBoneMatrices[indices.w] * weights.w;
-            
-        pos = (skinMatrix * vec4(pos, 1.0)).xyz;
-        normal = (skinMatrix * vec4(normal, 0.0)).xyz;
-        tangent = (skinMatrix * vec4(tangent, 0.0)).xyz;
+        
+        vec4 skinnedPos = vec4(0.0);
+        vec3 skinnedNormal = vec3(0.0);
+        vec3 skinnedTangent = vec3(0.0);
+
+        for (int i = 0; i < 4; ++i) {
+            int idx = indices[i];
+            float w = weights[i];
+            if (w > 0.0) {
+                mat4 m = u_ueBoneMatrices[idx];
+                skinnedPos += (m * vec4(pos, 1.0)) * w;
+                skinnedNormal += (mat3(m) * normal) * w;
+                skinnedTangent += (mat3(m) * tangent) * w;
+            }
+        }
+
+        pos = skinnedPos.xyz;
+        normal = normalize(skinnedNormal);
+        tangent = normalize(skinnedTangent);
+
     }
 
     // Vertex displacement
@@ -56,7 +67,8 @@ void main() {
 
     vec4 worldPos;
     if (u_ueNumBones > 0.5) {
-        worldPos = vec4(pos, 1.0);
+        // worldPos = vec4(pos, 1.0);
+        worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
     } else {
         worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
     }

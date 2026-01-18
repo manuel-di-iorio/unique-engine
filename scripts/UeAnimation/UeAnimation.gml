@@ -43,7 +43,8 @@ function UeAnimation(name, duration, ticksPerSecond = 24) constructor {
                 if (track.__rotation != undefined) quat_copy(target.rotation, track.__rotation);
                 if (track.__scale != undefined) vec3_copy(target.scale, track.__scale);
 
-                target.updateMatrix();
+                // target.updateMatrix();
+                target.updateMatrixWorld(true);
             }
         }
     }
