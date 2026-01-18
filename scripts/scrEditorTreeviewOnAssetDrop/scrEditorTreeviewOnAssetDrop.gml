@@ -235,7 +235,11 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
     
     // Copy __rotationEuler from the master object if it exists, otherwise create new
     obj.__rotationEuler = euler_create();
-    euler_copy(obj.__rotationEuler, obj.object.__rotationEuler);
+    if (obj.object != undefined && obj.object[$ "__rotationEuler"] != undefined) {
+        euler_copy(obj.__rotationEuler, obj.object.__rotationEuler);
+    } else {
+        euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
+    }
 
     // Ricorsione su children
     if (obj.children != undefined) {

@@ -70,9 +70,9 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         // Folders can accept anything
         if (targetType == "Folder") return true;
         
-        // Models can be dropped on other models or scenes
-        if (draggedType == "Mesh" || draggedType == "ModelInstance") {
-            if (targetType == "Mesh" || targetType == "ModelInstance" || targetType == "Scene") {
+        // Models and Object3D can be dropped on other models, scenes or Object3D
+        if (draggedType == "Mesh" || draggedType == "ModelInstance" || draggedType == "Object3D") {
+            if (targetType == "Mesh" || targetType == "ModelInstance" || targetType == "Scene" || targetType == "Object3D") {
                 return true;
             }
         }

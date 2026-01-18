@@ -38,6 +38,43 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     function onAfterShadow() {}
     
     /**
+     * Creates an instance with proper master-instance relationship
+     */
+    function createInstance() {
+        gml_pragma("forceinline");
+        var _this = self;
+        
+        var instance = new UeObject3D({
+            name: _this.name,
+            visible: _this.visible,
+            renderOrder: _this.renderOrder,
+            castShadow: _this.castShadow,
+            receiveShadow: _this.receiveShadow,
+        });
+        
+        // Copy transform
+        vec3_copy(instance.position, _this.position);
+        quat_copy(instance.rotation, _this.rotation);
+        vec3_copy(instance.scale, _this.scale);
+        vec3_copy(instance.up, _this.up);
+        
+        instance.layers = _this.layers.clone();
+        instance.frustumCulled = _this.frustumCulled;
+        instance.matrixAutoUpdate = _this.matrixAutoUpdate;
+        
+        instance.object = self;
+        instance.isInstance = true;
+                
+        self.instances.add(instance);
+
+        for (var i=0, il = array_length(self.children); i < il; i++) {
+            instance.add(self.children[i].createInstance());
+        }
+        
+        return instance;
+    }
+    
+    /**
      * Returns a clone of this object and optionally all descendants.
      * @param {bool} recursive If true, descendants of the object are also cloned. Default is true
      */
@@ -233,6 +270,50 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         return self;
     }
     
+    function toJSON() {
+        gml_pragma("forceinline");
+        return {
+            uuid,
+            type,
+            name,
+            children: array_map(children, function(child) { return child.uuid }),
+            visible,
+            parent: parent && !parent[$ "isScene"] ? parent.uuid : undefined,
+            renderOrder,
+            layers: layers.mask,
+            matrixAutoUpdate,
+            frustumCulled,
+            castShadow,
+            receiveShadow,
+            
+            position,
+            rotation,
+            scale,
+            up,
+        };
+    }
+
+    function fromJSON(data) {
+        gml_pragma("forceinline");
+        uuid = data[$ "uuid"];
+        name = data[$ "name"];
+        visible = data[$ "visible"];
+        renderOrder = data[$ "renderOrder"];
+        layers.mask = data[$ "layers"];
+        
+        if (data[$ "position"] != undefined) vec3_copy(position, data.position);
+        if (data[$ "rotation"] != undefined) quat_copy(rotation, data.rotation);
+        if (data[$ "scale"] != undefined) vec3_copy(scale, data.scale);
+        if (data[$ "up"] != undefined) vec3_copy(up, data.up);
+        
+        matrixAutoUpdate = data[$ "matrixAutoUpdate"];
+        frustumCulled = data[$ "frustumCulled"];
+        castShadow = data[$ "castShadow"];
+        receiveShadow = data[$ "receiveShadow"];
+
+        return self;
+    }
+
     /**
      * Searches through an object and its children, starting with the object itself, and returns the first with a matching id.
      * Note that ids are assigned in chronological order: 1, 2, 3, ..., incrementing by one for each new object.     

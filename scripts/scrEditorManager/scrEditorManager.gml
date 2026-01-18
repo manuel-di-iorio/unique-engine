@@ -48,7 +48,7 @@ function EditorManager() constructor {
             if (asset.type == "Scene") {
                 // Scene selected directly
                 self.activeScene = asset;
-            } else if (asset.type == "Mesh" || asset.type == "ModelInstance") {
+            } else if (asset.type == "Mesh" || asset.type == "ModelInstance" || asset.type == "Object3D") {
                 // Mesh/instance selected - find parent scene via treeview
                 var foundScene = undefined;
                 
@@ -91,7 +91,7 @@ function EditorManager() constructor {
         self.gizmoTarget = newGizmoTarget;
         
         // Update the box helper based on the final gizmo target
-        if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
+        if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance" || self.gizmoTarget.type == "Object3D")) {
             // Show box helper if the mesh has geometry OR if it has children (to show expanded bbox)
             var hasGeometry = self.gizmoTarget[$ "geometry"] != undefined && self.gizmoTarget.geometry[$ "vb"] != undefined;
             var hasChildren = array_length(self.gizmoTarget.children) > 0;
@@ -112,7 +112,7 @@ function EditorManager() constructor {
         }
         
         if (oSceneEditor.sceneManager.transformControls != undefined && self.gizmoTarget != undefined) {
-            if (self.activeTool != "view" && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
+            if (self.activeTool != "view" && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance" || self.gizmoTarget.type == "Object3D")) {
                 oSceneEditor.sceneManager.transformControls.attach(self.gizmoTarget);
             } else {
                 oSceneEditor.sceneManager.transformControls.detach();
@@ -170,7 +170,7 @@ function EditorManager() constructor {
                 if (tool == "view") {
                     oSceneEditor.sceneManager.transformControls.detach();
                 } else {
-                    if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance")) {
+                    if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "ModelInstance" || self.gizmoTarget.type == "Object3D")) {
                         oSceneEditor.sceneManager.transformControls.attach(self.gizmoTarget);
                     }
                     

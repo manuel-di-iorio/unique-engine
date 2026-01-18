@@ -28,7 +28,7 @@ scenes = [
     { name: "PBR Material", obj: oScenePBR, bg: c_ltgray }, // 11
     { name: "Platform Game", obj: oScenePlatformGame, bg: #66DDDD }, // 12
     { name: "Particles", obj: oSceneParticles, bg: #111111 }, // 13
-    { name: "LODs", obj: oSceneLODs, bg: #111111 }, // 14
+    { name: "LOD", obj: oSceneLOD, bg: #111111 }, // 14
     { name: "Animations", obj: oSceneAnimations, bg: #111111 }, // 15
 ];
 

@@ -183,6 +183,7 @@ function ProjectLoader() constructor {
         //   if (c[$ "lights"] != undefined) global.UI_ASSETS_LIGHTS_ID = c.lights;
         //   if (c[$ "cameras"] != undefined) global.UI_ASSETS_CAMERAS_ID = c.cameras;
           if (c[$ "scenes"] != undefined) global.UI_ASSETS_SCENES_ID = c.scenes;
+          if (c[$ "object3d"] != undefined) global.UI_ASSETS_OBJECT3D_ID = c.object3d;
           if (c[$ "instances"] != undefined) global.UI_ASSETS_INSTANCE_ID = c.instances;
           if (c[$ "folders"] != undefined) global.UI_ASSETS_FOLDERS_ID = c.folders;
       }
@@ -313,7 +314,7 @@ function ProjectLoader() constructor {
   self.__buildTreeviewForScene = function(scene, sceneItem, treeview) {
       for (var i = 0; i < array_length(scene.children); i++) {
           var child = scene.children[i];
-          if (child[$ "type"] == "ModelInstance") {
+          if (string_pos("Instance", child[$ "type"] ?? "") > 0) {
               self.__buildTreeviewForInstance(child, sceneItem, treeview);
           }
       }
@@ -339,7 +340,7 @@ function ProjectLoader() constructor {
       // Recursively add children
       for (var i = 0, il = array_length(instance.children); i < il; i++) {
           var child = instance.children[i];
-          if (child[$ "type"] == "ModelInstance") {
+          if (string_pos("Instance", child[$ "type"] ?? "") > 0) {
               self.__buildTreeviewForInstance(child, tvItem, treeview);
           }
       }
@@ -360,6 +361,7 @@ function ProjectLoader() constructor {
       case "Texture": asset = new UeTexture(); break;
       case "Material": asset = new UeMeshStandardMaterial(); break;
       case "Mesh": asset = new UeStaticMesh(); break;
+      case "Object3D": asset = new UeObject3D(); break;
       case "Scene": asset = new UeScene(); break;
     //   case "Light": 
     //     var lightType = node[$ "lightType"] ?? "PointLight";
@@ -378,20 +380,22 @@ function ProjectLoader() constructor {
       asset.uuid = uuid;
       asset.__metadata = node;
 
-      if (asset.type == "Mesh") {        
+      if (asset.type == "Mesh" || asset.type == "Object3D" || asset.type == "Camera") {        
         asset.__matrixAutoUpdate = node[$ "matrixAutoUpdate"] ?? false;
         
         asset.__rotationEuler = euler_create();
         euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
         
-        var geometryPath = assetDir + "geometry.buf";
+        if (asset.type == "Mesh") {
+          var geometryPath = assetDir + "geometry.buf";
 
-        if (file_exists(geometryPath)) {
-          var geometry = new UeGeometry({ canFreeze: true });
-          geometry.import(geometryPath);
-          geometry.__vbClone = geometry.cloneVb();
-          geometry.freeze();
-          asset.geometry = geometry;
+          if (file_exists(geometryPath)) {
+            var geometry = new UeGeometry({ canFreeze: true });
+            geometry.import(geometryPath);
+            geometry.__vbClone = geometry.cloneVb();
+            geometry.freeze();
+            asset.geometry = geometry;
+          }
         }
       }
       

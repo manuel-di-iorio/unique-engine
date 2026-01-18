@@ -49,6 +49,7 @@ function EditorUiInspector(ui) constructor {
         "Texture": scrEditorInspectorTexture(),
         "Material": scrEditorInspectorMaterial(),
         "Mesh": scrEditorInspectorMesh(),
+        "Object3D": scrEditorInspectorObject3D(),
         "ModelInstance": scrEditorInspectorModelInstance(), 
         // "Light": scrEditorInspectorLight(),
         "Scene": scrEditorInspectorScene(), 

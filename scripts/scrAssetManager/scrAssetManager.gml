@@ -122,7 +122,7 @@ function AssetManager() constructor {
         self.__trackChange("edit", asset);
         
         // Rebuild the box in the next frame in order to wait first for the matrix updates
-        if (asset.type == "Mesh" || asset.type == "ModelInstance") {
+        if (asset.type == "Mesh" || asset.type == "ModelInstance" || asset.type == "Object3D") {
             self.updateAssetMatrix(asset, recursive, syncEuler);
         }
     }
@@ -145,14 +145,9 @@ function AssetManager() constructor {
             return;
         }
         
-        // VALIDATION: Don't track generic Object3D types (these should not be saved)
-        if (action != "delete" && asset[$ "type"] == "Object3D") {
-            return;
-        }
-
-        // ModelInstance objects belong to Scenes: instead of tracking the instance itself,
+        // ModelInstance and Object3D objects belong to Scenes: instead of tracking the instance itself,
         // track the parent Scene as edited so scene changes (rename/move instance) are saved.
-        if (asset[$ "type"] == "ModelInstance") {
+        if (asset[$ "type"] == "ModelInstance" || asset[$ "type"] == "Object3D") {
             // Find nearest ancestor Scene
             var scene = asset[$ "parent"];
             while (scene != undefined && ((scene[$ "type"] ?? scene[$ "assetType"]) != "Scene")) {
@@ -271,15 +266,15 @@ function AssetManager() constructor {
             return false;
         }
         
-        // Models can have models as children
-        if ((assetType == "Mesh" || assetType == "ModelInstance") && 
-            (targetType == "Mesh" || targetType == "ModelInstance")) {
+        // Models and Object3D can have models or Object3D as children
+        if ((assetType == "Mesh" || assetType == "ModelInstance" || assetType == "Object3D") && 
+            (targetType == "Mesh" || targetType == "ModelInstance" || targetType == "Object3D")) {
             return true;
         }
         
-        // Scenes can only contain model instances
+        // Scenes can contain model instances or Object3D
         if (targetType == "Scene") {
-            if (assetType == "Mesh" || assetType == "ModelInstance") {
+            if (assetType == "Mesh" || assetType == "ModelInstance" || assetType == "Object3D") {
                 return true;
             }
             return false;

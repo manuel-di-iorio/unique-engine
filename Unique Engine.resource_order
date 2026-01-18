@@ -48,7 +48,7 @@
     {"name":"oSceneAssimpLoader","order":5,"path":"objects/oSceneAssimpLoader/oSceneAssimpLoader.yy",},
     {"name":"oSceneEditor","order":1,"path":"objects/oSceneEditor/oSceneEditor.yy",},
     {"name":"oSceneLinesRaycasting","order":3,"path":"objects/oSceneLinesRaycasting/oSceneLinesRaycasting.yy",},
-    {"name":"oSceneLODs","order":14,"path":"objects/oSceneLODs/oSceneLODs.yy",},
+    {"name":"oSceneLOD","order":14,"path":"objects/oSceneLOD/oSceneLOD.yy",},
     {"name":"oSceneMeshRaycasting","order":4,"path":"objects/oSceneMeshRaycasting/oSceneMeshRaycasting.yy",},
     {"name":"oSceneObjLoader","order":6,"path":"objects/oSceneObjLoader/oSceneObjLoader.yy",},
     {"name":"oSceneParticles","order":13,"path":"objects/oSceneParticles/oSceneParticles.yy",},

@@ -187,7 +187,7 @@ function ProjectSaver() constructor {
             metadata[$ "rotationEuler"] = asset[$ "__rotationEuler"];
         }
         
-        if (type == "Mesh" && struct_exists(asset, "__matrixAutoUpdate") && asset[$ "__matrixAutoUpdate"] != undefined) {
+        if ((type == "Mesh" || type == "Object3D" || type == "Camera") && struct_exists(asset, "__matrixAutoUpdate") && asset[$ "__matrixAutoUpdate"] != undefined) {
             metadata[$ "matrixAutoUpdate"] = asset[$ "__matrixAutoUpdate"];
         }
 
@@ -249,6 +249,7 @@ function ProjectSaver() constructor {
             lights: global.UI_ASSETS_LIGHTS_ID ?? 0,
             cameras: global.UI_ASSETS_CAMERAS_ID ?? 0,
             scenes: global.UI_ASSETS_SCENES_ID ?? 0,
+            object3d: global.UI_ASSETS_OBJECT3D_ID ?? 0,
             instances: global.UI_ASSETS_INSTANCE_ID ?? 0,
             folders: global.UI_ASSETS_FOLDERS_ID ?? 0
         };

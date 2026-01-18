@@ -18,6 +18,7 @@ assimpLoader = new UeAssimpLoader();
 //animatedTriangle = assimpLoader.load("AnimatedTriangle.gltf");
 model = assimpLoader.load("BrainStem.gltf");
 modelRoot = model.root;
+//log(model.root.bones)
 
 modelRoot.setScale(100, 100, 100);
 modelRoot.rotateX(90); 

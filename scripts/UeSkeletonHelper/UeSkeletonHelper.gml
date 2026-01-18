@@ -31,7 +31,12 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
     // Create geometry and material
     var geometry = new UeLineSegmentsGeometry();
     var material = new UeLineBasicMaterial({ color: c_white });
-    
+
+    material.transparent = true;
+    material.depthTest = false;
+    material.forceSinglePass = true;
+    material.side = cull_noculling;
+
     self.lineSegments = new UeLineSegments(geometry, material);
     self.add(self.lineSegments);
 
@@ -55,36 +60,36 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
         gml_pragma("forceinline");
         var positions = [];
         var colors = [];
-        
+
         var bonePos = global.UE_VEC3_TEMP1;
         var parentPos = global.UE_VEC3_TEMP2;
-        
+
         var boneCount = array_length(self.bones);
         for (var i = 0; i < boneCount; i++) {
             var bone = self.bones[i];
-            
+
             if (bone.parent != undefined && bone.parent[$ "isBone"]) {
                 var parent = bone.parent;
-                
+
                 // Get world positions
                 bone.getWorldPosition(bonePos);
                 parent.getWorldPosition(parentPos);
-                
+
                 // Add segment from parent to bone
                 array_push(positions, parentPos[0], parentPos[1], parentPos[2]);
                 array_push(positions, bonePos[0], bonePos[1], bonePos[2]);
-                
+
                 // Add colors for the segment
                 array_push(colors, self.color1[0], self.color1[1], self.color1[2]);
                 array_push(colors, self.color2[0], self.color2[1], self.color2[2]);
             }
         }
-        
+
         if (array_length(positions) > 0) {
             self.lineSegments.geometry.setPositions(positions);
             self.lineSegments.geometry.setColors(colors);
         }
-        
+
         return self;
     }
 
@@ -98,7 +103,7 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
         self.lineSegments.material.dispose();
         return self;
     }
-    
+
     // Initial update
     self.update();
 }

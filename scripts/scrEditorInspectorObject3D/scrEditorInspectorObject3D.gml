@@ -1,0 +1,73 @@
+function scrEditorInspectorObject3D() {
+  return [
+    // === SECTION: GENERAL ===
+    { 
+          id: "name",
+          field: "name",
+          label: "Name", 
+          type: "text"
+    }, 
+    { 
+          id: "static",
+          field: "__matrixAutoUpdate",
+          label: "Static", 
+          type: "checkbox",
+          tooltip: "Mark object as static (disable automatic matrix updates)",
+          valueGetter: function() {
+              return !self.asset.__matrixAutoUpdate;
+          },
+          onChange: function(value) {
+              self.asset.__matrixAutoUpdate = !value;
+              oSceneEditor.assetManager.editAsset(self.asset);
+          }
+    },
+
+    // === SECTION: TRANSFORM ===
+    {
+          id: "sectionTransform",
+          label: "Transform", 
+          type: "section",
+          collapsed: false,
+          children: [
+            { 
+                  id: "position",
+                  field: "position",
+                  label: "Position", 
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      return self.asset.position;
+                  },
+                  onBlur: function(value) {
+                      vec3_set(self.asset.position, value[0], value[1], value[2]);
+                  }
+            },
+            { 
+                  id: "rotation",
+                  field: "rotation",
+                  label: "Rotation", 
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      return self.asset.__rotationEuler;
+                  },
+                  onBlur: function(value) {
+                      var euler = self.asset.__rotationEuler;
+                      euler_set(euler, value[0], value[1], value[2]);
+                      self.asset.setRotation(value[0], value[1], value[2]);
+                  }
+            },
+            { 
+                  id: "scale",
+                  field: "scale",
+                  label: "Scale", 
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      return self.asset.scale;
+                  },
+                  onBlur: function(value) {
+                      vec3_set(self.asset.scale, value[0], value[1], value[2]);
+                  }
+            }
+          ]
+    }
+  ];
+}

@@ -109,6 +109,12 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           asset = new UeScene();
           assetId = global.UI_ASSETS_SCENES_ID++;
       break;
+
+      case "Object3D":
+          asset = new UeObject3D();
+          asset.__rotationEuler = euler_create();
+          assetId = global.UI_ASSETS_OBJECT3D_ID++;
+      break;
   }
   
   // Create treeview item
@@ -120,6 +126,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       case "Material": icon = sprUiMaterial; break;
       case "Mesh": icon = sprUiObject; break;
       case "Scene": icon = sprUiScene; break;
+      case "Object3D": icon = sprUiObject; break;
     //   case "PointLight": icon = sprUiPointLight; break;
     //   case "DirectionalLight": icon = sprUiDirectionalLight; break;
   }
