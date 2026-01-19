@@ -22,7 +22,7 @@ matFox.setUniform("ueFlatShading", true);
 
 modelRobot = assimpLoader.load("Robot/BrainStem.gltf");
 modelRobotRoot = modelRobot.root;
-modelRobotRoot.translateX(-170);
+modelRobotRoot.translateX(-250);
 modelRobotRoot.rotateX(90);
 modelRobotRoot.setScale(100, 100, 100);
 

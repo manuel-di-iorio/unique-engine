@@ -39,11 +39,18 @@ function UeAnimation(name, duration, ticksPerSecond = 24) constructor {
             if (target != undefined) {
                 track.interpolate(ticks);
 
-                if (track.__position != undefined) vec3_copy(target.position, track.__position);
-                if (track.__rotation != undefined) quat_copy(target.rotation, track.__rotation);
-                if (track.__scale != undefined) vec3_copy(target.scale, track.__scale);
+                if (target[$ "isBone"]) {
+                    if (track.__position != undefined) vec3_copy(target.position, track.__position);
+                    if (track.__rotation != undefined) quat_copy(target.rotation, track.__rotation);
+                    if (track.__scale != undefined) vec3_copy(target.scale, track.__scale);
+                } else {
+                    // For standard objects, only apply if keys exist to avoid overwriting user settings
+                    // AND if there's more than 1 key OR the only key is different from the initial state
+                    if (track.__position != undefined && array_length(track.positionKeys) > 1) vec3_copy(target.position, track.__position);
+                    if (track.__rotation != undefined && array_length(track.rotationKeys) > 1) quat_copy(target.rotation, track.__rotation);
+                    if (track.__scale != undefined && array_length(track.scaleKeys) > 1) vec3_copy(target.scale, track.__scale);
+                }
 
-                // target.updateMatrix();
                 target.updateMatrixWorld(true);
             }
         }
