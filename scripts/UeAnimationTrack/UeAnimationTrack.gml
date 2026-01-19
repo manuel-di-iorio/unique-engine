@@ -30,19 +30,91 @@ function UeAnimationTrack(nodeName) constructor {
   /** @private @type {Array<real>} Resulting scale from last interpolation */
   self.__scale = undefined;
 
+  /** @private @type {struct} Optional baked data for high-performance playback */
+  self._baked = {
+    pos: undefined,
+    rot: undefined,
+    scl: undefined,
+    duration: 1,
+    sampleCount: 0
+  };
+
   /** @private @type {struct} Caches for last used keyframe index to speed up lookups */
   self._posCache = { lastIndex: 0 };
   self._rotCache = { lastIndex: 0 };
   self._scaleCache = { lastIndex: 0 };
 
+  /** @private @type {real} Cached array lengths */
+  self._posLen = 0;
+  self._rotLen = 0;
+  self._scaleLen = 0;
+
   /**
-   * Interpolates the track at a given time.
+   * Updates metadata and bakes the track into a fixed-frequency lookup table.
+   * Should be called after modifying keyframe arrays.
+   * @param {real} duration Total duration of the animation in ticks
+   * @param {real} fps Samples per second to bake
+   */
+  static update = function(duration, fps = 60) {
+    gml_pragma("forceinline");
+    self._posLen = array_length(self.positionKeys);
+    self._rotLen = array_length(self.rotationKeys);
+    self._scaleLen = array_length(self.scaleKeys);
+    
+    // Reset caches for baking process
+    self._posCache.lastIndex = 0;
+    self._rotCache.lastIndex = 0;
+    self._scaleCache.lastIndex = 0;
+    self._lastTime = -1;
+
+    var totalSamples = ceil(duration * (fps / 60)) + 1; 
+    
+    var _pLen = self._posLen;
+    var _rLen = self._rotLen;
+    var _sLen = self._scaleLen;
+    
+    if (_pLen > 0) {
+        self._baked.pos = array_create(totalSamples * 3);
+        for (var i = 0; i < totalSamples; i++) {
+            var t = (i / (totalSamples - 1)) * duration;
+            var res = self._interpolateVec3(self.positionKeys, _pLen, t, self._tempPos, self._posCache);
+            var idx = i * 3;
+            self._baked.pos[idx] = res[0]; self._baked.pos[idx+1] = res[1]; self._baked.pos[idx+2] = res[2];
+        }
+    }
+    
+    if (_rLen > 0) {
+        self._baked.rot = array_create(totalSamples * 4);
+        for (var i = 0; i < totalSamples; i++) {
+            var t = (i / (totalSamples - 1)) * duration;
+            var res = self._interpolateQuat(self.rotationKeys, _rLen, t, self._tempRot, self._rotCache);
+            var idx = i * 4;
+            self._baked.rot[idx] = res[0]; self._baked.rot[idx+1] = res[1]; self._baked.rot[idx+2] = res[2]; self._baked.rot[idx+3] = res[3];
+        }
+    }
+    
+    if (_sLen > 0) {
+        self._baked.scl = array_create(totalSamples * 3);
+        for (var i = 0; i < totalSamples; i++) {
+            var t = (i / (totalSamples - 1)) * duration;
+            var res = self._interpolateVec3(self.scaleKeys, _sLen, t, self._tempScale, self._scaleCache);
+            var idx = i * 3;
+            self._baked.scl[idx] = res[0]; self._baked.scl[idx+1] = res[1]; self._baked.scl[idx+2] = res[2];
+        }
+    }
+    
+    self._baked.duration = duration;
+    self._baked.sampleCount = totalSamples;
+    return self;
+  }
+
+  /**
+   * Interpolates the track at a given time using baked data.
    * @param {real} time Current animation time in ticks
    */
   static interpolate = function (time) {
     gml_pragma("forceinline");
     
-    // Skip if time hasn't changed
     if (time == self._lastTime) return;
     self._lastTime = time;
 
@@ -50,37 +122,47 @@ function UeAnimationTrack(nodeName) constructor {
     self.__rotation = undefined;
     self.__scale = undefined;
 
-    // Reset caches if time jumped backwards (e.g. animation looped)
-    if (array_length(self.positionKeys) > 0 && time < self.positionKeys[self._posCache.lastIndex]) self._posCache.lastIndex = 0;
-    if (array_length(self.rotationKeys) > 0 && time < self.rotationKeys[self._rotCache.lastIndex]) self._rotCache.lastIndex = 0;
-    if (array_length(self.scaleKeys) > 0 && time < self.scaleKeys[self._scaleCache.lastIndex]) self._scaleCache.lastIndex = 0;
+    var _b = self._baked;
+    if (_b.sampleCount == 0) return;
 
-    // Position interpolation
-    if (array_length(self.positionKeys) > 0) {
-      self.__position = self._interpolateVec3(self.positionKeys, time, self._tempPos, self._posCache);
+    var sample = (time / _b.duration) * (_b.sampleCount - 1);
+    var idx = floor(sample);
+    
+    if (_b.pos != undefined) {
+        var i3 = idx * 3;
+        var res = self._tempPos;
+        var bData = _b.pos;
+        res[0] = bData[i3]; res[1] = bData[i3+1]; res[2] = bData[i3+2];
+        self.__position = res;
     }
 
-    // Rotation interpolation
-    if (array_length(self.rotationKeys) > 0) {
-      self.__rotation = self._interpolateQuat(self.rotationKeys, time, self._tempRot, self._rotCache);
+    if (_b.rot != undefined) {
+        var i4 = idx * 4;
+        var res = self._tempRot;
+        var bData = _b.rot;
+        res[0] = bData[i4]; res[1] = bData[i4+1]; res[2] = bData[i4+2]; res[3] = bData[i4+3];
+        self.__rotation = res;
     }
 
-    // Scale interpolation
-    if (array_length(self.scaleKeys) > 0) {
-      self.__scale = self._interpolateVec3(self.scaleKeys, time, self._tempScale, self._scaleCache);
+    if (_b.scl != undefined) {
+        var i3 = idx * 3;
+        var res = self._tempScale;
+        var bData = _b.scl;
+        res[0] = bData[i3]; res[1] = bData[i3+1]; res[2] = bData[i3+2];
+        self.__scale = res;
     }
   }
 
   /** @private
    *  Performs linear interpolation between two vec3 keyframes using binary search.
    *  @param {Array<real>} keys Flattened array of [time, x, y, z]
+   *  @param {real} n Array length
    *  @param {real} time Current animation time in ticks
    *  @param {Array<real>} target Pre-allocated vec3 to store the result
    *  @param {object} cache Optional object to store last index for faster lookup
    *  @returns {Array<real>} Interpolated vec3 (same as target parameter)
    */
-  static _interpolateVec3 = function (keys, time, target, cache = {}) {
-    var n = array_length(keys); // Total elements
+  static _interpolateVec3 = function (keys, n, time, target, cache) {
     var count = n >> 2; // Number of keys (each key is 4 elements: t, x, y, z)
     
     if (count == 1 || time <= keys[0]) {
@@ -92,20 +174,32 @@ function UeAnimationTrack(nodeName) constructor {
         return target;
     }
 
-    // Use cached index if possible (lastIndex points to the 'time' element of the key)
+    // 1. Check current cached index
     var lastIdx = cache.lastIndex;
     if (time >= keys[lastIdx] && time < keys[lastIdx + 4]) {
         var t1 = keys[lastIdx];
         var t2 = keys[lastIdx + 4];
         var f = (time - t1) / (t2 - t1);
-        
         target[0] = keys[lastIdx + 1] + (keys[lastIdx + 5] - keys[lastIdx + 1]) * f;
         target[1] = keys[lastIdx + 2] + (keys[lastIdx + 6] - keys[lastIdx + 2]) * f;
         target[2] = keys[lastIdx + 3] + (keys[lastIdx + 7] - keys[lastIdx + 3]) * f;
         return target;
     }
 
-    // Binary search
+    // 2. Check next index (loop-friendly)
+    var nextIdx = (lastIdx + 4 < n) ? lastIdx + 4 : 0;
+    if (time >= keys[nextIdx] && (nextIdx + 4 >= n || time < keys[nextIdx + 4])) {
+        cache.lastIndex = nextIdx;
+        var t1 = keys[nextIdx];
+        var t2 = keys[nextIdx + 4];
+        var f = (time - t1) / (t2 - t1);
+        target[0] = keys[nextIdx + 1] + (keys[nextIdx + 5] - keys[nextIdx + 1]) * f;
+        target[1] = keys[nextIdx + 2] + (keys[nextIdx + 6] - keys[nextIdx + 2]) * f;
+        target[2] = keys[nextIdx + 3] + (keys[nextIdx + 7] - keys[nextIdx + 3]) * f;
+        return target;
+    }
+
+    // 3. Fallback to binary search
     var left = 0, right = count - 1;
     while (left <= right) {
       var mid = (left + right) >> 1;
@@ -137,14 +231,14 @@ function UeAnimationTrack(nodeName) constructor {
   /** @private
   *  Performs spherical linear interpolation between two quaternion keyframes using binary search.
   *  @param {Array<real>} keys Flattened array of [time, x, y, z, w]
+  *  @param {real} n Array length
   *  @param {real} time Current animation time in ticks
   *  @param {Array<real>} target Pre-allocated quaternion to store the result
   *  @param {object} cache Optional object to store last index for faster lookup
   *  @returns {Array<real>} Interpolated quaternion (same as target parameter)
   */
-  static _interpolateQuat = function (keys, time, target, cache = {}) {
-    var n = array_length(keys);
-    var count = n div 5; // Each key is 5 elements: t, x, y, z, w
+  static _interpolateQuat = function (keys, n, time, target, cache) {
+    var count = n / 5; // Each key is 5 elements: t, x, y, z, w
     
     if (count == 1 || time <= keys[0]) {
         target[0] = keys[1]; target[1] = keys[2]; target[2] = keys[3]; target[3] = keys[4];
@@ -155,23 +249,26 @@ function UeAnimationTrack(nodeName) constructor {
         return target;
     }
 
-    // Use cached index if possible
+    // 1. Check current cached index
     var lastIdx = cache.lastIndex;
     if (time >= keys[lastIdx] && time < keys[lastIdx + 5]) {
         var t1 = keys[lastIdx];
         var t2 = keys[lastIdx + 5];
         var f = (time - t1) / (t2 - t1);
-        
-        // Use quat_slerp_flat or similar if available, or just call slerp
-        // For performance, we can inline a bit or use global temps
-        var q1 = global.UE_QUAT_TEMP0;
-        var q2 = global.UE_QUAT_TEMP1;
-        q1[0] = keys[lastIdx+1]; q1[1] = keys[lastIdx+2]; q1[2] = keys[lastIdx+3]; q1[3] = keys[lastIdx+4];
-        q2[0] = keys[lastIdx+6]; q2[1] = keys[lastIdx+7]; q2[2] = keys[lastIdx+8]; q2[3] = keys[lastIdx+9];
-        
-        return quat_slerp_quaternions(target, q1, q2, f);
+        return slerpFlat(target, 0, keys, lastIdx + 1, keys, lastIdx + 6, f);
     }
 
+    // 2. Check next index (loop-friendly)
+    var nextIdx = (lastIdx + 5 < n) ? lastIdx + 5 : 0;
+    if (time >= keys[nextIdx] && (nextIdx + 5 < n && time < keys[nextIdx + 5])) {
+        cache.lastIndex = nextIdx;
+        var t1 = keys[nextIdx];
+        var t2 = keys[nextIdx + 5];
+        var f = (time - t1) / (t2 - t1);
+        return slerpFlat(target, 0, keys, nextIdx + 1, keys, nextIdx + 6, f);
+    }
+
+    // 3. Fallback to binary search
     var left = 0, right = count - 1;
     while (left <= right) {
       var mid = (left + right) >> 1;
@@ -186,19 +283,17 @@ function UeAnimationTrack(nodeName) constructor {
       else right = mid - 1;
     }
 
-    var idx1 = right * 5;
-    var idx2 = left * 5;
+    var idx1 = (right * 5) | 0;
+    var idx2 = (left * 5) | 0;
     cache.lastIndex = idx1;
     
     var t1 = keys[idx1];
     var t2 = keys[idx2];
     var f = (time - t1) / (t2 - t1);
     
-    var q1 = global.UE_QUAT_TEMP0;
-    var q2 = global.UE_QUAT_TEMP1;
-    q1[0] = keys[idx1+1]; q1[1] = keys[idx1+2]; q1[2] = keys[idx1+3]; q1[3] = keys[idx1+4];
-    q2[0] = keys[idx2+1]; q2[1] = keys[idx2+2]; q2[2] = keys[idx2+3]; q2[3] = keys[idx2+4];
-    
-    return quat_slerp_quaternions(target, q1, q2, f);
+    return slerpFlat(target, 0, keys, idx1 + 1, keys, idx2 + 1, f);
   }
+
+  // Perform initial update (bake with default duration)
+  self.update(1, 60);
 }

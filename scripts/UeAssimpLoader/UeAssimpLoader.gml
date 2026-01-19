@@ -546,6 +546,9 @@
         anim.addTrack(track);
       }
 
+      // Pre-calculate and bake animation data for maximum performance
+      anim.update();
+
       animations[i] = anim;
       animationsMap[$ animName] = anim;
     }

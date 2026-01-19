@@ -601,8 +601,8 @@ void main() {
         else if (u_ueToneMapping == 6.0) color = NeutralToneMapping(color);
     }
 
-    //gl_FragColor = vec4(LinearToSRGB(color), alpha);
+    gl_FragColor = vec4(LinearToSRGB(color), alpha);
 
     // Show normals (debug)
-    gl_FragColor = vec4(normalize(vWorldNormal) * 0.5 + 0.5, 1.0);
+    // gl_FragColor = vec4(normalize(vWorldNormal) * 0.5 + 0.5, 1.0);
 }

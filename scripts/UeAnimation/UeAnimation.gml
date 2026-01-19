@@ -35,19 +35,43 @@ function UeAnimation(name, duration, ticksPerSecond = 24) constructor {
         var rootId = root.uuid;
         var boundTracks = [];
         
-        for (var i = 0, il = array_length(self.tracks); i < il; i++) {
-            var track = self.tracks[i];
+        var _tracks = self.tracks;
+        for (var i = 0, il = array_length(_tracks); i < il; i++) {
+            var track = _tracks[i];
+            
+            // Ensure track metadata and baking are up to date
+            track.update(self.duration, 60);
+            
             var target = root.getObjectByName(track.nodeName);
             if (target != undefined) {
+                var isBone = target[$ "isBone"] ?? false;
+                var hasPos = array_length(track.positionKeys) > (isBone ? 0 : 4);
+                var hasRot = array_length(track.rotationKeys) > (isBone ? 0 : 5);
+                var hasScl = array_length(track.scaleKeys) > (isBone ? 0 : 4);
+
                 array_push(boundTracks, {
-                    track: track,
-                    target: target,
-                    isBone: target[$ "isBone"] ?? false
+                    baked: track._baked,
+                    targetPos: hasPos ? target.position : undefined,
+                    targetRot: hasRot ? target.rotation : undefined,
+                    targetScl: hasScl ? target.scale : undefined
                 });
             }
         }
         
         self._targetCache[$ rootId] = boundTracks;
+        return self;
+    }
+
+    /**
+     * Updates and bakes all tracks in this animation for maximum performance.
+     * @param {real} fps Samples per second to bake
+     */
+    static update = function (fps = 60) {
+        gml_pragma("forceinline");
+        var _tracks = self.tracks;
+        for (var i = 0, il = array_length(_tracks); i < il; i++) {
+            _tracks[i].update(self.duration, fps);
+        }
         return self;
     }
 
@@ -69,23 +93,37 @@ function UeAnimation(name, duration, ticksPerSecond = 24) constructor {
             boundTracks = self._targetCache[$ rootId];
         }
 
-        for (var i = 0, il = array_length(boundTracks); i < il; i++) {
+        var il = array_length(boundTracks);
+        if (il == 0) return;
+
+        // Calculate sample index once (all tracks share same duration/samples)
+        var firstBaked = boundTracks[0].baked;
+        var idx = floor((ticks / firstBaked.duration) * (firstBaked.sampleCount - 1));
+
+        for (var i = 0; i < il; i++) {
             var data = boundTracks[i];
-            var track = data.track;
-            var target = data.target;
+            var baked = data.baked;
 
-            track.interpolate(ticks);
+            // Direct access to baked data arrays and target arrays
+            var bPos = baked.pos;
+            if (bPos != undefined) {
+                var i3 = idx * 3;
+                var tPos = data.targetPos;
+                tPos[0] = bPos[i3]; tPos[1] = bPos[i3+1]; tPos[2] = bPos[i3+2];
+            }
 
-            if (data.isBone) {
-                if (track.__position != undefined) vec3_copy(target.position, track.__position);
-                if (track.__rotation != undefined) quat_copy(target.rotation, track.__rotation);
-                if (track.__scale != undefined) vec3_copy(target.scale, track.__scale);
-            } else {
-                // For standard objects, only apply if keys exist to avoid overwriting user settings
-                // AND if there's more than 1 key (length > 4 for pos/scale, > 5 for rotation)
-                if (track.__position != undefined && array_length(track.positionKeys) > 4) vec3_copy(target.position, track.__position);
-                if (track.__rotation != undefined && array_length(track.rotationKeys) > 5) quat_copy(target.rotation, track.__rotation);
-                if (track.__scale != undefined && array_length(track.scaleKeys) > 4) vec3_copy(target.scale, track.__scale);
+            var bRot = baked.rot;
+            if (bRot != undefined) {
+                var i4 = idx * 4;
+                var tRot = data.targetRot;
+                tRot[0] = bRot[i4]; tRot[1] = bRot[i4+1]; tRot[2] = bRot[i4+2]; tRot[3] = bRot[i4+3];
+            }
+
+            var bScl = baked.scl;
+            if (bScl != undefined) {
+                var i3 = idx * 3;
+                var tScl = data.targetScl;
+                tScl[0] = bScl[i3]; tScl[1] = bScl[i3+1]; tScl[2] = bScl[i3+2];
             }
         }
     }

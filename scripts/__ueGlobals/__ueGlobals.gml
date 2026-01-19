@@ -1,6 +1,7 @@
 global.UE_OBJECT_ID = 0;
 global.UE_VERSION = "0.8.0";
 global.UE_VFORMAT_PU = new UeVertexFormat().position().uv().build();
+global.UE_VFORMAT_PC = new UeVertexFormat().position().color().build();
 global.UE_VFORMAT_PNUC = new UeVertexFormat().position().normal().uv().color().build();
 global.UE_VFORMAT_PNUTC = new UeVertexFormat().position().normal().uv().tangent().color().build();
 global.UE_VFORMAT_PNUTCB = new UeVertexFormat().position().normal().uv().tangent().color().bones().build();
@@ -145,6 +146,11 @@ global.UE_RENDERER_CAMERA_POSITION = array_create(3, 0);
 // Pre-allocated buffer for packed scene data [5 * 4 values]
 global.UE_SCENE_DATA_BUFFER = array_create(20, 0);
 global.UE_RENDERER_SCENE_DATA = undefined;
+
+// Pre-allocated buffers for lights data
+global.UE_POINT_LIGHTS_DATA_BUFFER = array_create(8 * 16, 0);
+global.UE_SPOT_LIGHTS_DATA_BUFFER = array_create(8 * 16, 0);
+global.UE_POINT_SHADOW_MATRICES_BUFFER = array_create(6 * 16, 0);
 
 // Global Uniform Caching
 global.UE_CURRENT_SHADER = -1;

@@ -1,6 +1,7 @@
 function UeLineGeometry(data = {}): UeGeometry(data) constructor {
     self.__color = data[$ "color"] ?? c_white;          // Default line color
     self.__alpha = data[$ "alpha"] ?? 1;                // Default line alpha
+    self.format = global.UE_VFORMAT_PC;
 
     /// Populates the geometry with 3D positions. Array must be multiple of 3 (x,y,z)
     function setPositions(array) {
@@ -9,8 +10,6 @@ function UeLineGeometry(data = {}): UeGeometry(data) constructor {
         
         // Initialize other attributes if needed
         var count = array_length(array) / 3;
-        self.normal = array_create(count * 3, 0);
-        self.uv = array_create(count * 2, 0);
         
         var col = array_create(count * 2);
         for (var i = 0; i < count; i++) {
@@ -42,8 +41,6 @@ function UeLineGeometry(data = {}): UeGeometry(data) constructor {
         gml_pragma("forceinline");
         var num = array_length(points);
         var pos = array_create(num * 3);
-        var norm = array_create(num * 3, 0);
-        var _uv = array_create(num * 2, 0);
         var col = array_create(num * 2);
         
         for (var i = 0; i < num; i++) {
@@ -57,8 +54,6 @@ function UeLineGeometry(data = {}): UeGeometry(data) constructor {
         }
         
         self.position = pos;
-        self.normal = norm;
-        self.uv = _uv;
         self.color = col;
         
         build();
@@ -71,8 +66,6 @@ function UeLineGeometry(data = {}): UeGeometry(data) constructor {
         if (!line.isLine) return self;
 
         self.position = variable_clone(line.geometry.position);
-        self.normal = line.geometry.normal ? variable_clone(line.geometry.normal) : undefined;
-        self.uv = line.geometry.uv ? variable_clone(line.geometry.uv) : undefined;
         self.color = line.geometry.color ? variable_clone(line.geometry.color) : undefined;
         self.index = line.geometry.index ? variable_clone(line.geometry.index) : undefined;
         

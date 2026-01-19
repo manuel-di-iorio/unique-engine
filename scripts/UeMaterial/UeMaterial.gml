@@ -143,6 +143,11 @@ function UeMaterial(data = {}) constructor {
       }
     }
 
+    // Cache counts for faster iteration in use()
+    __cache.uniformsStandardCount = array_length(__cache.uniformsStandard);
+    __cache.uniformsCachedCount = array_length(__cache.uniformsCached);
+    __cache.texturesCachedCount = array_length(__cache.texturesCached);
+
     return self;
   }
 
@@ -208,7 +213,7 @@ function UeMaterial(data = {}) constructor {
         pointShadowLight.getWorldPosition(uniformsCache);
         shader_set_uniform_f_array(__cache.uniformPointShadowPosLoc, uniformsCache);
 
-        var matrices = array_create(16 * 6);
+        var matrices = global.UE_POINT_SHADOW_MATRICES_BUFFER;
         for (var i = 0; i < 6; i++) {
           var cam = pointShadowLight.shadow.cameras[i];
           matrix_multiply(cam.matrixWorldInverse, cam.projectionMatrix, global.UE_MAT4_TEMP0);
@@ -247,14 +252,17 @@ function UeMaterial(data = {}) constructor {
 
     // --- Point Lights Data ---
     if (__cache.uniformPointLightsDataLoc != -1) {
-      var pointLightsData = array_create(8 * 16, 0);
+      var pointLightsData = global.UE_POINT_LIGHTS_DATA_BUFFER;
       for (var i = 0; i < 8; i++) {
+        var offset = i * 16;
         if (i < pointLightCount) {
           var light = pointLightState[i];
-          if (light.intensity <= 0) continue;
+          if (!light.enabled || light.intensity <= 0) {
+            pointLightsData[offset + 7] = 0;
+            continue;
+          }
 
           light.getWorldPosition(uniformsCache);
-          var offset = i * 16;
 
           // Row 0: pos.xyz, range
           pointLightsData[offset + 0] = uniformsCache[0];
@@ -270,6 +278,8 @@ function UeMaterial(data = {}) constructor {
 
           // Row 2: decay, ...
           pointLightsData[offset + 8] = light.decay;
+        } else {
+          pointLightsData[offset + 7] = 0;
         }
       }
       shader_set_uniform_f_array(__cache.uniformPointLightsDataLoc, pointLightsData);
@@ -277,14 +287,17 @@ function UeMaterial(data = {}) constructor {
 
     // --- Spot Lights Data ---
     if (__cache.uniformSpotLightsDataLoc != -1) {
-      var spotLightsData = array_create(8 * 16, 0);
+      var spotLightsData = global.UE_SPOT_LIGHTS_DATA_BUFFER;
       for (var i = 0; i < 8; i++) {
+        var offset = i * 16;
         if (i < spotLightCount) {
           var light = spotLightState[i];
-          if (light.intensity <= 0) continue;
+          if (!light.enabled || light.intensity <= 0) {
+            spotLightsData[offset + 7] = 0;
+            continue;
+          }
 
           light.getWorldPosition(uniformsCache);
-          var offset = i * 16;
 
           // Row 0: pos.xyz, range
           spotLightsData[offset + 0] = uniformsCache[0];
@@ -309,6 +322,8 @@ function UeMaterial(data = {}) constructor {
           // Row 3: angle, penumbra, ...
           spotLightsData[offset + 12] = cos(light.angle);
           spotLightsData[offset + 13] = cos(light.angle * (1.0 - light.penumbra));
+        } else {
+          spotLightsData[offset + 7] = 0;
         }
       }
       shader_set_uniform_f_array(__cache.uniformSpotLightsDataLoc, spotLightsData);
@@ -318,14 +333,18 @@ function UeMaterial(data = {}) constructor {
     if (__cache.uniformHemiLightIntensityLoc != -1) {
       if (hemiLightCount > 0) {
         var light = hemiLightState[0];
-        var dir = global.UE_VEC3_TEMP1;
-        vec3_copy(dir, light.position);
-        vec3_normalize(dir);
+        if (light.enabled && light.intensity > 0) {
+          var dir = global.UE_VEC3_TEMP1;
+          vec3_copy(dir, light.position);
+          vec3_normalize(dir);
 
-        shader_set_uniform_f(__cache.uniformHemiLightDirLoc, dir[0], dir[1], dir[2]);
-        shader_set_uniform_f_array(__cache.uniformHemiLightSkyColorLoc, light.skyColor);
-        shader_set_uniform_f_array(__cache.uniformHemiLightGroundColorLoc, light.groundColor);
-        shader_set_uniform_f(__cache.uniformHemiLightIntensityLoc, light.intensity);
+          shader_set_uniform_f(__cache.uniformHemiLightDirLoc, dir[0], dir[1], dir[2]);
+          shader_set_uniform_f_array(__cache.uniformHemiLightSkyColorLoc, light.skyColor);
+          shader_set_uniform_f_array(__cache.uniformHemiLightGroundColorLoc, light.groundColor);
+          shader_set_uniform_f(__cache.uniformHemiLightIntensityLoc, real(light.intensity));
+        } else {
+          shader_set_uniform_f(__cache.uniformHemiLightIntensityLoc, 0.0);
+        }
       } else {
         shader_set_uniform_f(__cache.uniformHemiLightIntensityLoc, 0.0);
       }
@@ -340,7 +359,7 @@ function UeMaterial(data = {}) constructor {
 
     // Set standard uniforms from the pre-built list
     var stdU = __cache.uniformsStandard;
-    for (var i = 0, sl = array_length(stdU); i < sl; i++) {
+    for (var i = 0, sl = __cache.uniformsStandardCount; i < sl; i++) {
       var uInfo = stdU[i];
       var loc = uInfo[0];
       var key = uInfo[1];
@@ -353,13 +372,13 @@ function UeMaterial(data = {}) constructor {
           var tm = (renderer != undefined) ? renderer.toneMapping : global.UE_RENDERER_TONE_MAPPING;
           var _exp = (renderer != undefined) ? renderer.toneMappingExposure : global.UE_RENDERER_TONE_MAPPING_EXPOSURE;
           var tmEnabled = (toneMapped && tm != UE_TONE_MAPPING.NONE) ? 1.0 : 0.0;
-          val = [tm, _exp, tmEnabled];
+          val = vec3_set(global.UE_VEC3_TEMP0, tm, _exp, tmEnabled);
           break;
         case "mapFlags":
-          val = [__cache.hasMapsFlags.map, __cache.hasMapsFlags.alphaMap, __cache.hasMapsFlags.ormMap, __cache.hasMapsFlags.normalMap];
+          val = vec4_set(global.UE_VEC4_TEMP0, __cache.hasMapsFlags.map, __cache.hasMapsFlags.alphaMap, __cache.hasMapsFlags.ormMap, __cache.hasMapsFlags.normalMap);
           break;
         case "mapFlags2":
-          val = [__cache.hasMapsFlags.emissiveMap, __cache.hasMapsFlags.displacementMap, 0.0, 0.0];
+          val = vec4_set(global.UE_VEC4_TEMP1, __cache.hasMapsFlags.emissiveMap, __cache.hasMapsFlags.displacementMap, 0.0, 0.0);
           break;
       }
 
@@ -381,7 +400,7 @@ function UeMaterial(data = {}) constructor {
 
     // Set custom uniforms
     var uCached = __cache.uniformsCached;
-    for (var i = 0, il = array_length(uCached); i < il; i++) {
+    for (var i = 0, il = __cache.uniformsCachedCount; i < il; i++) {
       var uData = uCached[i];
       var uObj = uData[0];
       var loc = uData[1];
@@ -414,7 +433,7 @@ function UeMaterial(data = {}) constructor {
 
     // Set textures from cache
     var tCached = __cache.texturesCached;
-    for (var i = 0, tl = array_length(tCached); i < tl; i++) {
+    for (var i = 0, tl = __cache.texturesCachedCount; i < tl; i++) {
       var tData = tCached[i];
       var tex = tData[0];
       var sampler = tData[1];

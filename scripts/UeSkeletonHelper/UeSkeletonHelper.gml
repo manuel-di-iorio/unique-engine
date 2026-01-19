@@ -82,7 +82,7 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
             if (bone.parent != undefined && bone.parent[$ "isBone"]) {
                 var parent = bone.parent;
 
-                // Get world positions directly from matrices (faster than getWorldPosition)
+                // Get world positions directly from matrices
                 var bMat = bone.matrixWorld;
                 var pMat = parent.matrixWorld;
 

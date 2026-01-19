@@ -1,4 +1,6 @@
 function UeLineSegmentsGeometry(data = {}): UeGeometry(data) constructor {
+    self.format = global.UE_VFORMAT_PC;
+
     // Set default color and alpha
     self.__defColor = data[$ "color"] ?? c_white;
     self.__defAlpha = data[$ "alpha"] ?? 1;
@@ -9,8 +11,6 @@ function UeLineSegmentsGeometry(data = {}): UeGeometry(data) constructor {
         var geo = mesh.geometry;
         
         self.position = variable_clone(geo.position);
-        self.normal = geo.normal ? variable_clone(geo.normal) : undefined;
-        self.uv = geo.uv ? variable_clone(geo.uv) : undefined;
         self.color = geo.color ? variable_clone(geo.color) : undefined;
         self.index = geo.index ? variable_clone(geo.index) : undefined;
 
@@ -25,23 +25,12 @@ function UeLineSegmentsGeometry(data = {}): UeGeometry(data) constructor {
         
         var count = array_length(arr) / 3;
         
-        // Only re-allocate if size changed
-        if (self.normal == undefined || array_length(self.normal) != count * 3) {
-            self.normal = array_create(count * 3, 0);
+        var colArr = array_create(count * 2);
+        for (var i = 0; i < count; i++) {
+            colArr[i * 2] = self.__defColor;
+            colArr[i * 2 + 1] = self.__defAlpha;
         }
-        
-        if (self.uv == undefined || array_length(self.uv) != count * 2) {
-            self.uv = array_create(count * 2, 0);
-        }
-        
-        if (self.color == undefined || array_length(self.color) != count * 2) {
-            var colArr = array_create(count * 2);
-            for (var i = 0; i < count; i++) {
-                colArr[i * 2] = self.__defColor;
-                colArr[i * 2 + 1] = self.__defAlpha;
-            }
-            self.color = colArr;
-        }
+        self.color = colArr;
 
         build();
         return self;
@@ -50,16 +39,12 @@ function UeLineSegmentsGeometry(data = {}): UeGeometry(data) constructor {
     // Set per-vertex colors: flat array [r1,g1,b1,r2,g2,b2,...]
     function setColors(arr) {
         var count = min(array_length(self.position) / 3, array_length(arr) / 3);
-        
-        // Only re-allocate if size changed
-        if (self.color == undefined || array_length(self.color) != count * 2) {
-            self.color = array_create(count * 2);
-        }
-
+        var colArr = array_create(count * 2);
         for (var i = 0; i < count; i++) {
-            self.color[i * 2] = make_color_rgb(arr[i * 3], arr[i * 3 + 1], arr[i * 3 + 2]);
-            self.color[i * 2 + 1] = self.__defAlpha;
+            colArr[i * 2] = make_color_rgb(arr[i * 3], arr[i * 3 + 1], arr[i * 3 + 2]);
+            colArr[i * 2 + 1] = self.__defAlpha;
         }
+        self.color = colArr;
         build();
         return self;
     }

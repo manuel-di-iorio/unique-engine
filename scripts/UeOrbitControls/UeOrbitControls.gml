@@ -54,6 +54,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self._deltaAzimuth = 0;
     self._deltaElevation = 0;
     self._deltaPan = vec3_create();
+    self._needsUpdate = true;
 
     self.__scratchVec0 = vec3_create();
     self.__scratchVec1 = vec3_create();
@@ -68,6 +69,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
       self.radius = vec3_distance_to(camera.position, target);
       self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
       self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+      self._needsUpdate = true;
     }
 
     // Update spherical coordinates from current camera position and target
@@ -82,6 +84,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
       self._deltaAzimuth = 0;
       self._deltaElevation = 0;
       vec3_set(self._deltaPan, 0, 0, 0);
+      self._needsUpdate = true;
     }
 
     // Update the camera orbit. 
@@ -124,7 +127,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         }
 
         // Early exit if no input, no damping, no auto-rotate, and we're not currently transforming or interacting
-        if (!hasInput && !isDamping && !self.autoRotate && !self.transforming && !anyButtonPressed && !anyButtonReleased) {
+        if (!hasInput && !isDamping && !self.autoRotate && !self.transforming && !anyButtonPressed && !anyButtonReleased && !self._needsUpdate) {
             self._prevMouseX = mx;
             self._prevMouseY = my;
             return;
@@ -285,6 +288,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         self.camera.setPosition(cx, cy, cz);
         vec3_copy(self.camera.target, self.target);
         
+        self._needsUpdate = false;
         self._prevMouseX = mx;
         self._prevMouseY = my;
     }
