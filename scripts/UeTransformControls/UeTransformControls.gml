@@ -179,7 +179,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
     if (self.camera.matrixWorldInverse != undefined) {
       mat4_copy(self._mat0, self.camera.matrixWorld);
-      mat4_invert(self._mat0);
+      matrix_inverse(self._mat0, self._mat0);
       mat4_copy(self.camera.matrixWorldInverse, self._mat0);
     }
 
@@ -438,7 +438,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         if (self.object.parent != undefined) {
           var parentInv = self._mat0;
           mat4_copy(parentInv, self.object.parent.matrixWorld);
-          mat4_invert(parentInv);
+          matrix_inverse(parentInv, parentInv);
           vec3_apply_matrix4(newPos, parentInv);
         }
 
@@ -462,7 +462,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         if (self.object.parent != undefined) {
           var parentInv = self._mat0;
           mat4_copy(parentInv, self.object.parent.matrixWorld);
-          mat4_invert(parentInv);
+          matrix_inverse(parentInv, parentInv);
           mat4_set_position(parentInv, 0, 0, 0);
           vec3_apply_matrix4(moveVec, parentInv);
         }
@@ -475,7 +475,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         if (self.object.parent != undefined) {
           var parentInv = self._mat0;
           mat4_copy(parentInv, self.object.parent.matrixWorld);
-          mat4_invert(parentInv);
+          matrix_inverse(parentInv, parentInv);
           mat4_set_position(parentInv, 0, 0, 0);
           vec3_apply_matrix4(moveVec, parentInv);
         }
@@ -1154,7 +1154,7 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
 
     var invVP = self._mat0;
     mat4_copy(invVP, self._matViewProj);
-    mat4_invert(invVP);
+    matrix_inverse(invVP, invVP);
 
     var cx = ndcX;
     var cy = ndcY;

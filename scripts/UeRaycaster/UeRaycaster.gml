@@ -67,7 +67,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         } else if (camera.isOrthographicCamera) {
             var invProj = global.UE_MAT4_TEMP0;
             mat4_copy(invProj, camera.projectionMatrix);
-            mat4_invert(invProj);
+            matrix_inverse(invProj, invProj);
             
             var originVec = global.UE_VEC3_TEMP0;
             vec3_set(originVec, mouse.ndcX, mouse.ndcY, (camera.near + camera.far) / (camera.near - camera.far));

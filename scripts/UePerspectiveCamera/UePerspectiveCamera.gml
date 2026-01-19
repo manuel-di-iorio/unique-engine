@@ -22,7 +22,7 @@ function UePerspectiveCamera(data = {}): UeCamera(data) constructor {
       matrix_build_projection_perspective_fov(fov, aspect, near, far, projectionMatrix);
       
       mat4_copy(projectionMatrixInverse, projectionMatrix);
-      mat4_invert(projectionMatrixInverse);
+      matrix_inverse(projectionMatrixInverse, projectionMatrixInverse);
     	
       camera_set_proj_mat(camera, projectionMatrix);
     }

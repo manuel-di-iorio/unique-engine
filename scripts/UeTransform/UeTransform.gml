@@ -470,7 +470,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
 
         var inv = global.UE_MAT4_TEMP0;
         mat4_copy(inv, matrixWorld);
-        mat4_invert(inv);
+        matrix_inverse(inv, inv);
         vec3_apply_matrix4(vec, inv);
 
         return vec;

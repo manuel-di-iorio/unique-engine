@@ -284,7 +284,7 @@ function UeGeometry(data = {}) constructor {
         }
         
         if (normal != undefined || tangent != undefined) {
-            var normalMatrix = mat4_clone(matrix); mat4_invert(normalMatrix); mat4_transpose(normalMatrix);
+            var normalMatrix = mat4_clone(matrix); matrix_inverse(normalMatrix, normalMatrix); mat4_transpose(normalMatrix);
             
             if (normal != undefined) {
                 for (var i = 0, l = array_length(normal); i < l; i += 3) {

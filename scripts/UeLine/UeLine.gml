@@ -9,7 +9,7 @@ function UeLine(geometry = undefined, material = undefined, data = {}): UeMesh(g
         var object = self;
     
         var invWorld = mat4_clone(matrixWorld);
-        mat4_invert(invWorld);
+        matrix_inverse(invWorld, invWorld);
     
         var localRay = ray_clone(raycaster.ray);
         ray_apply_matrix4(localRay, invWorld);

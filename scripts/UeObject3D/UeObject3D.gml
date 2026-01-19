@@ -112,7 +112,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         
         // Convert child's world transform into local relative to this object
         var localMatrix = mat4_clone(matrixWorld);
-        mat4_invert(localMatrix);
+        matrix_inverse(localMatrix, localMatrix);
         mat4_multiply(localMatrix, child.matrixWorld);
     
         // Decompose localMatrix into TRS and assign to child

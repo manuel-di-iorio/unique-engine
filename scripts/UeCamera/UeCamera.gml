@@ -39,7 +39,7 @@ function UeCamera(data = {}): UeObject3D(data) constructor {
       
       // Get the inverted matrix from the lookat matrix
       mat4_copy(matrixWorld, matrixWorldInverse);
-      mat4_invert(matrixWorld);
+      matrix_inverse(matrixWorld, matrixWorld);
       
       camera_set_view_mat(camera, matrixWorldInverse);
     }

@@ -139,7 +139,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
 
     var matrixWorldInverse = global.UE_MAT4_TEMP0;
     mat4_copy(matrixWorldInverse, matrixWorld);
-    mat4_invert(matrixWorldInverse);
+    matrix_inverse(matrixWorldInverse, matrixWorldInverse);
 
     var localRay = ray_clone(raycaster.ray);
     ray_apply_matrix4(localRay, matrixWorldInverse);
