@@ -112,9 +112,6 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       // Skip invisible objects and their children
       if (!object.visible || !object.layers.test(cameraLayers)) continue;
 
-      // Update matrices for dynamic objects
-      if (object.matrixAutoUpdate && object.matrixWorldAutoUpdate) object.updateMatrixWorld();
-
       // Precompute distance to camera for LOD and transparency sorting
       // We use the world matrix position for accuracy even if parented
       var _mw = object.matrixWorld;
@@ -486,6 +483,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
     // Collect and classify all renderable objects
     if (camera.matrixAutoUpdate) camera.updateMatrixWorld();
+    
+    // Update the entire scene graph once before collection
+    // This avoids redundant recursive calls inside __collectObjectQueues
+    if (scene.matrixAutoUpdate && scene.matrixWorldAutoUpdate) scene.updateMatrixWorld();
 
     array_resize(__lights, 0);
     array_resize(__queueShadow, 0);
