@@ -21,7 +21,6 @@ mesh.setScale(200, 200, 200);
 
 mesh.traverse(function(submesh) {
   if (submesh[$ "geometry"] == undefined) return;
-  submesh.geometry.freeze();
   submesh.matrixAutoUpdate = false;
   submesh.updateMatrix();  
 });

@@ -22,9 +22,6 @@ airplaneMesh.traverse(function(mesh) {
     mesh.updateMatrix();
     mesh.matrixAutoUpdate = false;
     
-    var geometry = mesh[$ "geometry"];
-    if (geometry != undefined) geometry.freeze();
-    
     var material = mesh[$ "material"];
     if (material != undefined) {
         material.textures.map = texAirplane;

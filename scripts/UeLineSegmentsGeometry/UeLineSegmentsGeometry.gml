@@ -24,15 +24,24 @@ function UeLineSegmentsGeometry(data = {}): UeGeometry(data) constructor {
         self.position = arr;
         
         var count = array_length(arr) / 3;
-        self.normal = array_create(count * 3, 0);
-        self.uv = array_create(count * 2, 0);
         
-        var colArr = array_create(count * 2);
-        for (var i = 0; i < count; i++) {
-            colArr[i * 2] = self.__defColor;
-            colArr[i * 2 + 1] = self.__defAlpha;
+        // Only re-allocate if size changed
+        if (self.normal == undefined || array_length(self.normal) != count * 3) {
+            self.normal = array_create(count * 3, 0);
         }
-        self.color = colArr;
+        
+        if (self.uv == undefined || array_length(self.uv) != count * 2) {
+            self.uv = array_create(count * 2, 0);
+        }
+        
+        if (self.color == undefined || array_length(self.color) != count * 2) {
+            var colArr = array_create(count * 2);
+            for (var i = 0; i < count; i++) {
+                colArr[i * 2] = self.__defColor;
+                colArr[i * 2 + 1] = self.__defAlpha;
+            }
+            self.color = colArr;
+        }
 
         build();
         return self;
@@ -41,12 +50,16 @@ function UeLineSegmentsGeometry(data = {}): UeGeometry(data) constructor {
     // Set per-vertex colors: flat array [r1,g1,b1,r2,g2,b2,...]
     function setColors(arr) {
         var count = min(array_length(self.position) / 3, array_length(arr) / 3);
-        var colArr = array_create(count * 2);
-        for (var i = 0; i < count; i++) {
-            colArr[i * 2] = make_color_rgb(arr[i * 3], arr[i * 3 + 1], arr[i * 3 + 2]);
-            colArr[i * 2 + 1] = self.__defAlpha;
+        
+        // Only re-allocate if size changed
+        if (self.color == undefined || array_length(self.color) != count * 2) {
+            self.color = array_create(count * 2);
         }
-        self.color = colArr;
+
+        for (var i = 0; i < count; i++) {
+            self.color[i * 2] = make_color_rgb(arr[i * 3], arr[i * 3 + 1], arr[i * 3 + 2]);
+            self.color[i * 2 + 1] = self.__defAlpha;
+        }
         build();
         return self;
     }

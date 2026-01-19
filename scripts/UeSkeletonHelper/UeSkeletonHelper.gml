@@ -28,6 +28,11 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
 
     self._getBones(self.root, self.bones);
 
+    // Optimized arrays for updates
+    self.__positions = [];
+    self.__colors = [];
+    self.__needsUpdate = true;
+
     // Create geometry and material
     var geometry = new UeLineSegmentsGeometry();
     var material = new UeLineBasicMaterial({ color: c_white });
@@ -39,6 +44,10 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
 
     self.lineSegments = new UeLineSegments(geometry, material);
     self.add(self.lineSegments);
+
+    // The helper itself doesn't need to update its matrix every frame
+    // as it builds geometry in world space.
+    self.matrixAutoUpdate = false;
 
     /**
      * Defines the colors of the helper.
@@ -58,36 +67,54 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
      */
     function update() {
         gml_pragma("forceinline");
-        var positions = [];
-        var colors = [];
-
-        var bonePos = global.UE_VEC3_TEMP1;
-        var parentPos = global.UE_VEC3_TEMP2;
-
+        
+        if (!self.visible) return self;
+        
         var boneCount = array_length(self.bones);
+        if (boneCount == 0) return self;
+
+        var posIdx = 0;
+        var colIdx = 0;
+
         for (var i = 0; i < boneCount; i++) {
             var bone = self.bones[i];
 
             if (bone.parent != undefined && bone.parent[$ "isBone"]) {
                 var parent = bone.parent;
 
-                // Get world positions
-                bone.getWorldPosition(bonePos);
-                parent.getWorldPosition(parentPos);
+                // Get world positions directly from matrices (faster than getWorldPosition)
+                var bMat = bone.matrixWorld;
+                var pMat = parent.matrixWorld;
 
                 // Add segment from parent to bone
-                array_push(positions, parentPos[0], parentPos[1], parentPos[2]);
-                array_push(positions, bonePos[0], bonePos[1], bonePos[2]);
+                self.__positions[posIdx++] = pMat[12];
+                self.__positions[posIdx++] = pMat[13];
+                self.__positions[posIdx++] = pMat[14];
+                
+                self.__positions[posIdx++] = bMat[12];
+                self.__positions[posIdx++] = bMat[13];
+                self.__positions[posIdx++] = bMat[14];
 
                 // Add colors for the segment
-                array_push(colors, self.color1[0], self.color1[1], self.color1[2]);
-                array_push(colors, self.color2[0], self.color2[1], self.color2[2]);
+                self.__colors[colIdx++] = self.color1[0];
+                self.__colors[colIdx++] = self.color1[1];
+                self.__colors[colIdx++] = self.color1[2];
+                
+                self.__colors[colIdx++] = self.color2[0];
+                self.__colors[colIdx++] = self.color2[1];
+                self.__colors[colIdx++] = self.color2[2];
             }
         }
 
-        if (array_length(positions) > 0) {
-            self.lineSegments.geometry.setPositions(positions);
-            self.lineSegments.geometry.setColors(colors);
+        if (posIdx > 0) {
+            // Trim arrays if they were larger (though usually they stay same size)
+            if (array_length(self.__positions) != posIdx) {
+                array_resize(self.__positions, posIdx);
+                array_resize(self.__colors, colIdx);
+            }
+            
+            self.lineSegments.geometry.setPositions(self.__positions);
+            self.lineSegments.geometry.setColors(self.__colors);
         }
 
         return self;

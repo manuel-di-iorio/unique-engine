@@ -35,8 +35,6 @@ function UeSkeleton(bones = []) constructor {
             var bone = self.bones[i];
             
             // Calculate final bone matrix: BoneWorldMatrix * BoneOffsetMatrix
-            // Note: GameMaker's matrix_multiply(A, B) computes B * A.
-            // We want BoneWorld * Offset, so we pass (Offset, BoneWorld).
             matrix_multiply(bone.offsetMatrix, bone.matrixWorld, self._tempMatrix);
             
             // Copy the 16 elements of the calculated matrix into the flattened array

@@ -28,71 +28,60 @@ uniform float u_ueDisplacementBias;
 uniform float u_ueHasDisplacementMap;
 
 void main() {
-    vec3 pos = in_Position;
-    vec3 normal = in_Normal;
-    vec3 tangent = in_TextureCoord1.xyz;
+    vec4 localPos = vec4(in_Position, 1.0);
+    vec3 localNormal = in_Normal;
+    vec3 localTangent = in_TextureCoord1.xyz;
+
+    vec4 worldPos;
+    vec3 worldNormal;
+    vec3 worldTangent;
 
     // Skinning
     if (u_ueNumBones > 0.5) {
         ivec4 indices = ivec4(in_TextureCoord2 + 0.5);
         vec4 weights = in_TextureCoord3;
                 
-        vec4 skinnedPos = vec4(0.0);
-        vec3 skinnedNormal = vec3(0.0);
-        vec3 skinnedTangent = vec3(0.0);
+        worldPos = vec4(0.0);
+        worldNormal = vec3(0.0);
+        worldTangent = vec3(0.0);
 
         for (int i = 0; i < 4; ++i) {
-            int idx = indices[i];
             float w = weights[i];
             if (w > 0.0) {
-                mat4 m = u_ueBoneMatrices[idx];
-                skinnedPos += (m * vec4(pos, 1.0)) * w;
-                skinnedNormal += (mat3(m) * normal) * w;
-                skinnedTangent += (mat3(m) * tangent) * w;
+                mat4 m = u_ueBoneMatrices[indices[i]];
+                worldPos += (m * localPos) * w;
+                mat3 m3 = mat3(m);
+                worldNormal += (m3 * localNormal) * w;
+                worldTangent += (m3 * localTangent) * w;
             }
         }
-
-        pos = skinnedPos.xyz;
-        normal = normalize(skinnedNormal);
-        tangent = normalize(skinnedTangent);
-
+        worldNormal = normalize(worldNormal);
+        worldTangent = normalize(worldTangent);
+    } else {
+        worldPos = gm_Matrices[MATRIX_WORLD] * localPos;
+        mat3 worldMat3 = mat3(gm_Matrices[MATRIX_WORLD]);
+        worldNormal = normalize(worldMat3 * localNormal);
+        worldTangent = normalize(worldMat3 * localTangent);
     }
 
     // Vertex displacement
     if (u_ueHasDisplacementMap > 0.5 && abs(u_ueDisplacementScale) > 0.0001) {
         float h = texture2D(s_displacementMap, in_TextureCoord0).r;
-        pos += normal * (h * u_ueDisplacementScale + u_ueDisplacementBias);
+        worldPos.xyz += worldNormal * (h * u_ueDisplacementScale + u_ueDisplacementBias);
     }
 
-    vec4 worldPos;
-    if (u_ueNumBones > 0.5) {
-        worldPos = vec4(pos, 1.0);
-        // worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
-    } else {
-        worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
-    }
-
-    vWorldPosition  = worldPos.xyz;
-    
-    if (u_ueNumBones > 0.5) {
-        vWorldNormal = normalize(normal);
-        vWorldTangent.xyz = normalize(tangent);
-    } else {
-        vWorldNormal = normalize((gm_Matrices[MATRIX_WORLD] * vec4(in_Normal, 0.0)).xyz);
-        vWorldTangent.xyz = normalize((gm_Matrices[MATRIX_WORLD] * vec4(in_TextureCoord1.xyz, 0.0)).xyz);
-    }
-    
-    vTexcoord         = in_TextureCoord0;
-    vColour           = in_Colour;
-    vWorldTangent.w   = in_TextureCoord1.w;
+    vWorldPosition = worldPos.xyz;
+    vWorldNormal = worldNormal;
+    vWorldTangent = vec4(worldTangent, in_TextureCoord1.w);
+    vTexcoord = in_TextureCoord0;
+    vColour = in_Colour;
 
     vDirLightSpacePos = u_ueDirShadowMatrix * worldPos;
     
     // Apply a small normal bias to the spot light shadow position to prevent acne
     vec4 shadowWorldPos = worldPos;
-    shadowWorldPos.xyz += vWorldNormal * 0.15;
+    shadowWorldPos.xyz += worldNormal * 0.15;
     vSpotLightSpacePos = u_ueSpotShadowMatrix * shadowWorldPos;
 
-    gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(pos, 1.0);
     gl_Position = gm_Matrices[MATRIX_PROJECTION] * (gm_Matrices[MATRIX_VIEW] * worldPos);
 }

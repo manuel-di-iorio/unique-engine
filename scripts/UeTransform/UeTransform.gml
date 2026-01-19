@@ -73,12 +73,11 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         // Update world matrix if needed
         if (matrixWorldNeedsUpdate || force) {
 
-            // Root object
             if (parent == undefined) {
+                // Root object
                 mat4_copy(matrixWorld, matrix);
-            }
-            // Child object
-            else {
+            } else {
+                // Child object
                 matrix_multiply(matrix, parent.matrixWorld, matrixWorld);
             }
 
@@ -97,14 +96,14 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
             }
         }
 
-        // Update skeleton if present
-        if (self.skeleton != undefined) {
-            self.skeleton.update();
-        }
-
         // Propagate update to children
         for (var i = 0, len = array_length(children); i < len; i++) {
             children[i].updateMatrixWorld(force);
+        }
+
+        // Update skeleton if present (AFTER children/bones have updated their world matrices)
+        if (self.skeleton != undefined) {
+            self.skeleton.update();
         }
 
         return self;
@@ -147,7 +146,52 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
             }
         }
 
+        // Update skeleton if present
+        if (self.skeleton != undefined) {
+            self.skeleton.update();
+        }
+
         return self;
+    }
+
+    /**
+     * @description Forces an update of the local and world matrices on all objects (also static).
+     * @warning: this should only be called once on scene start when you want to globally update all matrices, local and world, even on static objects. An example would be that you have a scene with a lot of static objects that you have transformed and you don't want to call updateMatrix() singularly on all of them. Be aware that this is an expensive operation and prone to anti-pattern, use if you know what you are doing.
+     */
+    function forceUpdate() {
+        gml_pragma("forceinline");
+
+        // Update local matrix
+        mat4_compose(matrix, position, rotation, scale);
+
+        if (parent == undefined) {
+            // Root object
+            mat4_copy(matrixWorld, matrix);
+        } else {
+            // Child object
+            matrix_multiply(matrix, parent.matrixWorld, matrixWorld);
+        }
+
+        // Update cached world-space bounding sphere if geometry exists
+        var geometry = self[$ "geometry"];
+        if (geometry != undefined) {
+            var boundingSphere = geometry[$ "boundingSphere"];
+            if (boundingSphere != undefined) {
+                __intersectionSphere ??= sphere_create();
+                sphere_copy(__intersectionSphere, boundingSphere);
+                sphere_apply_matrix4(__intersectionSphere, matrixWorld);
+            }
+        }
+
+        // Update children
+        for (var i = 0, len = array_length(children); i < len; i++) {
+            children[i].forceUpdate();
+        }
+
+        // Update skeleton if present
+        if (self.skeleton != undefined) {
+            self.skeleton.update();
+        }
     }
 
     // -------------------------------------------------------------------------

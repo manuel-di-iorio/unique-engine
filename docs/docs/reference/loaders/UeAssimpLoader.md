@@ -17,7 +17,9 @@ new UeAssimpLoader(data = {})
 ```
 
 ### Parameters
-- `data`: (Optional) Initialization settings (currently reserved for future use).
+- `data`: (Optional) Initialization settings:
+    - `canFreeze`: (Boolean, default: `true`) If set to `true`, the loader will automatically call `vertex_freeze()` on all loaded geometries. This significantly improves rendering performance but makes the vertex buffer read-only (which is the standard for static or skinned meshes).
+    - `matrixAutoUpdate`: (Boolean, default: `true`) If set to `true`, all objects, meshes, and bones created by the loader will have `matrixAutoUpdate` enabled. Setting this to `false` can improve performance for static scenes where you manually manage matrix updates.
 
 ---
 

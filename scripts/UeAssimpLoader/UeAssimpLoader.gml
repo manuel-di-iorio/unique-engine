@@ -1,11 +1,44 @@
-function UeAssimpLoader(data = {}) constructor {
-  if (!ASSIMP_IsWorking()) ueError("Assimp extension is not working");
-
-  importer = ASSIMP_CreateImporter();
+/**
+ * UeAssimpLoader
+ * Loader for 3D models using the Assimp extension.
+ * @param {struct} [data] Configuration data
+  * @param {bool} [data.canFreeze=true] Whether to freeze the vertex buffers after loading for performance.
+  * @param {bool} [data.matrixAutoUpdate=true] Whether to automatically update matrices for loaded objects.
+  */
+ function UeAssimpLoader(data = {}) constructor {
+   if (!ASSIMP_IsWorking()) ueError("Assimp extension is not working");
+ 
+   self.canFreeze = data[$ "canFreeze"] ?? true;
+   self.matrixAutoUpdate = data[$ "matrixAutoUpdate"] ?? true;
+ 
+   importer = ASSIMP_CreateImporter();
   ASSIMP_BindImporter(importer);
-
   nodeMap = {};
   boneMap = {};
+
+  materialTypes = [
+    { name: "map", type: ASSIMP_TEXTURE_TYPE.DIFFUSE },
+    { name: "normalsMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
+    { name: "ambientOcclusionMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
+    { name: "emissiveMap", type: ASSIMP_TEXTURE_TYPE.EMISSIVE },
+    { name: "reflectionMap", type: ASSIMP_TEXTURE_TYPE.REFLECTION },
+    { name: "ambientMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT },
+    { name: "shininessMap", type: ASSIMP_TEXTURE_TYPE.SHININESS },
+    { name: "displacementMap", type: ASSIMP_TEXTURE_TYPE.DISPLACEMENT },
+    { name: "lightmapMap", type: ASSIMP_TEXTURE_TYPE.LIGHTMAP },
+    { name: "heightMap", type: ASSIMP_TEXTURE_TYPE.HEIGHT },
+    { name: "opacityMap", type: ASSIMP_TEXTURE_TYPE.OPACITY },
+    { name: "specularMap", type: ASSIMP_TEXTURE_TYPE.SPECULAR },
+    { name: "baseColorMap", type: ASSIMP_TEXTURE_TYPE.BASE_COLOR },
+    { name: "clearCotMap", type: ASSIMP_TEXTURE_TYPE.CLEARCOAT },
+    { name: "diffuseRoughnessMap", type: ASSIMP_TEXTURE_TYPE.DIFFUSE_ROUGHNESS },
+    { name: "emissionColorMap", type: ASSIMP_TEXTURE_TYPE.EMISSION_COLOR },
+    { name: "metalnessMap", type: ASSIMP_TEXTURE_TYPE.METALNESS },
+    { name: "normalsCameraMap", type: ASSIMP_TEXTURE_TYPE.NORMAL_CAMERA },
+    { name: "sheenMap", type: ASSIMP_TEXTURE_TYPE.SHEEN },
+    { name: "transmissionMap", type: ASSIMP_TEXTURE_TYPE.TRANSMISSION },
+    { name: "unknownMap", type: ASSIMP_TEXTURE_TYPE.UNKNOWN },
+  ];
 
   function load(fname) {
     gml_pragma("forceinline");
@@ -85,14 +118,14 @@ function UeAssimpLoader(data = {}) constructor {
     }
   }
 
-  function _getMatrix() {
+  function _getMatrix(target = undefined) {
     gml_pragma("forceinline");
-    return [
-      ASSIMP_GetMatrixA1(), ASSIMP_GetMatrixB1(), ASSIMP_GetMatrixC1(), ASSIMP_GetMatrixD1(),
-      ASSIMP_GetMatrixA2(), ASSIMP_GetMatrixB2(), ASSIMP_GetMatrixC2(), ASSIMP_GetMatrixD2(),
-      ASSIMP_GetMatrixA3(), ASSIMP_GetMatrixB3(), ASSIMP_GetMatrixC3(), ASSIMP_GetMatrixD3(),
-      ASSIMP_GetMatrixA4(), ASSIMP_GetMatrixB4(), ASSIMP_GetMatrixC4(), ASSIMP_GetMatrixD4()
-    ];
+    target ??= mat4_create();
+    target[0] = ASSIMP_GetMatrixA1(); target[1] = ASSIMP_GetMatrixB1(); target[2] = ASSIMP_GetMatrixC1(); target[3] = ASSIMP_GetMatrixD1();
+    target[4] = ASSIMP_GetMatrixA2(); target[5] = ASSIMP_GetMatrixB2(); target[6] = ASSIMP_GetMatrixC2(); target[7] = ASSIMP_GetMatrixD2();
+    target[8] = ASSIMP_GetMatrixA3(); target[9] = ASSIMP_GetMatrixB3(); target[10] = ASSIMP_GetMatrixC3(); target[11] = ASSIMP_GetMatrixD3();
+    target[12] = ASSIMP_GetMatrixA4(); target[13] = ASSIMP_GetMatrixB4(); target[14] = ASSIMP_GetMatrixC4(); target[15] = ASSIMP_GetMatrixD4();
+    return target;
   }
 
   function _buildSceneGraph(nodeId = -1) {
@@ -104,14 +137,13 @@ function UeAssimpLoader(data = {}) constructor {
     }
 
     var name = ASSIMP_GetNodeName();
-    ASSIMP_BindNodeMatrix();
-    var matrix = _getMatrix();
-
-    var object = new UeObject3D();
+    
+    var object = new UeObject3D({ matrixAutoUpdate: self.matrixAutoUpdate });
     object.name = name;
     nodeMap[$ name] = object;
 
-    mat4_copy(object.matrix, matrix);
+    ASSIMP_BindNodeMatrix();
+    _getMatrix(object.matrix);
     mat4_decompose(object.matrix, object.position, object.rotation, object.scale);
 
     var childCount = ASSIMP_GetNodeChildrenNum();
@@ -153,30 +185,6 @@ function UeAssimpLoader(data = {}) constructor {
   function _addTextures(modelPath, globalTextures, textureCache) {
     gml_pragma("forceinline");
     var textures = {};
-
-    var materialTypes = [
-      { name: "map", type: ASSIMP_TEXTURE_TYPE.DIFFUSE },
-      { name: "normalsMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
-      { name: "ambientOcclusionMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
-      { name: "emissiveMap", type: ASSIMP_TEXTURE_TYPE.EMISSIVE },
-      { name: "reflectionMap", type: ASSIMP_TEXTURE_TYPE.REFLECTION },
-      { name: "ambientMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT },
-      { name: "shininessMap", type: ASSIMP_TEXTURE_TYPE.SHININESS },
-      { name: "displacementMap", type: ASSIMP_TEXTURE_TYPE.DISPLACEMENT },
-      { name: "lightmapMap", type: ASSIMP_TEXTURE_TYPE.LIGHTMAP },
-      { name: "heightMap", type: ASSIMP_TEXTURE_TYPE.HEIGHT },
-      { name: "opacityMap", type: ASSIMP_TEXTURE_TYPE.OPACITY },
-      { name: "specularMap", type: ASSIMP_TEXTURE_TYPE.SPECULAR },
-      { name: "baseColorMap", type: ASSIMP_TEXTURE_TYPE.BASE_COLOR },
-      { name: "clearCotMap", type: ASSIMP_TEXTURE_TYPE.CLEARCOAT },
-      { name: "diffuseRoughnessMap", type: ASSIMP_TEXTURE_TYPE.DIFFUSE_ROUGHNESS },
-      { name: "emissionColorMap", type: ASSIMP_TEXTURE_TYPE.EMISSION_COLOR },
-      { name: "metalnessMap", type: ASSIMP_TEXTURE_TYPE.METALNESS },
-      { name: "normalsCameraMap", type: ASSIMP_TEXTURE_TYPE.NORMAL_CAMERA },
-      { name: "sheenMap", type: ASSIMP_TEXTURE_TYPE.SHEEN },
-      { name: "transmissionMap", type: ASSIMP_TEXTURE_TYPE.TRANSMISSION },
-      { name: "unknownMap", type: ASSIMP_TEXTURE_TYPE.UNKNOWN },
-    ];
 
     for (var i = 0, len = array_length(materialTypes); i < len; i++) {
       var materialType = materialTypes[i];
@@ -250,10 +258,10 @@ function UeAssimpLoader(data = {}) constructor {
   function _buildMesh(globalBoneData) {
     gml_pragma("forceinline");
     var hasBones = ASSIMP_MeshHasBones();
-    var geometry = new UeGeometry({ canFreeze: false });
+    var geometry = new UeGeometry({ canFreeze: self.canFreeze });
 
     // Set up vertex format
-    var mesh = new UeMesh(geometry);
+    var mesh = new UeMesh(geometry, { matrixAutoUpdate: self.matrixAutoUpdate });
     mesh.name = ASSIMP_GetMeshName();
     mesh.bindMode = hasBones ? "skinned" : "attached";
     
@@ -267,12 +275,13 @@ function UeAssimpLoader(data = {}) constructor {
     var vertexCount = ASSIMP_GetMeshVerticesNum();
 
     // Collect bone weights for each vertex if mesh has bones
-    var vertBones = undefined;
+    var vertIndices = undefined;
+    var vertWeights = undefined;
+    var vertCounts = undefined;
     if (hasBones) {
-      vertBones = array_create(vertexCount);
-      for (var v = 0; v < vertexCount; v++) {
-        vertBones[v] = { indices: [0, 0, 0, 0], weights: [0, 0, 0, 0], count: 0 };
-      }
+      vertIndices = array_create(vertexCount * 4, 0);
+      vertWeights = array_create(vertexCount * 4, 0);
+      vertCounts = array_create(vertexCount, 0);
 
       var boneCount = ASSIMP_GetMeshBonesNum();
       for (var b = 0; b < boneCount; b++) {
@@ -294,11 +303,12 @@ function UeAssimpLoader(data = {}) constructor {
           var vIdx = ASSIMP_GetBoneVertexIndex(w);
           var weight = ASSIMP_GetBoneVertexWeight(w);
 
-          var vbData = vertBones[vIdx];
-          if (vbData.count < 4) {
-            vbData.indices[vbData.count] = boneIdx;
-            vbData.weights[vbData.count] = weight;
-            vbData.count++;
+          var count = vertCounts[vIdx];
+          if (count < 4) {
+            var offset = (vIdx << 2) + count;
+            vertIndices[offset] = boneIdx;
+            vertWeights[offset] = weight;
+            vertCounts[vIdx]++;
           }
         }
       }
@@ -354,23 +364,27 @@ function UeAssimpLoader(data = {}) constructor {
         }
 
         if (hasBones) {
-          var vbData = vertBones[v];
-          
+          var offset = v << 2;
+          var w0 = vertWeights[offset];
+          var w1 = vertWeights[offset + 1];
+          var w2 = vertWeights[offset + 2];
+          var w3 = vertWeights[offset + 3];
+
           // Normalize weights to ensure they sum to 1.0
-          var totalWeight = vbData.weights[0] + vbData.weights[1] + vbData.weights[2] + vbData.weights[3];
+          var totalWeight = w0 + w1 + w2 + w3;
           if (totalWeight > 0.0) {
             var invWeight = 1.0 / totalWeight;
-            vbData.weights[0] *= invWeight;
-            vbData.weights[1] *= invWeight;
-            vbData.weights[2] *= invWeight;
-            vbData.weights[3] *= invWeight;
+            w0 *= invWeight;
+            w1 *= invWeight;
+            w2 *= invWeight;
+            w3 *= invWeight;
           } else {
             // If no weights, assign to root bone (index 0) with full weight
-            vbData.weights[0] = 1.0;
+            w0 = 1.0;
           }
 
-          vertex_float4(vb, vbData.indices[0], vbData.indices[1], vbData.indices[2], vbData.indices[3]);
-          vertex_float4(vb, vbData.weights[0], vbData.weights[1], vbData.weights[2], vbData.weights[3]);
+          vertex_float4(vb, vertIndices[offset], vertIndices[offset + 1], vertIndices[offset + 2], vertIndices[offset + 3]);
+          vertex_float4(vb, w0, w1, w2, w3);
         } else {
           vertex_float4(vb, 0, 0, 0, 0);
           vertex_float4(vb, 0, 0, 0, 0);
@@ -379,6 +393,7 @@ function UeAssimpLoader(data = {}) constructor {
     }
 
     vertex_end(vb);
+    if (self.canFreeze) vertex_freeze(vb);
 
     // Store the bounding box
     geometry.boundingBox = box3_create(
@@ -441,7 +456,8 @@ function UeAssimpLoader(data = {}) constructor {
       var bone = new UeBone({
         name: data.name,
         offsetMatrix: data.offsetMatrix,
-        index: i
+        index: i,
+        matrixAutoUpdate: true // Bones should always auto-update if they are animated
       });
 
       // Copy transform
@@ -495,39 +511,36 @@ function UeAssimpLoader(data = {}) constructor {
 
         // Position keys
         var posCount = ASSIMP_GetNodeAnimPositionKeysNum();
+        track.positionKeys = array_create(posCount * 4);
         for (var k = 0; k < posCount; k++) {
-          var time = ASSIMP_GetNodeAnimPositionKeyTime(k);
-          var val = vec3_create(
-            ASSIMP_GetNodeAnimPositionKeyValueX(k),
-            ASSIMP_GetNodeAnimPositionKeyValueY(k),
-            ASSIMP_GetNodeAnimPositionKeyValueZ(k)
-          );
-          array_push(track.positionKeys, [time, val]);
+          var idx = k << 2;
+          track.positionKeys[idx] = ASSIMP_GetNodeAnimPositionKeyTime(k);
+          track.positionKeys[idx + 1] = ASSIMP_GetNodeAnimPositionKeyValueX(k);
+          track.positionKeys[idx + 2] = ASSIMP_GetNodeAnimPositionKeyValueY(k);
+          track.positionKeys[idx + 3] = ASSIMP_GetNodeAnimPositionKeyValueZ(k);
         }
 
         // Rotation keys
         var rotCount = ASSIMP_GetNodeAnimRotationKeysNum();
+        track.rotationKeys = array_create(rotCount * 5);
         for (var k = 0; k < rotCount; k++) {
-          var time = ASSIMP_GetNodeAnimRotationKeyTime(k);
-          var val = quat_create(
-            ASSIMP_GetNodeAnimRotationKeyQuaternionX(k),
-            ASSIMP_GetNodeAnimRotationKeyQuaternionY(k),
-            ASSIMP_GetNodeAnimRotationKeyQuaternionZ(k),
-            ASSIMP_GetNodeAnimRotationKeyQuaternionW(k)
-          );
-          array_push(track.rotationKeys, [time, val]);
+          var idx = k * 5;
+          track.rotationKeys[idx] = ASSIMP_GetNodeAnimRotationKeyTime(k);
+          track.rotationKeys[idx + 1] = ASSIMP_GetNodeAnimRotationKeyQuaternionX(k);
+          track.rotationKeys[idx + 2] = ASSIMP_GetNodeAnimRotationKeyQuaternionY(k);
+          track.rotationKeys[idx + 3] = ASSIMP_GetNodeAnimRotationKeyQuaternionZ(k);
+          track.rotationKeys[idx + 4] = ASSIMP_GetNodeAnimRotationKeyQuaternionW(k);
         }
 
         // Scale keys
         var scaleCount = ASSIMP_GetNodeAnimScalingKeysNum();
+        track.scaleKeys = array_create(scaleCount * 4);
         for (var k = 0; k < scaleCount; k++) {
-          var time = ASSIMP_GetNodeAnimScalingKeyTime(k);
-          var val = vec3_create(
-            ASSIMP_GetNodeAnimScalingKeyValueX(k),
-            ASSIMP_GetNodeAnimScalingKeyValueY(k),
-            ASSIMP_GetNodeAnimScalingKeyValueZ(k)
-          );
-          array_push(track.scaleKeys, [time, val]);
+          var idx = k << 2;
+          track.scaleKeys[idx] = ASSIMP_GetNodeAnimScalingKeyTime(k);
+          track.scaleKeys[idx + 1] = ASSIMP_GetNodeAnimScalingKeyValueX(k);
+          track.scaleKeys[idx + 2] = ASSIMP_GetNodeAnimScalingKeyValueY(k);
+          track.scaleKeys[idx + 3] = ASSIMP_GetNodeAnimScalingKeyValueZ(k);
         }
 
         anim.addTrack(track);
