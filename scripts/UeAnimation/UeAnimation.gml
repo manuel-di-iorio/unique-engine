@@ -50,8 +50,6 @@ function UeAnimation(name, duration, ticksPerSecond = 24) constructor {
                     if (track.__rotation != undefined && array_length(track.rotationKeys) > 1) quat_copy(target.rotation, track.__rotation);
                     if (track.__scale != undefined && array_length(track.scaleKeys) > 1) vec3_copy(target.scale, track.__scale);
                 }
-
-                target.updateMatrixWorld(true);
             }
         }
     }

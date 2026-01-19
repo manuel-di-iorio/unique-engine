@@ -31,10 +31,6 @@ function UeSkeleton(bones = []) constructor {
             self.boneMatrices = array_create(boneCount * 16, 0);
         }
 
-        static debugTimer = 0;
-        debugTimer++;
-        var doDebug = (debugTimer % 120 == 0); // Log every ~2 seconds (at 60fps)
-        
         for (var i = 0; i < boneCount; i++) {
             var bone = self.bones[i];
             

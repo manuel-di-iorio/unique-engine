@@ -27,12 +27,13 @@ Skeletal animation allows for deforming a mesh through a hierarchy of bones (`Ue
 
 ## Example: Playing an Animation
 
-To play an animation on an imported model in GameMaker:
+To play an animation on an imported model:
 
 ```gml
 // --- Create Event ---
 // Load a model with animations
-model = loader.load("character.fbx");
+model = assimpLoader.load("character.fbx");
+modelRoot = model.root;
 
 // Get the desired animation
 anim = model.animations[$ "Animation0"];
@@ -40,11 +41,10 @@ currentTime = 0;
 
 // --- Step Event ---
 // Update the animation time using delta_time (converted to seconds)
-var deltaTime = delta_time / 1000000;
-currentTime += deltaTime;
+currentTime += delta_time / 1000000;
 
 // Evaluate the animation and apply transforms to the model hierarchy
-anim.evaluate(currentTime, model);
+anim.evaluate(currentTime, modelRoot);
 ```
 
 ## Data Structure

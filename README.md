@@ -26,6 +26,7 @@ Links to the free 3D models used in the examples:
 - https://free3d.com/3d-model/cat-v1--522281.html
 - https://sketchfab.com/3d-models/pbr-mech-practice-be1e6f50f2c34a5199fd73291389ca20
 - https://kenney.nl/assets/holiday-kit (for the snow scene)
+- https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0 (Animated models)
 
 Music included in the Platform demo scene (Pixabay.com):
 - Background Music by its_tigri
