@@ -10,9 +10,9 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
     self.isSkeletonHelper = true;
     self.type = "SkeletonHelper";
 
-    // Colors as [r, g, b] in 0-255 range
-    self.color1 = [0, 0, 255]; // Default Blue
-    self.color2 = [0, 255, 0]; // Default Green
+    // Colors for the helper lines
+    self.color1 = data[$ "color1"] ?? c_blue;
+    self.color2 = data[$ "color2"] ?? c_lime;
 
     /**
      * Internal helper to find all bones in the hierarchy.
@@ -32,6 +32,8 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
     self.__positions = [];
     self.__colors = [];
     self.__needsUpdate = true;
+    self.__colorsDirty = true;
+    self.__lastBonesVersionSum = -1;
 
     // Create geometry and material
     var geometry = new UeLineSegmentsGeometry();
@@ -56,8 +58,11 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
      * @returns {UeSkeletonHelper}
      */
     function setColors(color1, color2) {
-        self.color1 = [color_get_red(color1), color_get_green(color1), color_get_blue(color1)];
-        self.color2 = [color_get_red(color2), color_get_green(color2), color_get_blue(color2)];
+        if (self.color1 != color1 || self.color2 != color2) {
+            self.color1 = color1;
+            self.color2 = color2;
+            self.__colorsDirty = true;
+        }
         return self;
     }
 
@@ -73,8 +78,38 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
         var boneCount = array_length(self.bones);
         if (boneCount == 0) return self;
 
+        // 1. Check if anything actually changed
+        var _versionSum = 0;
+        for (var i = 0; i < boneCount; i++) {
+            _versionSum += self.bones[i].version;
+        }
+
+        if (_versionSum == self.__lastBonesVersionSum && !self.__colorsDirty) {
+            return self;
+        }
+        
+        var _posDirty = (_versionSum != self.__lastBonesVersionSum);
+        self.__lastBonesVersionSum = _versionSum;
+
+        // 2. Pre-resize arrays if needed to avoid dynamic allocations in the loop
+        var segmentCount = 0;
+        for (var i = 0; i < boneCount; i++) {
+            if (self.bones[i].parent != undefined && self.bones[i].parent[$ "isBone"]) {
+                segmentCount++;
+            }
+        }
+        
+        var posLen = segmentCount * 6; // 2 vertices * 3 coords
+        var colLen = segmentCount * 4; // 2 vertices * (color + alpha)
+        
+        if (array_length(self.__positions) != posLen) array_resize(self.__positions, posLen);
+        if (array_length(self.__colors) != colLen) array_resize(self.__colors, colLen);
+
         var posIdx = 0;
         var colIdx = 0;
+        
+        var c1 = self.color1;
+        var c2 = self.color2;
 
         for (var i = 0; i < boneCount; i++) {
             var bone = self.bones[i];
@@ -82,41 +117,50 @@ function UeSkeletonHelper(object, data = {}): UeObject3D(data) constructor {
             if (bone.parent != undefined && bone.parent[$ "isBone"]) {
                 var parent = bone.parent;
 
-                // Get world positions directly from matrices
-                var bMat = bone.matrixWorld;
-                var pMat = parent.matrixWorld;
+                if (_posDirty) {
+                    var bMat = bone.matrixWorld;
+                    var pMat = parent.matrixWorld;
 
-                // Add segment from parent to bone
-                self.__positions[posIdx++] = pMat[12];
-                self.__positions[posIdx++] = pMat[13];
-                self.__positions[posIdx++] = pMat[14];
-                
-                self.__positions[posIdx++] = bMat[12];
-                self.__positions[posIdx++] = bMat[13];
-                self.__positions[posIdx++] = bMat[14];
+                    // Add segment from parent to bone
+                    self.__positions[posIdx]     = pMat[12];
+                    self.__positions[posIdx + 1] = pMat[13];
+                    self.__positions[posIdx + 2] = pMat[14];
+                    
+                    self.__positions[posIdx + 3] = bMat[12];
+                    self.__positions[posIdx + 4] = bMat[13];
+                    self.__positions[posIdx + 5] = bMat[14];
+                }
+                posIdx += 6;
 
-                // Add colors for the segment
-                self.__colors[colIdx++] = self.color1[0];
-                self.__colors[colIdx++] = self.color1[1];
-                self.__colors[colIdx++] = self.color1[2];
-                
-                self.__colors[colIdx++] = self.color2[0];
-                self.__colors[colIdx++] = self.color2[1];
-                self.__colors[colIdx++] = self.color2[2];
+                if (self.__colorsDirty) {
+                    // Add raw colors for the segment [color, alpha]
+                    self.__colors[colIdx]     = c1;
+                    self.__colors[colIdx + 1] = 1.0;
+                    
+                    self.__colors[colIdx + 2] = c2;
+                    self.__colors[colIdx + 3] = 1.0;
+                }
+                colIdx += 4;
             }
         }
 
         if (posIdx > 0) {
-            // Trim arrays if they were larger (though usually they stay same size)
-            if (array_length(self.__positions) != posIdx) {
-                array_resize(self.__positions, posIdx);
-                array_resize(self.__colors, colIdx);
-            }
+            // Update geometry attributes separately as requested
+            // This avoids double build if only one changes, or double array work
+            var _geo = self.lineSegments.geometry;
             
-            self.lineSegments.geometry.setPositions(self.__positions);
-            self.lineSegments.geometry.setColors(self.__colors);
+            if (_posDirty && self.__colorsDirty) {
+                // If both changed, we can use the batch update to call build() only once
+                _geo.setPositions(self.__positions, false);
+                _geo.setRawColors(self.__colors, true);
+            } else if (_posDirty) {
+                _geo.setPositions(self.__positions, true);
+            } else if (self.__colorsDirty) {
+                _geo.setRawColors(self.__colors, true);
+            }
         }
 
+        self.__colorsDirty = false;
         return self;
     }
 
