@@ -38,6 +38,16 @@ new UeRenderer(data = {})
 | `toneMapping` | `number`  | `UE_TONE_MAPPING.NONE` | Active tone mapping algorithm |
 | `toneMappingExposure` | `number` | `1.0` | Active exposure level |
 
+## 💡 Optimized Lighting System
+
+The renderer uses a high-performance lighting system designed to minimize state changes and redundant work:
+
+- **Numeric Hashing**: Instead of string-based hashing, the renderer uses a 32-bit FNV-1a numeric hash to detect light state changes (position, color, intensity, etc.).
+- **Leveled Versioning**: Lights track their own `version` (from [UeTransform](./UeTransform.md)) and `paramsVersion` (from [UeLight](../lights/UeLight.md)). The renderer only repacks light data into GPU buffers when these versions change.
+- **Unified Light Pass**: Hashing and light classification are performed in a single loop traversal.
+- **Direct Memory Access**: The renderer accesses world matrices directly, avoiding high-level function calls during the hot rendering loop.
+- **Shadow Index Caching**: The renderer caches the index of the primary shadow caster to avoid rescanning the light list every frame.
+
 ---
 
 ## 🏗️ Rendering Paths

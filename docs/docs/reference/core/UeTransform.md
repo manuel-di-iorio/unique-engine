@@ -34,6 +34,7 @@ new UeTransform(data = {})
 | `up` | `vec3` | `global.UE_DEFAULT_UP` | Local up direction |
 | `matrix` | `mat4` | | Local transformation matrix |
 | `matrixWorld` | `mat4` | | World transformation matrix |
+| `version` | `number` | `0` | Increments whenever the world matrix is updated. Used for performance tracking. |
 | `parent` | `UeTransform` | `undefined` | Parent transform |
 | `children` | `array` | `[]` | Child transforms |
 | `matrixAutoUpdate` | `boolean` | `true` | If true, recomputes local matrix every frame if needed |

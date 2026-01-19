@@ -46,6 +46,9 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
     /// Marks whether the world matrix needs updating
     matrixWorldNeedsUpdate = false;
 
+    /// Versioning for transform updates
+    version = 0;
+
     // === Cached intersection sphere (world space) ===
     __intersectionSphere = undefined;
 
@@ -82,6 +85,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
             }
 
             matrixWorldNeedsUpdate = false;
+            self.version++;
             force = true;
 
             // Update cached world-space bounding sphere if geometry exists

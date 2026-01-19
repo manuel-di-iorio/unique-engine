@@ -22,7 +22,8 @@ Constructs a new base light. This is typically not instantiated directly; use on
 | `type`      | `string`  | `Light`     | Object type                                    |
 | `name`      | `string`  | undefined   | Object name (optional)                         |
 | `lightType` | `string`  | `"Light"`   | Specific light type (`"AmbientLight"`, etc.)   |
-| `intensity` | `number`  | `1`         | Brightness multiplier for this light           |
+| `intensity` | `number` | `1`         | Brightness multiplier for this light           |
+| `paramsVersion` | `number` | `0` | Increments whenever light parameters change. |
 | `enabled`   | `boolean` | `true`      | Whether the light is currently active          |
 | `color`     | `array`   | `[0.5, 0.5, 0.5]` | RGB color as normalized array `[r, g, b]`      |
 
@@ -30,6 +31,12 @@ Constructs a new base light. This is typically not instantiated directly; use on
 
 ### `.setColor(color)`
 Sets the RGB color of the light. Accepts a GM color constant (e.g., `c_red`) or an `[r, g, b]` array.
+
+### `.setIntensity(intensity)`
+Sets the brightness multiplier for this light.
+
+### `.setEnabled(enabled)`
+Enables or disables the light.
 
 ### `.toJSON()`
 Returns an object representing this light's properties.

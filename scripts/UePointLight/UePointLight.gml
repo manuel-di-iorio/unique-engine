@@ -15,6 +15,18 @@ function UePointLight(_color = c_white, _intensity = 1, _distance = 500, _decay 
     self.distance = _distance;
     self.decay = _decay;
 
+    static setDistance = function(_distance) {
+      gml_pragma("forceinline");
+      distance = _distance;
+      paramsVersion++;
+    }
+
+    static setDecay = function(_decay) {
+      gml_pragma("forceinline");
+      decay = _decay;
+      paramsVersion++;
+    }
+
     /**
      * @property {Real} power The light's power measured in lumens.
      * Changing the power will also change the light's intensity.

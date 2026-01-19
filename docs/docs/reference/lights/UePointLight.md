@@ -52,3 +52,9 @@ Returns the light's power.
 
 ### `.setPower(power)`
 Sets the light's power.
+
+### `.setDistance(distance)`
+Sets the maximum range of the light.
+
+### `.setDecay(decay)`
+Sets the amount the light dims along the distance of the light.

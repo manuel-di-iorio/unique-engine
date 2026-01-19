@@ -4,12 +4,26 @@ function UeLight(data = {}): UeObject3D(data) constructor {
   lightType = "Light";
   intensity = data[$ "intensity"] ?? 1;
   enabled = data[$ "enabled"] ?? true;
+  paramsVersion = 0;
   range = undefined;
   target = undefined;
   
   function setColor(_color) {
     gml_pragma("forceinline");
     color = [color_get_red(_color) / 255, color_get_green(_color) / 255, color_get_blue(_color) / 255];
+    paramsVersion++;
+  }
+
+  function setIntensity(_intensity) {
+    gml_pragma("forceinline");
+    intensity = _intensity;
+    paramsVersion++;
+  }
+
+  function setEnabled(_enabled) {
+    gml_pragma("forceinline");
+    enabled = _enabled;
+    paramsVersion++;
   }
   
   function toJSON() {

@@ -118,6 +118,8 @@ enum UE_RENDER_PATH {
 
 // Internal globals
 global.UE_RENDERER_LIGHT_STATE = array_create(9);
+global.UE_MAX_POINT_LIGHTS = 8;
+global.UE_MAX_SPOT_LIGHTS = 8;
 
 enum UE_RENDERER_LIGHT_STATE_ENUM {
     AMBIENT,

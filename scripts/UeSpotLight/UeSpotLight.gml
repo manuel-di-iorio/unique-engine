@@ -20,6 +20,30 @@ function UeSpotLight(_color = c_white, _intensity = 100, _distance = 20, _angle 
   self.penumbra = _penumbra;
   self.decay = _decay;
 
+  static setDistance = function(_distance) {
+    gml_pragma("forceinline");
+    distance = _distance;
+    paramsVersion++;
+  }
+
+  static setDecay = function(_decay) {
+    gml_pragma("forceinline");
+    decay = _decay;
+    paramsVersion++;
+  }
+
+  static setAngle = function(_angle) {
+    gml_pragma("forceinline");
+    angle = _angle;
+    paramsVersion++;
+  }
+
+  static setPenumbra = function(_penumbra) {
+    gml_pragma("forceinline");
+    penumbra = _penumbra;
+    paramsVersion++;
+  }
+
   // Target is an Object3D that the light points at (default: origin)
   target = new UeObject3D({ x: data[$ "xt"] ?? 0, y: data[$ "yt"] ?? 0, z: data[$ "zt"] ?? 0 });
 

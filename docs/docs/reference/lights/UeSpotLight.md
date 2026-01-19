@@ -72,3 +72,15 @@ Returns the light's power.
 
 ### `.setPower(power)`
 Sets the light's power.
+
+### `.setDistance(distance)`
+Sets the maximum range of the light.
+
+### `.setDecay(decay)`
+Sets the amount the light dims along the distance of the light.
+
+### `.setAngle(angle)`
+Sets the maximum angle of light dispersion from its direction (in degrees).
+
+### `.setPenumbra(penumbra)`
+Sets the percent of the spotlight cone that is attenuated due to penumbra.

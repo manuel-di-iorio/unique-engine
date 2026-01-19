@@ -228,7 +228,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   }
 
   __lightStateVersion = 0;
-  __lastLightHash = "";
+  __lastLightHash = 0; // Numeric hash
 
   // Aggregate light data from scene lights
   function __buildLightState() {
@@ -237,38 +237,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     var len = array_length(lights);
     var lightState = global.UE_RENDERER_LIGHT_STATE;
     
-    // Check if something changed (count, IDs, and world positions/colors)
-    var _newHash = string(len); 
-    for (var i = 0; i < len; i++) {
-        var l = lights[i];
-        if (!l.enabled) continue;
-        
-        var _mw = l.matrixWorld;
-        _newHash += string(l.id) + string(_mw[12]) + string(_mw[13]) + string(_mw[14]) + string(l.intensity) + string(l.color[0]) + string(l.color[1]) + string(l.color[2]);
-        
-        if (l.lightType == "SpotLight" || l.lightType == "DirectionalLight") {
-            var _tmw = l.target.matrixWorld;
-            _newHash += string(_tmw[12]) + string(_tmw[13]) + string(_tmw[14]);
-        }
-        
-        if (l.lightType == "PointLight" || l.lightType == "SpotLight") {
-            _newHash += string(l.distance) + string(l.decay);
-        }
-        
-        if (l.lightType == "SpotLight") {
-            _newHash += string(l.angle) + string(l.penumbra);
-        }
-        
-        if (l.lightType == "HemisphereLight") {
-            _newHash += string(l.skyColor[0]) + string(l.skyColor[1]) + string(l.skyColor[2]);
-            _newHash += string(l.groundColor[0]) + string(l.groundColor[1]) + string(l.groundColor[2]);
-        }
-    }
-
-    if (_newHash == self.__lastLightHash) return;
-    self.__lastLightHash = _newHash;
-    self.__lightStateVersion++;
-
+    // 1. Unified loop for hashing and state classification
+    var _newHash = 2166136261; // FNV-1a offset basis
+    
     var ambientState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.AMBIENT];
     ambientState[0] = 0; ambientState[1] = 0; ambientState[2] = 0;
 
@@ -278,83 +249,104 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     var hemiLightState = lightState[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT];
 
     var dIdx = 0, pIdx = 0, sIdx = 0, hIdx = 0;
-
+    
     for (var i = 0; i < len; i++) {
-      var l = lights[i];
-      if (!l.enabled) continue;
+        var l = lights[i];
+        if (!l.enabled) continue;
+        
+        // FNV-1a hash update (numeric)
+        _newHash = ((_newHash ^ l.id) * 16777619) & 0xFFFFFFFF;
+        _newHash = ((_newHash ^ l.version) * 16777619) & 0xFFFFFFFF;
+        _newHash = ((_newHash ^ l.paramsVersion) * 16777619) & 0xFFFFFFFF;
 
-      switch (l.lightType) {
-        case "AmbientLight":
-          // Accumulate ambient light contributions
-          ambientState[0] += l.color[0] * l.intensity;
-          ambientState[1] += l.color[1] * l.intensity;
-          ambientState[2] += l.color[2] * l.intensity;
-          break;
-
-        case "DirectionalLight": directionalState[dIdx++] = l; break;
-        case "PointLight": pointLightState[pIdx++] = l; break;
-        case "SpotLight": spotLightState[sIdx++] = l; break;
-        case "HemisphereLight": hemiLightState[hIdx++] = l; break;
-      }
+        // Classify and accumulate
+        switch (l.lightType) {
+            case "AmbientLight":
+                ambientState[0] += l.color[0] * l.intensity;
+                ambientState[1] += l.color[1] * l.intensity;
+                ambientState[2] += l.color[2] * l.intensity;
+                break;
+            case "DirectionalLight": directionalState[dIdx++] = l; break;
+            case "PointLight": pointLightState[pIdx++] = l; break;
+            case "SpotLight": spotLightState[sIdx++] = l; break;
+            case "HemisphereLight": hemiLightState[hIdx++] = l; break;
+        }
     }
+
+    if (_newHash == self.__lastLightHash) return;
+    self.__lastLightHash = _newHash;
+    self.__lightStateVersion++;
 
     global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.DIRECTIONAL_COUNT] = dIdx;
     global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.POINT_LIGHT_COUNT] = pIdx;
     global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.SPOT_LIGHT_COUNT] = sIdx;
     global.UE_RENDERER_LIGHT_STATE[UE_RENDERER_LIGHT_STATE_ENUM.HEMI_LIGHT_COUNT] = hIdx;
 
-    // Clamp ambient light to prevent over-exposure
+    // Clamp ambient light
     ambientState[0] = clamp(ambientState[0], 0, 1);
     ambientState[1] = clamp(ambientState[1], 0, 1);
     ambientState[2] = clamp(ambientState[2], 0, 1);
 
-    // Pre-pack light data for shaders to avoid doing it per-material
-    var uniformsCache = global.UE_VEC3_TEMP3;
+    // 2. Pre-pack light data for shaders (Optimized with direct matrix access and versioning)
+    var _maxPoints = global.UE_MAX_POINT_LIGHTS;
+    var _maxSpots = global.UE_MAX_SPOT_LIGHTS;
 
     // --- Point Lights Data ---
     var pointLightsData = global.UE_POINT_LIGHTS_DATA_BUFFER;
-    for (var i = 0; i < 8; i++) {
+    for (var i = 0; i < _maxPoints; i++) {
         var offset = i * 16;
         if (i < pIdx) {
-            var light = pointLightState[i];
-            light.getWorldPosition(uniformsCache);
-            pointLightsData[offset + 0] = uniformsCache[0];
-            pointLightsData[offset + 1] = uniformsCache[1];
-            pointLightsData[offset + 2] = uniformsCache[2];
-            pointLightsData[offset + 3] = light.distance;
-            pointLightsData[offset + 4] = light.color[0];
-            pointLightsData[offset + 5] = light.color[1];
-            pointLightsData[offset + 6] = light.color[2];
-            pointLightsData[offset + 7] = light.intensity;
-            pointLightsData[offset + 8] = light.decay;
+            var l = pointLightState[i];
+            // Only repack if version changed
+            if (l.version != (l[$ "__cachedV"] ?? -1) || l.paramsVersion != (l[$ "__cachedPV"] ?? -1)) {
+                var _mw = l.matrixWorld;
+                pointLightsData[offset + 0] = _mw[12];
+                pointLightsData[offset + 1] = _mw[13];
+                pointLightsData[offset + 2] = _mw[14];
+                pointLightsData[offset + 3] = l.distance;
+                pointLightsData[offset + 4] = l.color[0];
+                pointLightsData[offset + 5] = l.color[1];
+                pointLightsData[offset + 6] = l.color[2];
+                pointLightsData[offset + 7] = l.intensity;
+                pointLightsData[offset + 8] = l.decay;
+                l.__cachedV = l.version;
+                l.__cachedPV = l.paramsVersion;
+            }
         } else {
-            pointLightsData[offset + 7] = 0;
+            pointLightsData[offset + 7] = 0; // Intensity = 0
         }
     }
 
     // --- Spot Lights Data ---
     var spotLightsData = global.UE_SPOT_LIGHTS_DATA_BUFFER;
-    for (var i = 0; i < 8; i++) {
+    for (var i = 0; i < _maxSpots; i++) {
         var offset = i * 16;
         if (i < sIdx) {
-            var light = spotLightState[i];
-            light.getWorldPosition(uniformsCache);
-            spotLightsData[offset + 0] = uniformsCache[0];
-            spotLightsData[offset + 1] = uniformsCache[1];
-            spotLightsData[offset + 2] = uniformsCache[2];
-            spotLightsData[offset + 3] = light.distance;
-            spotLightsData[offset + 4] = light.color[0];
-            spotLightsData[offset + 5] = light.color[1];
-            spotLightsData[offset + 6] = light.color[2];
-            spotLightsData[offset + 7] = light.intensity;
-            var worldDir = global.UE_VEC3_TEMP4;
-            light.getDirection(worldDir);
-            spotLightsData[offset + 8] = worldDir[0];
-            spotLightsData[offset + 9] = worldDir[1];
-            spotLightsData[offset + 10] = worldDir[2];
-            spotLightsData[offset + 11] = light.decay;
-            spotLightsData[offset + 12] = cos(degtorad(light.angle));
-            spotLightsData[offset + 13] = cos(degtorad(light.angle * (1.0 - light.penumbra)));
+            var l = spotLightState[i];
+            if (l.version != (l[$ "__cachedV"] ?? -1) || l.paramsVersion != (l[$ "__cachedPV"] ?? -1) || l.target.version != (l[$ "__cachedTV"] ?? -1)) {
+                var _mw = l.matrixWorld;
+                spotLightsData[offset + 0] = _mw[12];
+                spotLightsData[offset + 1] = _mw[13];
+                spotLightsData[offset + 2] = _mw[14];
+                spotLightsData[offset + 3] = l.distance;
+                spotLightsData[offset + 4] = l.color[0];
+                spotLightsData[offset + 5] = l.color[1];
+                spotLightsData[offset + 6] = l.color[2];
+                spotLightsData[offset + 7] = l.intensity;
+                
+                var worldDir = global.UE_VEC3_TEMP4;
+                l.getDirection(worldDir); // Still using getDirection for now as it handles normalization/target
+                spotLightsData[offset + 8] = worldDir[0];
+                spotLightsData[offset + 9] = worldDir[1];
+                spotLightsData[offset + 10] = worldDir[2];
+                spotLightsData[offset + 11] = l.decay;
+                spotLightsData[offset + 12] = cos(degtorad(l.angle));
+                spotLightsData[offset + 13] = cos(degtorad(l.angle * (1.0 - l.penumbra)));
+                
+                l.__cachedV = l.version;
+                l.__cachedPV = l.paramsVersion;
+                l.__cachedTV = l.target.version;
+            }
         } else {
             spotLightsData[offset + 7] = 0;
         }
@@ -362,42 +354,59 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
     // --- Primary Directional Light Data ---
     if (dIdx > 0) {
-        var light = directionalState[0];
-        var dir = global.UE_VEC3_TEMP4;
-        light.getDirection(dir);
-        global.UE_DIR_LIGHT_DATA.direction[0] = dir[0];
-        global.UE_DIR_LIGHT_DATA.direction[1] = dir[1];
-        global.UE_DIR_LIGHT_DATA.direction[2] = dir[2];
-        global.UE_DIR_LIGHT_DATA.color = light.color;
-        global.UE_DIR_LIGHT_DATA.intensity = light.intensity;
+        var l = directionalState[0];
+        if (l.version != (l[$ "__cachedV"] ?? -1) || l.paramsVersion != (l[$ "__cachedPV"] ?? -1) || l.target.version != (l[$ "__cachedTV"] ?? -1)) {
+            var dir = global.UE_VEC3_TEMP4;
+            l.getDirection(dir);
+            global.UE_DIR_LIGHT_DATA.direction[0] = dir[0];
+            global.UE_DIR_LIGHT_DATA.direction[1] = dir[1];
+            global.UE_DIR_LIGHT_DATA.direction[2] = dir[2];
+            global.UE_DIR_LIGHT_DATA.color = l.color;
+            global.UE_DIR_LIGHT_DATA.intensity = l.intensity;
+            l.__cachedV = l.version;
+            l.__cachedPV = l.paramsVersion;
+            l.__cachedTV = l.target.version;
+        }
     } else {
         global.UE_DIR_LIGHT_DATA.intensity = 0;
     }
 
     // --- Hemisphere Light Data ---
     if (hIdx > 0) {
-        var light = hemiLightState[0];
-        var dir = global.UE_VEC3_TEMP4;
-        light.getWorldPosition(dir);
-        vec3_normalize(dir);
-        global.UE_HEMI_LIGHT_DATA.direction[0] = dir[0];
-        global.UE_HEMI_LIGHT_DATA.direction[1] = dir[1];
-        global.UE_HEMI_LIGHT_DATA.direction[2] = dir[2];
-        global.UE_HEMI_LIGHT_DATA.skyColor = light.skyColor;
-        global.UE_HEMI_LIGHT_DATA.groundColor = light.groundColor;
-        global.UE_HEMI_LIGHT_DATA.intensity = light.intensity;
+        var l = hemiLightState[0];
+        if (l.version != (l[$ "__cachedV"] ?? -1) || l.paramsVersion != (l[$ "__cachedPV"] ?? -1)) {
+            var _mw = l.matrixWorld;
+            var _nx = _mw[12], _ny = _mw[13], _nz = _mw[14];
+            var _invLen = 1.0 / sqrt(_nx*_nx + _ny*_ny + _nz*_nz);
+            global.UE_HEMI_LIGHT_DATA.direction[0] = _nx * _invLen;
+            global.UE_HEMI_LIGHT_DATA.direction[1] = _ny * _invLen;
+            global.UE_HEMI_LIGHT_DATA.direction[2] = _nz * _invLen;
+            global.UE_HEMI_LIGHT_DATA.skyColor = l.skyColor;
+            global.UE_HEMI_LIGHT_DATA.groundColor = l.groundColor;
+            global.UE_HEMI_LIGHT_DATA.intensity = l.intensity;
+            l.__cachedV = l.version;
+            l.__cachedPV = l.paramsVersion;
+        }
     } else {
         global.UE_HEMI_LIGHT_DATA.intensity = 0;
     }
 
     // --- Point Shadow Matrices ---
+    // Optimization: Cache the shadow caster index to avoid scanning every frame
     var pointShadowLight = undefined;
-    for (var i = 0; i < pIdx; i++) {
-        if (pointLightState[i].castShadow) {
-            pointShadowLight = pointLightState[i];
-            break;
+    var _cachedIdx = self[$ "__cachedPointShadowIdx"] ?? -1;
+    if (_cachedIdx >= 0 && _cachedIdx < pIdx && pointLightState[_cachedIdx].castShadow) {
+        pointShadowLight = pointLightState[_cachedIdx];
+    } else {
+        for (var i = 0; i < pIdx; i++) {
+            if (pointLightState[i].castShadow) {
+                pointShadowLight = pointLightState[i];
+                self.__cachedPointShadowIdx = i;
+                break;
+            }
         }
     }
+    
     if (pointShadowLight != undefined) {
         var matrices = global.UE_POINT_SHADOW_MATRICES_BUFFER;
         for (var i = 0; i < 6; i++) {
