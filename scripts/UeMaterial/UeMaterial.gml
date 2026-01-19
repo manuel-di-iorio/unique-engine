@@ -200,8 +200,6 @@ function UeMaterial(data = {}) constructor {
 
       if (pointShadowLight != undefined && __cache.samplerPointShadowMapIdx != -1) {
         shader_set_uniform_f(__cache.uniformPointShadowEnabledLoc, 1.0);
-
-        // These usually don't change every frame, but we can't easily cache them without more state
         shader_set_uniform_f(__cache.uniformPointShadowFarLoc, pointShadowLight.shadow.cameras[0].far);
         shader_set_uniform_f(__cache.uniformPointShadowNearLoc, pointShadowLight.shadow.cameras[0].near);
 
@@ -212,14 +210,7 @@ function UeMaterial(data = {}) constructor {
 
         pointShadowLight.getWorldPosition(uniformsCache);
         shader_set_uniform_f_array(__cache.uniformPointShadowPosLoc, uniformsCache);
-
-        var matrices = global.UE_POINT_SHADOW_MATRICES_BUFFER;
-        for (var i = 0; i < 6; i++) {
-          var cam = pointShadowLight.shadow.cameras[i];
-          matrix_multiply(cam.matrixWorldInverse, cam.projectionMatrix, global.UE_MAT4_TEMP0);
-          for (var m = 0; m < 16; m++) matrices[i * 16 + m] = global.UE_MAT4_TEMP0[m];
-        }
-        shader_set_uniform_f_array(__cache.uniformPointShadowMatrixLoc, matrices);
+        shader_set_uniform_f_array(__cache.uniformPointShadowMatrixLoc, global.UE_POINT_SHADOW_MATRICES_BUFFER);
         texture_set_stage(__cache.samplerPointShadowMapIdx, pointShadowLight.shadow.map.getTexture());
       } else {
         shader_set_uniform_f(__cache.uniformPointShadowEnabledLoc, 0.0);
@@ -241,7 +232,8 @@ function UeMaterial(data = {}) constructor {
         shader_set_uniform_matrix_array(__cache.uniformSpotShadowMatrixLoc, spotShadowLight.shadow.lightSpaceMatrix);
         shader_set_uniform_f(__cache.uniformSpotShadowFarLoc, spotShadowLight.shadow.camera.far);
         shader_set_uniform_f(__cache.uniformSpotShadowNearLoc, spotShadowLight.shadow.camera.near);
-        shader_set_uniform_f(__cache.uniformSpotShadowPosLoc, spotShadowLight.position[0], spotShadowLight.position[1], spotShadowLight.position[2]);
+        spotShadowLight.getWorldPosition(uniformsCache);
+        shader_set_uniform_f(__cache.uniformSpotShadowPosLoc, uniformsCache[0], uniformsCache[1], uniformsCache[2]);
         shader_set_uniform_f(__cache.uniformSpotShadowTexelSizeLoc, 1.0 / spotShadowLight.shadow.mapSize.width);
         shader_set_uniform_f(__cache.uniformSpotShadowQualityLoc, shadowQuality);
         texture_set_stage(__cache.samplerSpotShadowMapIdx, spotShadowLight.shadow.map.getTexture());
@@ -252,99 +244,22 @@ function UeMaterial(data = {}) constructor {
 
     // --- Point Lights Data ---
     if (__cache.uniformPointLightsDataLoc != -1) {
-      var pointLightsData = global.UE_POINT_LIGHTS_DATA_BUFFER;
-      for (var i = 0; i < 8; i++) {
-        var offset = i * 16;
-        if (i < pointLightCount) {
-          var light = pointLightState[i];
-          if (!light.enabled || light.intensity <= 0) {
-            pointLightsData[offset + 7] = 0;
-            continue;
-          }
-
-          light.getWorldPosition(uniformsCache);
-
-          // Row 0: pos.xyz, range
-          pointLightsData[offset + 0] = uniformsCache[0];
-          pointLightsData[offset + 1] = uniformsCache[1];
-          pointLightsData[offset + 2] = uniformsCache[2];
-          pointLightsData[offset + 3] = light.distance;
-
-          // Row 1: color.rgb, intensity
-          pointLightsData[offset + 4] = light.color[0];
-          pointLightsData[offset + 5] = light.color[1];
-          pointLightsData[offset + 6] = light.color[2];
-          pointLightsData[offset + 7] = light.intensity;
-
-          // Row 2: decay, ...
-          pointLightsData[offset + 8] = light.decay;
-        } else {
-          pointLightsData[offset + 7] = 0;
-        }
-      }
-      shader_set_uniform_f_array(__cache.uniformPointLightsDataLoc, pointLightsData);
+      shader_set_uniform_f_array(__cache.uniformPointLightsDataLoc, global.UE_POINT_LIGHTS_DATA_BUFFER);
     }
 
     // --- Spot Lights Data ---
     if (__cache.uniformSpotLightsDataLoc != -1) {
-      var spotLightsData = global.UE_SPOT_LIGHTS_DATA_BUFFER;
-      for (var i = 0; i < 8; i++) {
-        var offset = i * 16;
-        if (i < spotLightCount) {
-          var light = spotLightState[i];
-          if (!light.enabled || light.intensity <= 0) {
-            spotLightsData[offset + 7] = 0;
-            continue;
-          }
-
-          light.getWorldPosition(uniformsCache);
-
-          // Row 0: pos.xyz, range
-          spotLightsData[offset + 0] = uniformsCache[0];
-          spotLightsData[offset + 1] = uniformsCache[1];
-          spotLightsData[offset + 2] = uniformsCache[2];
-          spotLightsData[offset + 3] = light.distance;
-
-          // Row 1: color.rgb, intensity
-          spotLightsData[offset + 4] = light.color[0];
-          spotLightsData[offset + 5] = light.color[1];
-          spotLightsData[offset + 6] = light.color[2];
-          spotLightsData[offset + 7] = light.intensity;
-
-          // Row 2: dir.xyz, decay
-          var worldDir = global.UE_VEC3_TEMP1;
-          light.getDirection(worldDir);
-          spotLightsData[offset + 8] = worldDir[0];
-          spotLightsData[offset + 9] = worldDir[1];
-          spotLightsData[offset + 10] = worldDir[2];
-          spotLightsData[offset + 11] = light.decay;
-
-          // Row 3: angle, penumbra, ...
-          spotLightsData[offset + 12] = cos(light.angle);
-          spotLightsData[offset + 13] = cos(light.angle * (1.0 - light.penumbra));
-        } else {
-          spotLightsData[offset + 7] = 0;
-        }
-      }
-      shader_set_uniform_f_array(__cache.uniformSpotLightsDataLoc, spotLightsData);
+      shader_set_uniform_f_array(__cache.uniformSpotLightsDataLoc, global.UE_SPOT_LIGHTS_DATA_BUFFER);
     }
 
     // --- Hemisphere Light ---
     if (__cache.uniformHemiLightIntensityLoc != -1) {
-      if (hemiLightCount > 0) {
-        var light = hemiLightState[0];
-        if (light.enabled && light.intensity > 0) {
-          var dir = global.UE_VEC3_TEMP1;
-          vec3_copy(dir, light.position);
-          vec3_normalize(dir);
-
-          shader_set_uniform_f(__cache.uniformHemiLightDirLoc, dir[0], dir[1], dir[2]);
-          shader_set_uniform_f_array(__cache.uniformHemiLightSkyColorLoc, light.skyColor);
-          shader_set_uniform_f_array(__cache.uniformHemiLightGroundColorLoc, light.groundColor);
-          shader_set_uniform_f(__cache.uniformHemiLightIntensityLoc, real(light.intensity));
-        } else {
-          shader_set_uniform_f(__cache.uniformHemiLightIntensityLoc, 0.0);
-        }
+      var hData = global.UE_HEMI_LIGHT_DATA;
+      if (hData.intensity > 0) {
+        shader_set_uniform_f(__cache.uniformHemiLightDirLoc, hData.direction[0], hData.direction[1], hData.direction[2]);
+        shader_set_uniform_f_array(__cache.uniformHemiLightSkyColorLoc, hData.skyColor);
+        shader_set_uniform_f_array(__cache.uniformHemiLightGroundColorLoc, hData.groundColor);
+        shader_set_uniform_f(__cache.uniformHemiLightIntensityLoc, real(hData.intensity));
       } else {
         shader_set_uniform_f(__cache.uniformHemiLightIntensityLoc, 0.0);
       }

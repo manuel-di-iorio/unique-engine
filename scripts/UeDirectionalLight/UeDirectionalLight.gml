@@ -20,6 +20,11 @@ function UeDirectionalLight(color = c_white, intensity = 1, data = {}): UeLight(
     // Shadow configuration
     shadow = new UeDirectionalLightShadow(data[$ "shadow"] ?? {});
     
+    // Caching
+    __direction = vec3_create();
+    __lastWorldPosition = vec3_create(infinity, infinity, infinity);
+    __lastWorldTargetPosition = vec3_create(infinity, infinity, infinity);
+
     /**
      * Gets the current light direction (normalized vector from position to target).
      * This is recalculated each time to reflect any changes in position or target.
@@ -28,9 +33,20 @@ function UeDirectionalLight(color = c_white, intensity = 1, data = {}): UeLight(
      */
     function getDirection(v = global.UE_VEC3_TEMP0) {
         gml_pragma("forceinline");
-        vec3_copy(v, target.position);
-        vec3_sub(v, position);
-        vec3_normalize(v);
+        
+        var wp = global.UE_VEC3_TEMP1;
+        var wtp = global.UE_VEC3_TEMP2;
+        self.getWorldPosition(wp);
+        target.getWorldPosition(wtp);
+
+        if (!vec3_equals(wp, __lastWorldPosition) || !vec3_equals(wtp, __lastWorldTargetPosition)) {
+            vec3_copy(__direction, wtp);
+            vec3_sub(__direction, wp);
+            vec3_normalize(__direction);
+            vec3_copy(__lastWorldPosition, wp);
+            vec3_copy(__lastWorldTargetPosition, wtp);
+        }
+        vec3_copy(v, __direction);
         return v;
     }
 }

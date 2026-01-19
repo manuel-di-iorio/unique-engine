@@ -19,7 +19,7 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
 
     // Light space transformation matrix
     lightSpaceMatrix = mat4_create();
-    
+
     /**
      * Updates the shadow map size and recreates the render target.
      * @param {number} width - New width
@@ -33,7 +33,7 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
         map.create();
         return self;
     }
-    
+
     /**
      * Updates the light space matrix and positions the shadow camera based on the light.
      * 
@@ -41,26 +41,29 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
      */
     function updateMatrices(light) {
         gml_pragma("forceinline");
-        
-        // Position shadow camera at the light's position
-        vec3_copy(camera.position, light.position);
-        
-        // Look at the light's target position
-        vec3_copy(camera.target, light.target.position);
-        
+
+        // Use world position and target position for shadow camera
+        var lp = global.UE_VEC3_TEMP1;
+        var tp = global.UE_VEC3_TEMP2;
+        light.getWorldPosition(lp);
+        light.target.getWorldPosition(tp);
+
+        vec3_copy(camera.position, lp);
+        vec3_copy(camera.target, tp);
+
         // Update camera matrices (recalculates view matrix)
         camera.updateMatrixWorld();
-        
+
         // Apply camera matrices to GameMaker camera
-        var _shadowCameraView = camera.camera; 
+        var _shadowCameraView = camera.camera;
         camera_apply(_shadowCameraView);
-        
+
         // Light space matrix = Projection * View
         matrix_multiply(camera.matrixWorldInverse, camera.projectionMatrix, lightSpaceMatrix);
-        
+
         return self;
     }
-    
+
     /**
      * Disposes of shadow resources.
      */

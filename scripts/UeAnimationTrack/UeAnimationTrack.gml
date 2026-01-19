@@ -293,7 +293,4 @@ function UeAnimationTrack(nodeName) constructor {
     
     return slerpFlat(target, 0, keys, idx1 + 1, keys, idx2 + 1, f);
   }
-
-  // Perform initial update (bake with default duration)
-  self.update(1, 60);
 }

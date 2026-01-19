@@ -152,5 +152,20 @@ global.UE_POINT_LIGHTS_DATA_BUFFER = array_create(8 * 16, 0);
 global.UE_SPOT_LIGHTS_DATA_BUFFER = array_create(8 * 16, 0);
 global.UE_POINT_SHADOW_MATRICES_BUFFER = array_create(6 * 16, 0);
 
+// Hemisphere Light Cached Data
+global.UE_HEMI_LIGHT_DATA = {
+    direction: [0, 1, 0],
+    skyColor: [1, 1, 1],
+    groundColor: [0, 0, 0],
+    intensity: 0
+};
+
+// Directional Light Cached Data (Primary)
+global.UE_DIR_LIGHT_DATA = {
+    direction: [0, 1, 0],
+    color: [1, 1, 1],
+    intensity: 0
+};
+
 // Global Uniform Caching
 global.UE_CURRENT_SHADER = -1;

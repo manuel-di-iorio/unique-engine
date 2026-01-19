@@ -37,7 +37,7 @@ function UeSpotLightShadow(data = {}): UeLightShadow(data) constructor {
         map.create();
         return self;
     }
-    
+
     /**
      * Updates the light space matrix and positions the shadow camera based on the light.
      * 
@@ -45,78 +45,81 @@ function UeSpotLightShadow(data = {}): UeLightShadow(data) constructor {
      */
     function updateMatrices(light) {
         gml_pragma("forceinline");
-        
+
         // Update camera FOV based on light angle (angle is half-angle in degrees)
         camera.fov = light.angle * 2;
         camera.updateProjectionMatrix();
 
-        // Position shadow camera at the light's position
-        vec3_copy(camera.position, light.position);
-        
-        // Look at the light's target position
-        vec3_copy(camera.target, light.target.position);
-        
+        // Use world position and target position for shadow camera
+        var lp = global.UE_VEC3_TEMP1;
+        var tp = global.UE_VEC3_TEMP2;
+        light.getWorldPosition(lp);
+        light.target.getWorldPosition(tp);
+
+        vec3_copy(camera.position, lp);
+        vec3_copy(camera.target, tp);
+
         // Update camera matrices (recalculates view matrix)
         camera.updateMatrixWorld();
-        
+
         // Apply camera matrices to GameMaker camera
-        var _shadowCameraView = camera.camera; 
+        var _shadowCameraView = camera.camera;
         camera_apply(_shadowCameraView);
-        
+
         // Light space matrix = Projection * View
         matrix_multiply(camera.matrixWorldInverse, camera.projectionMatrix, lightSpaceMatrix);
-        
+
         return self;
     }
-    
+
     /**
      * Renders the shadow map.
      */
     function render(light, scene, camera, __queue, __shadowIdx) {
         gml_pragma("forceinline");
-        
+
         if (!surface_exists(map.surface)) map.create();
         surface_set_target(map.surface);
 
         var _gpuCullMode = gpu_get_cullmode();
         gpu_set_cullmode(cull_noculling);
-        
+
         // Update matrices and apply camera
         updateMatrices(light);
-        
+
         global.UE_RENDERER_ACTIVE_SHADOW_CAMERA = self.camera;
         draw_clear(c_white);
-        
+
         global.UE_RENDERER_ACTIVE_SHADOW_SHADER = sh_ue_spot_shadow;
         shader_set(sh_ue_spot_shadow);
-        
+
         // Set light view projection matrix
         shader_set_uniform_f_array(__uLightViewProjLoc, lightSpaceMatrix);
-        
+
         // Set near and far planes for linear depth
         shader_set_uniform_f(__uNearLoc, self.camera.near);
         shader_set_uniform_f(__uFarLoc, self.camera.far);
-        
+
         var _shadowFrustum = self.camera.getFrustum();
         for (var i = 0; i < __shadowIdx; i++) {
             var object = __queue[i];
             if (!object.castShadow || object.geometry == undefined) continue;
-            
+
             if (object.frustumCulled) {
                 var s = object.__intersectionSphere;
                 if (s != undefined && !frustum_intersects_sphere(_shadowFrustum, s)) {
                     continue;
                 }
             }
-            
+
             var _onBeforeShadow = object[$ "onBeforeShadow"];
             var _onAfterShadow = object[$ "onAfterShadow"];
-            
+
             if (_onBeforeShadow != undefined) _onBeforeShadow();
             object.render();
             if (_onAfterShadow != undefined) _onAfterShadow();
         }
-        
+
         // Restore previous cull mode
         gpu_set_cullmode(_gpuCullMode);
 
