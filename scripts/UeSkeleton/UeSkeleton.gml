@@ -19,26 +19,43 @@ function UeSkeleton(bones = []) constructor {
     /** @private @type {Array<real>} Internal temporary matrix to avoid allocations during update */
     self._tempMatrix = matrix_build_identity();
 
+    /** @private @type {real} Last sum of bone versions to avoid redundant updates */
+    self.__lastBonesVersionSum = -1;
+
     /**
      * Updates all bone matrices to be sent to the shader.
      */
     static update = function() {
         gml_pragma("forceinline");
-        var boneCount = array_length(self.bones);
+        var _bones = self.bones;
+        var boneCount = array_length(_bones);
+        if (boneCount == 0) return;
+
+        // 1. Check if any bone has changed using version sum
+        var _versionSum = 0;
+        for (var i = 0; i < boneCount; i++) {
+            _versionSum += _bones[i].version;
+        }
         
-        // Resize boneMatrices if needed (16 floats per matrix)
-        if (array_length(self.boneMatrices) != boneCount * 16) {
-            self.boneMatrices = array_create(boneCount * 16, 0);
+        if (_versionSum == self.__lastBonesVersionSum) return;
+        self.__lastBonesVersionSum = _versionSum;
+
+        // 2. Resize boneMatrices if needed (16 floats per matrix)
+        var _boneMatrices = self.boneMatrices;
+        if (array_length(_boneMatrices) != boneCount * 16) {
+            _boneMatrices = array_create(boneCount * 16, 0);
+            self.boneMatrices = _boneMatrices;
         }
 
+        var _temp = self._tempMatrix;
         for (var i = 0; i < boneCount; i++) {
-            var bone = self.bones[i];
+            var bone = _bones[i];
             
             // Calculate final bone matrix: BoneWorldMatrix * BoneOffsetMatrix
-            matrix_multiply(bone.offsetMatrix, bone.matrixWorld, self._tempMatrix);
+            matrix_multiply(bone.offsetMatrix, bone.matrixWorld, _temp);
             
             // Copy the 16 elements of the calculated matrix into the flattened array
-            array_copy(self.boneMatrices, i * 16, self._tempMatrix, 0, 16);
+            array_copy(_boneMatrices, i * 16, _temp, 0, 16);
         }
     }
 }
