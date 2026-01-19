@@ -10,6 +10,7 @@ scene.add(hemiLight, dirLight);
 
 // Import models
 assimpLoader = new UeAssimpLoader();
+
 modelFox = assimpLoader.load("Fox/Fox.gltf");
 modelFoxRoot = modelFox.root;
 modelFoxRoot.translateX(-450);
@@ -57,12 +58,12 @@ scene.add(modelFoxRoot, modelRobotRoot, modelCubeRoot, modelBoxAnimatedRoot, mod
 
 // Init the animations
 currentTime = 0;
+
 animFoxRun = modelFox.animations[$ "Run"];
 animRobot = modelRobot.animations[$ "Animation0"];
 animCube = modelCube.animations[$ "animation_AnimatedCube"];
 animModelBoxAnimated = modelBoxAnimated.animations[$ "Animation0"];
 animCesiumMan = modelCesiumMan.animations[$ "Animation0"];
-
 animRiggedSimple = modelRiggedSimple.animations[$ "Animation0"];
 
 // Add the skeleton helpers

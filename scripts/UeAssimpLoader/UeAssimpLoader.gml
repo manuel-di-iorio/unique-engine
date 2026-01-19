@@ -25,7 +25,9 @@ function UeAssimpLoader(data = {}) constructor {
       ASSIMP_PP.FIX_INFACING_NORMALS |
       ASSIMP_PP.POPULATE_ARMATURE_DATA |
       ASSIMP_PP.REMOVE_COMPONENT |
-      ASSIMP_PP.GLOBAL_SCALE
+      ASSIMP_PP.GLOBAL_SCALE |
+      ASSIMP_PP.OPTIMIZE_MESHES |
+      ASSIMP_PP.OPTIMIZE_GRAPH
     );
 
     if (!check) {
@@ -353,10 +355,24 @@ function UeAssimpLoader(data = {}) constructor {
 
         if (hasBones) {
           var vbData = vertBones[v];
-          vertex_ubyte4(vb, vbData.indices[0], vbData.indices[1], vbData.indices[2], vbData.indices[3]);
+          
+          // Normalize weights to ensure they sum to 1.0
+          var totalWeight = vbData.weights[0] + vbData.weights[1] + vbData.weights[2] + vbData.weights[3];
+          if (totalWeight > 0.0) {
+            var invWeight = 1.0 / totalWeight;
+            vbData.weights[0] *= invWeight;
+            vbData.weights[1] *= invWeight;
+            vbData.weights[2] *= invWeight;
+            vbData.weights[3] *= invWeight;
+          } else {
+            // If no weights, assign to root bone (index 0) with full weight
+            vbData.weights[0] = 1.0;
+          }
+
+          vertex_float4(vb, vbData.indices[0], vbData.indices[1], vbData.indices[2], vbData.indices[3]);
           vertex_float4(vb, vbData.weights[0], vbData.weights[1], vbData.weights[2], vbData.weights[3]);
         } else {
-          vertex_ubyte4(vb, 0, 0, 0, 0);
+          vertex_float4(vb, 0, 0, 0, 0);
           vertex_float4(vb, 0, 0, 0, 0);
         }
       }
@@ -414,7 +430,10 @@ function UeAssimpLoader(data = {}) constructor {
       var boneNode = nodeMap[$ data.name]; // Fast lookup using nodeMap
 
       if (boneNode == undefined) {
-        ueWarning($"Bone node not found in hierarchy: {data.name}");
+        ueWarning($"Bone node not found in hierarchy: '{data.name}'. This will cause the bone to be ignored.");
+        // Debug: list all available nodes
+        var _nodeNames = variable_struct_get_names(nodeMap);
+        ueDebug($"Available nodes: {string(_nodeNames)}");
         continue;
       }
 

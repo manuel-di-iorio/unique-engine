@@ -18,7 +18,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
     function __serializeInstance(instance) {
         var data = {
             uuid: instance.uuid,
-            type: "ModelInstance",
+            type: instance.type,
             name: instance.name,
             model: instance.object != undefined ? instance.object.uuid : undefined,
             position: instance.position,
@@ -32,7 +32,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         // Recursively serialize children (submeshes)
         if (array_length(instance.children) > 0) {
             data.children = array_map(instance.children, function(child) {
-                if (child[$ "type"] == "ModelInstance") {
+                if (child[$ "isInstance"] == true) {
                     return __serializeInstance(child);
                 }
                 // For non-instance children, just save UUID
@@ -54,7 +54,7 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             name,
             children: array_map(children, function(child) { 
                 // For instances, save full metadata including transform and children
-                if (child[$ "type"] == "ModelInstance") {
+                if (child[$ "isInstance"] == true) {
                     return __serializeInstance(child);
                 }
                 // For other children, just save UUID
@@ -74,12 +74,18 @@ function UeScene(data = {}): UeObject3D(data) constructor {
         }
         
         var model = objectsByUUID[$ modelUUID];
+        var instance;
         
-        // Create new instance with same geometry and material
-        var instance = new UeMesh(model.geometry, model.material);
+        if (data.type == "Object3DInstance") {
+             instance = new UeObject3D();
+        } else {
+             // Create new instance with same geometry and material
+             instance = new UeMesh(model.geometry, model.material);
+        }
+
         instance.uuid = data[$ "uuid"];
         instance.name = data[$ "name"];
-        instance.type = "ModelInstance";
+        instance.type = data[$ "type"];
         instance.object = model;
         instance.isInstance = true;
         

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"throttle",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"throttle",
+  "parent":{
+    "name":"Packages",
+    "path":"folders/Packages.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

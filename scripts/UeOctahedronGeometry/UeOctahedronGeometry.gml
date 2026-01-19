@@ -15,8 +15,8 @@ function UeOctahedronGeometry(radius = 1, detail = 0, data = {}): UeGeometry(dat
     self.uv = [];
     self.color = [];
     self.tangent = [];
-    self.bone_indices = [];
-    self.bone_weights = [];
+    self.boneIndices = [];
+    self.boneWeights = [];
     
     // Internal temp objects
     self.__tempTri = tri_create();
@@ -73,8 +73,8 @@ function UeOctahedronGeometry(radius = 1, detail = 0, data = {}): UeGeometry(dat
                 array_push(self.normal, nx, ny, nz);
                 array_push(self.tangent, tx, ty, tz, 1.0);
                 array_push(self.color, col, alp);
-                array_push(self.bone_indices, 0, 0, 0, 0);
-                array_push(self.bone_weights, 0, 0, 0, 0);
+                array_push(self.boneIndices, 0, 0, 0, 0);
+                array_push(self.boneWeights, 0, 0, 0, 0);
                 
                 // Simple UV projection
                 var u = 0.5 + (arctan2(v[2], v[0]) / (2 * pi));

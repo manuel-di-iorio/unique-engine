@@ -19,7 +19,7 @@ uniform mat4 u_ueSpotShadowMatrix;
 
 // Uniforms
 uniform float u_ueNumBones;
-uniform mat4 u_ueBoneMatrices[64];
+uniform mat4 u_ueBoneMatrices[128];
 
 // Displacement
 uniform sampler2D s_displacementMap;
@@ -34,10 +34,9 @@ void main() {
 
     // Skinning
     if (u_ueNumBones > 0.5) {
-        ivec4 indices = ivec4(in_TextureCoord2 * 255.0 + 0.5);
+        ivec4 indices = ivec4(in_TextureCoord2 + 0.5);
         vec4 weights = in_TextureCoord3;
-        
-        
+                
         vec4 skinnedPos = vec4(0.0);
         vec3 skinnedNormal = vec3(0.0);
         vec3 skinnedTangent = vec3(0.0);
@@ -67,8 +66,8 @@ void main() {
 
     vec4 worldPos;
     if (u_ueNumBones > 0.5) {
-        // worldPos = vec4(pos, 1.0);
-        worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
+        worldPos = vec4(pos, 1.0);
+        // worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
     } else {
         worldPos = gm_Matrices[MATRIX_WORLD] * vec4(pos, 1.0);
     }
@@ -83,8 +82,8 @@ void main() {
         vWorldTangent.xyz = normalize((gm_Matrices[MATRIX_WORLD] * vec4(in_TextureCoord1.xyz, 0.0)).xyz);
     }
     
-    vTexcoord       = in_TextureCoord0;
-    vColour        = in_Colour;
+    vTexcoord         = in_TextureCoord0;
+    vColour           = in_Colour;
     vWorldTangent.w   = in_TextureCoord1.w;
 
     vDirLightSpacePos = u_ueDirShadowMatrix * worldPos;
@@ -94,6 +93,6 @@ void main() {
     shadowWorldPos.xyz += vWorldNormal * 0.15;
     vSpotLightSpacePos = u_ueSpotShadowMatrix * shadowWorldPos;
 
-    // gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(pos, 1.0);
+    gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(pos, 1.0);
     gl_Position = gm_Matrices[MATRIX_PROJECTION] * (gm_Matrices[MATRIX_VIEW] * worldPos);
 }

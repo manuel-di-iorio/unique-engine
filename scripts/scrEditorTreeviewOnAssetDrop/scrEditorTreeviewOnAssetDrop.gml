@@ -45,7 +45,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     }
     
     // Model can be moved under another Model (reparent) or under a Scene (instance)
-    else if (draggedItem.assetType == "Mesh") {
+    else if (draggedItem.assetType == "Mesh" || draggedItem.assetType == "Object3D") {
         // Determine whether the dragged item is an instance (from a scene) or a master (from the Models list)
         var draggedIsInstance = (draggedItem.asset != undefined && draggedItem.asset[$ "isInstance"] == true);
         var targetHasAsset = (targetItem.asset != undefined);

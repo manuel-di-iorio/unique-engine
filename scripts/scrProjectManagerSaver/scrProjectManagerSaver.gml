@@ -187,8 +187,13 @@ function ProjectSaver() constructor {
             metadata[$ "rotationEuler"] = asset[$ "__rotationEuler"];
         }
         
-        if ((type == "Mesh" || type == "Object3D" || type == "Camera") && struct_exists(asset, "__matrixAutoUpdate") && asset[$ "__matrixAutoUpdate"] != undefined) {
+        if ((type == "Mesh" || type == "Object3D" || type == "Camera" || type == "Bone") && struct_exists(asset, "__matrixAutoUpdate") && asset[$ "__matrixAutoUpdate"] != undefined) {
             metadata[$ "matrixAutoUpdate"] = asset[$ "__matrixAutoUpdate"];
+        }
+
+        if (type == "Bone") {
+            metadata[$ "offsetMatrix"] = asset[$ "offsetMatrix"];
+            metadata[$ "index"] = asset[$ "index"];
         }
 
         if (struct_exists(asset, "__parentUI") && asset[$ "__parentUI"] != undefined) {

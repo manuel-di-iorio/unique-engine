@@ -19,7 +19,7 @@ uniform mat4 u_ueSpotShadowMatrix;
 
 // Skinning
 uniform float u_ueNumBones;
-uniform mat4 u_ueBoneMatrices[96];
+uniform mat4 u_ueBoneMatrices[128];
 
 // Displacement
 uniform sampler2D s_displacementMap;
@@ -35,7 +35,7 @@ void main() {
 
     // Skinning
     if (u_ueNumBones > 0.5) {
-        ivec4 indices = ivec4(in_TextureCoord2 * 255.1);
+        ivec4 indices = ivec4(in_TextureCoord2 + 0.5);
         vec4 weights = in_TextureCoord3;
         
         mat4 skinMatrix = 

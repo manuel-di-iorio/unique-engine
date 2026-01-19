@@ -142,7 +142,7 @@ function UeMaterial(data = {}) constructor {
         }
       }
     }
-    
+
     return self;
   }
 
@@ -477,7 +477,7 @@ function UeMaterial(data = {}) constructor {
     if (mesh.skeleton != undefined && mesh.bindMode == "skinned") {
       var _cacheUniformBoneMatricesLoc = __cache[$ "uniformBoneMatricesLoc"];
       var _cacheUniformNumBonesLoc = __cache[$ "uniformNumBonesLoc"];
-      
+
       if (_cacheUniformBoneMatricesLoc != undefined && _cacheUniformBoneMatricesLoc != -1) {
         shader_set_uniform_matrix_array(_cacheUniformBoneMatricesLoc, mesh.skeleton.boneMatrices);
       }

@@ -10,6 +10,10 @@ function UeShadowMap(shader, width = 1024, height = 1024) constructor {
     self.height = height;
     self.surface = -1;
     self.shader = shader;
+
+    // Cache uniform locations for the shadow shader
+    self.uniformNumBonesLoc = shader_get_uniform(shader, global.UE_UNIFORM_NAMES_CONFIG.numBones);
+    self.uniformBoneMatricesLoc = shader_get_uniform(shader, global.UE_UNIFORM_NAMES_CONFIG.boneMatrices);
     
     /**
      * Creates the shadow map surface.
@@ -68,6 +72,21 @@ function UeShadowMap(shader, width = 1024, height = 1024) constructor {
             var _onAfterShadow = object[$ "onAfterShadow"];
             
             if (_onBeforeShadow != undefined) _onBeforeShadow();
+
+            // Set bone uniforms for skinned meshes during shadow pass
+            if (object.skeleton != undefined && object.bindMode == "skinned") {
+                if (self.uniformBoneMatricesLoc != -1) {
+                    shader_set_uniform_matrix_array(self.uniformBoneMatricesLoc, object.skeleton.boneMatrices);
+                }
+                if (self.uniformNumBonesLoc != -1) {
+                    shader_set_uniform_f(self.uniformNumBonesLoc, array_length(object.skeleton.bones));
+                }
+            } else {
+                if (self.uniformNumBonesLoc != -1) {
+                    shader_set_uniform_f(self.uniformNumBonesLoc, 0.0);
+                }
+            }
+
             object.render();
             if (_onAfterShadow != undefined) _onAfterShadow();
         } 

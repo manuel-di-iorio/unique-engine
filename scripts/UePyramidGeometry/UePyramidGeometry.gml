@@ -75,8 +75,8 @@ function UePyramidGeometry(data = {}): UeGeometry(data) constructor {
 
     // Bone data (empty for static geometry)
     var vcount = array_length(_pos) / 3;
-    self.bone_indices = array_create(vcount * 4, 0);
-    self.bone_weights = array_create(vcount * 4, 0);
+    self.boneIndices = array_create(vcount * 4, 0);
+    self.boneWeights = array_create(vcount * 4, 0);
 
     build();
 }

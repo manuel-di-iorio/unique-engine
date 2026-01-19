@@ -31,11 +31,16 @@ function UeSkeleton(bones = []) constructor {
             self.boneMatrices = array_create(boneCount * 16, 0);
         }
 
+        static debugTimer = 0;
+        debugTimer++;
+        var doDebug = (debugTimer % 120 == 0); // Log every ~2 seconds (at 60fps)
+        
         for (var i = 0; i < boneCount; i++) {
             var bone = self.bones[i];
             
             // Calculate final bone matrix: BoneWorldMatrix * BoneOffsetMatrix
-            // This transforms vertices from Bind Pose to Current Pose
+            // Note: GameMaker's matrix_multiply(A, B) computes B * A.
+            // We want BoneWorld * Offset, so we pass (Offset, BoneWorld).
             matrix_multiply(bone.offsetMatrix, bone.matrixWorld, self._tempMatrix);
             
             // Copy the 16 elements of the calculated matrix into the flattened array

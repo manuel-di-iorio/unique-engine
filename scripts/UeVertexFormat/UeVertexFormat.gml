@@ -38,8 +38,8 @@ function UeVertexFormat(data = {}) constructor {
 
     function bones() {
         gml_pragma("forceinline");
-        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "bone_indices", type: vertex_type_ubyte4 });
-        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "bone_weights", type: vertex_type_float4 });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "boneIndices", type: vertex_type_float4 });
+        array_push(attrs, { kind: UE_FORMAT_ATTR.CUSTOM, name: "boneWeights", type: vertex_type_float4 });
         return self;
     }
     
@@ -49,26 +49,13 @@ function UeVertexFormat(data = {}) constructor {
         return self;
     }
 
+    /**
+     * Returns the stride of the vertex format.
+     * @returns {number} The stride of the vertex format.
+     */
     function getStride() {
-        gml_pragma("forceinline");
-        var s = 0;
-        for (var i = 0, len = array_length(attrs); i < len; i++) {
-            var a = attrs[i];
-            switch (a.kind) {
-                case UE_FORMAT_ATTR.POSITION: s += 12; break; // float3
-                case UE_FORMAT_ATTR.NORMAL: s += 12; break;   // float3
-                case UE_FORMAT_ATTR.UV: s += 8; break;        // float2
-                case UE_FORMAT_ATTR.COLOR: s += 4; break;     // ubyte4 (RGBA8)
-                case UE_FORMAT_ATTR.CUSTOM:
-                    if (a.type == vertex_type_float1) s += 4;
-                    else if (a.type == vertex_type_float2) s += 8;
-                    else if (a.type == vertex_type_float3) s += 12;
-                    else if (a.type == vertex_type_float4) s += 16;
-                    else if (a.type == vertex_type_ubyte4) s += 4;
-                    break;
-            }
-        }
-        return s;
+      gml_pragma("forceinline");
+      return vertex_format_get_info(self.vf)[$ "stride"];
     }
 
     function build() {
@@ -124,10 +111,10 @@ function UeVertexFormat(data = {}) constructor {
     }
 
     /**
-     * Crea una copia profonda del formato del vertice.
-     * Il clone avrà un nuovo UUID e il puntatore al formato nativo (vf) verrà resettato,
-     * richiedendo una nuova chiamata a build() se si desidera utilizzarlo per creare buffer.
-     * @returns {Struct.UeVertexFormat} Una nuova istanza di UeVertexFormat.
+     * Creates a deep copy of the vertex format.
+     * The clone will have a new UUID and the native format pointer (vf) will be reset,
+     * requiring a new call to build() if you want to use it to create buffers.
+     * @returns {Struct.UeVertexFormat} A new instance of UeVertexFormat.
      */
     function clone() {
         gml_pragma("forceinline");

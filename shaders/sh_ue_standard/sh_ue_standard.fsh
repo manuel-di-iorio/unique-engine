@@ -604,5 +604,5 @@ void main() {
     gl_FragColor = vec4(LinearToSRGB(color), alpha);
 
     // Show normals (debug)
-    // gl_FragColor = vec4(normalize(vWorldNormal) * 0.5 + 0.5, 1.0);
+    //gl_FragColor = vec4(normalize(vWorldNormal) * 0.5 + 0.5, 1.0);
 }
