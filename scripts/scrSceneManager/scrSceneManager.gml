@@ -41,7 +41,7 @@ function SceneManager() constructor {
     }
     
     // Assimp loader
-    self.assimp = new UeAssimpLoader();
+    self.assimp = new UeAssimpLoader({ canFreeze: false });
     
     self.scene.add(self.grid, self.objects, self.boxHelper);
     

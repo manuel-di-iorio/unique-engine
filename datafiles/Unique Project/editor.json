@@ -1,0 +1,31 @@
+{
+  "camera": {
+    "damping": true,
+    "dampingFactor": 0.10,
+    "position": [
+      -626.97,
+      -228.69,
+      339.74
+    ],
+    "target": [
+      0,
+      0,
+      0
+    ]
+  },
+  "counters": {
+    "cameras": 0,
+    "folders": 0,
+    "instances": 0,
+    "lights": 0,
+    "materials": 6,
+    "models": 0,
+    "object3d": 0,
+    "scenes": 0,
+    "textures": 0
+  },
+  "gizmos": {
+    "showBoxColliders": true
+  },
+  "gridEnabled": true
+}

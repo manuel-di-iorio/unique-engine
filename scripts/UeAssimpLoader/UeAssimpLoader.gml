@@ -5,13 +5,13 @@
   * @param {bool} [data.canFreeze=true] Whether to freeze the vertex buffers after loading for performance.
   * @param {bool} [data.matrixAutoUpdate=true] Whether to automatically update matrices for loaded objects.
   */
- function UeAssimpLoader(data = {}) constructor {
-   if (!ASSIMP_IsWorking()) ueError("Assimp extension is not working");
- 
-   self.canFreeze = data[$ "canFreeze"] ?? true;
-   self.matrixAutoUpdate = data[$ "matrixAutoUpdate"] ?? true;
- 
-   importer = ASSIMP_CreateImporter();
+function UeAssimpLoader(data = {}) constructor {
+  if (!ASSIMP_IsWorking()) ueError("Assimp extension is not working");
+
+  self.canFreeze = data[$ "canFreeze"] ?? true;
+  self.matrixAutoUpdate = data[$ "matrixAutoUpdate"] ?? true;
+
+  importer = ASSIMP_CreateImporter();
   ASSIMP_BindImporter(importer);
   nodeMap = {};
   boneMap = {};
@@ -74,30 +74,27 @@
     var textureCache = {};
     var materials = _addMaterials(fname, textures, textureCache);
 
-    // 2. Scene Graph & Node Map
-    nodeMap = {};
-    var root = _buildSceneGraph();
-
-    // 3. Meshes & Bone Data
+    // 2. Meshes & Bone Data
     boneMap = {};
     var meshesResult = _addMeshes(materials.list);
     var boneData = meshesResult.boneData;
+
+    // 3. Scene Graph & Node Map
+    nodeMap = {};
+    var root = _buildSceneGraph(meshesResult.meshes);
 
     // 4. Skeleton construction
     var skeleton = undefined;
     if (array_length(boneData) > 0) {
       skeleton = _buildSkeleton(boneData, root);
-      _assignSkeletonToMeshes(meshesResult.meshes, skeleton);
+      _assignSkeletonToMeshes(root, skeleton);
     }
 
-    // 5. Link meshes to scene graph nodes
-    _linkMeshesToGraph(root, meshesResult.meshes);
-
-    // 6. Calculate total bounds for the model (the root Object3D)
+    // 5. Calculate total bounds for the model (the root Object3D)
     root.updateMatrixWorld(true);
     self._calculateModelBounds(root, meshesResult.meshes);
 
-    // 7. Animations
+    // 6. Animations
     var animations = _addAnimations();
 
     return {
@@ -109,13 +106,13 @@
     };
   }
 
-  function _assignSkeletonToMeshes(meshes, skeleton) {
-    for (var i = 0, il = array_length(meshes); i < il; i++) {
-      var mesh = meshes[i];
-      if (mesh.bindMode == "skinned") {
-        mesh.skeleton = skeleton;
-      }
+  function _assignSkeletonToMeshes(root, _skeleton) {
+    var context = { skeleton: _skeleton };
+    root.traverse(method(context, function (node) {
+      if (node[$ "isMesh"] && node.bindMode == "skinned") {
+      node.skeleton = self.skeleton;
     }
+    }));
   }
 
   function _getMatrix(target = undefined) {
@@ -128,7 +125,7 @@
     return target;
   }
 
-  function _buildSceneGraph(nodeId = -1) {
+  function _buildSceneGraph(meshes, nodeId = -1) {
     gml_pragma("forceinline");
     if (nodeId == -1) {
       ASSIMP_BindSceneNode();
@@ -137,18 +134,53 @@
     }
 
     var name = ASSIMP_GetNodeName();
-    
+
     var object = new UeObject3D({ matrixAutoUpdate: self.matrixAutoUpdate });
     object.name = name;
-    nodeMap[$ name] = object;
+
+    // Store in nodeMap for fast lookup (e.g. for bones)
+    // If multiple nodes have the same name, we append a suffix
+    var uniqueName = name;
+    var counter = 1;
+    while (struct_exists(nodeMap, uniqueName)) {
+      uniqueName = $"{name}_{counter++}";
+    }
+    nodeMap[$ uniqueName] = object;
+    object.name = uniqueName; // Keep the actual name unique too
 
     ASSIMP_BindNodeMatrix();
     _getMatrix(object.matrix);
     mat4_decompose(object.matrix, object.position, object.rotation, object.scale);
 
+    // Store initial transform as "rest pose" for animations that don't have all keyframe types
+    object.initialPosition = vec3_clone(object.position);
+    object.initialRotation = quat_clone(object.rotation);
+    object.initialScale = vec3_clone(object.scale);
+
+    // Link meshes to this node
+    var meshCount = ASSIMP_GetNodeMeshNum();
+
+    for (var i = 0; i < meshCount; i++) {
+      var meshIdx = ASSIMP_GetNodeMeshIndex(i);
+      if (meshIdx < array_length(meshes)) {
+        var proto = meshes[meshIdx];
+
+        // Always create a new UeMesh instance that shares geometry and material.
+        // This handles mesh sharing (instancing) between nodes.
+        var mesh = new UeMesh(proto.geometry, proto.material, {
+          matrixAutoUpdate: proto.matrixAutoUpdate,
+          castShadow: proto.castShadow,
+          receiveShadow: proto.receiveShadow
+        });
+        mesh.name = proto.name;
+        mesh.bindMode = proto.bindMode;
+        object.add(mesh);
+      }
+    }
+
     var childCount = ASSIMP_GetNodeChildrenNum();
     for (var i = 0; i < childCount; i++) {
-      object.add(_buildSceneGraph(i));
+      object.add(_buildSceneGraph(meshes, i));
       ASSIMP_BindNodeParent();
     }
 
@@ -241,10 +273,13 @@
     var boneData = [];
     boneMap = {}; // Reset bone map for this model
 
+
     for (var i = 0; i < meshesCount; i++) {
       ASSIMP_BindMesh(i);
+      var meshName = ASSIMP_GetMeshName();
       var meshResult = _buildMesh(boneData);
       var mesh = meshResult.mesh;
+      mesh.name = meshName != "" ? meshName : $"Mesh{i}";
       mesh.material = materials[ASSIMP_GetMeshMaterialIndex()];
       meshes[i] = mesh;
     }
@@ -264,7 +299,7 @@
     var mesh = new UeMesh(geometry, { matrixAutoUpdate: self.matrixAutoUpdate });
     mesh.name = ASSIMP_GetMeshName();
     mesh.bindMode = hasBones ? "skinned" : "attached";
-    
+
     var vb = vertex_create_buffer();
     geometry.vb = vb;
     vertex_begin(vb, global.UE_VFORMAT_PNUTCB.vf);
@@ -423,37 +458,6 @@
     return { mesh, boneData: globalBoneData };
   }
 
-  function _linkMeshesToGraph(root, meshes) {
-    gml_pragma("forceinline");
-
-    // Instead of searching for each node by name, we traverse the Assimp scene 
-    // and use our nodeMap to find the corresponding UeObject3D.
-    ASSIMP_BindSceneNode();
-    _traverseAndLink(meshes);
-  }
-
-  function _traverseAndLink(meshes) {
-    var name = ASSIMP_GetNodeName();
-    var node = nodeMap[$ name];
-
-    if (node != undefined) {
-      var meshCount = ASSIMP_GetNodeMeshNum();
-      for (var i = 0; i < meshCount; i++) {
-        var meshIdx = ASSIMP_GetNodeMeshIndex(i);
-        if (meshIdx < array_length(meshes)) {
-          node.add(meshes[meshIdx]);
-        }
-      }
-    }
-
-    var childCount = ASSIMP_GetNodeChildrenNum();
-    for (var i = 0; i < childCount; i++) {
-      ASSIMP_BindNodeChild(i);
-      _traverseAndLink(meshes);
-      ASSIMP_BindNodeParent();
-    }
-  }
-
   function _buildSkeleton(boneData, root) {
     gml_pragma("forceinline");
     var bones = [];
@@ -463,37 +467,18 @@
       var boneNode = nodeMap[$ data.name]; // Fast lookup using nodeMap
       if (boneNode == undefined) continue;
 
-      // Convert UeObject3D to UeBone
-      var bone = new UeBone({
-        name: data.name,
-        offsetMatrix: data.offsetMatrix,
-        index: i,
-        matrixAutoUpdate: true // Bones should always auto-update if they are animated
-      });
+      // Bone-ify the existing node instead of replacing it.
+      // This preserves the node if it's also a Mesh or has other properties,
+      // and keeps the hierarchy intact.
+      boneNode.isBone = true;
+      boneNode.offsetMatrix = data.offsetMatrix;
+      boneNode.index = i;
 
-      // Copy transform
-      vec3_copy(bone.position, boneNode.position);
-      quat_copy(bone.rotation, boneNode.rotation);
-      vec3_copy(bone.scale, boneNode.scale);
-      mat4_copy(bone.matrix, boneNode.matrix);
-
-      // Replace node in hierarchy and in nodeMap
-      var parent = boneNode.parent;
-      if (parent != undefined) {
-        parent.remove(boneNode);
-        parent.add(bone);
+      if (boneNode.type == "Object3D") {
+        boneNode.type = "Bone";
       }
 
-      nodeMap[$ data.name] = bone;
-
-      // Move children
-      var children = boneNode.children;
-      var jl = array_length(children) - 1;
-      for (var j = jl; j >= 0; j--) {
-        bone.add(children[j]);
-      }
-
-      bones[i] = bone;
+      bones[i] = boneNode;
     }
 
     return new UeSkeleton(bones);

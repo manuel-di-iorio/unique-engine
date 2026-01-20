@@ -11,61 +11,61 @@ scene.add(hemiLight, dirLight);
 // Import models
 assimpLoader = new UeAssimpLoader({ matrixAutoUpdate: true });
 
-// modelFox = assimpLoader.load("Fox/Fox.gltf");
-// modelFoxRoot = modelFox.root;
-// modelFoxRoot.translateX(-450);
-// modelFoxRoot.rotateX(90);
-// modelFoxRoot.setScale(2, 2, 2);
-// matFox = modelFox.materials[$ "fox_material"];
-// matFox.setUniform("ueFlatShading", true);
-// scene.add(modelFoxRoot);
+modelFox = assimpLoader.load("Fox/Fox.gltf");
+modelFoxRoot = modelFox.root;
+modelFoxRoot.translateX(-450);
+modelFoxRoot.rotateX(90);
+modelFoxRoot.setScale(2, 2, 2);
+matFox = modelFox.materials[$ "fox_material"];
+matFox.setUniform("ueFlatShading", true);
+scene.add(modelFoxRoot);
 
-// modelRobot = assimpLoader.load("Robot/BrainStem.gltf");
-// modelRobotRoot = modelRobot.root;
-// modelRobotRoot.translateX(-250);
-// modelRobotRoot.rotateX(90);
-// modelRobotRoot.setScale(100, 100, 100);
-// scene.add(modelRobotRoot);
+modelRobot = assimpLoader.load("Robot/BrainStem.gltf");
+modelRobotRoot = modelRobot.root;
+modelRobotRoot.translateX(-250);
+modelRobotRoot.rotateX(90);
+modelRobotRoot.setScale(100, 100, 100);
+scene.add(modelRobotRoot);
 
-// modelCube = assimpLoader.load("AnimatedCube/AnimatedCube.gltf");
-// modelCubeRoot = modelCube.root;
-// modelCubeRoot.matrixAutoUpdate = true;
-// modelCubeRoot.translateX(-50);
-// modelCubeRoot.translateZ(50);
-// modelCubeRoot.rotateX(90);
-// modelCubeRoot.setScale(40, 40, 40);
-// scene.add(modelCubeRoot);
+modelCube = assimpLoader.load("AnimatedCube/AnimatedCube.gltf");
+modelCubeRoot = modelCube.root;
+modelCubeRoot.matrixAutoUpdate = true;
+modelCubeRoot.translateX(-50);
+modelCubeRoot.translateZ(50);
+modelCubeRoot.rotateX(90);
+modelCubeRoot.setScale(40, 40, 40);
+scene.add(modelCubeRoot);
 
-// modelBoxAnimated = assimpLoader.load("BoxAnimated/BoxAnimated.gltf");
-// modelBoxAnimatedRoot = modelBoxAnimated.root;
-// modelBoxAnimatedRoot.traverse(function(node) {
-//   node.matrixAutoUpdate = true;
-// });
-// modelBoxAnimatedRoot.translateX(200);
-// modelBoxAnimatedRoot.translateZ(50);
-// modelBoxAnimatedRoot.rotateZ(180);
-// modelBoxAnimatedRoot.rotateX(90);
-// modelBoxAnimatedRoot.setScale(100, 100, 100);
-// scene.add(modelBoxAnimatedRoot);
+modelBoxAnimated = assimpLoader.load("BoxAnimated/BoxAnimated.gltf");
+modelBoxAnimatedRoot = modelBoxAnimated.root;
+modelBoxAnimatedRoot.traverse(function(node) {
+  node.matrixAutoUpdate = true;
+});
+modelBoxAnimatedRoot.translateX(200);
+modelBoxAnimatedRoot.translateZ(50);
+modelBoxAnimatedRoot.rotateZ(180);
+modelBoxAnimatedRoot.rotateX(90);
+modelBoxAnimatedRoot.setScale(100, 100, 100);
+scene.add(modelBoxAnimatedRoot);
 
-// modelCesiumMan = assimpLoader.load("CesiumMan/CesiumMan.gltf");
-// modelCesiumManRoot = modelCesiumMan.root;
-// modelCesiumManRoot.translateX(400);
-// modelCesiumManRoot.rotateX(90);
-// modelCesiumManRoot.setScale(100, 100, 100);
-// scene.add(modelCesiumManRoot);
+modelCesiumMan = assimpLoader.load("CesiumMan/CesiumMan.gltf");
+modelCesiumManRoot = modelCesiumMan.root;
+modelCesiumManRoot.translateX(400);
+modelCesiumManRoot.rotateX(90);
+modelCesiumManRoot.setScale(100, 100, 100);
+scene.add(modelCesiumManRoot);
 
-// modelRiggedSimple = assimpLoader.load("RiggedSimple/RiggedSimple.gltf");
-// modelRiggedSimpleRoot = modelRiggedSimple.root;
-// modelRiggedSimpleRoot.translateX(570);
-// modelRiggedSimpleRoot.translateZ(100);
-// modelRiggedSimpleRoot.rotateX(90);
-// modelRiggedSimpleRoot.setScale(30, 30, 30);
-// scene.add(modelRiggedSimpleRoot);
+modelRiggedSimple = assimpLoader.load("RiggedSimple/RiggedSimple.gltf");
+modelRiggedSimpleRoot = modelRiggedSimple.root;
+modelRiggedSimpleRoot.translateX(570);
+modelRiggedSimpleRoot.translateZ(100);
+modelRiggedSimpleRoot.rotateX(90);
+modelRiggedSimpleRoot.setScale(30, 30, 30);
+scene.add(modelRiggedSimpleRoot);
 
 modelMech = assimpLoader.load("mech_walker.fbx");
 modelMechRoot = modelMech.root;
-// modelMechRoot.translateX(-850);
+modelMechRoot.translateX(-850);
 // modelMechRoot.translateZ(100);
 modelMechRoot.rotateX(90);
 modelMechRoot.rotateY(270);
@@ -76,27 +76,26 @@ scene.add(modelMechRoot);
 // Init the animations
 currentTime = 0;
 
-// animFoxRun = modelFox.animations[$ "Run"].update();
-// animRobot = modelRobot.animations[$ "Animation0"].update();
-// animCube = modelCube.animations[$ "animation_AnimatedCube"].update();
-// animModelBoxAnimated = modelBoxAnimated.animations[$ "Animation0"].update();
-// animCesiumMan = modelCesiumMan.animations[$ "Animation0"].update();
-// animRiggedSimple = modelRiggedSimple.animations[$ "Animation0"].update();
+animFoxRun = modelFox.animations[$ "Run"].update();
+animRobot = modelRobot.animations[$ "Animation0"].update();
+animCube = modelCube.animations[$ "animation_AnimatedCube"].update();
+animModelBoxAnimated = modelBoxAnimated.animations[$ "Animation0"].update();
+animCesiumMan = modelCesiumMan.animations[$ "Animation0"].update();
+animRiggedSimple = modelRiggedSimple.animations[$ "Animation0"].update();
 
-log(modelMech.animations);
-animMech = modelMech.animations[$ "Neck_Mech_Rig|Rest"].update();
+animMech = modelMech.animations[$ "Neck_Mech_Rig|All_Animations"].update();
 
 // Add the skeleton helpers
-// skeletonHelperFox = new UeSkeletonHelper(modelFoxRoot);
-// scene.add(skeletonHelperFox);
+skeletonHelperFox = new UeSkeletonHelper(modelFoxRoot);
+scene.add(skeletonHelperFox);
 
-// skeletonHelperRobot = new UeSkeletonHelper(modelRobotRoot);
-// scene.add(skeletonHelperRobot);
+skeletonHelperRobot = new UeSkeletonHelper(modelRobotRoot);
+scene.add(skeletonHelperRobot);
 
-// skeletonHelperCesiumMan = new UeSkeletonHelper(modelCesiumManRoot);
-// scene.add(skeletonHelperCesiumMan);
+skeletonHelperCesiumMan = new UeSkeletonHelper(modelCesiumManRoot);
+scene.add(skeletonHelperCesiumMan);
 
-// skeletonHelperRiggedSimple = new UeSkeletonHelper(modelRiggedSimpleRoot);
-// scene.add(skeletonHelperRiggedSimple);
+skeletonHelperRiggedSimple = new UeSkeletonHelper(modelRiggedSimpleRoot);
+scene.add(skeletonHelperRiggedSimple);
 
 scene.forceUpdate();
