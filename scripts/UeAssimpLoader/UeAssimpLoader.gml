@@ -314,6 +314,17 @@
       }
     }
 
+    // Find the first available UV channel
+    var uvChannel = -1;
+    if (meshChannelNumTexcoord > 0) {
+      for (var i = 0; i < meshChannelNumTexcoord; i++) {
+        if (ASSIMP_MeshHasTexCoords(i)) {
+          uvChannel = i;
+          break;
+        }
+      }
+    }
+
     for (var f = 0; f < meshFacenum; f++) {
       var fn = ASSIMP_GetMeshFaceVerticesNum(f);
 
@@ -330,10 +341,10 @@
         var nz = ASSIMP_GetMeshNormalZ(v);
         vertex_normal(vb, nx, ny, nz);
 
-        var tx = 0, ty = 0, tz = 0;
-        if (meshChannelNumTexcoord > 0) {
-          tx = ASSIMP_GetMeshTexCoordU(v, 0);
-          ty = ASSIMP_GetMeshTexCoordV(v, 0);
+        var tx = 0, ty = 0;
+        if (uvChannel != -1) {
+          tx = ASSIMP_GetMeshTexCoordU(v, uvChannel);
+          ty = ASSIMP_GetMeshTexCoordV(v, uvChannel);
         }
         vertex_texcoord(vb, tx, ty);
 
@@ -380,7 +391,14 @@
             w3 *= invWeight;
           } else {
             // If no weights, assign to root bone (index 0) with full weight
+            vertIndices[offset] = 0;
+            vertIndices[offset + 1] = 0;
+            vertIndices[offset + 2] = 0;
+            vertIndices[offset + 3] = 0;
             w0 = 1.0;
+            w1 = 0.0;
+            w2 = 0.0;
+            w3 = 0.0;
           }
 
           vertex_float4(vb, vertIndices[offset], vertIndices[offset + 1], vertIndices[offset + 2], vertIndices[offset + 3]);
@@ -443,14 +461,7 @@
     for (var i = 0, il = array_length(boneData); i < il; i++) {
       var data = boneData[i];
       var boneNode = nodeMap[$ data.name]; // Fast lookup using nodeMap
-
-      if (boneNode == undefined) {
-        ueWarning($"Bone node not found in hierarchy: '{data.name}'. This will cause the bone to be ignored.");
-        // Debug: list all available nodes
-        var _nodeNames = variable_struct_get_names(nodeMap);
-        ueDebug($"Available nodes: {string(_nodeNames)}");
-        continue;
-      }
+      if (boneNode == undefined) continue;
 
       // Convert UeObject3D to UeBone
       var bone = new UeBone({

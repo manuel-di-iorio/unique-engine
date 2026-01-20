@@ -132,6 +132,7 @@
     {"$GMIncludedFile":"","%Name":"l.jpg","CopyToMask":-1,"filePath":"datafiles/InterpolationTest/glTF","name":"l.jpg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"README.md","CopyToMask":-1,"filePath":"datafiles/InterpolationTest","name":"README.md","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"screenshot.gif","CopyToMask":-1,"filePath":"datafiles/InterpolationTest/screenshot","name":"screenshot.gif","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"mech_walker.fbx","CopyToMask":-1,"filePath":"datafiles","name":"mech_walker.fbx","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Mech1_baseColor.png","CopyToMask":-1,"filePath":"datafiles/pbr_mech","name":"Mech1_baseColor.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Mech1_metallicRoughness.png","CopyToMask":-1,"filePath":"datafiles/pbr_mech","name":"Mech1_metallicRoughness.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Mech1_normal.png","CopyToMask":-1,"filePath":"datafiles/pbr_mech","name":"Mech1_normal.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
