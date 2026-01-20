@@ -10,7 +10,9 @@ scene.add(hemiLight, dirLight);
 
 // Terrain
 terrainGeometry = new UePlaneGeometry(1000, 1000, { color: #222222 });
-terrainMesh = new UeStaticMesh(terrainGeometry);
+terrainMesh = new UeStaticMesh(terrainGeometry, undefined, { z: -50 });
+terrainMesh.updateMatrix();
+terrainMesh.updateMatrixWorld();
 scene.add(terrainMesh);
 
 // Objects
