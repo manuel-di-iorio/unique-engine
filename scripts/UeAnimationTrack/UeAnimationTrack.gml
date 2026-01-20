@@ -35,6 +35,10 @@ function UeAnimationTrack(nodeName) constructor {
     pos: undefined,
     rot: undefined,
     scl: undefined,
+    // Optimized baking (indices only)
+    posIdx: undefined,
+    rotIdx: undefined,
+    sclIdx: undefined,
     duration: 1,
     sampleCount: 0
   };
@@ -57,6 +61,7 @@ function UeAnimationTrack(nodeName) constructor {
    */
   static update = function(duration, fps = 60) {
     gml_pragma("forceinline");
+    /* OLD FULL BAKE CODE - Commented out for benchmark reasons
     self._posLen = array_length(self.positionKeys);
     self._rotLen = array_length(self.rotationKeys);
     self._scaleLen = array_length(self.scaleKeys);
@@ -105,6 +110,59 @@ function UeAnimationTrack(nodeName) constructor {
     
     self._baked.duration = duration;
     self._baked.sampleCount = totalSamples;
+    */
+    return self;
+  }
+
+  /**
+   * Updates track metadata and maps global timestamps to local keyframe indices.
+   * This is much more memory-efficient than full baking.
+   * @param {real} duration Total animation duration
+   * @param {Array<real>} globalTimes Array of all unique timestamps in the animation
+   */
+  static updateOptimized = function(duration, globalTimes) {
+    gml_pragma("forceinline");
+    self._posLen = array_length(self.positionKeys);
+    self._rotLen = array_length(self.rotationKeys);
+    self._scaleLen = array_length(self.scaleKeys);
+    
+    var count = array_length(globalTimes);
+    var pLen = self._posLen;
+    var rLen = self._rotLen;
+    var sLen = self._scaleLen;
+    
+    if (pLen > 0) {
+        self._baked.posIdx = array_create(count);
+        var pLast = 0;
+        for (var i = 0; i < count; i++) {
+            var t = globalTimes[i];
+            while (pLast + 4 < pLen && self.positionKeys[pLast + 4] <= t) pLast += 4;
+            self._baked.posIdx[i] = pLast;
+        }
+    }
+    
+    if (rLen > 0) {
+        self._baked.rotIdx = array_create(count);
+        var rLast = 0;
+        for (var i = 0; i < count; i++) {
+            var t = globalTimes[i];
+            while (rLast + 5 < rLen && self.rotationKeys[rLast + 5] <= t) rLast += 5;
+            self._baked.rotIdx[i] = rLast;
+        }
+    }
+    
+    if (sLen > 0) {
+        self._baked.sclIdx = array_create(count);
+        var sLast = 0;
+        for (var i = 0; i < count; i++) {
+            var t = globalTimes[i];
+            while (sLast + 4 < sLen && self.scaleKeys[sLast + 4] <= t) sLast += 4;
+            self._baked.sclIdx[i] = sLast;
+        }
+    }
+    
+    self._baked.duration = duration;
+    self._baked.sampleCount = count;
     return self;
   }
 
