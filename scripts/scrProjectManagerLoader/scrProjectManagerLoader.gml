@@ -150,8 +150,6 @@ function ProjectLoader() constructor {
   };
 
   self.__registerAssetFromNode = function(node, treeview, assetTargets, projectDir) {
-      if (node[$ "type"] == "ModelInstance") return;
-
       var asset = self.__createAssetFromNode(projectDir, node);
       if (asset != undefined) {
           var icon = self.__iconForType(asset.type);
@@ -268,19 +266,72 @@ function ProjectLoader() constructor {
     }
 
     var scenes = assetManager.getAssetsByType("Scene");
+    var treeview = global.UI.Main.Assets.Treeview;
+
+    // Set up lazy loading callback for the treeview
+    treeview.onExpand = method({ self, objectsByUUID, materialsByUUID }, function(treeviewItem) {
+        if (treeviewItem[$ "needsLoading"] == true) {
+            var scene = treeviewItem.asset;
+            if (scene != undefined && scene.type == "Scene" && scene[$ "__metadata"] != undefined) {
+                // 1. Load 3D nodes
+                scene.fromJSON(scene.__metadata, objectsByUUID);
+                
+                // 2. Link materials for meshes in the scene
+                scene.traverse(method({ materialsByUUID }, function(obj) {
+                    if (obj.type == "Mesh") {
+                        var materialUUID = obj[$ "__metadata"] != undefined ? obj.__metadata[$ "material"] : undefined;
+                        if (materialUUID != undefined && materialsByUUID[$ materialUUID] != undefined) {
+                            obj.material = materialsByUUID[$ materialUUID];
+                        }
+                    }
+                }));
+
+                // 3. Build Treeview items
+                self.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
+                
+                // 4. Cleanup
+                treeviewItem.needsLoading = false;
+                delete scene.__metadata;
+            }
+        }
+    });
+
+    treeview.onCollapse = method({ self }, function(treeviewItem) {
+        var scene = treeviewItem.asset;
+        var editorManager = oSceneEditor.editorManager;
+        
+        // Only unload scenes that are NOT active
+        if (scene != undefined && scene.type == "Scene" && editorManager.activeScene != scene) {
+            // 1. Serialize back to metadata to preserve state
+            scene.__metadata = scene.toJSON();
+            
+            // 2. Clear 3D children
+            scene.children = [];
+            
+            // 3. Clear Treeview items
+            treeviewItem.Items.children = [];
+            treeviewItem.Items.clear(); // Ensure all internal state is cleared
+            
+            // 4. Mark as needing loading
+            treeviewItem.needsLoading = true;
+            treeviewItem.Arrow.visible = true;
+        }
+    });
+
     for (var i = 0, il = array_length(scenes); i < il; i++) {
         var scene = scenes[i];
         if (struct_exists(scene, "__metadata") && scene.__metadata != undefined) {
-            scene.fromJSON(scene.__metadata, objectsByUUID);
-            
-            // Build treeview children for the scene
-            var treeview = global.UI.Main.Assets.Treeview;
             var sceneItem = self.treeviewItemsByUUID[$ scene.uuid];
             if (sceneItem != undefined) {
-                self.__buildTreeviewForScene(scene, sceneItem, treeview);
+                // Mark for lazy loading if it has children
+                var hasChildren = (struct_exists(scene.__metadata, "children") && array_length(scene.__metadata.children) > 0);
+                if (hasChildren) {
+                    sceneItem.needsLoading = true;
+                    sceneItem.Arrow.visible = true;
+                } else {
+                    delete scene.__metadata;
+                }
             }
-
-            delete scene.__metadata;
         }
     }
   };
@@ -294,7 +345,7 @@ function ProjectLoader() constructor {
       case "Folder": return sprUiFolder;
       case "Light": return sprUiLight;
       case "Camera": return sprUiCamera;
-      case "ModelInstance": return sprUiObject;
+      case "Object3D": return sprUiObject;
     }
     return undefined;
   };
@@ -314,35 +365,31 @@ function ProjectLoader() constructor {
   self.__buildTreeviewForScene = function(scene, sceneItem, treeview) {
       for (var i = 0; i < array_length(scene.children); i++) {
           var child = scene.children[i];
-          if (string_pos("Instance", child[$ "type"] ?? "") > 0) {
-              self.__buildTreeviewForInstance(child, sceneItem, treeview);
-          }
+          self.__buildTreeviewForAssetRecursive(child, sceneItem, treeview);
       }
   };
 
-  self.__buildTreeviewForInstance = function(instance, parentItem, treeview) {
-      if (instance == undefined) return;
+  self.__buildTreeviewForAssetRecursive = function(asset, parentItem, treeview) {
+      if (asset == undefined) return;
       
-      var icon = self.__iconForType(instance.type);
+      var icon = self.__iconForType(asset.type);
       var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item" }, {
           treeview: treeview,
-          assetType: instance.type,
-          type: instance.type,
+          assetType: asset.type,
+          type: asset.type,
           icon: icon,
-          asset: instance
+          asset: asset
       });
       
       parentItem.addChild(tvItem, false);
       
       // Register with asset manager to enable selection and tracking
-      oSceneEditor.assetManager.addAsset(instance.type, instance);
+      oSceneEditor.assetManager.addAsset(asset.type, asset);
       
       // Recursively add children
-      for (var i = 0, il = array_length(instance.children); i < il; i++) {
-          var child = instance.children[i];
-          if (string_pos("Instance", child[$ "type"] ?? "") > 0) {
-              self.__buildTreeviewForInstance(child, tvItem, treeview);
-          }
+      for (var i = 0, il = array_length(asset.children); i < il; i++) {
+          var child = asset.children[i];
+          self.__buildTreeviewForAssetRecursive(child, tvItem, treeview);
       }
   };
 

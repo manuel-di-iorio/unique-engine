@@ -25,54 +25,12 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      * @note This is not actually used in Object3D, only in Meshes) */
     skeleton = undefined;
         
-    // Instances management
-    object = undefined;
-    instances = new UeInstanceList(self);
-    isInstance = false;
-
     // Abstract methods
     function render() {}
     function onBeforeRender() {}
     function onAfterRender() {}
     function onBeforeShadow() {}
     function onAfterShadow() {}
-    
-    /**
-     * Creates an instance with proper master-instance relationship
-     */
-    function createInstance() {
-        gml_pragma("forceinline");
-        var _this = self;
-        
-        var instance = new UeObject3D({
-            name: _this.name,
-            visible: _this.visible,
-            renderOrder: _this.renderOrder,
-            castShadow: _this.castShadow,
-            receiveShadow: _this.receiveShadow,
-        });
-        
-        // Copy transform
-        vec3_copy(instance.position, _this.position);
-        quat_copy(instance.rotation, _this.rotation);
-        vec3_copy(instance.scale, _this.scale);
-        vec3_copy(instance.up, _this.up);
-        
-        instance.layers = _this.layers.clone();
-        instance.frustumCulled = _this.frustumCulled;
-        instance.matrixAutoUpdate = _this.matrixAutoUpdate;
-        
-        instance.object = self;
-        instance.isInstance = true;
-                
-        self.instances.add(instance);
-
-        for (var i=0, il = array_length(self.children); i < il; i++) {
-            instance.add(self.children[i].createInstance());
-        }
-        
-        return instance;
-    }
     
     /**
      * Returns a clone of this object and optionally all descendants.
@@ -224,12 +182,6 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             }
         }
         return self;
-    }
-    
-    // Executes the callback on all instances of this object
-    // @doc
-    function traverseInstances(callback) {
-        return instances.traverseInstances(callback);
     }
     
     /**

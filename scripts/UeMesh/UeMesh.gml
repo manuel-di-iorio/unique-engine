@@ -234,49 +234,11 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
   }
 
   /**
-   * Creates an instance with proper master-instance relationship
-   */
-  function createInstance() {
-    gml_pragma("forceinline");
-    var _this = self;
-
-    var instance = new UeMesh(self.geometry, self.material, {
-      position: vec3_clone(_this.position),
-      rotation: quat_clone(_this.rotation),
-      scale: vec3_clone(_this.scale),
-      up: vec3_clone(_this.up),
-      name: _this.name,
-      visible: _this.visible,
-      renderOrder: _this.renderOrder,
-      layers: _this.layers.clone(),
-      frustumCulled: _this.frustumCulled,
-      matrixAutoUpdate: _this.matrixAutoUpdate,
-    });
-    instance.object = self; // Point to the master object
-    instance.isInstance = true; // Mark as instance
-
-    // Add to instances list
-    self.instances.add(instance);
-
-    for (var i = 0, il = array_length(self.children); i < il; i++) {
-      instance.add(self.children[i].createInstance());
-    }
-
-    return instance;
-  }
-
-  /**
    * Returns a clone of this mesh and optionally all descendants.
    */
   function clone(recursive = true) {
     var _newMesh = new UeMesh(self.geometry, self.material);
     _newMesh.copy(self, recursive);
-
-    if (self.isInstance) {
-      _newMesh.isInstance = true;
-      _newMesh.object = self.object;
-    }
-
     return _newMesh;
   }
 }

@@ -83,10 +83,10 @@ function ProjectSaver() constructor {
         var am = oSceneEditor.assetManager;
         var allAssets = am.assets;
         
-        for (var i = 0; i < array_length(allAssets); i++) {
+        for (var i = 0, il = array_length(allAssets); i< il; i++) {
             var asset = allAssets[i];
             var type = asset[$ "type"];
-            if (type == "ModelInstance" || type == "Folder") continue;
+            if (type == "Folder") continue;
             
             __saveAsset(asset, assetsDir);
         }
@@ -119,12 +119,10 @@ function ProjectSaver() constructor {
             switch (action) {
                 case "create":
                 case "edit":
-                    if (type == "ModelInstance") break;
                     __saveAsset(asset, assetsDir);
                     break;
                     
                 case "delete":
-                    if (type == "ModelInstance") break;
                     var typeDir = __getTypeDir(type);
                     var assetPath = assetsDir + typeDir + "/" + uuid;
                     if (directory_exists(assetPath)) directory_destroy(assetPath);

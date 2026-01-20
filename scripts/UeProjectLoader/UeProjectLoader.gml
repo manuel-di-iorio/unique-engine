@@ -151,34 +151,28 @@ function UeProjectLoader(data = {}) constructor {
     self.__instantiateChildren = function(childrenData, parent) {
         for (var i = 0; i < array_length(childrenData); i++) {
             var childData = childrenData[i];
-            if (is_struct(childData) && childData[$ "type"] == "ModelInstance") {
-                var modelUUID = childData[$ "model"];
-                var model = self.assetsByUuid[$ modelUUID];
+            if (is_struct(childData)) {
+                var child;
+                var type = childData[$ "type"];
                 
-                if (model != undefined && struct_exists(model, "isMesh") && model[$ "isMesh"] == true) {
-                    var instance = model.createInstance();
-                    instance.name = childData[$ "name"] ?? "Instance";
-                    instance.type = "ModelInstance";
-                    
-                    if (struct_exists(childData, "position")) {
-                        var p = childData[$ "position"];
-                        vec3_set(instance.position, p[0], p[1], p[2]);
-                    }
-                    if (struct_exists(childData, "rotation")) {
-                        var r = childData[$ "rotation"];
-                        quat_set(instance.rotation, r[0], r[1], r[2], r[3]);
-                    }
-                    if (struct_exists(childData, "scale")) {
-                        var s = childData[$ "scale"];
-                        vec3_set(instance.scale, s[0], s[1], s[2]);
-                    }
-                    
-                    instance.updateMatrix();
-                    parent.add(instance);
-                    
-                    if (struct_exists(childData, "children") && is_array(childData[$ "children"])) {
-                        self.__instantiateChildren(childData[$ "children"], instance);
-                    }
+                switch (type) {
+                    case "Mesh": child = new UeMesh(); break;
+                    case "Object3D": child = new UeObject3D(); break;
+                    case "AmbientLight": child = new UeAmbientLight(); break;
+                    case "PointLight": child = new UePointLight(); break;
+                    case "DirectionalLight": child = new UeDirectionalLight(); break;
+                    case "SpotLight": child = new UeSpotLight(); break;
+                    case "HemisphereLight": child = new UeHemisphereLight(); break;
+                    case "PerspectiveCamera": child = new UePerspectiveCamera(); break;
+                    case "OrthographicCamera": child = new UeOrthographicCamera(); break;
+                    default: child = new UeObject3D(); break;
+                }
+                
+                child.fromJSON(childData);
+                parent.add(child);
+                
+                if (struct_exists(childData, "children") && is_array(childData[$ "children"])) {
+                    self.__instantiateChildren(childData[$ "children"], child);
                 }
             } else if (is_string(childData)) {
                 var childAsset = self.assetsByUuid[$ childData];

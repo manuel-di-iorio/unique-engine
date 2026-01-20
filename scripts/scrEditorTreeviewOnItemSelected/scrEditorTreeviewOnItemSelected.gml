@@ -2,7 +2,6 @@ function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
     var editorManager = oSceneEditor.editorManager;
     
     switch (treeviewItem.asset.type) {
-        case "ModelInstance":                
         case "Mesh":
         case "Bone":
         case "Object3D":

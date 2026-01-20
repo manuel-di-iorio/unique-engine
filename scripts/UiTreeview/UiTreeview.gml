@@ -71,8 +71,8 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         if (targetType == "Folder") return true;
         
         // Models and Object3D can be dropped on other models, scenes or Object3D
-        if (draggedType == "Mesh" || draggedType == "ModelInstance" || draggedType == "Object3D") {
-            if (targetType == "Mesh" || targetType == "ModelInstance" || targetType == "Scene" || targetType == "Object3D") {
+        if (draggedType == "Mesh" || draggedType == "Object3D") {
+            if (targetType == "Mesh" || targetType == "Scene" || targetType == "Object3D") {
                 return true;
             }
         }
@@ -432,6 +432,11 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.Arrow.show();
         self.Items.show();
         
+        // Trigger onExpand callback if defined
+        if (self.treeview[$ "onExpand"] != undefined) {
+            self.treeview.onExpand(self);
+        }
+        
         // Temporarily hide children to prevent visual glitch
         // They will be shown once the layout is updated
         self.Items.visible = false;
@@ -456,6 +461,11 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.collapsed = true;
         self.Arrow.sprite = sprUiTreeviewArrowRight;
         self.Items.hide();
+        
+        // Trigger onCollapse callback if defined
+        if (self.treeview[$ "onCollapse"] != undefined) {
+            self.treeview.onCollapse(self);
+        }
     }
     
     function onDraw() {

@@ -153,9 +153,9 @@ if (myTexture != undefined) {
 setScene(sceneName)
 ```
 
-Populates the loader's scene with model instances from a scene asset. Clears any existing scene content before populating.
+Populates the loader's scene with objects from a scene asset. Clears any existing scene content before populating.
 
-The scene is automatically instantiated with all ModelInstances and their transforms (position, rotation, scale).
+The scene is automatically instantiated with all objects and their transforms (position, rotation, scale).
 
 **Parameters:**
 - `sceneName` (string) - Name of the scene to load
@@ -202,7 +202,7 @@ The loader supports the following asset types:
 | **Texture** | `assets/{uuid}/texture.png` + `metadata.json`     | Texture images                        |
 | **Material**| `assets/{uuid}/metadata.json`                     | Material definitions                  |
 | **Mesh**    | `assets/{uuid}/geometry.buf` + `metadata.json`    | 3D models with geometry               |
-| **Scene**   | `assets/{uuid}/metadata.json`                     | Scene hierarchies with model instances|
+| **Scene**   | `assets/{uuid}/metadata.json`                     | Scene hierarchies with objects       |
 
 ---
 

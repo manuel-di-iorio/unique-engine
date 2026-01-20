@@ -8,40 +8,10 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
     // 1. Clone the asset
     var clonedAsset = undefined;
     
-    // Check if the asset has a clone method
-    if (variable_struct_exists(originalAsset, "isInstance") && originalAsset.isInstance) {
-        // For model instances, we must create a new instance from the master object
-        // This ensures the materials and geometry are linked correctly
-        if (variable_struct_exists(originalAsset, "object") && originalAsset.object != undefined) {
-             // Create a new instance from the master object
-             if (variable_struct_exists(originalAsset.object, "createInstance")) {
-                clonedAsset = originalAsset.object.createInstance();
-                
-                // Copy properties from the original instance (transform etc)
-                clonedAsset.visible = originalAsset.visible;
-                clonedAsset.name = originalAsset.name; 
-                clonedAsset.position.copy(originalAsset.position);
-                clonedAsset.rotation.copy(originalAsset.rotation);
-                clonedAsset.scale.copy(originalAsset.scale);
-                if (variable_struct_exists(originalAsset, "__rotationEuler")) {
-                    if (clonedAsset[$ "__rotationEuler"] == undefined) clonedAsset.__rotationEuler = euler_create();
-                    euler_copy(clonedAsset.__rotationEuler, originalAsset.__rotationEuler);
-                }
-                
-                // If the instance had an overriden material, carry it over
-                if (originalAsset.material != originalAsset.object.material) {
-                     clonedAsset.material = originalAsset.material; 
-                }
-             }
-        }
-    } 
-    
-    if (clonedAsset == undefined) {
-        if (variable_struct_exists(originalAsset, "clone")) {
-            clonedAsset = originalAsset.clone(true); // Recursive clone
-        } else {
-            clonedAsset = variable_clone(originalAsset);
-        }
+    if (variable_struct_exists(originalAsset, "clone")) {
+        clonedAsset = originalAsset.clone(true); // Recursive clone
+    } else {
+        clonedAsset = variable_clone(originalAsset);
     }
     
     // Copy editor properties
@@ -142,7 +112,7 @@ function __editorTreeviewOnDuplicateAsset__createUiRecursive(treeview, asset, pa
     
     // Map type to icon (simple heuristic)
     if (type == "Folder") icon = sprUiFolder;
-    else if (type == "Mesh" || type == "Object3D" || type == "ModelInstance") icon = sprUiObject;
+    else if (type == "Mesh" || type == "Object3D") icon = sprUiObject;
     else if (type == "Material") icon = sprUiMaterial;
     else if (type == "Texture") icon = sprUiTexture;
     else if (type == "Scene") icon = sprUiScene;

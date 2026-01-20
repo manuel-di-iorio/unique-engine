@@ -46,92 +46,19 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     
     // Model can be moved under another Model (reparent) or under a Scene (instance)
     else if (draggedItem.assetType == "Mesh" || draggedItem.assetType == "Object3D") {
-        // Determine whether the dragged item is an instance (from a scene) or a master (from the Models list)
-        var draggedIsInstance = (draggedItem.asset != undefined && draggedItem.asset[$ "isInstance"] == true);
         var targetHasAsset = (targetItem.asset != undefined);
-        var targetIsInstance = targetHasAsset && (targetItem.asset[$ "isInstance"] == true);
+        var targetIsScene = (targetItem.assetType == "Scene");
 
-        if (draggedIsInstance) {
-            // If we're dragging an existing instance, do reparenting
-            if (targetIsInstance) {
-                isValidDrop = true;
-                dropAction = "reparent";
-            } else if (targetItem.assetType == "Mesh"  && !targetIsInstance) {
-                // Dragging an instance onto a master model -> reparent under that master
-                isValidDrop = true;
-                dropAction = "reparent";
-            } else if (targetItem.assetType == "Scene") {
-                // Move instance directly under the scene
-                isValidDrop = true;
-                dropAction = "reparent";
-            } else {
-                return false;
-            }
-        } else {
-            // Dragging from the Models list (master)
-            if (targetItem.assetType == "Mesh" && (!targetHasAsset || !targetIsInstance)) {
-                // Dropping on a master model -> reparent the master under another master
-                isValidDrop = true;
-                dropAction = "reparent";
-            } else if ((targetItem.assetType == "Scene" || targetIsInstance)) {
-                // Dropping a master onto a scene or onto an instance -> create a new instance
-                isValidDrop = true;
-                dropAction = "instance";
-            } else {
-                return false;
-            }
-        }
-    }
-    
-    // ModelInstance can be reparented under another ModelInstance or under a Scene
-    else if (draggedItem.assetType == "ModelInstance") {
-        var targetHasAsset = (targetItem.asset != undefined);
-        var targetIsInstance = targetHasAsset && (targetItem.asset[$ "isInstance"] == true);
-        
-        if (targetIsInstance || targetItem.assetType == "Scene") {
-            // Can reparent instance under another instance or under a scene
+        if (targetIsScene) {
+            // Dropping a master onto a scene -> create a new instance (clone)
+            isValidDrop = true;
+            dropAction = "instance";
+        } else if (targetItem.assetType == "Mesh" || targetItem.assetType == "Object3D") {
+            // Reparenting
             isValidDrop = true;
             dropAction = "reparent";
         } else {
             return false;
-        }
-    }
-    
-    // Other types of assets
-    else {
-        // For now, other asset types follow the same rules as models
-        if (targetItem.assetType == draggedItem.assetType) {
-            isValidDrop = true;
-            dropAction = "reparent";
-        } else {
-            return false;
-        }
-    }
-    
-    // Ensure we are not trying to move an item onto itself
-    if (draggedItem == targetItem) {
-        return false;
-    }
-    
-    // Ensure we are not trying to reparent a parent into one of its children
-    // (this would create a cycle in the hierarchy)
-    if (dropAction == "reparent" && draggedItem.asset != undefined && targetItem.asset != undefined) {
-        // Check if the targetItem is a descendant of the draggedItem
-        var currentParent = targetItem.asset[$ "parent"];
-        while (currentParent != undefined) {
-            if (currentParent == draggedItem.asset) {
-                return false;
-            }
-            currentParent = currentParent[$ "parent"];
-        }
-        
-        // Also check in the UI hierarchy of the treeview
-        var currentTreeviewParent = targetItem.parent;
-        while (currentTreeviewParent != undefined) {
-            if (currentTreeviewParent == draggedItem) {
-                return false;
-            }
-            currentTreeviewParent = currentTreeviewParent.parent;
         }
     }
     
@@ -195,7 +122,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         }
         else if (dropAction == "instance") {
             // Instantiate a new instance of the model in the scene
-            var instanceAsset = draggedItem.asset.createInstance();
+            var instanceAsset = draggedItem.asset.clone();
             instanceAsset.castShadow = true;
             instanceAsset.receiveShadow = true;
             
@@ -225,21 +152,11 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
 // On drop -> create instance -> imposta ricorsivamente, name, type e __rotationEuler su tutte le istanze
 function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
     obj.name += "_" + string(global.UI_ASSETS_INSTANCE_ID++)
+    obj.uuid = ueUuid(); // Ensure new UUID for the clone
 
-    switch (assetType) {
-        case "Mesh": obj.type = "ModelInstance"; break;
-        case "Light": obj.type = "LightInstance"; break;
-        case "Camera": obj.type = "CameraInstance"; break;
-        default: obj.type = assetType + "Instance"; break;
-    }
-    
     // Copy __rotationEuler from the master object if it exists, otherwise create new
     obj.__rotationEuler = euler_create();
-    if (obj.object != undefined && obj.object[$ "__rotationEuler"] != undefined) {
-        euler_copy(obj.__rotationEuler, obj.object.__rotationEuler);
-    } else {
-        euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
-    }
+    euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
 
     // Ricorsione su children
     if (obj.children != undefined) {

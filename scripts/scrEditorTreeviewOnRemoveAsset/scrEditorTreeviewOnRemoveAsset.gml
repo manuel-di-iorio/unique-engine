@@ -18,17 +18,15 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     
     // === 2. GESTIONE RIMOZIONE PER TIPO ===
     
-    // Texture: rimuoverla dai material che la usano
+    // Texture: rimuovi dall'AssetManager
     if (assetType == "Texture" && asset != undefined) {
         __editorTreeview_removeTextureFromMaterials(asset);
-        // Rimuovi dall'AssetManager
         assetManager.removeAsset("Texture", asset);
     }
     
-    // Material: rimuoverlo dagli object che lo hanno
+    // Material: rimuovi dall'AssetManager
     else if (assetType == "Material" && asset != undefined) {
         __editorTreeview_removeMaterialFromObjects(asset);
-        // Rimuovi dall'AssetManager
         assetManager.removeAsset("Material", asset);
     }
     
@@ -37,9 +35,6 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         // Rimuovi ricorsivamente i figli (se presenti nel treeview)
         __editorTreeview_removeChildrenRecursive(treeviewItem);
 
-        // Prima rimuovi tutte le istanze di questa mesh dalle scene
-        __editorTreeview_removeMeshInstances(asset, treeviewItem.treeview);
-        
         // Se ha un parent, rimuovilo dal parent
         if (asset.parent != undefined) {
             asset.parent.remove(asset);
@@ -67,31 +62,6 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         }
     }
     
-    // ModelInstance/Instance: rimuovere dalla scena
-    else if (asset != undefined && asset[$ "isInstance"] == true) {
-        // Deseleziona anche se è un'istanza attiva
-        if (editorManager.activeAsset == asset) {
-            var keepScene = editorManager.activeScene != undefined;
-            editorManager.clearActiveAsset(keepScene);
-        }
-        
-        // Rimuovi ricorsivamente i figli (se presenti nel treeview)
-        __editorTreeview_removeChildrenRecursive(treeviewItem);
-
-        // Rimuovi l'istanza dal parent
-        if (asset.parent != undefined) {
-            asset.parent.remove(asset);
-        }
-        
-        // Rimuovi dalla lista di istanze del modello originale
-        if (asset[$ "object"] != undefined && asset.object[$ "instances"] != undefined) {
-            asset.object.instances.remove(asset);
-        }
-        
-        // Track the deletion
-        assetManager.__trackChange("delete", asset);
-    }
-
     // Folder: rimuovere ricorsivamente tutti i figli
     else if (assetType == "Folder") {
         // Itera sui figli del treeview item per pulire i loro asset
@@ -116,96 +86,6 @@ function __editorTreeview_removeChildrenRecursive(treeviewItem) {
             editorTreeviewOnRemoveAsset(childItem, false);
         }
     }
-}
-
-/**
- * Rimuove tutte le istanze di una mesh dalle scene
- */
-function __editorTreeview_removeMeshInstances(targetMesh, treeview) {
-    // Controlla se il modello ha istanze
-    if (targetMesh[$ "instances"] == undefined || targetMesh.instances[$ "list"] == undefined) {
-        return;
-    }
-    
-    var instances = targetMesh.instances.list;
-    var assetManager = oSceneEditor.assetManager;
-    var editorManager = oSceneEditor.editorManager;
-    var parentSceneTreeviewItem = undefined;
-    
-    // Rimuovi tutte le istanze (itera all'indietro per evitare problemi con l'array che cambia)
-    for (var i = array_length(instances) - 1; i >= 0; i--) {
-        var instance = instances[i];
-        
-        // Deseleziona se questa istanza o uno dei suoi figli è attualmente selezionato
-        if (__editorTreeview_isInstanceOrChildSelected(instance, editorManager)) {
-            var keepScene = editorManager.activeScene != undefined;
-            editorManager.clearActiveAsset(keepScene);
-        }
-        
-        // Usa la back-reference __treeviewItem se esiste
-        if (instance[$ "__treeviewItem"] != undefined) {
-            var tvItem = instance.__treeviewItem;
-            parentSceneTreeviewItem = tvItem.parent; // Salva il parent per aggiornare freccia dopo
-            
-            // Rimuovi l'item dal parent nel treeview (Items container)
-            if (tvItem.parent != undefined && tvItem.parent[$ "children"] != undefined) {
-                for (var j = array_length(tvItem.parent.children) - 1; j >= 0; j--) {
-                    if (tvItem.parent.children[j] == tvItem) {
-                        array_delete(tvItem.parent.children, j, 1);
-                        tvItem.parent.childrenLength--;
-                        break;
-                    }
-                }
-            }
-            
-            // Distruggi l'elemento UI
-            tvItem.destroy();
-            instance.__treeviewItem = undefined;
-        } else if (treeview != undefined && treeview[$ "Items"] != undefined) {
-            // Fallback: cerca nel treeview se non c'è back-reference
-            __editorTreeview_findAndRemoveTreeviewItem(treeview.Items, instance);
-        }
-        
-        // Rimuovi l'istanza dal suo parent (scena)
-        if (instance.parent != undefined) {
-            instance.parent.remove(instance);
-        }
-        
-        // Track the deletion of this instance
-        assetManager.__trackChange("delete", instance);
-    }
-    
-    // Pulisci la lista delle istanze
-    targetMesh.instances.list = [];
-    
-    // Aggiorna la visibility della freccia del parent TreeviewItem (Scene o Instance)
-    if (parentSceneTreeviewItem != undefined && parentSceneTreeviewItem.parent != undefined) {
-        var sceneTreeviewItem = parentSceneTreeviewItem.parent;
-        if (sceneTreeviewItem[$ "__updateArrowVisibility"] != undefined) {
-            sceneTreeviewItem.__updateArrowVisibility();
-        }
-    }
-}
-
-/**
- * Controlla ricorsivamente se un'istanza o uno dei suoi figli è attualmente selezionato
- */
-function __editorTreeview_isInstanceOrChildSelected(instance, editorManager) {
-    // Controlla sia activeAsset che gizmoTarget (per le istanze dentro scene)
-    if (editorManager.activeAsset == instance || editorManager.gizmoTarget == instance) {
-        return true;
-    }
-    
-    // Controlla ricorsivamente i figli
-    if (instance[$ "children"] != undefined) {
-        for (var i = 0; i < array_length(instance.children); i++) {
-            if (__editorTreeview_isInstanceOrChildSelected(instance.children[i], editorManager)) {
-                return true;
-            }
-        }
-    }
-    
-    return false;
 }
 
 /**
@@ -292,13 +172,6 @@ function __editorTreeview_unsetMaterialRecursive(obj, targetMaterial) {
     if (obj[$ "children"] != undefined) {
         for (var j = 0; j < array_length(obj.children); j++) {
             __editorTreeview_unsetMaterialRecursive(obj.children[j], targetMaterial);
-        }
-    }
-    
-    // Ricorsione sulle instances
-    if (obj[$ "instances"] != undefined && obj.instances.list != undefined) {
-        for (var k = 0; k < array_length(obj.instances.list); k++) {
-            __editorTreeview_unsetMaterialRecursive(obj.instances.list[k], targetMaterial);
         }
     }
 }
