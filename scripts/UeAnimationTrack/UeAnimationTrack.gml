@@ -54,73 +54,12 @@ function UeAnimationTrack(nodeName) constructor {
   self._scaleLen = 0;
 
   /**
-   * Updates metadata and bakes the track into a fixed-frequency lookup table.
-   * Should be called after modifying keyframe arrays.
-   * @param {real} duration Total duration of the animation in ticks
-   * @param {real} fps Samples per second to bake
-   */
-  static update = function(duration, fps = 60) {
-    gml_pragma("forceinline");
-    /* OLD FULL BAKE CODE - Commented out for benchmark reasons
-    self._posLen = array_length(self.positionKeys);
-    self._rotLen = array_length(self.rotationKeys);
-    self._scaleLen = array_length(self.scaleKeys);
-    
-    // Reset caches for baking process
-    self._posCache.lastIndex = 0;
-    self._rotCache.lastIndex = 0;
-    self._scaleCache.lastIndex = 0;
-    self._lastTime = -1;
-
-    var totalSamples = ceil(duration * (fps / 60)) + 1; 
-    
-    var _pLen = self._posLen;
-    var _rLen = self._rotLen;
-    var _sLen = self._scaleLen;
-    
-    if (_pLen > 0) {
-        self._baked.pos = array_create(totalSamples * 3);
-        for (var i = 0; i < totalSamples; i++) {
-            var t = (i / (totalSamples - 1)) * duration;
-            var res = self._interpolateVec3(self.positionKeys, _pLen, t, self._tempPos, self._posCache);
-            var idx = i * 3;
-            self._baked.pos[idx] = res[0]; self._baked.pos[idx+1] = res[1]; self._baked.pos[idx+2] = res[2];
-        }
-    }
-    
-    if (_rLen > 0) {
-        self._baked.rot = array_create(totalSamples * 4);
-        for (var i = 0; i < totalSamples; i++) {
-            var t = (i / (totalSamples - 1)) * duration;
-            var res = self._interpolateQuat(self.rotationKeys, _rLen, t, self._tempRot, self._rotCache);
-            var idx = i * 4;
-            self._baked.rot[idx] = res[0]; self._baked.rot[idx+1] = res[1]; self._baked.rot[idx+2] = res[2]; self._baked.rot[idx+3] = res[3];
-        }
-    }
-    
-    if (_sLen > 0) {
-        self._baked.scl = array_create(totalSamples * 3);
-        for (var i = 0; i < totalSamples; i++) {
-            var t = (i / (totalSamples - 1)) * duration;
-            var res = self._interpolateVec3(self.scaleKeys, _sLen, t, self._tempScale, self._scaleCache);
-            var idx = i * 3;
-            self._baked.scl[idx] = res[0]; self._baked.scl[idx+1] = res[1]; self._baked.scl[idx+2] = res[2];
-        }
-    }
-    
-    self._baked.duration = duration;
-    self._baked.sampleCount = totalSamples;
-    */
-    return self;
-  }
-
-  /**
    * Updates track metadata and maps global timestamps to local keyframe indices.
    * This is much more memory-efficient than full baking.
    * @param {real} duration Total animation duration
    * @param {Array<real>} globalTimes Array of all unique timestamps in the animation
    */
-  static updateOptimized = function(duration, globalTimes) {
+  static update = function(duration, globalTimes) {
     gml_pragma("forceinline");
     self._posLen = array_length(self.positionKeys);
     self._rotLen = array_length(self.rotationKeys);

@@ -4,10 +4,6 @@ sidebar_position: 2
 
 # UeSkeleton
 
-:::warning
-Animations module is under costruction and do not works yet.
-:::
-
 Manager for a bone hierarchy for skinning.
 
 ## Constructor

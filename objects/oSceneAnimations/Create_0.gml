@@ -67,12 +67,12 @@ scene.add(modelRiggedSimpleRoot);
 // Init the animations
 currentTime = 0;
 
-animFoxRun = modelFox.animations[$ "Run"];
-animRobot = modelRobot.animations[$ "Animation0"];
-animCube = modelCube.animations[$ "animation_AnimatedCube"];
-animModelBoxAnimated = modelBoxAnimated.animations[$ "Animation0"];
-animCesiumMan = modelCesiumMan.animations[$ "Animation0"];
-animRiggedSimple = modelRiggedSimple.animations[$ "Animation0"];
+animFoxRun = modelFox.animations[$ "Run"].update();
+animRobot = modelRobot.animations[$ "Animation0"].update();
+animCube = modelCube.animations[$ "animation_AnimatedCube"].update();
+animModelBoxAnimated = modelBoxAnimated.animations[$ "Animation0"].update();
+animCesiumMan = modelCesiumMan.animations[$ "Animation0"].update();
+animRiggedSimple = modelRiggedSimple.animations[$ "Animation0"].update();
 
 // Add the skeleton helpers
 skeletonHelperFox = new UeSkeletonHelper(modelFoxRoot);

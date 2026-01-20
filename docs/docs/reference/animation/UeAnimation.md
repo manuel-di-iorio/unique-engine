@@ -4,10 +4,6 @@ sidebar_position: 1
 
 # UeAnimation
 
-:::warning
-Animations module is under costruction and do not works yet.
-:::
-
 Class representing a set of animation tracks for an object hierarchy.
 
 ## Constructor

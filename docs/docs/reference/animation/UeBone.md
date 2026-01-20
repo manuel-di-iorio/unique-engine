@@ -4,10 +4,6 @@ sidebar_position: 3
 
 # UeBone
 
-:::warning
-Animations module is under costruction and do not works yet.
-:::
-
 Represents an individual bone in a skeleton. Inherits from `UeObject3D`.
 
 ## Constructor

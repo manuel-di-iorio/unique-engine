@@ -4,11 +4,14 @@ sidebar_position: 6
 
 # Animations
 
-:::warning
-Animations module is under costruction and do not works yet.
-:::
-
 Unique Engine supports a hierarchical animation and skinning system based on the **Assimp** model. This allows for importing complex models with skeletons and keyframe animations.
+
+## Performance and Optimization
+
+The animation system is designed for maximum performance while maintaining a low memory footprint.
+
+### Global Timestamp Mapping
+To prepare the animation for optimized playback, you must call the `update()` method:
 
 ## Supported Animation Types
 
@@ -37,6 +40,10 @@ modelRoot = model.root;
 
 // Get the desired animation
 anim = model.animations[$ "Animation0"];
+
+// Initialize optimized mapping (crucial for performance)
+anim.update();
+
 currentTime = 0;
 
 // --- Step Event ---
@@ -50,12 +57,44 @@ anim.evaluate(currentTime, modelRoot);
 ## Data Structure
 
 ### UeAnimationTrack
-A track consists of three keyframe arrays:
-- `positionKeys`: `[ time, value: Vector3 ]`
-- `rotationKeys`: `[ time, value: Quaternion ]`
-- `scaleKeys`: `[ time, value: Vector3 ]`
+A track consists of three keyframe arrays and their optimized index maps:
+- `positionKeys`: `[ time, x, y, z, ... ]`
+- `rotationKeys`: `[ time, x, y, z, w, ... ]`
+- `scaleKeys`: `[ time, x, y, z, ... ]`
 
-Interpolation occurs automatically between the nearest keyframes during the `evaluate()` call.
+#### Optimized Baking
+When `anim.update()` is called, the system generates:
+- `_baked.posIdx`, `_baked.rotIdx`, `_baked.sclIdx`: Arrays of indices mapping global timestamps to the closest preceding keyframe in this track.
+
+## Blending Animations
+
+Unique Engine supports blending between multiple animations. This is useful for creating smooth transitions (e.g., from Walking to Running) or layering animations (e.g., an Aim animation on top of a Walk cycle).
+
+### 1. Manual Layering
+The `evaluate()` function takes an optional `weight` parameter (default is `1.0`). If the weight is less than 1.0, the animation will blend with the current transformation of the objects.
+
+```gml
+// Step Event
+// 1. Apply base animation (e.g., Walk)
+animWalk.evaluate(walkTime, modelRoot, 1.0);
+
+// 2. Layer another animation on top with 50% influence (e.g., Wave)
+animWave.evaluate(waveTime, modelRoot, 0.5);
+```
+
+### 2. Static Blend Helper
+For simple transitions between two animations, you can use the static `blend` method:
+
+```gml
+// Step Event
+// Blends between animA and animB based on 'weight' (0.0 to 1.0)
+UeAnimation.blend(animA, timeA, animB, timeB, weight, modelRoot);
+```
+
+### Interpolation
+Interpolation occurs on-the-fly during the `evaluate()` call using the mapped indices. 
+- **Linear Interpolation (LERP)** is used for Position and Scale.
+- **Spherical Linear Interpolation (SLERP)** is used for Rotation to ensure smooth transitions.
 
 ## Skinning and Matrices
 When a `UeMesh` has an associated `UeSkeleton`, the bone matrices are sent to the shader. The final calculation for each bone is:

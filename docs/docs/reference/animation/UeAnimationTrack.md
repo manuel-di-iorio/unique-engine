@@ -4,10 +4,6 @@ sidebar_position: 4
 
 # UeAnimationTrack
 
-:::warning
-Animations module is under costruction and do not works yet.
-:::
-
 Manages keyframes for a single node identified by name.
 
 ## Constructor
