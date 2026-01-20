@@ -65,7 +65,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
     }
 
     /// Updates the world matrix and optionally forces update on children
-    function updateMatrixWorld(force = false) {
+    function updateMatrixWorld(force = false, recursive = true) {
         gml_pragma("forceinline");
 
         // Update local matrix if enabled
@@ -100,14 +100,16 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
             }
         }
 
-        // Propagate update to children
-        for (var i = 0, len = array_length(children); i < len; i++) {
-            children[i].updateMatrixWorld(force);
-        }
+        if (recursive) {
+            // Propagate update to children
+            for (var i = 0, len = array_length(children); i < len; i++) {
+                children[i].updateMatrixWorld(force, true);
+            }
 
-        // Update skeleton if present (AFTER children/bones have updated their world matrices)
-        if (self.skeleton != undefined) {
-            self.skeleton.update();
+            // Update skeleton if present (AFTER children/bones have updated their world matrices)
+            if (self.skeleton != undefined) {
+                self.skeleton.update();
+            }
         }
 
         return self;

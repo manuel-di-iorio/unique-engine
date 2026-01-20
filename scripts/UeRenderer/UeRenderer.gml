@@ -44,6 +44,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   __queueShadow = [];
   __queueOpaque = [];
   __queueTransparent = [];
+  __skeletonUpdateQueue = [];
 
   function clear(color = true, depth = true, stencil = true) {
     if (color) draw_clear_alpha(self.__clearColor, self.__clearAlpha);
@@ -100,7 +101,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
   }
 
   // Recursively collect renderable objects and precompute their sort key
-  function __collectObjectQueues(objects, camera) {
+  function __collectObjectQueues(objects, camera, force = false) {
     gml_pragma("forceinline");
     var cameraPos = camera.position;
     var cameraLayers = camera.layers;
@@ -111,6 +112,19 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
 
       // Skip invisible objects and their children
       if (!object.visible || !object.layers.test(cameraLayers)) continue;
+
+      var _forced = force;
+      // Update matrices for dynamic objects (single pass, non-recursive)
+      if (object.matrixAutoUpdate && object.matrixWorldAutoUpdate) {
+        var _needsUpdate = object.matrixWorldNeedsUpdate || _forced;
+        object.updateMatrixWorld(_forced, false);
+        if (_needsUpdate) _forced = true;
+      }
+      
+      // Collect skeleton for deferred update
+      if (object.skeleton != undefined) {
+        array_push(__skeletonUpdateQueue, object.skeleton);
+      }
 
       // Precompute distance to camera for LOD and transparency sorting
       // We use the world matrix position for accuracy even if parented
@@ -173,7 +187,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
       }
 
       // Traverse child objects
-      if (array_length(object.children) > 0) __collectObjectQueues(object.children, camera);
+      if (array_length(object.children) > 0) __collectObjectQueues(object.children, camera, _forced);
     }
   }
 
@@ -484,17 +498,19 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     // Collect and classify all renderable objects
     if (camera.matrixAutoUpdate) camera.updateMatrixWorld();
     
-    // Update the entire scene graph once before collection
-    // This avoids redundant recursive calls inside __collectObjectQueues
-    if (scene.matrixAutoUpdate && scene.matrixWorldAutoUpdate) scene.updateMatrixWorld();
-
     array_resize(__lights, 0);
     array_resize(__queueShadow, 0);
     array_resize(__queueOpaque, 0);
     array_resize(__queueTransparent, 0);
+    array_resize(__skeletonUpdateQueue, 0);
 
     // Collect all renderable objects
     __collectObjectQueues(scene.children, camera);
+
+    // **Update all skeletons after matrices are finalized**
+    for (var i = 0, len = array_length(__skeletonUpdateQueue); i < len; i++) {
+        __skeletonUpdateQueue[i].update();
+    }
 
     // **PASS 1: Render shadow maps for shadow-casting lights**
     if (shadowMap.enabled && (shadowMap.autoUpdate || shadowMap.needsUpdate)) {
