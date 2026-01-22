@@ -1,213 +1,221 @@
 /**
  * UeTextGeometry
  * Creates a 3D mesh from a string using a GameMaker font.
- * 
- * @param {String} text The text to render
- * @param {Asset.GMFont} font The font asset to use
- * @param {Struct} data Configuration data (halign, valign, lineHeight, spacing, color, size, etc.)
+ *
+ * @param {String} text
+ * @param {Asset.GMFont} font
+ * @param {Struct} data
  */
 function UeTextGeometry(text = "", font = -1, data = {}): UeGeometry(data) constructor {
-    self.data = data;
     self.text = text;
     self.font = font;
-    self.halign = data[$ "halign"] ?? fa_left;
-    self.valign = data[$ "valign"] ?? fa_top;
-    self.lineHeight = data[$ "lineHeight"] ?? 1.0;
-    self.spacing = data[$ "spacing"] ?? 0;
-    self.fontSize = data[$ "size"] ?? 1.0; // Scale factor
-    
-    // Use PNUC format by default for text (Position, Normal, UV, Color)
-    self.format = data[$ "format"] ?? global.UE_VFORMAT_PNUC;
 
-    // Store parent build reference before overriding it
-    super_build = build;
-    
-    build = function() {
-        if (font == -1 || text == "") return self;
+    // ---- Default material flags ----
+    if (data[$"transparent"] == undefined) data.transparent = true;
+
+    // ---- Typography settings ----
+    self.halign     = data[$"halign"] ?? fa_left;
+    self.valign     = data[$"valign"] ?? fa_top;
+    self.lineHeight = data[$"lineHeight"] ?? 1.0;
+    self.spacing    = data[$"spacing"] ?? 1;
+    self.fontSize   = data[$"size"] ?? 1.0;
+    self.useKerning = data[$"kerning"] ?? false;
+
+    self.textColor  = data[$"color"] ?? c_white;
+    self.textAlpha  = data[$"alpha"] ?? 1;
+
+    // ---- Vertex format (P,U,C) ----
+    self.format = data[$"format"] ?? global.UE_VFORMAT_PUC;
+
+    self.__fontTexture = undefined;
+
+    // ==========================================================
+    // SET TEXT
+    // ==========================================================
+    function setText(_text) {
+        gml_pragma("forceinline");
+
+        self.text = _text;
         
-        // Ensure all characters are cached in the font's texture page
-        var len = string_length(text);
+
+        var len = string_length(_text);
+        // ---- Cache glyphs ----
         for (var i = 1; i <= len; i++) {
-            var charCode = string_ord_at(text, i);
-            if (charCode > 32) { 
-                font_cache_glyph(font, charCode);
-            }
+            var cc = string_ord_at(_text, i);
+            if (cc > 32) font_cache_glyph(self.font, cc);
         }
-        
-        var info = font_get_info(font);
+
+        var info = font_get_info(self.font);
         if (info == undefined) return self;
-        
+
         var glyphs = info.glyphs;
-        var tex = info.texture;
+        var tex    = info.texture;
         
-        // Safety: font without valid texture
-        var texW = 1, texH = 1;
-        if (tex != -1) {
-            texW = texture_get_width(tex);
-            texH = texture_get_height(tex);
+        // ---- Check if texture is ready ----
+        // if (tex == -1 || !texture_is_ready(tex)) {
+        //     log("Font texture not ready yet, skipping geometry build");
+        //     return self;
+        // }
+
+        var texW = (tex != -1) ? texture_get_width(tex)  : 1;
+        var texH = (tex != -1) ? texture_get_height(tex) : 1;
+        log("Font texture loaded:", tex, "Size:", texW, "x", texH);
+
+        // ---- Space width ----
+        var spaceShift = info.size * 0.25;
+        var gSpace = glyphs[$" "];
+        if (gSpace != undefined) {
+            spaceShift = gSpace.shift;
         }
-        
-        var lines = string_split(text, "\n");
+
+        // ---- Split lines ----
+        var lines = string_split(_text, "\n");
         var lineCount = array_length(lines);
-        
-        var posArr = [];
-        var normArr = [];
-        var uvArr = [];
-        var colArr = [];
-        var idxArr = [];
-        
-        var color = self.data[$ "color"] ?? c_white;
-        var alpha = self.data[$ "alpha"] ?? 1.0;
-        
-        // Calculate total height for vertical alignment
-        // Coordinate System: Z+ is Up (Sky), Y+ is Forward (Depth)
-        var baseLineHeight = info.size * lineHeight;
-        var totalHeight = (lineCount - 1) * baseLineHeight; // Adjusted for better baseline control
-        
+
+        // ---- Preallocate (6 vertices per glyph) ----
+        var maxVerts = len * 6;
+        var posArr = array_create(maxVerts * 3);
+        var uvArr  = array_create(maxVerts * 2);
+        var colArr = array_create(maxVerts * 2);
+
+        var _pi = 0, ui = 0, ci = 0;
+
+        // ---- Vertical alignment ----
+        var baseLineStep = info.size * lineHeight;
+        var totalHeight  = (lineCount - 1) * baseLineStep;
+
         var startZ = 0;
         if (valign == fa_middle) startZ = totalHeight * 0.5;
         else if (valign == fa_bottom) startZ = totalHeight;
-        
-        var vOffset = 0;
-        
+
+        // ==================================================
+        // BUILD GEOMETRY
+        // ==================================================
         for (var l = 0; l < lineCount; l++) {
             var line = lines[l];
-            var charCount = string_length(line);
-            
-            // Calculate line width for horizontal alignment
+            var lc   = string_length(line);
+
+            // ---- Measure line width ----
             var lineWidth = 0;
-            for (var c = 1; c <= charCount; c++) {
-                var char = string_char_at(line, c);
-                var g = glyphs[$ char];
+            for (var c = 1; c <= lc; c++) {
+                var ch = string_char_at(line, c);
+                var g  = glyphs[$ ch] ?? glyphs[$ string(ord(ch))];
+
                 if (g != undefined) {
-                    lineWidth += (g[$ "shift"] ?? 0) + spacing;
-                    // Add kerning if applicable
-                    if (c < charCount) {
-                        var nextChar = string_char_at(line, c + 1);
-                        var kerning = g[$ "kerning"];
-                        if (is_array(kerning)) {
-                            for (var k = 0; k < array_length(kerning); k += 2) {
-                                if (kerning[k] == ord(nextChar)) {
-                                    lineWidth += kerning[k+1];
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    lineWidth += (g.shift + spacing) * fontSize;
+                } else if (ch == " ") {
+                    lineWidth += (spaceShift + spacing) * fontSize;
                 }
             }
-            
-            var startX = 0;
-            if (halign == fa_center) startX = -lineWidth * 0.5;
-            else if (halign == fa_right) startX = -lineWidth;
-            
-            var cursorX = startX;
-            var cursorZ = startZ - (l * baseLineHeight);
-            
-            for (var c = 1; c <= charCount; c++) {
-                var char = string_char_at(line, c);
-                var g = glyphs[$ char];
+
+            var cursorX = 0;
+            if (halign == fa_center) cursorX = -lineWidth * 0.5;
+            else if (halign == fa_right) cursorX = -lineWidth;
+
+            var lineTopZ = (startZ - l * baseLineStep);
+
+            // ---- Characters ----
+            for (var c = 1; c <= lc; c++) {
+                var ch = string_char_at(line, c);
+                var g  = glyphs[$ ch] ?? glyphs[$ string(ord(ch))];
+
                 if (g == undefined) {
-                    // Handle spaces by advancing cursor
-                    if (char == " ") cursorX += (info.size * 0.25) + spacing;
+                    if (ch == " ") cursorX += (spaceShift + spacing) * fontSize;
                     continue;
                 }
-                
-                var _gx = g[$ "x"] ?? -1;
-                var _gy = g[$ "y"] ?? -1;
-                
-                // If the glyph is not in the texture yet (x/y = -1), skip it
-                if (_gx == -1 || _gy == -1) {
-                   cursorX += (g[$ "shift"] ?? 0) + spacing;
-                   continue;
+
+                if (g.x < 0 || g.y < 0) {
+                    cursorX += (g.shift + spacing) * fontSize;
+                    continue;
                 }
 
-                var _shift = g[$ "shift"] ?? 0;
-                var _offset = g[$ "offset"] ?? 0;
-                var _yoffset = g[$ "yoffset"] ?? 0;
-                var _w = g[$ "w"] ?? 0;
-                var _h = g[$ "h"] ?? 0;
+                var x1 = cursorX + g.offset * fontSize;
+                var x2 = x1 + g.w * fontSize;
+                var z1 = (lineTopZ - g.yoffset) * fontSize;
+                var z2 = z1 - g.h * fontSize;
+
+                var u1 = g.x / texW;
+                var v1 = g.y / texH;
+                var u2 = (g.x + g.w) / texW;
+                var v2 = (g.y + g.h) / texH;
+
+                // ---- Positions (XZ plane, Y=0) ----
+                // CCW Winding: BL -> BR -> TR, BL -> TR -> TL
+                // BL
+                posArr[_pi++] = x1; posArr[_pi++] = 0; posArr[_pi++] = z2;
+                // BR
+                posArr[_pi++] = x2; posArr[_pi++] = 0; posArr[_pi++] = z2;
+                // TR
+                posArr[_pi++] = x2; posArr[_pi++] = 0; posArr[_pi++] = z1;
                 
-                // Character quad bounds
-                // Orientation: Upright facing Camera (Y-), so on XZ plane
-                var x1 = cursorX + _offset;
-                var z1 = cursorZ - _yoffset;
-                var x2 = x1 + _w;
-                var z2 = z1 - _h;
-                
-                // Apply font size scale
-                x1 *= fontSize; x2 *= fontSize;
-                z1 *= fontSize; z2 *= fontSize;
-                
-                // UVs
-                var u1 = _gx / texW;
-                var v1 = _gy / texH;
-                var u2 = (_gx + _w) / texW;
-                var v2 = (_gy + _h) / texH;
-                
-                // Add vertices (4 per char)
-                // Plano XZ (Y=0), Normale (0, -1, 0)
-                array_push(posArr, x1, 0, z1,  x2, 0, z1,  x2, 0, z2,  x1, 0, z2);
-                array_push(normArr, 0, -1, 0,  0, -1, 0,   0, -1, 0,   0, -1, 0);
-                array_push(uvArr, u1, v1,      u2, v1,    u2, v2,    u1, v2);
-                array_push(colArr, color, alpha, color, alpha, color, alpha, color, alpha);
-                
-                // Indices (2 triangles)
-                array_push(idxArr, vOffset, vOffset + 1, vOffset + 2, vOffset, vOffset + 2, vOffset + 3);
-                
-                vOffset += 4;
-                
-                // Advance cursor
-                cursorX += _shift + spacing;
-                // Kerning
-                if (c < charCount) {
-                    var nextChar = string_char_at(line, c + 1);
-                    var kerning = g[$ "kerning"];
-                    if (is_array(kerning)) {
-                        for (var k = 0; k < array_length(kerning); k += 2) {
-                            if (kerning[k] == ord(nextChar)) {
-                                cursorX += kerning[k+1];
-                                break;
-                            }
+                // BL
+                posArr[_pi++] = x1; posArr[_pi++] = 0; posArr[_pi++] = z2;
+                // TR
+                posArr[_pi++] = x2; posArr[_pi++] = 0; posArr[_pi++] = z1;
+                // TL
+                posArr[_pi++] = x1; posArr[_pi++] = 0; posArr[_pi++] = z1;
+
+                // ---- UVs ----
+                uvArr[ui++] = u1; uvArr[ui++] = v2; // BL
+                uvArr[ui++] = u2; uvArr[ui++] = v2; // BR
+                uvArr[ui++] = u2; uvArr[ui++] = v1; // TR
+
+                uvArr[ui++] = u1; uvArr[ui++] = v2; // BL
+                uvArr[ui++] = u2; uvArr[ui++] = v1; // TR
+                uvArr[ui++] = u1; uvArr[ui++] = v1; // TL
+
+                // ---- Colors ----
+                for (var k = 0; k < 6; k++) {
+                    colArr[ci++] = textColor;
+                    colArr[ci++] = textAlpha;
+                }
+
+                cursorX += (g.shift + spacing) * fontSize;
+
+                // ---- Kerning ----
+                if (useKerning && c < lc && is_array(g.kerning)) {
+                    var nextChar = string_ord_at(line, c + 1);
+                    var kern = g.kerning;
+                    for (var k = 0, kl = array_length(kern); k < kl; k += 2) {
+                        if (kern[k] == nextChar) {
+                            cursorX += kern[k + 1] * fontSize;
+                            break;
                         }
                     }
                 }
             }
         }
-        
-        self.position = posArr;
-        self.normal = normArr;
-        self.uv = uvArr;
-        self.color = colArr;
-        self.index = idxArr;
-        
-        // If the format includes bones, add dummy data
-        if (format == global.UE_VFORMAT_PNUTCB) {
-            var vcount = array_length(posArr) / 3;
-            self.boneIndices = array_create(vcount * 4, 0);
-            self.boneWeights = array_create(vcount * 4, 0);
-        }
-        
-        // Compute bounds for proper culling
+
+        // ---- Trim arrays ----
+        array_resize(posArr, _pi);
+        array_resize(uvArr,  ui);
+        array_resize(colArr, ci);
+
+        position = posArr;
+        uv       = uvArr;
+        color    = colArr;
+
         computeBoundingBox();
         computeBoundingSphere();
-        
-        // Submit to GPU
-        super_build();
-        return self;
-    }
-    
-    /**
-     * Updates the text and rebuilds the geometry
-     * @param {String} newText
-     */
-    setText = function(newText) {
-        if (text == newText) return self;
-        text = newText;
+
         build();
         return self;
     }
 
-    // Initial build
-    build();
+    // ==========================================================
+    // FONT TEXTURE
+    // ==========================================================
+    function getFontTexture() {
+        if (__fontTexture != undefined) return __fontTexture;
+
+        var info = font_get_info(self.font);
+        if (info == undefined) return undefined;
+
+        __fontTexture = new UeTexture();
+        __fontTexture.__cachedTexture = info.texture;
+        log(texture_get_width(info.texture));
+        return __fontTexture;
+    }
+
+    if (text != "") setText(text);
 }

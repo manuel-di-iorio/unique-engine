@@ -111,8 +111,12 @@ function UeTexture(sprite = undefined, data = {}) constructor {
      */
     function update() {
         gml_pragma("forceinline");
+        if (!sprite_exists(sprite)) {
+            needsUpdate = false;
+            return self;
+        }
+        
         dispose();    // Clear previous cached sprite
-        if (!sprite_exists(sprite)) return;
         
         var repeatVec = self[$ "repeat"];
         var tilesX = ceil(abs(repeatVec[VEC2.x]));

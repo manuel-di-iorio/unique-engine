@@ -3,9 +3,9 @@
     "damping": true,
     "dampingFactor": 0.10,
     "position": [
-      123.00,
-      -178.59,
-      167.29
+      138.66,
+      -213.82,
+      100.31
     ],
     "target": [
       0,
@@ -19,9 +19,9 @@
     "instances": 3,
     "lights": 0,
     "materials": 0,
-    "models": 1,
-    "object3d": 1,
-    "scenes": 2,
+    "models": 3,
+    "object3d": 2,
+    "scenes": 3,
     "textures": 0
   },
   "gizmos": {

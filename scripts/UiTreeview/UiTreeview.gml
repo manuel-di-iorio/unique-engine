@@ -340,7 +340,8 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         
         if (expand) {
             self.expandItem();
-        } else {
+        } else if (self.Items.count() == 1) {
+            // Only collapse if this is the first child being added
             self.collapseItem();
         }
     }
@@ -458,6 +459,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     function collapseItem() {
+        if (self.collapsed) return;
         self.collapsed = true;
         self.Arrow.sprite = sprUiTreeviewArrowRight;
         self.Items.hide();

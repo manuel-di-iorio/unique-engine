@@ -36,13 +36,13 @@ function UeMaterial(data = {}) constructor {
 
   // Uniforms
   uniforms = data[$ "uniforms"] ?? {};
-  __uniformsList = []; // Optimized list for iteration
+  __uniformsList = [];
 
   // Textures
   textures = {
     map: data[$ "map"],
   };
-  __texturesList = []; // Optimized list for iteration
+  __texturesList = [];
 
   function setUniform(name, value) {
     gml_pragma("forceinline");

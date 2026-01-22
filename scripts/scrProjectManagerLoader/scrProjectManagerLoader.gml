@@ -269,7 +269,7 @@ function ProjectLoader() constructor {
     var treeview = global.UI.Main.Assets.Treeview;
 
     // Set up lazy loading callback for the treeview
-    treeview.onExpand = method({ self, objectsByUUID, materialsByUUID }, function(treeviewItem) {
+    treeview.onExpand = method({ objectsByUUID, materialsByUUID }, function(treeviewItem) {
         if (treeviewItem[$ "needsLoading"] == true) {
             var scene = treeviewItem.asset;
             if (scene != undefined && scene.type == "Scene") {
@@ -287,7 +287,7 @@ function ProjectLoader() constructor {
                 }));
 
                 // 3. Build Treeview items
-                self.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
+                oSceneEditor.projectManager.loader.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
                 
                 // 4. Cleanup
                 treeviewItem.needsLoading = false;

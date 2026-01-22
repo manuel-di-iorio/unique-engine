@@ -54,7 +54,9 @@
     {"$GMFolder":"","%Name":"Fonts","folderPath":"folders/Scene Editor/UI/Fonts.yy","name":"Fonts","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Icons","folderPath":"folders/Scene Editor/UI/Icons.yy","name":"Icons","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
-  "ForcedPrefabProjectReferences":[],
+  "ForcedPrefabProjectReferences":[
+    {"link":"io.gamemaker.sdfshaders-1.0.0","name":"io.gamemaker.sdfshaders-1.0.0","path":"io.gamemaker.sdfshaders-1.0.0.yyp",},
+  ],
   "IncludedFiles":[
     {"$GMIncludedFile":"","%Name":"11804_Airplane_diff.jpg","CopyToMask":-1,"filePath":"datafiles/airplane","name":"11804_Airplane_diff.jpg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"11804_Airplane_v2_l2.mtl","CopyToMask":-1,"filePath":"datafiles/airplane","name":"11804_Airplane_v2_l2.mtl","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
@@ -89,6 +91,7 @@
     {"$GMIncludedFile":"","%Name":"CesiumMan_img0.jpg","CopyToMask":-1,"filePath":"datafiles/CesiumMan","name":"CesiumMan_img0.jpg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"CesiumMan.gltf","CopyToMask":-1,"filePath":"datafiles/CesiumMan","name":"CesiumMan.gltf","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"README.md","CopyToMask":-1,"filePath":"datafiles/CesiumMan","name":"README.md","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"font.ttf","CopyToMask":-1,"filePath":"datafiles","name":"font.ttf","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Fox.bin","CopyToMask":-1,"filePath":"datafiles/Fox","name":"Fox.bin","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Fox.gltf","CopyToMask":-1,"filePath":"datafiles/Fox","name":"Fox.gltf","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"Texture.png","CopyToMask":-1,"filePath":"datafiles/Fox","name":"Texture.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
@@ -391,6 +394,7 @@
     {"id":{"name":"sh_ue_spot_shadow","path":"shaders/sh_ue_spot_shadow/sh_ue_spot_shadow.yy",},},
     {"id":{"name":"sh_ue_sprite","path":"shaders/sh_ue_sprite/sh_ue_sprite.yy",},},
     {"id":{"name":"sh_ue_standard","path":"shaders/sh_ue_standard/sh_ue_standard.yy",},},
+    {"id":{"name":"sh_ue_text","path":"shaders/sh_ue_text/sh_ue_text.yy",},},
     {"id":{"name":"sndDemoPlatformBG","path":"sounds/sndDemoPlatformBG/sndDemoPlatformBG.yy",},},
     {"id":{"name":"sndDemoPlatformCollect","path":"sounds/sndDemoPlatformCollect/sndDemoPlatformCollect.yy",},},
     {"id":{"name":"sndDemoPlatformFalling","path":"sounds/sndDemoPlatformFalling/sndDemoPlatformFalling.yy",},},
@@ -440,11 +444,11 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
     {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
+    {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[
-    {"$GMTextureGroup":"","%Name":"Default","autocrop":true,"border":8,"compressFormat":"bz2","customOptions":"","directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":0,"name":"Default","resourceType":"GMTextureGroup","resourceVersion":"2.0","targets":-1,},
+    {"$GMTextureGroup":"","%Name":"Default","autocrop":true,"border":8,"compressFormat":"bz2","customOptions":"","directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":-1,"name":"Default","resourceType":"GMTextureGroup","resourceVersion":"2.0","targets":-1,},
   ],
 }

@@ -126,7 +126,8 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             instanceAsset.castShadow = true;
             instanceAsset.receiveShadow = true;
             
-            // Set type and __rotationEuler for all children recursively using a class-level function
+            // Set type and __rotationEuler for all children recursively BEFORE adding to scene
+            // This ensures __rotationEuler exists before any inspector tries to access it
             __editorTreeview_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType);
 
             // Add the instance to the target element (scene or sub-object)
@@ -134,6 +135,9 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             
             // Track change
             oSceneEditor.assetManager.editAsset(targetItem.asset);
+
+            // Ensure target is expanded before creating treeview items
+            targetItem.expandItem();
 
             // Create TreeviewItems for the instance and its children
             var instanceTreeviewItem = __editorTreeview_createTreeviewItem(instanceAsset, targetItem, draggedItem.icon);
@@ -154,7 +158,11 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
     obj.name += "_" + string(global.UI_ASSETS_INSTANCE_ID++)
     obj.uuid = ueUuid(); // Ensure new UUID for the clone
 
-    // Copy __rotationEuler from the master object if it exists, otherwise create new
+    // Always create __rotationEuler for instances (clone may not copy it)
+    if (obj[$ "__rotationEuler"] != undefined) {
+        // If it exists, free the old one first to avoid memory leaks
+        delete obj.__rotationEuler;
+    }
     obj.__rotationEuler = euler_create();
     euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
 
@@ -172,7 +180,7 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
 }
 
 // Private function to recursively create TreeviewItems
-function __editorTreeview_createTreeviewItem(asset, parentTreeviewItem, icon) {
+function __editorTreeview_createTreeviewItem(asset, parentTreeviewItem, icon, expand = false) {
     var treeviewItem = new UiTreeviewItem({
         name: "UiTreeview.Item",
     }, {
@@ -182,7 +190,7 @@ function __editorTreeview_createTreeviewItem(asset, parentTreeviewItem, icon) {
         icon: icon,
         asset: asset
     });
-    parentTreeviewItem.addChild(treeviewItem);
+    parentTreeviewItem.addChild(treeviewItem, expand);
     return treeviewItem;
 }
 
