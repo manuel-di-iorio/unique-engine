@@ -49,8 +49,9 @@ function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
 
         default:
             // For other types (Texture, Material, Folder, etc.), clear the active 3D asset 
-            // but keep the current scene loaded.
-            editorManager.clearActiveAsset(true);
+            // but keep the current scene loaded and MAINTAIN the treeview selection.
+            editorManager.clearActiveAsset(true, false);
+            editorManager.selectedTreeviewItem = treeviewItem;
         break;
     }
 

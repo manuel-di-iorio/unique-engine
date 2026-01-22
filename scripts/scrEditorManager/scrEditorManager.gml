@@ -155,14 +155,16 @@ function EditorManager() constructor {
     /**
      * Clear the active asset selection
      */
-    function clearActiveAsset(keepScene = false) {
+    function clearActiveAsset(keepScene = false, clearTreeview = true) {
         // Deselect treeview item visually (for all asset types)
-        var treeview = global.UI.Main.Assets.Treeview;
-        
-        // Deselect the currently selected item in the treeview
-        if (treeview.selectedItem != undefined) {
-            treeview.selectedItem.selected = false;
-            treeview.selectedItem = undefined;
+        if (clearTreeview) {
+            var treeview = global.UI.Main.Assets.Treeview;
+            
+            // Deselect the currently selected item in the treeview
+            if (treeview.selectedItem != undefined) {
+                treeview.selectedItem.selected = false;
+                treeview.selectedItem = undefined;
+            }
         }
         
         var oldScene = self.activeScene;

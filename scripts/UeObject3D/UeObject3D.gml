@@ -38,7 +38,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      */
     function clone(recursive = true) {
         gml_pragma("forceinline");
-        var _clone = new UeObject3D(); break;
+        var _clone = new UeObject3D();
         _clone.copy(self, recursive);
         return _clone;
     }

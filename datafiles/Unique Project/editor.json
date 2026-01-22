@@ -1,28 +1,28 @@
 {
   "camera": {
     "damping": true,
-    "dampingFactor": 1,
+    "dampingFactor": 0.30,
     "position": [
-      108.30,
-      -269.36,
-      143.58
+      4.76,
+      -1.80,
+      4.04
     ],
     "target": [
-      0,
-      0,
+      3.13,
+      0.65,
       0
     ]
   },
   "counters": {
     "cameras": 0,
-    "folders": 1,
-    "instances": 4,
+    "folders": 2,
+    "instances": 25,
     "lights": 0,
-    "materials": 1,
-    "models": 9,
-    "object3d": 7,
-    "scenes": 4,
-    "textures": 1
+    "materials": 4,
+    "models": 0,
+    "object3d": 2,
+    "scenes": 3,
+    "textures": 3
   },
   "gizmos": {
     "showBoxColliders": true

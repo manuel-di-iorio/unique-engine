@@ -442,9 +442,37 @@ function UeTexture(sprite = undefined, data = {}) constructor {
     } 
 
     /**
+     * Copies the properties of the given texture into this instance.
+     * @param {Struct.UeTexture} source The texture to copy from.
+     * @returns {Struct.UeTexture} This instance.
+     */
+    function copy(source) {
+        gml_pragma("forceinline");
+        name = source.name;
+        sprite = source.sprite;
+        vec2_copy(offset, source.offset);
+        vec2_copy(self[$ "repeat"], source[$ "repeat"]);
+        vec2_copy(center, source.center);
+        rotation = source.rotation;
+        flipX = source.flipX;
+        flipY = source.flipY;
+        wrapS = source.wrapS;
+        wrapT = source.wrapT;
+        filter = source.filter;
+        generateMipmaps = source.generateMipmaps;
+        mat4_copy(matrix, source.matrix);
+        matrixAutoUpdate = source.matrixAutoUpdate;
+        needsUpdate = source.needsUpdate;
+        userData = variable_clone(source.userData);
+        __cachedSprite = source.__cachedSprite;
+        __cachedTexture = source.__cachedTexture;
+        return self;
+    }
+
+    /**
      * Clone this texture instance
      */
     function clone() {
-        return variable_clone(self);
+        return new UeTexture().copy(self);
     }
 }

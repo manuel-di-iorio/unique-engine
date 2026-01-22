@@ -434,12 +434,62 @@ function UeMaterial(data = {}) constructor {
   }
 
   /**
+   * Copies the properties of the given material into this instance.
+   * @param {Struct.UeMaterial} source The material to copy from.
+   * @returns {Struct.UeMaterial} This instance.
+   */
+  function copy(source) {
+    gml_pragma("forceinline");
+    name = source.name;
+    transparent = source.transparent;
+    opacity = source.opacity;
+    visible = source.visible;
+    side = source.side;
+    depthTest = source.depthTest;
+    depthWrite = source.depthWrite;
+    depthFunc = source.depthFunc;
+    forceSinglePass = source.forceSinglePass;
+    alphaTest = source.alphaTest;
+    colorWrite = source.colorWrite;
+    wireframe = source.wireframe;
+    allowOverride = source.allowOverride;
+    toneMapped = source.toneMapped;
+    userData = variable_clone(source.userData);
+    blending = source.blending;
+    blendEquation = source.blendEquation;
+    blendEquationAlpha = source.blendEquationAlpha;
+    blendSrc = source.blendSrc;
+    blendDst = source.blendDst;
+    blendSrcAlpha = source.blendSrcAlpha;
+    blendDstAlpha = source.blendDstAlpha;
+    shader = source.shader;
+    
+    // Copy uniforms (deep clone of the uniforms struct)
+    uniforms = variable_clone(source.uniforms);
+    
+    // Copy textures (copies references)
+    textures = {};
+    var _textureNames = variable_struct_get_names(source.textures);
+    for (var i = 0, il = array_length(_textureNames); i < il; i++) {
+        var _tName = _textureNames[i];
+        textures[$ _tName] = source.textures[$ _tName];
+    }
+    
+    receiveShadow = source.receiveShadow;
+    lights = source.lights;
+    shadowQuality = source.shadowQuality;
+    
+    build();
+    return self;
+  }
+
+  /**
    * Creates a deep copy of the material.
    * @returns {Struct.UeMaterial} A new instance of UeMaterial.
    */
   function clone() {
     gml_pragma("forceinline");
-    return variable_clone(self);
+    return new UeMaterial().copy(self);
   }
 
   function toJSON() {
