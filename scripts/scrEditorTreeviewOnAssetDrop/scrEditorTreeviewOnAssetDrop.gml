@@ -158,6 +158,11 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
     obj.__rotationEuler = euler_create();
     euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
 
+    // Ensure __matrixAutoUpdate exists and is synced with matrixAutoUpdate
+    if (obj[$ "__matrixAutoUpdate"] == undefined) {
+        obj.__matrixAutoUpdate = obj[$ "matrixAutoUpdate"] ?? true;
+    }
+
     // Ricorsione su children
     if (obj.children != undefined) {
         for (var i = 0; i < array_length(obj.children); i++) {

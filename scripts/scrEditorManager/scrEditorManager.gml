@@ -5,6 +5,7 @@ function EditorManager() constructor {
     // Active state
     self.activeAsset = undefined;      // Currently selected asset in the treeview
     self.activeScene = undefined;       // Currently active scene being edited
+    self.activeSceneTreeviewItem = undefined; // Reference to the treeview item of the active scene
     self.activeTool = "view";          // Current tool mode: "view", "move", "rotate", "scale"
     
     // UI References
@@ -39,39 +40,59 @@ function EditorManager() constructor {
         
         // If neither the asset nor the gizmo target have changed, exit
         if (!assetChanged && !gizmoTargetChanged) return;
+
+        // --- NEW: Scene Management Logic ---
+        var oldScene = self.activeScene;
+        var oldSceneItem = self.activeSceneTreeviewItem;
+        
+        var currentScene = undefined;
+        var currentSceneItem = undefined;
+
+        if (asset != undefined) {
+            // Find parent scene via treeview (recursive search)
+            var it = treeviewItem;
+            while (it != undefined) {
+                var itAsset = it[$ "asset"];
+                if (itAsset != undefined && itAsset.type == "Scene") {
+                    currentScene = itAsset;
+                    currentSceneItem = it;
+                    break;
+                }
+                
+                // Navigate up: Child Item -> Items Node -> Parent Item
+                var itParentItems = it[$ "parent"];
+                if (itParentItems != undefined) {
+                    var itParentItem = itParentItems[$ "parent"];
+                    if (itParentItem != undefined) {
+                        it = itParentItem;
+                        continue;
+                    }
+                }
+                it = undefined;
+            }
+        }
+
+        // Update active scene identity BEFORE potentially collapsing the old one
+        // This ensures the unload check (activeScene != scene) in onCollapse works correctly.
+        self.activeScene = currentScene;
+        self.activeSceneTreeviewItem = currentSceneItem;
+
+        // Collapse previous scene if we switched to a different scene (or no scene)
+        if (oldScene != undefined && oldScene != currentScene) {
+            if (oldSceneItem != undefined) {
+                oldSceneItem.collapseItem(); // This triggers onCollapse which unloads the scene
+            }
+        }
+
+        // Lazy loading: if the new scene item is not loaded, expand it now
+        if (currentSceneItem != undefined && currentSceneItem[$ "needsLoading"] == true) {
+            currentSceneItem.expandItem();
+        }
+        // ------------------------------------
+
         sm.boxHelper.dispose();
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
-
-        // Update active scene based on what was selected
-        if (asset != undefined) {
-            if (asset.type == "Scene") {
-                // Scene selected directly
-                self.activeScene = asset;
-                
-                // Lazy loading: if the scene item is not loaded, load it now
-                if (treeviewItem != undefined && treeviewItem[$ "needsLoading"] == true) {
-                    treeviewItem.expandItem();
-                }
-            } else if (asset.type == "Mesh" || asset.type == "Object3D") {
-                // Mesh/instance selected - find parent scene via treeview
-                var foundScene = undefined;
-                
-                if (treeviewItem != undefined && treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
-                    var parentTreeItem = treeviewItem.parent.parent;
-                    
-                    if (parentTreeItem[$ "asset"] != undefined && parentTreeItem.asset.type == "Scene") {
-                        foundScene = parentTreeItem.asset;
-                    }
-                }
-                self.activeScene = foundScene;
-            } else {
-                // Other asset type selected - clear active scene
-                self.activeScene = undefined;
-            }
-        } else {
-            self.activeScene = undefined;
-        }
 
         // Add to objects for rendering only if the asset is changed
         if (assetChanged) {
@@ -96,17 +117,12 @@ function EditorManager() constructor {
         self.gizmoTarget = newGizmoTarget;
         
         // Update the box helper based on the final gizmo target
-        if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "Object3D")) {
-            // Show box helper if the mesh has geometry OR if it has children (to show expanded bbox)
+        if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "Object3D" || self.gizmoTarget.type == "Bone")) {
+            // Show box helper if the target has geometry OR if it has children (to show expanded bbox)
             var hasGeometry = self.gizmoTarget[$ "geometry"] != undefined && self.gizmoTarget.geometry[$ "vb"] != undefined;
             var hasChildren = array_length(self.gizmoTarget.children) > 0;
             
             if (hasGeometry || hasChildren) {
-                // runLater(method({ sm, gizmoTarget: self.gizmoTarget }, function() { 
-                //     sm.boxHelper.object = gizmoTarget;
-                //     oSceneEditor.assetManager.updateAssetMatrix(gizmoTarget);
-                // }));
-                
                 sm.boxHelper.object = self.gizmoTarget;
                 
                 // Update the whole scene if we are in one, otherwise just the target
@@ -117,7 +133,7 @@ function EditorManager() constructor {
         }
         
         if (oSceneEditor.sceneManager.transformControls != undefined && self.gizmoTarget != undefined) {
-            if (self.activeTool != "view" && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "Object3D")) {
+            if (self.activeTool != "view" && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "Object3D" || self.gizmoTarget.type == "Bone")) {
                 oSceneEditor.sceneManager.transformControls.attach(self.gizmoTarget);
             } else {
                 oSceneEditor.sceneManager.transformControls.detach();
@@ -138,6 +154,8 @@ function EditorManager() constructor {
             treeview.selectedItem = undefined;
         }
         
+        var oldScene = self.activeScene;
+        var oldSceneItem = self.activeSceneTreeviewItem;
         var sceneToKeep = keepScene ? self.activeScene : undefined;
         
         oSceneEditor.sceneManager.boxHelper.dispose();
@@ -147,17 +165,24 @@ function EditorManager() constructor {
         self.renderClone = undefined;
         
         if (sceneToKeep == undefined) {
-            oSceneEditor.sceneManager.objects.clear(false);
             self.activeScene = undefined;
+            self.activeSceneTreeviewItem = undefined;
+            
+            // Collapse old scene if it was active to trigger unloading
+            if (oldSceneItem != undefined) {
+                oldSceneItem.collapseItem();
+            }
+
+            oSceneEditor.sceneManager.objects.clear(false);
             oSceneEditor.sceneManager.transformControls.detach();
             self.inspector.close();
         } else {
             // Re-set the scene as the active asset to maintain consistency
-            self.setActiveAsset(sceneToKeep);
+            self.setActiveAsset(oldScene, oldSceneItem);
             
             // Update inspector manually since we don't go through treeview callback
             if (self.inspector != undefined) {
-                self.inspector.inspect(sceneToKeep);
+                self.inspector.inspect(oldScene);
             }
         }
     }

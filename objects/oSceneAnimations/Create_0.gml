@@ -72,6 +72,14 @@ modelMechRoot.rotateY(270);
 modelMechRoot.setScale(60, 60, 60);
 scene.add(modelMechRoot);
 
+// Assign normals shader to all materials
+var _models = [modelFox, modelRobot, modelCube, modelBoxAnimated, modelCesiumMan, modelRiggedSimple, modelMech];
+for (var i = 0, il = array_length(_models); i < il; i++) {
+    ueStructEach(_models[i].materials, function(_name, _mat) {
+        _mat.shader = sh_ue_normals;
+        _mat.build();
+    });
+}
 
 // Init the animations
 currentTime = 0;

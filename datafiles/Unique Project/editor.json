@@ -3,9 +3,9 @@
     "damping": true,
     "dampingFactor": 0.10,
     "position": [
-      -626.97,
-      -228.69,
-      339.74
+      123.00,
+      -178.59,
+      167.29
     ],
     "target": [
       0,
@@ -16,12 +16,12 @@
   "counters": {
     "cameras": 0,
     "folders": 0,
-    "instances": 0,
+    "instances": 3,
     "lights": 0,
-    "materials": 6,
-    "models": 0,
-    "object3d": 0,
-    "scenes": 0,
+    "materials": 0,
+    "models": 1,
+    "object3d": 1,
+    "scenes": 2,
     "textures": 0
   },
   "gizmos": {

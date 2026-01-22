@@ -272,16 +272,16 @@ function ProjectLoader() constructor {
     treeview.onExpand = method({ self, objectsByUUID, materialsByUUID }, function(treeviewItem) {
         if (treeviewItem[$ "needsLoading"] == true) {
             var scene = treeviewItem.asset;
-            if (scene != undefined && scene.type == "Scene" && scene[$ "__metadata"] != undefined) {
+            if (scene != undefined && scene.type == "Scene") {
                 // 1. Load 3D nodes
                 scene.fromJSON(scene.__metadata, objectsByUUID);
                 
                 // 2. Link materials for meshes in the scene
                 scene.traverse(method({ materialsByUUID }, function(obj) {
                     if (obj.type == "Mesh") {
-                        var materialUUID = obj[$ "__metadata"] != undefined ? obj.__metadata[$ "material"] : undefined;
-                        if (materialUUID != undefined && materialsByUUID[$ materialUUID] != undefined) {
-                            obj.material = materialsByUUID[$ materialUUID];
+                        var matUUID = obj[$ "materialUUID"];
+                        if (matUUID != undefined && materialsByUUID[$ matUUID] != undefined) {
+                            obj.material = materialsByUUID[$ matUUID];
                         }
                     }
                 }));
@@ -340,7 +340,7 @@ function ProjectLoader() constructor {
     switch (type) {
       case "Texture": return sprUiTexture;
       case "Material": return sprUiMaterial;
-      case "Mesh": return sprUiObject;
+      case "Mesh": return sprUiMesh;
       case "Scene": return sprUiScene;
       case "Folder": return sprUiFolder;
       case "Light": return sprUiLight;

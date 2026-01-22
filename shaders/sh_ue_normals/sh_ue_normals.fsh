@@ -1,9 +1,6 @@
-varying vec3 v_vWorldPosition;
-varying vec3 v_vWorldNormal;
-varying vec3 v_vNormal;
+varying vec3 vWorldNormal;
 
 void main() 
 {
-    vec3 normal = normalize(v_vWorldNormal);
-    gl_FragColor = vec4(abs(normal), 1.0); return;
+    gl_FragColor = vec4(normalize(vWorldNormal) * 0.5 + 0.5, 1.0);
 }

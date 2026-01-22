@@ -30,6 +30,7 @@ scenes = [
     { name: "Particles", obj: oSceneParticles, bg: #111111 }, // 13
     { name: "LOD", obj: oSceneLOD, bg: #111111 }, // 14
     { name: "Animations", obj: oSceneAnimations, bg: #111111 }, // 15
+    { name: "3D Text", obj: oSceneText, bg: #111111 }, // 16
 ];
 
 setScene = function(idx) {
@@ -47,4 +48,4 @@ setScene = function(idx) {
     instance_create_layer(0, 0, "Instances", currentDemo.obj); 
 }
 
-setScene(15);
+setScene(16);

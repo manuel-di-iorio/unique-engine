@@ -226,6 +226,7 @@ function UeRendererDeferred(data = {}): UeRenderer(data) constructor {
     shader_reset();
     matrix_set(matrix_world, global.UE_MAT4_IDENTITY);
     gpu_set_state(_gpuState);
+    ds_map_destroy(_gpuState);
 
     return self;
   }

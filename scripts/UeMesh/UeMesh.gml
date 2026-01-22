@@ -56,12 +56,6 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
     // Submit the vertex buffer
     var tex = -1;
     var materialMap = material.textures[$ "map"];
-    //   var _mat = self.material;
-
-    //   var materialMap = undefined;
-    //   if (is_struct(_mat) && variable_struct_exists(_mat, "textures")) {
-    //       materialMap = _mat.textures[$ "map"];
-    //   }
 
     if (materialMap != undefined) {
       if (is_struct(materialMap) && variable_struct_exists(materialMap, "isTexture")) {
@@ -116,7 +110,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
     if (geometry != undefined && data[$ "geometry"] != undefined) {
       geometry.fromJSON(data.geometry);
     }
-
+    self.materialUUID = data[$ "material"];
     matrixAutoUpdate = data[$ "matrixAutoUpdate"];
     frustumCulled = data[$ "frustumCulled"];
     castShadow = data[$ "castShadow"] ?? false;

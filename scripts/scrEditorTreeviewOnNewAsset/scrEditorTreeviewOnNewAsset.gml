@@ -73,7 +73,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           asset.geometry.__vbClone = geometry.cloneVb();
           geometry.freeze();
           asset.__rotationEuler = euler_create();
-          asset.__matrixAutoUpdate = false; // Internal field for export (false = static mesh)
+          asset.__matrixAutoUpdate = false; // Internal field for export
           assetId = global.UI_ASSETS_MODELS_ID++;
       break;
       
@@ -113,6 +113,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       case "Object3D":
           asset = new UeObject3D();
           asset.__rotationEuler = euler_create();
+          asset.__matrixAutoUpdate = true;
           assetId = global.UI_ASSETS_OBJECT3D_ID++;
       break;
   }
@@ -124,7 +125,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   switch (assetType) {
       case "Texture": icon = sprUiTexture; break;
       case "Material": icon = sprUiMaterial; break;
-      case "Mesh": icon = sprUiObject; break;
+      case "Mesh": icon = sprUiMesh; break;
       case "Scene": icon = sprUiScene; break;
       case "Object3D": icon = sprUiObject; break;
     //   case "PointLight": icon = sprUiPointLight; break;
@@ -142,7 +143,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   });
   
   _assetTypeName = string_upper(string_char_at(assetType, 1)) + string_copy(assetType, 2, string_length(assetType) - 1);
-  if (_assetTypeName == "Mesh") _assetTypeName = "Object";
+  if (_assetTypeName == "Object3D") _assetTypeName = "Object";
   asset.name = _assetTypeName + string(assetId);
   
   // Determine the parent asset (only for 3D hierarchy, not folders)

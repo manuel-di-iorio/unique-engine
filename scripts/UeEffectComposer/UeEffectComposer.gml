@@ -91,6 +91,7 @@ function UeEffectComposer(renderer, renderTarget = undefined, data = {}) constru
         }
 
         gpu_set_state(_gpuState);
+        ds_map_destroy(_gpuState);
         shader_reset();
 
         return self;

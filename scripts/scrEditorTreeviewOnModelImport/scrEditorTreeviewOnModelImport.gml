@@ -152,7 +152,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
         treeview: treeview,
         assetType: "Mesh",
         type: "Mesh",
-        icon: sprUiObject,
+        icon: sprUiMesh,
         asset: model
     });
     folderItem.addChild(modelTreeviewItem);
@@ -178,7 +178,7 @@ function __editorTreeview_addModelChildrenRecursive(parentAsset, parentTreeviewI
             treeview: parentTreeviewItem.treeview,
             assetType: "Mesh",
             type: "Mesh",
-            icon: sprUiObject,
+            icon: sprUiMesh,
             asset: child
         });
         parentTreeviewItem.addChild(childTreeviewItem);

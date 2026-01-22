@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   fill="#ffffff"
+   width="64px"
+   height="64px"
+   viewBox="0 0 32 32"
+   id="icon"
+   version="1.1"
+   sodipodi:docname="model-alt-svgrepo-com.svg"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="12.734375"
+     inkscape:cx="32"
+     inkscape:cy="32"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="icon" />
+  <g
+     id="SVGRepo_bgCarrier"
+     stroke-width="0" />
+  <g
+     id="SVGRepo_tracerCarrier"
+     stroke-linecap="round"
+     stroke-linejoin="round" />
+  <g
+     id="SVGRepo_iconCarrier"
+     transform="matrix(0.30797546,0,0,0.30797546,14.95951,14.409816)"
+     inkscape:export-filename="SVGRepo_iconCarrier.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96">
+    <defs
+       id="defs1">
+      <style
+         id="style1"> .cls-1 { fill: none; } </style>
+    </defs>
+    <path
+       d="M 28.4473,16.1055 23,13.3818 V 7 A 1,1 0 0 0 22.4473,6.1055 l -6,-3 a 1.0008,1.0008 0 0 0 -0.8946,0 l -6,3 A 1,1 0 0 0 9,7 v 6.3818 L 3.5527,16.1055 A 1,1 0 0 0 3,17 v 7 a 1,1 0 0 0 0.5527,0.8945 l 6,3 a 1.001,1.001 0 0 0 0.8946,0 L 16,25.1182 l 5.5527,2.7763 a 1.001,1.001 0 0 0 0.8946,0 l 6,-3 A 1,1 0 0 0 29,24 V 17 A 1,1 0 0 0 28.4473,16.1055 Z M 21,13.3818 l -4,2 v -4.7636 l 4,-2 z M 16,5.1182 19.7637,7 16,8.8818 12.2363,7 Z m -5,3.5 4,2 v 4.7636 l -4,-2 z m -2,16.7636 -4,-2 v -4.7636 l 4,2 z m 1,-6.5 L 6.2363,17 10,15.1182 13.7637,17 Z m 1,1.7364 4,-2 v 4.7636 l -4,2 z m 10,4.7636 -4,-2 v -4.7636 l 4,2 z m 1,-6.5 L 18.2363,17 22,15.1182 25.7637,17 Z m 5,4.5 -4,2 v -4.7636 l 4,-2 z"
+       id="path1" />
+    <rect
+       id="_Transparent_Rectangle_"
+       data-name="&lt;Transparent Rectangle&gt;"
+       class="cls-1"
+       width="32"
+       height="32"
+       x="0"
+       y="0" />
+  </g>
+</svg>
