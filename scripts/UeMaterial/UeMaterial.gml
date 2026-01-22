@@ -434,7 +434,8 @@ function UeMaterial(data = {}) constructor {
   }
 
   /**
-   * Clone the material
+   * Creates a deep copy of the material.
+   * @returns {Struct.UeMaterial} A new instance of UeMaterial.
    */
   function clone() {
     gml_pragma("forceinline");

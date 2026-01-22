@@ -44,6 +44,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
             // Altrimenti rimuovi dalla lista globale
             assetManager.removeAsset("Mesh", asset);
         }
+        
+        // Dispose resources
+        asset.dispose(true);
     }
     
     // Scene: cancella la scena (i figli verranno cancellati automaticamente)
@@ -60,6 +63,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
             // Altrimenti rimuovi dalla lista globale
             assetManager.removeAsset("Scene", asset);
         }
+        
+        // Dispose resources
+        asset.dispose(true);
     }
     
     // Folder: rimuovere ricorsivamente tutti i figli

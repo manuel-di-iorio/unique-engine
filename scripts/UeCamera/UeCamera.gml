@@ -53,7 +53,7 @@ function UeCamera(data = {}): UeObject3D(data) constructor {
     }
     
     /**
-     * Destroys the GameMaker camera instance.
+     * Destroys the GameMaker camera instance and cleans up resources.
      */
     function dispose() {
         gml_pragma("forceinline");

@@ -38,7 +38,9 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
      */
     function clone(recursive = true) {
         gml_pragma("forceinline");
-        return variable_clone(self, recursive ? 128 : 0);
+        var _clone = new UeObject3D(); break;
+        _clone.copy(self, recursive);
+        return _clone;
     }
     
     /// @param ...objects
@@ -116,19 +118,19 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     function clear(recursive = false) {
         gml_pragma("forceinline");
 
-        for (var i=0, len=array_length(children); i<len; i++) {
+        for (var i = array_length(children) - 1; i >= 0; i--) {
             var child = children[i];
             
             if (recursive) {
                 child.clear(true);
             }
             
-            child.dispatch({ type: "removed" });
-            self.dispatch({ type: "childRemoved" });
             child.parent = undefined;
+            child.dispatch({ type: "removed" });
         }
         
         children = [];
+        self.dispatch({ type: "childRemoved" });
         return self;
     }
     
@@ -194,9 +196,13 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         name = source.name;
         visible = source.visible;
         renderOrder = source.renderOrder;
-        layers = variable_clone(source.layers);
+        layers.mask = source.layers.mask;
         userData = variable_clone(source.userData);
         frustumCulled = source.frustumCulled;
+        castShadow = source.castShadow;
+        receiveShadow = source.receiveShadow;
+        matrixAutoUpdate = source.matrixAutoUpdate;
+        matrixWorldAutoUpdate = source.matrixWorldAutoUpdate;
         
         var _sourceGeometry = source[$ "geometry"];
         if (_sourceGeometry != undefined) {

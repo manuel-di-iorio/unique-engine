@@ -31,8 +31,11 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     }
     // Allow dropping anything into a Folder
     else if (targetItem.assetType == "Folder") {
-        isValidDrop = true;
-        dropAction = "moveToFolder";
+        var draggedInScene = __editorTreeview_isAssetInScene(draggedItem.asset);
+        if (!draggedInScene) {
+            isValidDrop = true;
+            dropAction = "moveToFolder";
+        }
     }
     // Texture and Material are not draggable
     else if (draggedItem.assetType == "Texture" || draggedItem.assetType == "Material") {
@@ -59,8 +62,14 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                  var draggedInScene = __editorTreeview_isAssetInScene(draggedItem.asset);
                  
                  if (draggedInScene) {
-                     isValidDrop = true;
-                     dropAction = "reparent";
+                     // Ensure it's the SAME scene
+                     var draggedScene = __editorTreeview_getSceneOfAsset(draggedItem.asset);
+                     var targetScene = targetIsScene ? targetItem.asset : __editorTreeview_getSceneOfAsset(targetItem.asset);
+                     
+                     if (draggedScene != undefined && draggedScene == targetScene) {
+                        isValidDrop = true;
+                        dropAction = "reparent";
+                     }
                  } else {
                      // Project asset dropped onto scene -> Instance
                      isValidDrop = true;
@@ -68,9 +77,12 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                  }
              } else {
                  // Target is NOT in scene (must be a folder/project asset)
-                 // Just reparent/move
-                 isValidDrop = true;
-                 dropAction = "reparent";
+                 // Just reparent/move if dragged item is also not in a scene
+                 var draggedInScene = __editorTreeview_isAssetInScene(draggedItem.asset);
+                 if (!draggedInScene) {
+                    isValidDrop = true;
+                    dropAction = "reparent";
+                 }
              }
         } else {
             return false;
@@ -143,7 +155,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             
             // Set type and __rotationEuler for all children recursively BEFORE adding to scene
             // This ensures __rotationEuler exists before any inspector tries to access it
-            __editorTreeview_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType);
+            __editorTreeview_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType, draggedItem.asset);
             
             // Add the instance to the target element (scene or sub-object)
             targetItem.asset.add(instanceAsset);
@@ -174,10 +186,33 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     return false;
 }
 
+/**
+ * Get the Scene asset that contains this asset
+ */
+function __editorTreeview_getSceneOfAsset(asset) {
+    if (asset == undefined) return undefined;
+    
+    var curr = asset;
+    while (curr != undefined) {
+        if (curr[$ "type"] == "Scene") return curr;
+        
+        // Safety break for cycles
+        if (curr[$ "parent"] == curr) break;
+        
+        curr = curr[$ "parent"];
+    }
+    return undefined;
+}
+
 // On drop -> create instance -> imposta ricorsivamente, name, type e __rotationEuler su tutte le istanze
-function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
+function __editorTreeview_setInstanceTypeRecursive(obj, assetType, originalObj = undefined) {
     obj.name += "_" + string(global.UI_ASSETS_INSTANCE_ID++)
     obj.uuid = ueUuid(); // Ensure new UUID for the clone
+    
+    // Set metadata for the original asset
+    if (originalObj != undefined) {
+        obj.__instanceOf = originalObj;
+    }
 
     // Always create __rotationEuler for instances (clone may not copy it)
     if (obj[$ "__rotationEuler"] != undefined) {
@@ -196,7 +231,11 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
     // Ricorsione su children
     if (obj.children != undefined) {
         for (var i = 0; i < array_length(obj.children); i++) {
-            __editorTreeview_setInstanceTypeRecursive(obj.children[i], assetType);
+            var originalChild = undefined;
+            if (originalObj != undefined && originalObj[$ "children"] != undefined && i < array_length(originalObj.children)) {
+                originalChild = originalObj.children[i];
+            }
+            __editorTreeview_setInstanceTypeRecursive(obj.children[i], assetType, originalChild);
         }
     }
 }

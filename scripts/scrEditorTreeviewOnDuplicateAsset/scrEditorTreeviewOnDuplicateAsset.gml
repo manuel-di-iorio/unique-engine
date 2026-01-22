@@ -28,10 +28,16 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
     
     // 2. Recursive update internal identifiers (UUIDs, IDs)
     var _recursionScope = {};
-    _recursionScope.updateIdentifiers = method(_recursionScope, function(asset) {
+    _recursionScope.updateIdentifiers = method(_recursionScope, function(asset, originalSource = undefined) {
         if (!is_struct(asset)) return;
 
         asset.uuid = ueUuid();
+        
+        // Preserve __instanceOf if it exists on original
+        if (originalSource != undefined && originalSource[$ "__instanceOf"] != undefined) {
+            asset.__instanceOf = originalSource.__instanceOf;
+        }
+        
         if (variable_struct_exists(asset, "id")) {
              // Assuming global.UE_OBJECT_ID exists and is used for this
              if (variable_global_exists("UE_OBJECT_ID")) {
@@ -67,7 +73,8 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
         
         if (variable_struct_exists(asset, "children") && is_array(asset.children)) {
             for (var i = 0; i < array_length(asset.children); i++) {
-                self.updateIdentifiers(asset.children[i]);
+                var originalChild = (originalSource != undefined && originalSource[$ "children"] != undefined && i < array_length(originalSource.children)) ? originalSource.children[i] : undefined;
+                self.updateIdentifiers(asset.children[i], originalChild);
                 if (is_struct(asset.children[i])) {
                     asset.children[i].parent = asset; // Ensure parent linkage is correct
                 }
@@ -75,7 +82,7 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
         }
     });
     
-    _recursionScope.updateIdentifiers(clonedAsset);
+    _recursionScope.updateIdentifiers(clonedAsset, originalAsset);
     if (is_struct(clonedAsset)) {
         clonedAsset.name = originalAsset.name + " (Copy)";
         clonedAsset.parent = undefined; // Root clone has no parent yet
