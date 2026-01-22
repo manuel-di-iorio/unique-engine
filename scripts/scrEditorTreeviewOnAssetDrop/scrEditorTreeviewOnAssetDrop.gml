@@ -3,6 +3,10 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     var draggedItem = draggedTreeviewItem; // The TreeviewItem we are dragging
     var targetItem = targetTreeviewItem; // The TreeviewItem we are dropping onto
     
+    // Prevent dropping onto itself or onto one of its own children/descendants
+    if (draggedItem == targetItem) return false;
+    if (__editorTreeview_isDescendantOf(targetItem, draggedItem)) return false;
+    
     // Check if the drop is valid
     var isValidDrop = false;
     var dropAction = "";
@@ -18,12 +22,9 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         // We are dropping onto the root background
         
         // Instances cannot be at root (must be in a Scene or under a Mesh)
-        var draggedIsInstance = (draggedItem.asset != undefined && draggedItem.asset[$ "isInstance"] == true);
+        var draggedInScene = __editorTreeview_isAssetInScene(draggedItem.asset);
         
-        if (!draggedIsInstance) {
-            // Check if already at root
-            // If dragging from a folder, parent is defined. If from root, parent is undefined.
-            
+        if (!draggedInScene) {
             isValidDrop = true;
             dropAction = "moveToRoot";
         }
@@ -45,18 +46,32 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     }
     
     // Model can be moved under another Model (reparent) or under a Scene (instance)
-    else if (draggedItem.assetType == "Mesh" || draggedItem.assetType == "Object3D") {
-        var targetHasAsset = (targetItem.asset != undefined);
+    else if (draggedItem.assetType == "Mesh" || draggedItem.assetType == "Object3D" || draggedItem.assetType == "Bone") {
         var targetIsScene = (targetItem.assetType == "Scene");
+        var targetIsModel = (targetItem.assetType == "Mesh" || targetItem.assetType == "Object3D" || targetItem.assetType == "Bone");
 
-        if (targetIsScene) {
-            // Dropping a master onto a scene -> create a new instance (clone)
-            isValidDrop = true;
-            dropAction = "instance";
-        } else if (targetItem.assetType == "Mesh" || targetItem.assetType == "Object3D") {
-            // Reparenting
-            isValidDrop = true;
-            dropAction = "reparent";
+        if (targetIsScene || targetIsModel) {
+             // Is the target part of the scene graph?
+             var targetInScene = targetIsScene || __editorTreeview_isAssetInScene(targetItem.asset);
+             
+             if (targetInScene) {
+                 // If target is in scene, we check if we should instance or reparent
+                 var draggedInScene = __editorTreeview_isAssetInScene(draggedItem.asset);
+                 
+                 if (draggedInScene) {
+                     isValidDrop = true;
+                     dropAction = "reparent";
+                 } else {
+                     // Project asset dropped onto scene -> Instance
+                     isValidDrop = true;
+                     dropAction = "instance";
+                 }
+             } else {
+                 // Target is NOT in scene (must be a folder/project asset)
+                 // Just reparent/move
+                 isValidDrop = true;
+                 dropAction = "reparent";
+             }
         } else {
             return false;
         }
@@ -129,22 +144,28 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             // Set type and __rotationEuler for all children recursively BEFORE adding to scene
             // This ensures __rotationEuler exists before any inspector tries to access it
             __editorTreeview_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType);
-
+            
             // Add the instance to the target element (scene or sub-object)
             targetItem.asset.add(instanceAsset);
             
             // Track change
             oSceneEditor.assetManager.editAsset(targetItem.asset);
 
-            // Ensure target is expanded before creating treeview items
-            targetItem.expandItem();
+            // If target is a scene and it's not loaded yet, don't create treeview items manually
+            // expanding it will trigger the loader which builds the treeview
+            if (targetItem.assetType == "Scene" && targetItem[$ "needsLoading"] == true) {
+                targetItem.expandItem();
+            } else {
+                // Target is already loaded or is a regular object, create items manually
+                targetItem.expandItem();
 
-            // Create TreeviewItems for the instance and its children
-            var instanceTreeviewItem = __editorTreeview_createTreeviewItem(instanceAsset, targetItem, draggedItem.icon);
-            __editorTreeview_createTreeviewItemsForChildren(instanceAsset, instanceTreeviewItem, draggedItem.icon);
+                // Create TreeviewItems for the instance and its children
+                var instanceTreeviewItem = __editorTreeview_createTreeviewItem(instanceAsset, targetItem, draggedItem.icon);
+                __editorTreeview_createTreeviewItemsForChildren(instanceAsset, instanceTreeviewItem, draggedItem.icon);
 
-            // Only on the main parent call __onItemSelected
-            targetItem.treeview.__onItemSelected(instanceTreeviewItem);
+                // Only on the main parent call __onItemSelected
+                targetItem.treeview.__onItemSelected(instanceTreeviewItem);
+            }
         }
         
         return true;
@@ -166,10 +187,11 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType) {
     obj.__rotationEuler = euler_create();
     euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
 
-    // Ensure __matrixAutoUpdate exists and is synced with matrixAutoUpdate
+    // Ensure __matrixAutoUpdate exists and is true by default for the editor
     if (obj[$ "__matrixAutoUpdate"] == undefined) {
-        obj.__matrixAutoUpdate = obj[$ "matrixAutoUpdate"] ?? true;
+        obj.__matrixAutoUpdate = true;
     }
+    obj.matrixAutoUpdate = false; // Editor objects don't auto-update for performance
 
     // Ricorsione su children
     if (obj.children != undefined) {
@@ -228,4 +250,48 @@ function __removeFromParent(asset) {
     }
     
     asset.parent = undefined;
+}
+
+/**
+ * Check if a treeview item is a descendant of another treeview item
+ */
+function __editorTreeview_isDescendantOf(item, potentialAncestor) {
+    if (item == undefined || potentialAncestor == undefined) return false;
+    
+    var p = item.parent; // This is the Items container node
+    while (p != undefined) {
+        // If the parent of the Items container is the potential ancestor, we found it
+        if (p.parent == potentialAncestor) return true;
+        
+        // Go up to the next TreeviewItem
+        if (p.parent != undefined && p.parent[$ "parent"] != undefined) {
+            p = p.parent.parent;
+        } else {
+            break;
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Check if an asset is part of a Scene hierarchy
+ */
+function __editorTreeview_isAssetInScene(asset) {
+    if (asset == undefined) return false;
+    
+    // Explicit check for isInstance flag if it exists (for extra safety)
+    if (asset[$ "isInstance"] == true) return true;
+    
+    var curr = asset;
+    while (curr != undefined) {
+        if (curr[$ "type"] == "Scene") return true;
+        if (curr[$ "type"] == "Folder") return false; // Assets in folders are masters
+        
+        // Safety break for cycles (shouldn't happen but good practice)
+        if (curr[$ "parent"] == curr) break;
+        
+        curr = curr[$ "parent"];
+    }
+    return false;
 }

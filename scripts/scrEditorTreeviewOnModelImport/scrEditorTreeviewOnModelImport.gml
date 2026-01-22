@@ -126,7 +126,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
         node.castShadow = true;
         node.receiveShadow = true;
         node.matrixAutoUpdate = false; // Editor meshes don't auto-update for performance
-        node.__matrixAutoUpdate = false; // Internal field for export (false = static mesh)
+        node.__matrixAutoUpdate = true; // Internal field for export (true = dynamic mesh by default)
 
         // Clone the geometry buffer (for export) and freeze the original one for rendering performance reasons
         if (node[$ "geometry"] != undefined && node.geometry[$ "vb"] != undefined) {

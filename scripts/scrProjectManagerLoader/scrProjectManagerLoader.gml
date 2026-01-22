@@ -428,7 +428,8 @@ function ProjectLoader() constructor {
       asset.__metadata = node;
 
       if (asset.type == "Mesh" || asset.type == "Object3D" || asset.type == "Camera") {        
-        asset.__matrixAutoUpdate = node[$ "matrixAutoUpdate"] ?? false;
+        asset.__matrixAutoUpdate = node[$ "matrixAutoUpdate"] ?? true;
+        asset.matrixAutoUpdate = false; // Editor meshes/objects don't auto-update for performance
         
         asset.__rotationEuler = euler_create();
         euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);

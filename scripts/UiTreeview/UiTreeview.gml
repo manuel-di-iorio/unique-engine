@@ -91,14 +91,20 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         var _filterItem = undefined;
         _filterItem = method({ _lowerSearch, _filterItem:  function(item) {
                 // Check if this item matches
-                var nameToCheck = (item[$ "asset"] != undefined) ? item.asset.name : item.name;
-                var matches = (_lowerSearch == "" || string_pos(_lowerSearch, string_lower(nameToCheck)) > 0);
+                var nameToCheck = "";
+                if (item[$ "asset"] != undefined) {
+                    nameToCheck = item.asset[$ "name"] ?? "";
+                } else {
+                    nameToCheck = item[$ "name"] ?? "";
+                }
+                var matches = (_lowerSearch == "" || (nameToCheck != "" && string_pos(_lowerSearch, string_lower(nameToCheck)) > 0));
                 
                 var hasMatchingChildren = false;
                 
                 // Check children items
-                if (item.Items != undefined && item.Items.children != undefined) {
-                    var children = item.Items.children;
+                var itemsNode = item[$ "Items"];
+                if (itemsNode != undefined && itemsNode[$ "children"] != undefined) {
+                    var children = itemsNode.children;
                     for (var i = 0; i < array_length(children); i++) {
                         var child = children[i];
                         // Recursively check child
@@ -149,8 +155,9 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
                 }
                 
                 // Recurse children
-                if (item.Items != undefined && item.Items.children != undefined) {
-                    var children = item.Items.children;
+                var itemsNode = item[$ "Items"];
+                if (itemsNode != undefined && itemsNode[$ "children"] != undefined) {
+                    var children = itemsNode.children;
                     for (var i = 0; i < array_length(children); i++) {
                         self.run(children[i]);
                     }
@@ -180,7 +187,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.assetType = props[$ "assetType"];
     self.type = props[$ "type"];
     self.icon = props[$ "icon"];
-    self.name = props[$ "name"];
+    self.name = props[$ "name"] ?? style[$ "name"] ?? "UiTreeview.Item";
     self.selected = false;
     self.collapsed = props[$ "collapsed"] ?? true;
     self.asset = props[$ "asset"] ?? undefined;
@@ -270,7 +277,13 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
             
             // Draw the label
             draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle); draw_set_font(fText);
-            draw_text(xx, meanY, item.asset == undefined ? item.name : item.asset.name);
+            var labelText = "";
+            if (item[$ "asset"] != undefined) {
+                labelText = item.asset[$ "name"] ?? "Unnamed Asset";
+            } else {
+                labelText = item[$ "name"] ?? "Unnamed Item";
+            }
+            draw_text(xx, meanY, labelText);
         });
         
         // Use the external onAssetDrop callback if available
@@ -340,9 +353,6 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         
         if (expand) {
             self.expandItem();
-        } else if (self.Items.count() == 1) {
-            // Only collapse if this is the first child being added
-            self.collapseItem();
         }
     }
     

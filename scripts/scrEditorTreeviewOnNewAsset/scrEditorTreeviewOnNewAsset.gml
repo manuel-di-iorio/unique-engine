@@ -55,56 +55,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           asset = new UeMeshStandardMaterial();
           assetId = global.UI_ASSETS_MATERIALS_ID++;
       break;
-      
-      case "Mesh": 
-          var size = 50;
-          var geometry = new UeBoxGeometry(size, size, size, { canFreeze: false });
-          
-          // Set bounding box
-          geometry.boundingBox = box3_create();
-          box3_set_from_center_and_size(geometry.boundingBox, [0, 0, 0], [size, size, size]);
-          
-          // Set bounding sphere
-          geometry.boundingSphere = sphere_create(vec3_create(), size * 0.866); // sqrt(3)/2 ≈ 0.866
-          
-          asset = new UeStaticMesh(geometry);
-          asset.castShadow = true;
-          asset.receiveShadow = true;
-          asset.geometry.__vbClone = geometry.cloneVb();
-          geometry.freeze();
-          asset.__rotationEuler = euler_create();
-          asset.__matrixAutoUpdate = false; // Internal field for export
-          assetId = global.UI_ASSETS_MODELS_ID++;
-      break;
-      
-    //   case "PointLight":
-    //       asset = new UePointLight();
-    //       asset.__rotationEuler = euler_create();
-    //       assetId = global.UI_ASSETS_LIGHTS_ID++;
-          
-    //       var assetMesh = new UePointLightHelper();
-    //       assetMesh.geometry = new UePlaneGeometry(32, 32);
-    //       assetMesh.material = new UeSpriteMaterial({
-    //           map: new UeTexture(sprUiPointLight3D),
-    //       });
-    //       assetMesh.primitive = pr_trianglelist;
-    //       asset.addChild(assetMesh);
-    //   break;
-      
-    //   case "DirectionalLight":
-    //       asset = new UeDirectionalLight();
-    //       asset.__rotationEuler = euler_create();
-    //       assetId = global.UI_ASSETS_LIGHTS_ID++;
-    //   break;
-      
-    //   case "Camera":
-    //       asset = new UeObject3D();
-    //       asset.isCamera = true;
-    //       asset.type = "Camera";
-    //       asset.__rotationEuler = euler_create();
-    //       assetId = global.UI_ASSETS_CAMERAS_ID++;
-    //   break;
-      
+
       case "Scene":
           asset = new UeScene();
           assetId = global.UI_ASSETS_SCENES_ID++;
@@ -113,6 +64,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       case "Object3D":
           asset = new UeObject3D();
           asset.__rotationEuler = euler_create();
+          asset.matrixAutoUpdate = false;
           asset.__matrixAutoUpdate = true;
           assetId = global.UI_ASSETS_OBJECT3D_ID++;
       break;
@@ -125,7 +77,6 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   switch (assetType) {
       case "Texture": icon = sprUiTexture; break;
       case "Material": icon = sprUiMaterial; break;
-      case "Mesh": icon = sprUiMesh; break;
       case "Scene": icon = sprUiScene; break;
       case "Object3D": icon = sprUiObject; break;
     //   case "PointLight": icon = sprUiPointLight; break;

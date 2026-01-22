@@ -72,21 +72,21 @@ function EditorManager() constructor {
             }
         }
 
-        // Update active scene identity BEFORE potentially collapsing the old one
-        // This ensures the unload check (activeScene != scene) in onCollapse works correctly.
-        self.activeScene = currentScene;
-        self.activeSceneTreeviewItem = currentSceneItem;
-
-        // Collapse previous scene if we switched to a different scene (or no scene)
-        if (oldScene != undefined && oldScene != currentScene) {
-            if (oldSceneItem != undefined) {
-                oldSceneItem.collapseItem(); // This triggers onCollapse which unloads the scene
+        // Update active scene identity ONLY if we found a new scene
+        if (currentScene != undefined) {
+            // Collapse previous scene if we switched to a different scene
+            if (oldScene != undefined && oldScene != currentScene) {
+                if (oldSceneItem != undefined) {
+                    oldSceneItem.collapseItem(); // This triggers onCollapse which unloads the scene
+                }
             }
-        }
+            self.activeScene = currentScene;
+            self.activeSceneTreeviewItem = currentSceneItem;
 
-        // Lazy loading: if the new scene item is not loaded, expand it now
-        if (currentSceneItem != undefined && currentSceneItem[$ "needsLoading"] == true) {
-            currentSceneItem.expandItem();
+            // Lazy loading: if the new scene item is not loaded, expand it now
+            if (currentSceneItem != undefined && currentSceneItem[$ "needsLoading"] == true) {
+                currentSceneItem.expandItem();
+            }
         }
         // ------------------------------------
 
@@ -98,17 +98,29 @@ function EditorManager() constructor {
         if (assetChanged) {
             sm.objects.children = []; // Clear children without calling clear() to avoid parent issues
             
-            var objectToRender = undefined;
+            // 1. Render active scene if present
             if (self.activeScene != undefined) {
-                objectToRender = self.activeScene;
-            } else if (asset != undefined) {
-                objectToRender = asset;
+                array_push(sm.objects.children, self.activeScene);
             }
             
-            if (objectToRender != undefined) {
-                // Not using add() because it calls removeFromParent() which breaks the hierarchy
-                // Just add to children array directly for rendering purposes
-                array_push(sm.objects.children, objectToRender);
+            // 2. Render selected asset if it's not the scene itself and not inside it
+            if (asset != undefined && asset != self.activeScene) {
+                // Check if the asset is already a descendant of the active scene
+                var isInScene = false;
+                if (self.activeScene != undefined) {
+                    var curr = asset;
+                    while (curr != undefined) {
+                        if (curr == self.activeScene) {
+                            isInScene = true;
+                            break;
+                        }
+                        curr = curr.parent;
+                    }
+                }
+                
+                if (!isInScene) {
+                    array_push(sm.objects.children, asset);
+                }
             }
         }
         
@@ -125,10 +137,9 @@ function EditorManager() constructor {
             if (hasGeometry || hasChildren) {
                 sm.boxHelper.object = self.gizmoTarget;
                 
-                // Update the whole scene if we are in one, otherwise just the target
-                // Recursive update to ensure all children matrices are correct
-                var targetToUpdate = self.activeScene != undefined ? self.activeScene : self.gizmoTarget;
-                oSceneEditor.assetManager.updateAssetMatrix(targetToUpdate, true);
+                // Update the whole scene if we are in one, and the target asset
+                if (self.activeScene != undefined) oSceneEditor.assetManager.updateAssetMatrix(self.activeScene, true);
+                if (self.gizmoTarget != undefined && self.gizmoTarget != self.activeScene) oSceneEditor.assetManager.updateAssetMatrix(self.gizmoTarget, true);
             }
         }
         

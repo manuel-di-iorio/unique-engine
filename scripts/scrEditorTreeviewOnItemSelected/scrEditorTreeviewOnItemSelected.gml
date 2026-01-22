@@ -1,6 +1,11 @@
 function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
     var editorManager = oSceneEditor.editorManager;
     
+    if (treeviewItem == undefined || treeviewItem.asset == undefined) {
+        editorManager.clearActiveAsset(true);
+        return;
+    }
+    
     switch (treeviewItem.asset.type) {
         case "Mesh":
         case "Bone":
@@ -40,6 +45,12 @@ function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
 
         case "Scene":
             editorManager.setActiveAsset(treeviewItem.asset, treeviewItem);
+        break;
+
+        default:
+            // For other types (Texture, Material, Folder, etc.), clear the active 3D asset 
+            // but keep the current scene loaded.
+            editorManager.clearActiveAsset(true);
         break;
     }
 

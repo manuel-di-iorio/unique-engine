@@ -154,9 +154,6 @@ function EditorUiAssets(ui) constructor {
                 { label: "New Object3D", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Object3D");
                 })},
-                { label: "New Mesh", icon: sprUiMesh, onClick: method({ treeview: self.treeview }, function() {
-                    editorTreeviewOnNewAsset(undefined, "Mesh");
-                })},
                 { label: "New Scene", icon: sprUiScene, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Scene");
                 })},
@@ -170,12 +167,9 @@ function EditorUiAssets(ui) constructor {
             items = [];
             
             // Add creation actions based on item type
-            if (treeviewItem.assetType == "Mesh") {
+            if (treeviewItem.assetType == "Mesh" || treeviewItem.assetType == "Object3D" || treeviewItem.assetType == "Bone") {
                  array_push(items, { label: "New Object3D", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
                      editorTreeviewOnNewAsset(self.item, "Object3D");
-                 })});
-                array_push(items, { label: "New Mesh", icon: sprUiMesh, onClick: method({ item: treeviewItem }, function() {
-                     editorTreeviewOnNewAsset(self.item, "Mesh");
                  })});
                  array_push(items, { separator: true });
               } else if (treeviewItem.assetType == "Folder") {
@@ -190,9 +184,6 @@ function EditorUiAssets(ui) constructor {
                 })});
                 array_push(items, { label: "New Object3D", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Object3D");
-                })});
-                array_push(items, { label: "New Mesh", icon: sprUiMesh, onClick: method({ item: treeviewItem }, function() {
-                    editorTreeviewOnNewAsset(self.item, "Mesh");
                 })});
                 array_push(items, { label: "New Scene", icon: sprUiScene, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Scene");

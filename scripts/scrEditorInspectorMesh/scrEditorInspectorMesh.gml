@@ -14,6 +14,9 @@ function scrEditorInspectorMesh() {
           type: "checkbox",
           tooltip: "Mark object as static (disable automatic matrix updates)",
           valueGetter: function() {
+              if (self.asset[$ "__matrixAutoUpdate"] == undefined) {
+                  self.asset.__matrixAutoUpdate = self.asset[$ "matrixAutoUpdate"] ?? true;
+              }
               return !self.asset.__matrixAutoUpdate;
           },
           onChange: function(value) {
@@ -84,6 +87,10 @@ function scrEditorInspectorMesh() {
                   label: "Rotation", 
                   type: "transformXYZ",
                   valueGetter: function() {
+                      if (self.asset[$ "__rotationEuler"] == undefined) {
+                          self.asset.__rotationEuler = euler_create();
+                          euler_set_from_quaternion(self.asset.__rotationEuler, self.asset.rotation);
+                      }
                       return self.asset.__rotationEuler;
                   },
                   onBlur: function(value) {
