@@ -353,6 +353,7 @@
     {"id":{"name":"sprDemoLogo","path":"sprites/sprDemoLogo/sprDemoLogo.yy",},},
     {"id":{"name":"sprLogo","path":"sprites/sprLogo/sprLogo.yy",},},
     {"id":{"name":"sprLogoIcon","path":"sprites/sprLogoIcon/sprLogoIcon.yy",},},
+    {"id":{"name":"sprUiBone","path":"sprites/sprUiBone/sprUiBone.yy",},},
     {"id":{"name":"sprUiCamera","path":"sprites/sprUiCamera/sprUiCamera.yy",},},
     {"id":{"name":"sprUiCenter","path":"sprites/sprUiCenter/sprUiCenter.yy",},},
     {"id":{"name":"sprUiCheckTick","path":"sprites/sprUiCheckTick/sprUiCheckTick.yy",},},

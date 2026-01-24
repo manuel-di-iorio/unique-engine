@@ -150,9 +150,9 @@ function editorTreeviewOnModelImport(treeviewItem) {
         name: "UiTreeview.Item",
     }, {
         treeview: treeview,
-        assetType: "Mesh",
-        type: "Mesh",
-        icon: sprUiMesh,
+        assetType: "Object3D",
+        type: "Object3D",
+        icon: sprUiObject,
         asset: model
     });
     folderItem.addChild(modelTreeviewItem);
@@ -172,13 +172,20 @@ function __editorTreeview_addModelChildrenRecursive(parentAsset, parentTreeviewI
         var child = parentAsset.children[i];
         
         // Create Treeview Item
+        var _sprite = undefined;
+        switch (child.type) {
+            case "Mesh": _sprite = sprUiMesh; break;
+            case "Bone": _sprite = sprUiBone; break;
+            default: _sprite = sprUiObject;
+        }
+
         var childTreeviewItem = new UiTreeviewItem({
             name: "UiTreeview.Item",
         }, {
             treeview: parentTreeviewItem.treeview,
-            assetType: "Mesh",
-            type: "Mesh",
-            icon: sprUiMesh,
+            assetType: child.type,
+            type: child.type,
+            icon: _sprite,
             asset: child
         });
         parentTreeviewItem.addChild(childTreeviewItem);

@@ -341,10 +341,11 @@ function ProjectLoader() constructor {
       case "Texture": return sprUiTexture;
       case "Material": return sprUiMaterial;
       case "Mesh": return sprUiMesh;
+      case "Bone": return sprUiBone;
       case "Scene": return sprUiScene;
       case "Folder": return sprUiFolder;
       //case "Light": return sprUiLight;
-      case "Camera": return sprUiCamera;
+    //   case "Camera": return sprUiCamera;
       case "Object3D": return sprUiObject;
     }
     return undefined;

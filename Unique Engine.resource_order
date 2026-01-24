@@ -222,6 +222,7 @@
     {"name":"sprDemoLogo","order":4,"path":"sprites/sprDemoLogo/sprDemoLogo.yy",},
     {"name":"sprLogo","order":6,"path":"sprites/sprLogo/sprLogo.yy",},
     {"name":"sprLogoIcon","order":5,"path":"sprites/sprLogoIcon/sprLogoIcon.yy",},
+    {"name":"sprUiBone","order":34,"path":"sprites/sprUiBone/sprUiBone.yy",},
     {"name":"sprUiCamera","order":10,"path":"sprites/sprUiCamera/sprUiCamera.yy",},
     {"name":"sprUiCenter","order":23,"path":"sprites/sprUiCenter/sprUiCenter.yy",},
     {"name":"sprUiCheckTick","order":16,"path":"sprites/sprUiCheckTick/sprUiCheckTick.yy",},
