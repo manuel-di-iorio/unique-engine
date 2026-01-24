@@ -112,8 +112,9 @@ function AssetManager() constructor {
      * @param {Struct} asset - The asset that was modified
      * @param {Bool} [recursive=false] - Whether to update children recursively
      * @param {Bool} [syncEuler=false] - Whether to sync euler angles from quaternion
+     * @param {Bool} [emitEvent=true] Whether to emit the UI change event
      */
-    function editAsset(asset, recursive = false, syncEuler = false) {
+    function editAsset(asset, recursive = false, syncEuler = false, emitEvent = true) {
         self.__trackChange("edit", asset);
         
         // Rebuild the box in the next frame in order to wait first for the matrix updates
@@ -122,7 +123,9 @@ function AssetManager() constructor {
         }
 
         // Also notify the global editor manager so UI components can react
-        oSceneEditor.events.dispatch({ type: "assetChanged", data: asset });
+        if (emitEvent) {
+            oSceneEditor.events.dispatch({ type: "assetChanged", data: asset });
+        }
     }
     
     /**

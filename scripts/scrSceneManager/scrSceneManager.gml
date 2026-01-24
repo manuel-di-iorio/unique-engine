@@ -26,10 +26,11 @@ function SceneManager() constructor {
         view: 1,
         onDrag: function() {
             // Force Euler sync when dragging the gizmo to update the inspector
-            oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object, false, true);
+            oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object, false, true, false);
         },
         onDragEnd: function() {
             global.UI.needsRedraw = true;
+            oSceneEditor.events.dispatch({ type: "assetChanged"/*, data: asset*/ });
         }
     });
 
