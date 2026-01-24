@@ -405,6 +405,7 @@
     {"id":{"name":"spr_tex_pyramid","path":"sprites/spr_tex_pyramid/spr_tex_pyramid.yy",},},
     {"id":{"name":"spr_tex_sand","path":"sprites/spr_tex_sand/spr_tex_sand.yy",},},
     {"id":{"name":"sprDemoLogo","path":"sprites/sprDemoLogo/sprDemoLogo.yy",},},
+    {"id":{"name":"sprLogo","path":"sprites/sprLogo/sprLogo.yy",},},
     {"id":{"name":"sprUiCamera","path":"sprites/sprUiCamera/sprUiCamera.yy",},},
     {"id":{"name":"sprUiCenter","path":"sprites/sprUiCenter/sprUiCenter.yy",},},
     {"id":{"name":"sprUiCheckTick","path":"sprites/sprUiCheckTick/sprUiCheckTick.yy",},},

@@ -220,6 +220,7 @@
     {"name":"spr_tex_palm_tree","order":2,"path":"sprites/spr_tex_palm_tree/spr_tex_palm_tree.yy",},
     {"name":"spr_tex_pyramid","order":1,"path":"sprites/spr_tex_pyramid/spr_tex_pyramid.yy",},
     {"name":"sprDemoLogo","order":4,"path":"sprites/sprDemoLogo/sprDemoLogo.yy",},
+    {"name":"sprLogo","order":8,"path":"sprites/sprLogo/sprLogo.yy",},
     {"name":"sprUiCamera","order":10,"path":"sprites/sprUiCamera/sprUiCamera.yy",},
     {"name":"sprUiCenter","order":23,"path":"sprites/sprUiCenter/sprUiCenter.yy",},
     {"name":"sprUiCheckTick","order":16,"path":"sprites/sprUiCheckTick/sprUiCheckTick.yy",},

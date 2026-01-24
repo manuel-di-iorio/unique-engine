@@ -1,6 +1,6 @@
 # Unique Engine
 
-![uniqueCover](uniqueCover.png)
+<img src="uniqueCover.png" width="600" />
 
 Unique Engine is a modular and flexible opensource 3D game engine and scene editor, inspired by Three.js, designed to make it easy to create 3D games in GameMaker. The goal is to offer a simple, accessible and powerful full featured engine, while maintaining a clear and easily extensible structure.
 
