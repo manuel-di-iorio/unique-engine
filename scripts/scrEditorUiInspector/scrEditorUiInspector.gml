@@ -1,7 +1,9 @@
 function EditorUiInspector(ui) constructor {
     self.ui = ui;
+    self.asset = undefined;
 
     ui.Inspector = new UiNode({ name: "Inspector", minWidth: 350, width: "21%", marginBottom: 62, flexDirection: "column" }, { border: true });
+    ui.Inspector.owner = self;
 
     with (ui.Inspector) {
         function onDraw() {
@@ -9,7 +11,12 @@ function EditorUiInspector(ui) constructor {
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
             
             draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
-            draw_text(self.x1 + 20, self.y1 + 8, "Inspector");
+            
+            var title = "Inspector";
+            if (self.owner[$ "asset"] != undefined) {
+                title = self.owner.asset.type + " Inspector";
+            }
+            draw_text(self.x1 + 20, self.y1 + 8, title);
         }
     };
 
@@ -79,9 +86,19 @@ function EditorUiInspector(ui) constructor {
         var _context = { focused: false };
         
         __renderFields(self.ui.Inspector.Content.Items, assetFields, _context, _labelWidth); 
-    } 
-    
-    function close() {
+                
+                // Add a change listener to the asset to update the preview if needed
+                // This covers general properties that don't trigger specific events
+                if (asset[$ "on"] != undefined) {
+                    asset.on("change", method({ inspector: self }, function() {
+                        // The asset changed, but we don't want to re-render all fields
+                        // because it would break user focus/input.
+                        // The preview widgets will catch this event themselves.
+                    }));
+                }
+            } 
+            
+            function close() {
         self.ui.Inspector.Content.Items.destroyChildren();
     }
 
@@ -159,6 +176,18 @@ function EditorUiInspector(ui) constructor {
                             return asset.__cachedSprite;
                         }),
                         onChange
+                    });
+                break;
+                
+                case "meshPreview":
+                    input = new UiInspectorMeshPreview({ height: 256, flex: 1, justifyContent: "center" }, {
+                        asset: self.asset
+                    });
+                break;
+                
+                case "materialPreview":
+                    input = new UiInspectorMaterialPreview({ height: 150, flex: 1, justifyContent: "center" }, {
+                        asset: self.asset
                     });
                 break;
                 

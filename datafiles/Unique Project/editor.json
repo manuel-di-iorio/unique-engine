@@ -3,26 +3,26 @@
     "damping": true,
     "dampingFactor": 0.10,
     "position": [
-      2.44,
-      10.36,
-      4.03
+      -0.96,
+      -5.29,
+      1.72
     ],
     "target": [
-      0.97,
-      12.92,
+      -0.33,
+      -0.64,
       0
     ]
   },
   "counters": {
     "cameras": 0,
     "folders": 0,
-    "instances": 0,
+    "instances": 2,
     "lights": 0,
-    "materials": 1,
+    "materials": 16,
     "models": 0,
-    "object3d": 0,
-    "scenes": 0,
-    "textures": 1
+    "object3d": 1,
+    "scenes": 1,
+    "textures": 11
   },
   "gizmos": {
     "showBoxColliders": true

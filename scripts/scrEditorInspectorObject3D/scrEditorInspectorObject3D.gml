@@ -1,5 +1,11 @@
 function scrEditorInspectorObject3D() {
   return [
+    // === PREVIEW ===
+    {
+        id: "preview",
+        type: "meshPreview"
+    },
+
     // === SECTION: GENERAL ===
     { 
           id: "name",

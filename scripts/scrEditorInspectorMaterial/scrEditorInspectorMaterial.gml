@@ -31,6 +31,12 @@ function __scrEditorInspectorMaterialGetTextures(searchValue) {
 
 function scrEditorInspectorMaterial() {
   return [
+      // === PREVIEW ===
+      {
+          id: "preview",
+          type: "materialPreview"
+      },
+
       // === SECTION: GENERAL ===
       { 
           id: "name",
@@ -42,7 +48,7 @@ function scrEditorInspectorMaterial() {
       // === SECTION: TEXTURE MAPS ===
       { 
           type: "section",
-          label: "Texture Maps",
+          label: "Textures",
           collapsed: false,
           children: [
               { 

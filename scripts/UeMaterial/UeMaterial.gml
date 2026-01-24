@@ -1,4 +1,11 @@
-function UeMaterial(data = {}) constructor {
+/**
+ * @class UeMaterial
+ * @extends UeEventDispatcher
+ * @description Base class for all materials in the engine. 
+ * Emits a "change" event whenever the material is rebuilt or its properties change significantly.
+ * @param {struct} data - Initialization data
+ */
+function UeMaterial(data = {}): UeEventDispatcher(data) constructor {
   type = "Material";
   isMaterial = true;
   id = global.UE_OBJECT_ID++;
@@ -47,12 +54,14 @@ function UeMaterial(data = {}) constructor {
   function setUniform(name, value) {
     gml_pragma("forceinline");
     uniforms[$ name].value = value;
+    self.dispatch({ type: "change" });
     return self;
   }
 
   function setTexture(name, texture) {
     gml_pragma("forceinline");
     textures[$ name] = texture;
+    self.dispatch({ type: "change" });
     return self;
   }
 
@@ -63,6 +72,7 @@ function UeMaterial(data = {}) constructor {
   // Cache uniform/sampler locations
   function build() {
     gml_pragma("forceinline");
+    self.dispatch({ type: "change" });
     if (shader == undefined) return self;
 
     // Cache the core uniforms

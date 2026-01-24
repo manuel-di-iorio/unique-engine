@@ -18,7 +18,7 @@ Inspired by engines like **Three.js** and modern AAA rendering pipelines, Unique
 - **Engine-Grade Architecture**  
   Strict separation between geometry, meshes, materials, cameras, and scene logic, enabling scalable and maintainable projects.
 
-- **GameMaker-Native Integration**  
+- **GameMaker Native Integration**  
   Seamlessly integrates with GameMaker’s rendering and view systems without sacrificing flexibility or control.
 
 ---
@@ -72,7 +72,7 @@ Vertex buffers are automatically generated based on vertex format, vertices, and
 
 A high-performance math suite featuring:
 
-Vec2, Vec3, Mat3, Mat4, Quaternions, Planes & Rays and much more, with over 400 optimized math functions across specialized modules.
+Vec2, Vec3, Mat3, Mat4, Quaternions, Planes & Rays and much more, with over 400 math functions across 25 modules.
 
 ### 🕹 Camera Controls
 
@@ -99,13 +99,7 @@ Import and export complete scenes or individual objects for:
 
 ### 🎯 Spatial Queries & Raycasting
 
-Built-in support for:
-
-- Bounding Boxes
-
-- Bounding Spheres
-
-- Precision Raycasting
+Built-in support for Bounding Boxes, Bounding Spheres, Precision Raycasting.
 
 Ideal for collisions, picking, and gameplay queries.
 
@@ -116,6 +110,8 @@ Supports:
 - Hierarchical node animations
 
 - GPU-friendly vertex skinning for rigged characters
+
+Can also blend between multiple animations.
 
 ### 🧪 Post-Processing & Multi-Pass Rendering
 
@@ -143,11 +139,7 @@ https://github.com/manuel-di-iorio/unique-engine/issues
 
 Licensed under the **MIT License**.
 
-Third-party software:
-
-- **GMAssimp.dll** by Giacomo “Jak” Marton (MIT)
-
-Other bundled software, such as Assimp or the included 3d models, are copyrighted by their respective creators and may come with additional usage restrictions. The included extension "GMAssimp.dll", which the engine uses internally to import external models, has been created by Giacomo "Jak" Marton and it is MIT-licensed.
+Other bundled assets, such as included 3d test models, are copyrighted by their respective creators and may come with additional usage restrictions. The included extension "GMAssimp.dll", which the engine uses internally to import external models, has been created by Giacomo "Jak" Marton and it is MIT-licensed.
 
 Links to the free 3D models used in the examples:
 - https://free3d.com/3d-model/airplane-v2--659376.html
@@ -167,4 +159,3 @@ Music included in the Platform demo scene (Pixabay.com):
 
 - 📘 Documentation: https://manuel-di-iorio.github.io/unique-engine/
 - 🎮 GameMaker: https://gamemaker.io
-- GameMaker Italia: https://gamemakeritalia.it
