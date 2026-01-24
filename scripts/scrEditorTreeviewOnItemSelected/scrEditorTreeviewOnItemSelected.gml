@@ -1,62 +1,75 @@
 function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
-    var editorManager = oSceneEditor.editorManager;
-    
-    if (treeviewItem == undefined || treeviewItem.asset == undefined) {
-        editorManager.clearActiveAsset(true);
-        return;
-    }
-    
-    switch (treeviewItem.asset.type) {
-        case "Mesh":
-        case "Bone":
-        case "Object3D":
-        // case "Light":
-            var currentAsset = treeviewItem.asset;
-            // Find the root for rendering (Scene or top-level Mesh)
-            var rootAsset = currentAsset;
-            var curr = currentAsset;
-            
-            while (curr.parent != undefined) {
-                var parentType = curr.parent[$ "type"];
-                
-                if (parentType == "Scene") {
-                    rootAsset = curr.parent; // Found a scene, use it as root
-                    break;
-                }
-                
-                if (parentType == "Folder") {
-                    // Parent is a folder, so 'curr' is the top-level asset
-                    rootAsset = curr;
-                    break;
-                }
-                
-                // Move up
-                curr = curr.parent;
-                
-                // If we reached the top without hitting Scene or Folder (e.g. root asset)
-                if (curr.parent == undefined) {
-                    rootAsset = curr;
-                }
-            }
-            
-            // Pass the clicked submesh as gizmo target (third argument)
-            editorManager.setActiveAsset(rootAsset, treeviewItem, treeviewItem.asset);
-        break;
+  var editorManager = oSceneEditor.editorManager;
 
-        case "Scene":
-            editorManager.setActiveAsset(treeviewItem.asset, treeviewItem);
-        break;
+  if (treeviewItem == undefined || treeviewItem.asset == undefined) {
+    editorManager.clearActiveAsset(true);
+    return;
+  }
 
-        default:
-            // For other types (Texture, Material, Folder, etc.), clear the active 3D asset 
-            // but keep the current scene loaded and MAINTAIN the treeview selection.
-            editorManager.clearActiveAsset(true, false);
-            editorManager.selectedTreeviewItem = treeviewItem;
-        break;
-    }
+  switch (treeviewItem.asset.type) {
+    case "Mesh":
+    case "Bone":
+    case "Object3D":
+      var currentAsset = treeviewItem.asset;
 
-    // Inspect the asset
-    if (editorManager.inspector != undefined) {
-        editorManager.inspector.inspect(treeviewItem.asset, focus);
-    }
+      // Check if the asset is part of a scene
+      var isInScene = false;
+      var curr = currentAsset;
+      while (curr != undefined) {
+        if (curr[$ "type"] == "Scene") {
+          isInScene = true;
+          break;
+        }
+        curr = curr.parent;
+      }
+
+      if (isInScene) {
+        // Asset is inside a scene, allow selection and gizmo
+        var rootAsset = currentAsset;
+        var currSearch = currentAsset;
+
+        while (currSearch.parent != undefined) {
+          var parentType = currSearch.parent[$ "type"];
+
+          if (parentType == "Scene") {
+            rootAsset = currSearch.parent;
+            break;
+          }
+
+          if (parentType == "Folder") {
+            rootAsset = currSearch;
+            break;
+          }
+
+          currSearch = currSearch.parent;
+          if (currSearch.parent == undefined) {
+            rootAsset = currSearch;
+          }
+        }
+
+        editorManager.setActiveAsset(rootAsset, treeviewItem, treeviewItem.asset);
+      } else {
+        // Library asset (prefab/model): don't show in main view, just inspect.
+        // Now we have the preview in the inspector, so we don't need to render it in the scene.
+        editorManager.clearActiveAsset(true, false);
+        editorManager.selectedTreeviewItem = treeviewItem;
+      }
+      break;
+
+    case "Scene":
+      editorManager.setActiveAsset(treeviewItem.asset, treeviewItem);
+      break;
+
+    default:
+      // For other types (Texture, Material, Folder, etc.), clear the active 3D asset 
+      // but keep the current scene loaded and MAINTAIN the treeview selection.
+      editorManager.clearActiveAsset(true, false);
+      editorManager.selectedTreeviewItem = treeviewItem;
+      break;
+  }
+
+  // Inspect the asset
+  if (editorManager.inspector != undefined) {
+    editorManager.inspector.inspect(treeviewItem.asset, focus);
+  }
 };

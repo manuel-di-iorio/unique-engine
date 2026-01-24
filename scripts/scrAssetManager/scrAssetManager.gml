@@ -120,6 +120,9 @@ function AssetManager() constructor {
         if (asset.type == "Mesh" || asset.type == "Object3D") {
             self.updateAssetMatrix(asset, recursive, syncEuler);
         }
+
+        // Also notify the global editor manager so UI components can react
+        oSceneEditor.events.dispatch({ type: "assetChanged", data: asset });
     }
     
     /**

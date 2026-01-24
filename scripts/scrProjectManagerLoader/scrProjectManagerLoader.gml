@@ -343,7 +343,7 @@ function ProjectLoader() constructor {
       case "Mesh": return sprUiMesh;
       case "Scene": return sprUiScene;
       case "Folder": return sprUiFolder;
-      case "Light": return sprUiLight;
+      //case "Light": return sprUiLight;
       case "Camera": return sprUiCamera;
       case "Object3D": return sprUiObject;
     }

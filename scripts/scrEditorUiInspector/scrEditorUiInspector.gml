@@ -86,19 +86,9 @@ function EditorUiInspector(ui) constructor {
         var _context = { focused: false };
         
         __renderFields(self.ui.Inspector.Content.Items, assetFields, _context, _labelWidth); 
-                
-                // Add a change listener to the asset to update the preview if needed
-                // This covers general properties that don't trigger specific events
-                if (asset[$ "on"] != undefined) {
-                    asset.on("change", method({ inspector: self }, function() {
-                        // The asset changed, but we don't want to re-render all fields
-                        // because it would break user focus/input.
-                        // The preview widgets will catch this event themselves.
-                    }));
-                }
-            } 
-            
-            function close() {
+    } 
+    
+    function close() {
         self.ui.Inspector.Content.Items.destroyChildren();
     }
 

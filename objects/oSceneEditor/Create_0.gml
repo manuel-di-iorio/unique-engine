@@ -27,6 +27,7 @@ uiDebug = false;
 enableUI = true;
 
 // Setup UI and 3D scene
+events = new UeEventDispatcher();
 scrSetupUI();
 sceneManager = new SceneManager();
 assetManager = new AssetManager();
