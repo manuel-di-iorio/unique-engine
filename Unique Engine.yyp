@@ -249,6 +249,7 @@
     {"id":{"name":"UeLod","path":"scripts/UeLod/UeLod.yy",},},
     {"id":{"name":"UeMaterial","path":"scripts/UeMaterial/UeMaterial.yy",},},
     {"id":{"name":"UeMath","path":"scripts/UeMath/UeMath.yy",},},
+    {"id":{"name":"DynamicAABBTree2D","path":"scripts/DynamicAABBTree2D/DynamicAABBTree2D.yy",},},
     {"id":{"name":"UeMesh","path":"scripts/UeMesh/UeMesh.yy",},},
     {"id":{"name":"UeMeshBasicMaterial","path":"scripts/UeMeshBasicMaterial/UeMeshBasicMaterial.yy",},},
     {"id":{"name":"UeMeshStandardMaterial","path":"scripts/UeMeshStandardMaterial/UeMeshStandardMaterial.yy",},},

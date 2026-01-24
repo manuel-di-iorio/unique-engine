@@ -224,11 +224,11 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.handpoint = true;
         
         self.onMouseEnter(function() {
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
         });
         
         self.onMouseLeave(function() {
-            global.UI.needsRedraw = true; 
+            global.UI.requestRedraw(); 
         });
         
         self.onMouseDown(method({ item: treeviewItem }, function() {

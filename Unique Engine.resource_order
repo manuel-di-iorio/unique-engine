@@ -137,6 +137,7 @@
     {"name":"UeLod","order":14,"path":"scripts/UeLod/UeLod.yy",},
     {"name":"UeMaterial","order":6,"path":"scripts/UeMaterial/UeMaterial.yy",},
     {"name":"UeMath","order":1,"path":"scripts/UeMath/UeMath.yy",},
+    {"name":"DynamicAABBTree2D","order":2,"path":"scripts/DynamicAABBTree2D/DynamicAABBTree2D.yy",},
     {"name":"UeMeshBasicMaterial","order":1,"path":"scripts/UeMeshBasicMaterial/UeMeshBasicMaterial.yy",},
     {"name":"UeMeshStandardMaterial","order":2,"path":"scripts/UeMeshStandardMaterial/UeMeshStandardMaterial.yy",},
     {"name":"UeMtlLoader","order":4,"path":"scripts/UeMtlLoader/UeMtlLoader.yy",},

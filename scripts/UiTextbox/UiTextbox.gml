@@ -265,7 +265,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Update horizontal scroll based on cursor position
         self.updateScrollOffset = function() {
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
             var text = self.parent.value;
             var cursorX = 0;
             
@@ -616,7 +616,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             self.selectionStart = self.dragStartPos;
             self.selectionEnd = self.cursorPos;
             
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
         };
         
         // Handle key repeat timing
@@ -676,7 +676,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                 if (current_time - self.cursorBlinkTime > TEXTBOX_CURSOR_BLINK) {
                     self.showCursor = !self.showCursor;
                     self.cursorBlinkTime = current_time;
-                    global.UI.needsRedraw = true;
+                    global.UI.requestRedraw();
                 }
                 
                 self.updateKeyRepeat();
@@ -898,7 +898,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                 self.parent.onChange(self.parent.value, self.parent);
             }
             
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
             
             if (self.parent.onBlur != undefined) self.parent.onBlur(self.parent.value, self.parent);
         }

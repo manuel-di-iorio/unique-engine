@@ -165,11 +165,11 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                         });
                         
                         self.onMouseEnter(function() {
-                            global.UI.needsRedraw = true;
+                            global.UI.requestRedraw();
                         });
                         
                         self.onMouseLeave(function() {
-                            global.UI.needsRedraw = true;
+                            global.UI.requestRedraw();
                         });
                         
                         self.onDraw = function() {

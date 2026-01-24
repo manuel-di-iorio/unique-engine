@@ -20,11 +20,11 @@ function UiCheckbox(style = {}, props = {}) : UiNode(style, props) constructor {
         self.handpoint = true;
         
         self.onMouseEnter(function() {
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
         });
         
         self.onMouseLeave(function() {
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
         });
         
         self.onDraw = function() {
@@ -50,7 +50,7 @@ function UiCheckbox(style = {}, props = {}) : UiNode(style, props) constructor {
     self.onClick(function() {
         self.value = !self.value;
         self.onChange(self.value, self);
-        global.UI.needsRedraw = true;
+        global.UI.requestRedraw();
         return true;
     });
     

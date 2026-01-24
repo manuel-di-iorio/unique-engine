@@ -12,11 +12,11 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     self.enableRipple = props[$ "enableRipple"] ?? true; // @todo missing doc
     
     self.onMouseEnter(function() {
-        global.UI.needsRedraw = true;
+        global.UI.requestRedraw();
     });
     
     self.onMouseLeave(function() {
-        global.UI.needsRedraw = true;
+        global.UI.requestRedraw();
     });
     
     self.ripples = [];
@@ -38,7 +38,7 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
             alpha: 0.4,
             maxRadius: maxR
         });
-        global.UI.needsRedraw = true;
+        global.UI.requestRedraw();
     });
     
     function resize() {
@@ -108,7 +108,7 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
             draw_set_alpha(1);
             
             if (array_length(self.ripples) > 0) {
-                global.UI.needsRedraw = true;
+                global.UI.requestRedraw();
             }
         }
         

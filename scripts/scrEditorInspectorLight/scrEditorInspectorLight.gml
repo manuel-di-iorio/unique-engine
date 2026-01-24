@@ -51,7 +51,7 @@ function scrEditorInspectorLight() {
                         // Update quaternion from euler
                         quat_set_from_euler(self.asset.rotation, self.asset.__rotationEuler[0], self.asset.__rotationEuler[1], self.asset.__rotationEuler[2]);
                         self.asset.updateWorldMatrix(true, false);
-                        global.UI.needsRedraw = true;
+                        global.UI.requestRedraw();
                     }
                 },
             ]
@@ -72,7 +72,7 @@ function scrEditorInspectorLight() {
                     min: 0,
                     tooltip: "Brightness of the light source",
                     onBlur: function () {
-                        global.UI.needsRedraw = true;
+                        global.UI.requestRedraw();
                     }
                 },
                 {

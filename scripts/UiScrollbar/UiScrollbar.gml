@@ -20,12 +20,12 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
     function onMount() {
         self.parent.onWheelUp(function(ev) {
             self.parent.scrollTop = max(0, self.parent.scrollTop - 30);
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
         });
         
         self.parent.onWheelDown(function(ev) {
             self.parent.scrollTop = min(self.__maxScroll, self.parent.scrollTop + 30);
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
         });
     }
     
@@ -65,7 +65,7 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
                     // Convert thumb movement to scroll position
                     var scrollDelta = (deltaY / self.__maxThumbPosition) * self.__maxScroll;
                     self.parent.scrollTop = clamp(self.dragStartScrollTop + scrollDelta, 0, self.__maxScroll);
-                    global.UI.needsRedraw = true;
+                    global.UI.requestRedraw();
                 }
             }
         }

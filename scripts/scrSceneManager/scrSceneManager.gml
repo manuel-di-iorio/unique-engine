@@ -29,7 +29,7 @@ function SceneManager() constructor {
             oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object, false, true, false);
         },
         onDragEnd: function() {
-            global.UI.needsRedraw = true;
+            global.UI.requestRedraw();
             oSceneEditor.events.dispatch({ type: "assetChanged"/*, data: asset*/ });
         }
     });

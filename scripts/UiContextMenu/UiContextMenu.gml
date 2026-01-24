@@ -124,11 +124,11 @@ function UiContextMenu(x, y, items) constructor {
                 
                 with (menuItem) {
                     self.onMouseEnter(function() {
-                        global.UI.needsRedraw = true;
+                        global.UI.requestRedraw();
                     });
                     
                     self.onMouseLeave(function() {
-                        global.UI.needsRedraw = true;
+                        global.UI.requestRedraw();
                     });
                     
                     self.onMouseDown(method({ item: menuItem, contextMenu: _contextMenu }, function() {
