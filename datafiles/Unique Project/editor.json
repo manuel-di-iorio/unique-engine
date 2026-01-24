@@ -3,13 +3,13 @@
     "damping": true,
     "dampingFactor": 0.30,
     "position": [
-      4.76,
-      -1.80,
-      4.04
+      100.01,
+      -300.00,
+      70.00
     ],
     "target": [
-      3.13,
-      0.65,
+      0,
+      0,
       0
     ]
   },
@@ -18,9 +18,9 @@
     "folders": 2,
     "instances": 25,
     "lights": 0,
-    "materials": 4,
+    "materials": 5,
     "models": 0,
-    "object3d": 2,
+    "object3d": 4,
     "scenes": 3,
     "textures": 3
   },

@@ -168,6 +168,7 @@
     {"$GMIncludedFile":"","%Name":"skinAnimation.png","CopyToMask":-1,"filePath":"datafiles/SimpleSkin/screenshot","name":"skinAnimation.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"skinGeometry.png","CopyToMask":-1,"filePath":"datafiles/SimpleSkin/screenshot","name":"skinGeometry.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"skinningData.png","CopyToMask":-1,"filePath":"datafiles/SimpleSkin/screenshot","name":"skinningData.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"editor.json","CopyToMask":-1,"filePath":"datafiles/Unique Project","name":"editor.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
   ],
   "isEcma":false,
   "LibraryEmitters":[],
