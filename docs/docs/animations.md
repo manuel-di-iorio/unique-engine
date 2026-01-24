@@ -32,7 +32,7 @@ Skeletal animation allows for deforming a mesh through a hierarchy of bones (`Ue
 
 To play an animation on an imported model:
 
-```gml
+```js
 // --- Create Event ---
 // Load a model with animations
 model = assimpLoader.load("character.fbx");
@@ -73,7 +73,7 @@ Unique Engine supports blending between multiple animations. This is useful for 
 ### 1. Manual Layering
 The `evaluate()` function takes an optional `weight` parameter (default is `1.0`). If the weight is less than 1.0, the animation will blend with the current transformation of the objects.
 
-```gml
+```js
 // Step Event
 // 1. Apply base animation (e.g., Walk)
 animWalk.evaluate(walkTime, modelRoot, 1.0);
@@ -85,19 +85,8 @@ animWave.evaluate(waveTime, modelRoot, 0.5);
 ### 2. Static Blend Helper
 For simple transitions between two animations, you can use the static `blend` method:
 
-```gml
+```js
 // Step Event
 // Blends between animA and animB based on 'weight' (0.0 to 1.0)
 UeAnimation.blend(animA, timeA, animB, timeB, weight, modelRoot);
 ```
-
-### Interpolation
-Interpolation occurs on-the-fly during the `evaluate()` call using the mapped indices. 
-- **Linear Interpolation (LERP)** is used for Position and Scale.
-- **Spherical Linear Interpolation (SLERP)** is used for Rotation to ensure smooth transitions.
-
-## Skinning and Matrices
-When a `UeMesh` has an associated `UeSkeleton`, the bone matrices are sent to the shader. The final calculation for each bone is:
-`FinalMatrix = BoneWorldMatrix * BoneOffsetMatrix`
-
-Where `BoneOffsetMatrix` (Inverse Bind Pose) transforms vertices from mesh space to the bone's local space at the moment the mesh was bound to the skeleton.

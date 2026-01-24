@@ -1,7 +1,7 @@
 # Unique Engine
 
 <p align="center">
-  <img src="uniqueCover.png" width="600" />
+  <img src="other/uniqueCover.png" width="600" />
 </p>
 
 **Unique Engine** is a high-performance, modular 3D game engine and scene framework for **GameMaker**, designed to bring modern real-time rendering, clean architecture, and professional workflows into the GameMaker ecosystem.
@@ -84,8 +84,8 @@ Production-ready camera addons:
 
 ### 📦 Professional Model Importing
 
-Native integration with AssimpDLL (by Jak) for importing industry-standard 3D formats:
-FBX, GLTF, OBJ, and more.
+Native integration with Assimp for importing industry-standard 3D formats:
+FBX, GLTF, OBJ, 3DS, and more.
 
 ### 💾 Scene Serialization
 
@@ -95,7 +95,7 @@ Import and export complete scenes or individual objects for:
 
 - Scene streaming
 
-Tooling pipelines
+- Tooling pipelines
 
 ### 🎯 Spatial Queries & Raycasting
 
@@ -147,7 +147,21 @@ Third-party software:
 
 - **GMAssimp.dll** by Giacomo “Jak” Marton (MIT)
 
-- Included 3D models and assets remain the property of their respective creators
+Other bundled software, such as Assimp or the included 3d models, are copyrighted by their respective creators and may come with additional usage restrictions. The included extension "GMAssimp.dll", which the engine uses internally to import external models, has been created by Giacomo "Jak" Marton and it is MIT-licensed.
+
+Links to the free 3D models used in the examples:
+- https://free3d.com/3d-model/airplane-v2--659376.html
+- https://free3d.com/3d-model/cat-v1--522281.html
+- https://sketchfab.com/3d-models/pbr-mech-practice-be1e6f50f2c34a5199fd73291389ca20
+- https://kenney.nl/assets (for the project scene)
+- https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0 (Animated models)
+
+Music included in the Platform demo scene (Pixabay.com):
+- Background Music by its_tigri
+- Jump sound by Crunchpix Studio
+- Collect sound by LIECIO
+- Falling sound by Universfield
+- Win sound by floraphonic
 
 ## 🔗 Useful Links
 

@@ -37,7 +37,7 @@ Your 3D scene will usually include:
 
 3. Create an object and add it to your room.
 
-4. Turn on "Enable viewports" in your room view settings
+<!-- 4. Turn on "Enable viewports" in your room view settings -->
 
 ---
 
@@ -50,7 +50,7 @@ renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 50, y: -100, z: 50 }).use();
 
-cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: c_fuchsia });
+cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: #0066FF });
 cubeMesh = new UeMesh(cubeGeometry, new UeMeshStandardMaterial());
 
 ambientLight = new UeAmbientLight(c_gray);

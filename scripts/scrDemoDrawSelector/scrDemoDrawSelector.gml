@@ -25,17 +25,15 @@ function scrDemoDrawSelector() {
         var hover = point_in_rectangle(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), x1, yy, x2, yf);
         
         if (currentDemoIdx == i) {
-            btnCol = #CC00CC;
+            btnCol = #0066EE;
         } else {
             if (hover) {
                 isHovering = true;
                 
                 if (mouse_check_button_released(mb_left) && selectorMouseStart) {
-                    btnCol = #3377FF;
                     setScene(i);
-                    
                 } else {
-                    btnCol = #1155DD;
+                    btnCol = #888888;
                 }
             } else {
                 btnCol = #444444;

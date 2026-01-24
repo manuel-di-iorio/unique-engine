@@ -82,7 +82,7 @@ const config = {
         title: 'Unique Engine',
         logo: {
           alt: 'Unique Engine Logo',
-          src: 'img/logo.png',
+          src: 'img/logoIcon.png',
         },
         items: [
           {

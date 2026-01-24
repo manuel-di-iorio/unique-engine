@@ -4,7 +4,7 @@ camera = new UePerspectiveCamera({ x: 50, y: -100, z: 50 }).use();
 camera.matrixAutoUpdate = true; // Enable auto update for testing
 
 // Add a mesh and lights to the scene for test
-var cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: c_fuchsia });
+var cubeGeometry = new UeBoxGeometry(50, 50, 50, { color: #0066FF });
 var cubeMesh = new UeStaticMesh(cubeGeometry, new UeMeshStandardMaterial());
 var ambientLight = new UeAmbientLight(c_gray);
 var dirLight = new UeDirectionalLight(c_ltgray, 1, { x: 150, y: 80, z: 90 }); 
