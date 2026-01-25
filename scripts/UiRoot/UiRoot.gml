@@ -7,6 +7,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.previousTarget = undefined;
     self.needsUpdate = true;
     self.needsRedraw = true;
+    self.currentCursor = cr_default;
 
     function requestRedraw() {
         gml_pragma("forceinline");
@@ -16,6 +17,14 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     function requestUpdate() {
         gml_pragma("forceinline");
         self.needsUpdate = true;
+    }
+    
+    function setCursor(cursor) {
+        gml_pragma("forceinline");
+        if (self.currentCursor != cursor) {
+            self.currentCursor = cursor;
+            window_set_cursor(cursor);
+        }
     }
     self.layoutUpdated = undefined;
     self.surface = undefined;
@@ -294,7 +303,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             // Unhover the previous element first (before setting new hover)
             if (_currentlyHovered != undefined && _currentlyHovered != self.deepestTarget) {
                 if (self.draggedElement == undefined) {
-                    window_set_cursor(cr_default);
+                    self.setCursor(cr_default);
                 }
                 
                 _currentlyHovered.hovered = false;
@@ -317,8 +326,8 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                     self.requestRedraw();
                 }
                 
-                if (_elem.handpoint && window_get_cursor() == cr_default && self.draggedElement == undefined) {
-                    window_set_cursor(cr_handpoint);
+                if (_elem.handpoint && self.currentCursor == cr_default && self.draggedElement == undefined) {
+                    self.setCursor(cr_handpoint);
                 }
             }
             
@@ -332,7 +341,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                     self.draggedElement = self.potentialDraggedElement;
                     self.draggedElement.dragging = true;
                     self.potentialDraggedElement = undefined;
-                    window_set_cursor(cr_size_all);
+                    self.setCursor(cr_size_all);
                     
                     if (self.draggedElement.onDragStart != undefined) {
                         self.draggedElement.onDragStart(self.draggedElement);
@@ -407,7 +416,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             // First, handle the drag end if we got a dragged element
             if (self.draggedElement != undefined) {
                 self.draggedElement.dragging = false;
-                window_set_cursor(cr_default);
+                self.setCursor(cr_default);
                 
                 // Run the onDrop method on the dropzone
                 if (self.deepestTarget != undefined && self.deepestTarget.dropzone && 

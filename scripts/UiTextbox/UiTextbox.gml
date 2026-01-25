@@ -74,13 +74,13 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Mouse cursor change on hover
         self.onMouseEnter(function() {
-            if (window_get_cursor() == cr_default) {
-                window_set_cursor(cr_beam);
+            if (global.UI.currentCursor == cr_default) {
+                global.UI.setCursor(cr_beam);
             }
         });
         
         self.onMouseLeave(function() {
-            window_set_cursor(cr_default);
+            global.UI.setCursor(cr_default);
         });
         
         // Save state for undo functionality
