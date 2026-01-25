@@ -1,30 +1,50 @@
 function __scrEditorInspectorMaterialGetTextures(searchValue) {
-    var allTextures = oSceneEditor.assetManager.getAssetsByType("Texture");
+    // Cache delle texture uniche
+    static _cachedTextures = undefined;
+    static _cacheTime = 0;
     
-    var uniqueTextures = [];
-    var seen = {};
-    for (var i = 0, l = array_length(allTextures); i < l; i++) {
-        var _asset = allTextures[i];
-        var _key = string(ptr(_asset));
-        if (variable_struct_get(seen, _key) == undefined) {
-            variable_struct_set(seen, _key, true);
-            array_push(uniqueTextures, _asset);
+    // Invalida cache dopo 1 secondo o se non esiste
+    var _currentTime = current_time;
+    if (_cachedTextures == undefined || _currentTime - _cacheTime > 1000) {
+        var allTextures = oSceneEditor.assetManager.getAssetsByType("Texture");
+        
+        // Deduplica usando ds_map per performance
+        var seenMap = {};
+        _cachedTextures = [];
+        
+        for (var i = 0, l = array_length(allTextures); i < l; i++) {
+            var _asset = allTextures[i];
+            var _key = ptr(_asset);
+            var _value = seenMap[$ _key];
+            if (_value == undefined) {
+                seenMap[$ _key] = true;
+                array_push(_cachedTextures, _asset);
+            }
         }
+        
+        _cacheTime = _currentTime;
     }
     
-    var textures = array_filter(uniqueTextures, method({ searchValue }, function(texture) {
-        if (searchValue == "") return true;
-        return string_pos(string_trim(string_lower(searchValue)), string_lower(texture.name)) > 0;
-    }));
+    // Preprocessa searchValue una volta sola
+    var _searchLower = (searchValue == "") ? "" : string_lower(string_trim(searchValue));
+    var _hasSearch = (_searchLower != "");
     
-    var mapped = array_map(textures, function(texture) {
-        return {
+    // Filter + map in un solo passaggio
+    var mapped = [{ label: "<None>", value: undefined }];
+    
+    for (var i = 0, l = array_length(_cachedTextures); i < l; i++) {
+        var texture = _cachedTextures[i];
+        
+        // Skip se non matcha la ricerca
+        if (_hasSearch && string_pos(_searchLower, string_lower(texture.name)) == 0) {
+            continue;
+        }
+        
+        array_push(mapped, {
             label: texture.name, 
             value: texture
-        };
-    });
-    
-    array_insert(mapped, 0, { label: "<None>", value: undefined });
+        });
+    }
 
     return mapped;
 }

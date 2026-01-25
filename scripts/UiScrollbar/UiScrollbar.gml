@@ -89,6 +89,7 @@ function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) construc
         self.parent.dragged = true;
         self.parent.dragStartY = global.UI.mouseY;
         self.parent.dragStartScrollTop = self.parent.parent.scrollTop;
+        global.UI.isScrolling = true;
         
         self.setWidth(17);
         self.setLeft(-3);
@@ -99,6 +100,7 @@ function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) construc
         if (global.UI.mouseReleased) {
             if (self.parent.dragged) {
                 self.parent.dragged = false;
+                global.UI.isScrolling = false;
                 self.setWidth(11);
                 self.setLeft(0);
             }

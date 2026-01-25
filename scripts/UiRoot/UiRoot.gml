@@ -8,6 +8,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.needsUpdate = true;
     self.needsRedraw = true;
     self.currentCursor = cr_default;
+    self.isScrolling = false;
 
     function requestRedraw() {
         gml_pragma("forceinline");
@@ -300,34 +301,37 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         if (self.mouseChanged || self.layoutUpdated) {
             self.deepestTarget = self.spatialTree.getTopmostAtPoint(self.mouseX, self.mouseY);
             
-            // Unhover the previous element first (before setting new hover)
-            if (_currentlyHovered != undefined && _currentlyHovered != self.deepestTarget) {
-                if (self.draggedElement == undefined) {
-                    self.setCursor(cr_default);
-                }
-                
-                _currentlyHovered.hovered = false;
-                self.dispatchEvent(UI_EVENT.mouseleave, _currentlyHovered); 
-                self.dispatchEvent(UI_EVENT.mouseout, _currentlyHovered);
-                self.previousTarget = undefined;
-                self.requestRedraw();
-            }
-            
-            // Set hover on new element (only dispatch events if it's a new hover target)
-            if (self.deepestTarget != undefined) {
-                var _elem = self.deepestTarget;
-                var _wasAlreadyHovered = _elem.hovered;
-                _elem.hovered = true;
-                
-                // Only dispatch enter/over if this is a NEW hover target
-                if (!_wasAlreadyHovered) {
-                    self.dispatchEvent(UI_EVENT.mouseenter, _elem); 
-                    self.dispatchEvent(UI_EVENT.mouseover, _elem);
+            // Skip hover events during scroll
+            if (!self.isScrolling) {
+                // Unhover the previous element first (before setting new hover)
+                if (_currentlyHovered != undefined && _currentlyHovered != self.deepestTarget) {
+                    if (self.draggedElement == undefined) {
+                        self.setCursor(cr_default);
+                    }
+                    
+                    _currentlyHovered.hovered = false;
+                    self.dispatchEvent(UI_EVENT.mouseleave, _currentlyHovered); 
+                    self.dispatchEvent(UI_EVENT.mouseout, _currentlyHovered);
+                    self.previousTarget = undefined;
                     self.requestRedraw();
                 }
                 
-                if (_elem.handpoint && self.currentCursor == cr_default && self.draggedElement == undefined) {
-                    self.setCursor(cr_handpoint);
+                // Set hover on new element (only dispatch events if it's a new hover target)
+                if (self.deepestTarget != undefined) {
+                    var _elem = self.deepestTarget;
+                    var _wasAlreadyHovered = _elem.hovered;
+                    _elem.hovered = true;
+                    
+                    // Only dispatch enter/over if this is a NEW hover target
+                    if (!_wasAlreadyHovered) {
+                        self.dispatchEvent(UI_EVENT.mouseenter, _elem); 
+                        self.dispatchEvent(UI_EVENT.mouseover, _elem);
+                        self.requestRedraw();
+                    }
+                    
+                    if (_elem.handpoint && self.currentCursor == cr_default && self.draggedElement == undefined) {
+                        self.setCursor(cr_handpoint);
+                    }
                 }
             }
             
@@ -377,10 +381,14 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         if (_target != undefined && !(_target[$ "destroyed"] ?? false)) {
             // Wheel events
             if (mouse_wheel_up()) {
+                self.isScrolling = true;
                 global.UI.dispatchEvent(UI_EVENT.wheelup, _target);
+                self.isScrolling = false;
             }
             if (mouse_wheel_down()) {
+                self.isScrolling = true;
                 global.UI.dispatchEvent(UI_EVENT.wheeldown, _target);
+                self.isScrolling = false;
             }
             
             if (mouse_check_button_pressed(mb_any)) {
