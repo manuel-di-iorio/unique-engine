@@ -198,6 +198,27 @@ function ProjectSaver() constructor {
             metadata[$ "__parentUI"] = asset[$ "__parentUI"][$ "uuid"];
         }
         
+        // Serialize children recursively
+        if (type == "Scene" || type == "Object3D" || type == "Bone" || type == "Light" || type == "Camera") {
+            // Get children from the actual Three.js object
+            var actualChildren = asset[$ "children"];
+            if (is_array(actualChildren) && array_length(actualChildren) > 0) {
+                var serializedChildren = [];
+                for (var i = 0; i < array_length(actualChildren); i++) {
+                    var child = actualChildren[i];
+                    if (child != undefined) {
+                        // Recursively serialize child and its descendants
+                        var childMetadata = __serializeChildRecursive(child);
+                        array_push(serializedChildren, childMetadata);
+                    }
+                }
+                metadata[$ "children"] = serializedChildren;
+            } else {
+                // Ensure children is an empty array if no children
+                metadata[$ "children"] = [];
+            }
+        }
+        
         __writeJson(assetPath + "asset.json", metadata);
         
         switch (type) {
@@ -300,5 +321,31 @@ function ProjectSaver() constructor {
         var jsonString = buffer_read(buf, buffer_text);
         buffer_delete(buf);
         return json_parse(jsonString);
+    };
+
+    /**
+     * Recursively serialize a child object and all its descendants
+     * Expands children from Three.js objects to full metadata objects
+     */
+    self.__serializeChildRecursive = function(child) {
+        // Get the toJSON representation
+        var childToJSON = child[$ "toJSON"];
+        var childMetadata = is_callable(childToJSON) ? childToJSON() : child;
+        
+        // If this child has children, recursively serialize them
+        var actualChildren = child[$ "children"];
+        if (is_array(actualChildren) && array_length(actualChildren) > 0) {
+            var serializedChildren = [];
+            for (var i = 0; i < array_length(actualChildren); i++) {
+                var grandchild = actualChildren[i];
+                if (grandchild != undefined) {
+                    var grandchildMetadata = __serializeChildRecursive(grandchild);
+                    array_push(serializedChildren, grandchildMetadata);
+                }
+            }
+            childMetadata[$ "children"] = serializedChildren;
+        }
+        
+        return childMetadata;
     };
 }

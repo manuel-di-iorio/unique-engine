@@ -29,9 +29,10 @@ function UeScene(data = {}): UeObject3D(data) constructor {
     
     /*
      * Load scene data from JSON
-     * The children are linked using the objectsByUUID
+     * The children are linked using the objectsByUUID and materialsByUUID
+     * Accepts an optional materialsByUUID parameter to link materials
      */
-    function fromJSON(data, objectsByUUID = {}) {
+    function fromJSON(data, objectsByUUID = {}, materialsByUUID = {}) {
         gml_pragma("forceinline");
 
         uuid = data[$ "uuid"];
@@ -57,8 +58,22 @@ function UeScene(data = {}): UeObject3D(data) constructor {
                     default: child = new UeObject3D(); break;
                 }
                 
-                child.fromJSON(childData);
+                // Recursively load child data
+                if (type == "Mesh" || type == "Object3D" || type == "AmbientLight" || type == "PointLight" || type == "DirectionalLight" || type == "SpotLight" || type == "HemisphereLight") {
+                    child.fromJSON(childData, objectsByUUID, materialsByUUID);
+                } else {
+                    child.fromJSON(childData);
+                }
+                
                 add(child);
+                
+                // Link material if this is a mesh
+                if (type == "Mesh") {
+                    var matUUID = childData[$ "material"];
+                    if (matUUID != undefined && materialsByUUID[$ matUUID] != undefined) {
+                        child.material = materialsByUUID[$ matUUID];
+                    }
+                }
             }
         }
         

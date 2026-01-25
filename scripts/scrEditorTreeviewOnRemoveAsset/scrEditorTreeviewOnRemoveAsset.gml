@@ -46,7 +46,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         }
         
         // Dispose resources
-        asset.dispose(true);
+        if (asset != undefined && struct_exists(asset, "dispose")) {
+            asset.dispose(true);
+        }
     }
     
     // Scene: cancella la scena (i figli verranno cancellati automaticamente)
@@ -65,7 +67,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         }
         
         // Dispose resources
-        asset.dispose(true);
+        if (asset != undefined && struct_exists(asset, "dispose")) {
+            asset.dispose(true);
+        }
     }
     
     // Folder: rimuovere ricorsivamente tutti i figli

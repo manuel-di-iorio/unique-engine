@@ -170,9 +170,11 @@ function UiNode(style = {}, props = {}) constructor {
         
         // Remove all children from spatial tree first
         var _children = self.children;
-        var _len = self.childrenLength;
+        var _len = is_array(_children) ? array_length(_children) : 0;
         for (var i = 0; i < _len; i++) {
-            __removeFromSpatialTree(_children[i]);
+            if (_children[i] != undefined) {
+                __removeFromSpatialTree(_children[i]);
+            }
         }
         
         flexpanel_node_remove_all_children(self.node);

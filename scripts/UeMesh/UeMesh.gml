@@ -55,11 +55,13 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
 
     // Submit the vertex buffer
     var tex = -1;
-    var materialMap = material.textures[$ "map"];
+    if (material != undefined) {
+      var materialMap = material.textures[$ "map"];
 
-    if (materialMap != undefined) {
-        materialMap.__useGlobal();
-        tex = materialMap.__cachedTexture ?? -1;
+      if (materialMap != undefined) {
+          materialMap.__useGlobal();
+          tex = materialMap.__cachedTexture ?? -1;
+      }
     }
 
     vertex_submit(self.geometry.vb, wireframe ? pr_linelist : primitive, tex);

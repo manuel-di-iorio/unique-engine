@@ -273,13 +273,13 @@ function ProjectLoader() constructor {
         if (treeviewItem[$ "needsLoading"] == true) {
             var scene = treeviewItem.asset;
             if (scene != undefined && scene.type == "Scene") {
-                // 1. Load 3D nodes
-                scene.fromJSON(scene.__metadata, objectsByUUID);
+                // 1. Load 3D nodes with material linking support
+                scene.fromJSON(scene.__metadata, objectsByUUID, materialsByUUID);
                 
-                // 2. Link materials for meshes in the scene
+                // 2. Link materials for meshes in the scene (for top-level meshes)
                 scene.traverse(method({ materialsByUUID }, function(obj) {
                     if (obj.type == "Mesh") {
-                        var matUUID = obj[$ "materialUUID"];
+                        var matUUID = obj[$ "material"] ?? obj[$ "materialUUID"];
                         if (matUUID != undefined && materialsByUUID[$ matUUID] != undefined) {
                             obj.material = materialsByUUID[$ matUUID];
                         }
