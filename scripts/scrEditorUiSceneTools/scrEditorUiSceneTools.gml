@@ -29,10 +29,11 @@ function EditorUiSceneTools(ui) constructor {
    
          var target = global.UI.Main.Scene;
    
-         var newLeft = target.x1 + 10;
-         var newTop = target.y1 + 10;       
+         var newLeft = floor(target.x1 + 10);
+         var newTop = floor(target.y1 + 10);       
          
-         if (self.getLeft() != newLeft || self.getTop() != newTop) {
+         // Only update if position changed by more than 1 pixel to avoid loops
+         if (abs(self.getLeft() - newLeft) > 1 || abs(self.getTop() - newTop) > 1) {
             self.setLeft(newLeft);
             self.setTop(newTop);
          }

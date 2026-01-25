@@ -468,6 +468,10 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
     }
   }
 
+  /**
+   * Restore depth buffer from opaque objects
+   * This is needed before rendering transparent objects when using the Deferred Render Path.
+   */
   function __restoreDepth(queue) {
     gml_pragma("forceinline");
     if (array_length(queue) == 0) return;

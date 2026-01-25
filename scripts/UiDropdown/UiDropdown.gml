@@ -89,7 +89,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
         self.List = new UiNode({
             name: "UiDropdown.List", position: "absolute", padding: 5, maxHeight: 500, 
             left: -9999, top: -9999
-        });
+        }, { pointerEvents: true });
         
         with (self.List) {
             self.Dropdown = _Dropdown;
@@ -102,20 +102,29 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                 if (!_height) return;
                 
                 var Input = _Dropdown.Input;
-                if (self.x1 != Input.x1) self.setLeft(Input.x1);
-                if (self.width != Input.width) self.setWidth(Input.width); 
+                if (abs(self.x1 - Input.x1) > 1) self.setLeft(Input.x1);
+                if (abs(self.width - Input.width) > 1) self.setWidth(Input.width); 
                 
-                var yy = Input.y1 + 30;
+                var yy = floor(Input.y1 + 30);
                 if (yy + _height > oSceneEditor.winH) {
-                    yy = yy - 30 - self.layout.height;
+                    yy = floor(yy - 30 - self.layout.height);
                 }
-                if (self.y1 != yy) self.setTop(yy);
+                if (abs(self.y1 - yy) > 1) self.setTop(yy);
             }
     
+            // Skip the first mouseReleased after opening (user might hold mouse and release outside)
+            self.__skipFirstRelease = true;
+            
             self.onStep(function() {
                 self.computePosition();
                 
                 if (global.UI.mouseReleased) {
+                    // Skip the first mouseReleased event after opening
+                    if (self.__skipFirstRelease) {
+                        self.__skipFirstRelease = false;
+                        return;
+                    }
+                    
                     var y1 = min(self.y1, self.Dropdown.y1);
                     var y2 = max(self.y2, self.Dropdown.y2);
                     

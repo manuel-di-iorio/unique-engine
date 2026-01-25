@@ -43,7 +43,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
    */
   function render(wireframe = false) {
     gml_pragma("forceinline");
-
+    
     // Set the world matrix
     // If we are using skeletal animation, the bone matrices already include the world transform.
     // We set matrix_world to identity to avoid double-transforming.
@@ -58,12 +58,8 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
     var materialMap = material.textures[$ "map"];
 
     if (materialMap != undefined) {
-      if (is_struct(materialMap) && variable_struct_exists(materialMap, "isTexture")) {
         materialMap.__useGlobal();
-        tex = materialMap.__cachedTexture;
-      } else {
-        tex = materialMap;
-      }
+        tex = materialMap.__cachedTexture ?? -1;
     }
 
     vertex_submit(self.geometry.vb, wireframe ? pr_linelist : primitive, tex);

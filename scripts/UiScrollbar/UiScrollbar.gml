@@ -72,7 +72,7 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Compute the thumb max scroll and position
         if (self.__maxScroll > 0) {
-            var thumbPosition = (self.parent.scrollTop / self.__maxScroll) * self.__maxThumbPosition; 
+            var thumbPosition = floor((self.parent.scrollTop / self.__maxScroll) * self.__maxThumbPosition); 
             if (self.Thumb.getTop() != thumbPosition) {
                 self.Thumb.setTop(thumbPosition);
             }

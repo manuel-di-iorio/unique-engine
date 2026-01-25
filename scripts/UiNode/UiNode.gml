@@ -131,13 +131,50 @@ function UiNode(style = {}, props = {}) constructor {
             }
         }
         
+        // Remove child and all its descendants from the spatial tree
+        __removeFromSpatialTree(child);
         
         return self;
     }
     
+    // Helper: recursively remove element and children from spatial tree
+    static __removeFromSpatialTree = function(elem) {
+        // Clear hover state and deepestTarget if this element was being tracked
+        elem.hovered = false;
+        if (global.UI.deepestTarget == elem) {
+            global.UI.deepestTarget = undefined;
+        }
+        
+        // Remove this element from spatial tree
+        if (variable_struct_exists(elem, "__spatialProxyId") && elem.__spatialProxyId != undefined) {
+            global.UI.spatialTree.remove(elem.__spatialProxyId);
+            elem.__spatialProxyId = undefined;
+        }
+        
+        // Recursively remove children
+        var _children = elem.children;
+        var _len = elem.childrenLength;
+        for (var i = 0; i < _len; i++) {
+            __removeFromSpatialTree(_children[i]);
+        }
+        
+        // Also handle scrollbar if present
+        if (variable_struct_exists(elem, "__UiScrollbar") && elem.__UiScrollbar != undefined) {
+            __removeFromSpatialTree(elem.__UiScrollbar);
+        }
+    };
+    
     // Remove all children from the node tree (not from the memory, use destroy() for that)
     function clear() {
         gml_pragma("forceinline");
+        
+        // Remove all children from spatial tree first
+        var _children = self.children;
+        var _len = self.childrenLength;
+        for (var i = 0; i < _len; i++) {
+            __removeFromSpatialTree(_children[i]);
+        }
+        
         flexpanel_node_remove_all_children(self.node);
         global.UI.requestUpdate("UiNode.clear");
         self.children = [];
@@ -154,6 +191,10 @@ function UiNode(style = {}, props = {}) constructor {
         if (self.focusable && !self.root) {
             global.UI.__unregisterFocus(self);
         }
+        
+        // Remove this element and ALL descendants from spatial tree FIRST
+        // This also clears hover state and deepestTarget
+        __removeFromSpatialTree(self);
         
         for (var i = self.childrenLength - 1; i >= 0; i--) {
             self.children[i].destroy();
@@ -189,6 +230,10 @@ function UiNode(style = {}, props = {}) constructor {
         
         for (var i = self.childrenLength - 1; i >= 0; i--) {
             var elem = self.children[i];
+            
+            // Remove from spatial tree first (recursively for all descendants)
+            __removeFromSpatialTree(elem);
+            
             elem.destroyChildren();
             
             var elemOnDestroy = elem[$ "onDestroy"];

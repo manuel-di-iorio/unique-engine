@@ -70,6 +70,7 @@ function DynamicAABBTree2D(capacity = 1024) constructor {
     static freeNode = function(nodeId) {
         self.left[nodeId] = self.freeList;
         self.height[nodeId] = -1;
+        self.userData[nodeId] = undefined; // Clear userData to prevent stale references
         self.freeList = nodeId;
         self.nodeCount--;
     };
@@ -243,6 +244,10 @@ function DynamicAABBTree2D(capacity = 1024) constructor {
         var a = i;
         var b = self.left[a];
         var c = self.right[a];
+        
+        // Defensive check: ensure both children are valid
+        if (b == -1 || c == -1) return i;
+        
         var balance = self.height[c] - self.height[b];
 
         // Rotate C up
@@ -383,11 +388,6 @@ function DynamicAABBTree2D(capacity = 1024) constructor {
         return nodeId;
     };
 
-    static remove = function(proxyId) {
-        self.removeLeaf(proxyId);
-        self.freeNode(proxyId);
-    };
-
     static queryPoint = function(px, py, callback) {
         if (self.root == -1) return;
         
@@ -406,6 +406,10 @@ function DynamicAABBTree2D(capacity = 1024) constructor {
                     // Leaf node
                     if (callback(self.userData[nodeId], nodeId)) return true;
                 } else {
+                    // Ensure stack has space for 2 more entries
+                    if (stackPtr + 2 >= array_length(stack)) {
+                        array_resize(stack, array_length(stack) * 2);
+                    }
                     stack[stackPtr++] = self.left[nodeId];
                     stack[stackPtr++] = self.right[nodeId];
                 }
@@ -443,6 +447,11 @@ function DynamicAABBTree2D(capacity = 1024) constructor {
                         bestElem = self.userData[nodeId];
                     }
                 } else {
+                    // Ensure stack has space for 2 more entries
+                    if (stackPtr + 2 >= array_length(stack)) {
+                        array_resize(stack, array_length(stack) * 2);
+                    }
+                    
                     // Push children. To optimize, push the one with lower maxDrawIndex first,
                     // so we process the one with higher maxDrawIndex later (LIFO) and potentially prune more.
                     var left = self.left[nodeId];
@@ -473,5 +482,78 @@ function DynamicAABBTree2D(capacity = 1024) constructor {
         self.left[self.capacity - 1] = -1;
         self.height[self.capacity - 1] = -1;
         self.userData[self.capacity - 1] = undefined;
+    };
+    
+    // Move a proxy to a new AABB (incremental update)
+    // Note: This preserves the existing maxDrawIndex. Use updateDrawIndex() after move() 
+    //       if the draw order needs to be updated.
+    static move = function(proxyId, minX, minY, maxX, maxY) {
+        if (proxyId < 0 || proxyId >= self.capacity) return false;
+        if (self.height[proxyId] == -1) return false; // Not a valid proxy
+        if (self.left[proxyId] != -1) return false; // Not a leaf node
+        
+        // Check if the new AABB is significantly different
+        var extension = 2.0;
+        var fatMinX = minX - extension;
+        var fatMinY = minY - extension;
+        var fatMaxX = maxX + extension;
+        var fatMaxY = maxY + extension;
+        
+        // If new AABB is still contained in the old fat AABB, no need to reinsert
+        if (fatMinX >= self.minX[proxyId] && fatMinY >= self.minY[proxyId] &&
+            fatMaxX <= self.maxX[proxyId] && fatMaxY <= self.maxY[proxyId]) {
+            return true; // Movement is small enough, tree structure is still valid
+        }
+        
+        // Save userData and drawIndex before removal
+        var userData = self.userData[proxyId];
+        var drawIndex = self.maxDrawIndex[proxyId];
+        
+        // Remove and reinsert
+        self.removeLeaf(proxyId);
+        self.minX[proxyId] = fatMinX;
+        self.minY[proxyId] = fatMinY;
+        self.maxX[proxyId] = fatMaxX;
+        self.maxY[proxyId] = fatMaxY;
+        // Restore userData and drawIndex
+        self.userData[proxyId] = userData;
+        self.maxDrawIndex[proxyId] = drawIndex;
+        self.insertLeaf(proxyId);
+        
+        return true;
+    };
+    
+    // Remove a proxy from the tree
+    static remove = function(proxyId) {
+        if (proxyId < 0 || proxyId >= self.capacity) return false;
+        if (self.height[proxyId] == -1) return false; // Not a valid proxy
+        
+        self.removeLeaf(proxyId);
+        self.freeNode(proxyId);
+        return true;
+    };
+    
+    // Update the draw index of a proxy and propagate maxDrawIndex up the tree
+    static updateDrawIndex = function(proxyId, drawIndex) {
+        if (proxyId < 0 || proxyId >= self.capacity) return false;
+        if (self.height[proxyId] == -1) return false; // Not a valid proxy
+        
+        self.maxDrawIndex[proxyId] = drawIndex;
+        
+        // Propagate maxDrawIndex up to ancestors
+        var index = self.parent[proxyId];
+        while (index != -1) {
+            var left = self.left[index];
+            var right = self.right[index];
+            var newMax = max(self.maxDrawIndex[left], self.maxDrawIndex[right]);
+            
+            // Early exit if maxDrawIndex didn't change
+            if (self.maxDrawIndex[index] == newMax) break;
+            
+            self.maxDrawIndex[index] = newMax;
+            index = self.parent[index];
+        }
+        
+        return true;
     };
 }

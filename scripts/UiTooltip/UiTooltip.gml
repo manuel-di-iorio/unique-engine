@@ -44,8 +44,16 @@ function UiTooltip(): UiNode({
     };
     
     self.hide = function() {
-        self.setLeft(-9999);
-        self.setTop(-9999);
+        // Move offscreen without triggering layout update
+        self.layout.left = -9999;
+        self.layout.top = -9999;
+        self.x1 = -9999;
+        self.y1 = -9999;
+        self.x2 = -9999;
+        self.y2 = -9999;
+        
+        // Remove from spatial tree using the standard proxyId
+        global.UI.removeElementFromTree(self);
 
         // Hide logic (inlined from UiNode)
         flexpanel_node_style_set_display(self.node, flexpanel_display.none);
@@ -54,31 +62,10 @@ function UiTooltip(): UiNode({
         self.target = undefined;
     };
     
-    // Update position to follow cursor
+    // Make tooltip visible after layout is calculated
     self.onStep(function(layoutUpdated) {
         if (layoutUpdated && self.display && self.target != undefined) {
-            // Position relative to cursor
-            var currentWidth = self.width > 0 ? self.width : (self.textNode.getWidth() + 16);
-            var currentHeight = self.height > 0 ? self.height : 30;
-            
-            var tx = global.UI.mouseX + 15; // Offset to the right of cursor
-            var ty = global.UI.mouseY + 20; // Offset below cursor
-            
-            // Keep within screen bounds
-            var winW = window_get_width();
-            var winH = window_get_height();
-            
-            // Ensure we have dimensions
-            if (currentWidth > 0) {
-                tx = clamp(tx, 5, winW - currentWidth - 5);
-                ty = clamp(ty, 5, winH - currentHeight - 5);
-                
-                // Only update if changed to avoid constant layout invalidation
-                if (abs(self.getLeft() - tx) > 1) self.setLeft(tx);
-                if (abs(self.getTop() - ty) > 1) self.setTop(ty);
-
-                self.visible = true;
-            }
+            self.visible = true;
         }
     });
     
