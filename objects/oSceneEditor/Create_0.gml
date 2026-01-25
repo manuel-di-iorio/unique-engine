@@ -36,6 +36,3 @@ editorManager = new EditorManager();
 
 projectManager.autoLoad();
 scrUiResizeViewports();
-
-
-alarm[0] = 250;

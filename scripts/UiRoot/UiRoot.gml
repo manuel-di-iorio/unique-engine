@@ -8,48 +8,14 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.needsUpdate = true;
     self.needsRedraw = true;
 
-    // Benchmarking
-    self.__benchmarks = {
-        updateRequests: 0,
-        redrawRequests: 0,
-        lastUpdateSource: "unknown",
-        updateHistory: [],
-        isEnabled: false
-    };
-
-    function requestRedraw(source = "unknown") {
+    function requestRedraw() {
         gml_pragma("forceinline");
         self.needsRedraw = true;
-        if (self.__benchmarks.isEnabled) self.__benchmarks.redrawRequests++;
     }
 
-    function requestUpdate(source = "unknown") {
+    function requestUpdate() {
         gml_pragma("forceinline");
         self.needsUpdate = true;
-        if (self.__benchmarks.isEnabled) {
-            self.__benchmarks.updateRequests++;
-            self.__benchmarks.lastUpdateSource = source;
-            if (array_length(self.__benchmarks.updateHistory) > 100) array_delete(self.__benchmarks.updateHistory, 0, 1);
-            array_push(self.__benchmarks.updateHistory, { source: source, time: current_time });
-        }
-    }
-
-    function getBenchmarkSummary() {
-        if (!self.__benchmarks.isEnabled) return "Benchmarks are disabled. Set global.UI.__benchmarks.isEnabled = true to start.";
-        
-        var summary = "--- UI Benchmarks ---\n";
-        summary += "Update Requests: " + string(self.__benchmarks.updateRequests) + "\n";
-        summary += "Redraw Requests: " + string(self.__benchmarks.redrawRequests) + "\n";
-        summary += "Last Update Source: " + string(self.__benchmarks.lastUpdateSource) + "\n";
-        summary += "Recent History:\n";
-        
-        var historyLen = array_length(self.__benchmarks.updateHistory);
-        var startIdx = max(0, historyLen - 10);
-        for (var i = historyLen - 1; i >= startIdx; i--) {
-            var entry = self.__benchmarks.updateHistory[i];
-            summary += "  [" + string(entry.time) + "] " + string(entry.source) + "\n";
-        }
-        return summary;
     }
     self.layoutUpdated = undefined;
     self.surface = undefined;
@@ -176,7 +142,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         gml_pragma("forceinline");
         flexpanel_node_style_set_width(self.node, w, flexpanel_unit.point);
         flexpanel_node_style_set_height(self.node, h, flexpanel_unit.point);
-        global.UI.requestUpdate("setSize");
+        global.UI.requestUpdate();
         
         return self;
     } 
@@ -335,7 +301,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                 self.dispatchEvent(UI_EVENT.mouseleave, _currentlyHovered); 
                 self.dispatchEvent(UI_EVENT.mouseout, _currentlyHovered);
                 self.previousTarget = undefined;
-                self.requestRedraw("hover changed (unhover)");
+                self.requestRedraw();
             }
             
             // Set hover on new element (only dispatch events if it's a new hover target)
@@ -348,7 +314,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                 if (!_wasAlreadyHovered) {
                     self.dispatchEvent(UI_EVENT.mouseenter, _elem); 
                     self.dispatchEvent(UI_EVENT.mouseover, _elem);
-                    self.requestRedraw("hover changed (hover)");
+                    self.requestRedraw();
                 }
                 
                 if (_elem.handpoint && window_get_cursor() == cr_default && self.draggedElement == undefined) {
@@ -574,7 +540,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         if (!surface_exists(self.surface)) {
             self.surface = surface_create(self.width, self.height);
-            self.requestRedraw("UiRoot.render.surfaceLost");
+            self.requestRedraw();
         }
         
         self.rootDrawIndex = 0; 
@@ -598,4 +564,3 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
 }
 
 global.UI = new UiRoot();
-global.UI.__benchmarks.isEnabled = true;

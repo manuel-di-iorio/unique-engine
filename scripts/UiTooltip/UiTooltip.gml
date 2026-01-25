@@ -40,7 +40,7 @@ function UiTooltip(): UiNode({
         // Show logic (inlined from UiNode)
         flexpanel_node_style_set_display(self.node, flexpanel_display.flex);
         self.display = true;
-        global.UI.requestUpdate("UiTooltip.show");
+        global.UI.requestUpdate();
     };
     
     self.hide = function() {
