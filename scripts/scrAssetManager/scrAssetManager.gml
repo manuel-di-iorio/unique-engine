@@ -146,9 +146,10 @@ function AssetManager() constructor {
             return;
         }
         
-        // Object3D objects belong to Scenes: instead of tracking the instance itself,
+        // Object3D objects that belong to Scenes: instead of tracking the instance itself,
         // track the parent Scene as edited so scene changes (rename/move instance) are saved.
-        if (asset[$ "type"] == "Object3D") {
+        // However, if Object3D is standalone (no parent), track it normally like other assets.
+        if (asset[$ "type"] == "Object3D" && asset[$ "parent"] != undefined) {
             // Find nearest ancestor Scene
             var scene = asset[$ "parent"];
             while (scene != undefined && ((scene[$ "type"] ?? scene[$ "assetType"]) != "Scene")) {

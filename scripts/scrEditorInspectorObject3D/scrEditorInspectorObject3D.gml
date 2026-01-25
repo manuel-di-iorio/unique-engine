@@ -20,12 +20,14 @@ function scrEditorInspectorObject3D() {
           type: "checkbox",
           tooltip: "Mark object as static (disable automatic matrix updates)",
           valueGetter: function() {
+              if (self.asset == undefined) return undefined;
               if (self.asset[$ "__matrixAutoUpdate"] == undefined) {
                   self.asset.__matrixAutoUpdate = self.asset[$ "matrixAutoUpdate"] ?? true;
               }
               return !self.asset.__matrixAutoUpdate;
           },
           onChange: function(value) {
+              if (self.asset == undefined) return;
               self.asset.__matrixAutoUpdate = !value;
               oSceneEditor.assetManager.editAsset(self.asset);
           }
@@ -44,10 +46,12 @@ function scrEditorInspectorObject3D() {
                   label: "Position", 
                   type: "transformXYZ",
                   valueGetter: function() {
-                      return self.asset.position;
+                      return self.asset != undefined ? self.asset.position : undefined;
                   },
                   onBlur: function(value) {
-                      vec3_set(self.asset.position, value[0], value[1], value[2]);
+                      if (self.asset != undefined) {
+                          vec3_set(self.asset.position, value[0], value[1], value[2]);
+                      }
                   }
             },
             { 
@@ -56,6 +60,7 @@ function scrEditorInspectorObject3D() {
                   label: "Rotation", 
                   type: "transformXYZ",
                   valueGetter: function() {
+                      if (self.asset == undefined) return undefined;
                       if (self.asset[$ "__rotationEuler"] == undefined) {
                           self.asset.__rotationEuler = euler_create();
                           euler_set_from_quaternion(self.asset.__rotationEuler, self.asset.rotation);
@@ -63,6 +68,7 @@ function scrEditorInspectorObject3D() {
                       return self.asset.__rotationEuler;
                   },
                   onBlur: function(value) {
+                      if (self.asset == undefined) return;
                       var euler = self.asset.__rotationEuler;
                       euler_set(euler, value[0], value[1], value[2]);
                       self.asset.setRotation(value[0], value[1], value[2]);
@@ -74,10 +80,12 @@ function scrEditorInspectorObject3D() {
                   label: "Scale", 
                   type: "transformXYZ",
                   valueGetter: function() {
-                      return self.asset.scale;
+                      return self.asset != undefined ? self.asset.scale : undefined;
                   },
                   onBlur: function(value) {
-                      vec3_set(self.asset.scale, value[0], value[1], value[2]);
+                      if (self.asset != undefined) {
+                          vec3_set(self.asset.scale, value[0], value[1], value[2]);
+                      }
                   }
             }
           ]

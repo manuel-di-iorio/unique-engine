@@ -1,0 +1,43 @@
+{
+  "children": [
+    {
+      "castShadow": true,
+      "children": [
+      ],
+      "frustumCulled": true,
+      "layers": 1,
+      "matrixAutoUpdate": false,
+      "name": "Object4_0",
+      "parent": null,
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "receiveShadow": true,
+      "renderOrder": 0,
+      "rotation": [
+        -0.42,
+        0,
+        0,
+        0.91
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "type": "Object3D",
+      "up": [
+        0,
+        0,
+        -1
+      ],
+      "uuid": "14245d73-24c7-448b-ae5d-3b37004a2924",
+      "visible": true
+    }
+  ],
+  "name": "Scene0",
+  "type": "Scene",
+  "uuid": "e5603d44-09fd-4aff-8387-2c29deae465b"
+}

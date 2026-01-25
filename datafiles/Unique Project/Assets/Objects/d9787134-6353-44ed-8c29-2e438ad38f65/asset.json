@@ -1,0 +1,41 @@
+{
+  "castShadow": false,
+  "children": [
+  ],
+  "frustumCulled": true,
+  "layers": 1,
+  "matrixAutoUpdate": true,
+  "name": "Object4",
+  "parent": null,
+  "position": [
+    0,
+    0,
+    0
+  ],
+  "receiveShadow": false,
+  "renderOrder": 0,
+  "rotation": [
+    -0.42,
+    0,
+    0,
+    0.91
+  ],
+  "rotationEuler": [
+    50,
+    0,
+    0
+  ],
+  "scale": [
+    1,
+    1,
+    1
+  ],
+  "type": "Object3D",
+  "up": [
+    0,
+    0,
+    -1
+  ],
+  "uuid": "d9787134-6353-44ed-8c29-2e438ad38f65",
+  "visible": true
+}

@@ -14,7 +14,7 @@ function scrDemoDrawSelector() {
     var x2 = selectorW-10;
     var h = 30;
     var isHovering = false;
-    var btnCol;
+    var btnCol = #444444;
     
     for (var i=0, l=array_length(scenes); i<l; i++) {
         var scene = scenes[i];

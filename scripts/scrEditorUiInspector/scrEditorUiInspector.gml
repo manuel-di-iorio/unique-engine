@@ -69,14 +69,14 @@ function EditorUiInspector(ui) constructor {
     function inspect(asset, focusFirst = false) {
         self.ui.Inspector.Close.show();
 
+        // Clear the previous content
+        var _Items = self.ui.Inspector.Content.Items;
+        self.close();
+
         self.asset = asset;
         self.focusFirst = focusFirst;
         var assetType = asset.type;
         var assetFields = fields[$ assetType];
-        
-        // Clear the previous content
-        var _Items = self.ui.Inspector.Content.Items;
-        self.close();
         
         // First pass: calculate the max label width among all items (recursive)
         draw_set_font(fText);
@@ -90,6 +90,7 @@ function EditorUiInspector(ui) constructor {
     
     function close() {
         self.ui.Inspector.Content.Items.destroyChildren();
+        self.asset = undefined;  // Reset asset to show default "Inspector" title
     }
 
     function __getMaxLabelWidth(list) {
@@ -198,7 +199,7 @@ function EditorUiInspector(ui) constructor {
                         max: assetField[$ "max"],
                         negative: assetField[$ "negative"],
                         disabled: assetField[$ "disabled"],
-                        value: assetField[$ "field"] != undefined ? self.asset[$ assetField.field] : undefined,
+                        value: assetField[$ "field"] != undefined && self.asset != undefined ? self.asset[$ assetField[$ "field"]] : undefined,
                         valueGetter,
                         onBlur: method(scope, function(value, input) {
                             var field = self.assetField[$ "field"];
@@ -233,7 +234,7 @@ function EditorUiInspector(ui) constructor {
                     
                 case "checkbox": 
                     input = new UiCheckbox({ flex: 1, }, {
-                        value: self.asset[$ assetField.field],
+                        value: assetField[$ "field"] != undefined && self.asset != undefined ? self.asset[$ assetField[$ "field"]] : undefined,
                         valueGetter,
                         onChange: method(scope, function(value) {
                             self.asset[$ self.assetField.field] = value;
@@ -250,7 +251,7 @@ function EditorUiInspector(ui) constructor {
                 break;
                 
                 case "dropdown": 
-                    var dropdownValue = self.asset[$ assetField.field];
+                    var dropdownValue = assetField[$ "field"] != undefined && self.asset != undefined ? self.asset[$ assetField[$ "field"]] : undefined;
                     if (is_struct(dropdownValue) && assetField[$ "subKey"] != undefined) {
                         dropdownValue = dropdownValue[$ assetField[$ "subKey"]];
                     }

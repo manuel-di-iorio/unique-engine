@@ -1,4 +1,4 @@
-// UniqueUI Version: 0.3.1
+// UniqueUI Version: 1.0.0
 
 // UI Theme
 global.UI_COL_BTN_HOVER        = #393B47; // 57,59,71

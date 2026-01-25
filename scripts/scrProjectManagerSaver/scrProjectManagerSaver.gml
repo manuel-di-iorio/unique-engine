@@ -223,6 +223,8 @@ function ProjectSaver() constructor {
             case "Texture": return "Textures";
             case "Material": return "Materials";
             case "Mesh": return "Objects";
+            case "Object3D": return "Objects";
+            case "Bone": return "Objects";
             case "Scene": return "Scenes";
             case "Light": return "Objects";
             case "Camera": return "Objects";

@@ -157,6 +157,11 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   // Add asset to asset manager AFTER treeview parent is set (so __treeviewItem.parent is available)
   var typeKey = assetType;
   assetManager.addAsset(typeKey, asset, parentAsset);
+  
+  // Mark project as modified for standalone Object3D/Texture/Material/Scene (not tracked via parent)
+  if (assetType != "Folder") {
+      oSceneEditor.projectManager.markAsUnsaved();
+  }
 
   // Set visual representation for lights in editor
 //   if (assetType == "PointLight" || assetType == "DirectionalLight") {
