@@ -226,7 +226,8 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
         }
         
         global.UI.Overlay.add(self.List);
-        self.List.computePosition();
+        // Don't call computePosition() here - layout isn't calculated yet!
+        // It will be called in the first onStep after layout is ready.
     }
     
     self.closeList = function() {

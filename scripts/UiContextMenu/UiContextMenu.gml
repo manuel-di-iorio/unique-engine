@@ -37,7 +37,7 @@ function UiContextMenu(x, y, items) constructor {
             left: _x,
             top: _y,
             minWidth: 210
-        });
+        }, { pointerEvents: true });
         
         with (self.Menu) {
             self.ContextMenu = _contextMenu;

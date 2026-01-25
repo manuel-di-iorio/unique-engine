@@ -184,9 +184,6 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     /** Update */
     function __updateElemLayout(elem, _inheritedScrollableParent = undefined, _inheritedVisibility = true) {
         gml_pragma("forceinline");
-         
-        // Optimization: Resolve ancestor visibility down the tree
-        var _isVisible = _inheritedVisibility && elem.isVisible();
 
         // Optimization: Resolve ancestor scrollable parent down the tree
         var _scrollableParent = _inheritedScrollableParent;
@@ -207,6 +204,9 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         elem.xp2 = elem.x2 - elem.layout.paddingRight;
         elem.yp2 = elem.y2 - elem.layout.paddingBottom;
         
+        // Check visibility AFTER coordinates are updated (isVisible uses y1/y2 for scroll bounds check)
+        var _isVisible = _inheritedVisibility && elem.isVisible();
+        
         // Assign draw index (matches render order)
         elem.__drawIndex = self.__layoutDrawIndex++;
 
@@ -214,6 +214,12 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         if (_isVisible && elem.pointerEvents) {
             // Check if element already has a valid proxy
             var hasProxy = variable_struct_exists(elem, "__spatialProxyId") && elem.__spatialProxyId != undefined;
+            
+            // DEBUG: Log dropdown items being added
+            var _elemName = flexpanel_node_get_name(elem.node);
+            if (string_pos("Dropdown", _elemName) > 0 || string_pos("Item", _elemName) > 0) {
+                show_debug_message("SPATIAL ADD/UPDATE: " + _elemName + " pos: " + string(elem.x1) + "," + string(elem.y1) + " -> " + string(elem.x2) + "," + string(elem.y2) + " drawIdx: " + string(elem.__drawIndex) + " hasProxy: " + string(hasProxy));
+            }
             
             if (hasProxy) {
                 // Update existing proxy position
@@ -403,6 +409,10 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             }
             
             if (mouse_check_button_pressed(mb_any)) {
+                // DEBUG: Log what element we're clicking on
+                var _name = _target[$ "node"] != undefined ? flexpanel_node_get_name(_target.node) : "unknown";
+                show_debug_message("CLICK on: " + string(_name) + " drawIndex: " + string(_target[$ "__drawIndex"] ?? "none") + " proxyId: " + string(_target[$ "__spatialProxyId"] ?? "none"));
+                
                 global.UI_CLICK_START = _target;
                 global.UI.dispatchEvent(UI_EVENT.mousedown, _target);
 

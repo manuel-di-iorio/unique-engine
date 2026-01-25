@@ -376,22 +376,24 @@ function UiNode(style = {}, props = {}) constructor {
 
         if (self.isScrollbar || _scrollableParent == undefined) return true;
         
-        if (self.__scrollBoundsCachedScrollTop == self.scrollTop && !global.UI.layoutUpdated) {
+        // Use parent's scrollTop for cache check (not self.scrollTop which is always 0 for non-scrollable elements)
+        var _parentScrollTop = _scrollableParent.scrollTop;
+        if (self.__scrollBoundsCachedScrollTop == _parentScrollTop && 
+            self.__scrollBoundsCachedValue != undefined && 
+            !global.UI.layoutUpdated) {
             return self.__scrollBoundsCachedValue;
         }
         
-        self.__scrollBoundsCachedScrollTop = _scrollableParent.scrollTop;
+        self.__scrollBoundsCachedScrollTop = _parentScrollTop;
     
-        // Relative start position
-        var elemLayout = self.layout;
-        var elemTop = elemLayout.top - elemLayout.paddingTop;
-        var elemBottom = elemTop + elemLayout.height + elemLayout.paddingBottom;
+        // Use absolute coordinates (y1/y2) which are already calculated
+        // These account for scroll offset and absolute positioning
+        var elemTop = self.y1;
+        var elemBottom = self.y2;
     
-        var parentLayout = _scrollableParent.layout;
-
-        // Calculate the visible area based on the scroll
-        var visibleTop = parentLayout.top + _scrollableParent.scrollTop;
-        var visibleBottom = visibleTop + parentLayout.height;
+        // Parent's visible area in absolute coordinates
+        var visibleTop = _scrollableParent.y1;
+        var visibleBottom = _scrollableParent.y2;
 
         // If fully outside then it is invisible
         if (elemBottom < visibleTop || elemTop > visibleBottom) {
