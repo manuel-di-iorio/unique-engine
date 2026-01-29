@@ -54,9 +54,7 @@
     {"$GMFolder":"","%Name":"Fonts","folderPath":"folders/Scene Editor/UI/Fonts.yy","name":"Fonts","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Icons","folderPath":"folders/Scene Editor/UI/Icons.yy","name":"Icons","resourceType":"GMFolder","resourceVersion":"2.0",},
   ],
-  "ForcedPrefabProjectReferences":[
-    {"link":"io.gamemaker.sdfshaders-1.0.0","name":"io.gamemaker.sdfshaders-1.0.0","path":"io.gamemaker.sdfshaders-1.0.0.yyp",},
-  ],
+  "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
     {"$GMIncludedFile":"","%Name":"11804_Airplane_diff.jpg","CopyToMask":-1,"filePath":"datafiles/airplane","name":"11804_Airplane_diff.jpg","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"11804_Airplane_v2_l2.mtl","CopyToMask":-1,"filePath":"datafiles/airplane","name":"11804_Airplane_v2_l2.mtl","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
