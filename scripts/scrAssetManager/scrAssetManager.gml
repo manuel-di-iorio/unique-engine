@@ -63,21 +63,7 @@ function AssetManager() constructor {
         
         // Remove from parent if it has one
         if (asset[$ "parent"] != undefined && asset.parent != undefined) {
-            asset.parent.remove(asset);
-            // If parent has remove() method, call it (Object3D hierarchy)
-            //if (asset.parent[$ "remove"] != undefined) {
-                //asset.parent.remove(asset);
-            //}
-            //// Fallback: remove from parent's children array
-            //else if (asset.parent[$ "children"] != undefined) {
-                //var pchildren = asset.parent.children;
-                //for (var i = array_length(pchildren) - 1; i >= 0; i--) {
-                    //if (pchildren[i] == asset) {
-                        //array_delete(pchildren, i, 1);
-                        //break;
-                    //}
-                //}
-            //}
+            asset.parent.remove(asset); 
         }
         
         // Track removal
