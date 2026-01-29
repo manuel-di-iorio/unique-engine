@@ -64,6 +64,10 @@ global.UE_UNIFORM_NAMES_CONFIG = {
     hemiLightSkyColor: "u_ueHemiLightSkyColor",
     hemiLightGroundColor: "u_ueHemiLightGroundColor",
     hemiLightIntensity: "u_ueHemiLightIntensity",
+    
+    // Billboards (UeSprite)
+    lockHorizontal: "u_ueLockHorizontal",
+    lockVertical: "u_ueLockVertical",
 };
 
 global.UE_DEFAULT_MATERIAL = new UeMeshStandardMaterial();

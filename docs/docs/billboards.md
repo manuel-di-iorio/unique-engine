@@ -66,6 +66,16 @@ Since `UeSprite` inherits from `UeMesh`, you can manipulate it just like any oth
 - **Position**: `sprite.position` or `sprite.setPosition(x, y, z)`
 - **Scale**: `sprite.scale` or `sprite.setScale(x, y, z)`
 - **Rotation**: Typically billboards handle rotation automatically, but you can apply Z-rotation for 2D-like spinning.
+- **lockHorizontal** (bool): If true, the billboard's horizontal orientation is locked (faces X-right).
+- **lockVertical** (bool): If true, the billboard's vertical orientation is locked (remains upright on Z-axis). This is the default for "cylindrical" billboards like trees.
+
+### Example: Cylindrical Billboard (Tree)
+
+```js
+var tree = new UeSprite(material, { 
+    lockVertical: true 
+});
+```
 
 ### Common Use Cases
 

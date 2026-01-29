@@ -23,6 +23,8 @@ new UeSprite(material = new UeSpriteMaterial(), data = {})
 | ---------- | ------------------ | ------------------------ | -------------------------------------- |
 | `material` | `UeSpriteMaterial` | `new UeSpriteMaterial()` | Material used for rendering the sprite |
 | `data`     | `object`           | `{}`                     | Inherited properties from `UeMesh`     |
+| `data.lockHorizontal` | `boolean`        | `false`                  | Locks horizontal orientation. Can only lock one axis at a time.           |
+| `data.lockVertical` | `boolean`        | `false`                  | Locks vertical orientation. Can only lock one axis at a time.             |
 
 ### Properties
 
@@ -33,6 +35,8 @@ new UeSprite(material = new UeSpriteMaterial(), data = {})
 | `name`     | `string`           | undefined                | Object name (optional)                 |
 | `geometry` | `PlaneGeometry`    | `PlaneGeometry(1, 1)`    | A flat quad geometry                   |
 | `material` | `UeSpriteMaterial` | `new UeSpriteMaterial()` | Material used for rendering the sprite |
+| `lockHorizontal`    | `boolean`          | `false`                  | If true, locks horizontal axis         |
+| `lockVertical`    | `boolean`          | `false`                  | If true, locks vertical axis           |
 
 
 ### Geometry

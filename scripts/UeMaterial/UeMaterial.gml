@@ -78,7 +78,7 @@ function UeMaterial(data = {}) constructor {
       "pointShadowEnabled", "pointShadowFar", "pointShadowNear", "pointShadowPos", "pointShadowTexelSize", "pointShadowQuality", "pointShadowMatrix",
       "spotShadowEnabled", "spotShadowMatrix", "spotShadowFar", "spotShadowNear", "spotShadowPos", "spotShadowTexelSize", "spotShadowQuality",
       "pointLightsData", "spotLightsData", "hemiLightDir", "hemiLightSkyColor", "hemiLightGroundColor", "hemiLightIntensity",
-      "sceneData", "materialData", "mapFlags", "mapFlags2", "boneMatrices", "numBones"
+      "sceneData", "materialData", "mapFlags", "mapFlags2", "boneMatrices", "numBones", "lockHorizontal", "lockVertical"
     ];
     var _sCoreNames = ["dirShadowMap", "pointShadowMap", "spotShadowMap"];
 
@@ -397,6 +397,16 @@ function UeMaterial(data = {}) constructor {
       var _cacheUniformModelPositionLoc = __cache[$ "uniformModelPositionLoc"];
       if (_cacheUniformModelPositionLoc != undefined && _cacheUniformModelPositionLoc != -1) {
         shader_set_uniform_f_array(_cacheUniformModelPositionLoc, mesh.position);
+      }
+
+      var _cacheUniformLockHorizontalLoc = __cache[$ "uniformLockHorizontalLoc"];
+      if (_cacheUniformLockHorizontalLoc != undefined && _cacheUniformLockHorizontalLoc != -1) {
+        shader_set_uniform_f(_cacheUniformLockHorizontalLoc, mesh.lockHorizontal ? 1.0 : 0.0);
+      }
+
+      var _cacheUniformLockVerticalLoc = __cache[$ "uniformLockVerticalLoc"];
+      if (_cacheUniformLockVerticalLoc != undefined && _cacheUniformLockVerticalLoc != -1) {
+        shader_set_uniform_f(_cacheUniformLockVerticalLoc, mesh.lockVertical ? 1.0 : 0.0);
       }
     }
 

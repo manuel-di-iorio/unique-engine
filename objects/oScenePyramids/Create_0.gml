@@ -39,6 +39,7 @@ array_foreach(treePositions, function(arr) {
     var sprMesh = new UeSprite(matTree, {
         x: arr[0], y: arr[1], z: 19,
         sx: 26, sy: 40,
+        lockVertical: true,
     });
     sprMesh.matrixAutoUpdate = false;
     scene.add(sprMesh);
