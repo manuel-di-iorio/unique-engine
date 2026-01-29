@@ -1,0 +1,42 @@
+{
+  "__parentUI": "ee67d75f-e077-4965-9154-dcf27933dd2f",
+  "castShadow": false,
+  "children": [
+  ],
+  "frustumCulled": true,
+  "layers": 1,
+  "matrixAutoUpdate": true,
+  "name": "test",
+  "parent": null,
+  "position": [
+    0,
+    0,
+    0
+  ],
+  "receiveShadow": false,
+  "renderOrder": 0,
+  "rotation": [
+    0,
+    0,
+    0,
+    1
+  ],
+  "rotationEuler": [
+    0,
+    0,
+    0
+  ],
+  "scale": [
+    1,
+    1,
+    1
+  ],
+  "type": "Object3D",
+  "up": [
+    0,
+    0,
+    -1
+  ],
+  "uuid": "ae52fa25-7767-4502-88e0-72698bc1335a",
+  "visible": true
+}

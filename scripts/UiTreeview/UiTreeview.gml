@@ -311,7 +311,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.Content.add(self.LeftContent);
 
     // Arrow
-    self.Arrow = new UiSprite(sprUiTreeviewArrowDown, { 
+    self.Arrow = new UiSprite(self.collapsed ? sprUiTreeviewArrowRight : sprUiTreeviewArrowDown, { 
       name: "UiTreeview.Item.Content.ArrowBtn",
       marginLeft: 5, 
       marginRight: 10,
@@ -330,6 +330,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.LeftContent.add(self.Arrow);
     
     self.Items = new UiNode({ marginLeft: 15 });
+    if (self.collapsed) self.Items.hide();
     self.add(self.Items);
     
     // Methods 
@@ -438,6 +439,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     function expandItem() {
+        if (!self.collapsed) return;
         self.collapsed = false;
         self.Arrow.sprite = sprUiTreeviewArrowDown;
         self.Arrow.show();

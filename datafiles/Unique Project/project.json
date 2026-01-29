@@ -4,6 +4,11 @@
       "__parentUI": null,
       "name": "snowman-hat",
       "uuid": "c31512aa-0a0d-4d28-a4ef-3d1e8d502ec7"
+    },
+    {
+      "__parentUI": "c31512aa-0a0d-4d28-a4ef-3d1e8d502ec7",
+      "name": "Folder3",
+      "uuid": "ee67d75f-e077-4965-9154-dcf27933dd2f"
     }
   ],
   "id": "597e61c8-31c4-4d6a-a90d-be5736efa361",

@@ -15,12 +15,12 @@
   },
   "counters": {
     "cameras": 0,
-    "folders": 3,
+    "folders": 4,
     "instances": 2,
     "lights": 0,
     "materials": 6,
     "models": 0,
-    "object3d": 5,
+    "object3d": 6,
     "scenes": 2,
     "textures": 6
   },

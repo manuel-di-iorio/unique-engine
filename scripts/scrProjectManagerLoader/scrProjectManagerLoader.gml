@@ -73,7 +73,7 @@ function ProjectLoader() constructor {
         
         if (parentUUID != undefined && struct_exists(self.treeviewItemsByUUID, parentUUID)) {
             var parentItem = self.treeviewItemsByUUID[$ parentUUID];
-            parentItem.addChild(tvItem, false);
+            parentItem.addChild(tvItem, true);
             
             var parentAsset = parentItem.asset;
             if (struct_exists(parentAsset, "children")) array_push(parentAsset.children, folder);
@@ -140,7 +140,8 @@ function ProjectLoader() constructor {
           assetType: "Folder",
           type: "Folder",
           icon: sprUiFolder,
-          asset: folder
+          asset: folder,
+          collapsed: false
       });
       
       self.treeviewItemsByUUID[$ uuid] = tvItem;
@@ -158,7 +159,8 @@ function ProjectLoader() constructor {
               assetType: asset.type,
               type: asset.type,
               icon: icon,
-              asset: asset
+              asset: asset,
+              collapsed: asset.type == "Folder" ? false : true
           });
 
           self.treeviewItemsByUUID[$ asset.uuid] = tvItem;
