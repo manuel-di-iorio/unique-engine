@@ -1,0 +1,28 @@
+{
+  "__parentUI": "c31512aa-0a0d-4d28-a4ef-3d1e8d502ec7",
+  "center": [
+    0,
+    0
+  ],
+  "filter": true,
+  "flipX": false,
+  "flipY": false,
+  "generateMipmaps": 1,
+  "name": "Texture4",
+  "offset": [
+    0,
+    0
+  ],
+  "repeat": [
+    1,
+    1
+  ],
+  "rotation": 0,
+  "spriteBuffSize": 0,
+  "type": "Texture",
+  "userData": {
+  },
+  "uuid": "83a33b96-23f0-437e-af44-980f33661afc",
+  "wrapS": "@i64@1$i64$",
+  "wrapT": "@i64@1$i64$"
+}

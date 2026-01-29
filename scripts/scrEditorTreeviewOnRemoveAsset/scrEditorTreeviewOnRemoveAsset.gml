@@ -51,6 +51,27 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         }
     }
     
+    // Object3D: rimuovere dal parent o dalla lista globale
+    else if (assetType == "Object3D" && asset != undefined) {
+        // Rimuovi ricorsivamente i figli (se presenti nel treeview)
+        __editorTreeview_removeChildrenRecursive(treeviewItem);
+
+        // Se ha un parent, rimuovilo dal parent
+        if (asset.parent != undefined) {
+            // Track the deletion BEFORE removing, so we can detect the parent scene
+            assetManager.__trackChange("delete", asset);
+            asset.parent.remove(asset);
+        } else {
+            // Altrimenti rimuovi dalla lista globale
+            assetManager.removeAsset("Object3D", asset);
+        }
+        
+        // Dispose resources
+        if (asset != undefined && struct_exists(asset, "dispose")) {
+            asset.dispose(true);
+        }
+    }
+    
     // Scene: cancella la scena (i figli verranno cancellati automaticamente)
     else if (assetType == "Scene" && asset != undefined) {
         // Rimuovi ricorsivamente i figli (se presenti nel treeview)
