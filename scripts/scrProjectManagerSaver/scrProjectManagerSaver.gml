@@ -261,11 +261,11 @@ function ProjectSaver() constructor {
             damping: true
         };
 
-        cameraSettings[$ "position"] = [sm.camera.position[VEC3.x], sm.camera.position[VEC3.y], sm.camera.position[VEC3.z]];
+        cameraSettings.position = [sm.camera.position[VEC3.x], sm.camera.position[VEC3.y], sm.camera.position[VEC3.z]];
 
         if (sm.orbit != undefined) {
-            cameraSettings[$ "target"] = [sm.orbit.target[VEC3.x], sm.orbit.target[VEC3.y], sm.orbit.target[VEC3.z]];
-            cameraSettings[$ "dampingFactor"] = sm.orbit.dampingFactor;
+            cameraSettings.target = [sm.orbit.target[VEC3.x], sm.orbit.target[VEC3.y], sm.orbit.target[VEC3.z]];
+            cameraSettings.dampingFactor = sm.orbit.dampingFactor;
         }
 
         var counters = {
@@ -331,6 +331,11 @@ function ProjectSaver() constructor {
         // Get the toJSON representation
         var childToJSON = child[$ "toJSON"];
         var childMetadata = is_callable(childToJSON) ? childToJSON() : child;
+        
+        // Include editor-specific rotation helper if it exists (external to core UeObject3D)
+        if (struct_exists(child, "__rotationEuler") && child.__rotationEuler != undefined) {
+            childMetadata.rotationEuler = child.__rotationEuler;
+        }
         
         // If this child has children, recursively serialize them
         var actualChildren = child[$ "children"];

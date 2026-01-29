@@ -1,5 +1,5 @@
 {
-  "__parentUI": "c31512aa-0a0d-4d28-a4ef-3d1e8d502ec7",
+  "__parentUI": "d79780da-1935-447a-8d9d-af3870fefa21",
   "alphaTest": 0,
   "blendDst": 6,
   "blendDstAlpha": 6,
@@ -22,7 +22,7 @@
     "alphaMap": null,
     "displacementMap": null,
     "emissiveMap": null,
-    "map": "83a33b96-23f0-437e-af44-980f33661afc",
+    "map": "edb671dd-87bd-498c-91b8-cb63dbaa8c05",
     "normalMap": null,
     "ormMap": null
   },
@@ -106,5 +106,5 @@
       "value": 1
     }
   },
-  "uuid": "0a000eeb-ef86-47ad-bc69-3db7f5f59dbd"
+  "uuid": "826e350f-8e20-463b-b82c-9af36fd11f28"
 }

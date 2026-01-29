@@ -140,8 +140,8 @@ function UeProjectLoader(data = {}) constructor {
         
         self.scene.clear();
         
-        if (!struct_exists(sceneAsset, "__metadata") || sceneAsset[$ "__metadata"] == undefined) return;
-        var childrenData = sceneAsset[$ "__metadata"][$ "children"];
+        if (!struct_exists(sceneAsset, "__sceneJSON") || sceneAsset[$ "__sceneJSON"] == undefined) return;
+        var childrenData = sceneAsset[$ "__sceneJSON"][$ "children"];
         if (childrenData == undefined) return;
         
         self.__instantiateChildren(childrenData, self.scene);
@@ -213,7 +213,7 @@ function UeProjectLoader(data = {}) constructor {
                 
             case "Material":
                 asset = new UeMeshStandardMaterial();
-                asset.__metadata = metadata;
+                asset.__json = metadata;
                 break;
  
             case "Mesh":
@@ -230,13 +230,13 @@ function UeProjectLoader(data = {}) constructor {
                     geo.import(geoPath);
                     asset.geometry = geo;
                 }
-                asset.__metadata = metadata;
+                asset.__json = metadata;
                 break;
                 
             case "Scene":
                 asset = new UeScene();
                 asset.fromJSON(metadata);
-                asset.__metadata = metadata;
+                asset.__sceneJSON = metadata;
                 break;
 
             case "Light":
@@ -277,16 +277,16 @@ function UeProjectLoader(data = {}) constructor {
             var asset = self.assetsByUuid[$ assetUUIDs[i]];
             if (!is_struct(asset)) continue;
 
-            if (struct_exists(asset, "type") && asset[$ "type"] == "Material" && struct_exists(asset, "__metadata") && asset[$ "__metadata"] != undefined) {
-                asset.fromJSON(asset[$ "__metadata"], texturesByUUID);
-                delete asset.__metadata;
+            if (struct_exists(asset, "type") && asset[$ "type"] == "Material" && struct_exists(asset, "__json") && asset[$ "__json"] != undefined) {
+                asset.fromJSON(asset[$ "__json"], texturesByUUID);
+                delete asset.__json;
             }
-            if (struct_exists(asset, "type") && asset[$ "type"] == "Mesh" && struct_exists(asset, "__metadata") && asset[$ "__metadata"] != undefined) {
-                var matId = asset[$ "__metadata"][$ "material"];
+            if (struct_exists(asset, "type") && asset[$ "type"] == "Mesh" && struct_exists(asset, "__json") && asset[$ "__json"] != undefined) {
+                var matId = asset[$ "__json"][$ "material"];
                 if (matId != undefined && struct_exists(materialsByUUID, matId)) {
                     asset.material = materialsByUUID[$ matId];
                 }
-                delete asset.__metadata;
+                delete asset.__json;
             }
         }
     };

@@ -49,6 +49,16 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
     // Temporarily add the asset to the preview scene without reparenting
     array_push(self.scene.children, self.asset);
 
+    // Sync rotation from Euler if it exists and force matrix update 
+    // to ensure bounding box is computed correctly from local transform
+    if (struct_exists(self.asset, "forceUpdate")) {
+      if (struct_exists(self.asset, "__rotationEuler")) {
+        var _e = self.asset.__rotationEuler;
+        self.asset.setRotation(_e[0], _e[1], _e[2]);
+      }
+      self.asset.forceUpdate();
+    }
+
     // Auto-center and fit camera using the entire subtree bounding box
     var _bbox = box3_create();
     box3_set_from_object(_bbox, self.asset);

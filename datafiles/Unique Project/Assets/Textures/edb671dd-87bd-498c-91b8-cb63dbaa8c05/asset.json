@@ -1,5 +1,5 @@
 {
-  "__parentUI": "c31512aa-0a0d-4d28-a4ef-3d1e8d502ec7",
+  "__parentUI": "d79780da-1935-447a-8d9d-af3870fefa21",
   "center": [
     0,
     0
@@ -8,7 +8,7 @@
   "flipX": false,
   "flipY": false,
   "generateMipmaps": 1,
-  "name": "Texture4",
+  "name": "Texture8",
   "offset": [
     0,
     0
@@ -22,7 +22,7 @@
   "type": "Texture",
   "userData": {
   },
-  "uuid": "83a33b96-23f0-437e-af44-980f33661afc",
+  "uuid": "edb671dd-87bd-498c-91b8-cb63dbaa8c05",
   "wrapS": "@i64@1$i64$",
   "wrapT": "@i64@1$i64$"
 }
