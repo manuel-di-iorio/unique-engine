@@ -1,3 +1,10 @@
+/**
+ * G-Buffer Generation Shader
+ * This shader populates the G-Buffer for the deferred rendering pipeline. It handles 
+ * skeletal skinning and displacement mapping to output world-space positions, normals, 
+ * albedo, and material properties (Roughness, Metalness, AO) into multiple render targets.
+ * Used by UeDeferredGBufferMaterial.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec3 in_Normal;                    // (x,y,z)
 attribute vec2 in_TextureCoord0;             // (u,v)

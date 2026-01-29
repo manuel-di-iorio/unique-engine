@@ -1,3 +1,10 @@
+/**
+ * Advanced Particle Shader
+ * This shader handles the rendering of dynamic particles. The vertex stage manages 
+ * camera-facing billboarding and scaling, while the fragment stage supports soft 
+ * depth blending (to prevent hard edges against geometry) and shadow reception.
+ * Used by UeParticleRenderer.
+ */
 attribute vec3 in_Position;      // SpawnPos
 attribute vec4 in_Colour;        // ColorStart (U8x4)
 attribute vec2 in_TextureCoord;  // CornerXY (-0.5 a 0.5)

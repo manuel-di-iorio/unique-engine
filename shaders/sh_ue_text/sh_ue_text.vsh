@@ -1,3 +1,10 @@
+/**
+ * Text Rendering Shader
+ * This shader is responsible for rendering font glyphs. It transforms text geometry 
+ * into screen or world space and applies color tinting and alpha transparency from 
+ * the font texture in the fragment stage.
+ * Used by oSceneText for in-game labels.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec2 in_TextureCoord;            // (u,v)
 attribute vec4 in_Colour;                  // (r,g,b,a)

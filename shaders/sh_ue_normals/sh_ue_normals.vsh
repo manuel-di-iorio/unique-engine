@@ -1,3 +1,10 @@
+/**
+ * World-Space Normal Visualization Shader
+ * This shader renders the geometry's world-space normals, encoding them into the RGB color 
+ * channels. It is primarily used for debugging or specialized material effects that require 
+ * normal data in world space.
+ * Used by UeNormalsMaterial.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec3 in_Normal;                    // (x,y,z)
 attribute vec2 in_TextureCoord0;             // (u,v)

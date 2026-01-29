@@ -460,6 +460,9 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
                 hasRun.value = true;
                 items.visible = true;
                 
+                // Request another update so the now-visible items are added to the spatial tree
+                global.UI.requestUpdate();
+                
                 // Defer removal to next frame to avoid modifying array during iteration
                 runLater(method(items, function() {
                     __removeStepHandler();

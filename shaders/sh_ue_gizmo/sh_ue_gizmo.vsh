@@ -1,3 +1,10 @@
+/**
+ * Editor Gizmo Shader
+ * This shader renders 3D transformation handles (translation, rotation, scale) for the 
+ * scene editor. It provides basic directional lighting and emissive highlighting to 
+ * ensure the gizmos are clearly visible and interactive.
+ * Used by oSceneEditor.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec3 in_Normal;                    // (x,y,z)
 attribute vec4 in_Colour;                    // (r,g,b,a)

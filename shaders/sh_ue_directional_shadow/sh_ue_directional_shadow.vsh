@@ -1,3 +1,10 @@
+/**
+ * Directional Light Shadow Mapping Shader
+ * This shader renders geometry depth from the perspective of a directional light. It uses 
+ * an orthographic projection to transform vertices into light-space and stores the 
+ * linearized depth in a shadow map for global lighting.
+ * Used by UeDirectionalLightShadow.
+ */
 attribute vec3 in_Position;
 attribute vec4 in_TextureCoord2; // Bone Indices
 attribute vec4 in_TextureCoord3; // Bone Weights

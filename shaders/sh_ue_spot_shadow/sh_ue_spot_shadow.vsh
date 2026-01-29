@@ -1,3 +1,10 @@
+/**
+ * Spot Light Shadow Mapping Shader
+ * This shader renders geometry depth from the perspective of a spot light. It transforms 
+ * vertices into the light's view-projection space and outputs linearized depth to a 
+ * shadow map texture.
+ * Used by UeSpotLightShadow.
+ */
 attribute vec3 in_Position;
 attribute vec4 in_TextureCoord2; // Bone Indices
 attribute vec4 in_TextureCoord3; // Bone Weights

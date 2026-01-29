@@ -1,3 +1,10 @@
+/**
+ * Basic Unlit Shader
+ * A lightweight shader for materials that do not require complex lighting. It combines 
+ * the base texture with vertex colors and supports emissive maps and tone mapping 
+ * in the fragment stage.
+ * Used by UeMeshBasicMaterial.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec3 in_Normal;                    // (x,y,z)
 attribute vec4 in_Colour;                    // (r,g,b,a)

@@ -1,1 +1,0 @@
-//draw_surface(composer.writeTarget.surface, 0, 0 )

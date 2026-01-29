@@ -12,7 +12,7 @@ sidebar_position: 15
 
 - **Large Number of Lights**: You can have dozens or even hundreds of dynamic lights with minimal performance impact compared to Forward Shading.
 - **Simplified Shaders**: Geometry shaders don't need to handle lighting complexity, and lighting shaders don't need to handle complex geometry.
-- **Screen-Space Effects**: Easier integration of effects like SSAO, SSR, or screen-space reflections since depth and normals are already available in the G-Buffer.
+- **Screen-Space Effects**: Easier integration of effects like [SSAO](/docs/reference/post-processing/UeSSAOPass), SSR, or screen-space reflections since depth and normals are already available in the G-Buffer.
 
 ## Constructor
 

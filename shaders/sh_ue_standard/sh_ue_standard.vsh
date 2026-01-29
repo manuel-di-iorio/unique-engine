@@ -1,3 +1,11 @@
+/**
+ * Standard PBR Shader
+ * This is the main Physically Based Rendering (PBR) shader for forward rendering. 
+ * It handles skeletal skinning, displacement mapping, and TBN matrix generation in the vertex stage. 
+ * The fragment stage implements the GGX/Cook-Torrance reflectance model for multiple light sources 
+ * (directional, point, spot, and hemisphere), including shadow mapping, fog, and tone mapping.
+ * Used by UeMeshStandardMaterial.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec3 in_Normal;                    // (x,y,z)
 attribute vec2 in_TextureCoord0;             // (u,v)

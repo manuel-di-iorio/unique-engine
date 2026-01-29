@@ -1,6 +1,10 @@
-//
-// Mask Vertex Shader - Standard 3D transformation
-//
+/**
+ * Selection Mask Shader
+ * This shader renders object silhouettes as solid white colors. It is used to create 
+ * a selection mask on a separate surface, which serves as the input for the final 
+ * edge-detection outline post-process.
+ * Used by UeOutlinePass.
+ */
 attribute vec3 in_Position;
 
 void main()

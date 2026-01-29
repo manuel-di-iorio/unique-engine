@@ -10,14 +10,20 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.currentCursor = cr_default;
     self.isScrolling = false;
 
-    function requestRedraw() {
+    // Track modified elements for optimization/debugging
+    self.dirtyElements = [];
+    self.redrawElements = [];
+
+    function requestRedraw(element = undefined) {
         gml_pragma("forceinline");
         self.needsRedraw = true;
+        if (element != undefined) array_push(self.redrawElements, element);
     }
 
-    function requestUpdate() {
+    function requestUpdate(element = undefined) {
         gml_pragma("forceinline");
         self.needsUpdate = true;
+        if (element != undefined) array_push(self.dirtyElements, element);
     }
     
     function setCursor(cursor) {
@@ -469,6 +475,11 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         self.mouseXPrev = self.mouseX;
         self.mouseYPrev = self.mouseY;
+        
+        // Clear dirty elements list for the next frame
+        if (array_length(self.dirtyElements) > 0) {
+            self.dirtyElements = [];
+        }
     }
     
     /** Draw */
@@ -574,6 +585,11 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         }
         
         draw_surface(self.surface, 0, 0);
+        
+        // Clear redraw elements list for the next frame
+        if (array_length(self.redrawElements) > 0) {
+            self.redrawElements = [];
+        }
     } 
     
     

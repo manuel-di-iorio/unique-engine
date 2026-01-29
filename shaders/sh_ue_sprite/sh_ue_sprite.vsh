@@ -1,3 +1,10 @@
+/**
+ * 3D Sprite Shader
+ * This shader is used for rendering 2D sprites within a 3D environment. It handles 
+ * world-space transformations for the sprite geometry and supports basic texture mapping 
+ * and color tinting.
+ * Used by UeSpriteMaterial.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec3 in_Normal;                    // (x,y,z)
 attribute vec2 in_TextureCoord;              // (u,v)

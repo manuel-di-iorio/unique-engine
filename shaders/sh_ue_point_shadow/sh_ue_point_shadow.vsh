@@ -1,3 +1,10 @@
+/**
+ * Point Light Shadow Mapping Shader
+ * This shader renders geometry depth for one of the six faces of a point light's cubemap. 
+ * It transforms vertices into the appropriate light-space for the current face and 
+ * calculates linearized depth for the shadow map.
+ * Used by UePointLightShadow.
+ */
 attribute vec3 in_Position;
 attribute vec4 in_TextureCoord2; // Bone Indices
 attribute vec4 in_TextureCoord3; // Bone Weights

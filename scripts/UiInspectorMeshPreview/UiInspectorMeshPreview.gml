@@ -3,85 +3,151 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
   self.previewSprite = undefined;
   self.renderSize = 256;
 
+  // Preview rendering
+  self.renderer = undefined;
+  self.scene = undefined;
+  self.camera = undefined;
+  self.target = undefined;
+  self.orbitControls = undefined;
+  self.needsRender = true;
+
   // Listen for changes in the mesh or its material
   self.onAssetChanged = function (event) {
-    self.updatePreview();
+    self.setupPreview();
   };
 
   oSceneEditor.events.on("assetChanged", self.onAssetChanged);
 
-  self.updatePreview = function () {
+  self.setupPreview = function () {
     if (self.asset == undefined) return;
 
+    // Cleanup old resources
     if (self.previewSprite != undefined) {
       sprite_delete(self.previewSprite);
       self.previewSprite = undefined;
     }
+    if (self.orbitControls != undefined) {
+      self.orbitControls = undefined;
+    }
+    if (self.renderer != undefined) {
+      self.renderer = undefined;
+    }
 
-    var _renderer = new UeRenderer({
+    // Create new resources
+    self.renderer = new UeRenderer({
       toneMapping: UE_TONE_MAPPING.REINHARD
     });
-    var _scene = new UeScene();
-    var _camera = new UePerspectiveCamera({ fov: 45, near: 0.1, far: 10000, aspect: 1 });
-    var _target = new UeRenderTarget(self.renderSize, self.renderSize);
+    self.scene = new UeScene();
+    self.camera = new UePerspectiveCamera({ fov: 45, near: 0.1, far: 10000, aspect: 1 });
+    self.target = new UeRenderTarget(self.renderSize, self.renderSize);
 
     // Setup lights
     var _ambient = new UeAmbientLight(c_white, 0.5);
     var _dirLight = new UeDirectionalLight(c_white, 0.8, { x: 100, y: 100, z: 100 });
-    _scene.add(_ambient, _dirLight);
+    self.scene.add(_ambient, _dirLight);
 
     // Temporarily add the asset to the preview scene without reparenting
-    // This allows us to render the entire subtree of the asset
-    array_push(_scene.children, self.asset);
+    array_push(self.scene.children, self.asset);
 
     // Auto-center and fit camera using the entire subtree bounding box
     var _bbox = box3_create();
     box3_set_from_object(_bbox, self.asset);
 
-    var _center = box3_get_center(_bbox, vec3_create());
-    var _size = box3_get_size(_bbox, vec3_create());
+    var _center, _size;
+    if (box3_is_empty(_bbox)) {
+        _center = vec3_create(0, 0, 0);
+        _size = vec3_create(2, 2, 2);
+    } else {
+        _center = box3_get_center(_bbox, vec3_create());
+        _size = box3_get_size(_bbox, vec3_create());
+    }
     var _maxDim = max(_size[0], _size[1], _size[2]);
 
     if (_maxDim <= 0) _maxDim = 1; // Fallback for empty objects
 
     // Position camera to see the mesh center with a more frontal angle
-    var _dist = (_maxDim / (2 * tan(degtorad(_camera.fov) / 2))) * 1.5;
+    var _dist = (_maxDim / (2 * tan(degtorad(self.camera.fov) / 2))) * 1.5;
     // Looking from slightly side/top but mostly front (-Y is front)
-    vec3_set(_camera.position, _center[0] + _dist * 0.25, _center[1] - _dist * 1.5, _center[2] + _dist * 0.25);
-    vec3_set(_camera.target, _center[0], _center[1], _center[2]);
-    _camera.updateMatrixWorld();
+    vec3_set(self.camera.position, _center[0] + _dist * 0.25, _center[1] - _dist * 1.5, _center[2] + _dist * 0.25);
+    vec3_set(self.camera.target, _center[0], _center[1], _center[2]);
+    self.camera.updateMatrixWorld();
 
-    // Render
-    _renderer.setRenderTarget(_target);
+    // Setup orbit controls
+    var _widget = self;
+    self.orbitControls = new UeOrbitControls(self.camera, {
+      target: self.asset,
+      enableRotate: true,
+      enablePan: false,
+      enableZoom: true,
+      rotateSpeed: 1.0,
+      zoomSpeed: 0.3,
+      enableDamping: true,
+      dampingFactor: 0.15,
+      shouldHandleInput: function() {
+        // Check if mouse is over the widget
+        var _mx = device_mouse_x_to_gui(0);
+        var _my = device_mouse_y_to_gui(0);
+        return _mx >= _widget.x1 && _mx <= _widget.x2 && 
+               _my >= _widget.y1 && _my <= _widget.y2;
+      },
+      onChange: function() {
+        _widget.needsRender = true;
+      }
+    });
+
+    self.needsRender = true;
+    self.renderPreview();
+  }
+
+  self.renderPreview = function() {
+    if (self.asset == undefined || self.scene == undefined) return;
+
+    self.renderer.setRenderTarget(self.target);
 
     // Clear surface
-    if (!surface_exists(_target.surface)) _target.create();
-    surface_set_target(_target.surface);
+    if (!surface_exists(self.target.surface)) self.target.create();
+    surface_set_target(self.target.surface);
     draw_clear_alpha(global.UI_COL_INPUT_BG, 1);
 
     // Apply camera matrices
-    camera_apply(_camera.camera);
+    camera_apply(self.camera.camera);
 
-    _renderer.render(_scene, _camera);
+    self.renderer.render(self.scene, self.camera);
     surface_reset_target();
-    _renderer.setRenderTarget(undefined);
-
-    // Remove the asset from the preview scene
-    array_pop(_scene.children);
+    self.renderer.setRenderTarget(undefined);
 
     // Convert to sprite
     if (self.previewSprite != undefined) {
       sprite_delete(self.previewSprite);
     }
-    self.previewSprite = sprite_create_from_surface(_target.surface, 0, 0, self.renderSize, self.renderSize, false, false, 0, 0);
+    self.previewSprite = sprite_create_from_surface(self.target.surface, 0, 0, self.renderSize, self.renderSize, false, false, 0, 0);
 
-    // Cleanup resources
-    _target.dispose();
+    self.needsRender = false;
+  }
+
+  self.updatePreview = function () {
+    if (self.asset == undefined) return;
+    self.setupPreview();
+  }
+
+  self.onUpdate = function () {
+    // Update orbit controls
+    if (self.orbitControls != undefined) {
+      self.orbitControls.update();
+      
+      // Check if controls are transforming (user is interacting)
+      if (self.orbitControls.transforming || self.orbitControls._needsUpdate) {
+        self.needsRender = true;
+      }
+    }
+
+    // Render if needed
+    if (self.needsRender && self.camera != undefined) {
+      self.renderPreview();
+    }
   }
 
   self.onDraw = function () {
-
-
     var _w = self.x2 - self.x1;
     var _h = self.y2 - self.y1;
 
@@ -113,9 +179,19 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
       sprite_delete(self.previewSprite);
       self.previewSprite = undefined;
     }
+
+    if (self.target != undefined) {
+      self.target.dispose();
+      self.target = undefined;
+    }
+
+    self.orbitControls = undefined;
+    self.renderer = undefined;
+    self.scene = undefined;
+    self.camera = undefined;
   };
 
   if (self.previewSprite == undefined) {
-    self.updatePreview();
+    self.setupPreview();
   }
 }

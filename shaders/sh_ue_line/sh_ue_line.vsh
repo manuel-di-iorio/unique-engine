@@ -1,3 +1,9 @@
+/**
+ * Line Rendering Shader
+ * A simple shader designed for rendering line primitives and wireframe geometry. 
+ * It combines vertex colors with a uniform color multiplier to output a final solid color.
+ * Used by UeLineBasicMaterial.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec4 in_Colour;                    // (r,g,b,a)
 

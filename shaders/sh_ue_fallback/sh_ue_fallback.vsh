@@ -1,3 +1,10 @@
+/**
+ * Fallback/Error Shader
+ * This is a safety shader that renders objects in a solid magenta color. It is 
+ * automatically used by the engine when a material's primary shader is missing or 
+ * fails to compile, providing a clear visual indicator of a technical error.
+ * Used globally as a fallback mechanism.
+ */
 attribute vec3 in_Position;                  // (x,y,z)
 attribute vec4 in_Colour;                    // (r,g,b,a)
 attribute vec2 in_TextureCoord;              // (u,v)
