@@ -76,7 +76,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       name,
       children: array_map(children, function (child) { return child.uuid }),
       visible,
-      parent: parent && !parent[$ "isScene"] ?parent.uuid : undefined,
+      parent: parent ? parent.uuid : undefined,
       renderOrder,
       geometry: self.geometry ? self.geometry.toJSON() : undefined,
       material: self.material ? self.material.uuid : undefined,

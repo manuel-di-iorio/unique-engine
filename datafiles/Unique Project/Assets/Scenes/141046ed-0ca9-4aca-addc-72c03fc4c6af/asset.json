@@ -1,0 +1,89 @@
+{
+  "children": [
+    {
+      "castShadow": true,
+      "children": [
+        {
+          "castShadow": true,
+          "children": [
+          ],
+          "frustumCulled": true,
+          "layers": 1,
+          "matrixAutoUpdate": false,
+          "name": "Object1_3",
+          "parent": "3f70490e-2575-4e59-b128-df313efba18f",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "receiveShadow": true,
+          "renderOrder": 0,
+          "rotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "rotationEuler": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ],
+          "type": "Object3D",
+          "up": [
+            0,
+            0,
+            -1
+          ],
+          "uuid": "8577d759-fff8-4642-bbd8-516f4e0dd55c",
+          "visible": true
+        }
+      ],
+      "frustumCulled": true,
+      "layers": 1,
+      "matrixAutoUpdate": false,
+      "name": "Object0_2",
+      "parent": "141046ed-0ca9-4aca-addc-72c03fc4c6af",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "receiveShadow": true,
+      "renderOrder": 0,
+      "rotation": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "rotationEuler": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "type": "Object3D",
+      "up": [
+        0,
+        0,
+        -1
+      ],
+      "uuid": "3f70490e-2575-4e59-b128-df313efba18f",
+      "visible": true
+    }
+  ],
+  "name": "Scene1",
+  "type": "Scene",
+  "uuid": "141046ed-0ca9-4aca-addc-72c03fc4c6af"
+}

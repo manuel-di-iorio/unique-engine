@@ -40,6 +40,8 @@ function UeLight(data = {}): UeObject3D(data) constructor {
       px: position[0],
       py: position[1],
       pz: position[2],
+      parent: parent ? parent.uuid : undefined,
+      children: array_map(children, function (child) { return child.uuid }),
     };
     
     if (target != undefined) {

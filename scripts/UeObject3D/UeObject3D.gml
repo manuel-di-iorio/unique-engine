@@ -236,7 +236,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             name,
             children: array_map(children, function (child) { return child.uuid }),
             visible,
-            parent: parent && !parent[$ "isScene"] ?parent.uuid : undefined,
+            parent: parent ? parent.uuid : undefined,
             renderOrder,
             layers: layers.mask,
             matrixAutoUpdate,
