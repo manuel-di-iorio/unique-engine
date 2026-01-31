@@ -129,6 +129,7 @@ function ProjectLoader() constructor {
 
   self.__createFolderItem = function (fData, treeview) {
     if (fData == undefined) return undefined;
+    
     var uuid = fData[$ "uuid"];
     var folder = new EditorFolder({
       name: fData[$ "name"],
@@ -293,27 +294,26 @@ function ProjectLoader() constructor {
         }
     });
 
-treeview.onCollapse = method({ self }, function (treeviewItem) {
-  var scene = treeviewItem.asset;
-  var editorManager = oSceneEditor.editorManager;
+    treeview.onCollapse = method(self, function (treeviewItem) {
+      var scene = treeviewItem.asset;
+      var editorManager = oSceneEditor.editorManager;
 
-  // Only unload scenes that are NOT active
-  if (scene != undefined && scene.type == "Scene" && editorManager.activeScene != scene) {
-    // 1. Serialize back to temporary JSON to preserve state
-    scene.__sceneJSON = scene.toJSON();
+      // Only unload scenes that are NOT active
+      if (scene != undefined && scene.type == "Scene" && editorManager.activeScene != scene) {
+        // 1. Serialize back to temporary JSON to preserve state
+        scene.__sceneJSON = scene.toJSON();
 
-    // 2. Clear 3D children
-    scene.children = [];
+        // 2. Clear 3D children
+        scene.clear();
 
-    // 3. Clear Treeview items
-    treeviewItem.Items.children = [];
-    treeviewItem.Items.clear(); // Ensure all internal state is cleared
+        // 3. Clear Treeview items
+        treeviewItem.Items.clear(); // Ensure all internal state is cleared
 
-    // 4. Mark as needing loading
-    treeviewItem.needsLoading = true;
-    treeviewItem.Arrow.visible = true;
-  }
-});
+        // 4. Mark as needing loading
+        treeviewItem.needsLoading = true;
+        treeviewItem.Arrow.visible = true;
+      }
+    });
 
 for (var i = 0, il = array_length(scenes); i < il; i++) {
   var scene = scenes[i];
@@ -333,143 +333,144 @@ for (var i = 0, il = array_length(scenes); i < il; i++) {
 }
     };
 
-self.__iconForType = function (type) {
-  switch (type) {
-    case "Texture": return sprUiTexture;
-    case "Material": return sprUiMaterial;
-    case "Mesh": return sprUiMesh;
-    case "Bone": return sprUiBone;
-    case "Scene": return sprUiScene;
-    case "Folder": return sprUiFolder;
-    //case "Light": return sprUiLight;
-    //   case "Camera": return sprUiCamera;
-    case "Object3D": return sprUiObject;
-  }
-  return undefined;
-};
-
-self.__getTypeDir = function (type) {
-  switch (type) {
-    case "Texture": return "Textures";
-    case "Material": return "Materials";
-    case "Mesh": return "Objects";
-    case "Scene": return "Scenes";
-    //   case "Light": return "Objects";
-    //   case "Camera": return "Objects";
-  }
-  return "Objects";
-};
-
-self.__buildTreeviewForScene = function (scene, sceneItem, treeview) {
-  for (var i = 0; i < array_length(scene.children); i++) {
-    var child = scene.children[i];
-    self.__buildTreeviewForAssetRecursive(child, sceneItem, treeview);
-  }
-};
-
-self.__buildTreeviewForAssetRecursive = function (asset, parentItem, treeview) {
-  if (asset == undefined) return;
-
-  var icon = self.__iconForType(asset.type);
-  var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item" }, {
-    treeview: treeview,
-    assetType: asset.type,
-    type: asset.type,
-    icon: icon,
-    asset: asset
-  });
-
-  parentItem.addChild(tvItem, false);
-
-  // Register with asset manager to enable selection and tracking
-  oSceneEditor.assetManager.addAsset(asset.type, asset);
-
-  // Recursively add children
-  for (var i = 0, il = array_length(asset.children); i < il; i++) {
-    var child = asset.children[i];
-    self.__buildTreeviewForAssetRecursive(child, tvItem, treeview);
-  }
-};
-
-self.__createAssetFromNode = function (projectDir, node) {
-  if (node[$ "type"] == "Folder") {
-    return new EditorFolder({ name: node[$ "name"], uuid: node[$ "uuid"] });
-  }
-
-  var asset = undefined;
-  var type = node[$ "type"];
-  var uuid = node[$ "uuid"];
-  var typeDir = self.__getTypeDir(type);
-  var assetDir = projectDir + "Assets/" + typeDir + "/" + uuid + "/";
-
-  switch (type) {
-    case "Texture": asset = new UeTexture(); break;
-    case "Material": asset = new UeMeshStandardMaterial(); break;
-    case "Mesh": asset = new UeStaticMesh(); break;
-    case "Object3D": asset = new UeObject3D(); break;
-    case "Scene": asset = new UeScene(); break;
-    //   case "Light": 
-    //     var lightType = node[$ "lightType"] ?? "PointLight";
-    //     switch (lightType) {
-    //         case "PointLight": asset = new UePointLight(); break;
-    //         case "DirectionalLight": asset = new UeDirectionalLight(); break;
-    //         case "AmbientLight": asset = new UeAmbientLight(); break;
-    //         default: asset = new UeLight(); break;
-    //     }
-    //     break;
-    case "Camera": asset = new UeObject3D(); asset.isCamera = true; asset.type = "Camera"; break;
-  }
-
-  if (asset != undefined) {
-    if (type == "Material") {
-      asset.__json = node;
+  self.__iconForType = function (type) {
+    switch (type) {
+      case "Texture": return sprUiTexture;
+      case "Material": return sprUiMaterial;
+      case "Mesh": return sprUiMesh;
+      case "Bone": return sprUiBone;
+      case "Scene": return sprUiScene;
+      case "Folder": return sprUiFolder;
+      //case "Light": return sprUiLight;
+      //   case "Camera": return sprUiCamera;
+      case "Object3D": return sprUiObject;
     }
-    asset.fromJSON(node);
-    asset.matrixAutoUpdate = false; // Editor meshes/objects don't auto-update for performance
+    return undefined;
+  };
 
-    // Editor-specific rotation helper (not part of core Object3D)
-    var type = asset.type;
-    if (type == "Mesh" || type == "Object3D" || type == "Camera" || type == "Light") {
-      asset.__rotationEuler = euler_create();
-      if (struct_exists(node, "rotationEuler") && node.rotationEuler != undefined) {
-        euler_copy(asset.__rotationEuler, node.rotationEuler);
-      } else {
-        euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
+  self.__getTypeDir = function (type) {
+    switch (type) {
+      case "Texture": return "Textures";
+      case "Material": return "Materials";
+      case "Mesh": return "Objects";
+      case "Scene": return "Scenes";
+      //   case "Light": return "Objects";
+      //   case "Camera": return "Objects";
+    }
+    return "Objects";
+  };
+
+  self.__buildTreeviewForScene = function (scene, sceneItem, treeview) {
+    for (var i = 0; i < array_length(scene.children); i++) {
+      var child = scene.children[i];
+      self.__buildTreeviewForAssetRecursive(child, sceneItem, treeview);
+    }
+  };
+
+  self.__buildTreeviewForAssetRecursive = function (asset, parentItem, treeview) {
+    if (asset == undefined) return;
+
+    var icon = self.__iconForType(asset.type);
+    var tvItem = new UiTreeviewItem({ name: "UiTreeview.Item" }, {
+      treeview: treeview,
+      assetType: asset.type,
+      type: asset.type,
+      icon: icon,
+      asset: asset
+    });
+
+    parentItem.addChild(tvItem, false);
+
+    // Recursively add children
+    for (var i = 0, il = array_length(asset.children); i < il; i++) {
+      var child = asset.children[i];
+      self.__buildTreeviewForAssetRecursive(child, tvItem, treeview);
+    }
+  };
+
+  self.__createAssetFromNode = function (projectDir, node) {
+    if (node[$ "type"] == "Folder") {
+      return new EditorFolder({ name: node[$ "name"], uuid: node[$ "uuid"] });
+    }
+
+    var asset = undefined;
+    var type = node[$ "type"];
+    var uuid = node[$ "uuid"];
+    var typeDir = self.__getTypeDir(type);
+    var assetDir = projectDir + "Assets/" + typeDir + "/" + uuid + "/";
+
+    switch (type) {
+      case "Texture": asset = new UeTexture(); break;
+      case "Material": asset = new UeMeshStandardMaterial(); break;
+      case "Mesh": asset = new UeStaticMesh(); break;
+      case "Object3D": asset = new UeObject3D(); break;
+      case "Scene": asset = new UeScene(); break;
+      //   case "Light": 
+      //     var lightType = node[$ "lightType"] ?? "PointLight";
+      //     switch (lightType) {
+      //         case "PointLight": asset = new UePointLight(); break;
+      //         case "DirectionalLight": asset = new UeDirectionalLight(); break;
+      //         case "AmbientLight": asset = new UeAmbientLight(); break;
+      //         default: asset = new UeLight(); break;
+      //     }
+      //     break;
+      case "Camera": asset = new UeObject3D(); asset.isCamera = true; asset.type = "Camera"; break;
+    }
+
+    if (asset != undefined) {
+      if (type == "Material") {
+        asset.__json = node;
+      }
+      asset.fromJSON(node);
+      asset.matrixAutoUpdate = false; // Editor meshes/objects don't auto-update for performance
+
+      // Editor-specific rotation helper (not part of core Object3D)
+      var type = asset.type;
+      if (type == "Mesh" || type == "Object3D" || type == "Camera" || type == "Light" || type == "Scene") {
+        asset.__rotationEuler = euler_create();
+        if (struct_exists(node, "rotationEuler") && node.rotationEuler != undefined) {
+          euler_copy(asset.__rotationEuler, node.rotationEuler);
+        } else {
+          euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
+        }
+      }
+
+      if (type == "Scene") {
+          asset.__sceneJSON = node;
+      }
+
+      if (type == "Mesh") {
+        var geometryPath = assetDir + "geometry.buf";
+
+        if (file_exists(geometryPath)) {
+          var geometry = new UeGeometry({ canFreeze: true });
+          geometry.import(geometryPath);
+          geometry.__vbClone = geometry.cloneVb();
+          geometry.freeze();
+          asset.geometry = geometry;
+        }
+      }
+
+      if (node != undefined && struct_exists(node, "__parentUI")) {
+        asset.__parentUI = node[$ "__parentUI"];
+      }
+
+      var importFunc = asset[$ "import"];
+      if (is_callable(importFunc)) {
+        var texturePath = assetDir + "texture.png";
+
+        if (file_exists(texturePath)) {
+          asset.import(texturePath);
+        }
       }
     }
+    return asset;
+  };
 
-    if (type == "Mesh") {
-      var geometryPath = assetDir + "geometry.buf";
-
-      if (file_exists(geometryPath)) {
-        var geometry = new UeGeometry({ canFreeze: true });
-        geometry.import(geometryPath);
-        geometry.__vbClone = geometry.cloneVb();
-        geometry.freeze();
-        asset.geometry = geometry;
-      }
-    }
-
-    if (node != undefined && struct_exists(node, "__parentUI")) {
-      asset.__parentUI = node[$ "__parentUI"];
-    }
-
-    var importFunc = asset[$ "import"];
-    if (is_callable(importFunc)) {
-      var texturePath = assetDir + "texture.png";
-
-      if (file_exists(texturePath)) {
-        asset.import(texturePath);
-      }
-    }
-  }
-  return asset;
-};
-
-self.__readJson = function (path) {
-  var bf = buffer_load(path);
-  var str = buffer_read(bf, buffer_text);
-  buffer_delete(bf);
-  return json_parse(str);
-};
+  self.__readJson = function (path) {
+    var bf = buffer_load(path);
+    var str = buffer_read(bf, buffer_text);
+    buffer_delete(bf);
+    return json_parse(str);
+  };
 }

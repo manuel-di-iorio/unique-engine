@@ -155,7 +155,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             
             // Set type and __rotationEuler for all children recursively BEFORE adding to scene
             // This ensures __rotationEuler exists before any inspector tries to access it
-            __editorTreeview_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType, draggedItem.asset);
+            __editorTreeview_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType, draggedItem.asset, targetItem.asset);
             
             // Add the instance to the target element (scene or sub-object)
             targetItem.asset.add(instanceAsset);
@@ -205,13 +205,18 @@ function __editorTreeview_getSceneOfAsset(asset) {
 }
 
 // On drop -> create instance -> imposta ricorsivamente, name, type e __rotationEuler su tutte le istanze
-function __editorTreeview_setInstanceTypeRecursive(obj, assetType, originalObj = undefined) {
+function __editorTreeview_setInstanceTypeRecursive(obj, assetType, originalObj = undefined, parentObj = undefined) {
     obj.name += "_" + string(global.UI_ASSETS_INSTANCE_ID++)
     obj.uuid = ueUuid(); // Ensure new UUID for the clone
     
     // Set metadata for the original asset
     if (originalObj != undefined) {
         obj.__instanceOf = originalObj;
+    }
+
+    // Set __parentUI for editor hierarchy tracking
+    if (parentObj != undefined) {
+        obj.__parentUI = parentObj;
     }
 
     // Always create __rotationEuler for instances (clone may not copy it)
@@ -235,7 +240,7 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType, originalObj =
             if (originalObj != undefined && originalObj[$ "children"] != undefined && i < array_length(originalObj.children)) {
                 originalChild = originalObj.children[i];
             }
-            __editorTreeview_setInstanceTypeRecursive(obj.children[i], assetType, originalChild);
+            __editorTreeview_setInstanceTypeRecursive(obj.children[i], assetType, originalChild, obj);
         }
     }
 }

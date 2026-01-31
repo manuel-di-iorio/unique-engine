@@ -40,3 +40,4 @@ function UeOrthographicCamera(data = {}): UeCamera(data) constructor {
     // Build the orthographic projection
     updateProjectionMatrix();
 }
+

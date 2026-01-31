@@ -92,31 +92,6 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
     };
   }
 
-  function fromJSON(data) {
-    gml_pragma("forceinline");
-    uuid = data[$ "uuid"];
-    name = data[$ "name"];
-    visible = data[$ "visible"];
-    renderOrder = data[$ "renderOrder"];
-    layers.mask = data[$ "layers"];
-
-    if (data[$ "position"] != undefined) vec3_copy(position, data.position);
-    if (data[$ "rotation"] != undefined) quat_copy(rotation, data.rotation);
-    if (data[$ "scale"] != undefined) vec3_copy(scale, data.scale);
-    if (data[$ "up"] != undefined) vec3_copy(self.up, data.up);
-
-    if (geometry != undefined && data[$ "geometry"] != undefined) {
-      geometry.fromJSON(data.geometry);
-    }
-    self.materialUUID = data[$ "material"];
-    matrixAutoUpdate = data[$ "matrixAutoUpdate"];
-    frustumCulled = data[$ "frustumCulled"];
-    castShadow = data[$ "castShadow"] ?? false;
-    receiveShadow = data[$ "receiveShadow"] ?? false;
-
-    return self;
-  }
-
   /// @description Performs a raycast intersection test against this mesh object
   /// @param {Struct} raycaster The raycaster object containing the ray to test against
   /// @param {Array} hits Array to store hit results when intersections are found

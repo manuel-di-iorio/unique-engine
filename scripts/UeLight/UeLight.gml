@@ -51,21 +51,6 @@ function UeLight(data = {}): UeObject3D(data) constructor {
     return payload;
   }
 
-  function fromJSON(data) {
-    gml_pragma("forceinline");
-    uuid = data[$ "uuid"];
-    name = data[$ "name"];
-    lightType = data[$ "lightType"];
-    intensity = data[$ "intensity"];
-    enabled = data[$ "enabled"];
-    range = data[$ "range"];
-    color = data[$ "color"];
-    vec3_set(position, data[$ "px"] ?? 0, data[$ "py"] ?? 0, data[$ "pz"] ?? 0);
-    
-    if (data[$ "targetX"] != undefined && data[$ "targetY"] != undefined && data[$ "targetZ"] != undefined) {
-      target = vec3_create(data[$ "targetX"], data[$ "targetY"], data[$ "targetZ"]);
-    }
-  }
   
   function _compileData(data) {
     return { payload: toJSON() };

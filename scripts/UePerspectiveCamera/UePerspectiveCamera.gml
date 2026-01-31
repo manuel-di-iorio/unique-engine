@@ -30,3 +30,4 @@ function UePerspectiveCamera(data = {}): UeCamera(data) constructor {
     // Build the perspective projection
     updateProjectionMatrix();
 }
+
