@@ -58,6 +58,11 @@ A more granular control method:
 - `updateParents`: If true, recursively updates parents first.
 - `updateChildren`: If true, recursively updates children after.
 
+### `forceUpdate(startFromRoot)`
+Forces an update of the local and world matrices on this object and its children, even on static objects (where `matrixAutoUpdate` or `matrixWorldAutoUpdate` is false).
+- `startFromRoot`: If true, the update starts from the absolute root of the scene graph, ensuring the entire hierarchy is synchronized. 
+- ⚠️ This is an expensive operation and should generally be used during initialization or major scene restructuring.
+
 ---
 
 ## 🎮 Common Methods

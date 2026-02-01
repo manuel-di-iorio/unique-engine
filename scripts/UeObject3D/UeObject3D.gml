@@ -270,17 +270,88 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         castShadow = data[$ "castShadow"] ?? false;
         receiveShadow = data[$ "receiveShadow"] ?? false;
 
+        // Subclass-specific data
+        if (struct_exists(self, "isMesh") && self.isMesh) {
+            if (data[$ "material"] != undefined) self.materialUUID = data.material;
+            if (data[$ "geometry"] != undefined && is_struct(data.geometry)) {
+                self.geometry = new UeGeometry();
+                self.geometry.fromJSON(data.geometry);
+                if (self.geometry.position != undefined) self.geometry.build();
+            }
+        } else if (struct_exists(self, "isLight") && self.isLight) {
+            if (data[$ "intensity"] != undefined) self.intensity = data.intensity;
+            if (data[$ "color"] != undefined) self.color = data.color;
+            if (data[$ "enabled"] != undefined) self.enabled = data.enabled;
+            if (data[$ "range"] != undefined) self.range = data.range;
+            
+            // SpotLight specific
+            if (struct_exists(self, "isSpotLight") && self.isSpotLight) {
+                if (data[$ "distance"] != undefined) self.distance = data.distance;
+                if (data[$ "angle"] != undefined) self.angle = data.angle;
+                if (data[$ "penumbra"] != undefined) self.penumbra = data.penumbra;
+                if (data[$ "decay"] != undefined) self.decay = data.decay;
+            }
+            // HemisphereLight specific
+            if (struct_exists(self, "isHemisphereLight") && self.isHemisphereLight) {
+                if (data[$ "skyColor"] != undefined) self.skyColor = data.skyColor;
+                if (data[$ "groundColor"] != undefined) self.groundColor = data.groundColor;
+            }
+        } else if (struct_exists(self, "isBone") && self.isBone) {
+            if (data[$ "offsetMatrix"] != undefined) self.offsetMatrix = data.offsetMatrix;
+            if (data[$ "index"] != undefined) self.index = data.index;
+        }
+
         if (data[$ "children"] != undefined && is_array(data.children)) {
             var childrenData = data.children;
+            
+            // Map current children by UUID for quick lookup and deduplication
+            var currentChildren = {};
+            for (var i = 0, il = array_length(children); i < il; i++) {
+                currentChildren[$ children[i].uuid] = children[i];
+            }
+
             for (var i = 0, il = array_length(childrenData); i < il; i++) {
                 var childData = childrenData[i];
                 var child = undefined;
+                var childUuid = is_string(childData) ? childData : childData[$ "uuid"];
 
-                if (is_string(childData)) {
-                    child = objectsByUUID[$ childData];
+                // 1. Try to find existing instance in current children or global cache
+                if (childUuid != undefined) {
+                    child = currentChildren[$ childUuid] ?? objectsByUUID[$ childUuid];
+                }
+
+                // 2. If not found and data is a struct, create new instance
+                if (child == undefined && is_struct(childData)) {
+                    var childType = childData[$ "type"] ?? "Object3D";
+                    switch (childType) {
+                        case "Mesh": child = new UeStaticMesh(); break;
+                        case "Object3D": child = new UeObject3D(); break;
+                        case "Light":
+                            var lightType = childData[$ "lightType"] ?? "PointLight";
+                            switch (lightType) {
+                                case "PointLight": child = new UePointLight(); break;
+                                case "DirectionalLight": child = new UeDirectionalLight(); break;
+                                case "AmbientLight": child = new UeAmbientLight(); break;
+                                case "SpotLight": child = new UeSpotLight(); break;
+                                case "HemisphereLight": child = new UeHemisphereLight(); break;
+                                default: child = new UeLight(); break;
+                            }
+                            break;
+                        case "Bone": child = new UeBone(); break;
+                        case "Camera": child = new UeObject3D(); child.type = "Camera"; child.isCamera = true; break;
+                        case "Scene": child = new UeScene(); break;
+                        default: child = new UeObject3D(); break;
+                    }
                 }
                 
+                // 3. Update the child from JSON (whether new or existing)
                 if (child != undefined) {
+                    if (is_struct(childData)) {
+                        child.fromJSON(childData, objectsByUUID, materialsByUUID);
+                    }
+                    
+                    // add() handles moving the child if it already had a different parent
+                    // and avoids duplication if it's already in the children array.
                     self.add(child);
                 }
             }

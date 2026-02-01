@@ -60,6 +60,11 @@ updateWorldMatrix(updateParents = false, updateChildren = false)
 ```
 Updates world matrices with optional parent or child propagation.
 
+```js
+forceUpdate(startFromRoot = false)
+```
+Forces an update of the local and world matrices on this object and its children. Also static objects will be updated. If `startFromRoot` is true, the update starts from the absolute root object.
+
 #### Translation
 
 ```js

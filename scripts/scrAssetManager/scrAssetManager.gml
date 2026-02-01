@@ -154,9 +154,9 @@ function AssetManager() constructor {
                     };
                     projectManager.markAsUnsaved();
                 }
-            }
 
-            return;
+                return;
+            }
         }
         
         var uuid = asset.uuid;

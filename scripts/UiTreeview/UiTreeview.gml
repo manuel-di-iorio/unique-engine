@@ -327,6 +327,12 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         }
     }));
     
+    // Stop propagation on mousedown so clicking the arrow doesn't trigger 
+    // selection/expansion on the parent Content node
+    self.Arrow.onMouseDown(function() {
+        return true; 
+    });
+    
     self.LeftContent.add(self.Arrow);
     
     self.Items = new UiNode({ marginLeft: 15 });
@@ -365,7 +371,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     function __updateArrowVisibility() {
-        var hasChildren = (self.Items.count() > 0);
+        var hasChildren = (self.Items.count() > 0) || (self[$ "needsLoading"] == true);
         self.Arrow.visible = hasChildren;
         
         if (!hasChildren && !self.collapsed) {

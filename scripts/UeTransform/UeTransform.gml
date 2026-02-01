@@ -161,11 +161,21 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
     }
 
     /**
-     * @description Forces an update of the local and world matrices on all objects (also static).
-     * @warning: this should only be called once on scene start when you want to globally update all matrices, local and world, even on static objects. An example would be that you have a scene with a lot of static objects that you have transformed and you don't want to call updateMatrix() singularly on all of them. Be aware that this is an expensive operation and prone to anti-pattern, use if you know what you are doing.
+     * @description Forces an update of the local and world matrices on this object and its children. Also static objects will be updated. Optionally starting the update from the root object.
+     * @warning: This should only be called once on scene start when you want to globally update all matrices, local and world, even on static objects. An example would be that you have a scene with a lot of static objects that you have transformed and you don't want to call updateMatrix() singularly on all of them. Be aware that this is an expensive operation  and prone to anti-pattern, use only if you know what you are doing.
      */
-    function forceUpdate() {
+    function forceUpdate(startFromRoot = false) {
         gml_pragma("forceinline");
+
+        // If requested, start the update from the root parent to ensure the entire hierarchy is correct
+        if (startFromRoot && parent != undefined) {
+            var root = parent;
+            while (root.parent != undefined) {
+                root = root.parent;
+            }
+            root.forceUpdate();
+            return;
+        }
 
         // Update local matrix
         mat4_compose(matrix, position, rotation, scale);

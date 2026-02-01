@@ -51,7 +51,7 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
 
     // Force matrix update to ensure bounding box is computed correctly from local transform
     if (struct_exists(self.asset, "forceUpdate")) {
-      self.asset.forceUpdate();
+      self.asset.forceUpdate(true);
     }
 
     // Auto-center and fit camera using the entire subtree bounding box

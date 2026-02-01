@@ -199,7 +199,7 @@ function ProjectSaver() constructor {
         }
         
         // Serialize children recursively
-        if (type == "Scene" || type == "Object3D" || type == "Bone" || type == "Light" || type == "Camera") {
+        if (asset[$ "isObject3D"] || type == "Scene" || type == "Object3D") {
             // Get children from the actual Three.js object
             var actualChildren = asset[$ "children"];
             if (is_array(actualChildren) && array_length(actualChildren) > 0) {

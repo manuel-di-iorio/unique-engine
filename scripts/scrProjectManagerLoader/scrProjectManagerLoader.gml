@@ -91,9 +91,14 @@ function ProjectLoader() constructor {
 
       if (parentUUID != undefined && struct_exists(self.treeviewItemsByUUID, parentUUID)) {
         var parentItem = self.treeviewItemsByUUID[$ parentUUID];
-        parentItem.addChild(tvItem, false);
-
         var parentAsset = parentItem.asset;
+
+        // If parent is a Scene, we don't add the child treeview item yet.
+        // It will be built dynamically when the Scene is expanded (lazy-load).
+        if (parentAsset.type != "Scene") {
+          parentItem.addChild(tvItem, false);
+        }
+
         if (parentAsset.type == "Folder") {
           array_push(parentAsset.children, asset);
         } else if (struct_exists(parentAsset, "add")) {
@@ -179,8 +184,6 @@ function ProjectLoader() constructor {
       if (c[$ "textures"] != undefined) global.UI_ASSETS_TEXTURES_ID = c.textures;
       if (c[$ "materials"] != undefined) global.UI_ASSETS_MATERIALS_ID = c.materials;
       if (c[$ "models"] != undefined) global.UI_ASSETS_MODELS_ID = c.models;
-      //   if (c[$ "lights"] != undefined) global.UI_ASSETS_LIGHTS_ID = c.lights;
-      //   if (c[$ "cameras"] != undefined) global.UI_ASSETS_CAMERAS_ID = c.cameras;
       if (c[$ "scenes"] != undefined) global.UI_ASSETS_SCENES_ID = c.scenes;
       if (c[$ "object3d"] != undefined) global.UI_ASSETS_OBJECT3D_ID = c.object3d;
       if (c[$ "instances"] != undefined) global.UI_ASSETS_INSTANCE_ID = c.instances;
@@ -227,21 +230,18 @@ function ProjectLoader() constructor {
 
     var textures = assetManager.getAssetsByType("Texture");
     for (var i = 0, il = array_length(textures); i < il; i++) {
-      var texture = textures[i];
-      texturesByUUID[$ texture.uuid] = texture;
+        texturesByUUID[$ textures[i].uuid] = textures[i];
     }
 
     var meshes = assetManager.getAssetsByType("Mesh");
     for (var i = 0, il = array_length(meshes); i < il; i++) {
-      var mesh = meshes[i];
-      objectsByUUID[$ mesh.uuid] = mesh;
+        objectsByUUID[$ meshes[i].uuid] = meshes[i];
     }
 
     var materials = assetManager.getAssetsByType("Material");
     var materialsByUUID = {};
     for (var i = 0, il = array_length(materials); i < il; i++) {
-      var material = materials[i];
-      materialsByUUID[$ material.uuid] = material;
+        materialsByUUID[$ materials[i].uuid] = materials[i];
     }
 
     for (var i = 0, il = array_length(materials); i < il; i++) {
@@ -264,74 +264,71 @@ function ProjectLoader() constructor {
     var treeview = global.UI.Main.Assets.Treeview;
 
     // Set up lazy loading callback for the treeview
-    treeview.onExpand = method({ objectsByUUID, materialsByUUID }, function (treeviewItem) {
+    var loaderRef = self;
+    treeview.onExpand = method({ loader: loaderRef, objectsByUUID, materialsByUUID }, function (treeviewItem) {
       if (treeviewItem[$ "needsLoading"] == true) {
-      var scene = treeviewItem.asset;
-      if (scene != undefined && scene.type == "Scene") {
-        // 1. Load 3D nodes with material linking support
-        scene.fromJSON(scene.__sceneJSON, objectsByUUID, materialsByUUID);
+        var scene = treeviewItem.asset;
+        if (scene != undefined && scene.type == "Scene") {
+          treeviewItem.Items.clear();
 
-        // 2. Link materials for meshes in the scene (for top-level meshes)
-        scene.traverse(method({ materialsByUUID }, function (obj) {
-          if (obj.type == "Mesh") {
-            var matUUID = obj[$ "material"] ?? obj[$ "materialUUID"];
-            if (matUUID != undefined && materialsByUUID[$ matUUID] != undefined) {
-          obj.material = materialsByUUID[$ matUUID];
-      }
-    }
-  }));
+          var sceneData = undefined;
+          if (struct_exists(scene, "__assetPath") && file_exists(scene.__assetPath)) {
+            sceneData = loader.__readJson(scene.__assetPath);
+          } else if (struct_exists(scene, "__sceneJSON")) {
+            sceneData = scene.__sceneJSON;
+          }
 
-  // 3. Build Treeview items
-  oSceneEditor.projectManager.loader.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
+          if (sceneData != undefined) {
+            scene.fromJSON(sceneData, objectsByUUID, materialsByUUID);
 
-  // 4. Force immediate matrix update
-  scene.forceUpdate();
+            scene.traverse(method({ materialsByUUID }, function (obj) {
+              if (obj.type == "Mesh") {
+                var matUUID = obj[$ "material"] ?? obj[$ "materialUUID"];
+                if (matUUID != undefined && materialsByUUID[$ matUUID] != undefined) {
+                  obj.material = materialsByUUID[$ matUUID];
+                }
+              }
+            }));
 
-  // 5. Cleanup
-  treeviewItem.needsLoading = false;
-  delete scene.__sceneJSON;
-}
+            loader.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
+            scene.forceUpdate();
+          }
+
+          treeviewItem.needsLoading = false;
+          treeviewItem.__updateArrowVisibility();
+          if (struct_exists(scene, "__sceneJSON")) delete scene.__sceneJSON;
         }
+      }
     });
 
     treeview.onCollapse = method(self, function (treeviewItem) {
       var scene = treeviewItem.asset;
       var editorManager = oSceneEditor.editorManager;
 
-      // Only unload scenes that are NOT active
       if (scene != undefined && scene.type == "Scene" && editorManager.activeScene != scene) {
-        // 1. Serialize back to temporary JSON to preserve state
-        scene.__sceneJSON = scene.toJSON();
-
-        // 2. Clear 3D children
-        scene.clear();
-
-        // 3. Clear Treeview items
-        treeviewItem.Items.clear(); // Ensure all internal state is cleared
-
-        // 4. Mark as needing loading
+        scene.clear(true);
+        treeviewItem.Items.clear(); 
         treeviewItem.needsLoading = true;
-        treeviewItem.Arrow.visible = true;
+        treeviewItem.__updateArrowVisibility();
       }
     });
 
-for (var i = 0, il = array_length(scenes); i < il; i++) {
-  var scene = scenes[i];
-  if (struct_exists(scene, "__sceneJSON") && scene.__sceneJSON != undefined) {
-    var sceneItem = self.treeviewItemsByUUID[$ scene.uuid];
-    if (sceneItem != undefined) {
-      // Mark for lazy loading if it has children
-      var hasChildren = (struct_exists(scene.__sceneJSON, "children") && array_length(scene.__sceneJSON.children) > 0);
-      if (hasChildren) {
-        sceneItem.needsLoading = true;
-        sceneItem.Arrow.visible = true;
-      } else {
-        delete scene.__sceneJSON;
+    for (var i = 0, il = array_length(scenes); i < il; i++) {
+      var scene = scenes[i];
+      if (struct_exists(scene, "__sceneJSON") && scene.__sceneJSON != undefined) {
+        var sceneItem = loaderRef.treeviewItemsByUUID[$ scene.uuid]; // Fix: self and loaderRef should both work if in constructor pass
+        if (sceneItem != undefined) {
+          var hasChildren = (struct_exists(scene.__sceneJSON, "children") && array_length(scene.__sceneJSON.children) > 0);
+          if (hasChildren) {
+            sceneItem.needsLoading = true;
+            sceneItem.__updateArrowVisibility();
+          } else {
+            delete scene.__sceneJSON;
+          }
+        }
       }
     }
-  }
-}
-    };
+  };
 
   self.__iconForType = function (type) {
     switch (type) {
@@ -341,8 +338,6 @@ for (var i = 0, il = array_length(scenes); i < il; i++) {
       case "Bone": return sprUiBone;
       case "Scene": return sprUiScene;
       case "Folder": return sprUiFolder;
-      //case "Light": return sprUiLight;
-      //   case "Camera": return sprUiCamera;
       case "Object3D": return sprUiObject;
     }
     return undefined;
@@ -354,8 +349,6 @@ for (var i = 0, il = array_length(scenes); i < il; i++) {
       case "Material": return "Materials";
       case "Mesh": return "Objects";
       case "Scene": return "Scenes";
-      //   case "Light": return "Objects";
-      //   case "Camera": return "Objects";
     }
     return "Objects";
   };
@@ -381,11 +374,12 @@ for (var i = 0, il = array_length(scenes); i < il; i++) {
 
     parentItem.addChild(tvItem, false);
 
-    // Recursively add children
     for (var i = 0, il = array_length(asset.children); i < il; i++) {
       var child = asset.children[i];
       self.__buildTreeviewForAssetRecursive(child, tvItem, treeview);
     }
+    
+    tvItem.__updateArrowVisibility();
   };
 
   self.__createAssetFromNode = function (projectDir, node) {
@@ -405,43 +399,37 @@ for (var i = 0, il = array_length(scenes); i < il; i++) {
       case "Mesh": asset = new UeStaticMesh(); break;
       case "Object3D": asset = new UeObject3D(); break;
       case "Scene": asset = new UeScene(); break;
-      //   case "Light": 
-      //     var lightType = node[$ "lightType"] ?? "PointLight";
-      //     switch (lightType) {
-      //         case "PointLight": asset = new UePointLight(); break;
-      //         case "DirectionalLight": asset = new UeDirectionalLight(); break;
-      //         case "AmbientLight": asset = new UeAmbientLight(); break;
-      //         default: asset = new UeLight(); break;
-      //     }
-      //     break;
       case "Camera": asset = new UeObject3D(); asset.isCamera = true; asset.type = "Camera"; break;
     }
 
     if (asset != undefined) {
+      asset.__assetPath = assetDir + "asset.json";
+      
       if (type == "Material") {
         asset.__json = node;
       }
       asset.fromJSON(node);
-      asset.matrixAutoUpdate = false; // Editor meshes/objects don't auto-update for performance
+      asset.matrixAutoUpdate = false;
 
-      // Editor-specific rotation helper (not part of core Object3D)
       var type = asset.type;
-      if (type == "Mesh" || type == "Object3D" || type == "Camera" || type == "Light" || type == "Scene") {
+      if (asset[$ "isObject3D"] || type == "Scene" || type == "Object3D") {
         asset.__rotationEuler = euler_create();
         if (struct_exists(node, "rotationEuler") && node.rotationEuler != undefined) {
           euler_copy(asset.__rotationEuler, node.rotationEuler);
         } else {
           euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
         }
+
+        asset.updateMatrix();
+        asset.updateMatrixWorld();
       }
 
       if (type == "Scene") {
-          asset.__sceneJSON = node;
+        asset.__sceneJSON = node;
       }
 
       if (type == "Mesh") {
         var geometryPath = assetDir + "geometry.buf";
-
         if (file_exists(geometryPath)) {
           var geometry = new UeGeometry({ canFreeze: true });
           geometry.import(geometryPath);
@@ -458,7 +446,6 @@ for (var i = 0, il = array_length(scenes); i < il; i++) {
       var importFunc = asset[$ "import"];
       if (is_callable(importFunc)) {
         var texturePath = assetDir + "texture.png";
-
         if (file_exists(texturePath)) {
           asset.import(texturePath);
         }
@@ -469,6 +456,7 @@ for (var i = 0, il = array_length(scenes); i < il; i++) {
 
   self.__readJson = function (path) {
     var bf = buffer_load(path);
+    if (bf == -1) return undefined;
     var str = buffer_read(bf, buffer_text);
     buffer_delete(bf);
     return json_parse(str);
