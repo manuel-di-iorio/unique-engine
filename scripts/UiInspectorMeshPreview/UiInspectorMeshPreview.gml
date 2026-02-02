@@ -74,6 +74,7 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
 
     // Position camera to see the mesh center with a more frontal angle
     var _dist = (_maxDim / (2 * tan(degtorad(self.camera.fov) / 2))) * 1.5;
+    
     // Looking from slightly side/top but mostly front (-Y is front)
     vec3_set(self.camera.position, _center[0] + _dist * 0.25, _center[1] - _dist * 1.5, _center[2] + _dist * 0.25);
     vec3_set(self.camera.target, _center[0], _center[1], _center[2]);

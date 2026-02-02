@@ -251,7 +251,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         };
     }
 
-    function fromJSON(data, objectsByUUID = {}, materialsByUUID = {}) {
+    function fromJSON(data, objectsByUUID = {}, materialsByUUID = {}, geometriesByUUID = {}) {
         gml_pragma("forceinline");
         uuid = data[$ "uuid"] ?? uuid;
         name = data[$ "name"] ?? name;
@@ -274,9 +274,14 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         if (struct_exists(self, "isMesh") && self.isMesh) {
             if (data[$ "material"] != undefined) self.materialUUID = data.material;
             if (data[$ "geometry"] != undefined && is_struct(data.geometry)) {
-                self.geometry = new UeGeometry();
-                self.geometry.fromJSON(data.geometry);
-                if (self.geometry.position != undefined) self.geometry.build();
+                var geoUuid = data.geometry[$ "uuid"];
+                if (geoUuid != undefined && geometriesByUUID[$ geoUuid] != undefined) {
+                    self.geometry = geometriesByUUID[$ geoUuid];
+                } else {
+                    self.geometry = new UeGeometry();
+                    self.geometry.fromJSON(data.geometry);
+                    if (self.geometry.position != undefined) self.geometry.build();
+                }
             }
         } else if (struct_exists(self, "isLight") && self.isLight) {
             if (data[$ "intensity"] != undefined) self.intensity = data.intensity;
@@ -347,11 +352,9 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
                 // 3. Update the child from JSON (whether new or existing)
                 if (child != undefined) {
                     if (is_struct(childData)) {
-                        child.fromJSON(childData, objectsByUUID, materialsByUUID);
+                        child.fromJSON(childData, objectsByUUID, materialsByUUID, geometriesByUUID);
                     }
                     
-                    // add() handles moving the child if it already had a different parent
-                    // and avoids duplication if it's already in the children array.
                     self.add(child);
                 }
             }

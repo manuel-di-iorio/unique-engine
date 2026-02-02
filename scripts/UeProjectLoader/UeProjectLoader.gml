@@ -144,11 +144,36 @@ function UeProjectLoader(data = {}) constructor {
         var childrenData = sceneAsset[$ "__sceneJSON"][$ "children"];
         if (childrenData == undefined) return;
         
-        self.__instantiateChildren(childrenData, self.scene);
+        log("Loading Scene: " + string(sceneName));
+
+        var materialsByUUID = {};
+        var geometriesByUUID = {};
+        var objectsByUUID = {};
+        
+        var assetKeys = struct_get_names(self.assetsByUuid);
+        log("Total Assets to scan: " + string(array_length(assetKeys)));
+
+        for (var i = 0; i < array_length(assetKeys); i++) {
+            var uuid = assetKeys[i];
+            var asset = self.assetsByUuid[$ uuid];
+            
+            if (is_struct(asset) && struct_exists(asset, "type")) {
+                if (asset.type == "Material") materialsByUUID[$ uuid] = asset;
+                if (asset.type == "Mesh" && struct_exists(asset, "geometry") && is_struct(asset.geometry)) {
+                    log("Found geometry for asset: " + uuid + " GeoUUID: " + string(asset.geometry.uuid));
+                    geometriesByUUID[$ asset.geometry.uuid] = asset.geometry;
+                }
+                if (asset.type == "Mesh" || asset.type == "Object3D") {
+                    objectsByUUID[$ uuid] = asset;
+                }
+            }
+        }
+        
+        self.__instantiateChildren(childrenData, self.scene, objectsByUUID, materialsByUUID, geometriesByUUID);
         self.scene.updateWorldMatrix(false, true);
     };
 
-    self.__instantiateChildren = function(childrenData, parent) {
+    self.__instantiateChildren = function(childrenData, parent, objectsByUUID = {}, materialsByUUID = {}, geometriesByUUID = {}) {
         for (var i = 0; i < array_length(childrenData); i++) {
             var childData = childrenData[i];
             if (is_struct(childData)) {
@@ -168,11 +193,12 @@ function UeProjectLoader(data = {}) constructor {
                     default: child = new UeObject3D(); break;
                 }
                 
-                child.fromJSON(childData);
+                child.fromJSON(childData, objectsByUUID, materialsByUUID, geometriesByUUID);
                 parent.add(child);
                 
                 if (struct_exists(childData, "children") && is_array(childData[$ "children"])) {
                     self.__instantiateChildren(childData[$ "children"], child);
+                    // Recursion is handled by fromJSON -> calls fromJSON on children (@todo verify)
                 }
             } else if (is_string(childData)) {
                 var childAsset = self.assetsByUuid[$ childData];
