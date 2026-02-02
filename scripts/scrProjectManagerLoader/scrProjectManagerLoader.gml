@@ -432,6 +432,9 @@ function ProjectLoader() constructor {
         var geometryPath = assetDir + "geometry.buf";
         if (file_exists(geometryPath)) {
           var geometry = new UeGeometry({ canFreeze: true });
+          if (struct_exists(node, "geometry") && node.geometry != undefined) {
+            geometry.fromJSON(node.geometry);
+          }
           geometry.import(geometryPath);
           geometry.__vbClone = geometry.cloneVb();
           geometry.freeze();

@@ -198,8 +198,8 @@ function ProjectSaver() constructor {
             metadata[$ "__parentUI"] = asset[$ "__parentUI"][$ "uuid"];
         }
         
-        // Serialize children recursively
-        if (asset[$ "isObject3D"] || type == "Scene" || type == "Object3D") {
+        // Serialize children recursively only for Scenes
+        if (type == "Scene") {
             // Get children from the actual Three.js object
             var actualChildren = asset[$ "children"];
             if (is_array(actualChildren) && array_length(actualChildren) > 0) {
@@ -218,7 +218,7 @@ function ProjectSaver() constructor {
                 metadata[$ "children"] = [];
             }
         }
-        
+
         __writeJson(assetPath + "asset.json", metadata);
         
         switch (type) {

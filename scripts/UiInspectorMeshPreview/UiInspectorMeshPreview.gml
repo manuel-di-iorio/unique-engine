@@ -1,7 +1,9 @@
 function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) constructor {
   self.asset = props[$ "asset"];
   self.previewSprite = undefined;
+  self.previewObject = undefined;
   self.renderSize = 256;
+  self.pointerEvents = true;
 
   // Preview rendering
   self.renderer = undefined;
@@ -46,13 +48,13 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
     var _dirLight = new UeDirectionalLight(c_white, 0.8, { x: 100, y: 100, z: 100 });
     self.scene.add(_ambient, _dirLight);
 
-    // Temporarily add the asset to the preview scene without reparenting
-    array_push(self.scene.children, self.asset);
-
     // Force matrix update to ensure bounding box is computed correctly from local transform
     if (struct_exists(self.asset, "forceUpdate")) {
       self.asset.forceUpdate(true);
     }
+
+    // Add the asset to the preview scene
+    array_push(self.scene.children, self.asset);
 
     // Auto-center and fit camera using the entire subtree bounding box
     var _bbox = box3_create();
@@ -89,15 +91,11 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
       enableDamping: true,
       dampingFactor: 0.15,
       shouldHandleInput: function() {
-        // Check if mouse is over the widget
-        var _mx = device_mouse_x_to_gui(0);
-        var _my = device_mouse_y_to_gui(0);
-        return _mx >= _widget.x1 && _mx <= _widget.x2 && 
-               _my >= _widget.y1 && _my <= _widget.y2;
+        return self.hovered;
       },
-      onChange: function() {
+      onChange: method({ _widget }, function() {
         _widget.needsRender = true;
-      }
+      })
     });
 
     self.needsRender = true;
@@ -184,6 +182,8 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
       sprite_delete(self.previewSprite);
       self.previewSprite = undefined;
     }
+
+    self.previewObject = undefined;
 
     if (self.target != undefined) {
       self.target.dispose();

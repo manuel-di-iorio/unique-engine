@@ -1,5 +1,5 @@
 {
-  "__parentUI": "c76dad87-bc3e-4f53-9a2a-878bfb30f37c",
+  "__parentUI": "9d58942b-2f45-4e1f-9700-7a6c63d95ba4",
   "castShadow": true,
   "children": [],
   "frustumCulled": true,
@@ -29,14 +29,14 @@
     "position": null,
     "tangent": null,
     "type": "Geometry",
-    "uuid": "8590c6d2-d9d1-49b4-b1fe-312995e7ac62",
+    "uuid": "d3bc7da6-8342-4d2d-b786-05752a5b538c",
     "uv": null
   },
   "layers": 1,
-  "material": "f602d930-6be2-4e2a-8b39-3286a27649bd",
-  "matrixAutoUpdate": true,
-  "name": "mSnowmanHat",
-  "parent": "c76dad87-bc3e-4f53-9a2a-878bfb30f37c",
+  "material": "a88010b1-1c18-4bcc-991e-914b675f66bc",
+  "matrixAutoUpdate": false,
+  "name": "Scene2",
+  "parent": "9d58942b-2f45-4e1f-9700-7a6c63d95ba4",
   "position": [ 0, 0, 0 ],
   "receiveShadow": true,
   "renderOrder": 0,
@@ -45,6 +45,6 @@
   "scale": [ 1, 1, 1 ],
   "type": "Mesh",
   "up": [ 0, 0, -1 ],
-  "uuid": "13c9440c-cfc8-426a-aaf5-256a71dc5d5e",
+  "uuid": "77e9dae7-fa5c-4239-9538-dc7747019eb4",
   "visible": true
 }

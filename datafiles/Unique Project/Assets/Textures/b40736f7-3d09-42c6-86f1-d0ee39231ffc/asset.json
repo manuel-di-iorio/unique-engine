@@ -1,17 +1,18 @@
 {
+  "__parentUI": "6863ed02-f3c9-41c8-847f-098100e60730",
   "center": [ 0, 0 ],
   "filter": true,
   "flipX": false,
   "flipY": false,
   "generateMipmaps": 1,
-  "name": "tStandard",
+  "name": "Texture0",
   "offset": [ 0, 0 ],
   "repeat": [ 1, 1 ],
   "rotation": 0,
   "spriteBuffSize": 0,
   "type": "Texture",
   "userData": {},
-  "uuid": "6945cdc9-81ea-40c6-b790-15746149f2f7",
+  "uuid": "b40736f7-3d09-42c6-86f1-d0ee39231ffc",
   "wrapS": "@i64@1$i64$",
   "wrapT": "@i64@1$i64$"
 }
