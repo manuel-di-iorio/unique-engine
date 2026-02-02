@@ -272,7 +272,12 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
 
         // Subclass-specific data
         if (struct_exists(self, "isMesh") && self.isMesh) {
-            if (data[$ "material"] != undefined) self.materialUUID = data.material;
+            if (data[$ "material"] != undefined) {
+                self.materialUUID = data.material;
+                if (materialsByUUID[$ self.materialUUID] != undefined) {
+                    self.material = materialsByUUID[$ self.materialUUID];
+                }
+            }
             if (data[$ "geometry"] != undefined && is_struct(data.geometry)) {
                 var geoUuid = data.geometry[$ "uuid"];
                 if (geoUuid != undefined && geometriesByUUID[$ geoUuid] != undefined) {

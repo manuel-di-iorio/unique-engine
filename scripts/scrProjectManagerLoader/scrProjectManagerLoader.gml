@@ -285,14 +285,7 @@ function ProjectLoader() constructor {
           if (sceneData != undefined) {
             scene.fromJSON(sceneData, objectsByUUID, materialsByUUID, geometriesByUUID);
 
-            scene.traverse(method({ materialsByUUID }, function (obj) {
-              if (obj.type == "Mesh") {
-                var matUUID = obj[$ "material"] ?? obj[$ "materialUUID"];
-                if (matUUID != undefined && materialsByUUID[$ matUUID] != undefined) {
-                  obj.material = materialsByUUID[$ matUUID];
-                }
-              }
-            }));
+
 
             loader.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
             scene.forceUpdate();
