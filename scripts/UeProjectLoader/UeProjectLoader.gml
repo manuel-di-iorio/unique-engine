@@ -197,8 +197,7 @@ function UeProjectLoader(data = {}) constructor {
                 parent.add(child);
                 
                 if (struct_exists(childData, "children") && is_array(childData[$ "children"])) {
-                    self.__instantiateChildren(childData[$ "children"], child);
-                    // Recursion is handled by fromJSON -> calls fromJSON on children (@todo verify)
+                    self.__instantiateChildren(childData[$ "children"], child, objectsByUUID, materialsByUUID, geometriesByUUID);
                 }
             } else if (is_string(childData)) {
                 var childAsset = self.assetsByUuid[$ childData];

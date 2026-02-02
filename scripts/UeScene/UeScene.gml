@@ -15,15 +15,15 @@ function UeScene(data = {}): UeObject3D(data) constructor {
     /**
      * Write the scene data to a JSON object
      */
-    function toJSON() {
+    function toJSON(recursive = false) {
         gml_pragma("forceinline");
         return {
             uuid,
             type,
             name,
-            children: array_map(children, function(child) { 
-                return child.toJSON();
-            })
+            children: recursive
+                ? array_map(children, function(child) { return child.toJSON(true); })
+                : array_map(children, function(child) { return child.uuid })
         };
     }
     

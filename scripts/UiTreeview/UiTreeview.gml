@@ -371,7 +371,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     }
     
     function __updateArrowVisibility() {
-        var hasChildren = (self.Items.count() > 0) || (self[$ "needsLoading"] == true);
+        var hasChildren = self.Items.count() > 0;
         self.Arrow.visible = hasChildren;
         
         if (!hasChildren && !self.collapsed) {

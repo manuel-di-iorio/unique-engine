@@ -1,0 +1,76 @@
+{
+  "children": [
+    {
+      "castShadow": true,
+      "children": [
+        {
+          "castShadow": true,
+          "children": [],
+          "frustumCulled": true,
+          "geometry": {
+            "boneIndices": null,
+            "boneWeights": null,
+            "boundingBox": [ -0.54, 0, -0.34, 0.54, 1.36, 0.34 ],
+            "boundingSphere": [ 0, 0.68, 0, 0.94 ],
+            "color": null,
+            "format": {
+              "attrs": [
+                { "kind": "@i64@0$i64$" },
+                { "kind": "@i64@1$i64$" },
+                { "kind": "@i64@2$i64$" },
+                { "kind": "@i64@4$i64$", "name": "tangent", "type": 4 },
+                { "kind": "@i64@3$i64$" },
+                { "kind": "@i64@4$i64$", "name": "boneIndices", "type": 4 },
+                { "kind": "@i64@4$i64$", "name": "boneWeights", "type": 4 }
+              ],
+              "name": "",
+              "type": "VertexFormat",
+              "uuid": "d207f54a-b5c9-4230-91fa-2886d27b19b9"
+            },
+            "index": null,
+            "name": null,
+            "normal": null,
+            "position": null,
+            "tangent": null,
+            "type": "Geometry",
+            "uuid": "d3bc7da6-8342-4d2d-b786-05752a5b538c",
+            "uv": null
+          },
+          "layers": 1,
+          "material": "a88010b1-1c18-4bcc-991e-914b675f66bc",
+          "matrixAutoUpdate": false,
+          "name": "Scene2_14",
+          "parent": "ec91db4e-c7d1-4373-959f-6cd66f63f8e3",
+          "position": [ 0, 0, 0 ],
+          "receiveShadow": true,
+          "renderOrder": 0,
+          "rotation": [ 0, 0, 0, 1 ],
+          "rotationEuler": [ 0, 0, 0 ],
+          "scale": [ 1, 1, 1 ],
+          "type": "Mesh",
+          "up": [ 0, 0, -1 ],
+          "uuid": "70e29720-cf76-41be-abc5-5154b6431e34",
+          "visible": true
+        }
+      ],
+      "frustumCulled": true,
+      "layers": 1,
+      "matrixAutoUpdate": false,
+      "name": "snowman-hat2223_13",
+      "parent": "f19cc000-5be7-40bc-9a05-33a5b20f1146",
+      "position": [ 0, 0, 0 ],
+      "receiveShadow": true,
+      "renderOrder": 0,
+      "rotation": [ -0.71, 0, 0, -0.71 ],
+      "rotationEuler": [ 90, 0, 0 ],
+      "scale": [ 50, 50, 50 ],
+      "type": "Object3D",
+      "up": [ 0, 0, -1 ],
+      "uuid": "ec91db4e-c7d1-4373-959f-6cd66f63f8e3",
+      "visible": true
+    }
+  ],
+  "name": "Scene6",
+  "type": "Scene",
+  "uuid": "f19cc000-5be7-40bc-9a05-33a5b20f1146"
+}

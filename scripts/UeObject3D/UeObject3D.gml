@@ -228,13 +228,15 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         return self;
     }
 
-    function toJSON() {
+    function toJSON(recursive = false) {
         gml_pragma("forceinline");
         return {
             uuid,
             type,
             name,
-            children: array_map(children, function (child) { return child.uuid }),
+            children: recursive 
+                ? array_map(children, function (child) { return child.toJSON(true); })
+                : array_map(children, function (child) { return child.uuid }),
             visible,
             parent: parent ? parent.uuid : undefined,
             renderOrder,

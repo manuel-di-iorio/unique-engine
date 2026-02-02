@@ -277,7 +277,8 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         // Mouse zoom
         if (enableZoom && allowInteractions) {
             // Exponential zoom based on current radius for better control at any scale
-            var zoomStep = self.radius * 0.1 * self.zoomSpeed * 0.2;
+            var _zoomScale = (self.targetObject == undefined) ? 0.05 : 0.2;
+            var zoomStep = self.radius * 0.1 * self.zoomSpeed * _zoomScale;
             if (wheelUp) self.radius -= zoomStep * 5;
             if (wheelDown) self.radius += zoomStep * 5;
             if (self._zooming) self.radius += dy * zoomStep * 0.1;

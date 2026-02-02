@@ -74,18 +74,31 @@ function EditorManager() constructor {
 
         // Update active scene identity ONLY if we found a new scene
         if (currentScene != undefined) {
+            self.activeScene = currentScene;
+            self.activeSceneTreeviewItem = currentSceneItem;
+
             // Collapse previous scene if we switched to a different scene
             if (oldScene != undefined && oldScene != currentScene) {
                 if (oldSceneItem != undefined) {
-                    oldSceneItem.collapseItem(); // This triggers onCollapse which unloads the scene
+                  oldSceneItem.collapseItem(); // This triggers onCollapse which unloads the scene
                 }
             }
-            self.activeScene = currentScene;
-            self.activeSceneTreeviewItem = currentSceneItem;
 
             // Lazy loading: if the new scene item is not loaded, expand it now
             if (currentSceneItem != undefined && currentSceneItem[$ "needsLoading"] == true) {
                 currentSceneItem.expandItem();
+            }
+        } else if (asset != undefined) {
+            // If the selected asset is NOT part of a scene (e.g., a standalone asset),
+            // we should also collapse/clear the previous active scene if it exists.
+            
+            self.activeScene = undefined;
+            self.activeSceneTreeviewItem = undefined;
+            
+            if (oldScene != undefined) {
+                if (oldSceneItem != undefined) {
+                    oldSceneItem.collapseItem();
+                }
             }
         }
         // ------------------------------------

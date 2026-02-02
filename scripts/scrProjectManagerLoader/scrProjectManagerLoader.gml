@@ -276,10 +276,10 @@ function ProjectLoader() constructor {
           treeviewItem.Items.clear();
 
           var sceneData = undefined;
-          if (struct_exists(scene, "__assetPath") && file_exists(scene.__assetPath)) {
-            sceneData = loader.__readJson(scene.__assetPath);
-          } else if (struct_exists(scene, "__sceneJSON")) {
+          if (struct_exists(scene, "__sceneJSON") && scene.__sceneJSON != undefined) {
             sceneData = scene.__sceneJSON;
+          } else if (struct_exists(scene, "__assetPath") && file_exists(scene.__assetPath)) {
+            sceneData = loader.__readJson(scene.__assetPath);
           }
 
           if (sceneData != undefined) {
@@ -303,27 +303,22 @@ function ProjectLoader() constructor {
       var editorManager = oSceneEditor.editorManager;
 
       if (scene != undefined && scene.type == "Scene" && editorManager.activeScene != scene) {
+        scene.__sceneJSON = scene.toJSON(true); // Serialize state recursively to memory before unloading
         scene.clear(true);
         treeviewItem.Items.clear(); 
         treeviewItem.needsLoading = true;
-        treeviewItem.__updateArrowVisibility();
+        treeviewItem.needsLoading = true;
+        treeviewItem.Arrow.visible = false;
       }
     });
 
     for (var i = 0, il = array_length(scenes); i < il; i++) {
-      var scene = scenes[i];
-      if (struct_exists(scene, "__sceneJSON") && scene.__sceneJSON != undefined) {
-        var sceneItem = loaderRef.treeviewItemsByUUID[$ scene.uuid]; // Fix: self and loaderRef should both work if in constructor pass
+        var scene = scenes[i];
+        var sceneItem = loaderRef.treeviewItemsByUUID[$ scene.uuid];
         if (sceneItem != undefined) {
-          var hasChildren = (struct_exists(scene.__sceneJSON, "children") && array_length(scene.__sceneJSON.children) > 0);
-          if (hasChildren) {
-            sceneItem.needsLoading = true;
-            sceneItem.__updateArrowVisibility();
-          } else {
-            delete scene.__sceneJSON;
-          }
+             sceneItem.needsLoading = true;
+             sceneItem.Arrow.visible = false;
         }
-      }
     }
   };
 
@@ -419,10 +414,6 @@ function ProjectLoader() constructor {
 
         asset.updateMatrix();
         asset.updateMatrixWorld();
-      }
-
-      if (type == "Scene") {
-        asset.__sceneJSON = node;
       }
 
       if (type == "Mesh") {
