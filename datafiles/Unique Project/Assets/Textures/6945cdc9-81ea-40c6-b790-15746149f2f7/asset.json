@@ -1,0 +1,17 @@
+{
+  "center": [ 0, 0 ],
+  "filter": true,
+  "flipX": false,
+  "flipY": false,
+  "generateMipmaps": 1,
+  "name": "tStandard",
+  "offset": [ 0, 0 ],
+  "repeat": [ 1, 1 ],
+  "rotation": 0,
+  "spriteBuffSize": 0,
+  "type": "Texture",
+  "userData": {},
+  "uuid": "6945cdc9-81ea-40c6-b790-15746149f2f7",
+  "wrapS": "@i64@1$i64$",
+  "wrapT": "@i64@1$i64$"
+}
