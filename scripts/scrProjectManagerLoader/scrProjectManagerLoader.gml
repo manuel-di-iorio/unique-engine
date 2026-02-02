@@ -234,8 +234,12 @@ function ProjectLoader() constructor {
     }
 
     var meshes = assetManager.getAssetsByType("Mesh");
+    var geometriesByUUID = {};
     for (var i = 0, il = array_length(meshes); i < il; i++) {
         objectsByUUID[$ meshes[i].uuid] = meshes[i];
+        if (meshes[i].geometry != undefined) {
+             geometriesByUUID[$ meshes[i].geometry.uuid] = meshes[i].geometry;
+        }
     }
 
     var materials = assetManager.getAssetsByType("Material");
@@ -265,7 +269,7 @@ function ProjectLoader() constructor {
 
     // Set up lazy loading callback for the treeview
     var loaderRef = self;
-    treeview.onExpand = method({ loader: loaderRef, objectsByUUID, materialsByUUID }, function (treeviewItem) {
+    treeview.onExpand = method({ loader: loaderRef, objectsByUUID, materialsByUUID, geometriesByUUID }, function (treeviewItem) {
       if (treeviewItem[$ "needsLoading"] == true) {
         var scene = treeviewItem.asset;
         if (scene != undefined && scene.type == "Scene") {
@@ -279,7 +283,7 @@ function ProjectLoader() constructor {
           }
 
           if (sceneData != undefined) {
-            scene.fromJSON(sceneData, objectsByUUID, materialsByUUID);
+            scene.fromJSON(sceneData, objectsByUUID, materialsByUUID, geometriesByUUID);
 
             scene.traverse(method({ materialsByUUID }, function (obj) {
               if (obj.type == "Mesh") {
