@@ -1,5 +1,17 @@
 {
-  "folders": [ { "__parentUI": null, "name": "snowman-hat", "uuid": "6863ed02-f3c9-41c8-847f-098100e60730" } ],
+  "folders": [
+    { "__parentUI": null, "name": "Objects", "uuid": "d1901e88-0dbb-4721-8c97-139c74e58e0f" },
+    {
+      "__parentUI": "d1901e88-0dbb-4721-8c97-139c74e58e0f",
+      "name": "Trees",
+      "uuid": "e688c91c-a383-4d0b-b8bd-4e99af6b2abd"
+    },
+    {
+      "__parentUI": "d1901e88-0dbb-4721-8c97-139c74e58e0f",
+      "name": "Snows",
+      "uuid": "a2762141-4201-4c44-992b-179bfcdfb2d5"
+    }
+  ],
   "id": "f0bd5256-2740-4a2d-a452-c8f90fce6fef",
   "version": "0.9.0"
 }

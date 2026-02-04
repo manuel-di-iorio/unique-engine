@@ -1,5 +1,4 @@
 {
-  "__parentUI": "6863ed02-f3c9-41c8-847f-098100e60730",
   "alphaTest": 0,
   "blendDst": 6,
   "blendDstAlpha": 6,
@@ -14,7 +13,7 @@
   "depthWrite": true,
   "forceSinglePass": false,
   "lights": true,
-  "name": "colormap",
+  "name": "tStandard",
   "opacity": 1,
   "shader": "sh_ue_standard",
   "side": 2,

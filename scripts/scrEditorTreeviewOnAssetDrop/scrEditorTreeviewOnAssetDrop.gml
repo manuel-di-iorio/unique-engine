@@ -225,7 +225,13 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType, originalObj =
         delete obj.__rotationEuler;
     }
     obj.__rotationEuler = euler_create();
-    euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
+    
+    // Copy original rotationEuler if it exists, otherwise calculate from quaternion
+    if (originalObj != undefined && originalObj[$ "__rotationEuler"] != undefined) {
+        euler_copy(obj.__rotationEuler, originalObj.__rotationEuler);
+    } else {
+        euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
+    }
 
     // Ensure __matrixAutoUpdate exists and is true by default for the editor
     if (obj[$ "__matrixAutoUpdate"] == undefined) {

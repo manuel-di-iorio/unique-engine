@@ -1,11 +1,10 @@
 {
-  "__parentUI": "6863ed02-f3c9-41c8-847f-098100e60730",
   "center": [ 0, 0 ],
   "filter": true,
   "flipX": false,
   "flipY": false,
   "generateMipmaps": 1,
-  "name": "Texture0",
+  "name": "tStandard",
   "offset": [ 0, 0 ],
   "repeat": [ 1, 1 ],
   "rotation": 0,

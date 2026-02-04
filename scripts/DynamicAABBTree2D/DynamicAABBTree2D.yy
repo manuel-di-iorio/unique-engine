@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"DynamicAABBTree2D",
   "parent":{
-    "name":"Utils",
-    "path":"folders/Packages/Unique Engine/Utils.yy",
+    "name":"Unique Math",
+    "path":"folders/Packages/Unique Math.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -1,13 +1,13 @@
 {
-  "__parentUI": "d1901e88-0dbb-4721-8c97-139c74e58e0f",
+  "__parentUI": "e688c91c-a383-4d0b-b8bd-4e99af6b2abd",
   "castShadow": true,
-  "children": [ "5803d6b1-9294-47c9-ba9b-50a371c54137" ],
+  "children": [],
   "frustumCulled": true,
   "geometry": {
     "boneIndices": null,
     "boneWeights": null,
-    "boundingBox": [ -0.54, 0, -0.34, 0.54, 1.36, 0.34 ],
-    "boundingSphere": [ 0, 0.68, 0, 0.94 ],
+    "boundingBox": [ -0.60, 0, -0.60, 0.60, 1.92, 0.60 ],
+    "boundingSphere": [ 0, 0.96, 0, 1.28 ],
     "color": null,
     "format": {
       "attrs": [
@@ -29,14 +29,14 @@
     "position": null,
     "tangent": null,
     "type": "Geometry",
-    "uuid": "d3bc7da6-8342-4d2d-b786-05752a5b538c",
+    "uuid": "98867012-cc27-44cd-a302-17018c77fdaa",
     "uv": null
   },
   "layers": 1,
   "material": "a88010b1-1c18-4bcc-991e-914b675f66bc",
   "matrixAutoUpdate": false,
-  "name": "mSnowmanHat",
-  "parent": null,
+  "name": "mTree",
+  "parent": "55dab86c-4e31-47db-aaaa-d09702750346",
   "position": [ 0, 0, 0 ],
   "receiveShadow": true,
   "renderOrder": 0,
@@ -45,6 +45,6 @@
   "scale": [ 100, 100, 100 ],
   "type": "Mesh",
   "up": [ 0, 0, -1 ],
-  "uuid": "77e9dae7-fa5c-4239-9538-dc7747019eb4",
+  "uuid": "73b0eba7-a4ef-46d2-9681-5a0ccaf16bd8",
   "visible": true
 }
