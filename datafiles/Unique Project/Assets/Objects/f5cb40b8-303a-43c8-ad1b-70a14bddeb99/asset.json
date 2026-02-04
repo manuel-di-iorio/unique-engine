@@ -1,0 +1,50 @@
+{
+  "__parentUI": "7154638f-226c-43ef-8ad5-a6b2bb8a1f33",
+  "castShadow": true,
+  "children": [],
+  "frustumCulled": true,
+  "geometry": {
+    "boneIndices": null,
+    "boneWeights": null,
+    "boundingBox": [ -0.77, 0, -0.68, 0.77, 0.65, 0.73 ],
+    "boundingSphere": [ 0, 0.32, 0.02, 1.09 ],
+    "color": null,
+    "format": {
+      "attrs": [
+        { "kind": "@i64@0$i64$" },
+        { "kind": "@i64@1$i64$" },
+        { "kind": "@i64@2$i64$" },
+        { "kind": "@i64@4$i64$", "name": "tangent", "type": 4 },
+        { "kind": "@i64@3$i64$" },
+        { "kind": "@i64@4$i64$", "name": "boneIndices", "type": 4 },
+        { "kind": "@i64@4$i64$", "name": "boneWeights", "type": 4 }
+      ],
+      "name": "",
+      "type": "VertexFormat",
+      "uuid": "d207f54a-b5c9-4230-91fa-2886d27b19b9"
+    },
+    "index": null,
+    "name": null,
+    "normal": null,
+    "position": null,
+    "tangent": null,
+    "type": "Geometry",
+    "uuid": "62bb5aec-f5a2-42bb-bf01-def7a9b04b2f",
+    "uv": null
+  },
+  "layers": 1,
+  "material": "a88010b1-1c18-4bcc-991e-914b675f66bc",
+  "matrixAutoUpdate": false,
+  "name": "mRocksSmall",
+  "parent": "b20dfef4-1737-4a8f-b69d-bc300e62ded8",
+  "position": [ 0, 0, 0 ],
+  "receiveShadow": true,
+  "renderOrder": 0,
+  "rotation": [ -0.71, 0, 0, -0.71 ],
+  "rotationEuler": [ 270, 0, 0 ],
+  "scale": [ 100, 100, 100 ],
+  "type": "Mesh",
+  "up": [ 0, 0, -1 ],
+  "uuid": "f5cb40b8-303a-43c8-ad1b-70a14bddeb99",
+  "visible": true
+}

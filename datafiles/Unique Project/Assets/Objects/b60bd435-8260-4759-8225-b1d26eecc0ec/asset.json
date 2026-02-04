@@ -1,0 +1,50 @@
+{
+  "__parentUI": "a2762141-4201-4c44-992b-179bfcdfb2d5",
+  "castShadow": true,
+  "children": [],
+  "frustumCulled": true,
+  "geometry": {
+    "boneIndices": null,
+    "boneWeights": null,
+    "boundingBox": [ -1.03, 0, -0.67, 0.91, 0.41, 0.67 ],
+    "boundingSphere": [ -0.06, 0.21, 0, 1.20 ],
+    "color": null,
+    "format": {
+      "attrs": [
+        { "kind": "@i64@0$i64$" },
+        { "kind": "@i64@1$i64$" },
+        { "kind": "@i64@2$i64$" },
+        { "kind": "@i64@4$i64$", "name": "tangent", "type": 4 },
+        { "kind": "@i64@3$i64$" },
+        { "kind": "@i64@4$i64$", "name": "boneIndices", "type": 4 },
+        { "kind": "@i64@4$i64$", "name": "boneWeights", "type": 4 }
+      ],
+      "name": "",
+      "type": "VertexFormat",
+      "uuid": "d207f54a-b5c9-4230-91fa-2886d27b19b9"
+    },
+    "index": null,
+    "name": null,
+    "normal": null,
+    "position": null,
+    "tangent": null,
+    "type": "Geometry",
+    "uuid": "65873f36-152a-4c98-9099-6834ab475646",
+    "uv": null
+  },
+  "layers": 1,
+  "material": "a88010b1-1c18-4bcc-991e-914b675f66bc",
+  "matrixAutoUpdate": false,
+  "name": "mSnowBunker",
+  "parent": "4915f9e3-6206-4002-b4a8-0dbd18df77d4",
+  "position": [ 0, 0, 0 ],
+  "receiveShadow": true,
+  "renderOrder": 0,
+  "rotation": [ -0.71, 0, 0, -0.71 ],
+  "rotationEuler": [ 270, 0, 0 ],
+  "scale": [ 100, 100, 100 ],
+  "type": "Mesh",
+  "up": [ 0, 0, -1 ],
+  "uuid": "b60bd435-8260-4759-8225-b1d26eecc0ec",
+  "visible": true
+}
