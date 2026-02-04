@@ -48,9 +48,7 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
         // __rotationEuler
         if (variable_struct_exists(asset, "rotation") && asset[$ "__rotationEuler"] == undefined) {
              asset.__rotationEuler = euler_create();
-             if (is_array(asset.rotation)) {
-                euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
-             }
+             euler_copy(asset.__rotationEuler, originalAsset.__rotationEuler);
         }
         
         // __matrixAutoUpdate

@@ -284,8 +284,7 @@ function ProjectLoader() constructor {
 
           if (sceneData != undefined) {
             scene.fromJSON(sceneData, objectsByUUID, materialsByUUID, geometriesByUUID);
-
-
+            loader.__initEditorPropsRecursive(scene, sceneData);
 
             loader.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
             scene.forceUpdate();
@@ -374,6 +373,36 @@ function ProjectLoader() constructor {
     tvItem.__updateArrowVisibility();
   };
 
+  self.__initEditorPropsRecursive = function (asset, node) {
+    if (asset == undefined) return;
+
+    var type = asset.type;
+    if (asset[$ "isObject3D"] || type == "Scene" || type == "Object3D" || type == "Mesh" || type == "Camera" || type == "Bone") {
+      if (asset[$ "__rotationEuler"] == undefined) {
+        asset.__rotationEuler = euler_create();
+      }
+
+      if (is_struct(node) && struct_exists(node, "rotationEuler") && node.rotationEuler != undefined) {
+        euler_copy(asset.__rotationEuler, node.rotationEuler);
+      } else {
+        euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
+      }
+
+      asset.matrixAutoUpdate = false;
+      asset.updateMatrix();
+      asset.updateMatrixWorld();
+    }
+
+    if (is_struct(node) && struct_exists(node, "children") && is_array(node.children) && struct_exists(asset, "children")) {
+      var childNodes = node.children;
+      var children = asset.children;
+      var count = min(array_length(childNodes), array_length(children));
+      for (var i = 0; i < count; i++) {
+        self.__initEditorPropsRecursive(children[i], childNodes[i]);
+      }
+    }
+  };
+
   self.__createAssetFromNode = function (projectDir, node) {
     if (node[$ "type"] == "Folder") {
       return new EditorFolder({ name: node[$ "name"], uuid: node[$ "uuid"] });
@@ -401,20 +430,7 @@ function ProjectLoader() constructor {
         asset.__json = node;
       }
       asset.fromJSON(node);
-      asset.matrixAutoUpdate = false;
-
-      var type = asset.type;
-      if (asset[$ "isObject3D"] || type == "Scene" || type == "Object3D") {
-        asset.__rotationEuler = euler_create();
-        if (struct_exists(node, "rotationEuler") && node.rotationEuler != undefined) {
-          euler_copy(asset.__rotationEuler, node.rotationEuler);
-        } else {
-          euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
-        }
-
-        asset.updateMatrix();
-        asset.updateMatrixWorld();
-      }
+      self.__initEditorPropsRecursive(asset, node);
 
       if (type == "Mesh") {
         var geometryPath = assetDir + "geometry.buf";

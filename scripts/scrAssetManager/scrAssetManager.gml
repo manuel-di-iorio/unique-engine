@@ -208,9 +208,9 @@ function AssetManager() constructor {
      */
     function updateAssetMatrix(asset, recursive = false, syncEuler = false) {
         // Sync rotation euler ONLY if explicitly requested (e.g. from gizmo)
-        if (syncEuler && variable_struct_exists(asset, "__rotationEuler")) {
-            euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
-        }
+        // if (syncEuler && variable_struct_exists(asset, "__rotationEuler")) {
+            // euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
+        // }
 
         self.__updateMatrixInternal(asset, recursive);
         

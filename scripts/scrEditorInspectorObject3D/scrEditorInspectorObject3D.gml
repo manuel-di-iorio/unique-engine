@@ -60,11 +60,6 @@ function scrEditorInspectorObject3D() {
                   label: "Rotation", 
                   type: "transformXYZ",
                   valueGetter: function() {
-                      if (self.asset == undefined) return undefined;
-                      if (self.asset[$ "__rotationEuler"] == undefined) {
-                          self.asset.__rotationEuler = euler_create();
-                          euler_set_from_quaternion(self.asset.__rotationEuler, self.asset.rotation);
-                      }
                       return self.asset.__rotationEuler;
                   },
                   onBlur: function(value) {
