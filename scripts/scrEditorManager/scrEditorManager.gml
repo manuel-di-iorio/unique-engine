@@ -151,8 +151,8 @@ function EditorManager() constructor {
                 sm.boxHelper.object = self.gizmoTarget;
                 
                 // Update the whole scene if we are in one, and the target asset
-                if (self.activeScene != undefined) oSceneEditor.assetManager.updateAssetMatrix(self.activeScene, true);
-                if (self.gizmoTarget != undefined && self.gizmoTarget != self.activeScene) oSceneEditor.assetManager.updateAssetMatrix(self.gizmoTarget, true);
+                if (self.activeScene != undefined) oSceneEditor.assetManager.updateAssetMatrix(self.activeScene);
+                if (self.gizmoTarget != undefined && self.gizmoTarget != self.activeScene) oSceneEditor.assetManager.updateAssetMatrix(self.gizmoTarget);
             }
         }
         

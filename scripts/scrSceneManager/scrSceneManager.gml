@@ -25,8 +25,14 @@ function SceneManager() constructor {
     self.transformControls = new UeTransformControls(self.camera, {
         view: 1,
         onDrag: function() {
+            // Sync rotation euler ONLY during gizmo interaction to update the inspector
+            var asset = oSceneEditor.sceneManager.transformControls.object;
+            if (oSceneEditor.sceneManager.transformControls.mode == "rotate" && asset != undefined && variable_struct_exists(asset, "__rotationEuler")) {
+                euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
+            }
+
             // Force Euler sync when dragging the gizmo to update the inspector
-            oSceneEditor.assetManager.editAsset(oSceneEditor.sceneManager.transformControls.object, false, true, false);
+            oSceneEditor.assetManager.editAsset(asset, true, false);
         },
         onDragEnd: function() {
             global.UI.requestRedraw();

@@ -97,15 +97,14 @@ function AssetManager() constructor {
      * Mark an asset as edited (triggers unsaved changes)
      * @param {Struct} asset - The asset that was modified
      * @param {Bool} [recursive=false] - Whether to update children recursively
-     * @param {Bool} [syncEuler=false] - Whether to sync euler angles from quaternion
      * @param {Bool} [emitEvent=true] Whether to emit the UI change event
      */
-    function editAsset(asset, recursive = false, syncEuler = false, emitEvent = true) {
+    function editAsset(asset, recursive = false, emitEvent = true) {
         self.__trackChange("edit", asset);
         
         // Rebuild the box in the next frame in order to wait first for the matrix updates
         if (asset.type == "Mesh" || asset.type == "Object3D") {
-            self.updateAssetMatrix(asset, recursive, syncEuler);
+            self.updateAssetMatrix(asset, recursive);
         }
 
         // Also notify the global editor manager so UI components can react
@@ -204,14 +203,8 @@ function AssetManager() constructor {
      * The update is scheduled in the next frame in order to wait for box helper update
      * @param {Struct} asset - The asset to update
      * @param {Bool} [recursive=false] - Whether to update children recursively
-     * @param {Bool} [syncEuler=false] - Whether to sync euler angles from quaternion
      */
-    function updateAssetMatrix(asset, recursive = false, syncEuler = false) {
-        // Sync rotation euler ONLY if explicitly requested (e.g. from gizmo)
-        // if (syncEuler && variable_struct_exists(asset, "__rotationEuler")) {
-            // euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
-        // }
-
+    function updateAssetMatrix(asset, recursive = false) {
         self.__updateMatrixInternal(asset, recursive);
         
         // Update the box helper to match the new transform
