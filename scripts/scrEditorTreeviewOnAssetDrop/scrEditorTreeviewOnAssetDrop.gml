@@ -233,8 +233,10 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType, originalObj =
         euler_set_from_quaternion(obj.__rotationEuler, obj.rotation);
     }
 
-    // Ensure __matrixAutoUpdate exists and is true by default for the editor
-    if (obj[$ "__matrixAutoUpdate"] == undefined) {
+    // Ensure __matrixAutoUpdate exists and is copied from original if available
+    if (originalObj != undefined && originalObj[$ "__matrixAutoUpdate"] != undefined) {
+        obj.__matrixAutoUpdate = originalObj.__matrixAutoUpdate;
+    } else if (obj[$ "__matrixAutoUpdate"] == undefined) {
         obj.__matrixAutoUpdate = true;
     }
     obj.matrixAutoUpdate = false; // Editor objects don't auto-update for performance
