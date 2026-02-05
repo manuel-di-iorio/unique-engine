@@ -8,6 +8,8 @@ You can download the latest versioned source code from here. In the downloaded s
 
 To get started with Unique Engine, drag and drop this file into your Game Maker project to import Unique Engine.
 
+<!-- | 0.10.0   | [See changes](/changelog/0.10.0) | [Download](https://github.com/manuel-di-iorio/unique-engine/releases/tag/0.10.0) | -->
+
 | Version | Changelog | Download |
 |---------|-----------|----------|
 | 0.9.0   | [See changes](/changelog/0.9.0) | [Download](https://github.com/manuel-di-iorio/unique-engine/releases/tag/0.9.0) |

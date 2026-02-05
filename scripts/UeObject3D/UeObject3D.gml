@@ -17,6 +17,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     frustumCulled = true;
     castShadow = data[$ "castShadow"] ?? false;
     receiveShadow = data[$ "receiveShadow"] ?? false;
+    gmObject = data[$ "gmObject"] ?? undefined;
+    gmLayer = data[$ "gmLayer"] ?? "Instances";
 
     /** @type {Array<UeAnimation>} List of animations associated with this node */
     animations = [];
@@ -201,6 +203,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         frustumCulled = source.frustumCulled;
         castShadow = source.castShadow;
         receiveShadow = source.receiveShadow;
+        gmObject = source[$ "gmObject"];
+        gmLayer = source[$ "gmLayer"];
         matrixAutoUpdate = source.matrixAutoUpdate;
         matrixWorldAutoUpdate = source.matrixWorldAutoUpdate;
 
@@ -245,6 +249,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             frustumCulled,
             castShadow,
             receiveShadow,
+            gmObject,
+            gmLayer,
 
             position,
             rotation,
@@ -271,6 +277,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         frustumCulled = data[$ "frustumCulled"] ?? true;
         castShadow = data[$ "castShadow"] ?? false;
         receiveShadow = data[$ "receiveShadow"] ?? false;
+        gmObject = data[$ "gmObject"];
+        gmLayer = data[$ "gmLayer"] ?? "Instances";
 
         // Subclass-specific data
         if (struct_exists(self, "isMesh") && self.isMesh) {

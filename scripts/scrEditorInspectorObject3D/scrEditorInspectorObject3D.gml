@@ -33,6 +33,55 @@ function scrEditorInspectorObject3D() {
           }
     },
 
+    // === SECTION: GAMEMAKER INTEGRATION ===
+    {
+          id: "sectionGM",
+          label: "GameMaker Integration",
+          type: "section",
+          collapsed: false,
+          children: [
+            {
+                id: "gmObject",
+                field: "gmObject",
+                label: "GM Object",
+                type: "dropdown",
+                tooltip: "GameMaker object to instantiate with this 3D object",
+                search: "Search GM object..",
+                itemsGetter: function(searchValue) {
+                    var allObjects = ueYypGetObjects();
+                    var items = array_filter(allObjects, method({ searchValue }, function(name) {
+                        if (searchValue == "") return true;
+                        return string_pos(string_lower(searchValue), string_lower(name)) > 0;
+                    }));
+                    
+                    var mapped = array_map(items, function(name) {
+                        return { label: name, value: name };
+                    });
+                    
+                    array_insert(mapped, 0, { label: "None", value: undefined });
+                    return mapped;
+                },
+                valueGetter: function() {
+                    if (self.asset == undefined || self.asset.gmObject == undefined) return undefined;
+                    return self.asset.gmObject;
+                },
+                onChange: function(value) {
+                    if (self.asset == undefined) return;
+                    self.asset.gmObject = value;
+                    oSceneEditor.assetManager.editAsset(self.asset);
+                }
+            },
+            {
+                id: "gmLayer",
+                field: "gmLayer",
+                label: "GM Layer",
+                type: "text",
+                tooltip: "Layer name where the GM object will be instantiated",
+                placeholder: "Instances"
+            }
+          ]
+    },
+
     // === SECTION: TRANSFORM ===
     {
           id: "sectionTransform",

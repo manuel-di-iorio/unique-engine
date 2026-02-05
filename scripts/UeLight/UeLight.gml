@@ -37,6 +37,8 @@ function UeLight(data = {}): UeObject3D(data) constructor {
       enabled,
       range,
       color,
+      gmObject,
+      gmLayer,
       px: position[0],
       py: position[1],
       pz: position[2],

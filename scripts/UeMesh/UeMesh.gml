@@ -85,6 +85,8 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       frustumCulled,
       castShadow,
       receiveShadow,
+      gmObject,
+      gmLayer,
       position,
       rotation,
       scale,

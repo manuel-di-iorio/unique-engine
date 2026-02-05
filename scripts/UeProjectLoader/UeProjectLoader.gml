@@ -170,8 +170,9 @@ function UeProjectLoader(data = {}) constructor {
     };
 
     self.__instantiateChildren = function(childrenData, parent, objectsByUUID = {}, materialsByUUID = {}, geometriesByUUID = {}) {
-        for (var i = 0; i < array_length(childrenData); i++) {
+        for (var i = 0, il = array_length(childrenData); i < il; i++) {
             var childData = childrenData[i];
+    
             if (is_struct(childData)) {
                 var child;
                 var type = childData[$ "type"];
@@ -197,16 +198,33 @@ function UeProjectLoader(data = {}) constructor {
                 }
                 
                 parent.add(child);
+
+                // Instantiate GameMaker object if specified
+                if (child.gmObject != undefined && child.gmObject != "") {
+                    var objIndex = asset_get_index(child.gmObject);
+                    if (objIndex != -1) {
+                        instance_create_layer(0, 0, child.gmLayer, objIndex, { ueObject: child });
+                    }
+                }
                 
                 if (struct_exists(childData, "children") && is_array(childData[$ "children"])) {
                     self.__instantiateChildren(childData[$ "children"], child, objectsByUUID, materialsByUUID, geometriesByUUID);
                 }
-            } else if (is_string(childData)) {
-                var childAsset = self.assetsByUuid[$ childData];
-                if (childAsset != undefined && is_struct(childAsset) && struct_exists(childAsset, "isObject3D")) {
-                     parent.add(childAsset);
-                }
             }
+            //  else if (is_string(childData)) {
+            //     var childAsset = self.assetsByUuid[$ childData];
+            //     if (childAsset != undefined && is_struct(childAsset) && struct_exists(childAsset, "isObject3D")) {
+            //          parent.add(childAsset);
+                     
+            //          // Instantiate GameMaker object if specified
+            //          if (struct_exists(childAsset, "gmObject") && childAsset.gmObject != undefined && childAsset.gmObject != "") {
+            //              var objIndex = asset_get_index(childAsset.gmObject);
+            //              if (objIndex != -1) {
+            //                  instance_create_layer(0, 0, childAsset.gmLayer, objIndex, { ueObject: childAsset });
+            //              }
+            //          }
+            //     }
+            // }
         }
     };
 

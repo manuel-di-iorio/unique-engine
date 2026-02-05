@@ -157,6 +157,14 @@ Populates the loader's scene with objects from a scene asset. Clears any existin
 
 The scene is automatically instantiated with all objects and their transforms (position, rotation, scale).
 
+#### GameMaker Integration
+When `setScene()` is called, the loader also handles the instantiation of associated GameMaker objects. If a 3D object in the scene has `gmObject` and `gmLayer` defined:
+1. It looks up the GameMaker object index using `asset_get_index(gmObject)`.
+2. It instantiates the object on the specified `gmLayer` at `(0, 0)` using `instance_create_layer`.
+3. It passes the 3D object reference to the newly created GameMaker instance via a variable named `ueObject`.
+
+This allows GameMaker objects to "wrap" 3D entities and react to their properties or control them at runtime.
+
 **Parameters:**
 - `sceneName` (string) - Name of the scene to load
 

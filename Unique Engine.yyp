@@ -276,6 +276,7 @@
     {"id":{"name":"scrProjectManagerSaver","path":"scripts/scrProjectManagerSaver/scrProjectManagerSaver.yy",},},
     {"id":{"name":"scrSceneManager","path":"scripts/scrSceneManager/scrSceneManager.yy",},},
     {"id":{"name":"scrSetupUI","path":"scripts/scrSetupUI/scrSetupUI.yy",},},
+    {"id":{"name":"scrYypUtility","path":"scripts/scrYypUtility/scrYypUtility.yy",},},
     {"id":{"name":"Sphere","path":"scripts/Sphere/Sphere.yy",},},
     {"id":{"name":"Spherical","path":"scripts/Spherical/Spherical.yy",},},
     {"id":{"name":"SphericalHarmonics3","path":"scripts/SphericalHarmonics3/SphericalHarmonics3.yy",},},
@@ -473,8 +474,8 @@
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
   "RoomOrderNodes":[
-    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
     {"roomId":{"name":"rTest","path":"rooms/rTest/rTest.yy",},},
+    {"roomId":{"name":"rSceneEditor","path":"rooms/rSceneEditor/rSceneEditor.yy",},},
   ],
   "templateType":"game",
   "TextureGroups":[

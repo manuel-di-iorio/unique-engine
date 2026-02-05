@@ -21,6 +21,8 @@ new UeObject3D(data = {})
 | `renderOrder`     | `number`                  | `0`         | Custom sort order for rendering |
 | `castShadow`      | `boolean`                 | `false`     | Whether this object casts shadows |
 | `receiveShadow`   | `boolean`                 | `false`     | Whether this object receives shadows |
+| `gmObject`        | `string`                  | `undefined` | GameMaker object name to instantiate (e.g. "objPlayer") when this object is created by UeProjectLoader |
+| `gmLayer`         | `string`                  | `"Instances"`| GameMaker layer name for the instantiation |
 
 ### Properties
 
@@ -37,6 +39,8 @@ new UeObject3D(data = {})
 | `renderOrder` | `number`     | 0                | Overrides render sort when rendering             |
 | `layers`      | `UeLayers`   |                  | Layers with membership set to layer 0 by default |
 | `userData`    | `struct`     | {}               | A struct where to safely place custom related data for this entity |
+| `gmObject`    | `string`     | undefined        | GameMaker object name to instantiate with this 3D object |
+| `gmLayer`     | `string`     | "Instances"      | GameMaker layer name where the object will be instantiated |
 | `onBeforeRender` | `method`  | void method      | Function called before rendering this object |
 | `onAfterRender`  | `method`  | void method      | Function called after rendering this object  |
 | `onBeforeShadow` | `method`  | void method      | Function called before rendering this object to shadow map |
