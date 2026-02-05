@@ -88,6 +88,7 @@ function SceneManager() constructor {
             _editorManager.pickLastIndex = (_editorManager.pickLastIndex + 1) % _prevHitsLength;
         } else {
             // Perform a new raycast
+            self.camera.updateMatrixWorld();
             self.raycaster.setFromCamera(self.camera);
             _editorManager.pickLastHits = self.raycaster.intersectObjects(self.objects.children, true, true);
             _editorManager.pickLastIndex = 0;
