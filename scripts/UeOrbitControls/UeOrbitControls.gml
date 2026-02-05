@@ -185,6 +185,8 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             self.target[VEC3.y] + dir[VEC3.y] * self.radius,
             self.target[VEC3.z] + dir[VEC3.z] * self.radius
         );
+        self.camera.lookAtVec(self.target);
+        vec3_copy(self.camera.target, self.target);
 
         // --- 7. Sync stato orbit ---
         self._deltaAzimuth = 0;
@@ -434,6 +436,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var cz = self.target[VEC3.z] + self.radius * sin(self.elevation);
 
         self.camera.setPosition(cx, cy, cz);
+        self.camera.lookAtVec(self.target);
         vec3_copy(self.camera.target, self.target);
 
         self._needsUpdate = false;
