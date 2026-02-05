@@ -1,10 +1,10 @@
 // @todo check input configuration in variables (mouse/keyboard)
 function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self.camera = camera;
-    
+
     var _initialTarget = data[$ "target"] ?? vec3_create(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
     self.target = is_array(_initialTarget) ? vec3_clone(_initialTarget) : vec3_create();
-    
+
     self.targetObject = undefined;
     self.targetOffset = vec3_create();
     self.sizeFactor = 1.0;
@@ -37,7 +37,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     self.mouseButtonRotate = mb_left;
     self.mouseButtonZoom = mb_middle;
-    self.mouseButtonPan = mb_right; 
+    self.mouseButtonPan = mb_right;
 
     self.keyPanSpeed = 1.0;
     self.keyRotateSpeed = 1.0;
@@ -54,7 +54,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self._panning = false;
     self._zooming = false;
     self.transforming = false;
-    
+
     // Callback fired when transformation ends
     self.onChange = data[$"onChange"] ?? undefined;
 
@@ -69,29 +69,29 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     // @todo missing doc
     function reset() {
-      gml_pragma("forceinline");
-      vec3_set(self.target, 0, 0, 0);  // @todo should set to the actual initial target
-      
-      var dir = vec3_sub_vectors(self.__scratchVec0, camera.position, self.target);
-      self.radius = vec3_distance_to(camera.position, self.target);
-      self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
-      self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
-      self._needsUpdate = true;
+        gml_pragma("forceinline");
+        vec3_set(self.target, 0, 0, 0);  // @todo should set to the actual initial target
+
+        var dir = vec3_sub_vectors(self.__scratchVec0, camera.position, self.target);
+        self.radius = vec3_distance_to(camera.position, self.target);
+        self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
+        self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+        self._needsUpdate = true;
     }
 
     // Update spherical coordinates from current camera position and target
     // Useful when manually setting the camera position and target
     // @todo missing doc
     function updateSphericalCoordinates() {
-      var dir = vec3_sub_vectors(self.__scratchVec0, camera.position, self.target);
-      self.radius = vec3_distance_to(camera.position, self.target);
-      self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
-      self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
-        
-      self._deltaAzimuth = 0;
-      self._deltaElevation = 0;
-      vec3_set(self._deltaPan, 0, 0, 0);
-      self._needsUpdate = true;
+        var dir = vec3_sub_vectors(self.__scratchVec0, camera.position, self.target);
+        self.radius = vec3_distance_to(camera.position, self.target);
+        self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
+        self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+
+        self._deltaAzimuth = 0;
+        self._deltaElevation = 0;
+        vec3_set(self._deltaPan, 0, 0, 0);
+        self._needsUpdate = true;
     }
 
     /**
@@ -102,26 +102,26 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
      */
     function setTarget(newTarget) {
         vec3_set(self.targetOffset, 0, 0, 0);
-        if (typeof(newTarget) == "struct" && (newTarget[$ "isObject3D"] || newTarget[$ "isMesh"])) {
+        if (typeof (newTarget) == "struct" && (newTarget[$ "isObject3D"] || newTarget[$ "isMesh"])) {
             self.targetObject = newTarget;
             box3_set_from_object(self.__scratchBox, newTarget);
-            
+
             if (box3_is_empty(self.__scratchBox)) {
                 vec3_set(self.target, 0, 0, 0);
                 self.sizeFactor = 1.0;
             } else {
                 var center = box3_get_center(self.__scratchBox);
                 vec3_copy(self.target, center);
-                
+
                 var size = box3_get_size(self.__scratchBox);
                 self.sizeFactor = max(size[0], size[1], size[2]);
                 if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
             }
-            
+
             // Adjust zoom limits based on size
             self.minTargetRadius = self.sizeFactor * 0.05;
             self.maxTargetRadius = self.sizeFactor * 50.0;
-            
+
             // Optionally adjust radius to fit object if it's currently outside bounds
             self.radius = clamp(self.radius, self.minTargetRadius, self.maxTargetRadius);
         } else {
@@ -139,49 +139,77 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
      * @param {UeObject3D} newTarget - The object to focus on
      */
     function focus(newTarget) {
+        if (!newTarget) return;
+
         self.setTarget(newTarget);
-        if (self.targetObject != undefined) {
-            // Re-calculate bounding box to ensure it's centered
-            box3_set_from_object(self.__scratchBox, self.targetObject);
-            if (!box3_is_empty(self.__scratchBox)) {
-                var center = box3_get_center(self.__scratchBox);
-                vec3_copy(self.target, center);
-                
-                // Recalculate size factor to be sure it's accurate for the zoom
-                var size = box3_get_size(self.__scratchBox);
-                self.sizeFactor = max(size[0], size[1], size[2]);
-                if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
-            }
-            
-            // Set zoom very close (0.8x of max dimension) to fill the screen
-            self.radius = self.sizeFactor * 0.8;
-            
-            // Fallback if size is 0
-            if (self.radius <= 0) {
-                self.radius = 1.0;
-            }
-            
-            // Reset deltas to stop any existing movement and snap to center
-            self._deltaAzimuth = 0;
-            self._deltaElevation = 0;
-            vec3_set(self._deltaPan, 0, 0, 0);
+        if (!self.targetObject) return;
+
+        // --- 1. Bounding box ---
+        box3_set_from_object(self.__scratchBox, self.targetObject);
+        if (box3_is_empty(self.__scratchBox)) return;
+
+        // --- 2. Target = centro geometrico ---
+        var center = box3_get_center(self.__scratchBox);
+        vec3_copy(self.target, center);
+
+        // --- 3. Calcolo dimensioni ---
+        var size = box3_get_size(self.__scratchBox);
+        var radius = max(size[VEC3.x], size[VEC3.y], size[VEC3.z]) * 0.5;
+
+        // --- 4. Distanza camera (Unity-style) ---
+        var vFov = degtorad(self.camera[$"fov"] ?? 60);
+        var aspect = self.camera[$"aspect"] ?? 1.0;
+
+        var distY = radius / tan(vFov * 0.5);
+        var distX = radius / (tan(vFov * 0.5) * aspect);
+
+        self.radius = max(distX, distY) * 1.1; // padding
+
+        // --- 5. Direzione attuale (preserva angolo) ---
+        var dir = vec3_sub_vectors(
+            self.__scratchVec0,
+            self.camera.position,
+            self.target
+        );
+
+        if (vec3_length_sq(dir) < UE_EPSILON) {
+            // fallback sensato (dipende dal tuo sistema)
+            vec3_set(dir, 0, 1, 0);
         }
+
+        vec3_normalize(dir);
+
+        // --- 6. Posiziona la camera ---
+        self.camera.setPosition(
+            self.target[VEC3.x] + dir[VEC3.x] * self.radius,
+            self.target[VEC3.y] + dir[VEC3.y] * self.radius,
+            self.target[VEC3.z] + dir[VEC3.z] * self.radius
+        );
+
+        // --- 7. Sync stato orbit ---
+        self._deltaAzimuth = 0;
+        self._deltaElevation = 0;
+        vec3_set(self._deltaPan, 0, 0, 0);
+        vec3_set(self.targetOffset, 0, 0, 0);
+
+        self.updateSphericalCoordinates();
         self._needsUpdate = true;
     }
+
 
     // Update the camera orbit. 
     // Optionally takes the mouse coordinates in input, otherwise it will get it automatically from the UeMouse class
     function update(mx = undefined, my = undefined) {
         gml_pragma("forceinline");
-        
+
         if (!enabled) return;
-        
+
         if (mx == undefined) {
-            var mouse = global.UE_MOUSE.get(); 
+            var mouse = global.UE_MOUSE.get();
             mx = mouse.x;
             my = mouse.y;
         }
-        
+
         var allowInteractions = shouldHandleInput();
         var wheelUp = false;
         var wheelDown = false;
@@ -191,11 +219,11 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             wheelUp = mouse_wheel_up();
             wheelDown = mouse_wheel_down();
             hasInput = wheelUp || wheelDown ||
-                       mouse_check_button(self.mouseButtonRotate) || 
-                       mouse_check_button(self.mouseButtonPan) || 
-                       mouse_check_button(self.mouseButtonZoom) || 
-                       keyboard_check(self.keys.LEFT) || keyboard_check(self.keys.RIGHT) ||
-                       keyboard_check(self.keys.UP) || keyboard_check(self.keys.BOTTOM);
+                mouse_check_button(self.mouseButtonRotate) ||
+                mouse_check_button(self.mouseButtonPan) ||
+                mouse_check_button(self.mouseButtonZoom) ||
+                keyboard_check(self.keys.LEFT) || keyboard_check(self.keys.RIGHT) ||
+                keyboard_check(self.keys.UP) || keyboard_check(self.keys.BOTTOM);
         }
 
         var anyButtonPressed = mouse_check_button_pressed(mb_any);
@@ -203,9 +231,9 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
         var isDamping = false;
         if (self.enableDamping) {
-            isDamping = abs(self._deltaAzimuth) > 0.0001 || 
-                        abs(self._deltaElevation) > 0.0001 || 
-                        vec3_length_sq(self._deltaPan) > 0.0001;
+            isDamping = abs(self._deltaAzimuth) > 0.0001 ||
+                abs(self._deltaElevation) > 0.0001 ||
+                vec3_length_sq(self._deltaPan) > 0.0001;
         }
 
         // Early exit if no input, no damping, no auto-rotate, and we're not currently transforming or interacting
@@ -218,7 +246,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var displayWidth = display_get_width();
         var displayHeight = display_get_height();
         var worldUp = global.UE_DEFAULT_UP;
-        
+
         if (anyButtonPressed) {
             self._prevMouseX = mx;
             self._prevMouseY = my;
@@ -241,10 +269,10 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         self._dragging = isRotatingNow;
         self._panning = isPanningNow;
         self._zooming = isZoomingNow;
-        
+
         var wasTransforming = self.transforming;
         self.transforming = self._dragging || self._panning || self._zooming || isWheelZooming;
-        
+
         if (wasTransforming && !self.transforming && self.onChange != undefined) {
             self.onChange();
         }
@@ -264,7 +292,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             box3_set_from_object(self.__scratchBox, self.targetObject);
             var center = box3_get_center(self.__scratchBox, self.__scratchVec0);
             var size = box3_get_size(self.__scratchBox, self.__scratchVec1);
-            
+
             self.sizeFactor = max(size[0], size[1], size[2]);
             if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
 
@@ -276,7 +304,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             vec3_add_vectors(self.target, center, self.targetOffset);
         }
 
-        var effectiveSizeFactor = (self.targetObject != undefined) ? (self.sizeFactor * 0.002) : 1.0;
+        var effectiveSizeFactor = (self.targetObject != undefined) ? (self.sizeFactor * 0.001) : 1.0;
 
         // Mouse rotate
         if (self._dragging && self.enableRotate) {
@@ -287,13 +315,13 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         // Mouse pan
         if (self._panning && self.enablePan) {
             if (camDir == undefined) {
-                camDir = vec3_sub_vectors(self.__scratchVec0, camTarget, camPos); 
+                camDir = vec3_sub_vectors(self.__scratchVec0, camTarget, camPos);
                 vec3_normalize(camDir);
             }
 
             var panX = -(dx / displayWidth) * self.panSpeed * effectiveSizeFactor * self.radius * 3;
             var panY = (dy / displayHeight) * self.panSpeed * effectiveSizeFactor * self.radius * 3;
-            
+
             if (self.screenSpacePanning) {
                 var right = vec3_copy(self.__scratchVec1, camDir); vec3_cross(right, worldUp); vec3_normalize(right);
                 var up = vec3_copy(self.__scratchVec2, right); vec3_cross(up, camDir); vec3_normalize(up);
@@ -310,9 +338,9 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         }
 
         // Mouse zoom
-        if (enableZoom && allowInteractions) {
+        if (self.enableZoom && allowInteractions) {
             // Exponential zoom based on current radius for better control at any scale
-            var _zoomScale = (self.targetObject == undefined) ? 0.05 : 0.2;
+            var _zoomScale = (self.targetObject == undefined) ? 0.025 : 0.2;
             var zoomStep = self.radius * 0.1 * self.zoomSpeed * _zoomScale;
             if (wheelUp) self.radius -= zoomStep * 5;
             if (wheelDown) self.radius += zoomStep * 5;
@@ -322,35 +350,35 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         // Keyboard input
         if (allowInteractions && !global.UI.hasAnyFocus()) {
             var shiftPressed = keyboard_check(self.keys.SHIFT);
-            
+
             if (shiftPressed) {
                 var rotateKeyAmount = self.keyRotateSpeed * pi * 0.01;
-                if (keyboard_check(self.keys.LEFT))  self._deltaAzimuth += rotateKeyAmount;
+                if (keyboard_check(self.keys.LEFT)) self._deltaAzimuth += rotateKeyAmount;
                 if (keyboard_check(self.keys.RIGHT)) self._deltaAzimuth -= rotateKeyAmount;
-                if (keyboard_check(self.keys.UP))    self._deltaElevation += rotateKeyAmount;
-                if (keyboard_check(self.keys.BOTTOM))self._deltaElevation -= rotateKeyAmount;
+                if (keyboard_check(self.keys.UP)) self._deltaElevation += rotateKeyAmount;
+                if (keyboard_check(self.keys.BOTTOM)) self._deltaElevation -= rotateKeyAmount;
             } else {
                 var panKeyAmount = self.keyPanSpeed * effectiveSizeFactor * self.radius * 0.01;
                 if (camDir == undefined) {
-                    camDir = vec3_sub_vectors(self.__scratchVec0, camTarget, camPos); 
+                    camDir = vec3_sub_vectors(self.__scratchVec0, camTarget, camPos);
                     vec3_normalize(camDir);
                 }
 
                 if (self.screenSpacePanning) {
                     var right = vec3_copy(self.__scratchVec1, camDir); vec3_cross(right, worldUp); vec3_normalize(right);
                     var up = vec3_copy(self.__scratchVec2, right); vec3_cross(up, camDir); vec3_normalize(up);
-                  
-                    if (keyboard_check(self.keys.LEFT))   vec3_add_scaled_vector(self._deltaPan, right, panKeyAmount);
-                    if (keyboard_check(self.keys.RIGHT))  vec3_add_scaled_vector(self._deltaPan, right, -panKeyAmount);
-                    if (keyboard_check(self.keys.UP))     vec3_add_scaled_vector(self._deltaPan, up, -panKeyAmount);
+
+                    if (keyboard_check(self.keys.LEFT)) vec3_add_scaled_vector(self._deltaPan, right, panKeyAmount);
+                    if (keyboard_check(self.keys.RIGHT)) vec3_add_scaled_vector(self._deltaPan, right, -panKeyAmount);
+                    if (keyboard_check(self.keys.UP)) vec3_add_scaled_vector(self._deltaPan, up, -panKeyAmount);
                     if (keyboard_check(self.keys.BOTTOM)) vec3_add_scaled_vector(self._deltaPan, up, panKeyAmount);
                 } else {
                     var forward = vec3_set(self.__scratchVec1, camDir[VEC3.x], camDir[VEC3.y], 0); vec3_normalize(forward);
                     var right = vec3_set(self.__scratchVec2, -forward[VEC3.y], forward[VEC3.x], 0);
-                    
-                    if (keyboard_check(self.keys.LEFT))   vec3_add_scaled_vector(self._deltaPan, right, panKeyAmount);
-                    if (keyboard_check(self.keys.RIGHT))  vec3_add_scaled_vector(self._deltaPan, right, -panKeyAmount);
-                    if (keyboard_check(self.keys.UP))     vec3_add_scaled_vector(self._deltaPan, forward, panKeyAmount);
+
+                    if (keyboard_check(self.keys.LEFT)) vec3_add_scaled_vector(self._deltaPan, right, panKeyAmount);
+                    if (keyboard_check(self.keys.RIGHT)) vec3_add_scaled_vector(self._deltaPan, right, -panKeyAmount);
+                    if (keyboard_check(self.keys.UP)) vec3_add_scaled_vector(self._deltaPan, forward, panKeyAmount);
                     if (keyboard_check(self.keys.BOTTOM)) vec3_add_scaled_vector(self._deltaPan, forward, -panKeyAmount);
                 }
             }
@@ -365,7 +393,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         if (self.enableDamping) {
             self.azimuth += self._deltaAzimuth * self.dampingFactor;
             self.elevation += self._deltaElevation * self.dampingFactor;
-            
+
             if (self.targetObject != undefined) {
                 vec3_add_scaled_vector(self.targetOffset, self._deltaPan, self.dampingFactor);
             } else {
@@ -378,7 +406,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         } else {
             self.azimuth += self._deltaAzimuth;
             self.elevation += self._deltaElevation;
-            
+
             if (self.targetObject != undefined) {
                 vec3_add(self.targetOffset, self._deltaPan);
             } else {
@@ -389,7 +417,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             self._deltaElevation = 0;
             vec3_set(self._deltaPan, 0, 0, 0);
         }
-        
+
         self.radius = clamp(self.radius, self.minTargetRadius, self.maxTargetRadius);
         self.elevation = clamp(self.elevation, -pi * 0.4999, pi * 0.4999);
 
@@ -404,22 +432,22 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var cx = self.target[VEC3.x] + self.radius * cosElevation * cos(self.azimuth);
         var cy = self.target[VEC3.y] + self.radius * cosElevation * sin(self.azimuth);
         var cz = self.target[VEC3.z] + self.radius * sin(self.elevation);
-    
+
         self.camera.setPosition(cx, cy, cz);
         vec3_copy(self.camera.target, self.target);
-        
+
         self._needsUpdate = false;
         self._prevMouseX = mx;
         self._prevMouseY = my;
     }
-    
-    var mouse = global.UE_MOUSE.get(); 
+
+    var mouse = global.UE_MOUSE.get();
     self._prevMouseX = mouse.x;
     self._prevMouseY = mouse.y;
 
     // If the target is an object, we need to set it up properly at the end
     // to ensure all methods are defined before calling them
-    if (typeof(_initialTarget) == "struct" && (_initialTarget[$ "isObject3D"] || _initialTarget[$ "isMesh"])) {
+    if (typeof (_initialTarget) == "struct" && (_initialTarget[$ "isObject3D"] || _initialTarget[$ "isMesh"])) {
         self.setTarget(_initialTarget);
     }
 }

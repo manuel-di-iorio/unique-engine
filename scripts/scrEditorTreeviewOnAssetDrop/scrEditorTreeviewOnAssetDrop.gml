@@ -197,6 +197,9 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                 var instanceTreeviewItem = __editorTreeview_createTreeviewItem(instanceAsset, targetItem, draggedItem.icon);
                 __editorTreeview_createTreeviewItemsForChildren(instanceAsset, instanceTreeviewItem, draggedItem.icon);
 
+                // Focus the newly created instance in the viewport
+                oSceneEditor.sceneManager.orbit.focus(instanceAsset);
+
                 // Only on the main parent call __onItemSelected
                 targetItem.treeview.__onItemSelected(instanceTreeviewItem);
             }
