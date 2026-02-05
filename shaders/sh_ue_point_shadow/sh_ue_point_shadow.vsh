@@ -6,10 +6,12 @@
  * Used by UePointLightShadow.
  */
 attribute vec3 in_Position;
+attribute vec2 in_TextureCoord0;
 attribute vec4 in_TextureCoord2; // Bone Indices
 attribute vec4 in_TextureCoord3; // Bone Weights
 
 varying float v_dist;
+varying vec2 v_vTexcoord;
 
 uniform vec3 u_lightPos;
 uniform float u_ueNumBones;
@@ -42,4 +44,5 @@ void main()
     
     gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * vec4(pos, 1.0);
     v_dist = length(worldPos.xyz - u_lightPos);
+    v_vTexcoord = in_TextureCoord0;
 }

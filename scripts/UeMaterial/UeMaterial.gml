@@ -298,7 +298,7 @@ function UeMaterial(data = {}) constructor {
           val = vec4_set(global.UE_VEC4_TEMP0, __cache.hasMapsFlags.map, __cache.hasMapsFlags.alphaMap, __cache.hasMapsFlags.ormMap, __cache.hasMapsFlags.normalMap);
           break;
         case "mapFlags2":
-          val = vec4_set(global.UE_VEC4_TEMP1, __cache.hasMapsFlags.emissiveMap, __cache.hasMapsFlags.displacementMap, 0.0, 0.0);
+          val = vec4_set(global.UE_VEC4_TEMP1, __cache.hasMapsFlags.emissiveMap, __cache.hasMapsFlags.displacementMap, alphaTest / 255.0, 0.0);
           break;
       }
 
@@ -372,8 +372,6 @@ function UeMaterial(data = {}) constructor {
     gpu_set_ztestenable(depthTest);
     gpu_set_zwriteenable(depthWrite);
     gpu_set_zfunc(depthFunc);
-    gpu_set_alphatestenable(alphaTest > 0);
-    gpu_set_alphatestref(alphaTest);
 
     if (blending) {
       gpu_set_blendenable(true);

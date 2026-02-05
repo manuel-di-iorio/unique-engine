@@ -1,6 +1,7 @@
 function UeSpriteMaterial(data = {}): UeMaterial(data) constructor {
   lights = 0;
   shader = sh_ue_sprite;
+  alphaTest = data[$ "alphaTest"] ?? 25; // Default sprite alpha test
   transparent = data[$ "transparent"] ?? true;
   blending = transparent;
   side = data[$ "side"] ?? cull_noculling;

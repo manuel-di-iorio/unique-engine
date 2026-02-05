@@ -6,10 +6,12 @@
  * Used by UeDirectionalLightShadow.
  */
 attribute vec3 in_Position;
+attribute vec2 in_TextureCoord0;
 attribute vec4 in_TextureCoord2; // Bone Indices
 attribute vec4 in_TextureCoord3; // Bone Weights
 
 varying float v_depth;
+varying vec2 v_vTexcoord;
 
 uniform float u_ueNumBones;
 uniform mat4 u_ueBoneMatrices[128];
@@ -37,4 +39,5 @@ void main()
 
     float ndc = clip.z / clip.w;    
     v_depth = ndc * 0.5 + 0.5; 
+    v_vTexcoord = in_TextureCoord0;
 }

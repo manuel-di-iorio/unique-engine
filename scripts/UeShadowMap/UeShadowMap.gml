@@ -15,6 +15,11 @@ function UeShadowMap(shader, width = 1024, height = 1024) constructor {
     self.uniformNumBonesLoc = shader_get_uniform(shader, global.UE_UNIFORM_NAMES_CONFIG.numBones);
     self.uniformBoneMatricesLoc = shader_get_uniform(shader, global.UE_UNIFORM_NAMES_CONFIG.boneMatrices);
     
+    // Alpha test uniforms
+    self.uniformMapFlagsLoc = shader_get_uniform(shader, "u_ueMapFlags");
+    self.uniformMapFlags2Loc = shader_get_uniform(shader, "u_ueMapFlags2");
+    self.samplerAlphaMapLoc = shader_get_sampler_index(shader, "s_alphaMap");
+    
     /**
      * Creates the shadow map surface.
      */
@@ -85,6 +90,31 @@ function UeShadowMap(shader, width = 1024, height = 1024) constructor {
                 if (self.uniformNumBonesLoc != -1) {
                     shader_set_uniform_f(self.uniformNumBonesLoc, 0.0);
                 }
+            }
+
+            // Set alpha test uniforms if mesh has a material
+            if (object[$ "material"] != undefined) {
+                var _mat = object.material;
+                var _cache = _mat.__cache;
+                
+                if (self.uniformMapFlagsLoc != -1) {
+                    shader_set_uniform_f(self.uniformMapFlagsLoc, _cache.hasMapsFlags.map, _cache.hasMapsFlags.alphaMap, 0.0, 0.0);
+                }
+                
+                if (self.uniformMapFlags2Loc != -1) {
+                    shader_set_uniform_f(self.uniformMapFlags2Loc, 0.0, 0.0, _mat.alphaTest / 255.0, 0.0);
+                }
+                
+                if (self.samplerAlphaMapLoc != -1) {
+                    var _alphaMap = _mat.textures[$ "alphaMap"];
+                    if (_alphaMap != undefined) {
+                        _alphaMap.__useGlobal();
+                        texture_set_stage(self.samplerAlphaMapLoc, _alphaMap.__cachedTexture);
+                    }
+                }
+            } else {
+                if (self.uniformMapFlagsLoc != -1) shader_set_uniform_f(self.uniformMapFlagsLoc, 0, 0, 0, 0);
+                if (self.uniformMapFlags2Loc != -1) shader_set_uniform_f(self.uniformMapFlags2Loc, 0, 0, 0, 0);
             }
 
             object.render();

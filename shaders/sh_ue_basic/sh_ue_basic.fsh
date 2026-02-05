@@ -17,14 +17,18 @@ uniform vec4 u_ueMapFlags;  // [hasMap, hasAlphaMap, hasOrmMap, hasNormalMap]
 #define u_ueHasOrmMap           u_ueMapFlags.z
 #define u_ueHasNormalMap        u_ueMapFlags.w
 
-uniform vec4 u_ueMapFlags2; // [hasEmissiveMap, hasDisplacementMap, 0, 0]
+uniform vec4 u_ueMapFlags2; // [hasEmissiveMap, hasDisplacementMap, alphaTest, 0]
 #define u_ueHasEmissiveMap      u_ueMapFlags2.x
 #define u_ueHasDisplacementMap  u_ueMapFlags2.y
+#define u_ueAlphaTest           u_ueMapFlags2.z
 
 void main()
 {
     vec4 tex = (u_ueHasMap > 0.5) ? texture2D(gm_BaseTexture, v_vTexcoord) : vec4(1.0);
     vec4 baseColor = v_vColour * tex;
+    
+    // Alpha Test
+    if (baseColor.a < u_ueAlphaTest) discard;
     
     // === Emissive ===
     vec3 emissiveTex = (u_ueHasEmissiveMap > 0.5) ? texture2D(s_emissiveMap, v_vTexcoord).rgb : vec3(0.0);

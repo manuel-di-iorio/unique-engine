@@ -156,7 +156,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var size = box3_get_size(self.__scratchBox);
         var radius = max(size[VEC3.x], size[VEC3.y], size[VEC3.z]) * 0.5;
 
-        // --- 4. Distanza camera (Unity-style) ---
+        // --- 4. Distanza camera ---
         var vFov = degtorad(self.camera[$"fov"] ?? 60);
         var aspect = self.camera[$"aspect"] ?? 1.0;
 

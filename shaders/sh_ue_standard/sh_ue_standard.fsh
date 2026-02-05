@@ -52,9 +52,10 @@ uniform vec4 u_ueMapFlags;  // [hasMap, hasAlphaMap, hasOrmMap, hasNormalMap]
 #define u_ueHasOrmMap           u_ueMapFlags.z
 #define u_ueHasNormalMap        u_ueMapFlags.w
 
-uniform vec4 u_ueMapFlags2; // [hasEmissiveMap, hasDisplacementMap, 0, 0]
+uniform vec4 u_ueMapFlags2; // [hasEmissiveMap, hasDisplacementMap, alphaTest, 0]
 #define u_ueHasEmissiveMap      u_ueMapFlags2.x
 #define u_ueHasDisplacementMap  u_ueMapFlags2.y
+#define u_ueAlphaTest           u_ueMapFlags2.z
 
 // ===== Lights =====
 
@@ -458,8 +459,8 @@ void main() {
     float alphaMap = (u_ueHasAlphaMap > 0.5) ? texture2D(s_alphaMap, vTexcoord).r : 1.0;
     float alpha = base.a * alphaMap;
 
-    // Discard if transparent (for Opaque pass, we can use alpha testing)
-    // if (alpha < 0.5) discard;
+    // Alpha Test
+    if (alpha < u_ueAlphaTest) discard;
 
     vec3 albedo = SRGBToLinear(base.rgb * u_ueColor);
 
