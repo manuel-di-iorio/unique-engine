@@ -75,4 +75,23 @@ if (!uiHasFocus) {
       tool = "scale";
       editorManager.sceneTools.updateToolButtons();
     }
+    
+    // Focus shortcut
+    if (keyboard_check_pressed(ord("F"))) {
+       var activeAsset = editorManager.activeAsset;
+       if (activeAsset != undefined && (activeAsset[$ "isObject3D"] || activeAsset[$ "isMesh"])) {
+           sceneManager.orbit.focus(activeAsset);
+       }
+    }
+}
+
+// Handle window close confirmation
+if (window_command_check(window_command_close)) {
+    if (projectManager.hasUnsavedChanges) {
+        if (show_question("There are unsaved changes. Do you really want to exit?")) {
+            game_end();
+        }
+    } else {
+        game_end();
+    }
 }

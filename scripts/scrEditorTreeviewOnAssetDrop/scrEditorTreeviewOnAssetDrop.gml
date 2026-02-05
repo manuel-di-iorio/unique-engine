@@ -37,8 +37,30 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             dropAction = "moveToFolder";
         }
     }
-    // Texture and Material are not draggable
-    else if (draggedItem.assetType == "Texture" || draggedItem.assetType == "Material") {
+    // Material dropped onto Mesh
+    else if (draggedItem.assetType == "Material" && targetItem.assetType == "Mesh") {
+        isValidDrop = true;
+        dropAction = "applyMaterial";
+    }
+    
+    // Texture can be dragged on Materials
+    else if (draggedItem.assetType == "Texture") {
+        if (targetItem != undefined && targetItem.assetType == "Material") {
+            var material = targetItem.asset;
+            var texture = draggedItem.asset;
+            material.setTexture("map", texture);
+            
+            // Refresh inspector if this material is the one currently edited
+            if (oSceneEditor.editorManager.activeAsset == material) {
+                oSceneEditor.assetManager.editAsset(material);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    // Material is not draggable onto other things
+    else if (draggedItem.assetType == "Material") {
         return false;
     }
     
@@ -178,6 +200,11 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                 // Only on the main parent call __onItemSelected
                 targetItem.treeview.__onItemSelected(instanceTreeviewItem);
             }
+        }
+        else if (dropAction == "applyMaterial") {
+            // Apply material to mesh
+            targetItem.asset.material = draggedItem.asset;
+            oSceneEditor.assetManager.editAsset(targetItem.asset);
         }
         
         return true;

@@ -60,6 +60,12 @@ Must be called every frame in the game loop.
 Optionally takes the mouse coordinates in input, otherwise it will get it automatically from the `UeMouse` class
 
 ```js
+focus(targetObject)
+```
+Focuses the camera on a specific object. 
+It centers the camera on the object's bounding box and adjusts the radius for an optimal view based on the object's dimensions.
+
+```js
 reset()
 ```
 Resets the controls to their initial state.

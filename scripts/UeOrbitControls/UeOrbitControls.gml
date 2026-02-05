@@ -134,6 +134,41 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         self.updateSphericalCoordinates();
     }
 
+    /**
+     * Focus on an object by setting it as target and adjusting radius
+     * @param {UeObject3D} newTarget - The object to focus on
+     */
+    function focus(newTarget) {
+        self.setTarget(newTarget);
+        if (self.targetObject != undefined) {
+            // Re-calculate bounding box to ensure it's centered
+            box3_set_from_object(self.__scratchBox, self.targetObject);
+            if (!box3_is_empty(self.__scratchBox)) {
+                var center = box3_get_center(self.__scratchBox);
+                vec3_copy(self.target, center);
+                
+                // Recalculate size factor to be sure it's accurate for the zoom
+                var size = box3_get_size(self.__scratchBox);
+                self.sizeFactor = max(size[0], size[1], size[2]);
+                if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
+            }
+            
+            // Set zoom very close (0.8x of max dimension) to fill the screen
+            self.radius = self.sizeFactor * 0.8;
+            
+            // Fallback if size is 0
+            if (self.radius <= 0) {
+                self.radius = 1.0;
+            }
+            
+            // Reset deltas to stop any existing movement and snap to center
+            self._deltaAzimuth = 0;
+            self._deltaElevation = 0;
+            vec3_set(self._deltaPan, 0, 0, 0);
+        }
+        self._needsUpdate = true;
+    }
+
     // Update the camera orbit. 
     // Optionally takes the mouse coordinates in input, otherwise it will get it automatically from the UeMouse class
     function update(mx = undefined, my = undefined) {
@@ -241,7 +276,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
             vec3_add_vectors(self.target, center, self.targetOffset);
         }
 
-        var effectiveSizeFactor = (self.targetObject != undefined) ? (self.sizeFactor * 0.1) : 1.0;
+        var effectiveSizeFactor = (self.targetObject != undefined) ? (self.sizeFactor * 0.002) : 1.0;
 
         // Mouse rotate
         if (self._dragging && self.enableRotate) {

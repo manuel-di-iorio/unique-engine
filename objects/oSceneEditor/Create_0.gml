@@ -10,6 +10,7 @@ randomize();
 // Maximize the window
 runLater(function() {
     window_command_run(window_command_maximize);
+    window_command_hook(window_command_close);
 }, 12);
 
 // Asset ID counters (for naming new assets)
