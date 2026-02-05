@@ -23,6 +23,7 @@ new UeObject3D(data = {})
 | `receiveShadow`   | `boolean`                 | `false`     | Whether this object receives shadows |
 | `gmObject`        | `string`                  | `undefined` | GameMaker object name to instantiate (e.g. "objPlayer") when this object is created by UeProjectLoader |
 | `gmLayer`         | `string`                  | `"Instances"`| GameMaker layer name for the instantiation |
+| `prefab`          | `UeObject3D`              | `undefined` | The original asset this object is an instance of (set automatically when dragging assets into a scene (Scene Editor) |
 
 ### Properties
 
@@ -41,6 +42,7 @@ new UeObject3D(data = {})
 | `userData`    | `struct`     | {}               | A struct where to safely place custom related data for this entity |
 | `gmObject`    | `string`     | undefined        | GameMaker object name to instantiate with this 3D object |
 | `gmLayer`     | `string`     | "Instances"      | GameMaker layer name where the object will be instantiated |
+| `prefab`      | `UeObject3D` | undefined        | Reference to the source prefab/asset this instance belongs to (Scene Editor) |
 | `onBeforeRender` | `method`  | void method      | Function called before rendering this object |
 | `onAfterRender`  | `method`  | void method      | Function called after rendering this object  |
 | `onBeforeShadow` | `method`  | void method      | Function called before rendering this object to shadow map |
@@ -129,6 +131,17 @@ Searches for and returns the first object in the hierarchy where object[name] ==
 getObjectsByProperty(name, value, optionalTarget = [])`
 ```
 Same as getObjectByProperty, but collects all matching objects in the hierarchy. Optional array target can be passed for reuse.
+
+<!-- @todo -->
+<!-- ```js
+setOverride(field, value)
+```
+Sets a property and marks it as locally overridden, preventing future syncs from the prefab for this specific field.
+
+```js
+syncFromPrefab(source)
+```
+Synchronizes properties from the source prefab, respecting local overrides. -->
 
 ```js
 traverseChildren(callback)
