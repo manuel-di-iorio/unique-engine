@@ -185,7 +185,6 @@
     {"$GMIncludedFile":"","%Name":"asset.json","CopyToMask":-1,"filePath":"datafiles/Unique Project/Assets/Scenes/f19cc000-5be7-40bc-9a05-33a5b20f1146","name":"asset.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"asset.json","CopyToMask":-1,"filePath":"datafiles/Unique Project/Assets/Textures/b40736f7-3d09-42c6-86f1-d0ee39231ffc","name":"asset.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"texture.png","CopyToMask":-1,"filePath":"datafiles/Unique Project/Assets/Textures/b40736f7-3d09-42c6-86f1-d0ee39231ffc","name":"texture.png","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
-    {"$GMIncludedFile":"","%Name":"editor.json","CopyToMask":-1,"filePath":"datafiles/Unique Project","name":"editor.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"project.json","CopyToMask":-1,"filePath":"datafiles/Unique Project","name":"project.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
   ],
   "isEcma":false,

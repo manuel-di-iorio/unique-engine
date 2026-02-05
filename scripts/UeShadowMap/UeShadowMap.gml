@@ -20,6 +20,10 @@ function UeShadowMap(shader, width = 1024, height = 1024) constructor {
     self.uniformMapFlags2Loc = shader_get_uniform(shader, "u_ueMapFlags2");
     self.samplerAlphaMapLoc = shader_get_sampler_index(shader, "s_alphaMap");
     
+    // Caching for near/far uniforms (used for linear depth calculation)
+    self.uniformNearLoc = shader_get_uniform(shader, "u_near");
+    self.uniformFarLoc = shader_get_uniform(shader, "u_far");
+    
     /**
      * Creates the shadow map surface.
      */
@@ -58,6 +62,10 @@ function UeShadowMap(shader, width = 1024, height = 1024) constructor {
         // Set shadow depth shader to write depth values to color buffer
         global.UE_RENDERER_ACTIVE_SHADOW_SHADER = self.shader;
         shader_set(self.shader);
+
+        // Set camera near/far for linear depth calculation in shadow shader
+        if (self.uniformNearLoc != -1) shader_set_uniform_f(self.uniformNearLoc, _shadowCamera.near);
+        if (self.uniformFarLoc != -1) shader_set_uniform_f(self.uniformFarLoc, _shadowCamera.far);
 
         // Render objects from the pre-collected queue
         var _shadowFrustum = _shadow.camera.getFrustum();

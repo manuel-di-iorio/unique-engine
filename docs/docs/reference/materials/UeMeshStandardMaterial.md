@@ -2,9 +2,9 @@
 sidebar_position: 3
 ---
 
-A ready-to-use material with built-in lighting support (ambient, point, directional) and texture handling.
+A ready-to-use material with built-in lighting support (ambient, point, directional, spot) and texture handling.
 
-Currently handles up to **1 directional light** and **8 point lights**. Only 1 directional and 1 point light can cast shadows simultaneously.
+Currently handles up to **1 directional light**, **8 point lights** and **8 spot lights**. Only 1 directional, 1 point light and 1 spot light can cast shadows simultaneously.
 
 > Inherits from [UeMaterial](/docs/reference/core/UeMaterial)
 

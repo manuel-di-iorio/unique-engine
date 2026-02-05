@@ -39,5 +39,5 @@ spotLight = new UeSpotLight(c_orange, 50000, 400, 30, 1, 2, { x: 90, y: 170, z: 
 spotLightHelper = new UeSpotLightHelper(spotLight);
 spotShadowMapViewer = new UeShadowMapViewer(spotLight, { width: 180, height: 180 });
 
-scene.add(cubeMesh, cubeMesh2, cubeMesh3, ambientLight, dirLight, dirLightHelper, pointLight, pointLightHelper, spotLight, spotLightHelper, terrain);
+scene.add(cubeMesh, cubeMesh2, cubeMesh3, ambientLight, /*dirLight, dirLightHelper, pointLight, pointLightHelper, */spotLight, spotLightHelper, terrain);
 scene.updateWorldMatrix(false, true);

@@ -269,6 +269,13 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         _newHash = ((_newHash ^ l.id) * 16777619) & 0xFFFFFFFF;
         _newHash = ((_newHash ^ l.version) * 16777619) & 0xFFFFFFFF;
         _newHash = ((_newHash ^ l.paramsVersion) * 16777619) & 0xFFFFFFFF;
+        
+        // Include target version for lights that have one (Directional, Spot)
+        var _target = l[$ "target"];
+        if (_target != undefined) {
+            _newHash = ((_newHash ^ _target.id) * 16777619) & 0xFFFFFFFF;
+            _newHash = ((_newHash ^ _target.version) * 16777619) & 0xFFFFFFFF;
+        }
 
         // Classify and accumulate
         switch (l.lightType) {
@@ -309,7 +316,7 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
         if (i < pIdx) {
             var l = pointLightState[i];
             // Only repack if version changed
-            if (l.version != (l[$ "__cachedV"] ?? -1) || l.paramsVersion != (l[$ "__cachedPV"] ?? -1)) {
+            if (l.version != (l[$ "__cachedV"] ?? -1) || l.paramsVersion != (l[$ "__cachedPV"] ?? -1) || l.target.version != (l[$ "__cachedTV"] ?? -1)) {
                 var _mw = l.matrixWorld;
                 pointLightsData[offset + 0] = _mw[12];
                 pointLightsData[offset + 1] = _mw[13];
