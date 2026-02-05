@@ -87,6 +87,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       receiveShadow,
       gmObject,
       gmLayer,
+      prefab: self[$ "prefab"] != undefined ? self.prefab.uuid : undefined,
       position,
       rotation,
       scale,

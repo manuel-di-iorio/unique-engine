@@ -11,7 +11,6 @@ attribute vec4 in_TextureCoord2; // Bone Indices
 attribute vec4 in_TextureCoord3; // Bone Weights
 
 varying vec2 v_vTexcoord;
-varying float v_depth;
 
 uniform mat4 uLightViewProj;
 uniform float u_ueNumBones;
@@ -44,7 +43,4 @@ void main()
 
     gl_Position = uLightViewProj * worldPos;
     v_vTexcoord = in_TextureCoord0;
-    
-    float ndc = gl_Position.z / gl_Position.w;    
-    v_depth = ndc * 0.5 + 0.5;
 }

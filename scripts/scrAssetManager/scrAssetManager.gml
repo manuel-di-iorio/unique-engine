@@ -3,7 +3,7 @@
 function AssetManager() constructor {
     // Flat array of all assets
     self.assets = [];
-    
+
     /**
      * Add an asset to the manager
      * @param {String} type - Asset type: "Texture", "Material", "Mesh", "Scene", "Light", "Camera", "Folder"
@@ -13,16 +13,16 @@ function AssetManager() constructor {
     function addAsset(type, asset, parent = undefined) {
         // Always add to flat assets array
         array_push(self.assets, asset);
-        
+
         // Set __parentUI if asset is in a folder (from treeview)
         if (asset[$ "__treeviewItem"] != undefined) {
             var treeviewItem = asset.__treeviewItem;
-            
+
             // The parent of a treeview item is the "Items" container
             // The parent of "Items" is the actual parent treeview item
             if (treeviewItem[$ "parent"] != undefined && treeviewItem.parent[$ "parent"] != undefined) {
                 var parentTreeviewItem = treeviewItem.parent.parent;
-                
+
                 // Check if parent item has an asset
                 if (parentTreeviewItem[$ "asset"] != undefined) {
                     // Store parent UI asset in __parentUI (used for saving hierarchy)
@@ -31,16 +31,16 @@ function AssetManager() constructor {
                 }
             }
         }
-        
+
         // Handle hierarchy parent
         if (parent != undefined) {
             parent.add(asset);
         }
-        
+
         // Track creation
         __trackChange("create", asset);
     }
-    
+
     /**
      * Remove an asset from the manager
      * @param {String} type - Asset type
@@ -48,28 +48,28 @@ function AssetManager() constructor {
      */
     function removeAsset(type, asset) {
         // Remove from flat assets array
-        var index = array_find_index(self.assets, method({ asset }, function(item) {
+        var index = array_find_index(self.assets, method({ asset }, function (item) {
             return item == asset;
         }));
-        
+
         if (index != -1) {
             array_delete(self.assets, index, 1);
         }
-        
+
         // Clear __parentUI if it was in a folder
         if (asset[$ "__parentUI"] != undefined) {
             asset.__parentUI = undefined;
         }
-        
+
         // Remove from parent if it has one
         if (asset[$ "parent"] != undefined && asset.parent != undefined) {
-            asset.parent.remove(asset); 
+            asset.parent.remove(asset);
         }
-        
+
         // Track removal
         __trackChange("delete", asset);
     }
-    
+
     /**
      * Get all assets of a specific type (root level only, not in folders)
      * @param {String} type - Asset type (case insensitive)
@@ -85,14 +85,14 @@ function AssetManager() constructor {
         }
         return result;
     }
-    
+
     /**
      * Clear all assets
      */
     function clear() {
         self.assets = [];
     }
-    
+
     /**
      * Mark an asset as edited (triggers unsaved changes)
      * @param {Struct} asset - The asset that was modified
@@ -101,7 +101,7 @@ function AssetManager() constructor {
      */
     function editAsset(asset, recursive = false, emitEvent = true) {
         self.__trackChange("edit", asset);
-        
+
         // Rebuild the box in the next frame in order to wait first for the matrix updates
         if (asset.type == "Mesh" || asset.type == "Object3D") {
             self.updateAssetMatrix(asset, recursive);
@@ -111,8 +111,13 @@ function AssetManager() constructor {
         if (emitEvent) {
             oSceneEditor.events.dispatch({ type: "assetChanged", data: asset });
         }
+
+        // If this is not a prefab, propagate changes to its instances
+        if (asset[$ "prefab"] == undefined) {
+            self.propagatePrefabChanges(asset);
+        }
     }
-    
+
     /**
      * Internal: Track a change to an asset
      * @param {String} action - "create", "edit", "delete"
@@ -120,17 +125,17 @@ function AssetManager() constructor {
      */
     function __trackChange(action, asset) {
         var projectManager = oSceneEditor.projectManager;
-        
+
         // VALIDATION: Don't track invalid assets
         if (asset == undefined) {
             return;
         }
-        
+
         // VALIDATION: Don't track assets without names (except delete)
         if (action != "delete" && (asset[$ "name"] == undefined || asset.name == "")) {
             return;
         }
-        
+
         // Object3D objects that belong to Scenes: instead of tracking the instance itself,
         // track the parent Scene as edited so scene changes (rename/move instance) are saved.
         // However, if Object3D is standalone (no parent), track it normally like other assets.
@@ -149,7 +154,7 @@ function AssetManager() constructor {
                 if (existingSceneChange == undefined) {
                     projectManager.changes[$ sceneUuid] = {
                         action: "edit",
-                        asset: scene
+                            asset: scene
                     };
                     projectManager.markAsUnsaved();
                 }
@@ -157,10 +162,10 @@ function AssetManager() constructor {
                 return;
             }
         }
-        
+
         var uuid = asset.uuid;
         var existing = projectManager.changes[$ uuid];
-        
+
         // If asset already has a change tracked
         if (existing != undefined) {
             // create -> delete = no change needed (asset never existed in saved state)
@@ -172,18 +177,18 @@ function AssetManager() constructor {
                 }
                 return;
             }
-            
+
             // create -> edit = still create (new asset with edits)
             if (existing.action == "create" && action == "edit") {
                 return; // Keep the create
             }
-            
+
             // edit -> delete = delete (override edit with delete)
             if (existing.action == "edit" && action == "delete") {
                 existing.action = "delete";
                 return;
             }
-            
+
             // edit -> edit = keep edit (already tracked)
             if (existing.action == "edit" && action == "edit") {
                 return; // Already tracked
@@ -192,7 +197,7 @@ function AssetManager() constructor {
             // New change
             projectManager.changes[$ uuid] = {
                 action,
-                asset
+                    asset
             };
             projectManager.markAsUnsaved();
         }
@@ -206,9 +211,9 @@ function AssetManager() constructor {
      */
     function updateAssetMatrix(asset, recursive = false) {
         self.__updateMatrixInternal(asset, recursive);
-        
+
         // Update the box helper to match the new transform
-        oSceneEditor.sceneManager.boxHelper.update();   
+        oSceneEditor.sceneManager.boxHelper.update();
         oSceneEditor.sceneManager.transformControls.updateGizmo();
     }
 
@@ -220,7 +225,7 @@ function AssetManager() constructor {
     function __updateMatrixInternal(asset, recursive) {
         asset.updateMatrix();
         asset.updateMatrixWorld(true);
-        
+
         if (recursive) {
             var children = asset[$ "children"];
             if (children != undefined) {
@@ -231,7 +236,7 @@ function AssetManager() constructor {
             }
         }
     }
-    
+
     /**
      * Validate asset hierarchy rules
      * @param {Struct} asset - Asset being moved/added
@@ -241,18 +246,18 @@ function AssetManager() constructor {
     function validateHierarchy(asset, target) {
         var assetType = asset[$ "type"] ?? asset[$ "assetType"];
         var targetType = target[$ "type"] ?? target[$ "assetType"];
-        
+
         // Textures and materials cannot have children
         if (targetType == "Texture" || targetType == "Material") {
             return false;
         }
-        
+
         // Models and Object3D can have models or Object3D as children
-        if ((assetType == "Mesh" || assetType == "Object3D") && 
+        if ((assetType == "Mesh" || assetType == "Object3D") &&
             (targetType == "Mesh" || targetType == "Object3D")) {
             return true;
         }
-        
+
         // Scenes can contain model instances or Object3D
         if (targetType == "Scene") {
             if (assetType == "Mesh" || assetType == "Object3D") {
@@ -260,7 +265,27 @@ function AssetManager() constructor {
             }
             return false;
         }
-        
+
         return false;
+    }
+
+    /**
+     * Propagate changes from a prefab to all its instances in the scene
+     * @param {Struct} prefabSource - The prefab that was modified
+     */
+    function propagatePrefabChanges(prefabSource) {
+        // Find all scenes
+        // @todo
+        // var scenes = self.getAssetsByType("Scene");
+        // for (var i = 0, il = array_length(scenes); i < il; i++) {
+        //     var scene = scenes[i];
+
+        // Traverse scene and find instances of this prefab
+        //     scene.traverse(method({ prefabSource }, function(obj) {
+        //         if (obj[$ "prefab"] == prefabSource) {
+        //             obj.syncFromPrefab(prefabSource);
+        //         }
+        //     }));
+        // }
     }
 }

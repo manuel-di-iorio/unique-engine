@@ -241,7 +241,7 @@ function __editorTreeview_setInstanceTypeRecursive(obj, assetType, originalObj =
     
     // Set metadata for the original asset
     if (originalObj != undefined) {
-        obj.__instanceOf = originalObj;
+        obj.prefab = originalObj;
     }
 
     // Set __parentUI for editor hierarchy tracking

@@ -20,6 +20,11 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     gmObject = data[$ "gmObject"] ?? undefined;
     gmLayer = data[$ "gmLayer"] ?? "Instances";
 
+    // /** @type {Struct} Map of properties that have been overridden locally on this instance */
+    // __localOverrides = data[$ "__localOverrides"] ?? {};
+    /** @type {UeObject3D} Reference to the prefab this object is an instance of (Scene Editor) */
+    prefab = data[$ "prefab"] ?? undefined;
+
     /** @type {Array<UeAnimation>} List of animations associated with this node */
     animations = [];
 
@@ -33,6 +38,43 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     function onAfterRender() { }
     function onBeforeShadow() { }
     function onAfterShadow() { }
+
+    // @todo
+    /**
+     * Set a property and mark it as a local override if this is an instance
+     * @param {string} field The property name
+     * @param {any} value The new value
+     */
+    // function setOverride(field, value) {
+    //     self[$ field] = value;
+    //     if (prefab != undefined) {
+    //         __localOverrides[$ field] = true;
+    //     }
+    // }
+
+    /**
+     * Sync properties from a prefab, respecting local overrides
+     * @param {UeObject3D} prefabSource The source prefab
+     */
+    // function syncFromPrefab(prefabSource) {
+    //     if (prefabSource == undefined) return;
+        
+    //     var fields = ["name", "visible", "renderOrder", "frustumCulled", "castShadow", "receiveShadow", "gmObject", "gmLayer", "matrixAutoUpdate"];
+    //     for (var i = 0; i < array_length(fields); i++) {
+    //         var f = fields[i];
+    //         if (__localOverrides[$ f] == undefined) {
+    //             self[$ f] = prefabSource[$ f];
+    //         }
+    //     }
+
+    //     // Sync transforms if not overridden
+    //     if (__localOverrides[$ "position"] == undefined) vec3_copy(position, prefabSource.position);
+    //     if (__localOverrides[$ "rotation"] == undefined) quat_copy(rotation, prefabSource.rotation);
+    //     if (__localOverrides[$ "scale"] == undefined) vec3_copy(scale, prefabSource.scale);
+        
+    //     // Update matrix after sync
+    //     updateMatrix();
+    // }
 
     /**
      * Returns a clone of this object and optionally all descendants.
@@ -189,6 +231,33 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     }
 
     /**
+     * Synchronizes properties from the source prefab, respecting local overrides.
+     * @param {Struct} source - The prefab object to sync from
+     */
+    // function syncFromPrefab(source) {
+    //     gml_pragma("forceinline");
+    //     // Only sync if it's the correct prefab
+    //     if (self.prefab != source) return;
+
+    //     // Sync basic properties (can be expanded with local overrides logic)
+    //     visible = source.visible;
+    //     renderOrder = source.renderOrder;
+    //     layers.mask = source.layers.mask;
+    //     frustumCulled = source.frustumCulled;
+    //     castShadow = source.castShadow;
+    //     receiveShadow = source.receiveShadow;
+        
+    //     // Sync Mesh specific properties
+    //     if (struct_exists(self, "isMesh") && self.isMesh && struct_exists(source, "isMesh") && source.isMesh) {
+    //         geometry = source.geometry;
+    //         material = source.material;
+    //     }
+
+    //     // Note: position, rotation, scale are usually NOT synced from prefab 
+    //     // as instances have their own transforms in the scene.
+    // }
+
+    /**
      * Copies the given object variables into this object. Note: Event listeners and user-defined callbacks (eg. .onAfterRender and .onBeforeRender) are not copied
      * @param {Struct} source object to copy into this one
      * @param {bool} recursive If set to true, descendants of the object are copied next to the existing ones. If set to false, descendants are left unchanged. Default is true.
@@ -207,6 +276,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         gmLayer = source[$ "gmLayer"];
         matrixAutoUpdate = source.matrixAutoUpdate;
         matrixWorldAutoUpdate = source.matrixWorldAutoUpdate;
+        prefab = source[$ "prefab"];
+        // __localOverrides = variable_clone(source[$ "__localOverrides"] ?? {});
 
         var _sourceGeometry = source[$ "geometry"];
         if (_sourceGeometry != undefined) {
@@ -251,6 +322,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             receiveShadow,
             gmObject,
             gmLayer,
+            prefab: prefab ? prefab.uuid : undefined,
+            // __localOverrides,
 
             position,
             rotation,
@@ -279,6 +352,14 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         receiveShadow = data[$ "receiveShadow"] ?? false;
         gmObject = data[$ "gmObject"];
         gmLayer = data[$ "gmLayer"] ?? "Instances";
+        // __localOverrides = data[$ "__localOverrides"] ?? {};
+
+        if (data[$ "prefab"] != undefined) {
+            var prefabUuid = data.prefab;
+            if (objectsByUUID[$ prefabUuid] != undefined) {
+                self.prefab = objectsByUUID[$ prefabUuid];
+            }
+        }
 
         // Subclass-specific data
         if (struct_exists(self, "isMesh") && self.isMesh) {

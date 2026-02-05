@@ -1,7 +1,6 @@
 precision highp float;
 
 varying vec2 v_vTexcoord;
-varying float v_depth;
 
 uniform float u_near;
 uniform float u_far;
@@ -32,9 +31,7 @@ void main()
 
     // We write the linearized depth to the color buffer for debugging/viewer purposes.
     float zparam = u_far / u_near;
-    // float depth = LinearizeDepth(gl_FragCoord.z, zparam);
-    // Use v_depth calculated in vertex shader instead of gl_FragCoord.z for better consistency
-    float depth = LinearizeDepth(v_depth, zparam);
+    float depth = LinearizeDepth(gl_FragCoord.z, zparam);
     
     gl_FragColor = vec4(depth, 0.0, 0.0, 1.0);
 }
