@@ -98,7 +98,7 @@ function UeSpotLightShadow(data = {}): UeLightShadow(data) constructor {
         shader_set(sh_ue_spot_shadow);
 
         // Set light view projection matrix
-        shader_set_uniform_f_array(__uLightViewProjLoc, lightSpaceMatrix);
+        shader_set_uniform_matrix_array(__uLightViewProjLoc, lightSpaceMatrix);
 
         // Set near and far planes for linear depth
         shader_set_uniform_f(__uNearLoc, self.camera.near);

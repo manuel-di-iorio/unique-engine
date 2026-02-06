@@ -431,16 +431,26 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         return self;
     }
 
-    /// Gets world-space position
-    function getWorldPosition(target) {
+    /**
+     * @description Gets the world-space position.
+     * @param {Array} [target] Optional target array to store the result.
+     * @returns {Array} The world-space position.
+     */
+    function getWorldPosition(target = undefined) {
         gml_pragma("forceinline");
+        target ??= vec3_create();
         vec3_set_from_matrix_position(target, matrixWorld);
         return target;
     }
 
-    /// Gets world-space rotation quaternion
-    function getWorldQuaternion(target) {
+    /**
+     * @description Gets the world-space rotation quaternion.
+     * @param {Array} [target] Optional target array to store the result.
+     * @returns {Array} The world-space rotation quaternion.
+     */
+    function getWorldQuaternion(target = undefined) {
         gml_pragma("forceinline");
+        target ??= quat_create();
 
         var v = global.UE_VEC3_TEMP0;
         mat4_decompose(matrixWorld, v, target, v);
@@ -448,9 +458,14 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         return target;
     }
 
-    /// Gets world-space scale
-    function getWorldScale(target) {
+    /**
+     * @description Gets the world-space scale.
+     * @param {Array} [target] Optional target array to store the result.
+     * @returns {Array} The world-space scale.
+     */
+    function getWorldScale(target = undefined) {
         gml_pragma("forceinline");
+        target ??= vec3_create();
 
         var v = global.UE_VEC3_TEMP0;
         mat4_decompose(matrixWorld, v, global.__QUAT_TEMP, target);
@@ -458,7 +473,11 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         return target;
     }
 
-    /// Gets forward direction in world space
+    /**
+     * @description Gets the forward direction in world space.
+     * @param {Array} [target] Optional target array to store the result.
+     * @returns {Array} The world-space forward direction.
+     */
     function getWorldDirection(target = undefined) {
         gml_pragma("forceinline");
 

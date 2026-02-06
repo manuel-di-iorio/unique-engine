@@ -161,24 +161,24 @@ applyQuaternion(quat)
 Applies a quaternion rotation to the object.
 
 ```js
-getWorldPosition(target)
+getWorldPosition(target = undefined)
 ```
-Returns the world position of the object.
+Returns the world position of the object. If `target` is provided, the result is stored in it; otherwise, a new array is returned.
 
 ```js
-getWorldQuaternion(target)
+getWorldQuaternion(target = undefined)
 ```
-Returns the world rotation quaternion.
+Returns the world rotation quaternion. If `target` is provided, the result is stored in it; otherwise, a new array is returned.
 
 ```js
-getWorldScale(target)
+getWorldScale(target = undefined)
 ```
-Returns the world scale.
+Returns the world scale. If `target` is provided, the result is stored in it; otherwise, a new array is returned.
 
 ```js
-getWorldDirection(target)
+getWorldDirection(target = undefined)
 ```
-Returns a vector representing the world direction the object is facing (based on the `up` property).
+Returns a vector representing the world direction the object is facing (based on the `up` property). If `target` is provided, the result is stored in it; otherwise, a new array is returned.
 
 ```js
 localToWorld(vector)

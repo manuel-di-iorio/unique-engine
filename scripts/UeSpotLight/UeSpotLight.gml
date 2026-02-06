@@ -97,6 +97,7 @@ function UeSpotLight(_color = c_white, _intensity = 100, _distance = 20, _angle 
       vec3_copy(__lastWorldTargetPosition, wtp);
     }
     vec3_copy(v, __direction);
+
     return v;
   }
 }

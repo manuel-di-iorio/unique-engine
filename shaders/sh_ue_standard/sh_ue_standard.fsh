@@ -285,10 +285,10 @@ float calculatePointShadow(vec3 worldPos, vec3 N) {
 
 float calculateSpotShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
     if (lightSpacePos.w < EPSILON) return 0.0;
-    vec3 p = lightSpacePos.xyz / lightSpacePos.w;
     
-    // Map NDC to UV for x and y
-    p.xy = p.xy * 0.5 + 0.5;
+    // Map NDC to [0, 1] range
+    vec3 p = lightSpacePos.xyz / lightSpacePos.w;
+    p = p * 0.5 + 0.5;
     p.y = 1.0 - p.y; // Flip Y for GameMaker surfaces
     
     // Scarta fuori frustum
@@ -302,23 +302,23 @@ float calculateSpotShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
     float zparam = u_ueSpotShadowFar / u_ueSpotShadowNear;
     float currentDepth = LinearizeDepth(p.z, zparam);
 
-    // Bias (slightly adjusted for linear depth)
+    // Dynamic bias based on slope
     float cosTheta = clamp(dot(N, L), 0.0, 1.0);
-    float bias = max(0.005 * (1.0 - cosTheta), 0.001);
+    float bias = max(0.005 * (1.0 - cosTheta), 0.001); 
 
     float shadow = 0.0;
 
     // 5-tap PCF (Center + corners)
     if (u_ueSpotShadowQuality > 0.5) {
         float texelSize = u_ueSpotShadowInvTexelSize;
-        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy).r) ? 1.0 : 0.0;
-        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy + vec2(-0.7, -0.7) * texelSize).r) ? 1.0 : 0.0;
-        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy + vec2( 0.7, -0.7) * texelSize).r) ? 1.0 : 0.0;
-        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy + vec2(-0.7,  0.7) * texelSize).r) ? 1.0 : 0.0;
-        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy + vec2( 0.7,  0.7) * texelSize).r) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy).r, zparam)) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2(-0.7, -0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2( 0.7, -0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2(-0.7,  0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2( 0.7,  0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
         return shadow / 5.0;
     } else {
-        float d = texture2D(s_spotShadowMap, p.xy).r;
+        float d = LinearizeDepth(texture2D(s_spotShadowMap, p.xy).r, zparam);
         return (currentDepth - bias > d) ? 1.0 : 0.0;
     }
 }
@@ -558,8 +558,7 @@ void main() {
             shadow = calculateSpotShadow(vSpotLightSpacePos, N, L);
         }
 
-        Lo += calculateSpotLight(sPos, sDir, sColor, sRange, sIntensity, sDecay, sAngle, sPenumbra, N, V, albedo, F0, roughness, metalness)
-              * (1.0 - shadow);
+        Lo += calculateSpotLight(sPos, sDir, sColor, sRange, sIntensity, sDecay, sAngle, sPenumbra, N, V, albedo, F0, roughness, metalness) * (1.0 - shadow);
     }
 
     // Ambient

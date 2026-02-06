@@ -85,11 +85,7 @@ void main() {
     vColour = in_Colour;
 
     vDirLightSpacePos = u_ueDirShadowMatrix * worldPos;
-    
-    // Apply a small normal bias to the spot light shadow position to prevent acne
-    vec4 shadowWorldPos = worldPos;
-    shadowWorldPos.xyz += worldNormal * 0.15;
-    vSpotLightSpacePos = u_ueSpotShadowMatrix * shadowWorldPos;
+    vSpotLightSpacePos = u_ueSpotShadowMatrix * worldPos;
 
     gl_Position = gm_Matrices[MATRIX_PROJECTION] * (gm_Matrices[MATRIX_VIEW] * worldPos);
 }
