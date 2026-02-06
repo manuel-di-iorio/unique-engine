@@ -45,6 +45,10 @@ function UeDirectionalLightShadow(data = {}): UeLightShadow(data) constructor {
         // Use world position and target position for shadow camera
         var lp = global.UE_VEC3_TEMP1;
         var tp = global.UE_VEC3_TEMP2;
+
+        light.updateWorldMatrix(true, false);
+        light.target.updateWorldMatrix(true, false);
+
         light.getWorldPosition(lp);
         light.target.getWorldPosition(tp);
 

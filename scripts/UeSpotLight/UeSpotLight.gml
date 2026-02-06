@@ -47,56 +47,56 @@ function UeSpotLight(_color = c_white, _intensity = 100, _distance = 20, _angle 
   // Target is an Object3D that the light points at (default: origin)
   target = new UeObject3D({ x: data[$ "xt"] ?? 0, y: data[$ "yt"] ?? 0, z: data[$ "zt"] ?? 0 });
 
-    /**
-     * @property {Real} power The light's power measured in lumens.
-     * Changing the power will also change the light's intensity.
-     */
-    static getPower = function () {
-      gml_pragma("forceinline");
-      return self.intensity * pi;
-    };
-        
-        static setPower = function (_power) {
-      gml_pragma("forceinline");
-      self.intensity = _power / pi;
-    };
+  /**
+   * @property {Real} power The light's power measured in lumens.
+   * Changing the power will also change the light's intensity.
+   */
+  static getPower = function () {
+    gml_pragma("forceinline");
+    return self.intensity * pi;
+  };
+      
+  static setPower = function (_power) {
+    gml_pragma("forceinline");
+    self.intensity = _power / pi;
+  };
 
-    // Shadow support for spot lights
-    var _shadowFar = data[$ "shadowFar"] ?? self.distance;
+  // Shadow support for spot lights
+  var _shadowFar = data[$ "shadowFar"] ?? self.distance;
 
-    shadow = new UeSpotLightShadow({
-      near: data[$ "shadowNear"] ?? .5,
-      far: _shadowFar,
-      mapWidth: data[$ "shadowMapWidth"] ?? 1024,
-      mapHeight: data[$ "shadowMapHeight"] ?? 1024
-        });
+  shadow = new UeSpotLightShadow({
+    near: data[$ "shadowNear"] ?? .5,
+    far: _shadowFar,
+    mapWidth: data[$ "shadowMapWidth"] ?? 1024,
+    mapHeight: data[$ "shadowMapHeight"] ?? 1024
+  });
 
-    // Caching
-    __direction = vec3_create();
-    __lastWorldPosition = vec3_create(infinity, infinity, infinity);
-    __lastWorldTargetPosition = vec3_create(infinity, infinity, infinity);
+  // Caching
+  __direction = vec3_create();
+  __lastWorldPosition = vec3_create(infinity, infinity, infinity);
+  __lastWorldTargetPosition = vec3_create(infinity, infinity, infinity);
 
-    /**
-     * Gets the current light direction (normalized vector from position to target).
-     * @params {Array} v - Output vector (vec3)
-     * @returns {Array} Normalized direction vector (vec3)
-     */
-    function getDirection(v = global.UE_VEC3_TEMP0) {
-      gml_pragma("forceinline");
+  /**
+   * Gets the current light direction (normalized vector from position to target).
+   * @params {Array} v - Output vector (vec3)
+   * @returns {Array} Normalized direction vector (vec3)
+   */
+  function getDirection(v = global.UE_VEC3_TEMP0) {
+    gml_pragma("forceinline");
+    
+    var wp = global.UE_VEC3_TEMP1;
+    var wtp = global.UE_VEC3_TEMP2;
+    self.getWorldPosition(wp);
+    target.getWorldPosition(wtp);
 
-      var wp = global.UE_VEC3_TEMP1;
-      var wtp = global.UE_VEC3_TEMP2;
-      self.getWorldPosition(wp);
-      target.getWorldPosition(wtp);
-
-      if (!vec3_equals(wp, __lastWorldPosition) || !vec3_equals(wtp, __lastWorldTargetPosition)) {
-        vec3_copy(__direction, wtp);
-        vec3_sub(__direction, wp);
-        vec3_normalize(__direction);
-        vec3_copy(__lastWorldPosition, wp);
-        vec3_copy(__lastWorldTargetPosition, wtp);
-      }
-      vec3_copy(v, __direction);
-      return v;
+    if (!vec3_equals(wp, __lastWorldPosition) || !vec3_equals(wtp, __lastWorldTargetPosition)) {
+      vec3_copy(__direction, wtp);
+      vec3_sub(__direction, wp);
+      vec3_normalize(__direction);
+      vec3_copy(__lastWorldPosition, wp);
+      vec3_copy(__lastWorldTargetPosition, wtp);
     }
+    vec3_copy(v, __direction);
+    return v;
+  }
 }

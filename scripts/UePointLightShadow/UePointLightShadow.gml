@@ -68,6 +68,7 @@ function UePointLightShadow(data = {}): UeLightShadow(data) constructor {
 
     // Use world position for shadow cameras
     var lp = global.UE_VEC3_TEMP1;
+    light.updateWorldMatrix(true, false);
     light.getWorldPosition(lp);
 
     for (var i = 0; i < 6; i++) {

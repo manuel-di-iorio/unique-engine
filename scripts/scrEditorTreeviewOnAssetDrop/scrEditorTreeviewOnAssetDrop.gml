@@ -64,8 +64,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         return false;
     }
     
-    // Scene can only be moved under another Scene
-    // Scene cannot be moved under another Scene
+    // Scene cannot be moved under another Scene or Object (no nesting)
     else if (draggedItem.assetType == "Scene") {
         return false;
     }
@@ -359,7 +358,8 @@ function __editorTreeview_isAssetInScene(asset) {
     // Explicit check for isInstance flag if it exists (for extra safety)
     if (asset[$ "isInstance"] == true) return true;
     
-    var curr = asset;
+    // Start from parent to check if it's contained within a scene hierarchy
+    var curr = asset[$ "parent"];
     while (curr != undefined) {
         if (curr[$ "type"] == "Scene") return true;
         if (curr[$ "type"] == "Folder") return false; // Assets in folders are masters
