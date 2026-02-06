@@ -4,7 +4,7 @@
  * @param {Real} [_intensity=1] The light's strength/intensity.
  * @param {Real} [_distance=0] Maximum range of the light.
  * @param {Real} [_angle=60] Maximum angle of light dispersion from its direction (in degrees).
- * @param {Real} [_penumbra=0] Percent of the spotlight cone that is attenuated due to penumbra.
+ * @param {Real} [_penumbra=0] Percent of the spotlight cone that is attenuated due to penumbra [0,1].
  * @param {Real} [_decay=2] The amount the light dims along the distance of the light.
  * @param {Struct} [data={}] Additional configuration data.
  */
@@ -17,7 +17,7 @@ function UeSpotLight(_color = c_white, _intensity = 100, _distance = 20, _angle 
   self.intensity = _intensity;
   self.distance = _distance;
   self.angle = _angle;
-  self.penumbra = _penumbra;
+  self.penumbra = clamp(_penumbra, 0.0, 1.0);
   self.decay = _decay;
 
   static setDistance = function(_distance) {
@@ -40,7 +40,7 @@ function UeSpotLight(_color = c_white, _intensity = 100, _distance = 20, _angle 
 
   static setPenumbra = function(_penumbra) {
     gml_pragma("forceinline");
-    penumbra = _penumbra;
+    penumbra = clamp(_penumbra, 0.0, 1.0);
     paramsVersion++;
   }
 

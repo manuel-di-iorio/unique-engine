@@ -35,10 +35,9 @@ pointLight = new UePointLight(c_yellow, 50, 300, 1, { castShadow: true });
 pointLightHelper = new UePointLightHelper(pointLight, 5);
 pointShadowMapViewer = new UeShadowMapViewer(pointLight, { width: 180, height: 180 });
 
-// spotLight = new UeSpotLight(c_orange, 50000, 400, 30, 1, 2, { x: 90, y: 170, z: 50, zt: -25, castShadow: true });
-spotLight = new UeSpotLight(c_orange, 1, 400, 30, 0, 0, { x: 90, y: 170, z: 50, zt: -25, castShadow: true });
+spotLight = new UeSpotLight(c_orange, 500, 400, 30, 0.2, 1, { x: 90, y: 170, z: 50, castShadow: true });
 spotLightHelper = new UeSpotLightHelper(spotLight);
 spotShadowMapViewer = new UeShadowMapViewer(spotLight, { width: 180, height: 180 });
 
-scene.add(cubeMesh, cubeMesh2, cubeMesh3, /*ambientLight, dirLight, dirLightHelper, pointLight, pointLightHelper, */spotLight, spotLightHelper, terrain);
+scene.add(cubeMesh, cubeMesh2, cubeMesh3, ambientLight, dirLight, dirLightHelper, pointLight, pointLightHelper, spotLight, spotLightHelper, terrain);
 scene.updateWorldMatrix(false, true);

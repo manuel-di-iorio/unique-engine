@@ -197,6 +197,7 @@ float calculateDirShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
     } else {
         float d = texture2D(s_dirShadowMap, p.xy).r;
         return (p.z - bias > d) ? 1.0 : 0.0;
+        return (p.z > d) ? 1.0 : 0.0;
     }
 }
 
@@ -284,44 +285,39 @@ float calculatePointShadow(vec3 worldPos, vec3 N) {
 }
 
 float calculateSpotShadow(vec4 lightSpacePos, vec3 N, vec3 L) {
-    if (lightSpacePos.w < EPSILON) return 0.0;
-    
-    // Map NDC to [0, 1] range
+    if (lightSpacePos.w <= 0.0) return 0.0;
+
     vec3 p = lightSpacePos.xyz / lightSpacePos.w;
-    p = p * 0.5 + 0.5;
-    p.y = 1.0 - p.y; // Flip Y for GameMaker surfaces
-    
-    // Scarta fuori frustum
+    p.xy = p.xy * 0.5 + 0.5;
+    p.y = 1.0 - p.y;
+
     if (p.x < 0.0 || p.x > 1.0 ||
         p.y < 0.0 || p.y > 1.0 ||
         p.z < 0.0 || p.z > 1.0)
-    {
         return 0.0;
-    }
 
-    float zparam = u_ueSpotShadowFar / u_ueSpotShadowNear;
-    float currentDepth = LinearizeDepth(p.z, zparam);
+    // Use shifted depth comparison to match v_depth = ndc * 0.5 + 0.5
+    float currentDepth = p.z * 0.5 + 0.5;
 
-    // Dynamic bias based on slope
-    float cosTheta = clamp(dot(N, L), 0.0, 1.0);
-    float bias = max(0.005 * (1.0 - cosTheta), 0.001); 
+    float cosTheta = max(dot(N, L), 0.0);
+    float bias = max(0.002 * (1.0 - cosTheta), 0.0005);
 
     float shadow = 0.0;
 
-    // 5-tap PCF (Center + corners)
     if (u_ueSpotShadowQuality > 0.5) {
-        float texelSize = u_ueSpotShadowInvTexelSize;
-        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy).r, zparam)) ? 1.0 : 0.0;
-        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2(-0.7, -0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
-        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2( 0.7, -0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
-        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2(-0.7,  0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
-        shadow += (currentDepth - bias > LinearizeDepth(texture2D(s_spotShadowMap, p.xy + vec2( 0.7,  0.7) * texelSize).r, zparam)) ? 1.0 : 0.0;
+        float texel = u_ueSpotShadowInvTexelSize;
+        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy).r) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy + vec2(-0.7, -0.7) * texel).r) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy + vec2( 0.7, -0.7) * texel).r) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy + vec2(-0.7,  0.7) * texel).r) ? 1.0 : 0.0;
+        shadow += (currentDepth - bias > texture2D(s_spotShadowMap, p.xy + vec2( 0.7,  0.7) * texel).r) ? 1.0 : 0.0;
         return shadow / 5.0;
     } else {
-        float d = LinearizeDepth(texture2D(s_spotShadowMap, p.xy).r, zparam);
+        float d = texture2D(s_spotShadowMap, p.xy).r;
         return (currentDepth - bias > d) ? 1.0 : 0.0;
     }
 }
+
 
 vec3 BRDF_GGX(vec3 N, vec3 V, vec3 L, vec3 lightColor, float intensity,
               vec3 albedo, vec3 F0, float roughness, float metalness) {
@@ -361,7 +357,7 @@ vec3 calculatePointLight(vec3 pos, vec3 color, float range, float intensity, flo
 }
 
 // ===== Spot Light =====
-vec3 calculateSpotLight(vec3 pos, vec3 dir, vec3 color, float range, float intensity, float decay, float angle, float penumbra, vec3 N, vec3 V, vec3 albedo, vec3 F0, float roughness, float metalness) {
+vec3 calculateSpotLight(vec3 pos, vec3 dir, vec3 color, float range, float intensity, float decay, float angleCos, float penumbraCos, vec3 N, vec3 V, vec3 albedo, vec3 F0, float roughness, float metalness) {
     vec3 toL = pos - vWorldPosition;
     float d = length(toL);
     if (intensity <= 0.0 || (range > 0.0 && d > range)) return vec3(0.0);
@@ -369,20 +365,16 @@ vec3 calculateSpotLight(vec3 pos, vec3 dir, vec3 color, float range, float inten
     vec3 L = normalize(toL);
     float theta = dot(L, normalize(-dir));
     
-    if (theta < angle) return vec3(0.0);
+    // angleCos is the outer edge, penumbraCos is the inner edge
+    float spotEffect = smoothstep(angleCos, penumbraCos, theta);
+    if (spotEffect <= 0.0) return vec3(0.0);
 
     float att = 1.0 / (pow(d, decay) + EPSILON);
     if (range > 0.0) {
         att *= pow(clamp(1.0 - pow(d / range, 4.0), 0.0, 1.0), 2.0);
     }
 
-    float intensityFactor = 1.0;
-    if (abs(penumbra - angle) > EPSILON) {
-        intensityFactor = clamp((theta - angle) / (penumbra - angle), 0.0, 1.0);
-    }
-    att *= intensityFactor;
-
-    return BRDF_GGX(N, V, L, SRGBToLinear(color), intensity * att, albedo, F0, roughness, metalness);
+    return BRDF_GGX(N, V, L, SRGBToLinear(color), intensity * att * spotEffect, albedo, F0, roughness, metalness);
 }
 
 // ===== Tone Mapping =====

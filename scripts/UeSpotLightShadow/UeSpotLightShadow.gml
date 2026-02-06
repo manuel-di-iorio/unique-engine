@@ -21,8 +21,6 @@ function UeSpotLightShadow(data = {}): UeLightShadow(data) constructor {
 
     // Uniform locations
     __uLightViewProjLoc = shader_get_uniform(sh_ue_spot_shadow, "uLightViewProj");
-    __uNearLoc = shader_get_uniform(sh_ue_spot_shadow, "u_near");
-    __uFarLoc = shader_get_uniform(sh_ue_spot_shadow, "u_far");
 
     /**
      * Updates the shadow map size and recreates the render target.
@@ -99,10 +97,6 @@ function UeSpotLightShadow(data = {}): UeLightShadow(data) constructor {
 
         // Set light view projection matrix
         shader_set_uniform_matrix_array(__uLightViewProjLoc, lightSpaceMatrix);
-
-        // Set near and far planes for linear depth
-        shader_set_uniform_f(__uNearLoc, self.camera.near);
-        shader_set_uniform_f(__uFarLoc, self.camera.far);
 
         var _shadowFrustum = self.camera.getFrustum();
         for (var i = 0; i < __shadowIdx; i++) {

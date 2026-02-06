@@ -358,8 +358,9 @@ function UeRenderer(data = {}): UeObject3D(data) constructor {
                 spotLightsData[offset + 9] = worldDir[1];
                 spotLightsData[offset + 10] = worldDir[2];
                 spotLightsData[offset + 11] = l.decay;
-                spotLightsData[offset + 12] = cos(degtorad(l.angle));
-                spotLightsData[offset + 13] = cos(degtorad(l.angle * (1.0 - l.penumbra)));
+
+                spotLightsData[offset + 12] = dcos(l.angle);
+                spotLightsData[offset + 13] = dcos(l.angle * (1.0 - l.penumbra));
                 
                 l.__cachedV = l.version;
                 l.__cachedPV = l.paramsVersion;

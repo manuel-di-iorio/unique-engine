@@ -28,7 +28,7 @@ Constructs a new spot light.
 - `intensity`: The light's strength/intensity. Default is `1`.
 - `distance`: Maximum range of the light. Default is `0` (no limit).
 - `angle`: Maximum angle of light dispersion from its direction (in degrees). Default is `30`.
-- `penumbra`: Percent of the spotlight cone that is attenuated due to penumbra. Default is `0`.
+- `penumbra`: Percent of the spotlight cone that is attenuated due to penumbra (range 0-1). Default is `0`.
 - `decay`: The amount the light dims along the distance of the light. Default is `2`.
 - `data`: Optional configuration object.
 

@@ -37,6 +37,29 @@ if (len > 0) {
 if (keyboard_check(ord("U"))) pointLight.position[VEC3.z] += moveSpeed;
 if (keyboard_check(ord("O"))) pointLight.position[VEC3.z] -= moveSpeed;
 
+// Spot light movement
+if (len > 0) {
+    if (keyboard_check(ord("A"))) {
+        spotLight.position[VEC3.x] -= rgtX * moveSpeed;
+        spotLight.position[VEC3.y] -= rgtY * moveSpeed;
+    }
+    if (keyboard_check(ord("D"))) {
+        spotLight.position[VEC3.x] += rgtX * moveSpeed;
+        spotLight.position[VEC3.y] += rgtY * moveSpeed;
+    }
+    if (keyboard_check(ord("W"))) {
+        spotLight.position[VEC3.x] += fwdX * moveSpeed;
+        spotLight.position[VEC3.y] += fwdY * moveSpeed;
+    }
+    if (keyboard_check(ord("S"))) {
+        spotLight.position[VEC3.x] -= fwdX * moveSpeed;
+        spotLight.position[VEC3.y] -= fwdY * moveSpeed;
+    }
+}
+
+if (keyboard_check(ord("Q"))) spotLight.position[VEC3.z] += moveSpeed;
+if (keyboard_check(ord("E"))) spotLight.position[VEC3.z] -= moveSpeed;
+
 orbit.update();
 pointLightHelper.update();
 spotLightHelper.update();

@@ -476,22 +476,22 @@ function UeMaterial(data = {}) constructor {
     blendSrcAlpha = source.blendSrcAlpha;
     blendDstAlpha = source.blendDstAlpha;
     shader = source.shader;
-    
+
     // Copy uniforms (deep clone of the uniforms struct)
     uniforms = variable_clone(source.uniforms);
-    
+
     // Copy textures (copies references)
     textures = {};
     var _textureNames = variable_struct_get_names(source.textures);
     for (var i = 0, il = array_length(_textureNames); i < il; i++) {
-        var _tName = _textureNames[i];
-        textures[$ _tName] = source.textures[$ _tName];
+      var _tName = _textureNames[i];
+      textures[$ _tName] = source.textures[$ _tName];
     }
-    
+
     receiveShadow = source.receiveShadow;
     lights = source.lights;
     shadowQuality = source.shadowQuality;
-    
+
     build();
     return self;
   }
