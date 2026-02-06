@@ -11,10 +11,18 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self.__scratchBox = box3_create();
 
     // Set the initial azimuth/elevation from the camera position towards the target
-    var dir = vec3_clone(camera.position); vec3_sub(dir, self.target);
-    self.radius = vec3_distance_to(camera.position, self.target);
-    self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
-    self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+    var cp = camera.position;
+    var ct = self.target;
+    if (!is_nan(cp[0] + cp[1] + cp[2] + ct[0] + ct[1] + ct[2])) {
+        var dir = vec3_clone(cp); vec3_sub(dir, ct);
+        self.radius = vec3_distance_to(cp, ct);
+        self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
+        self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+    } else {
+        self.radius = 10;
+        self.azimuth = 0;
+        self.elevation = 0;
+    }
 
     self.enableZoom = data[$"enableZoom"] ?? true;
     self.zoomSpeed = data[$"zoomSpeed"] ?? 5;
@@ -72,10 +80,15 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         gml_pragma("forceinline");
         vec3_set(self.target, 0, 0, 0);  // @todo should set to the actual initial target
 
-        var dir = vec3_sub_vectors(self.__scratchVec0, camera.position, self.target);
-        self.radius = vec3_distance_to(camera.position, self.target);
-        self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
-        self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+        var cp = camera.position;
+        var ct = self.target;
+        if (!is_nan(cp[0] + cp[1] + cp[2] + ct[0] + ct[1] + ct[2])) {
+            var dir = vec3_sub_vectors(self.__scratchVec0, cp, ct);
+            self.radius = vec3_distance_to(cp, ct);
+            self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
+            self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+        }
+
         self._needsUpdate = true;
     }
 
@@ -83,8 +96,12 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     // Useful when manually setting the camera position and target
     // @todo missing doc
     function updateSphericalCoordinates() {
-        var dir = vec3_sub_vectors(self.__scratchVec0, camera.position, self.target);
-        self.radius = vec3_distance_to(camera.position, self.target);
+        var cp = camera.position;
+        var ct = self.target;
+        if (is_nan(cp[0] + cp[1] + cp[2] + ct[0] + ct[1] + ct[2])) return;
+
+        var dir = vec3_sub_vectors(self.__scratchVec0, cp, ct);
+        self.radius = vec3_distance_to(cp, ct);
         self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
         self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
 
@@ -103,19 +120,26 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     function setTarget(newTarget) {
         vec3_set(self.targetOffset, 0, 0, 0);
         if (typeof (newTarget) == "struct" && (newTarget[$ "isObject3D"] || newTarget[$ "isMesh"])) {
-            self.targetObject = newTarget;
             box3_set_from_object(self.__scratchBox, newTarget);
 
             if (box3_is_empty(self.__scratchBox)) {
+                self.targetObject = undefined;
                 vec3_set(self.target, 0, 0, 0);
                 self.sizeFactor = 1.0;
             } else {
+                self.targetObject = newTarget;
                 var center = box3_get_center(self.__scratchBox);
-                vec3_copy(self.target, center);
+                
+                if (is_nan(center[0] + center[1] + center[2])) {
+                    vec3_set(self.target, 0, 0, 0);
+                    self.sizeFactor = 1.0;
+                } else {
+                    vec3_copy(self.target, center);
 
-                var size = box3_get_size(self.__scratchBox);
-                self.sizeFactor = max(size[0], size[1], size[2]);
-                if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
+                    var size = box3_get_size(self.__scratchBox);
+                    self.sizeFactor = max(size[0], size[1], size[2]);
+                    if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
+                }
             }
 
             // Adjust zoom limits based on size
@@ -150,6 +174,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
         // --- 2. Target = centro geometrico ---
         var center = box3_get_center(self.__scratchBox);
+        if (is_nan(center[0] + center[1] + center[2])) return;
         vec3_copy(self.target, center);
 
         // --- 3. Calcolo dimensioni ---
@@ -292,18 +317,24 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         // Update target from object if set
         if (self.targetObject != undefined) {
             box3_set_from_object(self.__scratchBox, self.targetObject);
-            var center = box3_get_center(self.__scratchBox, self.__scratchVec0);
-            var size = box3_get_size(self.__scratchBox, self.__scratchVec1);
+            
+            if (!box3_is_empty(self.__scratchBox)) {
+                var center = box3_get_center(self.__scratchBox, self.__scratchVec0);
+                
+                if (!is_nan(center[0] + center[1] + center[2])) {
+                    var size = box3_get_size(self.__scratchBox, self.__scratchVec1);
 
-            self.sizeFactor = max(size[0], size[1], size[2]);
-            if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
+                    self.sizeFactor = max(size[0], size[1], size[2]);
+                    if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
 
-            // Dynamic zoom limits
-            self.minTargetRadius = self.sizeFactor * 0.05;
-            self.maxTargetRadius = self.sizeFactor * 50.0;
+                    // Dynamic zoom limits
+                    self.minTargetRadius = self.sizeFactor * 0.05;
+                    self.maxTargetRadius = self.sizeFactor * 50.0;
 
-            // Base target is center + offset
-            vec3_add_vectors(self.target, center, self.targetOffset);
+                    // Base target is center + offset
+                    vec3_add_vectors(self.target, center, self.targetOffset);
+                }
+            }
         }
 
         var effectiveSizeFactor = (self.targetObject != undefined) ? (self.sizeFactor * 0.001) : 1.0;
@@ -363,7 +394,11 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
                 var panKeyAmount = self.keyPanSpeed * effectiveSizeFactor * self.radius * 0.01;
                 if (camDir == undefined) {
                     camDir = vec3_sub_vectors(self.__scratchVec0, camTarget, camPos);
-                    vec3_normalize(camDir);
+                    if (!is_nan(camDir[0] + camDir[1] + camDir[2])) {
+                        vec3_normalize(camDir);
+                    } else {
+                        camDir = [0, 0, 1]; // Fallback
+                    }
                 }
 
                 if (self.screenSpacePanning) {

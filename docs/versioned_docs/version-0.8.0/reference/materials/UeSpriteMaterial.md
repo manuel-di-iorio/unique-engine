@@ -1,7 +1,0 @@
----
-sidebar_position: 4
----
-
-A simplified material for 2D-like rendering of flat meshes or billboards. It uses the shader `sh_ue_sprite` under the hood and does not support lighting.
-
-> Inherits from [UeMaterial](/docs/reference/core/UeMaterial)

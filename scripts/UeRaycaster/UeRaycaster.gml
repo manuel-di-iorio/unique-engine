@@ -31,6 +31,9 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         var ox, oy, oz, dx, dy, dz;
         ox = origin[0]; oy = origin[1]; oz = origin[2];
         dx = direction[0]; dy = direction[1]; dz = direction[2];
+        if (is_nan(dx + dy + dz)) {
+            dx = 0; dy = 0; dz = -1;
+        }
         var len = sqrt(dx*dx + dy*dy + dz*dz);
         if (len > 0) { var inv = 1/len; dx*=inv; dy*=inv; dz*=inv; }
         ray_set(self.ray, vec3_create(ox, oy, oz), vec3_create(dx, dy, dz));
@@ -52,31 +55,60 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
             var origin = camera.position;
             
             var ndc = global.UE_VEC3_TEMP0;
-            vec3_set(ndc, mouse.ndcX, mouse.ndcY, 0.5);
+            var mx = mouse.ndcX ?? 0;
+            var my = mouse.ndcY ?? 0;
+            if (is_nan(mx) || is_nan(my)) { mx = 0; my = 0; }
+            vec3_set(ndc, mx, my, 0.5);
             
             var worldPoint = global.UE_VEC3_TEMP1;
             vec3_copy(worldPoint, ndc);
-            vec3_apply_matrix4(worldPoint, camera.projectionMatrixInverse);
-            vec3_apply_matrix4(worldPoint, camera.matrixWorld);
+            
+            var invProj = camera.projectionMatrixInverse;
+            var matWorld = camera.matrixWorld;
+            if (invProj == undefined || matWorld == undefined) return self;
+            
+            vec3_apply_matrix4(worldPoint, invProj);
+            vec3_apply_matrix4(worldPoint, matWorld);
             
             var dir = global.UE_VEC3_TEMP2;
             vec3_sub_vectors(dir, worldPoint, origin);
-            vec3_normalize(dir);
+            
+            if (is_nan(dir[0] + dir[1] + dir[2])) {
+                vec3_set(dir, 0, 0, -1); // Default forward
+            } else {
+                vec3_normalize(dir);
+            }
+            
             ray_set(self.ray, vec3_create(origin[0], origin[1], origin[2]), vec3_create(dir[0], dir[1], dir[2]));
           
         } else if (camera.isOrthographicCamera) {
+            var mx = mouse.ndcX ?? 0;
+            var my = mouse.ndcY ?? 0;
+            if (is_nan(mx) || is_nan(my)) { mx = 0; my = 0; }
+
             var invProj = global.UE_MAT4_TEMP0;
             mat4_copy(invProj, camera.projectionMatrix);
             matrix_inverse(invProj, invProj);
             
             var originVec = global.UE_VEC3_TEMP0;
-            vec3_set(originVec, mouse.ndcX, mouse.ndcY, (camera.near + camera.far) / (camera.near - camera.far));
+            vec3_set(originVec, mx, my, (camera.near + camera.far) / (camera.near - camera.far));
+            
+            var matWorld = camera.matrixWorld;
+            if (matWorld == undefined) return self;
+            
             vec3_apply_matrix4(originVec, invProj);
-            vec3_apply_matrix4(originVec, camera.matrixWorld);
+            vec3_apply_matrix4(originVec, matWorld);
             
             var dirVec = global.UE_VEC3_TEMP1;
             vec3_set(dirVec, 0, 1, 0);
-            vec3_transform_direction(dirVec, camera.matrixWorld);
+            vec3_transform_direction(dirVec, matWorld);
+            
+            if (!is_nan(dirVec[0] + dirVec[1] + dirVec[2])) {
+                vec3_normalize(dirVec);
+            } else {
+                vec3_set(dirVec, 0, 0, -1);
+            }
+            
             ray_set(self.ray, vec3_create(originVec[0], originVec[1], originVec[2]), vec3_create(dirVec[0], dirVec[1], dirVec[2]));
         }
         return self;
@@ -95,7 +127,8 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         hits ??= [];
         
         // If the object has a raycast method, invoke it
-        if (object.visible && object[$ "geometry"] && layers.test(object.layers)) {
+        // Skip picking for objects without bounding box
+        if (object.visible && object[$ "geometry"] && layers.test(object.layers) && object.geometry[$ "boundingBox"] != undefined) {
             var objectRaycast = object[$ "raycast"];
             if (objectRaycast != undefined) { 
                 objectRaycast(self, hits);
