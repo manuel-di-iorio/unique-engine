@@ -18,6 +18,8 @@ new UeTransformControls(camera, data = {})
 | `onDragStart` | `function` | `undefined` | Callback fired when dragging begins             |
 | `onDrag`      | `function` | `undefined` | Callback fired every frame while dragging       |
 | `onDragEnd`   | `function` | `undefined` | Callback fired when dragging stops              |
+| `snapEnabled` | `boolean`  | `false`     | Whether grid snapping is enabled by default     |
+| `snapSize`    | `number`   | `10`        | The default snapping increment                  |
 
 ### Properties
 
@@ -36,6 +38,8 @@ new UeTransformControls(camera, data = {})
 | `lineWidth`   | `number`     | Thickness of gizmo lines in pixels (default: 3)    |
 | `hitThreshold`| `number`     | Pixel distance for mouse picking (default: 10)     |
 | `axisLength`  | `number`     | Length of the axes in world units (default: 1.5)   |
+| `snapEnabled` | `boolean`    | Whether grid snapping is enabled                   |
+| `snapSize`    | `number`     | Current grid snapping increment                    |
 
 ## Methods
 
@@ -86,6 +90,15 @@ Allows scaling of the object.
 - **Planes**: Scale along two axes simultaneously.
 - **Center Cube**: Uniform scaling on all axes.
   - Uniform scaling uses a visual "drag" distance logic for intuitive control.
+
+## Snapping
+
+`UeTransformControls` supports grid snapping for the **Move** mode (translation). When enabled, coordinates will be rounded to the nearest multiple of `snapSize`.
+
+- **snapEnabled**: Toggle snapping on/off.
+- **snapSize**: Set the increment for snapping (e.g., 10, 50, 100 world units).
+
+In the editor, this can be toggled using the **Grid Snap** icon in the scene tools bar.
 
 ## Callbacks
 

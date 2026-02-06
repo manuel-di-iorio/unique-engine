@@ -199,6 +199,10 @@ function ProjectLoader() constructor {
       if (sm.orbit != undefined) {
         if (c[$ "target"] != undefined) vec3_set(sm.orbit.target, c.target[0], c.target[1], c.target[2]);
         if (c[$ "dampingFactor"] != undefined) sm.orbit.dampingFactor = c.dampingFactor;
+        if (c[$ "zoomSpeed"] != undefined) sm.orbit.zoomSpeed = c.zoomSpeed;
+        if (c[$ "panSpeed"] != undefined) sm.orbit.panSpeed = c.panSpeed;
+        if (c[$ "rotateSpeed"] != undefined) sm.orbit.rotateSpeed = c.rotateSpeed;
+        
         sm.orbit.updateSphericalCoordinates();
         sm.orbit.update();
       }
@@ -209,6 +213,15 @@ function ProjectLoader() constructor {
       var sm = oSceneEditor.sceneManager;
       sm.gridEnabled = settings.gridEnabled;
       sm.grid.visible = settings.gridEnabled;
+      if (settings[$ "gridSnapEnabled"] != undefined) sm.gridSnapEnabled = settings.gridSnapEnabled;
+      if (settings[$ "gridSnapSize"] != undefined) sm.gridSnapSize = settings.gridSnapSize;
+      
+      // Update transform controls if they exist
+      if (sm.transformControls != undefined) {
+        sm.transformControls.snapEnabled = sm.gridSnapEnabled;
+        sm.transformControls.snapSize = sm.gridSnapSize;
+      }
+      
       oSceneEditor.editorManager.sceneTools.updateGridButton();
     }
 

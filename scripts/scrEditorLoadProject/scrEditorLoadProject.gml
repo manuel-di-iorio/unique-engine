@@ -28,6 +28,11 @@ function scrEditorLoadProject(projectPath) {
     ui.Scene.onDrop = function(draggedNode) {
         var draggedItem = draggedNode.parent;
         if (draggedItem != undefined && draggedItem[$ "assetType"] != undefined) {
+            // Only allow dropping assets that are already in a scene (instances)
+            if (!__editorTreeview_isAssetInScene(draggedItem.asset)) {
+                 return false;
+            }
+
             if (draggedItem.assetType == "Mesh" || draggedItem.assetType == "Object3D") {
                 var activeSceneItem = oSceneEditor.editorManager.activeSceneTreeviewItem;
                 if (activeSceneItem != undefined) {

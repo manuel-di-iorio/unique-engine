@@ -20,6 +20,8 @@ function SceneManager() constructor {
     // Helpers
     self.grid = new UeGridHelper(10000, 50);
     self.gridEnabled = true;
+    self.gridSnapEnabled = false;
+    self.gridSnapSize = 10;
     self.showBoxColliders = true;
     self.objects = new UeObject3D({ matrixAutoUpdate: false });
     self.transformControls = new UeTransformControls(self.camera, {

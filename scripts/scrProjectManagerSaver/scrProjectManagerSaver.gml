@@ -258,7 +258,11 @@ function ProjectSaver() constructor {
         var cameraSettings = {
             position: [100, -300, 70],
             target: [0, 0, 0],
-            damping: true
+            damping: true,
+            dampingFactor: 0.1,
+            zoomSpeed: 5,
+            panSpeed: 1,
+            rotateSpeed: 1
         };
 
         cameraSettings.position = [sm.camera.position[VEC3.x], sm.camera.position[VEC3.y], sm.camera.position[VEC3.z]];
@@ -266,6 +270,9 @@ function ProjectSaver() constructor {
         if (sm.orbit != undefined) {
             cameraSettings.target = [sm.orbit.target[VEC3.x], sm.orbit.target[VEC3.y], sm.orbit.target[VEC3.z]];
             cameraSettings.dampingFactor = sm.orbit.dampingFactor;
+            cameraSettings.zoomSpeed = sm.orbit.zoomSpeed;
+            cameraSettings.panSpeed = sm.orbit.panSpeed;
+            cameraSettings.rotateSpeed = sm.orbit.rotateSpeed;
         }
 
         var counters = {
@@ -284,6 +291,8 @@ function ProjectSaver() constructor {
             camera: cameraSettings,
             counters: counters,
             gridEnabled: sm.gridEnabled,
+            gridSnapEnabled: sm.gridSnapEnabled,
+            gridSnapSize: sm.gridSnapSize,
             gizmos: {
                 showBoxColliders: sm.showBoxColliders
             }

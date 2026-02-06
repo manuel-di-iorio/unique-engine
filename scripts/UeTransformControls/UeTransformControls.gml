@@ -26,6 +26,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
   self.size = 1.0;         // User-defined size multiplier for the gizmo
   self.enabled = true;     // Whether the gizmo is active and visible
   self.view = data[$ "view"] ?? 0; // The GameMaker view index to use
+  self.snapEnabled = data[$ "snapEnabled"] ?? false;
+  self.snapSize = data[$ "snapSize"] ?? 10;
 
   self.hoveredAxis = undefined;  // The axis currently under the mouse
   self.selectedAxis = undefined; // The axis currently being dragged
@@ -442,6 +444,12 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
           vec3_apply_matrix4(newPos, parentInv);
         }
 
+        if (self.snapEnabled && self.snapSize > 0) {
+          newPos[0] = round(newPos[0] / self.snapSize) * self.snapSize;
+          newPos[1] = round(newPos[1] / self.snapSize) * self.snapSize;
+          newPos[2] = round(newPos[2] / self.snapSize) * self.snapSize;
+        }
+
         vec3_copy(self.object.position, newPos);
         self.object.updateWorldMatrix(true, false);
       } else {
@@ -469,6 +477,13 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         var newPos = self._vec3;
         vec3_copy(newPos, self._dragStartPoint);
         vec3_add(newPos, moveVec);
+
+        if (self.snapEnabled && self.snapSize > 0) {
+          newPos[0] = round(newPos[0] / self.snapSize) * self.snapSize;
+          newPos[1] = round(newPos[1] / self.snapSize) * self.snapSize;
+          newPos[2] = round(newPos[2] / self.snapSize) * self.snapSize;
+        }
+
         vec3_copy(self.object.position, newPos);
 
       } else { // World Space Axis
@@ -482,6 +497,13 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
         var newPos = self._vec3;
         vec3_copy(newPos, self._dragStartPoint);
         vec3_add(newPos, moveVec);
+
+        if (self.snapEnabled && self.snapSize > 0) {
+          newPos[0] = round(newPos[0] / self.snapSize) * self.snapSize;
+          newPos[1] = round(newPos[1] / self.snapSize) * self.snapSize;
+          newPos[2] = round(newPos[2] / self.snapSize) * self.snapSize;
+        }
+
         vec3_copy(self.object.position, newPos);
       }
 

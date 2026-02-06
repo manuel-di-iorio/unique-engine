@@ -183,10 +183,59 @@ function EditorUiSceneTools(ui) constructor {
     // Set initial state
     ui.SceneTools.BtnBoxColliders.selected = oSceneEditor.sceneManager.showBoxColliders;
 
-    ui.SceneTools.Right.add(ui.SceneTools.BtnResetCam, ui.SceneTools.BtnCamAccel, ui.SceneTools.BtnGrid, ui.SceneTools.BtnBoxColliders);
+    // Toggle grid snap
+    ui.SceneTools.BtnGridSnap = new UiButton(sprUiSnap, btnStyle, { tooltip: "Toggle grid snap when moving objects" });
+    
+    with (ui.SceneTools.BtnGridSnap) {
+        onClick(function() {
+            var sm = oSceneEditor.sceneManager;
+            sm.gridSnapEnabled = !sm.gridSnapEnabled;
+            self.selected = sm.gridSnapEnabled;
+            
+            // Sync with transform controls
+            if (sm.transformControls != undefined) {
+                sm.transformControls.snapEnabled = sm.gridSnapEnabled;
+            }
+            
+            // If enabled, prompt for size (or just let it be)
+            if (sm.gridSnapEnabled) {
+                var newSize = get_integer("Grid snap size:", sm.gridSnapSize);
+                if (newSize > 0) {
+                    sm.gridSnapSize = newSize;
+                    if (sm.transformControls != undefined) sm.transformControls.snapSize = newSize;
+                }
+            }
+            
+            global.UI.requestRedraw();
+            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+        });
+    }
+    
+    ui.SceneTools.BtnGridSnap.selected = oSceneEditor.sceneManager.gridSnapEnabled;
+
+    // Orbit settings
+    ui.SceneTools.BtnOrbitSettings = new UiButton(sprUiSection, btnStyle, { tooltip: "Orbit controls settings" });
+    ui.SceneTools.BtnOrbitSettings.onClick(function() {
+        var sm = oSceneEditor.sceneManager;
+        var orbit = sm.orbit;
+        if (orbit != undefined) {
+            var newPan = get_integer("Pan speed (default 1):", orbit.panSpeed) ?? 1;
+            var newRot = get_integer("Rotation speed (default 1):", orbit.rotateSpeed) ?? 1;
+            var newZoom = get_integer("Zoom speed (default 5):", orbit.zoomSpeed) ?? 5;
+            
+            orbit.panSpeed = min(999999, max(0.00001, newPan));
+            orbit.rotateSpeed = min(999999, max(0.00001, newRot));
+            orbit.zoomSpeed = min(999999, max(0.00001, newZoom));
+            
+            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+        }
+    });
+
+    ui.SceneTools.Right.add(ui.SceneTools.BtnResetCam, ui.SceneTools.BtnCamAccel, ui.SceneTools.BtnGrid, ui.SceneTools.BtnGridSnap, ui.SceneTools.BtnBoxColliders, ui.SceneTools.BtnOrbitSettings);
 
     self.updateGridButton = function() {
         ui.SceneTools.BtnGrid.selected = oSceneEditor.sceneManager.grid.visible;
+        ui.SceneTools.BtnGridSnap.selected = oSceneEditor.sceneManager.gridSnapEnabled;
         global.UI.requestRedraw();
     };
 
