@@ -30,6 +30,15 @@ new UeAssimpLoader(data = {})
 | `load(filename)` | `struct` | Synchronously reads a file and returns the processed scene data. |
 | `dispose()` | `self` | Frees the internal Assimp importer resources. |
 
+### Texture Loading and Material Linking
+The loader handles textures in two phases:
+1. **Pre-loading**: All textures referenced in the model (including external files and embedded Base64 textures) are loaded into a global cache.
+2. **Linking**: Materials are then created and automatically linked to these textures. It supports multiple texture slots per material type (e.g., `map`, `map1`, etc.) using a sequential lookup.
+
+#### Supported Texture Types
+- **External**: Files located in the same directory as the model or relative paths.
+- **Embedded**: Textures embedded within the model file (e.g., in `.glb` or `.fbx`) are loaded directly from memory via Base64.
+
 ### `load(filename)` Result Struct
 The `load` method returns a struct containing all components of the 3D scene:
 

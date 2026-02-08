@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UeAssimpLoader",
   "parent":{
-    "name":"UeAssimpLoader",
-    "path":"folders/Packages/Unique Engine/Loaders/UeAssimpLoader.yy",
+    "name":"Loaders",
+    "path":"folders/Packages/Unique Engine/Loaders.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

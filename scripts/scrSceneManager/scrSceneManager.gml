@@ -92,7 +92,32 @@ function SceneManager() constructor {
             // Perform a new raycast
             self.camera.updateMatrixWorld();
             self.raycaster.setFromCamera(self.camera);
-            _editorManager.pickLastHits = self.raycaster.intersectObjects(self.objects.children, true, true);
+            var _hits = self.raycaster.intersectObjects(self.objects.children, true, true);
+            
+            // Filter hits to unique root objects (direct children of scene or objects container)
+            var _uniqueRoots = {};
+            var _filteredHits = [];
+            var _activeScene = _editorManager.activeScene;
+            
+            for (var i = 0, il = array_length(_hits); i < il; i++) {
+                var _hit = _hits[i];
+                var _root = _hit.object;
+                
+                // Traverse up to find the root object
+                while (_root.parent != undefined && 
+                       _root.parent != self.objects && 
+                       (_activeScene == undefined || _root.parent != _activeScene)) {
+                    _root = _root.parent;
+                }
+                
+                if (_uniqueRoots[$ _root.uuid] == undefined) {
+                    _uniqueRoots[$ _root.uuid] = true;
+                    _hit.object = _root; // Update the hit to point to the root object
+                    array_push(_filteredHits, _hit);
+                }
+            }
+            
+            _editorManager.pickLastHits = _filteredHits;
             _editorManager.pickLastIndex = 0;
             _editorManager.pickLastPos = _mousePos;
         }

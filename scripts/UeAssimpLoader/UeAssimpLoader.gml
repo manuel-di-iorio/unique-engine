@@ -18,28 +18,38 @@ function UeAssimpLoader(data = {}) constructor {
 
   materialTypes = [
     { name: "map", type: ASSIMP_TEXTURE_TYPE.DIFFUSE },
-    { name: "normalsMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
-    { name: "ambientOcclusionMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
+    { name: "normalMap", type: ASSIMP_TEXTURE_TYPE.NORMALS },
+    { name: "aoMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT_OCCLUSION },
     { name: "emissiveMap", type: ASSIMP_TEXTURE_TYPE.EMISSIVE },
     { name: "reflectionMap", type: ASSIMP_TEXTURE_TYPE.REFLECTION },
     { name: "ambientMap", type: ASSIMP_TEXTURE_TYPE.AMBIENT },
     { name: "shininessMap", type: ASSIMP_TEXTURE_TYPE.SHININESS },
     { name: "displacementMap", type: ASSIMP_TEXTURE_TYPE.DISPLACEMENT },
-    { name: "lightmapMap", type: ASSIMP_TEXTURE_TYPE.LIGHTMAP },
+    { name: "lightMap", type: ASSIMP_TEXTURE_TYPE.LIGHTMAP },
     { name: "heightMap", type: ASSIMP_TEXTURE_TYPE.HEIGHT },
-    { name: "opacityMap", type: ASSIMP_TEXTURE_TYPE.OPACITY },
+    { name: "alphaMap", type: ASSIMP_TEXTURE_TYPE.OPACITY },
     { name: "specularMap", type: ASSIMP_TEXTURE_TYPE.SPECULAR },
-    { name: "baseColorMap", type: ASSIMP_TEXTURE_TYPE.BASE_COLOR },
-    { name: "clearCotMap", type: ASSIMP_TEXTURE_TYPE.CLEARCOAT },
+    { name: "map", type: ASSIMP_TEXTURE_TYPE.BASE_COLOR },
+    { name: "clearCoatMap", type: ASSIMP_TEXTURE_TYPE.CLEARCOAT },
     { name: "diffuseRoughnessMap", type: ASSIMP_TEXTURE_TYPE.DIFFUSE_ROUGHNESS },
     { name: "emissionColorMap", type: ASSIMP_TEXTURE_TYPE.EMISSION_COLOR },
     { name: "metalnessMap", type: ASSIMP_TEXTURE_TYPE.METALNESS },
-    { name: "normalsCameraMap", type: ASSIMP_TEXTURE_TYPE.NORMAL_CAMERA },
+    { name: "normalCameraMap", type: ASSIMP_TEXTURE_TYPE.NORMAL_CAMERA },
     { name: "sheenMap", type: ASSIMP_TEXTURE_TYPE.SHEEN },
     { name: "transmissionMap", type: ASSIMP_TEXTURE_TYPE.TRANSMISSION },
     { name: "unknownMap", type: ASSIMP_TEXTURE_TYPE.UNKNOWN },
   ];
 
+  /**
+   * Loads a 3D model from a file.
+   * @param {string} fname The path to the model file.
+   * @returns {struct} A struct containing the loaded model data:
+   *  - textures: Array of UeTexture objects loaded.
+   *  - materials: Map of UeMaterial objects by name.
+   *  - root: The root Object3D of the scene graph.
+   *  - skeleton: The UeSkeleton if the model has bones.
+   *  - animations: Map of UeAnimationClip objects by name.
+   */
   function load(fname) {
     gml_pragma("forceinline");
     var check = ASSIMP_ReadFile(fname,
@@ -72,6 +82,7 @@ function UeAssimpLoader(data = {}) constructor {
     // 1. Materials & Textures
     var textures = [];
     var textureCache = {};
+    _addTextures(fname, textures, textureCache);
     var materials = _addMaterials(fname, textures, textureCache);
 
     // 2. Meshes & Bone Data
@@ -106,6 +117,12 @@ function UeAssimpLoader(data = {}) constructor {
     };
   }
 
+  /**
+   * Assigns a skeleton to all skinned meshes in the hierarchy.
+   * @param {Object3D} root The root node to traverse.
+   * @param {Skeleton} _skeleton The skeleton to assign.
+   * @private
+   */
   function _assignSkeletonToMeshes(root, _skeleton) {
     var context = { skeleton: _skeleton };
     root.traverse(method(context, function (node) {
@@ -115,6 +132,12 @@ function UeAssimpLoader(data = {}) constructor {
     }));
   }
 
+  /**
+   * Retrieves the current Assimp matrix and optionally stores it in a target.
+   * @param {array} [target] A 16-element array to store the matrix.
+   * @returns {array} The 16-element matrix.
+   * @private
+   */
   function _getMatrix(target = undefined) {
     gml_pragma("forceinline");
     target ??= mat4_create();
@@ -125,6 +148,13 @@ function UeAssimpLoader(data = {}) constructor {
     return target;
   }
 
+  /**
+   * Recursively builds the scene graph from Assimp nodes.
+   * @param {array} meshes Array of pre-built prototype meshes.
+   * @param {real} [nodeId=-1] The Assimp node ID to process.
+   * @returns {Object3D} The built hierarchy node.
+   * @private
+   */
   function _buildSceneGraph(meshes, nodeId = -1) {
     gml_pragma("forceinline");
     if (nodeId == -1) {
@@ -187,19 +217,60 @@ function UeAssimpLoader(data = {}) constructor {
     return object;
   }
 
-  function _addMaterials(fname, textures, textureCache) {
+  /**
+   * Pre-loads all textures referenced by the current Assimp scene.
+   * @param {string} fname Path to the model file.
+   * @param {array} textures Array to store loaded UeTexture objects.
+   * @param {struct} textureCache Cache to prevent duplicate loading.
+   * @private
+   */
+  function _addTextures(fname, textures, textureCache) {
     gml_pragma("forceinline");
     var modelPath = filename_path(fname);
+    
+    for (var i = 0, il = ASSIMP_GetTexturesNum(); i < il; i++) {
+      var texName = ASSIMP_GetTextureFilename(i);
+      log(i, texName);
+      if (texName == "") continue;
+      
+      var txt = undefined;
+      
+      if (ASSIMP_GetTextureHeight(i) == 0) {
+        // Embedded texture
+        var data64 = ASSIMP_GetTextureDataBase64(i);
+        txt = _addEmbeddedTexture(data64, ASSIMP_GetTextureFormatHint(i), texName);
+      } else {
+        // External texture
+        txt = _addTexture(modelPath, texName);
+      }
+      
+      if (txt != undefined) {
+        textureCache[$ texName] = txt;
+        array_push(textures, txt);
+      }
+    }
+  }
+
+  /**
+   * Processes and creates all materials in the Assimp scene.
+   * @param {string} fname Path to the model file.
+   * @param {array} textures Array of loaded textures.
+   * @param {struct} textureCache Cache used for texture linking.
+   * @returns {struct} A struct with 'list' (array) and 'map' (struct by name) of materials.
+   * @private
+   */
+  function _addMaterials(fname, textures, textureCache) {
+    gml_pragma("forceinline");
     var modelName = filename_change_ext(filename_name(fname), "");
 
-    // Get the materials
+    // Get the materials and link textures
     var materialsCount = ASSIMP_GetMaterialNum();
     var materials = array_create(materialsCount);
     var materialsMap = {};
 
     for (var i = 0; i < materialsCount; i++) {
       ASSIMP_BindMaterial(i);
-      var material = new UeMeshStandardMaterial(_addTextures(modelPath, textures, textureCache));
+      var material = new UeMeshStandardMaterial(_linkTextures(textureCache));
       material.name = string_trim(ASSIMP_GetMaterialName());
       if (material.name == "") material.name = modelName + "__Material" + string(i);
       material.opacity = ASSIMP_GetMaterialOpacity();
@@ -214,57 +285,87 @@ function UeAssimpLoader(data = {}) constructor {
     };
   }
 
-  function _addTextures(modelPath, globalTextures, textureCache) {
+  /**
+   * Links textures from the cache to a material based on its type.
+   * @param {struct} textureCache The cache containing loaded textures.
+   * @returns {struct} A map of texture slots (e.g., 'map', 'normalMap') and UeTexture objects.
+   * @private
+   */
+  function _linkTextures(textureCache) {
     gml_pragma("forceinline");
-    var textures = {};
+    var matTextures = {};
 
     for (var i = 0, len = array_length(materialTypes); i < len; i++) {
       var materialType = materialTypes[i];
-
-      var txtName = ASSIMP_GetMaterialTextureName(materialType.type, 0);
-      if (txtName == "") continue;
-
-      var fileName = filename_name(txtName);
-      var txt = undefined;
-
-      // Check cache first
-      if (textureCache[$ fileName] != undefined) {
-        txt = textureCache[$ fileName];
-      } else {
-        // Load new texture
-        txt = _addTexture(modelPath, fileName);
-        if (txt) {
-          textureCache[$ fileName] = txt;
-          array_push(globalTextures, txt);
-        }
-      }
-
-      if (txt) {
-        textures[$ materialType.name] = txt;
+      var n = 0;
+      
+      while (true) {
+        var txtName = ASSIMP_GetMaterialTextureName(materialType.type, n);
+        if (txtName == "") break;
+        
+        // If it's the first texture of this type, use the standard name
+        // If there are more, we store it appending the counter to the key (currently UeMeshStandardMaterial only support one)
+        var key = n == 0 ? materialType.name : materialType.name + string(n);
+        matTextures[$ key] = textureCache[$ txtName];
+        
+        n++;
       }
     }
 
-    return textures;
+    return matTextures;
   }
 
+  /**
+   * Creates a UeTexture from a Base64 string (embedded textures).
+   * @param {string} data64 The Base64 encoded image data.
+   * @param {string} format The image format (e.g., 'png', 'jpg').
+   * @param {string} texName The name to assign to the texture.
+   * @returns {UeTexture|undefined} The created texture or undefined on failure.
+   * @private
+   */
+  function _addEmbeddedTexture(data64, format, texName) {
+    gml_pragma("forceinline");
+    var image = sprite_add($"data:image/{format};base64,{data64}", 1, false, false, 0, 0);
+    if (image == -1) return undefined;
+    
+    var tex = new UeTexture(image);
+    tex.name = filename_name(texName);
+    return tex;
+  }
+
+  /**
+   * Loads a texture from an external file.
+   * @param {string} modelPath The base path where the model is located.
+   * @param {string} fname The relative path/filename of the texture.
+   * @returns {UeTexture|undefined} The created texture or undefined on failure.
+   * @private
+   */
   function _addTexture(modelPath, fname) {
     gml_pragma("forceinline");
-    var fullPath = modelPath + "/" + fname;
+    var fullPath = modelPath + fname;
 
     if (!file_exists(fullPath)) {
-      fullPath = modelPath + "/" + filename_change_ext(fname, ".jpg");
+      fullPath = modelPath + filename_change_ext(fname, ".jpg");
 
       if (!file_exists(fullPath)) {
-        fullPath = modelPath + "/" + filename_change_ext(fname, ".png");
+        fullPath = modelPath + filename_change_ext(fname, ".png");
       }
     }
 
     var image = sprite_add(fullPath, 1, false, false, 0, 0);
     if (image == -1) return undefined;
 
-    return new UeTexture(image);
+    var tex = new UeTexture(image);
+    tex.name = filename_name(fname);
+    return tex;
   }
 
+  /**
+   * Processes all meshes in the Assimp scene.
+   * @param {array} materials Array of pre-built materials.
+   * @returns {struct} A struct with 'meshes' (array) and 'boneData' (array).
+   * @private
+   */
   function _addMeshes(materials) {
     gml_pragma("forceinline");
 
@@ -290,6 +391,12 @@ function UeAssimpLoader(data = {}) constructor {
     };
   }
 
+  /**
+   * Builds a single UeMesh/UeGeometry from the currently bound Assimp mesh.
+   * @param {array} globalBoneData Global bone list to populate if the mesh is skinned.
+   * @returns {struct} A struct containing the built 'mesh' and updated 'boneData'.
+   * @private
+   */
   function _buildMesh(globalBoneData) {
     gml_pragma("forceinline");
     var hasBones = ASSIMP_MeshHasBones();
@@ -458,6 +565,13 @@ function UeAssimpLoader(data = {}) constructor {
     return { mesh, boneData: globalBoneData };
   }
 
+  /**
+   * Creates a UeSkeleton from the gathered bone data and scene hierarchy.
+   * @param {array} boneData Array of bone information (names and offset matrices).
+   * @param {Object3D} root The root node of the scene.
+   * @returns {UeSkeleton} The constructed skeleton.
+   * @private
+   */
   function _buildSkeleton(boneData, root) {
     gml_pragma("forceinline");
     var bones = [];
@@ -484,6 +598,11 @@ function UeAssimpLoader(data = {}) constructor {
     return new UeSkeleton(bones);
   }
 
+  /**
+   * Imports all animations from the Assimp scene.
+   * @returns {struct} A struct with 'list' (array) and 'map' (struct by name) of animations.
+   * @private
+   */
   function _addAnimations() {
     gml_pragma("forceinline");
     var animCount = ASSIMP_GetAnimationNum();
@@ -555,6 +674,12 @@ function UeAssimpLoader(data = {}) constructor {
     };
   }
 
+  /**
+   * Calculates the global bounding box and sphere for the loaded model.
+   * @param {Object3D} model The root object of the model.
+   * @param {array} meshes The list of meshes in the model.
+   * @private
+   */
   function _calculateModelBounds(model, meshes) {
     gml_pragma("forceinline");
 
@@ -584,6 +709,10 @@ function UeAssimpLoader(data = {}) constructor {
     sphere_set(model.boundingSphere, center, vec3_distance_to(center, maxV));
   }
 
+  /**
+   * Frees internal importer resources.
+   * @returns {UeAssimpLoader} self.
+   */
   function dispose() {
     gml_pragma("forceinline");
     ASSIMP_DeleteImporter(importer);
