@@ -5,6 +5,7 @@ enum UI_EVENT {
     mousedown,
     mouseup,
     click,
+    doubleclick,
     
     mouseover,
     mouseout,
@@ -665,6 +666,12 @@ function UiNode(style = {}, props = {}) constructor {
     function onWheelDown(cb) {
         gml_pragma("forceinline");
         self.addEventListener(UI_EVENT.wheeldown, cb); 
+        return self;
+    }
+    
+    function onDoubleClick(cb) {
+        gml_pragma("forceinline");
+        self.addEventListener(UI_EVENT.doubleclick, cb);
         return self;
     }
     

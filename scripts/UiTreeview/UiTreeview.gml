@@ -28,11 +28,13 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
      * Select a treeview item
      */
     function __onItemSelected(treeviewItem, focus = false) {
-        if (self.selectedItem == treeviewItem) return;
-        self.selectedItem = treeviewItem;
-        self.Items.traverseChildren(method({ treeviewItem }, function(child) {
-            child.selected = child == self.treeviewItem;
-        }));
+        if (self.selectedItem != treeviewItem) {
+            self.selectedItem = treeviewItem;
+            self.Items.traverseChildren(method({ treeviewItem }, function(child) {
+                child.selected = child == self.treeviewItem;
+            }));
+        }
+        
         if (self.onItemSelected != undefined) self.onItemSelected(treeviewItem, focus);
     }
     
@@ -192,8 +194,6 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.collapsed = props[$ "collapsed"] ?? true;
     self.asset = props[$ "asset"] ?? undefined;
     self.acceptsDropOf = props[$ "acceptsDropOf"] ?? undefined;
-    self.lastClickTime = -1;
-    self.doubleClickThreshold = 300;
     
     // Store back-reference in asset for efficient lookup
     if (self.asset != undefined) {
@@ -236,12 +236,13 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.onMouseDown(method({ item: treeviewItem }, function() {
             // Only select on left click, not right click (right click is for context menu)
             if (mouse_lastbutton == mb_left) {
-                var now = current_time;
-                var isDoubleClick = (item.lastClickTime != -1 && now - item.lastClickTime <= item.doubleClickThreshold);
-                
-                item.treeview.__onItemSelected(item, isDoubleClick);
-                item.lastClickTime = now;
+                item.treeview.__onItemSelected(item);
             }
+            return false;
+        }));
+        
+        self.onDoubleClick(method({ item: treeviewItem }, function() {
+            item.treeview.__onItemSelected(item, true);
             return false;
         }));
         

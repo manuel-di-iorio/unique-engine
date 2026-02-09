@@ -42,6 +42,11 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.stepHandlers = [];
     self.hoveredElements = [];
     
+    // Double click tracking
+    self.lastClickTime = -1;
+    self.lastClickTarget = undefined;
+    self.doubleClickThreshold = 500;
+    
     // Focus management
     self.focusedElement = undefined;
     self.focusableElements = [];
@@ -417,6 +422,11 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Handle mouse release
         if (self.mouseReleased) {
+            var releasedButton = mb_left; // Default to left if we can't determine
+            if (device_mouse_check_button_released(0, mb_left)) releasedButton = mb_left;
+            else if (device_mouse_check_button_released(0, mb_right)) releasedButton = mb_right;
+            else if (device_mouse_check_button_released(0, mb_middle)) releasedButton = mb_middle;
+
             // First, handle the drag end if we got a dragged element
             if (self.draggedElement != undefined) {
                 self.draggedElement.dragging = false;
@@ -440,8 +450,19 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             else if (self.deepestTarget != undefined && self.deepestTarget == global.UI_CLICK_START) {
                 global.UI.dispatchEvent(UI_EVENT.mouseup, self.deepestTarget);
 
-                if (mouse_lastbutton == mb_left) {
+                if (releasedButton == mb_left) {
                     global.UI.dispatchEvent(UI_EVENT.click, self.deepestTarget);
+                    
+                    // Handle double click
+                    var now = current_time;
+                    if (self.lastClickTarget == self.deepestTarget && (now - self.lastClickTime) < self.doubleClickThreshold) {
+                        global.UI.dispatchEvent(UI_EVENT.doubleclick, self.deepestTarget);
+                        self.lastClickTime = -1; // Reset to avoid triple-click as double-click
+                        self.lastClickTarget = undefined;
+                    } else {
+                        self.lastClickTime = now;
+                        self.lastClickTarget = self.deepestTarget;
+                    }
                 }
             }
             
