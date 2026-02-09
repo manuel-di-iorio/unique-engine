@@ -160,65 +160,53 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
 
     /**
      * Focus on an object by setting it as target and adjusting radius
-     * @param {UeObject3D} newTarget - The object to focus on
+     * @param {UeObject3D} object - The object to focus on
      */
-    function focus(newTarget) {
-        if (!newTarget) return;
-
-        self.setTarget(newTarget);
-        if (!self.targetObject) return;
+    function focus(object) {
+        if (!object) return;
 
         // --- 1. Bounding box ---
-        box3_set_from_object(self.__scratchBox, self.targetObject);
+        box3_set_from_object(self.__scratchBox, object);
         if (box3_is_empty(self.__scratchBox)) return;
 
-        // --- 2. Target = centro geometrico ---
-        var center = box3_get_center(self.__scratchBox);
-        if (is_nan(center[0] + center[1] + center[2])) return;
-        vec3_copy(self.target, center);
+        var center = box3_get_center(self.__scratchBox, self.__scratchVec0);
+        var size = box3_get_size(self.__scratchBox, self.__scratchVec1);
 
-        // --- 3. Calcolo dimensioni ---
-        var size = box3_get_size(self.__scratchBox);
-        var radius = max(size[VEC3.x], size[VEC3.y], size[VEC3.z]) * 0.5;
+        // --- 2. Calcola distanza necessaria (radius) ---
+        var radius = max(size[0], size[1], size[2]) * 0.5;
 
-        // --- 4. Distanza camera ---
-        var vFov = degtorad(self.camera[$"fov"] ?? 60);
-        var aspect = self.camera[$"aspect"] ?? 1.0;
+        var vFov = degtorad(self.camera.fov ?? 60);
+        var aspect = self.camera.aspect ?? 1.0;
 
         var distY = radius / tan(vFov * 0.5);
         var distX = radius / (tan(vFov * 0.5) * aspect);
 
-        self.radius = max(distX, distY) * 1.1; // padding
+        var distance = max(distX, distY) * 1.1; // padding leggero
 
-        // --- 5. Direzione attuale (preserva angolo) ---
-        var dir = vec3_sub_vectors(
-            self.__scratchVec0,
-            self.camera.position,
-            self.target
-        );
-
-        if (vec3_length_sq(dir) < UE_EPSILON) {
-            // fallback sensato (dipende dal tuo sistema)
-            vec3_set(dir, 0, 1, 0);
+        // --- 3. Direzione attuale camera → target ---
+        var forward = vec3_sub_vectors(self.__scratchVec2, self.camera.position, self.camera.target);
+        if (vec3_length_sq(forward) < UE_EPSILON) {
+            // fallback sensato se la camera era sul target
+            vec3_set(forward, 0, 0, 1);
         }
+        vec3_normalize(forward);
 
-        vec3_normalize(dir);
+        // --- 4. Aggiorna target ---
+        vec3_copy(self.target, center);
 
-        // --- 6. Posiziona la camera ---
+        // --- 5. Posiziona camera lungo la stessa direzione ---
         self.camera.setPosition(
-            self.target[VEC3.x] + dir[VEC3.x] * self.radius,
-            self.target[VEC3.y] + dir[VEC3.y] * self.radius,
-            self.target[VEC3.z] + dir[VEC3.z] * self.radius
+            self.target[0] + forward[0] * distance,
+            self.target[1] + forward[1] * distance,
+            self.target[2] + forward[2] * distance
         );
-        self.camera.lookAtVec(self.target);
+
         vec3_copy(self.camera.target, self.target);
 
-        // --- 7. Sync stato orbit ---
+        // --- 6. Aggiorna orbit state ---
         self._deltaAzimuth = 0;
         self._deltaElevation = 0;
         vec3_set(self._deltaPan, 0, 0, 0);
-        vec3_set(self.targetOffset, 0, 0, 0);
-
         self.updateSphericalCoordinates();
         self._needsUpdate = true;
     }
