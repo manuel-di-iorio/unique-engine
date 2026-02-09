@@ -181,7 +181,7 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
         var distY = radius / tan(vFov * 0.5);
         var distX = radius / (tan(vFov * 0.5) * aspect);
 
-        var distance = max(distX, distY) * 1.1; // padding leggero
+        var distance = max(distX, distY) * 1.8; // padding leggero
 
         // --- 3. Direzione attuale camera → target ---
         var forward = vec3_sub_vectors(self.__scratchVec2, self.camera.position, self.camera.target);

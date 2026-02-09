@@ -192,6 +192,8 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
     self.collapsed = props[$ "collapsed"] ?? true;
     self.asset = props[$ "asset"] ?? undefined;
     self.acceptsDropOf = props[$ "acceptsDropOf"] ?? undefined;
+    self.lastClickTime = -1;
+    self.doubleClickThreshold = 300;
     
     // Store back-reference in asset for efficient lookup
     if (self.asset != undefined) {
@@ -234,7 +236,11 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.onMouseDown(method({ item: treeviewItem }, function() {
             // Only select on left click, not right click (right click is for context menu)
             if (mouse_lastbutton == mb_left) {
-                item.treeview.__onItemSelected(item);
+                var now = current_time;
+                var isDoubleClick = (item.lastClickTime != -1 && now - item.lastClickTime <= item.doubleClickThreshold);
+                
+                item.treeview.__onItemSelected(item, isDoubleClick);
+                item.lastClickTime = now;
             }
             return false;
         }));

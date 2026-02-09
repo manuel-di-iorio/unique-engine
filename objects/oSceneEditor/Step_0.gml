@@ -78,9 +78,9 @@ if (!uiHasFocus) {
     
     // Focus shortcut
     if (keyboard_check_pressed(ord("F"))) {
-       var activeAsset = editorManager.activeAsset;
-       if (activeAsset != undefined && (activeAsset[$ "isObject3D"] || activeAsset[$ "isMesh"])) {
-           sceneManager.orbit.focus(activeAsset);
+       var target = editorManager.gizmoTarget;
+       if (target != undefined && (target[$ "isObject3D"] || target[$ "isMesh"])) {
+           sceneManager.orbit.focus(target);
        }
     }
 }
