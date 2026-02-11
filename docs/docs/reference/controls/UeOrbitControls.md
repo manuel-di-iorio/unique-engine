@@ -7,14 +7,13 @@ It supports mouse drag, scroll wheel zoom, keyboard pan/rotation, and inertia da
 
 ### Constructor
 ```js
-new UeOrbitControls(data = {})
+new UeOrbitControls(camera, uiSceneNode = undefined, data = {})
 ```
 
 ### Data parameters
 
 | Key                  | Type        | Default      | Description                         |
 | -------------------- | ----------- | ------------ | ----------------------------------- |
-| `camera`             | `UeCamera`  | **required** | The camera to control               |
 | `target`             | `UeVector3` | `(0,0,0)`    | The center point to orbit around    |
 | `zoomSpeed`          | `number`    | `5`          | Scroll/drag zoom speed              |
 | `panSpeed`           | `number`    | `1.0`        | Mouse pan speed                     |
@@ -29,6 +28,8 @@ new UeOrbitControls(data = {})
 | `minTargetRadius`    | `number`    | `5`          | Minimum zoom radius                 |
 | `maxTargetRadius`    | `number`    | `Infinity`   | Maximum zoom radius                 |
 | `screenSpacePanning` | `boolean`   | `false`      | Whether pan is screen-space aligned |
+| `enableFlythrough`   | `boolean`   | `true`       | Enables FPS-style flythrough mode   |
+| `flythroughSpeed`    | `number`    | `5.0`       | Base speed for flythrough movement  |
 
 ### Properties
 
@@ -80,10 +81,20 @@ The control scheme is similar to Three.js OrbitControls.
 - Pan can be done via the right mouse button or arrow keys.
 - Holding Shift switches keyboard input from pan to orbit.
 
+### 🚀 Flythrough Mode
+
+Hold the **Right Mouse Button** to enter Flythrough (FPS) mode:
+- **WASD**: Move forward/backward/left/right.
+- **Q / E**: Move down / up.
+- **Shift**: Double movement speed.
+- **Scroll Wheel**: Adjust base flythrough speed.
+- **Mouse Look**: Look around.
+- **Mouse Warping**: The mouse will warp to the opposite side if it reaches the scene boundaries (requires `uiSceneNode`).
+
 To use:
 
 ```js
-const controls = new UeOrbitControls({ camera });
+const controls = new UeOrbitControls(camera, uiSceneNode);
 ```
 
 ```js

@@ -2,7 +2,7 @@ renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera().use();
 
-orbitControls = new UeOrbitControls(camera, {
+orbitControls = new UeOrbitControls(camera, undefined, {
     autoRotate: true, 
     autoRotateSpeed: .1,
     enablePan: false,

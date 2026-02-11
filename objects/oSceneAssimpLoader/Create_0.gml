@@ -1,7 +1,7 @@
 renderer = new UeRenderer();
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 400, y: 300, z: 300 }).use();
-orbitControls = new UeOrbitControls(camera, { autoRotate: true });
+orbitControls = new UeOrbitControls(camera, undefined, { autoRotate: true });
 
 // Lighting
 var ambientLight = new UeAmbientLight(c_gray);

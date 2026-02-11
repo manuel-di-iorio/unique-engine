@@ -1,7 +1,7 @@
 renderer = new UeRenderer({ sortObjects: false });
 scene = new UeScene();
 camera = new UePerspectiveCamera({ x: 450, y: -300, z: 300 }).use();
-orbitControls = new UeOrbitControls(camera, { zt: 150 });
+orbitControls = new UeOrbitControls(camera, undefined, { zt: 150 });
 
 // Lighting
 var hemiLight = new UeAmbientLight(#AAFFAA);

@@ -82,7 +82,7 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
 
     // Setup orbit controls
     var _widget = self;
-    self.orbitControls = new UeOrbitControls(self.camera, {
+    self.orbitControls = new UeOrbitControls(self.camera, self, {
       target: self.asset,
       enableRotate: true,
       enablePan: false,

@@ -8,7 +8,7 @@ function SceneManager() constructor {
     });
     self.camera = new UePerspectiveCamera({ x: 100, y: -300, z: 70, far: 10000, view: 1 }).use();
     // Note: UI.Main.Scene doesn't exist yet at this point, will be set later
-    self.orbit = new UeOrbitControlsV2(self.camera, undefined, {
+    self.orbit = new UeOrbitControls(self.camera, undefined, {
         shouldHandleInput: function() {
             return global.UI.Main.Scene != undefined && global.UI.Main.Scene.hovered;
         },

@@ -1,6 +1,6 @@
 renderer = new UeRenderer();
 camera = new UePerspectiveCamera({ x: 150, y: -200, z: 200 }).use();
-controls = new UeOrbitControls(camera, { zt: 100 });
+controls = new UeOrbitControls(camera, undefined, { zt: 100 });
 scene = new UeScene();
 
 // Light

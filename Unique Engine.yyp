@@ -335,7 +335,6 @@
     {"id":{"name":"UeObjLoader","path":"scripts/UeObjLoader/UeObjLoader.yy",},},
     {"id":{"name":"UeOctahedronGeometry","path":"scripts/UeOctahedronGeometry/UeOctahedronGeometry.yy",},},
     {"id":{"name":"UeOrbitControls","path":"scripts/UeOrbitControls/UeOrbitControls.yy",},},
-    {"id":{"name":"UeOrbitControlsV2","path":"scripts/UeOrbitControlsV2/UeOrbitControlsV2.yy",},},
     {"id":{"name":"UeOrthographicCamera","path":"scripts/UeOrthographicCamera/UeOrthographicCamera.yy",},},
     {"id":{"name":"UeOutlinePass","path":"scripts/UeOutlinePass/UeOutlinePass.yy",},},
     {"id":{"name":"UeParticleEmitter","path":"scripts/UeParticleEmitter/UeParticleEmitter.yy",},},
