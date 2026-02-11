@@ -220,7 +220,7 @@ function EditorUiSceneTools(ui) constructor {
         var orbit = sm.orbit;
         if (orbit != undefined) {
             var newPan = get_integer("Pan speed (default 10):", orbit.panSpeed) ?? 10;
-            var newRot = get_integer("Rotation speed (default 10):", orbit.rotateSpeed) ?? 10;
+            var newRot = get_integer("Rotation speed (default 1):", orbit.rotateSpeed) ?? 1;
             var newZoom = get_integer("Zoom speed (default 2):", orbit.zoomSpeed) ?? 2;
             
             orbit.panSpeed = min(999999, max(0.00001, newPan));
