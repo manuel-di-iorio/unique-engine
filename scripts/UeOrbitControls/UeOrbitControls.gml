@@ -30,7 +30,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         var dir = vec3_clone(cp); vec3_sub(dir, ct);
         self.radius = vec3_distance_to(cp, ct);
         self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
-        self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+        self.elevation = self.radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / self.radius, -1, 1));
     } else {
         self.radius = 10;
         self.azimuth = 0;
@@ -130,7 +130,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
             var dir = vec3_sub_vectors(self.__scratchVec0, cp, ct);
             self.radius = vec3_distance_to(cp, ct);
             self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
-            self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+            self.elevation = self.radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / self.radius, -1, 1));
         }
         
         self._needsUpdate = true;
@@ -145,7 +145,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         var dir = vec3_sub_vectors(self.__scratchVec0, cp, ct);
         self.radius = vec3_distance_to(cp, ct);
         self.azimuth = arctan2(dir[VEC3.y], dir[VEC3.x]);
-        self.elevation = radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / radius, -1, 1));
+        self.elevation = self.radius == 0 ? 0 : arcsin(clamp(dir[VEC3.z] / self.radius, -1, 1));
         
         self._deltaAzimuth = 0;
         self._deltaElevation = 0;
@@ -363,6 +363,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         
         // Exit flythrough: update orbit coordinates
         if (wasFlythroughActive && !self.flythroughActive) {
+            vec3_copy(self.target, self.camera.target);
             self.updateSphericalCoordinates();
         }
         
@@ -444,29 +445,35 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
             var _speed = self.flythroughSpeed * (shiftPressed ? self.flythroughSpeedMultiplier : 1.0);
             var camPos = self.camera.position;
             
+            // Temporary variable for position delta
+            var posDelta = self.__scratchVec2;
+            vec3_set(posDelta, 0, 0, 0);
+            
             if (keyboard_check(self.keys.FORWARD)) {
-                vec3_add_scaled_vector(camPos, forward, _speed);
+                vec3_add_scaled_vector(posDelta, forward, _speed);
             }
             if (keyboard_check(self.keys.BACKWARD)) {
-                vec3_add_scaled_vector(camPos, forward, -_speed);
+                vec3_add_scaled_vector(posDelta, forward, -_speed);
             }
             if (keyboard_check(self.keys.LEFT_STRAFE)) {
-                vec3_add_scaled_vector(camPos, right, -_speed);
+                vec3_add_scaled_vector(posDelta, right, -_speed);
             }
             if (keyboard_check(self.keys.RIGHT_STRAFE)) {
-                vec3_add_scaled_vector(camPos, right, _speed);
+                vec3_add_scaled_vector(posDelta, right, _speed);
             }
             if (keyboard_check(self.keys.UP_MOVE)) {
-                vec3_add_scaled_vector(camPos, up, -_speed);
+                vec3_add_scaled_vector(posDelta, worldUp, -_speed);
             }
             if (keyboard_check(self.keys.DOWN_MOVE)) {
-                vec3_add_scaled_vector(camPos, up, _speed);
+                vec3_add_scaled_vector(posDelta, worldUp, _speed);
             }
             
+            vec3_add(camPos, posDelta);
+            
             // Update camera target based on look direction
-            var targetDist = 100; // Arbitrary distance for look-at point
+            var targetDist = self.radius; // Use current radius as distance for look-at point
             vec3_add_scaled_vector(vec3_copy(self.camera.target, camPos), forward, targetDist);
-            vec3_copy(self.target, self.camera.target);
+            // We DON'T update self.target here to avoid orbit drifting during flight
         } else {
             // === ORBIT MODE ===
             
