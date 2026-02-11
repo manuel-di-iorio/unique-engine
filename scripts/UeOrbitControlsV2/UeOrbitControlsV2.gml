@@ -623,7 +623,7 @@ function UeOrbitControlsV2(camera, uiSceneNode, data = {}): UeControls(data) con
     }
     
     /// Draw flythrough speed indicator (call this in Draw GUI event)
-    function draw() {
+    function render() {
         if (self.flythroughSpeedDisplayTime > 0) {
             var alpha = min(1, self.flythroughSpeedDisplayTime / 30); // Fade out in last 0.5 seconds
             
