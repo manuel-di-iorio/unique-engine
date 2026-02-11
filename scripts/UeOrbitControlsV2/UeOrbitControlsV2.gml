@@ -294,6 +294,11 @@ function UeOrbitControlsV2(camera, uiSceneNode, data = {}): UeControls(data) con
         
         if (!enabled) return;
         
+        // Decrease speed display timer
+        if (self.flythroughSpeedDisplayTime > 0) {
+            self.flythroughSpeedDisplayTime--;
+        }
+        
         // Get mouse position (window-relative is more robust for editor controls)
         if (mx == undefined) {
             mx = window_mouse_get_x();
@@ -615,11 +620,6 @@ function UeOrbitControlsV2(camera, uiSceneNode, data = {}): UeControls(data) con
             self._prevMouseX = mx;
             self._prevMouseY = my;
         }
-        
-        // Decrease speed display timer
-        if (self.flythroughSpeedDisplayTime > 0) {
-            self.flythroughSpeedDisplayTime--;
-        }
     }
     
     /// Draw flythrough speed indicator (call this in Draw GUI event)
@@ -637,13 +637,19 @@ function UeOrbitControlsV2(camera, uiSceneNode, data = {}): UeControls(data) con
             if (centerX <= 0) centerX = window_get_width() / 2;
             if (centerY <= 0) centerY = window_get_height() / 2;
             
-            var text = "Flythrough Speed: " + string_format(self.flythroughSpeed, 0, 2);
+            // Calculate percentage (logarithmic mapping feels more natural for speed)
+            var logMin = log10(self.flythroughSpeedMin);
+            var logMax = log10(self.flythroughSpeedMax);
+            var logCurr = log10(self.flythroughSpeed);
+            var pct = 1 + ((logCurr - logMin) / (logMax - logMin)) * 99;
+            
+            var text = "Flythrough Speed: " + string_format(pct, 0, 0) + "%";
             var tw = string_width(text) + 40;
             var th = string_height(text) + 20;
             
             // Draw background
-            draw_set_alpha(alpha * 0.8);
-            draw_set_color(global.UI_COL_INPUT_BG);
+            draw_set_alpha(alpha * 0.9);
+            draw_set_color(global.UI_COL_SELECTION); // Lighter gray for better visibility
             draw_roundrect_ext(centerX - tw/2, centerY - th/2, centerX + tw/2, centerY + th/2, 10, 10, false);
             
             // Draw speed text
