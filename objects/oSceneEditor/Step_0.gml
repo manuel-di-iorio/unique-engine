@@ -21,6 +21,7 @@ var uiScene = global.UI.Main.Scene;
 var winMouseX = window_mouse_get_x();
 var winMouseY = window_mouse_get_y();
 var uiHasFocus = global.UI.hasAnyFocus();
+var flythroughActive = sceneManager.orbit.flythroughActive;
 
 // Update transform controls based on current tool
 var currentTool = editorManager.activeTool;
@@ -43,10 +44,9 @@ switch (currentTool) {
 // Mesh picking
 sceneManager.handleMeshPicking();
 
-// Wrap the mouse coords when out of bounds
-editorManager.handleMouseWrap(winMouseX, winMouseY, winW, winH);
+// editorManager.handleMouseWrap(winMouseX, winMouseY, winW, winH);
 
-if (!uiHasFocus) {
+if (!uiHasFocus && !flythroughActive) {
    // Save project
    if (keyboard_check(vk_control) && keyboard_check_pressed(ord("S"))) {
        if (projectManager.hasUnsavedChanges) {

@@ -24,7 +24,7 @@ new UeOrbitControls(data = {})
 | `enablePan`          | `boolean`   | `true`       | Enables panning                     |
 | `enableRotate`       | `boolean`   | `true`       | Enables orbit rotation              |
 | `enableDamping`      | `boolean`   | `true`       | Enables inertia smoothing           |
-| `dampingFactor`      | `number`    | `0.9`        | Lerp factor for smooth motion       |
+| `dampingFactor`      | `number`    | `1.0`        | Lerp factor for smooth motion       |
 | `autoRotateSpeed`    | `number`    | `0.1`        | Speed of automatic rotation         |
 | `minTargetRadius`    | `number`    | `5`          | Minimum zoom radius                 |
 | `maxTargetRadius`    | `number`    | `Infinity`   | Maximum zoom radius                 |

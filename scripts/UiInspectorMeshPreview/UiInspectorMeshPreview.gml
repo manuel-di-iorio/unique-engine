@@ -87,10 +87,10 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
       enableRotate: true,
       enablePan: false,
       enableZoom: true,
-      rotateSpeed: 1.0,
-      zoomSpeed: 0.3,
+      rotateSpeed: 10.0,
+      zoomSpeed: 0.1,
       enableDamping: true,
-      dampingFactor: 0.15,
+      dampingFactor: 1.0,
       shouldHandleInput: function() {
         return self.hovered;
       },

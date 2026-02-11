@@ -7,9 +7,10 @@ function SceneManager() constructor {
       }
     });
     self.camera = new UePerspectiveCamera({ x: 100, y: -300, z: 70, far: 10000, view: 1 }).use();
-    self.orbit = new UeOrbitControls(self.camera, {
+    // Note: UI.Main.Scene doesn't exist yet at this point, will be set later
+    self.orbit = new UeOrbitControlsV2(self.camera, undefined, {
         shouldHandleInput: function() {
-            return global.UI.Main.Scene.hovered;
+            return global.UI.Main.Scene != undefined && global.UI.Main.Scene.hovered;
         },
         onChange: function() {
             oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);

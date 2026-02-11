@@ -102,36 +102,36 @@ function EditorUiSceneTools(ui) constructor {
     ui.SceneTools.Left.add(ui.SceneTools.BtnView, ui.SceneTools.BtnMove, ui.SceneTools.BtnRotate, ui.SceneTools.BtnScale);
     
     // Toggle camera easing
-    ui.SceneTools.BtnCamAccel = new UiButton(sprUiCamera, btnStyle, { tooltip: "Toggle camera easing" });
+    // ui.SceneTools.BtnCamAccel = new UiButton(sprUiCamera, btnStyle, { tooltip: "Toggle camera easing" });
 
-    with (ui.SceneTools.BtnCamAccel) {
-        onClick(function() {
-            var sm = oSceneEditor.sceneManager;
-            if (sm.orbit != undefined) {
-                // Toggle between 0.3 (Damped) and 1.0 (Linear)
-                if (sm.orbit.dampingFactor >= 1.0) {
-                    sm.orbit.dampingFactor = 0.3;
-                } else {
-                    sm.orbit.dampingFactor = 1.0;
-                }
+    // with (ui.SceneTools.BtnCamAccel) {
+    //     onClick(function() {
+    //         var sm = oSceneEditor.sceneManager;
+    //         if (sm.orbit != undefined) {
+    //             // Toggle between 0.3 (Damped) and 1.0 (Linear)
+    //             if (sm.orbit.dampingFactor >= 1.0) {
+    //                 sm.orbit.dampingFactor = 0.3;
+    //             } else {
+    //                 sm.orbit.dampingFactor = 1.0;
+    //             }
                 
-                self.selected = (sm.orbit.dampingFactor < 1.0);
-                sm.orbit.enableDamping = self.selected;
-                global.UI.requestRedraw();
-                oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
-            }
-        });
-    }
+    //             self.selected = (sm.orbit.dampingFactor < 1.0);
+    //             sm.orbit.enableDamping = self.selected;
+    //             global.UI.requestRedraw();
+    //             oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+    //         }
+    //     });
+    // }
     
     // Set initial state
-    if (oSceneEditor.sceneManager.orbit != undefined) {
-        ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 1.0);
-    }
+    // if (oSceneEditor.sceneManager.orbit != undefined) {
+    //     ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 1.0);
+    // }
     
-    self.updateDampingButton = function() {
-        ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 1.0);
-        global.UI.requestRedraw();
-    };
+    // self.updateDampingButton = function() {
+    //     ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 1.0);
+    //     global.UI.requestRedraw();
+    // };
     
     // Reset camera position
     ui.SceneTools.BtnResetCam = new UiButton(sprUiCenter, btnStyle, { tooltip: "Reset camera" });
@@ -219,9 +219,9 @@ function EditorUiSceneTools(ui) constructor {
         var sm = oSceneEditor.sceneManager;
         var orbit = sm.orbit;
         if (orbit != undefined) {
-            var newPan = get_integer("Pan speed (default 1):", orbit.panSpeed) ?? 1;
-            var newRot = get_integer("Rotation speed (default 1):", orbit.rotateSpeed) ?? 1;
-            var newZoom = get_integer("Zoom speed (default 5):", orbit.zoomSpeed) ?? 5;
+            var newPan = get_integer("Pan speed (default 10):", orbit.panSpeed) ?? 10;
+            var newRot = get_integer("Rotation speed (default 10):", orbit.rotateSpeed) ?? 10;
+            var newZoom = get_integer("Zoom speed (default 2):", orbit.zoomSpeed) ?? 2;
             
             orbit.panSpeed = min(999999, max(0.00001, newPan));
             orbit.rotateSpeed = min(999999, max(0.00001, newRot));
@@ -231,7 +231,7 @@ function EditorUiSceneTools(ui) constructor {
         }
     });
 
-    ui.SceneTools.Right.add(ui.SceneTools.BtnResetCam, ui.SceneTools.BtnCamAccel, ui.SceneTools.BtnGrid, ui.SceneTools.BtnGridSnap, ui.SceneTools.BtnBoxColliders, ui.SceneTools.BtnOrbitSettings);
+    ui.SceneTools.Right.add(ui.SceneTools.BtnResetCam, /*ui.SceneTools.BtnCamAccel,*/ ui.SceneTools.BtnGrid, ui.SceneTools.BtnGridSnap, ui.SceneTools.BtnBoxColliders, ui.SceneTools.BtnOrbitSettings);
 
     self.updateGridButton = function() {
         ui.SceneTools.BtnGrid.selected = oSceneEditor.sceneManager.grid.visible;

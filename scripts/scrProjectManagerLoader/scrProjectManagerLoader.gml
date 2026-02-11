@@ -198,7 +198,7 @@ function ProjectLoader() constructor {
       }
       if (sm.orbit != undefined) {
         if (c[$ "target"] != undefined) vec3_set(sm.orbit.target, c.target[0], c.target[1], c.target[2]);
-        if (c[$ "dampingFactor"] != undefined) sm.orbit.dampingFactor = c.dampingFactor;
+        // if (c[$ "dampingFactor"] != undefined) sm.orbit.dampingFactor = c.dampingFactor;
         if (c[$ "zoomSpeed"] != undefined) sm.orbit.zoomSpeed = c.zoomSpeed;
         if (c[$ "panSpeed"] != undefined) sm.orbit.panSpeed = c.panSpeed;
         if (c[$ "rotateSpeed"] != undefined) sm.orbit.rotateSpeed = c.rotateSpeed;
@@ -206,7 +206,7 @@ function ProjectLoader() constructor {
         sm.orbit.updateSphericalCoordinates();
         sm.orbit.update();
       }
-      oSceneEditor.editorManager.sceneTools.updateDampingButton();
+      // oSceneEditor.editorManager.sceneTools.updateDampingButton();
     }
 
     if (settings[$ "gridEnabled"] != undefined) {

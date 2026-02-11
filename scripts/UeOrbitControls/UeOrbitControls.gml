@@ -25,18 +25,18 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     }
 
     self.enableZoom = data[$"enableZoom"] ?? true;
-    self.zoomSpeed = data[$"zoomSpeed"] ?? 5;
+    self.zoomSpeed = data[$"zoomSpeed"] ?? 2;
     self.minTargetRadius = data[$"minTargetRadius"] ?? 5;
     self.maxTargetRadius = data[$"maxTargetRadius"] ?? infinity;
 
     self.enablePan = data[$"enablePan"] ?? true;
-    self.panSpeed = data[$"panSpeed"] ?? 1.0;
+    self.panSpeed = data[$"panSpeed"] ?? 10.0;
 
     self.enableRotate = data[$"enableRotate"] ?? true;
-    self.rotateSpeed = data[$"rotateSpeed"] ?? 1.0;
+    self.rotateSpeed = data[$"rotateSpeed"] ?? 10.0;
 
     self.enableDamping = data[$"enableDamping"] ?? true;
-    self.dampingFactor = data[$"dampingFactor"] ?? 0.1;
+    self.dampingFactor = data[$"dampingFactor"] ?? 1.0;
 
     self.autoRotate = data[$"autoRotate"] ?? false;
     self.autoRotateSpeed = data[$"autoRotateSpeed"] ?? 0.5;
@@ -47,8 +47,8 @@ function UeOrbitControls(camera, data = {}): UeControls(data) constructor {
     self.mouseButtonZoom = mb_middle;
     self.mouseButtonPan = mb_right;
 
-    self.keyPanSpeed = 1.0;
-    self.keyRotateSpeed = 1.0;
+    self.keyPanSpeed = 10.0;
+    self.keyRotateSpeed = 10.0;
 
     self.keys = {
         LEFT: vk_left,

@@ -24,6 +24,9 @@ function scrEditorLoadProject(projectPath) {
     // Recreate the UI elements
     ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true, dropzone: true });
     
+    // Update orbit controls with the UI Scene reference
+    oSceneEditor.sceneManager.orbit.uiSceneNode = ui.Scene;
+    
     // Handle drop on scene (instance model)
     ui.Scene.onDrop = function(draggedNode) {
         var draggedItem = draggedNode.parent;

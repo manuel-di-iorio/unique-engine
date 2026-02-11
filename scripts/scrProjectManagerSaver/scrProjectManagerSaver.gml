@@ -259,7 +259,7 @@ function ProjectSaver() constructor {
             position: [100, -300, 70],
             target: [0, 0, 0],
             damping: true,
-            dampingFactor: 0.1,
+            // dampingFactor: 1.0,
             zoomSpeed: 5,
             panSpeed: 1,
             rotateSpeed: 1
@@ -269,7 +269,7 @@ function ProjectSaver() constructor {
 
         if (sm.orbit != undefined) {
             cameraSettings.target = [sm.orbit.target[VEC3.x], sm.orbit.target[VEC3.y], sm.orbit.target[VEC3.z]];
-            cameraSettings.dampingFactor = sm.orbit.dampingFactor;
+            // cameraSettings.dampingFactor = sm.orbit.dampingFactor;
             cameraSettings.zoomSpeed = sm.orbit.zoomSpeed;
             cameraSettings.panSpeed = sm.orbit.panSpeed;
             cameraSettings.rotateSpeed = sm.orbit.rotateSpeed;
