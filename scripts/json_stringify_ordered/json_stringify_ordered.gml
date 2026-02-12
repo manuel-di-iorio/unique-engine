@@ -1,3 +1,5 @@
+// v1.1.1
+
 /// @function json_stringify_ordered(value, [prettify], [compact])
 /// @description Converts any value (struct, array, or primitive) to a formatted JSON string using buffers for better performance
 /// @param {any} value The value to convert to JSON
@@ -54,7 +56,7 @@ function __json_stringify_primitive(v, buf) {
   gml_pragma("forceinline");
   if (is_string(v) || is_handle(v)) {
     buffer_write(buf, buffer_u8, ord("\""));
-    buffer_write(buf, buffer_text, string_replace_all(v, "\"", "\\\""));
+    buffer_write(buf, buffer_text, __json_escape_string(string(v)));
     buffer_write(buf, buffer_u8, ord("\""));
   }
   else if (is_infinity(v)) {
@@ -148,7 +150,7 @@ function __json_stringify_struct(st, buf, indent, prettify, compact, is_spaced =
       
       if (prettify) buffer_write(buf, buffer_text, pad);
       buffer_write(buf, buffer_u8, ord("\""));
-      buffer_write(buf, buffer_text, k);
+      buffer_write(buf, buffer_text, __json_escape_string(k));
       buffer_write(buf, buffer_text, (prettify || is_spaced) ? "\": " : "\":");
       
       __json_stringify_buffer(st[$ k], buf, indent + 1, prettify, compact, is_spaced);
@@ -163,6 +165,23 @@ function __json_stringify_struct(st, buf, indent, prettify, compact, is_spaced =
   if (prettify) buffer_write(buf, buffer_text, pad_close);
   if (is_spaced && !prettify && kl > 0) buffer_write(buf, buffer_u8, ord(" "));
   buffer_write(buf, buffer_u8, ord("}"));
+}
+
+/**
+ * @internal: Escapes a string for JSON inclusion
+ * @param {string} str The string to escape
+ * @return {string} The escaped string
+ */
+function __json_escape_string(str) {
+  gml_pragma("forceinline");
+  var s = string_replace_all(str, "\\", "\\\\");
+  s = string_replace_all(s, "\"", "\\\"");
+  s = string_replace_all(s, "\n", "\\n");
+  s = string_replace_all(s, "\r", "\\r");
+  s = string_replace_all(s, "\t", "\\t");
+  s = string_replace_all(s, "\b", "\\b");
+  s = string_replace_all(s, "\f", "\\f");
+  return s;
 }
 
 /**

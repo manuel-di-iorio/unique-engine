@@ -86,41 +86,80 @@ function SceneManager() constructor {
          * - If there are last hits, cycle through them
          */
         var _prevHitsLength = array_length(_editorManager.pickLastHits);
-        if (_prevHitsLength && _mousePos.x == _editorManager.pickLastPos.x && _mousePos.y == _editorManager.pickLastPos.y) {
-            // Cycle through hits
+        var _clickedSamePos = _prevHitsLength && _mousePos.x == _editorManager.pickLastPos.x && _mousePos.y == _editorManager.pickLastPos.y;
+        
+        if (_clickedSamePos) {
+            // Cycle through hits at the same position
             _editorManager.pickLastIndex = (_editorManager.pickLastIndex + 1) % _prevHitsLength;
         } else {
-            // Perform a new raycast
+            // Perform a new raycast for a new position
             self.camera.updateMatrixWorld();
             self.raycaster.setFromCamera(self.camera);
             var _hits = self.raycaster.intersectObjects(self.objects.children, true, true);
             
-            // Filter hits to unique root objects (direct children of scene or objects container)
-            var _uniqueRoots = {};
             var _filteredHits = [];
             var _activeScene = _editorManager.activeScene;
+            var _currentlySelectedRoot = undefined;
+            
+            // Find the root of the currently selected asset (if any)
+            if (_editorManager.activeAsset != undefined) {
+                var _curr = _editorManager.activeAsset;
+                while (_curr.parent != undefined && 
+                       _curr.parent != self.objects && 
+                       (_activeScene == undefined || _curr.parent != _activeScene)) {
+                    _curr = _curr.parent;
+                }
+                _currentlySelectedRoot = _curr;
+            }
+
+            // Group hits: for each hit, we add the Root and then the specific Submesh.
+            // We use __hitRoot to track which tree each hit belongs to.
+            var _uniqueEntries = {};
             
             for (var i = 0, il = array_length(_hits); i < il; i++) {
                 var _hit = _hits[i];
-                var _root = _hit.object;
+                var _sub = _hit.object;
                 
                 // Traverse up to find the root object
+                var _root = _sub;
                 while (_root.parent != undefined && 
                        _root.parent != self.objects && 
                        (_activeScene == undefined || _root.parent != _activeScene)) {
                     _root = _root.parent;
                 }
                 
-                if (_uniqueRoots[$ _root.uuid] == undefined) {
-                    _uniqueRoots[$ _root.uuid] = true;
-                    _hit.object = _root; // Update the hit to point to the root object
+                // 1. Add the Root object to the cycle list if not already there for this click position
+                if (_uniqueEntries[$ _root.uuid] == undefined) {
+                    _uniqueEntries[$ _root.uuid] = true;
+                    var _rootEntry = { object: _root, distance: _hit.distance, __hitRoot: _root };
+                    array_push(_filteredHits, _rootEntry);
+                }
+                
+                // 2. Add the specific Submesh to the cycle list (if it's different from root)
+                if (_sub != _root && _uniqueEntries[$ _sub.uuid] == undefined) {
+                    _uniqueEntries[$ _sub.uuid] = true;
+                    _hit.__hitRoot = _root; // Tag with root for easy comparison
                     array_push(_filteredHits, _hit);
                 }
             }
             
             _editorManager.pickLastHits = _filteredHits;
-            _editorManager.pickLastIndex = 0;
             _editorManager.pickLastPos = _mousePos;
+            
+            // Determine starting index:
+            // If the first root hit belongs to the object tree already selected, skip to the submesh (index 1)
+            // so that clicking different parts of the same object tree selects submeshes immediately.
+            _editorManager.pickLastIndex = 0;
+            if (array_length(_filteredHits) > 1) {
+                var _primaryHitRoot = _filteredHits[0].__hitRoot;
+                
+                if (_currentlySelectedRoot != undefined && _primaryHitRoot == _currentlySelectedRoot) {
+                    // Check if the next hit is a submesh of the same tree
+                    if (_filteredHits[1].__hitRoot == _primaryHitRoot) {
+                        _editorManager.pickLastIndex = 1;
+                    }
+                }
+            }
         }
         
         // Select the hit object (if available)

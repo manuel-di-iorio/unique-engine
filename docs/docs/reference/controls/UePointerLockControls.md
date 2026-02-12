@@ -16,16 +16,20 @@ new UePointerLockControls(camera, data = {})
 
 | Key | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `sensitivityX` | `number` | `0.1` | Horizontal mouse sensitivity |
-| `sensitivityY` | `number` | `0.1` | Vertical mouse sensitivity |
+| `pointerSpeedX` | `number` | `0.1` | Horizontal mouse speed |
+| `pointerSpeedY` | `number` | `0.1` | Vertical mouse speed |
+| `minPolarAngle` | `number` | `0` | Camera pitch lower limit (radians) |
+| `maxPolarAngle` | `number` | `Math.PI` | Camera pitch upper limit (radians) |
 
 ### Properties
 
 | Property | Type | Description |
 | :--- | :--- | :--- |
 | `camera` | `UeCamera` | The controlled camera |
-| `sensitivityX` | `number` | Horizontal mouse sensitivity |
-| `sensitivityY` | `number` | Vertical mouse sensitivity |
+| `pointerSpeedX` | `number` | Horizontal mouse speed |
+| `pointerSpeedY` | `number` | Vertical mouse speed |
+| `minPolarAngle` | `number` | Camera pitch lower limit. Range is `[0, Math.PI]` in radians |
+| `maxPolarAngle` | `number` | Camera pitch upper limit. Range is `[0, Math.PI]` in radians |
 | `yaw` | `number` | Current horizontal rotation (degrees) |
 | `pitch` | `number` | Current vertical rotation (degrees) |
 | `isLocked` | `boolean` | Whether the pointer is currently locked |
@@ -49,11 +53,35 @@ unlock()
 ```
 Releases the pointer lock.
 
+```js
+getDirection(target)
+```
+Returns a vector representing the current look direction.  
+- **target**: An array `[x, y, z]` or struct `{x, y, z}` to store the result.
+
+```js
+moveForward(distance)
+```
+Moves the camera position forward along the ground plane (based on yaw).
+
+```js
+moveRight(distance)
+```
+Moves the camera position right relative to the current orientation.
+
+### 🔔 Events
+
+| Event | Description |
+| :--- | :--- |
+| `change` | Fires when the user moves the mouse. |
+| `lock` | Fires when the pointer lock status is "locked". |
+| `unlock` | Fires when the pointer lock status is "unlocked". |
+
 ## 🧠 Notes
 
 - **Input capture**: The lock is requested on the first left-click inside the game view. Pressing `Escape` (default browser/engine behavior) will release the lock.
-- **Orientation**: The camera rotation is clamped between -89 and +89 degrees on the vertical (pitch) axis to prevent flipping.
-- **Direction**: The controls update the `camera.target` property based on the calculated direction, while the camera's `position` remains independent (allowing the user to handle movement separately).
+- **Orientation**: The camera orientation is clamped according to `minPolarAngle` and `maxPolarAngle`. The default range is `[0, Math.PI]`.
+- **Direction**: The controls update the `camera.target` property based on the calculated direction.
 - **Inheritance**: It inherits from `UeControls`, so it can be enabled/disabled via the `enabled` property.
 
 ### Example
@@ -61,17 +89,17 @@ Releases the pointer lock.
 ```js
 // Initialize controls
 const controls = new UePointerLockControls(camera, { 
-    sensitivityX: 0.08,
-    sensitivityY: 0.08
+    pointerSpeedX: 0.08,
+    pointerSpeedY: 0.08
 });
 
 // In your update loop
 function update() {
     controls.update();
     
-    // Example: move camera position separately
+    // Example: move camera position using the control's methods
     if (keyboard_check(ord("W"))) {
-        camera.translateZ(5);
+        controls.moveForward(5);
     }
 }
 ```

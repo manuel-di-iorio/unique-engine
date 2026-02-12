@@ -48,7 +48,9 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
         // __rotationEuler
         if (variable_struct_exists(asset, "rotation") && asset[$ "__rotationEuler"] == undefined) {
              asset.__rotationEuler = euler_create();
-             euler_copy(asset.__rotationEuler, originalAsset.__rotationEuler);
+             if (originalSource != undefined && originalSource[$ "__rotationEuler"] != undefined) {
+                euler_copy(asset.__rotationEuler, originalSource.__rotationEuler);
+             }
         }
         
         // __matrixAutoUpdate
@@ -109,7 +111,7 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
     assetManager.addAsset(treeviewItem.assetType, clonedAsset, parentAsset);
 
     // 6. Select
-    treeview.__onItemSelected(newRootItem, true);
+    treeview.__onItemSelected(newRootItem, false);
 }
 
 function __editorTreeviewOnDuplicateAsset__createUiRecursive(treeview, asset, parentUiItem) {

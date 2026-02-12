@@ -17,9 +17,17 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     
     // Handle delete shortcut
     self.onStep(method(self, function() {
+        if (global.UI.hasAnyFocus()) return;
+        
         if (keyboard_check_pressed(vk_delete)) {
-            if (self.selectedItem != undefined && !global.UI.hasAnyFocus()) {
+            if (self.selectedItem != undefined) {
                 self.selectedItem.__removeItem();
+            }
+        }
+        
+        if (keyboard_check(vk_control) && keyboard_check_pressed(ord("D"))) {
+            if (self.selectedItem != undefined) {
+                editorTreeviewOnDuplicateAsset(self.selectedItem);
             }
         }
     }));
@@ -243,6 +251,16 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         
         self.onDoubleClick(method({ item: treeviewItem }, function() {
             item.treeview.__onItemSelected(item, true);
+            
+            // Toggle expand/collapse if it has children
+            if (item.Items.count() > 0) {
+                if (item.collapsed) {
+                    item.expandItem();
+                } else {
+                    item.collapseItem();
+                }
+            }
+            
             return false;
         }));
         

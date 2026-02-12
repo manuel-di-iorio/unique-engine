@@ -107,6 +107,17 @@ function EditorUiInspector(ui) constructor {
         for (var i = 0, l = array_length(fieldsList); i < l; i++) {
             var assetField = fieldsList[i];
             
+            // Handle visibility
+            var _asset = self.asset;
+            var isVisible = assetField[$ "visible"];
+            if (isVisible != undefined) {
+                if (is_method(isVisible) || is_callable(isVisible)) {
+                    if (!method({ asset: _asset, assetField }, isVisible)()) continue;
+                } else if (!isVisible) {
+                    continue;
+                }
+            }
+
             // Handle Sections with children
             if (assetField.type == "section" && assetField[$ "children"] != undefined) {
               var isCollapsed = assetField[$ "collapsed"] ?? false;

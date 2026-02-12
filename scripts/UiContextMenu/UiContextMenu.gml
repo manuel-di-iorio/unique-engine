@@ -117,6 +117,7 @@ function UiContextMenu(x, y, items) constructor {
                 });
                 
                 menuItem.label = itemData.label;
+                menuItem.shortcut = itemData[$ "shortcut"];
                 menuItem.icon = itemData[$ "icon"];
                 menuItem.onClick = itemData.onClick;
                 menuItem.pointerEvents = true;
@@ -163,6 +164,14 @@ function UiContextMenu(x, y, items) constructor {
                         draw_set_valign(fa_middle);
                         draw_set_font(fText);
                         draw_text(xx, yy, self.label);
+
+                        // Draw shortcut
+                        if (self.shortcut != undefined) {
+                            draw_set_color(c_gray);
+                            draw_set_halign(fa_right);
+                            draw_text(self.x2 - 15, yy, self.shortcut);
+                            draw_set_halign(fa_left);
+                        }
                     };
                 }
                 

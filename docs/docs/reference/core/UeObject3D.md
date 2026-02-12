@@ -24,6 +24,7 @@ new UeObject3D(data = {})
 | `gmObject`        | `string`                  | `undefined` | GameMaker object name to instantiate (e.g. "objPlayer") when this object is created by UeProjectLoader |
 | `gmLayer`         | `string`                  | `"Instances"`| GameMaker layer name for the instantiation |
 | `prefab`          | `UeObject3D`              | `undefined` | The original asset this object is an instance of (set automatically when dragging assets into a scene (Scene Editor) |
+| `sourcePath`      | `string`                  | `undefined` | The original external asset path this object belongs to (e.g. "models/car.glb") |
 
 ### Properties
 
@@ -43,6 +44,7 @@ new UeObject3D(data = {})
 | `gmObject`    | `string`     | undefined        | GameMaker object name to instantiate with this 3D object |
 | `gmLayer`     | `string`     | "Instances"      | GameMaker layer name where the object will be instantiated |
 | `prefab`      | `UeObject3D` | undefined        | Reference to the source prefab/asset this instance belongs to (Scene Editor) |
+| `sourcePath`  | `string`     | undefined        | The file path of the source asset (e.g. GLTF/OBJ path) |
 | `onBeforeRender` | `method`  | void method      | Function called before rendering this object |
 | `onAfterRender`  | `method`  | void method      | Function called after rendering this object  |
 | `onBeforeShadow` | `method`  | void method      | Function called before rendering this object to shadow map |

@@ -44,6 +44,7 @@ function UeLight(data = {}): UeObject3D(data) constructor {
       pz: position[2],
       parent: parent ? parent.uuid : undefined,
       children: array_map(children, function (child) { return child.uuid }),
+      sourcePath: self[$ "sourcePath"],
     };
     
     if (target != undefined) {

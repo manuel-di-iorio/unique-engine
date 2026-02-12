@@ -95,9 +95,14 @@ function ProjectManager() constructor {
           var jsonString = buffer_read(buf, buffer_text);
           buffer_delete(buf);
           
-          var settings = json_parse(jsonString);
-          if (settings[$ "lastProject"] != undefined) {
-              scrEditorLoadProject(settings.lastProject);
+          try {
+              var settings = json_parse(jsonString);
+              if (settings[$ "lastProject"] != undefined) {
+                  scrEditorLoadProject(settings.lastProject);
+              }
+          } catch (e) {
+              show_debug_message("FAILED TO PARSE settings.json");
+              show_debug_message("CONTENT: " + jsonString);
           }
        } 
     }

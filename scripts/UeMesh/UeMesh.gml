@@ -92,6 +92,7 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       rotation,
       scale,
       up,
+      sourcePath: self[$ "sourcePath"],
     };
   }
 

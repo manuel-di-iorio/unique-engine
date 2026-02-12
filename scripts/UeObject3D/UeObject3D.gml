@@ -329,6 +329,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             rotation,
             scale,
             up,
+            sourcePath: self[$ "sourcePath"],
         };
     }
 
@@ -336,6 +337,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         gml_pragma("forceinline");
         uuid = data[$ "uuid"] ?? uuid;
         name = data[$ "name"] ?? name;
+        sourcePath = data[$ "sourcePath"] ?? undefined;
         visible = data[$ "visible"] ?? true;
         renderOrder = data[$ "renderOrder"] ?? 0;
 

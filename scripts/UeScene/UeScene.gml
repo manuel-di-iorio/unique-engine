@@ -23,7 +23,8 @@ function UeScene(data = {}): UeObject3D(data) constructor {
             name,
             children: recursive
                 ? array_map(children, function(child) { return child.toJSON(true); })
-                : array_map(children, function(child) { return child.uuid })
+                : array_map(children, function(child) { return child.uuid }),
+            sourcePath: self[$ "sourcePath"]
         };
     }
     

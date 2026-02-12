@@ -211,12 +211,12 @@ function EditorUiAssets(ui) constructor {
             //})});
 
             // Duplicate action
-            array_push(items, { label: "Duplicate", icon: sprUiDuplicate, onClick: method({ item: treeviewItem }, function() {
+            array_push(items, { label: "Duplicate", shortcut: "Ctrl+D", icon: sprUiDuplicate, onClick: method({ item: treeviewItem }, function() {
                  editorTreeviewOnDuplicateAsset(self.item);
             })});
             
             // Delete action
-            array_push(items, { label: "Delete", icon: sprUiTrash, onClick: method({ item: treeviewItem }, function() {
+            array_push(items, { label: "Delete", shortcut: "Del", icon: sprUiTrash, onClick: method({ item: treeviewItem }, function() {
                 self.item.__removeItem();
             })});
         }

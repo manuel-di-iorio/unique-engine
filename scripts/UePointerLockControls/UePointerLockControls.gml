@@ -5,9 +5,13 @@
 function UePointerLockControls(camera, data = {}): UeControls(data) constructor {
     self.camera = camera;
     
-    // Configurazione Sensibilità
-    self.sensitivityX = data[$ "sensitivityX"] ?? 0.1;
-    self.sensitivityY = data[$ "sensitivityY"] ?? 0.1;
+    // Configurazione Speed
+    self.pointerSpeedX = data[$ "pointerSpeedX"] ?? 0.1;
+    self.pointerSpeedY = data[$ "pointerSpeedY"] ?? 0.1;
+    
+    // Limits
+    self.minPolarAngle = data[$ "minPolarAngle"] ?? 0;
+    self.maxPolarAngle = data[$ "maxPolarAngle"] ?? pi;
     
     // Accumulatori rotazione (in gradi)
     self.yaw = 0;   // Rotazione attorno a Z (World Up)
@@ -22,21 +26,59 @@ function UePointerLockControls(camera, data = {}): UeControls(data) constructor 
     // Metodi di controllo Lock
     static lock = function() {
         window_mouse_set_locked(true);
-        self.isLocked = true;
+        if (!self.isLocked) {
+            self.isLocked = true;
+            self.dispatchEvent({ type: "lock" });
+        }
         self._needsUpdate = true;
     };
 
     static unlock = function() {
         window_mouse_set_locked(false);
-        self.isLocked = false;
+        if (self.isLocked) {
+            self.isLocked = false;
+            self.dispatchEvent({ type: "unlock" });
+        }
         self._needsUpdate = true;
     };
     
-    static setOrientation = function(_yaw, _pitch) {
-        self.yaw = _yaw;
-        self.pitch = clamp(_pitch, -89, 89);
-        self._needsUpdate = true;
-        return self;
+
+    static getDirection = function(target) {
+        var r = dcos(self.pitch);
+        var dirX = r * dcos(self.yaw);
+        var dirY = r * dsin(self.yaw);
+        var dirZ = dsin(self.pitch);
+        
+        if (is_array(target)) {
+            target[0] = dirX;
+            target[1] = dirY;
+            target[2] = dirZ;
+        } else {
+            target.x = dirX;
+            target.y = dirY;
+            target.z = dirZ;
+        }
+        return target;
+    };
+    
+    static moveForward = function(distance) {
+        var moveX = dcos(self.yaw) * distance;
+        var moveY = dsin(self.yaw) * distance;
+        
+        self.camera.position[0] += moveX;
+        self.camera.position[1] += moveY;
+        self.camera.target[0] += moveX;
+        self.camera.target[1] += moveY;
+    };
+    
+    static moveRight = function(distance) {
+        var moveX = -dsin(self.yaw) * distance;
+        var moveY = dcos(self.yaw) * distance;
+        
+        self.camera.position[0] += moveX;
+        self.camera.position[1] += moveY;
+        self.camera.target[0] += moveX;
+        self.camera.target[1] += moveY;
     };
     
     static update = function() {
@@ -52,11 +94,18 @@ function UePointerLockControls(camera, data = {}): UeControls(data) constructor 
         
         // Se non siamo lockati, non ruotiamo a meno che non sia richiesto un aggiornamento forzato
         var isLockedNow = window_mouse_get_locked();
-        if (!isLockedNow && !self._needsUpdate) {
-            self.isLocked = false;
-            return;
+        if (!isLockedNow) {
+            if (self.isLocked) {
+                self.isLocked = false;
+                self.dispatchEvent({ type: "unlock" });
+            }
+            if (!self._needsUpdate) return;
+        } else {
+            if (!self.isLocked) {
+                self.isLocked = true;
+                self.dispatchEvent({ type: "lock" });
+            }
         }
-        self.isLocked = isLockedNow;
 
         // Get Mouse Delta
         var dx = isLockedNow ? window_mouse_get_delta_x() : 0;
@@ -67,24 +116,25 @@ function UePointerLockControls(camera, data = {}): UeControls(data) constructor 
         // Aggiorna Yaw (Z-axis) e Pitch (X-axis) solo se lockati
         if (isLockedNow) {
             // dx positivo (mouse a destra) -> yaw diminuisce (ruota orario verso Y-)
-            self.yaw -= dx * self.sensitivityX;
+            self.yaw -= dx * self.pointerSpeedX;
             
             // dy positivo (mouse giù) -> pitch diminuisce (guarda giù)
-            self.pitch -= dy * self.sensitivityY;
+            self.pitch -= dy * self.pointerSpeedY;
 
-            // Clamp Pitch (evita di capovolgersi, limitato a +/- 89)
-            self.pitch = clamp(self.pitch, -89, 89);
+            // Clamp Pitch
+            var minPitchDeg = 90 - (self.maxPolarAngle * 180 / pi);
+            var maxPitchDeg = 90 - (self.minPolarAngle * 180 / pi);
+            self.pitch = clamp(self.pitch, minPitchDeg, maxPitchDeg);
+            
+            self.dispatchEvent({ type: "change" });
         }
         
         // --- Aggiorna Camera Target ---
-        // UeCamera usa matrix_build_lookat, quindi dobbiamo aggiornare il target point.
         var r = dcos(self.pitch); // Raggio orizzontale
         var dirX = r * dcos(self.yaw);
         var dirY = r * dsin(self.yaw);
         var dirZ = dsin(self.pitch);
         
-        // Impostiamo il target a una certa distanza lungo la direzione
-        // Questo simula una rotazione "FPS" mantenendo il funzionamento LookAt della camera
         var dist = 1000;
         self.camera.target[0] = self.camera.position[0] + dirX * dist;
         self.camera.target[1] = self.camera.position[1] + dirY * dist;

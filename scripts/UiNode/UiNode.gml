@@ -157,6 +157,10 @@ function UiNode(style = {}, props = {}) constructor {
         elem.hovered = false;
         if (global.UI.deepestTarget == elem) {
             global.UI.deepestTarget = undefined;
+            
+            if (global.UI.draggedElement == undefined) {
+                global.UI.setCursor(cr_default);
+            }
         }
         
         // Remove this element from spatial tree

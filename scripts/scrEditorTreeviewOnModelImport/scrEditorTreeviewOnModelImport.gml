@@ -13,6 +13,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
     var textures = modelContainer.textures;
     var materials = modelContainer.materials;
     var model = modelContainer.root;
+    model.sourcePath = path;
     
     // Extract model name from file path or use progressive ID
     var fileName = filename_name(path);

@@ -165,6 +165,105 @@ function scrEditorInspectorMesh() {
           ]
     },
 
+    // === SECTION: BOUNDING BOX ===
+    {
+          id: "sectionBoundingBox",
+          label: "Bounding Box",
+          type: "section",
+          collapsed: true,
+          visible: function() {
+              var geo = self.asset[$ "geometry"];
+              return geo != undefined && geo[$ "boundingBox"] != undefined;
+          },
+          children: [
+            {
+                  id: "bboxMin",
+                  label: "Min",
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      var geo = self.asset[$ "geometry"];
+                      if (geo == undefined || geo[$ "boundingBox"] == undefined) return undefined;
+                      var bbox = geo.boundingBox;
+                      return [bbox[0], bbox[1], bbox[2]];
+                  },
+                  onBlur: function(value) {
+                      var geo = self.asset[$ "geometry"];
+                      if (geo != undefined && geo[$ "boundingBox"] != undefined) {
+                          var bbox = geo.boundingBox;
+                          bbox[0] = value[0]; bbox[1] = value[1]; bbox[2] = value[2];
+                      }
+                  }
+            },
+            {
+                  id: "bboxMax",
+                  label: "Max",
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      var geo = self.asset[$ "geometry"];
+                      if (geo == undefined || geo[$ "boundingBox"] == undefined) return undefined;
+                      var bbox = geo.boundingBox;
+                      return [bbox[3], bbox[4], bbox[5]];
+                  },
+                  onBlur: function(value) {
+                      var geo = self.asset[$ "geometry"];
+                      if (geo != undefined && geo[$ "boundingBox"] != undefined) {
+                          var bbox = geo.boundingBox;
+                          bbox[3] = value[0]; bbox[4] = value[1]; bbox[5] = value[2];
+                      }
+                  }
+            }
+          ]
+    },
+
+    // === SECTION: BOUNDING SPHERE ===
+    {
+          id: "sectionBoundingSphere",
+          label: "Bounding Sphere",
+          type: "section",
+          collapsed: true,
+          visible: function() {
+              var geo = self.asset[$ "geometry"];
+              return geo != undefined && geo[$ "boundingSphere"] != undefined;
+          },
+          children: [
+            {
+                  id: "bsphereCenter",
+                  label: "Center",
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      var geo = self.asset[$ "geometry"];
+                      if (geo == undefined || geo[$ "boundingSphere"] == undefined) return undefined;
+                      var bsphere = geo.boundingSphere;
+                      return [bsphere[0], bsphere[1], bsphere[2]];
+                  },
+                  onBlur: function(value) {
+                      var geo = self.asset[$ "geometry"];
+                      if (geo != undefined && geo[$ "boundingSphere"] != undefined) {
+                          var bsphere = geo.boundingSphere;
+                          bsphere[0] = value[0]; bsphere[1] = value[1]; bsphere[2] = value[2];
+                      }
+                  }
+            },
+            {
+                  id: "bsphereRadius",
+                  label: "Radius",
+                  type: "text",
+                  format: "float",
+                  valueGetter: function() {
+                      var geo = self.asset[$ "geometry"];
+                      if (geo == undefined || geo[$ "boundingSphere"] == undefined) return undefined;
+                      return geo.boundingSphere[3];
+                  },
+                  onBlur: function(value) {
+                      var geo = self.asset[$ "geometry"];
+                      if (geo != undefined && geo[$ "boundingSphere"] != undefined) {
+                          geo.boundingSphere[3] = value;
+                      }
+                  }
+            }
+          ]
+    },
+
     // === SECTION: RENDERING ===
     {
           id: "sectionRendering",

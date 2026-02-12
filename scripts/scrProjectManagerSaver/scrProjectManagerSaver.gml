@@ -197,6 +197,16 @@ function ProjectSaver() constructor {
         if (struct_exists(asset, "__parentUI") && asset[$ "__parentUI"] != undefined) {
             metadata[$ "__parentUI"] = asset[$ "__parentUI"][$ "uuid"];
         }
+
+        if (struct_exists(asset, "sourcePath") && asset.sourcePath != undefined && asset.sourcePath != "") {
+            metadata[$ "sourcePath"] = asset.sourcePath;
+            
+            var ext = filename_ext(asset.sourcePath);
+            var targetModelPath = assetPath + "model" + ext;
+            if (!file_exists(targetModelPath) && file_exists(asset.sourcePath)) {
+                file_copy(asset.sourcePath, targetModelPath);
+            }
+        }
         
         // Serialize children recursively only for Scenes
         if (type == "Scene") {

@@ -133,6 +133,109 @@ function scrEditorInspectorObject3D() {
                 placeholder: "Instances"
             }
           ]
+    },
+
+    // === SECTION: BOUNDING BOX ===
+    {
+          id: "sectionBoundingBox",
+          label: "Bounding Box",
+          type: "section",
+          collapsed: true,
+          visible: function() {
+              var bbox = self.asset[$ "boundingBox"];
+              if (bbox == undefined && self.asset[$ "geometry"] != undefined) bbox = self.asset.geometry.boundingBox;
+              return bbox != undefined;
+          },
+          children: [
+            {
+                  id: "bboxMin",
+                  label: "Min",
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      var bbox = self.asset[$ "boundingBox"];
+                      if (bbox == undefined && self.asset[$ "geometry"] != undefined) bbox = self.asset.geometry.boundingBox;
+                      if (bbox == undefined) return undefined;
+                      return [bbox[0], bbox[1], bbox[2]];
+                  },
+                  onBlur: function(value) {
+                      var bbox = self.asset[$ "boundingBox"];
+                      if (bbox == undefined && self.asset[$ "geometry"] != undefined) bbox = self.asset.geometry.boundingBox;
+                      if (bbox != undefined) {
+                          bbox[0] = value[0]; bbox[1] = value[1]; bbox[2] = value[2];
+                      }
+                  }
+            },
+            {
+                  id: "bboxMax",
+                  label: "Max",
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      var bbox = self.asset[$ "boundingBox"];
+                      if (bbox == undefined && self.asset[$ "geometry"] != undefined) bbox = self.asset.geometry.boundingBox;
+                      if (bbox == undefined) return undefined;
+                      return [bbox[3], bbox[4], bbox[5]];
+                  },
+                  onBlur: function(value) {
+                      var bbox = self.asset[$ "boundingBox"];
+                      if (bbox == undefined && self.asset[$ "geometry"] != undefined) bbox = self.asset.geometry.boundingBox;
+                      if (bbox != undefined) {
+                          bbox[3] = value[0]; bbox[4] = value[1]; bbox[5] = value[2];
+                      }
+                  }
+            }
+          ]
+    },
+
+    // === SECTION: BOUNDING SPHERE ===
+    {
+          id: "sectionBoundingSphere",
+          label: "Bounding Sphere",
+          type: "section",
+          collapsed: true,
+          visible: function() {
+              var bsphere = self.asset[$ "boundingSphere"];
+              if (bsphere == undefined && self.asset[$ "geometry"] != undefined) bsphere = self.asset.geometry.boundingSphere;
+              return bsphere != undefined;
+          },
+          children: [
+            {
+                  id: "bsphereCenter",
+                  label: "Center",
+                  type: "transformXYZ",
+                  valueGetter: function() {
+                      var bsphere = self.asset[$ "boundingSphere"];
+                      if (bsphere == undefined && self.asset[$ "geometry"] != undefined) bsphere = self.asset.geometry.boundingSphere;
+                      if (bsphere == undefined) return undefined;
+                      return [bsphere[0], bsphere[1], bsphere[2]];
+                  },
+                  onBlur: function(value) {
+                      var bsphere = self.asset[$ "boundingSphere"];
+                      if (bsphere == undefined && self.asset[$ "geometry"] != undefined) bsphere = self.asset.geometry.boundingSphere;
+                      if (bsphere != undefined) {
+                          bsphere[0] = value[0]; bsphere[1] = value[1]; bsphere[2] = value[2];
+                      }
+                  }
+            },
+            {
+                  id: "bsphereRadius",
+                  label: "Radius",
+                  type: "text",
+                  format: "float",
+                  valueGetter: function() {
+                      var bsphere = self.asset[$ "boundingSphere"];
+                      if (bsphere == undefined && self.asset[$ "geometry"] != undefined) bsphere = self.asset.geometry.boundingSphere;
+                      if (bsphere == undefined) return undefined;
+                      return bsphere[3];
+                  },
+                  onBlur: function(value) {
+                      var bsphere = self.asset[$ "boundingSphere"];
+                      if (bsphere == undefined && self.asset[$ "geometry"] != undefined) bsphere = self.asset.geometry.boundingSphere;
+                      if (bsphere != undefined) {
+                          bsphere[3] = value;
+                      }
+                  }
+            }
+          ]
     }
   ];
 }

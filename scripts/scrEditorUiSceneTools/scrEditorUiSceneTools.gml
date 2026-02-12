@@ -219,9 +219,9 @@ function EditorUiSceneTools(ui) constructor {
         var sm = oSceneEditor.sceneManager;
         var orbit = sm.orbit;
         if (orbit != undefined) {
-            var newPan = get_integer("Pan speed (default 10):", orbit.panSpeed) ?? 10;
+            var newPan = get_integer("Pan speed (default 1):", orbit.panSpeed) ?? 1;
             var newRot = get_integer("Rotation speed (default 1):", orbit.rotateSpeed) ?? 1;
-            var newZoom = get_integer("Zoom speed (default 2):", orbit.zoomSpeed) ?? 2;
+            var newZoom = get_integer("Zoom speed (default 1):", orbit.zoomSpeed) ?? 1;
             
             orbit.panSpeed = min(999999, max(0.00001, newPan));
             orbit.rotateSpeed = min(999999, max(0.00001, newRot));

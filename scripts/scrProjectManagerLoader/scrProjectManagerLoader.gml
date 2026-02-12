@@ -479,6 +479,13 @@ function ProjectLoader() constructor {
     if (bf == -1) return undefined;
     var str = buffer_read(bf, buffer_text);
     buffer_delete(bf);
-    return json_parse(str);
+    
+    try {
+        return json_parse(str);
+    } catch (e) {
+        show_debug_message("FAILED TO PARSE JSON AT: " + path);
+        show_debug_message("CONTENT: " + str);
+        throw(e);
+    }
   };
 }
