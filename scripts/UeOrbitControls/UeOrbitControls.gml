@@ -157,27 +157,19 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
     function setTarget(newTarget) {
         vec3_set(self.targetOffset, 0, 0, 0);
         if (typeof (newTarget) == "struct" && (newTarget[$ "isObject3D"] || newTarget[$ "isMesh"])) {
-            box3_set_from_object(self.__scratchBox, newTarget);
+            self.targetObject = newTarget;
+            newTarget.getWorldPosition(self.target);
             
-            if (box3_is_empty(self.__scratchBox)) {
-                self.targetObject = undefined;
-                vec3_set(self.target, 0, 0, 0);
-                self.sizeFactor = 1.0;
+            // Determine size factor for zoom limits from geometry bbox if available
+            var geom = newTarget[$ "geometry"];
+            if (geom != undefined && geom[$ "boundingBox"] != undefined) {
+                var size = box3_get_size(geom.boundingBox, self.__scratchVec1);
+                var worldScale = newTarget.getWorldScale(self.__scratchVec0);
+                self.sizeFactor = max(size[0] * worldScale[0], size[1] * worldScale[1], size[2] * worldScale[2]);
             } else {
-                self.targetObject = newTarget;
-                var center = box3_get_center(self.__scratchBox);
-                
-                if (is_nan(center[0] + center[1] + center[2])) {
-                    vec3_set(self.target, 0, 0, 0);
-                    self.sizeFactor = 1.0;
-                } else {
-                    vec3_copy(self.target, center);
-                    
-                    var size = box3_get_size(self.__scratchBox);
-                    self.sizeFactor = max(size[0], size[1], size[2]);
-                    if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
-                }
+                self.sizeFactor = vec3_length(newTarget.getWorldScale(self.__scratchVec0));
             }
+            if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
             
             // Adjust zoom limits based on size
             self.minTargetRadius = self.sizeFactor * 0.05;
@@ -197,13 +189,19 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
     function focus(object) {
         if (!object) return;
         
-        box3_set_from_object(self.__scratchBox, object);
-        if (box3_is_empty(self.__scratchBox)) return;
+        var center = object.getWorldPosition(self.__scratchVec0);
+        var sizeValue = 1.0;
         
-        var center = box3_get_center(self.__scratchBox, self.__scratchVec0);
-        var size = box3_get_size(self.__scratchBox, self.__scratchVec1);
+        var geom = object[$ "geometry"];
+        if (geom != undefined && geom[$ "boundingBox"] != undefined) {
+            var sizeVec = box3_get_size(geom.boundingBox, self.__scratchVec1);
+            var worldScale = object.getWorldScale(self.__scratchVec2);
+            sizeValue = max(sizeVec[0] * worldScale[0], sizeVec[1] * worldScale[1], sizeVec[2] * worldScale[2]);
+        } else {
+            sizeValue = vec3_length(object.getWorldScale(self.__scratchVec1)) * 2;
+        }
         
-        var radius = max(size[0], size[1], size[2]) * 0.5;
+        var radius = sizeValue * 0.5;
         var vFov = degtorad(self.camera.fov ?? 60);
         var aspect = self.camera.aspect ?? 1.0;
         
@@ -479,23 +477,9 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
             
             // Update target from object if set
             if (self.targetObject != undefined) {
-                box3_set_from_object(self.__scratchBox, self.targetObject);
-                
-                if (!box3_is_empty(self.__scratchBox)) {
-                    var center = box3_get_center(self.__scratchBox, self.__scratchVec0);
-                    
-                    if (!is_nan(center[0] + center[1] + center[2])) {
-                        var size = box3_get_size(self.__scratchBox, self.__scratchVec1);
-                        
-                        self.sizeFactor = max(size[0], size[1], size[2]);
-                        if (self.sizeFactor <= 0) self.sizeFactor = 1.0;
-                        
-                        self.minTargetRadius = self.sizeFactor * 0.05;
-                        self.maxTargetRadius = self.sizeFactor * 50.0;
-                        
-                        vec3_add_vectors(self.target, center, self.targetOffset);
-                    }
-                }
+                // Using world position (pivot) instead of recursive bbox center for performance
+                self.targetObject.getWorldPosition(self.__scratchVec0);
+                vec3_add_vectors(self.target, self.__scratchVec0, self.targetOffset);
             }
             
             var effectiveSizeFactor = (self.targetObject != undefined) ? (self.sizeFactor * 0.001) : 1.0;
@@ -629,48 +613,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         }
     }
     
-    /// Draw flythrough speed indicator (call this in Draw GUI event)
-    function render() {
-        if (self.flythroughSpeedDisplayTime > 0) {
-            var alpha = min(1, self.flythroughSpeedDisplayTime / 30); // Fade out in last 0.5 seconds
-            
-            draw_set_halign(fa_center);
-            draw_set_valign(fa_middle);
-            draw_set_font(-1);
-            
-            var centerX = (self._sceneBounds.x1 + self._sceneBounds.x2) / 2;
-            var centerY = (self._sceneBounds.y1 + self._sceneBounds.y2) / 2;
-            
-            if (centerX <= 0) centerX = window_get_width() / 2;
-            if (centerY <= 0) centerY = window_get_height() / 2;
-            
-            // Calculate percentage (logarithmic mapping feels more natural for speed)
-            var logMin = log10(self.flythroughSpeedMin);
-            var logMax = log10(self.flythroughSpeedMax);
-            var logCurr = log10(self.flythroughSpeed);
-            var pct = 1 + ((logCurr - logMin) / (logMax - logMin)) * 99;
-            
-            var text = "Flythrough Speed: " + string_format(pct, 0, 0) + "%";
-            var tw = string_width(text) + 40;
-            var th = string_height(text) + 20;
-            
-            // Draw background
-            draw_set_alpha(alpha * 0.9);
-            draw_set_color(global.UI_COL_SELECTION); // Lighter gray for better visibility
-            draw_roundrect_ext(centerX - tw/2, centerY - th/2, centerX + tw/2, centerY + th/2, 10, 10, false);
-            
-            // Draw speed text
-            draw_set_alpha(alpha);
-            draw_set_color(c_white);
-            draw_text(centerX, centerY, text);
-            
-            // Reset draw settings
-            draw_set_alpha(1);
-            draw_set_halign(fa_left);
-            draw_set_valign(fa_top);
-            draw_set_color(c_white);
-        }
-    }
+
     
     // Initialize mouse position
     self._prevMouseX = window_mouse_get_x();

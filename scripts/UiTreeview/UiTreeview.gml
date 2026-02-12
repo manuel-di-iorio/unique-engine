@@ -42,6 +42,14 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
                 child.selected = child == self.treeviewItem;
             }));
         }
+
+        if (treeviewItem[$ "expandParents"] != undefined) {
+            treeviewItem.expandParents();
+        }
+
+        if (treeviewItem[$ "scrollToItem"] != undefined) {
+            treeviewItem.scrollToItem();
+        }
         
         if (self.onItemSelected != undefined) self.onItemSelected(treeviewItem, focus);
     }
@@ -516,6 +524,69 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         }
     }
     
+    function expandParents() {
+        var _curr = self.parent;
+        var _expanded = false;
+        while (_curr != undefined) {
+            var _parentItem = _curr.parent;
+            if (_parentItem != undefined && variable_struct_exists(_parentItem, "expandItem")) {
+                if (_parentItem.collapsed) {
+                    _parentItem.expandItem();
+                    _expanded = true;
+                }
+                _curr = _parentItem.parent;
+            } else {
+                break;
+            }
+        }
+        return _expanded;
+    }
+
+    function scrollToItem() {
+        var _scrollContainer = self.treeview.Items;
+        if (_scrollContainer[$ "__UiScrollbar"] == undefined) return;
+        
+        var _scrollState = { 
+            attempts: 0,
+            lastY: -99999
+        };
+        
+        self.onStep(method({ item: self, container: _scrollContainer, state: _scrollState }, function(layoutUpdated) {
+            if (layoutUpdated) {
+                if (!is_struct(item) || !variable_struct_exists(item, "y1")) return;
+                
+                var itemY = item.y1;
+                
+                // If it hasn't changed from last attempt and we've tried a bit, it's stable
+                if (abs(itemY - state.lastY) < 1 && state.attempts > 1) {
+                     __removeStepHandler();
+                     return;
+                }
+                
+                state.lastY = itemY;
+                state.attempts++;
+
+                var viewHeight = container.layout.height;
+                var containerY = container.y1;
+                
+                var relY = (itemY - containerY) + container.scrollTop;
+                var targetScroll = relY - (viewHeight / 2) + 15; // Centering logic
+                
+                var scrollbar = container.__UiScrollbar;
+                var maxScroll = scrollbar.__maxScroll ?? 0;
+                
+                // Update scrollTop and request redraw
+                container.scrollTop = clamp(targetScroll, 0, maxScroll);
+                global.UI.requestRedraw();
+                
+                // Safety: Stop after enough attempts even if unstable
+                if (state.attempts > 10) {
+                    __removeStepHandler();
+                }
+            }
+        }));
+    }
+
     function onDraw() {
         // Draw the item background if not collapsed
         if (!self.collapsed) {

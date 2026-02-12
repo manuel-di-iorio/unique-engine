@@ -132,7 +132,10 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         draw_clear_alpha(c_black, 0);
         
         var currentBlendEnable = gpu_get_blendenable();
+        var currentFilter = gpu_get_texfilter();
+        
         gpu_set_blendenable(false);
+        gpu_set_texfilter(filter);
         
         updateMatrix();  // Build the transformation matrix
         matrix_set(matrix_world, matrix);
@@ -158,6 +161,7 @@ function UeTexture(sprite = undefined, data = {}) constructor {
         }
         
         gpu_set_blendenable(currentBlendEnable);
+        gpu_set_texfilter(currentFilter);
 
         surface_reset_target();
 

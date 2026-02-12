@@ -468,7 +468,7 @@ function UeTransform(_data = undefined): UeEventDispatcher(_data) constructor {
         target ??= vec3_create();
 
         var v = global.UE_VEC3_TEMP0;
-        mat4_decompose(matrixWorld, v, global.__QUAT_TEMP, target);
+        mat4_decompose(matrixWorld, v, global.UE_QUAT_TEMP0, target);
 
         return target;
     }

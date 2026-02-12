@@ -174,7 +174,8 @@ function EditorUiInspector(ui) constructor {
                 // Import a new sprite for the texture
                 case "spriteFilePicker":
                     input = new UiInspectorSpriteFilePicker({ flex: 1, justifyContent: "center" }, {
-                            valueGetter: method(scope, function() { 
+                        asset: self.asset,
+                        valueGetter: method(scope, function() { 
                             return asset.__cachedSprite;
                         }),
                         onChange

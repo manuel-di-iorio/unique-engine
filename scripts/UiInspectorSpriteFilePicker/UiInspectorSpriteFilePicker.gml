@@ -3,6 +3,7 @@ function UiInspectorSpriteFilePicker(style = {}, props = {}): UiNode(style, prop
     self.value = props[$ "value"];
     self.valueGetter = props[$ "valueGetter"];
     self.onChange = props[$ "onChange"];
+    self.asset = props[$ "asset"];
     self.spriteW = self.value && sprite_get_width(self.value);
     self.spriteH = self.value && sprite_get_height(self.value);
     
@@ -14,13 +15,22 @@ function UiInspectorSpriteFilePicker(style = {}, props = {}): UiNode(style, prop
         function onDraw() {
             var _elem = self.parent.parent;
             var _sprite = _elem.value;
+            var _asset = _elem.asset;
+            
             draw_sprite_part(sprUiEmptyTransparentBg, 0, 0, 0, 256, 256, self.x1, self.y1);
             
             if (_sprite != undefined) {
                 var _maxSize = 256;
                 var _scale = min(_maxSize / _elem.spriteW, _maxSize / _elem.spriteH);
                 
+                var _oldFilter = gpu_get_texfilter();
+                if (_asset != undefined && variable_struct_exists(_asset, "filter")) {
+                    gpu_set_texfilter(_asset.filter);
+                }
+                
                 draw_sprite_ext(_sprite, 0, self.x1, self.y1, _scale, _scale, 0, c_white, 1);
+                
+                gpu_set_texfilter(_oldFilter);
             }
             
             draw_set_color(global.UI_COL_BOX);

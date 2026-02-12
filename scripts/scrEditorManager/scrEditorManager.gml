@@ -274,6 +274,54 @@ function EditorManager() constructor {
         }
     }
 
+    /**
+     * Render editor UI overlays (like flythrough speed)
+     */
+    function renderUI() {
+        var sceneManager = oSceneEditor.sceneManager;
+        var orbit = sceneManager.orbit;
+        
+        if (orbit.flythroughSpeedDisplayTime > 0) {
+            var alpha = min(1, orbit.flythroughSpeedDisplayTime / 30); // Fade out in last 0.5 seconds
+            
+            draw_set_halign(fa_center);
+            draw_set_valign(fa_middle);
+            draw_set_font(fText); // Using correct editor font
+            
+            var centerX = (orbit._sceneBounds.x1 + orbit._sceneBounds.x2) / 2;
+            var centerY = (orbit._sceneBounds.y1 + orbit._sceneBounds.y2) / 2;
+            
+            if (centerX <= 0) centerX = window_get_width() / 2;
+            if (centerY <= 0) centerY = window_get_height() / 2;
+            
+            // Calculate percentage (logarithmic mapping feels more natural for speed)
+            var logMin = log10(orbit.flythroughSpeedMin);
+            var logMax = log10(orbit.flythroughSpeedMax);
+            var logCurr = log10(orbit.flythroughSpeed);
+            var pct = 1 + ((logCurr - logMin) / (logMax - logMin)) * 99;
+            
+            var text = "Flythrough Speed: " + string_format(pct, 0, 0) + "%";
+            var tw = string_width(text) + 40;
+            var th = string_height(text) + 20;
+            
+            // Draw background
+            draw_set_alpha(alpha * 0.9);
+            draw_set_color(global.UI_COL_SELECTION);
+            draw_roundrect_ext(centerX - tw/2, centerY - th/2, centerX + tw/2, centerY + th/2, 10, 10, false);
+            
+            // Draw speed text
+            draw_set_alpha(alpha);
+            draw_set_color(c_white);
+            draw_text(centerX, centerY, text);
+            
+            // Reset draw settings
+            draw_set_alpha(1);
+            draw_set_halign(fa_left);
+            draw_set_valign(fa_top);
+            draw_set_color(c_white);
+        }
+    }
+
     function clear() {
         self.clearActiveAsset();
     }

@@ -79,98 +79,86 @@ function SceneManager() constructor {
 
         var _mousePos = global.UE_MOUSE.get();
         var _editorManager = oSceneEditor.editorManager;
+        var _activeAsset = _editorManager.activeAsset;
 
-        /**
-         * Pick System: 
-         * - If there are no last hits, perform a new raycast
-         * - If there are last hits, cycle through them
-         */
-        var _prevHitsLength = array_length(_editorManager.pickLastHits);
-        var _clickedSamePos = _prevHitsLength && _mousePos.x == _editorManager.pickLastPos.x && _mousePos.y == _editorManager.pickLastPos.y;
-        
-        if (_clickedSamePos) {
-            // Cycle through hits at the same position
-            _editorManager.pickLastIndex = (_editorManager.pickLastIndex + 1) % _prevHitsLength;
-        } else {
-            // Perform a new raycast for a new position
-            self.camera.updateMatrixWorld();
-            self.raycaster.setFromCamera(self.camera);
-            var _hits = self.raycaster.intersectObjects(self.objects.children, true, true);
-            
-            var _filteredHits = [];
-            var _activeScene = _editorManager.activeScene;
-            var _currentlySelectedRoot = undefined;
-            
-            // Find the root of the currently selected asset (if any)
-            if (_editorManager.activeAsset != undefined) {
-                var _curr = _editorManager.activeAsset;
-                while (_curr.parent != undefined && 
-                       _curr.parent != self.objects && 
-                       (_activeScene == undefined || _curr.parent != _activeScene)) {
-                    _curr = _curr.parent;
-                }
-                _currentlySelectedRoot = _curr;
-            }
+        // 1. hits = raycastAllSorted(mousePos)
+        self.camera.updateMatrixWorld();
+        self.raycaster.setFromCamera(self.camera);
+        var _hits = self.raycaster.intersectObjects(self.objects.children, true, true);
 
-            // Group hits: for each hit, we add the Root and then the specific Submesh.
-            // We use __hitRoot to track which tree each hit belongs to.
-            var _uniqueEntries = {};
-            
-            for (var i = 0, il = array_length(_hits); i < il; i++) {
-                var _hit = _hits[i];
-                var _sub = _hit.object;
-                
-                // Traverse up to find the root object
-                var _root = _sub;
-                while (_root.parent != undefined && 
-                       _root.parent != self.objects && 
-                       (_activeScene == undefined || _root.parent != _activeScene)) {
-                    _root = _root.parent;
-                }
-                
-                // 1. Add the Root object to the cycle list if not already there for this click position
-                if (_uniqueEntries[$ _root.uuid] == undefined) {
-                    _uniqueEntries[$ _root.uuid] = true;
-                    var _rootEntry = { object: _root, distance: _hit.distance, __hitRoot: _root };
-                    array_push(_filteredHits, _rootEntry);
-                }
-                
-                // 2. Add the specific Submesh to the cycle list (if it's different from root)
-                if (_sub != _root && _uniqueEntries[$ _sub.uuid] == undefined) {
-                    _uniqueEntries[$ _sub.uuid] = true;
-                    _hit.__hitRoot = _root; // Tag with root for easy comparison
-                    array_push(_filteredHits, _hit);
-                }
-            }
-            
-            _editorManager.pickLastHits = _filteredHits;
-            _editorManager.pickLastPos = _mousePos;
-            
-            // Determine starting index:
-            // If the first root hit belongs to the object tree already selected, skip to the submesh (index 1)
-            // so that clicking different parts of the same object tree selects submeshes immediately.
-            _editorManager.pickLastIndex = 0;
-            if (array_length(_filteredHits) > 1) {
-                var _primaryHitRoot = _filteredHits[0].__hitRoot;
-                
-                if (_currentlySelectedRoot != undefined && _primaryHitRoot == _currentlySelectedRoot) {
-                    // Check if the next hit is a submesh of the same tree
-                    if (_filteredHits[1].__hitRoot == _primaryHitRoot) {
-                        _editorManager.pickLastIndex = 1;
-                    }
-                }
+        // 2. Build unique selectable objects list (ALL HITS)
+        var _selectableObjects = [];
+        var _addedUuids = {}; 
+
+        for (var i = 0, il = array_length(_hits); i < il; i++) {
+            var _curr = _hits[i].object;
+            if (_addedUuids[$ _curr.uuid] == undefined) {
+                _addedUuids[$ _curr.uuid] = true;
+                array_push(_selectableObjects, _curr);
             }
         }
-        
-        // Select the hit object (if available)
-        if (array_length(_editorManager.pickLastHits) > 0) {
-            var hitObject = _editorManager.pickLastHits[_editorManager.pickLastIndex].object;
+
+        // 3. Clear if empty
+        if (array_length(_selectableObjects) == 0) {
+            _editorManager.pickLastHits = [];
+            _editorManager.pickLastIndex = 0;
+            _editorManager.pickLastPos = _mousePos;
             
-            // Use the back-reference to get the treeview item directly
-            if (hitObject[$ "__treeviewItem"] != undefined) {
-                var treeview = global.UI.Main.Assets.Treeview;
-                treeview.__onItemSelected(hitObject.__treeviewItem);
+            // If we have an active scene, revert selection to the scene instead of clearing everything
+            if (_editorManager.activeScene != undefined) {
+                 _editorManager.setActiveAsset(_editorManager.activeScene, _editorManager.activeSceneTreeviewItem);
+                 
+                 // Update treeview selection visually without triggering side effects
+                 var treeview = global.UI.Main.Assets.Treeview;
+                 if (_editorManager.activeSceneTreeviewItem != undefined) {
+                     treeview.selectedItem = _editorManager.activeSceneTreeviewItem;
+                     treeview.Items.traverseChildren(method({ treeview }, function(child) {
+                         child.selected = (child == treeview.selectedItem);
+                     }));
+                 }
+            } else {
+                _editorManager.clearActiveAsset();
             }
+
+            global.UI.requestRedraw();
+            return;
+        }
+
+        // 4. Cycle logic (between different hits)
+        var _shouldCycle = false;
+        if (_editorManager.pickLastPos != undefined) {
+             var _dist = point_distance(_mousePos.x, _mousePos.y, _editorManager.pickLastPos.x, _editorManager.pickLastPos.y);
+             if (_dist < 2) {
+                 var _prevHits = _editorManager.pickLastHits;
+                 if (array_length(_selectableObjects) == array_length(_prevHits)) {
+                     _shouldCycle = true;
+                     for (var i = 0, l = array_length(_selectableObjects); i < l; i++) {
+                         if (_selectableObjects[i] != _prevHits[i]) {
+                             _shouldCycle = false;
+                             break;
+                         }
+                     }
+                 }
+             }
+        }
+
+        if (_shouldCycle) {
+            _editorManager.pickLastIndex = (_editorManager.pickLastIndex + 1) % array_length(_selectableObjects);
+        } else {
+            _editorManager.pickLastHits = _selectableObjects;
+            _editorManager.pickLastIndex = 0;
+        }
+
+        // 5. Determine final selection from the cycle
+        var _finalSelection = _selectableObjects[_editorManager.pickLastIndex];
+
+        // 7. Update last click pixel
+        _editorManager.pickLastPos = _mousePos;
+
+        // 8. Select the final object
+        if (_finalSelection[$ "__treeviewItem"] != undefined) {
+            var treeview = global.UI.Main.Assets.Treeview;
+            treeview.__onItemSelected(_finalSelection.__treeviewItem);
         }
     }
     
