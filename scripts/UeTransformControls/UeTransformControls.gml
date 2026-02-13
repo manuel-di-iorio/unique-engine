@@ -694,8 +694,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     gml_pragma("forceinline");
     if (self.hoveredAxis == axis || self.selectedAxis == axis) return self.cYellow;
     if (axis == UE_GIZMO_AXIS.x || axis == UE_GIZMO_AXIS.yz) return self.cRed;
-    if (axis == UE_GIZMO_AXIS.y || axis == UE_GIZMO_AXIS.xz) return self.cBlue;
-    if (axis == UE_GIZMO_AXIS.z || axis == UE_GIZMO_AXIS.xy) return self.cGreen;
+    if (axis == UE_GIZMO_AXIS.y || axis == UE_GIZMO_AXIS.xz) return self.cGreen;
+    if (axis == UE_GIZMO_AXIS.z || axis == UE_GIZMO_AXIS.xy) return self.cBlue;
     return c_white;
   }
 
@@ -823,8 +823,8 @@ function UeTransformControls(camera, data = {}): UeControls(data) constructor {
     gml_pragma("forceinline");
     // Planes:
     // YZ (Red): Normal X. Spans Y, Z.
-    // XZ (Blue): Normal Y. Spans X, Z.
-    // XY (Green): Normal Z. Spans X, Y.
+    // XZ (Green): Normal Y. Spans X, Z.
+    // XY (Blue): Normal Z. Spans X, Y.
 
     var size = self.axisLength * scale * 0.2;
     var offset = 0;

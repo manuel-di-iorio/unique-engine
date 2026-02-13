@@ -20,8 +20,8 @@ function UeAxesHelper(size = 1, data = {}): UeLineSegments(undefined, undefined,
     // Colors: RGB triplets for each point (2 points per axis)
     var colors = [
         255, 0, 0,  255, 0, 0,   // X: red
-        0, 0, 255,  0, 0, 255,   // Y: blue
-        0, 255, 0,  0, 255, 0    // Z: green
+        0, 255, 0,  0, 255, 0,   // Y: green
+        0, 0, 255,  0, 0, 255    // Z: blue
     ];
 
     var geom = new UeLineSegmentsGeometry();
