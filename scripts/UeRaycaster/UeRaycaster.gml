@@ -127,8 +127,7 @@ function UeRaycaster(_origin = undefined, _direction = undefined, _near = 0, _fa
         hits ??= [];
         
         // If the object has a raycast method, invoke it
-        // Skip picking for objects without bounding box
-        if (object.visible && object[$ "geometry"] && layers.test(object.layers) && object.geometry[$ "boundingBox"] != undefined) {
+        if (object.visible && layers.test(object.layers)) {
             var objectRaycast = object[$ "raycast"];
             if (objectRaycast != undefined) { 
                 objectRaycast(self, hits);

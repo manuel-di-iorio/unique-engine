@@ -67,6 +67,25 @@ function SceneManager() constructor {
     self.raycaster.setFromCamera(self.camera);
     
     /**
+     * Get the selectable chain of an object (self + parents)
+     * @param {UeObject3D} object The object to start from
+     * @returns {Array<UeObject3D>} The selectable chain
+     */
+    function getSelectableChain(object) {
+        var chain = [];
+        while (object != undefined && object[$ "isScene"] == undefined) {
+            // Avoid system containers
+            if (object == self.objects) break;
+
+            if (object.selectable) {
+                array_insert(chain, 0, object);
+            }
+            object = object.parent;
+        }
+        return chain;
+    }
+
+    /**
      * Handle mesh picking with mouse raycast
      * Performs contextual selection based on currently selected asset
      * @returns {bool} True if a mesh was selected, false otherwise
@@ -92,9 +111,15 @@ function SceneManager() constructor {
 
         for (var i = 0, il = array_length(_hits); i < il; i++) {
             var _curr = _hits[i].object;
-            if (_addedUuids[$ _curr.uuid] == undefined) {
-                _addedUuids[$ _curr.uuid] = true;
-                array_push(_selectableObjects, _curr);
+            var _chain = getSelectableChain(_curr);
+
+            for (var j = 0, jl = array_length(_chain); j < jl; j++) {
+                var _obj = _chain[j];
+
+                if (_addedUuids[$ _obj.uuid] == undefined) {
+                    _addedUuids[$ _obj.uuid] = true;
+                    array_push(_selectableObjects, _obj);
+                }
             }
         }
 

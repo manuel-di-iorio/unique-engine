@@ -17,6 +17,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     frustumCulled = true;
     castShadow = data[$ "castShadow"] ?? false;
     receiveShadow = data[$ "receiveShadow"] ?? false;
+    selectable = data[$ "selectable"] ?? true;
     gmObject = data[$ "gmObject"] ?? undefined;
     gmLayer = data[$ "gmLayer"] ?? "Instances";
 
@@ -272,6 +273,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         frustumCulled = source.frustumCulled;
         castShadow = source.castShadow;
         receiveShadow = source.receiveShadow;
+        selectable = source.selectable;
         gmObject = source[$ "gmObject"];
         gmLayer = source[$ "gmLayer"];
         matrixAutoUpdate = source.matrixAutoUpdate;
@@ -320,6 +322,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             frustumCulled,
             castShadow,
             receiveShadow,
+            selectable,
             gmObject,
             gmLayer,
             prefab: prefab ? prefab.uuid : undefined,
@@ -352,6 +355,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         frustumCulled = data[$ "frustumCulled"] ?? true;
         castShadow = data[$ "castShadow"] ?? false;
         receiveShadow = data[$ "receiveShadow"] ?? false;
+        selectable = data[$ "selectable"] ?? true;
         gmObject = data[$ "gmObject"];
         gmLayer = data[$ "gmLayer"] ?? "Instances";
         // __localOverrides = data[$ "__localOverrides"] ?? {};
