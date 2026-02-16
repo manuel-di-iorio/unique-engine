@@ -66,29 +66,33 @@ function SceneManager() constructor {
     self.raycaster = new UeRaycaster();
     self.raycaster.setFromCamera(self.camera);
 
-    function getSelectableRoot(object) {
+    function getSelectableRoot(object, _topMost) {
+        var _result = undefined;
 
-    while (object != undefined && object[$ "isScene"] == undefined) {
+        while (object != undefined && object[$ "isScene"] == undefined) {
 
-        if (object == self.objects)
-            break;
+            if (object == self.objects)
+                break;
 
-        if (object.selectable)
-            return object; // <-- STOP at FIRST selectable
+            if (object.selectable) {
+                if (_topMost == true) {
+                    _result = object;
+                } else {
+                    return object; // <-- STOP at FIRST selectable
+                }
+            }
 
-        object = object.parent;
+            object = object.parent;
+        }
+
+        return _result;
     }
 
-    return undefined;
-}
-
-
     /**
-  * Handle mesh picking - TRUE Unity-like behaviour
-  * @returns {bool}
-  */
+     * Handle mesh picking - TRUE Unity-like behaviour
+     * @returns {bool}
+     */
     function handleMeshPicking() {
-
         if (!mouse_check_button_pressed(mb_left) || !global.UI.Main.Scene.hovered)
             return false;
 
@@ -111,11 +115,12 @@ function SceneManager() constructor {
         var _selectableObjects = [];
         var _addedUuids = {};
         var _topSelectable = undefined;
+        var _isAltPressed = keyboard_check(vk_alt);
 
         for (var i = 0; i < array_length(_hits); i++) {
 
             var _curr = _hits[i].object;
-            var _selectable = getSelectableRoot(_curr);
+            var _selectable = getSelectableRoot(_curr, _isAltPressed);
 
             if (_selectable == undefined)
                 continue;
@@ -162,7 +167,7 @@ function SceneManager() constructor {
             return false;
         }
 
-        // --- UNITY-LIKE CYCLE CHECK ---
+        // --- CYCLE CHECK ---
         var _shouldCycle = false;
 
         var _lastTopUuid = _editorManager.pickLastTopSelectableUuid;
@@ -209,8 +214,6 @@ function SceneManager() constructor {
         global.UI.requestRedraw();
         return true;
     }
-
-
 
     function clear() {
         self.objects.children = [];
