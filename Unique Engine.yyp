@@ -14,6 +14,7 @@
     {"$GMFolder":"","%Name":"Audio","folderPath":"folders/Demo/Audio.yy","name":"Audio","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Scenes","folderPath":"folders/Demo/Scenes.yy","name":"Scenes","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Textures","folderPath":"folders/Demo/Textures.yy","name":"Textures","resourceType":"GMFolder","resourceVersion":"2.0",},
+    {"$GMFolder":"","%Name":"fswatcher","folderPath":"folders/Packages/fswatcher.yy","name":"fswatcher","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Packages","folderPath":"folders/Packages.yy","name":"Packages","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"AssimpExtension","folderPath":"folders/Packages/AssimpExtension.yy","name":"AssimpExtension","resourceType":"GMFolder","resourceVersion":"2.0",},
     {"$GMFolder":"","%Name":"Unique Engine","folderPath":"folders/Packages/Unique Engine.yy","name":"Unique Engine","resourceType":"GMFolder","resourceVersion":"2.0",},
@@ -196,6 +197,7 @@
   "name":"Unique Engine",
   "resources":[
     {"id":{"name":"assimp_extension","path":"extensions/assimp_extension/assimp_extension.yy",},},
+    {"id":{"name":"fswatcher","path":"extensions/fswatcher/fswatcher.yy",},},
     {"id":{"name":"window_command_hook","path":"extensions/window_command_hook/window_command_hook.yy",},},
     {"id":{"name":"fDemoUI","path":"fonts/fDemoUI/fDemoUI.yy",},},
     {"id":{"name":"fText","path":"fonts/fText/fText.yy",},},
@@ -237,6 +239,7 @@
     {"id":{"name":"DynamicAABBTree2D","path":"scripts/DynamicAABBTree2D/DynamicAABBTree2D.yy",},},
     {"id":{"name":"Euler","path":"scripts/Euler/Euler.yy",},},
     {"id":{"name":"Frustum","path":"scripts/Frustum/Frustum.yy",},},
+    {"id":{"name":"fswatcher_onchange","path":"scripts/fswatcher_onchange/fswatcher_onchange.yy",},},
     {"id":{"name":"json_stringify_ordered","path":"scripts/json_stringify_ordered/json_stringify_ordered.yy",},},
     {"id":{"name":"Line3","path":"scripts/Line3/Line3.yy",},},
     {"id":{"name":"log","path":"scripts/log/log.yy",},},

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"fswatcher_onchange",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"fswatcher_onchange",
+  "parent":{
+    "name":"fswatcher",
+    "path":"folders/Packages/fswatcher.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

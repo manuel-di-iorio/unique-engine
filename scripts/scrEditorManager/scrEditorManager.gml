@@ -19,6 +19,7 @@ function EditorManager() constructor {
     self.pickLastHits = [];
     self.pickLastIndex = 0;
     self.pickLastPos = undefined;
+    self.pickLastTopSelectableUuid = undefined;
     
     self.gizmoTarget = undefined; // Store the target for the gizmo (The ORIGINAL asset)
     self.renderClone = undefined; // The root clone being rendered
