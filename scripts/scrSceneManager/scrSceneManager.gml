@@ -67,44 +67,26 @@ function SceneManager() constructor {
     self.raycaster.setFromCamera(self.camera);
 
     function getSelectableRoot(object) {
-        var lastSelectable = undefined;
 
-        while (object != undefined && object[$ "isScene"] == undefined) {
-            if (object == self.objects) break;
+    while (object != undefined && object[$ "isScene"] == undefined) {
 
-            if (object.selectable) {
-                lastSelectable = object;
-            }
+        if (object == self.objects)
+            break;
 
-            object = object.parent;
-        }
+        if (object.selectable)
+            return object; // <-- STOP at FIRST selectable
 
-        return lastSelectable;
+        object = object.parent;
     }
 
-    /**
-     * Get the selectable chain of an object (self + parents)
-     * @param {UeObject3D} object The object to start from
-     * @returns {Array<UeObject3D>} The selectable chain
-     */
-    function getSelectableChain(object) {
-        var chain = [];
-        while (object != undefined && object[$ "isScene"] == undefined) {
-            // Avoid system containers
-            if (object == self.objects) break;
+    return undefined;
+}
 
-            if (object.selectable) {
-                array_insert(chain, 0, object);
-            }
-            object = object.parent;
-        }
-        return chain;
-    }
 
     /**
- * Handle mesh picking with true Unity-like cycling
- * @returns {bool}
- */
+  * Handle mesh picking - TRUE Unity-like behaviour
+  * @returns {bool}
+  */
     function handleMeshPicking() {
 
         if (!mouse_check_button_pressed(mb_left) || !global.UI.Main.Scene.hovered)
@@ -116,59 +98,62 @@ function SceneManager() constructor {
 
         var _editorManager = oSceneEditor.editorManager;
 
-        // 1. hits = raycastAllSorted(mousePos)
+        // --- RAYCAST ---
         self.camera.updateMatrixWorld();
         self.raycaster.setFromCamera(self.camera);
-        
-        // 1:1 Unity-like precise picking (triangle-level)
+
         var _oldPrecise = self.raycaster.params.Mesh.precise;
         self.raycaster.params.Mesh.precise = true;
         var _hits = self.raycaster.intersectObjects(self.objects.children, true, true);
         self.raycaster.params.Mesh.precise = _oldPrecise;
 
-        // 2. Build unique selectable objects list (ALL HITS)
+        // --- BUILD SELECTABLE LIST (ONE PER HIT, ORDER PRESERVED) ---
         var _selectableObjects = [];
-        var _addedUuids = {}; 
+        var _addedUuids = {};
         var _topSelectable = undefined;
 
-        for (var i = 0, il = array_length(_hits); i < il; i++) {
-            var _curr = _hits[i].object;
-            var _chain = getSelectableChain(_curr);
+        for (var i = 0; i < array_length(_hits); i++) {
 
-            // Identify the topmost selectable of the first hit for Unity-like sticky cycling
-            // We take the FIRST element (the most root-like) to maintain consistency across submeshes
-            if (i == 0 && array_length(_chain) > 0) {
-                _topSelectable = _chain[0];
+            var _curr = _hits[i].object;
+            var _selectable = getSelectableRoot(_curr);
+
+            if (_selectable == undefined)
+                continue;
+
+            if (_addedUuids[$ _selectable.uuid] == undefined) {
+                _addedUuids[$ _selectable.uuid] = true;
+                array_push(_selectableObjects, _selectable);
             }
 
-            for (var j = 0, jl = array_length(_chain); j < jl; j++) {
-                var _obj = _chain[j];
-
-                if (_addedUuids[$ _obj.uuid] == undefined) {
-                    _addedUuids[$ _obj.uuid] = true;
-                    array_push(_selectableObjects, _obj);
-                }
+            if (i == 0) {
+                _topSelectable = _selectable;
             }
         }
 
-        // 3. Clear if empty
+        // --- NO HITS ---
         if (array_length(_selectableObjects) == 0) {
+
             _editorManager.pickLastHits = [];
             _editorManager.pickLastIndex = 0;
             _editorManager.pickLastTopSelectableUuid = undefined;
-            
-            // If we have an active scene, revert selection to the scene instead of clearing everything
+
             if (_editorManager.activeScene != undefined) {
-                 _editorManager.setActiveAsset(_editorManager.activeScene, _editorManager.activeSceneTreeviewItem);
-                 
-                 // Update treeview selection visually without triggering side effects
-                 var treeview = global.UI.Main.Assets.Treeview;
-                 if (_editorManager.activeSceneTreeviewItem != undefined) {
-                     treeview.selectedItem = _editorManager.activeSceneTreeviewItem;
-                     treeview.Items.traverseChildren(method({ treeview }, function(child) {
-                         child.selected = (child == treeview.selectedItem);
-                     }));
-                 }
+                _editorManager.setActiveAsset(
+                    _editorManager.activeScene,
+                    _editorManager.activeSceneTreeviewItem
+                );
+
+                var treeview = global.UI.Main.Assets.Treeview;
+
+                if (_editorManager.activeSceneTreeviewItem != undefined) {
+                    treeview.selectedItem = _editorManager.activeSceneTreeviewItem;
+
+                    treeview.Items.traverseChildren(
+                        method({ treeview }, function (child) {
+                            child.selected = (child == treeview.selectedItem);
+                        })
+                    );
+                }
             } else {
                 _editorManager.clearActiveAsset();
             }
@@ -177,25 +162,45 @@ function SceneManager() constructor {
             return false;
         }
 
-        // 4. Cycle logic (Unity-like)
+        // --- UNITY-LIKE CYCLE CHECK ---
         var _shouldCycle = false;
-        var _lastTopUuid = _editorManager[$ "pickLastTopSelectableUuid"];
-        if (_topSelectable != undefined && _lastTopUuid != undefined && _lastTopUuid == _topSelectable.uuid) {
-            _shouldCycle = true;
+
+        var _lastTopUuid = _editorManager.pickLastTopSelectableUuid;
+        var _lastHits = _editorManager.pickLastHits;
+
+        if (_lastTopUuid != undefined && _topSelectable != undefined) {
+
+            var _sameTop = (_lastTopUuid == _topSelectable.uuid);
+            var _sameLength = (array_length(_lastHits) == array_length(_selectableObjects));
+            var _sameOrder = true;
+
+            if (_sameLength) {
+                for (var i = 0; i < array_length(_selectableObjects); i++) {
+                    if (_lastHits[i].uuid != _selectableObjects[i].uuid) {
+                        _sameOrder = false;
+                        break;
+                    }
+                }
+            } else {
+                _sameOrder = false;
+            }
+
+            _shouldCycle = (_sameTop && _sameLength && _sameOrder);
         }
 
         if (_shouldCycle) {
-            _editorManager.pickLastIndex = (_editorManager.pickLastIndex + 1) % array_length(_selectableObjects);
+            _editorManager.pickLastIndex =
+                (_editorManager.pickLastIndex + 1) % array_length(_selectableObjects);
         } else {
             _editorManager.pickLastHits = _selectableObjects;
             _editorManager.pickLastIndex = 0;
-            _editorManager.pickLastTopSelectableUuid = _topSelectable != undefined ? _topSelectable.uuid : undefined;
+            _editorManager.pickLastTopSelectableUuid =
+                (_topSelectable != undefined) ? _topSelectable.uuid : undefined;
         }
 
-        // 5. Determine final selection from the cycle
+        // --- FINAL SELECTION ---
         var _finalSelection = _selectableObjects[_editorManager.pickLastIndex];
 
-        // 8. Select the final object
         if (_finalSelection[$ "__treeviewItem"] != undefined) {
             var treeview = global.UI.Main.Assets.Treeview;
             treeview.__onItemSelected(_finalSelection.__treeviewItem);
@@ -204,6 +209,7 @@ function SceneManager() constructor {
         global.UI.requestRedraw();
         return true;
     }
+
 
 
     function clear() {
@@ -221,12 +227,12 @@ function SceneManager() constructor {
     function raycastFromMouse() {
         self.camera.updateMatrixWorld();
         self.raycaster.setFromCamera(self.camera);
-        
+
         var _oldPrecise = self.raycaster.params.Mesh.precise;
         self.raycaster.params.Mesh.precise = true;
         var _hits = self.raycaster.intersectObjects(self.objects.children, true, true);
         self.raycaster.params.Mesh.precise = _oldPrecise;
-        
+
         return (array_length(_hits) > 0) ? _hits[0] : undefined;
     }
 }
