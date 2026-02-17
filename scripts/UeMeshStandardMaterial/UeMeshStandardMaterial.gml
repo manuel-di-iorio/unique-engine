@@ -74,5 +74,15 @@ function UeMeshStandardMaterial(data = {}): UeMaterial(data) constructor {
 //   textures.lightMap = data[$ "lightMap"];
 //   textures.envMap = data[$ "envMap"] ?? global.UE_TEXTURE_DEFAULT_BLACK;
   
+  static setColor = function(_color) {
+    color = [ color_get_red(_color)/255, color_get_green(_color)/255, color_get_blue(_color)/255 ];
+    uniforms.ueColor.value = color;
+  }
+
+  static setEmissiveColor = function(_color) {
+    emissive = [ color_get_red(_color)/255, color_get_green(_color)/255, color_get_blue(_color)/255 ];
+    uniforms.ueEmissive.value = emissive;
+  }
+  
   build();
 }

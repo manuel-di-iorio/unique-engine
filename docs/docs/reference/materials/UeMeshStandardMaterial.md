@@ -48,3 +48,13 @@ Currently handles up to **1 directional light**, **8 point lights** and **8 spot
 <!-- | `textures.bumpMap` | `UeTexture` | Bump map for adding surface detail. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->
 <!-- | `textures.lightMap` | `UeTexture` | Pre-baked light map. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->
 <!-- | `textures.envMap` | `UeTexture` | Environment map for reflections. | `global.UE_TEXTURE_DEFAULT_BLACK` | -->
+
+---
+
+## 🧾 Methods
+
+| Method | Description |
+| --- | --- |
+| `setColor(color)` | Sets the base color of the material (e.g. `c_red`, `c_white`). |
+| `setEmissiveColor(color)` | Sets the emissive color of the material. |
+

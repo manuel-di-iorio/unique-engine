@@ -273,6 +273,9 @@ function UeAssimpLoader(data = {}) constructor {
       var material = new UeMeshStandardMaterial(_linkTextures(textureCache));
       material.name = string_trim(ASSIMP_GetMaterialName());
       if (material.name == "") material.name = modelName + "__Material" + string(i);
+        
+      material.setColor(ASSIMP_GetMaterialDiffuseColorGM());
+      material.setEmissiveColor(ASSIMP_GetMaterialEmissiveColorGM());
       material.opacity = ASSIMP_GetMaterialOpacity();
       material.transparent = material.opacity < 1;
       materials[i] = material;
