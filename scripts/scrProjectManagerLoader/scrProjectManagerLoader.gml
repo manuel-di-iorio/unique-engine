@@ -401,6 +401,7 @@ function ProjectLoader() constructor {
         euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
       }
 
+      asset.__matrixAutoUpdate = node[$ "matrixAutoUpdate"] ?? true;
       asset.matrixAutoUpdate = false;
       asset.updateMatrix();
       asset.updateMatrixWorld();

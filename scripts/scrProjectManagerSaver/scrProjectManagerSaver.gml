@@ -356,6 +356,15 @@ function ProjectSaver() constructor {
             childMetadata.rotationEuler = child.__rotationEuler;
         }
         
+        // Override matrixAutoUpdate with __matrixAutoUpdate (the "real" user value).
+        // In editor, matrixAutoUpdate is always false (so the editor never auto-updates matrices),
+        // but __matrixAutoUpdate stores whether the user actually marked the object as static or not.
+        var childType = child[$ "type"];
+        if ((childType == "Mesh" || childType == "Object3D" || childType == "Camera" || childType == "Bone")
+            && struct_exists(child, "__matrixAutoUpdate") && child[$ "__matrixAutoUpdate"] != undefined) {
+            childMetadata[$ "matrixAutoUpdate"] = child[$ "__matrixAutoUpdate"];
+        }
+        
         // If this child has children, recursively serialize them
         var actualChildren = child[$ "children"];
         if (is_array(actualChildren) && array_length(actualChildren) > 0) {
