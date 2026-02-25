@@ -211,20 +211,6 @@ function UeProjectLoader(data = {}) constructor {
                     self.__instantiateChildren(childData[$ "children"], child, objectsByUUID, materialsByUUID, geometriesByUUID);
                 }
             }
-            //  else if (is_string(childData)) {
-            //     var childAsset = self.assetsByUuid[$ childData];
-            //     if (childAsset != undefined && is_struct(childAsset) && struct_exists(childAsset, "isObject3D")) {
-            //          parent.add(childAsset);
-                     
-            //          // Instantiate GameMaker object if specified
-            //          if (struct_exists(childAsset, "gmObject") && childAsset.gmObject != undefined && childAsset.gmObject != "") {
-            //              var objIndex = asset_get_index(childAsset.gmObject);
-            //              if (objIndex != -1) {
-            //                  instance_create_layer(0, 0, childAsset.gmLayer, objIndex, { ueObject: childAsset });
-            //              }
-            //          }
-            //     }
-            // }
         }
     };
 
