@@ -4,6 +4,9 @@ if (sceneManager.transformControls.object != undefined) {
   sceneManager.transformControls.render();
 }
 
+// Draw rectangle selection overlay
+sceneManager.rectSelectDraw();
+
 draw_set_font(fText);
 global.UI.render(uiDebug);
 

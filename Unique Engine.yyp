@@ -267,6 +267,7 @@
     {"id":{"name":"scrEditorInspectorTexture","path":"scripts/scrEditorInspectorTexture/scrEditorInspectorTexture.yy",},},
     {"id":{"name":"scrEditorLoadProject","path":"scripts/scrEditorLoadProject/scrEditorLoadProject.yy",},},
     {"id":{"name":"scrEditorManager","path":"scripts/scrEditorManager/scrEditorManager.yy",},},
+    {"id":{"name":"scrEditorSelectionManager","path":"scripts/scrEditorSelectionManager/scrEditorSelectionManager.yy",},},
     {"id":{"name":"scrEditorTreeviewOnAssetDrop","path":"scripts/scrEditorTreeviewOnAssetDrop/scrEditorTreeviewOnAssetDrop.yy",},},
     {"id":{"name":"scrEditorTreeviewOnDuplicateAsset","path":"scripts/scrEditorTreeviewOnDuplicateAsset/scrEditorTreeviewOnDuplicateAsset.yy",},},
     {"id":{"name":"scrEditorTreeviewOnItemSelected","path":"scripts/scrEditorTreeviewOnItemSelected/scrEditorTreeviewOnItemSelected.yy",},},

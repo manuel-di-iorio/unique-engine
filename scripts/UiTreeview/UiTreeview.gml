@@ -5,9 +5,11 @@
 function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
     setName(style[$ "name"] ?? "UiTreeview");
     var _this = self;
-    self.selectedItem = undefined;  
+    self.selectedItem = undefined;   // Primary selected item (backwards compat)
+    self.lastClickedItem = undefined; // Last clicked item for Shift range selection
     self.pointerEvents = true;
     self.onItemSelected = undefined;
+    self.onMultiItemSelected = undefined; // Callback for multi-selection changes
     self.onAssetDrop = undefined;
     self.onContextMenu = undefined; // Callback for showing context menu
     
@@ -20,7 +22,39 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         if (global.UI.hasAnyFocus()) return;
         
         if (keyboard_check_pressed(vk_delete)) {
-            if (self.selectedItem != undefined) {
+            // Multi-delete: if SelectionManager has multiple items, delete them all
+            var _selMgr = global.editor.selectionManager;
+            if (_selMgr != undefined && _selMgr.count() > 1) {
+                if (!show_question("Are you sure you want to delete " + string(_selMgr.count()) + " selected assets?")) return;
+                
+                // Collect treeview items to delete (copy array to avoid mutation during iteration)
+                var _items = [];
+                array_copy(_items, 0, _selMgr.selectedTreeviewItems, 0, array_length(_selMgr.selectedTreeviewItems));
+                
+                // Clear selection first
+                _selMgr.clear();
+                global.editor.editorManager.clearActiveAsset(true);
+                
+                // Delete each item (in reverse to handle hierarchy safely)
+                for (var i = array_length(_items) - 1; i >= 0; i--) {
+                    var _tvItem = _items[i];
+                    if (_tvItem != undefined && self[$ "onRemoveItem"] != undefined) {
+                        self.onRemoveItem(_tvItem, false);
+                    }
+                    if (_tvItem != undefined && variable_struct_exists(_tvItem, "destroy")) {
+                        var _parent = _tvItem.parent;
+                        _tvItem.destroy();
+                        if (_parent != undefined && _parent.parent != undefined) {
+                            var parentItem = _parent.parent;
+                            if (variable_struct_exists(parentItem, "__updateArrowVisibility")) {
+                                parentItem.__updateArrowVisibility();
+                            }
+                        }
+                    }
+                }
+                
+                global.UI.requestRedraw();
+            } else if (self.selectedItem != undefined) {
                 self.selectedItem.__removeItem();
             }
         }
@@ -30,28 +64,124 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
                 editorTreeviewOnDuplicateAsset(self.selectedItem);
             }
         }
+        
+        // Arrow key navigation
+        var _arrowPressed = keyboard_check_pressed(vk_up) || keyboard_check_pressed(vk_down)
+                         || keyboard_check_pressed(vk_left) || keyboard_check_pressed(vk_right);
+        
+        if (_arrowPressed && self.selectedItem != undefined) {
+            if (keyboard_check_pressed(vk_left)) {
+                // Left: collapse current item if expanded, otherwise navigate to parent
+                if (!self.selectedItem.collapsed && self.selectedItem.Items.count() > 0) {
+                    self.selectedItem.collapseItem();
+                } else {
+                    // Navigate to parent item
+                    var _parentNode = self.selectedItem.parent;
+                    if (_parentNode != undefined) {
+                        var _parentItem = _parentNode.parent;
+                        if (_parentItem != undefined && _parentItem[$ "assetType"] != undefined) {
+                            self.__onItemSelected(_parentItem);
+                        }
+                    }
+                }
+            } else if (keyboard_check_pressed(vk_right)) {
+                // Right: expand current item if collapsed, otherwise navigate to first child
+                if (self.selectedItem.Items.count() > 0) {
+                    if (self.selectedItem.collapsed) {
+                        self.selectedItem.expandItem();
+                    } else {
+                        // Navigate to first visible child
+                        var _children = self.selectedItem.Items.children;
+                        if (_children != undefined) {
+                            for (var i = 0; i < array_length(_children); i++) {
+                                var _child = _children[i];
+                                if (_child[$ "isScrollbar"] == true) continue;
+                                if (_child[$ "display"] == false) continue;
+                                if (_child[$ "assetType"] != undefined) {
+                                    self.__onItemSelected(_child);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Up/Down: navigate to previous/next visible item
+                var _visibleItems = [];
+                self.__collectVisibleItems(self.Items, _visibleItems);
+                
+                var _currentIdx = -1;
+                for (var i = 0; i < array_length(_visibleItems); i++) {
+                    if (_visibleItems[i] == self.selectedItem) {
+                        _currentIdx = i;
+                        break;
+                    }
+                }
+                
+                if (_currentIdx >= 0) {
+                    var _newIdx = _currentIdx;
+                    if (keyboard_check_pressed(vk_up)) {
+                        _newIdx = max(0, _currentIdx - 1);
+                    } else if (keyboard_check_pressed(vk_down)) {
+                        _newIdx = min(array_length(_visibleItems) - 1, _currentIdx + 1);
+                    }
+                    
+                    if (_newIdx != _currentIdx) {
+                        self.__onItemSelected(_visibleItems[_newIdx]);
+                    }
+                }
+            }
+        }
     }));
     
     /**
-     * Select a treeview item
+     * Select a treeview item (single select - clears others)
      */
     function __onItemSelected(treeviewItem, focus = false) {
-        if (self.selectedItem != treeviewItem) {
-            self.selectedItem = treeviewItem;
-            self.Items.traverseChildren(method({ treeviewItem }, function(child) {
-                child.selected = child == self.treeviewItem;
-            }));
+        // Clear all highlights (selection manager handles multi-select visuals)
+        self.Items.traverseChildren(function(child) {
+            child.selected = false;
+        });
+        
+        self.selectedItem = treeviewItem;
+        self.lastClickedItem = treeviewItem;
+        
+        if (treeviewItem != undefined) {
+            treeviewItem.selected = true;
         }
 
-        if (treeviewItem[$ "expandParents"] != undefined) {
+        if (treeviewItem != undefined && treeviewItem[$ "expandParents"] != undefined) {
             treeviewItem.expandParents();
         }
 
-        if (treeviewItem[$ "scrollToItem"] != undefined) {
+        if (treeviewItem != undefined && treeviewItem[$ "scrollToItem"] != undefined) {
             treeviewItem.scrollToItem();
         }
         
         if (self.onItemSelected != undefined) self.onItemSelected(treeviewItem, focus);
+    }
+    
+    /**
+     * Handle Ctrl+click toggle on a treeview item
+     */
+    function __onItemToggled(treeviewItem) {
+        self.selectedItem = treeviewItem;
+        self.lastClickedItem = treeviewItem;
+        
+        if (self.onMultiItemSelected != undefined) {
+            self.onMultiItemSelected(treeviewItem, "toggle");
+        }
+    }
+    
+    /**
+     * Handle Shift+click range selection
+     */
+    function __onItemRangeSelected(treeviewItem) {
+        self.selectedItem = treeviewItem;
+        
+        if (self.onMultiItemSelected != undefined) {
+            self.onMultiItemSelected(treeviewItem, "range");
+        }
     }
     
     /**
@@ -193,6 +323,29 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
             }
         }
     }
+    
+    /**
+     * Collect all visible treeview items in display order (for arrow key navigation)
+     */
+    function __collectVisibleItems(container, result) {
+        if (container[$ "children"] == undefined) return;
+        
+        var children = container.children;
+        for (var i = 0; i < array_length(children); i++) {
+            var child = children[i];
+            if (child[$ "isScrollbar"] == true) continue;
+            if (child[$ "display"] == false) continue;
+            
+            if (child[$ "asset"] != undefined || child[$ "assetType"] != undefined) {
+                array_push(result, child);
+                
+                // Recurse into children only if expanded
+                if (child[$ "collapsed"] == false && child[$ "Items"] != undefined) {
+                    __collectVisibleItems(child.Items, result);
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -252,7 +405,16 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         self.onMouseDown(method({ item: treeviewItem }, function() {
             // Only select on left click, not right click (right click is for context menu)
             if (mouse_lastbutton == mb_left) {
-                item.treeview.__onItemSelected(item);
+                if (keyboard_check(vk_shift)) {
+                    // Shift+click: range selection
+                    item.treeview.__onItemRangeSelected(item);
+                } else if (keyboard_check(vk_control)) {
+                    // Ctrl+click: toggle selection
+                    item.treeview.__onItemToggled(item);
+                } else {
+                    // Normal click: single selection
+                    item.treeview.__onItemSelected(item);
+                }
             }
             return false;
         }));

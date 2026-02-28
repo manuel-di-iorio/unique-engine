@@ -129,6 +129,7 @@ function EditorUiAssets(ui) constructor {
     Treeview.Items.enableScrollbar();
         
     Treeview.onItemSelected = editorTreeviewOnItemSelected;
+    Treeview.onMultiItemSelected = editorTreeviewOnMultiItemSelected;
     Treeview.onAssetDrop = editorTreeviewOnAssetDrop;
     Treeview.onRemoveItem = editorTreeviewOnRemoveAsset; 
     

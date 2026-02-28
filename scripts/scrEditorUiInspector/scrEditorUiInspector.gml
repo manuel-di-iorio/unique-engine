@@ -1,6 +1,7 @@
 function EditorUiInspector(ui) constructor {
     self.ui = ui;
     self.asset = undefined;
+    self.multiSelectCount = 0;
 
     ui.Inspector = new UiNode({ name: "Inspector", minWidth: 350, width: "21%", marginBottom: 62, flexDirection: "column" }, { border: true });
     ui.Inspector.owner = self;
@@ -13,7 +14,9 @@ function EditorUiInspector(ui) constructor {
             draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
             
             var title = "Inspector";
-            if (self.owner[$ "asset"] != undefined) {
+            if (self.owner[$ "multiSelectCount"] != undefined && self.owner.multiSelectCount > 1) {
+                title = string(self.owner.multiSelectCount) + " Objects Selected";
+            } else if (self.owner[$ "asset"] != undefined) {
                 title = self.owner.asset.type + " Inspector";
             }
             draw_text(self.x1 + 20, self.y1 + 8, title);
@@ -91,6 +94,57 @@ function EditorUiInspector(ui) constructor {
     function close() {
         self.ui.Inspector.Content.Items.destroyChildren();
         self.asset = undefined;  // Reset asset to show default "Inspector" title
+        self.multiSelectCount = 0;
+    }
+    
+    /// Show a multi-selection summary in the inspector
+    /// @param {Array<Struct>} assets All selected assets
+    /// @param {Struct} primaryAsset The primary selected asset
+    function inspectMultiple(assets, primaryAsset) {
+        self.ui.Inspector.Close.show();
+        
+        // Clear previous content
+        var _Items = self.ui.Inspector.Content.Items;
+        close();
+        
+        self.asset = primaryAsset;
+        self.multiSelectCount = array_length(assets);
+        
+        // --- Summary header ---
+        var _header = new UiText(string(self.multiSelectCount) + " objects selected", { 
+            width: "100%", height: 30, marginTop: 10
+        }, { 
+            pointerEvents: false 
+        });
+        _Items.add(_header);
+        
+        // --- List selected object names ---
+        for (var i = 0; i < array_length(assets); i++) {
+            var _a = assets[i];
+            var _name = _a[$ "name"] ?? ("Object " + string(i));
+            var _type = _a[$ "type"] ?? "Unknown";
+            var _isPrimary = (_a == primaryAsset);
+            
+            var _row = new UiNode({ 
+                width: "100%", height: 22, marginTop: 4,
+                flexDirection: "row", alignItems: "center", paddingLeft: 5
+            });
+            
+            // Primary indicator (small marker)
+            var _label = "  " + _name;
+            
+            var _nameText = new UiText(_label, { flex: 1, height: 20 }, { 
+                pointerEvents: false 
+            });
+            _row.add(_nameText);
+            
+            var _typeText = new UiText(_type, { width: 80, height: 20 }, { 
+                pointerEvents: false 
+            });
+            _row.add(_typeText);
+            
+            _Items.add(_row);
+        }
     }
 
     function __getMaxLabelWidth(list) {

@@ -42,7 +42,49 @@ switch (currentTool) {
 }
 
 // Mesh picking
-sceneManager.handleMeshPicking();
+var _pickHit = sceneManager.handleMeshPicking();
+
+// Rectangle selection (marquee select)
+var _guiMouseX = device_mouse_x_to_gui(0);
+var _guiMouseY = device_mouse_y_to_gui(0);
+
+if (uiScene.hovered && !sceneManager.orbit.transforming && !flythroughActive) {
+    // Start rect select: left click in scene with no gizmo interaction and no pick hit
+    if (mouse_check_button_pressed(mb_left) && !sceneManager.transformControls.dragging 
+        && sceneManager.transformControls.hoveredAxis == undefined && !_pickHit) {
+        sceneManager.__rectSelectPending = true;
+        sceneManager.__rectSelectPendingX = _guiMouseX;
+        sceneManager.__rectSelectPendingY = _guiMouseY;
+    }
+    
+    // Begin actual rect select after a small drag threshold
+    if (sceneManager.__rectSelectPending && mouse_check_button(mb_left) && !sceneManager.rectSelectActive) {
+        if (point_distance(_guiMouseX, _guiMouseY, sceneManager.__rectSelectPendingX, sceneManager.__rectSelectPendingY) > 5) {
+            sceneManager.rectSelectBegin(sceneManager.__rectSelectPendingX, sceneManager.__rectSelectPendingY);
+            sceneManager.__rectSelectPending = false;
+        }
+    }
+    
+    // Update rect select during drag
+    if (sceneManager.rectSelectActive) {
+        sceneManager.rectSelectUpdate(_guiMouseX, _guiMouseY);
+    }
+}
+
+// Cancel pending on mouse release
+if (!mouse_check_button(mb_left)) {
+    sceneManager.__rectSelectPending = false;
+    
+    // End rect select
+    if (sceneManager.rectSelectActive) {
+        sceneManager.rectSelectEnd();
+    }
+}
+
+// Update multi-selection box helpers
+if (global.editor.selectionManager != undefined) {
+    global.editor.selectionManager.updateBoxHelpers();
+}
 
 // editorManager.handleMouseWrap(winMouseX, winMouseY, winW, winH);
 

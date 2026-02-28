@@ -7,6 +7,7 @@ global.editor = {
     sceneManager: undefined,
     assetManager: undefined,
     projectManager: undefined,
+    selectionManager: undefined,
     events: undefined,
 };
 
@@ -17,5 +18,6 @@ function editorServices_register(editorManager, sceneManager, assetManager, proj
     global.editor.sceneManager = sceneManager;
     global.editor.assetManager = assetManager;
     global.editor.projectManager = projectManager;
+    global.editor.selectionManager = new EditorSelectionManager();
     global.editor.events = events;
 }

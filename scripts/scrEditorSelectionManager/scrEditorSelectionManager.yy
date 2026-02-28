@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"__EditorServices",
+  "%Name":"scrEditorSelectionManager",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"__EditorServices",
+  "name":"scrEditorSelectionManager",
   "parent":{
     "name":"Components",
     "path":"folders/Scene Editor/Scripts/Components.yy",
