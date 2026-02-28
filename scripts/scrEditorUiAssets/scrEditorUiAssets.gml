@@ -217,7 +217,7 @@ function EditorUiAssets(ui) constructor {
             })});
             
             // Delete action
-            array_push(items, { label: "Delete", shortcut: "Del", icon: sprUiTrash, onClick: method({ item: treeviewItem }, function() {
+            array_push(items, { label: "Delete", shortcut: "Delete", icon: sprUiTrash, onClick: method({ item: treeviewItem }, function() {
                 self.item.__removeItem();
             })});
         }
