@@ -424,7 +424,7 @@ function UiTreeviewItem(style = {}, props = {}): UiNode(style, props) constructo
         
         // If selected, deselect it first to clean up any gizmos/helpers
         if (wasSelected) {
-            oSceneEditor.editorManager.clearActiveAsset(true); // Keep scene active
+            global.editor.editorManager.clearActiveAsset(true); // Keep scene active
         }
         
         // Remove from current parent

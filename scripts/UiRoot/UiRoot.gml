@@ -52,19 +52,24 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.focusableElements = [];
     
     // Register an element as focusable
+    // Helper: find element index in focusableElements using a simple loop (avoids method() allocation)
+    function __findFocusableIndex(element) {
+        var _arr = self.focusableElements;
+        for (var i = array_length(_arr) - 1; i >= 0; i--) {
+            if (_arr[i] == element) return i;
+        }
+        return -1;
+    }
+    
     function __registerFocus(element) {
-        if (array_find_index(self.focusableElements, method({ element }, function(item) {
-            return item == element;
-        })) == -1) {
+        if (__findFocusableIndex(element) == -1) {
             array_insert(self.focusableElements, 0, element);
         }
     }
     
     // Unregister an element from being focusable
     function __unregisterFocus(element) {
-        var index = array_find_index(self.focusableElements, method({ element }, function(item) {
-            return item == element;
-        }));
+        var index = __findFocusableIndex(element);
         
         if (index != -1) {
             array_delete(self.focusableElements, index, 1);
@@ -86,9 +91,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         var currentIndex = -1;
         if (self.focusedElement != undefined) {
-            currentIndex = array_find_index(self.focusableElements, method({ el: self.focusedElement }, function(item) {
-                return item == el;
-            }));
+            currentIndex = __findFocusableIndex(self.focusedElement);
         }
         
         var nextIndex = (currentIndex + 1) % array_length(self.focusableElements);
@@ -113,9 +116,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         var currentIndex = -1;
         if (self.focusedElement != undefined) {
-            currentIndex = array_find_index(self.focusableElements, method({ el: self.focusedElement }, function(item) {
-                return item == el;
-            }));
+            currentIndex = __findFocusableIndex(self.focusedElement);
         }
         
         var prevIndex = currentIndex - 1;
@@ -178,18 +179,30 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             elem.scrollableParent = _scrollableParent;
         }
         
-        // Store the layout position data of this element
-        elem.layout = flexpanel_node_layout_get_position(elem.node, false);
-        elem.width = elem.layout.width;
-        elem.height = elem.layout.height;
-        elem.x1 = elem.layout.left; 
-        elem.y1 = elem.layout.top - (elem.scrollableParent ? elem.scrollableParent.scrollTop : 0);
-        elem.x2 = elem.layout.left + elem.width; 
+        // Store the layout position data of this element (reuse existing struct to avoid GC pressure)
+        var _newLayout = flexpanel_node_layout_get_position(elem.node, false);
+        var _layout = elem.layout;
+        _layout.left = _newLayout.left;
+        _layout.top = _newLayout.top;
+        _layout.right = _newLayout.right;
+        _layout.bottom = _newLayout.bottom;
+        _layout.width = _newLayout.width;
+        _layout.height = _newLayout.height;
+        _layout.paddingLeft = _newLayout.paddingLeft;
+        _layout.paddingTop = _newLayout.paddingTop;
+        _layout.paddingRight = _newLayout.paddingRight;
+        _layout.paddingBottom = _newLayout.paddingBottom;
+        
+        elem.width = _layout.width;
+        elem.height = _layout.height;
+        elem.x1 = _layout.left; 
+        elem.y1 = _layout.top - (elem.scrollableParent ? elem.scrollableParent.scrollTop : 0);
+        elem.x2 = _layout.left + elem.width; 
         elem.y2 = elem.y1 + elem.height;
-        elem.xp1 = elem.x1 + elem.layout.paddingLeft;
-        elem.yp1 = elem.y1 + elem.layout.paddingTop;
-        elem.xp2 = elem.x2 - elem.layout.paddingRight;
-        elem.yp2 = elem.y2 - elem.layout.paddingBottom;
+        elem.xp1 = elem.x1 + _layout.paddingLeft;
+        elem.yp1 = elem.y1 + _layout.paddingTop;
+        elem.xp2 = elem.x2 - _layout.paddingRight;
+        elem.yp2 = elem.y2 - _layout.paddingBottom;
         
         // Check visibility AFTER coordinates are updated (isVisible uses y1/y2 for scroll bounds check)
         var _isVisible = _inheritedVisibility && elem.isVisible();
@@ -200,7 +213,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         // Update element in the spatial partition tree (incremental - no clear!)
         if (_isVisible && elem.pointerEvents) {
             // Check if element already has a valid proxy
-            var hasProxy = variable_struct_exists(elem, "__spatialProxyId") && elem.__spatialProxyId != undefined;
+            var hasProxy = elem.__spatialProxyId != undefined;
             
             if (hasProxy) {
                 // Update existing proxy position
@@ -213,7 +226,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             }
         } else {
             // Element is not visible/interactive - remove from tree if present
-            if (variable_struct_exists(elem, "__spatialProxyId") && elem.__spatialProxyId != undefined) {
+            if (elem.__spatialProxyId != undefined) {
                 self.spatialTree.remove(elem.__spatialProxyId);
                 elem.__spatialProxyId = undefined;
             }
@@ -479,9 +492,13 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             }
         }
         
-        // Run the step handlers
+        // Run the step handlers (skip elements hidden via hide(), but NOT merely invisible ones
+        // since some handlers need to run to restore visibility after layout updates)
         for (var i = array_length(self.stepHandlers) - 1; i >= 0; i--) {
-            self.stepHandlers[i][0](self.layoutUpdated);
+            var _handler = self.stepHandlers[i];
+            if (_handler[1].display) {
+                _handler[0](self.layoutUpdated);
+            }
         }
         
         self.mouseXPrev = self.mouseX;
@@ -489,7 +506,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Clear dirty elements list for the next frame
         if (array_length(self.dirtyElements) > 0) {
-            self.dirtyElements = [];
+            array_resize(self.dirtyElements, 0);
         }
     }
     
@@ -599,7 +616,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Clear redraw elements list for the next frame
         if (array_length(self.redrawElements) > 0) {
-            self.redrawElements = [];
+            array_resize(self.redrawElements, 0);
         }
     } 
     

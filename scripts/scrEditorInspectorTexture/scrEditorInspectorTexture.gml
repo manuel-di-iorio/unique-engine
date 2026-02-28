@@ -17,7 +17,7 @@ function scrEditorInspectorTexture() {
               self.asset.__cachedTexture = sprite_get_texture(value, 0);
               
               // Track the change in asset manager
-            oSceneEditor.assetManager.editAsset(self.asset);
+            global.editor.assetManager.editAsset(self.asset);
         }
     },
     {
@@ -33,7 +33,7 @@ function scrEditorInspectorTexture() {
             onChange: function(value) {
             self.asset.filter = value;
             self.asset.update();
-            oSceneEditor.assetManager.editAsset(self.asset);
+            global.editor.assetManager.editAsset(self.asset);
         }
     }
 ];

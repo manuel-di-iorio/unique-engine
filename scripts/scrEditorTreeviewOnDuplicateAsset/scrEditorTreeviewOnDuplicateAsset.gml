@@ -2,7 +2,7 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
     if (treeviewItem == undefined || treeviewItem.asset == undefined) return;
     
     var originalAsset = treeviewItem.asset;
-    var assetManager = oSceneEditor.assetManager;
+    var assetManager = global.editor.assetManager;
     var treeview = treeviewItem.treeview;
     
     // 1. Clone the asset

@@ -66,7 +66,8 @@ function UiNode(style = {}, props = {}) constructor {
     self.hasStepEvent = false;
     self.__UiScrollbar = undefined;
     self.__scrollBoundsCachedScrollTop = undefined;
-    self.__scrollBoundsCachedResult = undefined;
+    self.__scrollBoundsCachedValue = undefined;
+    self.__spatialProxyId = undefined;
     self.borderColor = #191A21;
 
     // Tooltip props
@@ -164,7 +165,7 @@ function UiNode(style = {}, props = {}) constructor {
         }
         
         // Remove this element from spatial tree
-        if (variable_struct_exists(elem, "__spatialProxyId") && elem.__spatialProxyId != undefined) {
+        if (elem.__spatialProxyId != undefined) {
             global.UI.spatialTree.remove(elem.__spatialProxyId);
             elem.__spatialProxyId = undefined;
         }
@@ -177,7 +178,7 @@ function UiNode(style = {}, props = {}) constructor {
         }
         
         // Also handle scrollbar if present
-        if (variable_struct_exists(elem, "__UiScrollbar") && elem.__UiScrollbar != undefined) {
+        if (elem.__UiScrollbar != undefined) {
             __removeFromSpatialTree(elem.__UiScrollbar);
         }
     };
@@ -717,18 +718,21 @@ function UiNode(style = {}, props = {}) constructor {
     function dispatchEvent(event, target) {
         gml_pragma("forceinline");
         
-        // Build path from root to target
-        var path = [];
+        // Build path from target to root (reverse order), then iterate backwards for capture phase.
+        // Uses a pre-allocated static array to avoid per-event allocations.
+        static path = array_create(64, undefined);
+        var pathLen = 0;
         var current = target;
         while (current != undefined) {
-            array_insert(path, 0, current); // Insert at beginning
+            path[pathLen++] = current;
             current = current.parent;
         }
         
         // CAPTURE PHASE - from root to target (excluding target)
+        // path is [target, parent, ..., root], so iterate from pathLen-1 down to 1
         var _stopped = false;
         
-        for (var i = 0; i < array_length(path) - 1; i++) {
+        for (var i = pathLen - 1; i >= 1; i--) {
             current = path[i];
             
             if (current.eventListeners[$ event] != undefined) {
@@ -759,7 +763,7 @@ function UiNode(style = {}, props = {}) constructor {
                 
                 if (!_stopped) {
                     for (var j = 0, jl = array_length(targetListeners.bubble); j < jl; j++) {
-                        if (targetListeners.bubble[j](event)) {
+                        if (targetListeners.bubble[j](target)) {
                             _stopped = true;
                             break;
                         }
@@ -769,8 +773,9 @@ function UiNode(style = {}, props = {}) constructor {
         }
         
         // BUBBLE PHASE - from target parent to root
+        // path is [target, parent, ..., root], so iterate from 1 to pathLen-1
         if (!_stopped && event != UI_EVENT.mouseenter && event != UI_EVENT.mouseleave) {
-            for (var i = array_length(path) - 2; i >= 0; i--) {
+            for (var i = 1; i < pathLen; i++) {
                 current = path[i];
                 
                 if (current.eventListeners[$ event] != undefined) {

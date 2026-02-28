@@ -59,7 +59,7 @@ function scrUiResizeViewports() {
         view_set_wport(0, winW);
         view_set_hport(0, winH);
 
-        if (!oSceneEditor.projectManager.loaded) return;
+        if (!global.editor.projectManager.loaded) return;
         var uiScenePos = ui.Main.Scene.layout;
         
         // Available container for the scene (inside the UI)

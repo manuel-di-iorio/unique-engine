@@ -41,6 +41,22 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
         global.UI.requestRedraw();
     });
     
+    // Step handler for ripple animation (decoupled from draw rate)
+    self.onStep(function() {
+        if (array_length(self.ripples) == 0) return;
+        
+        for (var i = array_length(self.ripples) - 1; i >= 0; i--) {
+            var r = self.ripples[i];
+            r.radius += 3;
+            r.alpha -= 0.015;
+            
+            if (r.alpha <= 0) {
+                array_delete(self.ripples, i, 1);
+            }
+        }
+        global.UI.requestRedraw();
+    });
+    
     function resize() {
         var _w, _h;
         if (self.text != undefined) {
@@ -85,31 +101,21 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
         }
         
-        // Ripples
+        // Ripples (draw only, state updated in onStep)
         if (array_length(self.ripples) > 0) {
             var _scissor = gpu_get_scissor();
             gpu_set_scissor(self.x1, self.y1, self.x2 - self.x1, self.y2 - self.y1);
             
             for (var i = array_length(self.ripples) - 1; i >= 0; i--) {
                 var r = self.ripples[i];
-                r.radius += 3;
-                r.alpha -= 0.015;
                 
                 draw_set_alpha(r.alpha);
                 draw_set_color(c_white);
                 draw_circle(r.x, r.y, r.radius, false);
-                
-                if (r.alpha <= 0) {
-                    array_delete(self.ripples, i, 1);
-                }
             }
             
             gpu_set_scissor(_scissor);
             draw_set_alpha(1);
-            
-            if (array_length(self.ripples) > 0) {
-                global.UI.requestRedraw();
-            }
         }
         
         if (!self.outline) {

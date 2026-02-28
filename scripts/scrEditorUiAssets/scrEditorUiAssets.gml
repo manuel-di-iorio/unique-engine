@@ -194,11 +194,11 @@ function EditorUiAssets(ui) constructor {
                 })});
                 array_push(items, { separator: true });
              } else if (treeviewItem.assetType == "Scene") {
-                // array_push(items, { label: "New Point Light", icon: sprUiPointLight, disabled: oSceneEditor.editorManager.activeScene == undefined, onClick: method({ treeview: self.treeview }, function() {
+                // array_push(items, { label: "New Point Light", icon: sprUiPointLight, disabled: global.editor.editorManager.activeScene == undefined, onClick: method({ treeview: self.treeview }, function() {
                 //     editorTreeviewOnNewAsset(undefined, "PointLight");
                 // })});
                 
-                // array_push(items, { label: "New Directional Light", icon: sprUiDirectionalLight, disabled: oSceneEditor.editorManager.activeScene == undefined, onClick: method({ treeview: self.treeview }, function() {
+                // array_push(items, { label: "New Directional Light", icon: sprUiDirectionalLight, disabled: global.editor.editorManager.activeScene == undefined, onClick: method({ treeview: self.treeview }, function() {
                 //     editorTreeviewOnNewAsset(undefined, "DirectionalLight");
                 // })});
 

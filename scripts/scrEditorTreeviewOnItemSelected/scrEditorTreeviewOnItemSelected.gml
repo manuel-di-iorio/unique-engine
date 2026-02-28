@@ -1,5 +1,5 @@
 function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
-  var editorManager = oSceneEditor.editorManager;
+  var editorManager = global.editor.editorManager;
 
   if (treeviewItem == undefined || treeviewItem.asset == undefined) {
     editorManager.clearActiveAsset(true);
@@ -77,7 +77,7 @@ function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
   if (focus && (treeviewItem.asset[$ "isObject3D"] || treeviewItem.asset[$ "isMesh"])) {
     // Use the EditorManager's knowledge of the active scene to determine if we can focus
     if (editorManager.activeScene != undefined) {
-      oSceneEditor.sceneManager.orbit.focus(treeviewItem.asset);
+      global.editor.sceneManager.orbit.focus(treeviewItem.asset);
     }
   }
 };

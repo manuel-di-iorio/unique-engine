@@ -26,13 +26,13 @@ var flythroughActive = sceneManager.orbit.flythroughActive;
 // Update transform controls based on current tool
 var currentTool = editorManager.activeTool;
 switch (currentTool) {
-    case "view": 
+    case EDITOR_TOOL.View: 
         sceneManager.transformControls.updateGizmo();
         sceneManager.orbit.update(winMouseX, winMouseY);
     break;
-    case "move":
-    case "rotate":
-    case "scale":
+    case EDITOR_TOOL.Move:
+    case EDITOR_TOOL.Rotate:
+    case EDITOR_TOOL.Scale:
         sceneManager.transformControls.update();
 
         if (!sceneManager.transformControls.dragging) {
@@ -56,23 +56,19 @@ if (!uiHasFocus && !flythroughActive) {
    
    // Tool shortcuts
    if (keyboard_check_pressed(ord("Q"))) {
-       editorManager.setTool("view");
-       tool = "view";
+       editorManager.setTool(EDITOR_TOOL.View);
        editorManager.sceneTools.updateToolButtons();
    }
    if (keyboard_check_pressed(ord("W"))) {
-       editorManager.setTool("move");
-       tool = "move";
+       editorManager.setTool(EDITOR_TOOL.Move);
        editorManager.sceneTools.updateToolButtons();
    }
     if (keyboard_check_pressed(ord("E"))) {
-       editorManager.setTool("rotate");
-       tool = "rotate";
+       editorManager.setTool(EDITOR_TOOL.Rotate);
        editorManager.sceneTools.updateToolButtons();
     }
     if (keyboard_check_pressed(ord("R"))) {
-      editorManager.setTool("scale");
-      tool = "scale";
+      editorManager.setTool(EDITOR_TOOL.Scale);
       editorManager.sceneTools.updateToolButtons();
     }
     

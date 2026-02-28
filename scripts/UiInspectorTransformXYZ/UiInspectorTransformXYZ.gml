@@ -13,13 +13,19 @@ function UiInspectorTransformXYZ(style = {}, props = {}): UiNode(style, props) c
     
     self.add(self.X, self.Y, self.Z);
     
+    // Cached previous values to avoid string() allocation every frame
+    self.__lastVx = undefined;
+    self.__lastVy = undefined;
+    self.__lastVz = undefined;
+    
     self.onStep(function() {
         if (self.valueGetter != undefined) {
             var values = self.valueGetter();
             if (values != undefined && is_array(values)) {
-                if (!self.X.Input.focused) self.X.value = string(values[VEC3.x]);
-                if (!self.Y.Input.focused) self.Y.value = string(values[VEC3.y]);
-                if (!self.Z.Input.focused) self.Z.value = string(values[VEC3.z]);
+                var vx = values[VEC3.x], vy = values[VEC3.y], vz = values[VEC3.z];
+                if (!self.X.Input.focused && self.__lastVx != vx) { self.__lastVx = vx; self.X.value = string(vx); }
+                if (!self.Y.Input.focused && self.__lastVy != vy) { self.__lastVy = vy; self.Y.value = string(vy); }
+                if (!self.Z.Input.focused && self.__lastVz != vz) { self.__lastVz = vz; self.Z.value = string(vz); }
             }
         }
     });

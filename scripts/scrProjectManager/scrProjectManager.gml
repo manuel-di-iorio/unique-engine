@@ -80,9 +80,9 @@ function ProjectManager() constructor {
     function clearProject() {
         var ui = global.UI.Main;
         self.clear();
-        oSceneEditor.assetManager.clear();
-        oSceneEditor.editorManager.clear();
-        oSceneEditor.sceneManager.clear();
+        global.editor.assetManager.clear();
+        global.editor.editorManager.clear();
+        global.editor.sceneManager.clear();
         ui.Inspector.destroy();
         ui.Assets.destroy();
         ui.Scene.destroy();

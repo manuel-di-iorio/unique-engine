@@ -1,12 +1,7 @@
 function scrEditorInspectorLight() {
     return [
         // === SECTION: GENERAL ===
-        {
-            id: "name",
-            field: "name",
-            label: "Name",
-            type: "text"
-        },
+        inspectorField_name(),
         {
             id: "enabled",
             field: "enabled",

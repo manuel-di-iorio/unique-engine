@@ -25,7 +25,7 @@ function EditorUiInspector(ui) constructor {
 
     with (ui.Inspector.Close) {
         self.onClick(function() {
-            oSceneEditor.editorManager.clearActiveAsset();
+            global.editor.editorManager.clearActiveAsset();
             self.hide();
         });
     }
@@ -144,7 +144,7 @@ function EditorUiInspector(ui) constructor {
                 self.asset[$ self.assetField.field] = value;
                 
                 // Track the change in asset manager
-                oSceneEditor.assetManager.editAsset(self.asset);
+                global.editor.assetManager.editAsset(self.asset);
                 
                 var _onAfterChange = self.assetField[$ "onAfterChange"];
                 if (_onAfterChange != undefined) {
@@ -161,7 +161,7 @@ function EditorUiInspector(ui) constructor {
                 method(self, self.assetField.onBlur)(value, input);
                 
                 // Track the change in asset manager
-                oSceneEditor.assetManager.editAsset(self.asset);
+                global.editor.assetManager.editAsset(self.asset);
             }) : undefined;
             
             switch (assetField.type) {
@@ -239,7 +239,7 @@ function EditorUiInspector(ui) constructor {
                             }
                             
                             // 4. Track the change in asset manager
-                            oSceneEditor.assetManager.editAsset(self.asset);
+                            global.editor.assetManager.editAsset(self.asset);
                         })
                     });
                 break; 
@@ -252,7 +252,7 @@ function EditorUiInspector(ui) constructor {
                             self.asset[$ self.assetField.field] = value;
                             
                             // Track the change in asset manager
-                            oSceneEditor.assetManager.editAsset(self.asset);
+                            global.editor.assetManager.editAsset(self.asset);
                             
                             var _onChange = self.assetField[$ "onChange"];
                             if (_onChange != undefined) {
@@ -280,7 +280,7 @@ function EditorUiInspector(ui) constructor {
                             }
                             
                             // Track the change in asset manager
-                            oSceneEditor.assetManager.editAsset(self.asset);
+                            global.editor.assetManager.editAsset(self.asset);
                             
                             // Call custom onChange if defined
                             var _onChange = self.assetField[$ "onChange"];

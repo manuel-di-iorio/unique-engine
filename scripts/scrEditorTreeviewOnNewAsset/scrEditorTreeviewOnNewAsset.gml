@@ -36,14 +36,14 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
           treeview.Items.add(folderItem);
       }
       
-      oSceneEditor.assetManager.addAsset("Folder", folder);
+      global.editor.assetManager.addAsset("Folder", folder);
       treeview.__onItemSelected(folderItem, true);
       return;
   }
   
   var asset;
   var assetId;
-  var assetManager = oSceneEditor.assetManager;
+  var assetManager = global.editor.assetManager;
 
   switch (assetType) {
       case "Texture": 
@@ -160,7 +160,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   
   // Mark project as modified for standalone Object3D/Texture/Material/Scene (not tracked via parent)
   if (assetType != "Folder") {
-      oSceneEditor.projectManager.markAsUnsaved();
+      global.editor.projectManager.markAsUnsaved();
   }
 
   // Set visual representation for lights in editor

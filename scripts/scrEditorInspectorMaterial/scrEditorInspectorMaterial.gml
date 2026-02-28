@@ -6,7 +6,7 @@ function __scrEditorInspectorMaterialGetTextures(searchValue) {
     // Invalida cache dopo 1 secondo o se non esiste
     var _currentTime = current_time;
     if (_cachedTextures == undefined || _currentTime - _cacheTime > 1000) {
-        var allTextures = oSceneEditor.assetManager.getAssetsByType("Texture");
+        var allTextures = global.editor.assetManager.getAssetsByType("Texture");
         
         // Deduplica usando ds_map per performance
         var seenMap = {};
@@ -83,7 +83,7 @@ function scrEditorInspectorMaterial() {
                   onChange: function(value, input) {
                       variable_struct_set(self.asset.textures, "map", value);
                       self.asset.build();
-                      oSceneEditor.assetManager.editAsset(self.asset);
+                      global.editor.assetManager.editAsset(self.asset);
                   }
               },
               { 
@@ -98,7 +98,7 @@ function scrEditorInspectorMaterial() {
                 onChange: function(value, input) {
                     variable_struct_set(self.asset.textures, "normalMap", value);
                     self.asset.build();
-                    oSceneEditor.assetManager.editAsset(self.asset);
+                    global.editor.assetManager.editAsset(self.asset);
                 }
             },
             { 
@@ -113,7 +113,7 @@ function scrEditorInspectorMaterial() {
                 onChange: function(value, input) {
                     variable_struct_set(self.asset.textures, "ormMap", value);
                     self.asset.build();
-                    oSceneEditor.assetManager.editAsset(self.asset);
+                    global.editor.assetManager.editAsset(self.asset);
                 }
             },
             { 
@@ -128,7 +128,7 @@ function scrEditorInspectorMaterial() {
                 onChange: function(value, input) {
                     variable_struct_set(self.asset.textures, "emissiveMap", value);
                     self.asset.build();
-                    oSceneEditor.assetManager.editAsset(self.asset);
+                    global.editor.assetManager.editAsset(self.asset);
                 }
             },
             { 
@@ -143,7 +143,7 @@ function scrEditorInspectorMaterial() {
                 onChange: function(value, input) {
                     variable_struct_set(self.asset.textures, "alphaMap", value);
                     self.asset.build();
-                    oSceneEditor.assetManager.editAsset(self.asset);
+                    global.editor.assetManager.editAsset(self.asset);
                 }
             },
             { 
@@ -158,7 +158,7 @@ function scrEditorInspectorMaterial() {
                 onChange: function(value, input) {
                     variable_struct_set(self.asset.textures, "displacementMap", value);
                     self.asset.build();
-                    oSceneEditor.assetManager.editAsset(self.asset);
+                    global.editor.assetManager.editAsset(self.asset);
                 }
             }
           ]
@@ -182,7 +182,7 @@ function scrEditorInspectorMaterial() {
                   valueGetter: function() { return self.asset.uniforms.ueMetalness.value; },
                   onBlur: function(value) {
                       self.asset.setUniform("ueMetalness", value);
-                      oSceneEditor.assetManager.editAsset(self.asset);
+                      global.editor.assetManager.editAsset(self.asset);
                   }
               },
               { 
@@ -197,7 +197,7 @@ function scrEditorInspectorMaterial() {
                   valueGetter: function() { return self.asset.uniforms.ueRoughness.value; },
                   onBlur: function(value) {
                       self.asset.setUniform("ueRoughness", value);
-                      oSceneEditor.assetManager.editAsset(self.asset);
+                      global.editor.assetManager.editAsset(self.asset);
                   }
               },
               { 
@@ -223,7 +223,7 @@ function scrEditorInspectorMaterial() {
                   valueGetter: function() { return self.asset.uniforms.ueEmissiveIntensity.value; },
                   onBlur: function(value) {
                       self.asset.setUniform("ueEmissiveIntensity", value);
-                      oSceneEditor.assetManager.editAsset(self.asset);
+                      global.editor.assetManager.editAsset(self.asset);
                   }
               }
           ]
@@ -247,7 +247,7 @@ function scrEditorInspectorMaterial() {
                   valueGetter: function() { return self.asset.uniforms.ueAoIntensity.value; },
                   onBlur: function(value) {
                       self.asset.setUniform("ueAoIntensity", value);
-                      oSceneEditor.assetManager.editAsset(self.asset);
+                      global.editor.assetManager.editAsset(self.asset);
                   }
               },
               { 
@@ -262,7 +262,7 @@ function scrEditorInspectorMaterial() {
                   valueGetter: function() { return self.asset.uniforms.ueAoMapIntensity.value; },
                   onBlur: function(value) {
                       self.asset.setUniform("ueAoMapIntensity", value);
-                      oSceneEditor.assetManager.editAsset(self.asset);
+                      global.editor.assetManager.editAsset(self.asset);
                   }
               }
           ]

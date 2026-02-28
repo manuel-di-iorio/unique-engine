@@ -13,7 +13,7 @@ function SceneManager() constructor {
             return global.UI.Main.Scene != undefined && global.UI.Main.Scene.hovered;
         },
         onChange: function () {
-            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+            global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         }
     });
     self.scene = new UeScene();
@@ -29,17 +29,17 @@ function SceneManager() constructor {
         view: 1,
         onDrag: function () {
             // Sync rotation euler ONLY during gizmo interaction to update the inspector
-            var asset = oSceneEditor.sceneManager.transformControls.object;
-            if (oSceneEditor.sceneManager.transformControls.mode == "rotate" && asset != undefined && variable_struct_exists(asset, "__rotationEuler")) {
+            var asset = global.editor.sceneManager.transformControls.object;
+            if (global.editor.sceneManager.transformControls.mode == "rotate" && asset != undefined && variable_struct_exists(asset, "__rotationEuler")) {
                 euler_set_from_quaternion(asset.__rotationEuler, asset.rotation);
             }
 
             // Force Euler sync when dragging the gizmo to update the inspector
-            oSceneEditor.assetManager.editAsset(asset, true, false);
+            global.editor.assetManager.editAsset(asset, true, false);
         },
         onDragEnd: function () {
             global.UI.requestRedraw();
-            oSceneEditor.events.dispatch({ type: "assetChanged"/*, data: asset*/ });
+            global.editor.events.dispatch({ type: "assetChanged"/*, data: asset*/ });
         }
     });
 
@@ -100,7 +100,7 @@ function SceneManager() constructor {
         if (self.transformControls.hoveredAxis != undefined || self.transformControls.dragging)
             return false;
 
-        var _editorManager = oSceneEditor.editorManager;
+        var _editorManager = global.editor.editorManager;
 
         // --- RAYCAST ---
         self.camera.updateMatrixWorld();

@@ -62,37 +62,37 @@ function EditorUiSceneTools(ui) constructor {
     // View tool
     ui.SceneTools.BtnView = new UiButton(sprUiEye, btnStyle, { tooltip: "View tool (Q)" });
     ui.SceneTools.BtnView.onClick(function() {
-        oSceneEditor.editorManager.setTool("view");
+        global.editor.editorManager.setTool(EDITOR_TOOL.View);
         self.updateToolButtons();
     });
     
     // Move tool
     ui.SceneTools.BtnMove = new UiButton(sprUiMove, btnStyle, { tooltip: "Move tool (W)" });
     ui.SceneTools.BtnMove.onClick(function() {
-        oSceneEditor.editorManager.setTool("move");
+        global.editor.editorManager.setTool(EDITOR_TOOL.Move);
         self.updateToolButtons();
     });
 
     // Rotate tool
     ui.SceneTools.BtnRotate = new UiButton(sprUiRotateModel, btnStyle, { tooltip: "Rotate tool (E)" });
     ui.SceneTools.BtnRotate.onClick(function() {
-        oSceneEditor.editorManager.setTool("rotate");
+        global.editor.editorManager.setTool(EDITOR_TOOL.Rotate);
         self.updateToolButtons();
     });
 
     // Scale tool
     ui.SceneTools.BtnScale = new UiButton(sprUiScaleModel, btnStyle, { tooltip: "Scale tool (R)" });
     ui.SceneTools.BtnScale.onClick(function() {
-        oSceneEditor.editorManager.setTool("scale");
+        global.editor.editorManager.setTool(EDITOR_TOOL.Scale);
         self.updateToolButtons();
     });
     
     self.updateToolButtons = function() {
-        var tool = oSceneEditor.editorManager.activeTool;
-        ui.SceneTools.BtnView.selected = (tool == "view");
-        ui.SceneTools.BtnMove.selected = (tool == "move");
-        ui.SceneTools.BtnRotate.selected = (tool == "rotate");
-        ui.SceneTools.BtnScale.selected = (tool == "scale");
+        var tool = global.editor.editorManager.activeTool;
+        ui.SceneTools.BtnView.selected = (tool == EDITOR_TOOL.View);
+        ui.SceneTools.BtnMove.selected = (tool == EDITOR_TOOL.Move);
+        ui.SceneTools.BtnRotate.selected = (tool == EDITOR_TOOL.Rotate);
+        ui.SceneTools.BtnScale.selected = (tool == EDITOR_TOOL.Scale);
         global.UI.requestRedraw();
     };
     
@@ -106,7 +106,7 @@ function EditorUiSceneTools(ui) constructor {
 
     // with (ui.SceneTools.BtnCamAccel) {
     //     onClick(function() {
-    //         var sm = oSceneEditor.sceneManager;
+    //         var sm = global.editor.sceneManager;
     //         if (sm.orbit != undefined) {
     //             // Toggle between 0.3 (Damped) and 1.0 (Linear)
     //             if (sm.orbit.dampingFactor >= 1.0) {
@@ -118,25 +118,25 @@ function EditorUiSceneTools(ui) constructor {
     //             self.selected = (sm.orbit.dampingFactor < 1.0);
     //             sm.orbit.enableDamping = self.selected;
     //             global.UI.requestRedraw();
-    //             oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+    //             global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
     //         }
     //     });
     // }
     
     // Set initial state
-    // if (oSceneEditor.sceneManager.orbit != undefined) {
-    //     ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 1.0);
+    // if (global.editor.sceneManager.orbit != undefined) {
+    //     ui.SceneTools.BtnCamAccel.selected = (global.editor.sceneManager.orbit.dampingFactor < 1.0);
     // }
     
     // self.updateDampingButton = function() {
-    //     ui.SceneTools.BtnCamAccel.selected = (oSceneEditor.sceneManager.orbit.dampingFactor < 1.0);
+    //     ui.SceneTools.BtnCamAccel.selected = (global.editor.sceneManager.orbit.dampingFactor < 1.0);
     //     global.UI.requestRedraw();
     // };
     
     // Reset camera position
     ui.SceneTools.BtnResetCam = new UiButton(sprUiCenter, btnStyle, { tooltip: "Reset camera" });
     ui.SceneTools.BtnResetCam.onClick(function() {
-        var sm = oSceneEditor.sceneManager;
+        var sm = global.editor.sceneManager;
         if (sm.camera != undefined) {
             // Reset to default position
             sm.camera.setPosition(100, -300, 70);
@@ -145,7 +145,7 @@ function EditorUiSceneTools(ui) constructor {
                 vec3_set(sm.orbit.target, 0, 0, 0);
                 sm.orbit.reset(); 
             }
-            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+            global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         }
     });
 
@@ -154,41 +154,41 @@ function EditorUiSceneTools(ui) constructor {
     
     with (ui.SceneTools.BtnGrid) {
         onClick(function() {
-            var sm = oSceneEditor.sceneManager;
+            var sm = global.editor.sceneManager;
             sm.grid.visible = !sm.grid.visible;
             sm.gridEnabled = sm.grid.visible;
             self.selected = sm.grid.visible;
             global.UI.requestRedraw();
-            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+            global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         });
     }
     
     // Set initial state
-    ui.SceneTools.BtnGrid.selected = oSceneEditor.sceneManager.grid.visible;
+    ui.SceneTools.BtnGrid.selected = global.editor.sceneManager.grid.visible;
     
     // Toggle box colliders
     ui.SceneTools.BtnBoxColliders = new UiButton(sprUiGizmos, btnStyle, { tooltip: "Toggle box colliders" });
     
     with (ui.SceneTools.BtnBoxColliders) {
         onClick(function() {
-            var sm = oSceneEditor.sceneManager;
+            var sm = global.editor.sceneManager;
             sm.showBoxColliders = !sm.showBoxColliders;
             sm.boxHelper.visible = sm.showBoxColliders;
             self.selected = sm.showBoxColliders;
             global.UI.requestRedraw();
-            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+            global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         });
     }
     
     // Set initial state
-    ui.SceneTools.BtnBoxColliders.selected = oSceneEditor.sceneManager.showBoxColliders;
+    ui.SceneTools.BtnBoxColliders.selected = global.editor.sceneManager.showBoxColliders;
 
     // Toggle grid snap
     ui.SceneTools.BtnGridSnap = new UiButton(sprUiSnap, btnStyle, { tooltip: "Toggle grid snap when moving objects" });
     
     with (ui.SceneTools.BtnGridSnap) {
         onClick(function() {
-            var sm = oSceneEditor.sceneManager;
+            var sm = global.editor.sceneManager;
             sm.gridSnapEnabled = !sm.gridSnapEnabled;
             self.selected = sm.gridSnapEnabled;
             
@@ -207,16 +207,16 @@ function EditorUiSceneTools(ui) constructor {
             }
             
             global.UI.requestRedraw();
-            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+            global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         });
     }
     
-    ui.SceneTools.BtnGridSnap.selected = oSceneEditor.sceneManager.gridSnapEnabled;
+    ui.SceneTools.BtnGridSnap.selected = global.editor.sceneManager.gridSnapEnabled;
 
     // Orbit settings
     ui.SceneTools.BtnOrbitSettings = new UiButton(sprUiSection, btnStyle, { tooltip: "Orbit controls settings" });
     ui.SceneTools.BtnOrbitSettings.onClick(function() {
-        var sm = oSceneEditor.sceneManager;
+        var sm = global.editor.sceneManager;
         var orbit = sm.orbit;
         if (orbit != undefined) {
             var newPan = get_integer("Pan speed (default 1):", orbit.panSpeed) ?? 1;
@@ -227,20 +227,20 @@ function EditorUiSceneTools(ui) constructor {
             orbit.rotateSpeed = min(999999, max(0.00001, newRot));
             orbit.zoomSpeed = min(999999, max(0.00001, newZoom));
             
-            oSceneEditor.projectManager.saver.saveEditorSettings(oSceneEditor.projectManager);
+            global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         }
     });
 
     ui.SceneTools.Right.add(ui.SceneTools.BtnResetCam, /*ui.SceneTools.BtnCamAccel,*/ ui.SceneTools.BtnGrid, ui.SceneTools.BtnGridSnap, ui.SceneTools.BtnBoxColliders, ui.SceneTools.BtnOrbitSettings);
 
     self.updateGridButton = function() {
-        ui.SceneTools.BtnGrid.selected = oSceneEditor.sceneManager.grid.visible;
-        ui.SceneTools.BtnGridSnap.selected = oSceneEditor.sceneManager.gridSnapEnabled;
+        ui.SceneTools.BtnGrid.selected = global.editor.sceneManager.grid.visible;
+        ui.SceneTools.BtnGridSnap.selected = global.editor.sceneManager.gridSnapEnabled;
         global.UI.requestRedraw();
     };
 
     self.updateBoxCollidersButton = function() {
-        ui.SceneTools.BtnBoxColliders.selected = oSceneEditor.sceneManager.showBoxColliders;
+        ui.SceneTools.BtnBoxColliders.selected = global.editor.sceneManager.showBoxColliders;
         global.UI.requestRedraw();
     };
     

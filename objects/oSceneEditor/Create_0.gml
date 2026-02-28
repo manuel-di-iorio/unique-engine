@@ -35,5 +35,8 @@ assetManager = new AssetManager();
 projectManager = new ProjectManager();
 editorManager = new EditorManager();
 
+// Register services globally so scripts don't depend on oSceneEditor instance
+editorServices_register(editorManager, sceneManager, assetManager, projectManager, events);
+
 projectManager.autoLoad();
 scrUiResizeViewports();

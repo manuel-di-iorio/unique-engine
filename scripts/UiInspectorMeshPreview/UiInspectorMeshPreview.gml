@@ -18,7 +18,7 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
     self.setupPreview();
   };
 
-  oSceneEditor.events.on("assetChanged", self.onAssetChanged);
+  global.editor.events.on("assetChanged", self.onAssetChanged);
 
   self.setupPreview = function () {
     if (self.asset == undefined) return;
@@ -176,7 +176,7 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
 
   self.onDestroy = function () {
     if (self.asset != undefined) {
-      oSceneEditor.events.off("assetChanged", self.onAssetChanged);
+      global.editor.events.off("assetChanged", self.onAssetChanged);
     }
 
     if (self.previewSprite != undefined) {

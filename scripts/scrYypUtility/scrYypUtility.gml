@@ -7,7 +7,7 @@
  * @returns {Array<string>} An array of GameMaker object names.
  */
 function ueYypGetObjects() {
-    var projectPath = oSceneEditor.projectManager.projectPath;
+    var projectPath = global.editor.projectManager.projectPath;
     if (projectPath == "" || !file_exists(projectPath)) {
         return [];
     }

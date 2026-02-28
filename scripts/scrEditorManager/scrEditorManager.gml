@@ -6,7 +6,7 @@ function EditorManager() constructor {
     self.activeAsset = undefined;      // Currently selected asset in the treeview
     self.activeScene = undefined;       // Currently active scene being edited
     self.activeSceneTreeviewItem = undefined; // Reference to the treeview item of the active scene
-    self.activeTool = "view";          // Current tool mode: "view", "move", "rotate", "scale"
+    self.activeTool = EDITOR_TOOL.View;  // Current tool mode: EDITOR_TOOL enum
     
     // UI References
     self.inspector = undefined;
@@ -31,7 +31,7 @@ function EditorManager() constructor {
      * @param {Struct} gizmoTarget - Optional target for transform controls (used for instances in scenes)
      */
     function setActiveAsset(asset, treeviewItem = undefined, gizmoTarget = undefined) {
-        var sm = oSceneEditor.sceneManager;
+        var sm = global.editor.sceneManager;
         
         var assetChanged = self.activeAsset != asset;
         
@@ -59,6 +59,8 @@ function EditorManager() constructor {
                     currentSceneItem = it;
                     break;
                 }
+                // Note: itAsset.type is the engine-level string type ("Scene", "Mesh", etc.)
+                // set on the 3D objects themselves. ASSET_TYPE enums are used in editor-level code.
                 
                 // Navigate up: Child Item -> Items Node -> Parent Item
                 var itParentItems = it[$ "parent"];
@@ -152,16 +154,16 @@ function EditorManager() constructor {
                 sm.boxHelper.object = self.gizmoTarget;
                 
                 // Update the whole scene if we are in one, and the target asset
-                if (self.activeScene != undefined) oSceneEditor.assetManager.updateAssetMatrix(self.activeScene);
-                if (self.gizmoTarget != undefined && self.gizmoTarget != self.activeScene) oSceneEditor.assetManager.updateAssetMatrix(self.gizmoTarget);
+                if (self.activeScene != undefined) global.editor.assetManager.updateAssetMatrix(self.activeScene);
+                if (self.gizmoTarget != undefined && self.gizmoTarget != self.activeScene) global.editor.assetManager.updateAssetMatrix(self.gizmoTarget);
             }
         }
         
-        if (oSceneEditor.sceneManager.transformControls != undefined && self.gizmoTarget != undefined) {
-            if (self.activeTool != "view" && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "Object3D" || self.gizmoTarget.type == "Bone")) {
-                oSceneEditor.sceneManager.transformControls.attach(self.gizmoTarget);
+        if (global.editor.sceneManager.transformControls != undefined && self.gizmoTarget != undefined) {
+            if (self.activeTool != EDITOR_TOOL.View && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "Object3D" || self.gizmoTarget.type == "Bone")) {
+                global.editor.sceneManager.transformControls.attach(self.gizmoTarget);
             } else {
-                oSceneEditor.sceneManager.transformControls.detach();
+                global.editor.sceneManager.transformControls.detach();
             }
         }
     }
@@ -185,7 +187,7 @@ function EditorManager() constructor {
         var oldSceneItem = self.activeSceneTreeviewItem;
         var sceneToKeep = keepScene ? self.activeScene : undefined;
         
-        oSceneEditor.sceneManager.boxHelper.dispose();
+        global.editor.sceneManager.boxHelper.dispose();
         self.activeAsset = undefined;
         self.gizmoTarget = undefined;
         self.selectedTreeviewItem = undefined;
@@ -200,8 +202,8 @@ function EditorManager() constructor {
                 oldSceneItem.collapseItem();
             }
 
-            oSceneEditor.sceneManager.objects.clear(false);
-            oSceneEditor.sceneManager.transformControls.detach();
+            global.editor.sceneManager.objects.clear(false);
+            global.editor.sceneManager.transformControls.detach();
             self.inspector.close();
         } else {
             // Re-set the scene as the active asset to maintain consistency
@@ -216,30 +218,30 @@ function EditorManager() constructor {
     
     /**
      * Set the active tool
-     * @param {String} tool - Tool name: "view", "move", "rotate", "scale"
+     * @param {Real} tool - EDITOR_TOOL enum value
      */
     function setTool(tool) {
         if (self.activeTool != tool) {
             self.activeTool = tool;
             
             // Update transform controls mode
-            if (oSceneEditor.sceneManager.transformControls != undefined) {
-                if (tool == "view") {
-                    oSceneEditor.sceneManager.transformControls.detach();
+            if (global.editor.sceneManager.transformControls != undefined) {
+                if (tool == EDITOR_TOOL.View) {
+                    global.editor.sceneManager.transformControls.detach();
                 } else {
                     if (self.gizmoTarget != undefined && (self.gizmoTarget.type == "Mesh" || self.gizmoTarget.type == "Object3D")) {
-                        oSceneEditor.sceneManager.transformControls.attach(self.gizmoTarget);
+                        global.editor.sceneManager.transformControls.attach(self.gizmoTarget);
                     }
                     
                     switch (tool) {
-                        case "move":
-                            oSceneEditor.sceneManager.transformControls.setMode("move");
+                        case EDITOR_TOOL.Move:
+                            global.editor.sceneManager.transformControls.setMode("move");
                             break;
-                        case "rotate":
-                            oSceneEditor.sceneManager.transformControls.setMode("rotate");
+                        case EDITOR_TOOL.Rotate:
+                            global.editor.sceneManager.transformControls.setMode("rotate");
                             break;
-                        case "scale":
-                            oSceneEditor.sceneManager.transformControls.setMode("scale");
+                        case EDITOR_TOOL.Scale:
+                            global.editor.sceneManager.transformControls.setMode("scale");
                             break;
                     }
                 }
@@ -248,7 +250,7 @@ function EditorManager() constructor {
     }
 
     function handleMouseWrap(winMouseX, winMouseY, winW, winH) {
-        var sceneManager = oSceneEditor.sceneManager;
+        var sceneManager = global.editor.sceneManager;
         if (mouse_button != mb_none && sceneManager.orbit.transforming) {
             var fixMousePos = false;
 
@@ -279,7 +281,7 @@ function EditorManager() constructor {
      * Render editor UI overlays (like flythrough speed)
      */
     function renderUI() {
-        var sceneManager = oSceneEditor.sceneManager;
+        var sceneManager = global.editor.sceneManager;
         var orbit = sceneManager.orbit;
         
         if (orbit.flythroughSpeedDisplayTime > 0) {

@@ -109,7 +109,7 @@ function AssetManager() constructor {
 
         // Also notify the global editor manager so UI components can react
         if (emitEvent) {
-            oSceneEditor.events.dispatch({ type: "assetChanged", data: asset });
+            global.editor.events.dispatch({ type: "assetChanged", data: asset });
         }
 
         // If this is not a prefab, propagate changes to its instances
@@ -124,7 +124,7 @@ function AssetManager() constructor {
      * @param {Struct} asset - The asset that was modified
      */
     function __trackChange(action, asset) {
-        var projectManager = oSceneEditor.projectManager;
+        var projectManager = global.editor.projectManager;
 
         // VALIDATION: Don't track invalid assets
         if (asset == undefined) {
@@ -213,8 +213,8 @@ function AssetManager() constructor {
         self.__updateMatrixInternal(asset, recursive);
 
         // Update the box helper to match the new transform
-        oSceneEditor.sceneManager.boxHelper.update();
-        oSceneEditor.sceneManager.transformControls.updateGizmo();
+        global.editor.sceneManager.boxHelper.update();
+        global.editor.sceneManager.transformControls.updateGizmo();
     }
 
     /**

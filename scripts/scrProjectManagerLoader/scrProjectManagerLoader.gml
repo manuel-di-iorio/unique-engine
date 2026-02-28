@@ -111,7 +111,7 @@ function ProjectLoader() constructor {
     }
 
     // 4. Convert __parentUI for all assets to object references
-    var allAssets = oSceneEditor.assetManager.assets;
+    var allAssets = global.editor.assetManager.assets;
     for (var i = 0; i < array_length(allAssets); i++) {
       var asset = allAssets[i];
       if (struct_exists(asset, "__parentUI") && is_string(asset.__parentUI)) {
@@ -150,7 +150,7 @@ function ProjectLoader() constructor {
     });
 
     self.treeviewItemsByUUID[$ uuid] = tvItem;
-    oSceneEditor.assetManager.addAsset("Folder", folder);
+    global.editor.assetManager.addAsset("Folder", folder);
 
     return { item: tvItem, parentUUID: fData[$ "__parentUI"] };
   };
@@ -168,7 +168,7 @@ function ProjectLoader() constructor {
       });
 
       self.treeviewItemsByUUID[$ asset.uuid] = tvItem;
-      oSceneEditor.assetManager.addAsset(asset.type, asset);
+      global.editor.assetManager.addAsset(asset.type, asset);
 
       // Save for parenting pass
       array_push(assetTargets, {
@@ -192,7 +192,7 @@ function ProjectLoader() constructor {
 
     if (settings[$ "camera"] != undefined) {
       var c = settings.camera;
-      var sm = oSceneEditor.sceneManager;
+      var sm = global.editor.sceneManager;
       if (sm.camera != undefined && c[$ "position"] != undefined) {
         sm.camera.setPosition(c.position[0], c.position[1], c.position[2]);
       }
@@ -206,11 +206,11 @@ function ProjectLoader() constructor {
         sm.orbit.updateSphericalCoordinates();
         sm.orbit.update();
       }
-      // oSceneEditor.editorManager.sceneTools.updateDampingButton();
+      // global.editor.editorManager.sceneTools.updateDampingButton();
     }
 
     if (settings[$ "gridEnabled"] != undefined) {
-      var sm = oSceneEditor.sceneManager;
+      var sm = global.editor.sceneManager;
       sm.gridEnabled = settings.gridEnabled;
       sm.grid.visible = settings.gridEnabled;
       if (settings[$ "gridSnapEnabled"] != undefined) sm.gridSnapEnabled = settings.gridSnapEnabled;
@@ -222,22 +222,22 @@ function ProjectLoader() constructor {
         sm.transformControls.snapSize = sm.gridSnapSize;
       }
       
-      oSceneEditor.editorManager.sceneTools.updateGridButton();
+      global.editor.editorManager.sceneTools.updateGridButton();
     }
 
     if (settings[$ "gizmos"] != undefined) {
       var g = settings.gizmos;
-      var sm = oSceneEditor.sceneManager;
+      var sm = global.editor.sceneManager;
       if (g[$ "showBoxColliders"] != undefined) {
         sm.showBoxColliders = g.showBoxColliders;
         sm.boxHelper.visible = sm.showBoxColliders;
       }
-      oSceneEditor.editorManager.sceneTools.updateBoxCollidersButton();
+      global.editor.editorManager.sceneTools.updateBoxCollidersButton();
     }
   };
 
   self.__linkNodes = function () {
-    var assetManager = oSceneEditor.assetManager;
+    var assetManager = global.editor.assetManager;
     var texturesByUUID = {};
     var objectsByUUID = {};
 
@@ -312,7 +312,7 @@ function ProjectLoader() constructor {
 
     treeview.onCollapse = method(self, function (treeviewItem) {
       var scene = treeviewItem.asset;
-      var editorManager = oSceneEditor.editorManager;
+      var editorManager = global.editor.editorManager;
 
       if (scene != undefined && scene.type == "Scene" && editorManager.activeScene != scene) {
         scene.__sceneJSON = scene.toJSON(true); // Serialize state recursively to memory before unloading

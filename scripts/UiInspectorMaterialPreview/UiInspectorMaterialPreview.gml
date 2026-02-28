@@ -8,7 +8,7 @@ function UiInspectorMaterialPreview(style = {}, props = {}): UiNode(style, props
     self.updatePreview();
   };
 
-  oSceneEditor.events.on("assetChanged", self.onAssetChanged);
+  global.editor.events.on("assetChanged", self.onAssetChanged);
 
   self.updatePreview = function () {
     if (self.asset == undefined) return;
@@ -56,14 +56,9 @@ function UiInspectorMaterialPreview(style = {}, props = {}): UiNode(style, props
     self.previewSprite = sprite_create_from_surface(_target.surface, 0, 0, self.renderSize, self.renderSize, false, false, 0, 0);
 
     // Cleanup resources
+    _geom.dispose();
     _target.dispose();
   }
-
-  self.onDestroy = function () {
-    if (self.asset != undefined) {
-      oSceneEditor.events.on("assetChanged", self.onAssetChanged);
-    }
-  };
 
   self.onDraw = function () {
 
@@ -92,7 +87,7 @@ function UiInspectorMaterialPreview(style = {}, props = {}): UiNode(style, props
 
   self.onDestroy = function () {
     if (self.asset != undefined) {
-      oSceneEditor.events.off("assetChanged", self.onAssetChanged);
+      global.editor.events.off("assetChanged", self.onAssetChanged);
     }
 
     if (self.previewSprite != undefined) {

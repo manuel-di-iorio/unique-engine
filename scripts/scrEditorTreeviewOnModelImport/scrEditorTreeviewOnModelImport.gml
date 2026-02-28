@@ -3,7 +3,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
     if (path == "") return;
 
     var ui = oSceneEditor.ui;
-    var assimp = oSceneEditor.sceneManager.assimp;
+    var assimp = global.editor.sceneManager.assimp;
     var treeview = ui.Assets.Treeview;
 
     // Load the model
@@ -51,7 +51,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
     }
     
     // Add folder to AssetManager
-    oSceneEditor.assetManager.addAsset("Folder", folder);
+    global.editor.assetManager.addAsset("Folder", folder);
     
 
     // 1. Add textures to project and treeview (inside folder)
@@ -82,7 +82,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
         folderItem.addChild(textureTreeviewItem);
         
         // Add to asset manager
-        oSceneEditor.assetManager.addAsset("Texture", tex);
+        global.editor.assetManager.addAsset("Texture", tex);
     }
     
     // 2. Add materials to project and treeview (inside folder)
@@ -114,7 +114,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
         folderItem.addChild(materialTreeviewItem);
         
         // Add to asset manager
-        oSceneEditor.assetManager.addAsset("Material", mat);
+        global.editor.assetManager.addAsset("Material", mat);
     }
     
     // 3. Add model to project and treeview (with hierarchy, inside folder)
@@ -140,7 +140,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
         }
         
         // Add to AssetManager
-        oSceneEditor.assetManager.addAsset("Mesh", node);
+        global.editor.assetManager.addAsset("Mesh", node);
     });
     
     // Overwrite the parent UI of the root model with the correct folder asset
@@ -159,39 +159,13 @@ function editorTreeviewOnModelImport(treeviewItem) {
     folderItem.addChild(modelTreeviewItem);
     
     // Add to asset manager
-    oSceneEditor.assetManager.addAsset("Mesh", model);
+    global.editor.assetManager.addAsset("Mesh", model);
     
     // 4. Add submeshes recursively with proper hierarchy
-    __editorTreeview_addModelChildrenRecursive(model, modelTreeviewItem);
+    editorTreeviewUtil_addModelChildrenRecursive(model, modelTreeviewItem);
     
     // 5. Select the imported model
     treeview.__onItemSelected(modelTreeviewItem);
 }
 
-function __editorTreeview_addModelChildrenRecursive(parentAsset, parentTreeviewItem) {
-    for (var i = 0, il = array_length(parentAsset.children); i < il; i++) {
-        var child = parentAsset.children[i];
-        
-        // Create Treeview Item
-        var _sprite = undefined;
-        switch (child.type) {
-            case "Mesh": _sprite = sprUiMesh; break;
-            case "Bone": _sprite = sprUiBone; break;
-            default: _sprite = sprUiObject;
-        }
-
-        var childTreeviewItem = new UiTreeviewItem({
-            name: "UiTreeview.Item",
-        }, {
-            treeview: parentTreeviewItem.treeview,
-            assetType: child.type,
-            type: child.type,
-            icon: _sprite,
-            asset: child
-        });
-        parentTreeviewItem.addChild(childTreeviewItem);
-        
-        // Recurse
-        __editorTreeview_addModelChildrenRecursive(child, childTreeviewItem);
-    }
-}
+// Helper function moved to scrEditorTreeviewUtils

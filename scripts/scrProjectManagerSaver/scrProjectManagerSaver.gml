@@ -80,7 +80,7 @@ function ProjectSaver() constructor {
             if (!directory_exists(path)) directory_create(path);
         }
 
-        var am = oSceneEditor.assetManager;
+        var am = global.editor.assetManager;
         var allAssets = am.assets;
         
         for (var i = 0, il = array_length(allAssets); i< il; i++) {
@@ -150,7 +150,7 @@ function ProjectSaver() constructor {
         }
         
         var foldersEntries = [];
-        var am = oSceneEditor.assetManager;
+        var am = global.editor.assetManager;
         var allFolders = am.getAssetsByType("Folder");
         
         for (var i = 0; i < array_length(allFolders); i++) {
@@ -264,7 +264,7 @@ function ProjectSaver() constructor {
     };
 
     self.__getProjectSettings = function() {
-        var sm = oSceneEditor.sceneManager;
+        var sm = global.editor.sceneManager;
         var cameraSettings = {
             position: [100, -300, 70],
             target: [0, 0, 0],
