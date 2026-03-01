@@ -10,4 +10,6 @@ To get started with Unique Engine, drag and drop this file into your Game Maker 
 
 | Version | Changelog | Download |
 |---------|-----------|----------|
+| 0.12.0   | [See changes](/changelog/0.12.0) | [Download](https://github.com/manuel-di-iorio/unique-engine/releases/tag/0.12.0) |
+| 0.11.0   | [See changes](/changelog/0.11.0) | [Download](https://github.com/manuel-di-iorio/unique-engine/releases/tag/0.11.0) |
 | 0.10.0   | [See changes](/changelog/0.10.0) | [Download](https://github.com/manuel-di-iorio/unique-engine/releases/tag/0.10.0) |
