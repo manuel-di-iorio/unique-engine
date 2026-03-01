@@ -2,7 +2,7 @@
  * EventDispatcher
  */
 function UeEventDispatcher() constructor {
-    _listeners = {};
+    self._listeners = {};
 
     /**
      * Adds a listener to an event type.

@@ -28,7 +28,7 @@ function UePointerLockControls(camera, data = {}): UeControls(data) constructor 
         window_mouse_set_locked(true);
         if (!self.isLocked) {
             self.isLocked = true;
-            self.dispatchEvent({ type: "lock" });
+            self.dispatch({ type: "lock" });
         }
         self._needsUpdate = true;
     };
@@ -37,7 +37,7 @@ function UePointerLockControls(camera, data = {}): UeControls(data) constructor 
         window_mouse_set_locked(false);
         if (self.isLocked) {
             self.isLocked = false;
-            self.dispatchEvent({ type: "unlock" });
+            self.dispatch({ type: "unlock" });
         }
         self._needsUpdate = true;
     };
@@ -97,13 +97,13 @@ function UePointerLockControls(camera, data = {}): UeControls(data) constructor 
         if (!isLockedNow) {
             if (self.isLocked) {
                 self.isLocked = false;
-                self.dispatchEvent({ type: "unlock" });
+                self.dispatch({ type: "unlock" });
             }
             if (!self._needsUpdate) return;
         } else {
             if (!self.isLocked) {
                 self.isLocked = true;
-                self.dispatchEvent({ type: "lock" });
+                self.dispatch({ type: "lock" });
             }
         }
 
@@ -126,7 +126,7 @@ function UePointerLockControls(camera, data = {}): UeControls(data) constructor 
             var maxPitchDeg = 90 - (self.minPolarAngle * 180 / pi);
             self.pitch = clamp(self.pitch, minPitchDeg, maxPitchDeg);
             
-            self.dispatchEvent({ type: "change" });
+            self.dispatch({ type: "change" });
         }
         
         // --- Aggiorna Camera Target ---
