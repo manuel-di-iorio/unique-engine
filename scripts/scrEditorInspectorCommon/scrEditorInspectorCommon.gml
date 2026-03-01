@@ -30,6 +30,7 @@ function inspectorField_static() {
         field: "__matrixAutoUpdate",
         label: "Static",
         type: "checkbox",
+        customUndo: true,
         tooltip: "Mark object as static (disable automatic matrix updates)",
         valueGetter: function() {
             if (self.asset == undefined) return undefined;
@@ -40,7 +41,12 @@ function inspectorField_static() {
         },
         onChange: function(value) {
             if (self.asset == undefined) return;
-            self.asset.__matrixAutoUpdate = !value;
+            var _old = self.asset.__matrixAutoUpdate;
+            var _new = !value;
+            self.asset.__matrixAutoUpdate = _new;
+            if (_old != _new) {
+                global.editor.undoManager.push(new UndoCommandPropertyChange(self.asset, "__matrixAutoUpdate", _old, _new));
+            }
             global.editor.assetManager.editAsset(self.asset);
         }
     };

@@ -380,6 +380,15 @@ function EditorUiInspector(ui) constructor {
                         value: assetField[$ "field"] != undefined && self.asset != undefined ? self.asset[$ assetField[$ "field"]] : undefined,
                         valueGetter,
                         onChange: method(scope, function(value) {
+                            // If this field manages its own undo/redo, delegate entirely to custom onChange
+                            if ((self.assetField[$ "customUndo"] ?? false) == true) {
+                                var _onChange = self.assetField[$ "onChange"];
+                                if (_onChange != undefined) {
+                                    method(self, _onChange)(value);
+                                }
+                                return;
+                            }
+                            
                             // Capture old value for undo
                             var _oldValue = self.asset[$ self.assetField.field];
                             
