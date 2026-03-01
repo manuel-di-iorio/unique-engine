@@ -38,6 +38,10 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
       
       global.editor.assetManager.addAsset("Folder", folder);
       treeview.__onItemSelected(folderItem, true);
+      
+      // Push undo command for folder creation
+      var _folderParent = (treeviewItem != undefined && treeviewItem.assetType == "Folder") ? treeviewItem.asset : undefined;
+      global.editor.undoManager.push(new UndoCommandTreeview("create", "Folder", folder, _folderParent, treeviewItem));
       return;
   }
   
@@ -181,4 +185,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   
   // Select the new item
   treeview.__onItemSelected(newTreeviewItem, true);
+  
+  // Push undo command for asset creation
+  global.editor.undoManager.push(new UndoCommandTreeview("create", assetType, asset, parentAsset, parentTreeviewItem));
 };

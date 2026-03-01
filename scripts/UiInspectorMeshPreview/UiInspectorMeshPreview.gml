@@ -10,8 +10,16 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
   self.scene = undefined;
   self.camera = undefined;
   self.target = undefined;
-  self.orbitControls = undefined;
   self.needsRender = true;
+  
+  // Custom orbit rotation
+  self._dragging = false;
+  self._prevMX = 0;
+  self._prevMY = 0;
+  self._azimuth = 0;
+  self._elevation = 0;
+  self._radius = 1;
+  self._orbitCenter = vec3_create(0, 0, 0);
 
   // Listen for changes in the mesh or its material
   self.onAssetChanged = function (event) {
@@ -27,9 +35,6 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
     if (self.previewSprite != undefined) {
       sprite_delete(self.previewSprite);
       self.previewSprite = undefined;
-    }
-    if (self.orbitControls != undefined) {
-      self.orbitControls = undefined;
     }
     if (self.renderer != undefined) {
       self.renderer = undefined;
@@ -80,24 +85,17 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
     vec3_set(self.camera.target, _center[0], _center[1], _center[2]);
     self.camera.updateMatrixWorld();
 
-    // Setup orbit controls
-    var _widget = self;
-    self.orbitControls = new UeOrbitControls(self.camera, self, {
-      target: self.asset,
-      enableRotate: true,
-      enablePan: false,
-      enableZoom: true,
-      rotateSpeed: 10.0,
-      zoomSpeed: 0.1,
-      enableDamping: true,
-      dampingFactor: 1.0,
-      shouldHandleInput: function() {
-        return self.hovered;
-      },
-      onChange: method({ _widget }, function() {
-        _widget.needsRender = true;
-      })
-    });
+    // Compute initial spherical coordinates from camera position
+    var _dir = vec3_create(
+      self.camera.position[0] - _center[0],
+      self.camera.position[1] - _center[1],
+      self.camera.position[2] - _center[2]
+    );
+    self._radius = vec3_length(_dir);
+    self._azimuth = arctan2(_dir[1], _dir[0]);
+    self._elevation = (self._radius == 0) ? 0 : arcsin(clamp(_dir[2] / self._radius, -1, 1));
+    vec3_set(self._orbitCenter, _center[0], _center[1], _center[2]);
+    self._dragging = false;
 
     self.needsRender = true;
     self.renderPreview();
@@ -129,29 +127,88 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
     self.needsRender = false;
   }
 
+  /// Reposition camera using current spherical coordinates
+  self._updateCameraFromSpherical = function() {
+    var _cosElev = cos(self._elevation);
+    vec3_set(self.camera.position,
+      self._orbitCenter[0] + self._radius * _cosElev * cos(self._azimuth),
+      self._orbitCenter[1] + self._radius * _cosElev * sin(self._azimuth),
+      self._orbitCenter[2] + self._radius * sin(self._elevation)
+    );
+    vec3_set(self.camera.target, self._orbitCenter[0], self._orbitCenter[1], self._orbitCenter[2]);
+    self.camera.updateMatrixWorld();
+  };
+
   self.updatePreview = function () {
     if (self.asset == undefined) return;
     self.setupPreview();
   }
 
-  self.onUpdate = function () {
-    // Update orbit controls
-    if (self.orbitControls != undefined) {
-      self.orbitControls.update();
-      
-      // Check if controls are transforming (user is interacting)
-      if (self.orbitControls.transforming || self.orbitControls._needsUpdate) {
-        self.needsRender = true;
+  // --- Mouse interaction via UI event system ---
+
+  // Start drag on mouse down
+  self.onMouseDown(function() {
+    self._dragging = true;
+    self._prevMX = window_mouse_get_x();
+    self._prevMY = window_mouse_get_y();
+    return true;
+  });
+
+  // Scroll wheel zoom - return true to stop propagation to parent scrollbar
+  self.onWheelUp(function() {
+    if (self.camera == undefined) return false;
+    self._radius *= 0.9;
+    self._radius = max(self._radius, 0.01);
+    self._updateCameraFromSpherical();
+    self.needsRender = true;
+    return true;
+  });
+
+  self.onWheelDown(function() {
+    if (self.camera == undefined) return false;
+    self._radius *= 1.1;
+    self._updateCameraFromSpherical();
+    self.needsRender = true;
+    return true;
+  });
+
+  // Per-frame step: handle drag continuation + render
+  self.onStep(function() {
+    if (self._dragging) {
+      if (mouse_check_button(mb_left)) {
+        var _mx = window_mouse_get_x();
+        var _my = window_mouse_get_y();
+        var _dx = _mx - self._prevMX;
+        var _dy = _my - self._prevMY;
+
+        if (_dx != 0 || _dy != 0) {
+          self._azimuth -= _dx * 0.01;
+          self._elevation += _dy * 0.01;
+          self._elevation = clamp(self._elevation, -pi / 2 + 0.01, pi / 2 - 0.01);
+
+          self._updateCameraFromSpherical();
+          self.needsRender = true;
+        }
+
+        self._prevMX = _mx;
+        self._prevMY = _my;
+      } else {
+        self._dragging = false;
       }
     }
 
-    // Render if needed
+    // Request UI redraw so onDraw is called and the surface gets updated
+    if (self.needsRender) {
+      self.requestRedraw();
+    }
+  });
+
+  self.onDraw = function () {
+    // Render in draw event (surface_set_target requires draw context)
     if (self.needsRender && self.camera != undefined) {
       self.renderPreview();
     }
-  }
 
-  self.onDraw = function () {
     var _w = self.x2 - self.x1;
     var _h = self.y2 - self.y1;
 
@@ -191,7 +248,6 @@ function UiInspectorMeshPreview(style = {}, props = {}): UiNode(style, props) co
       self.target = undefined;
     }
 
-    self.orbitControls = undefined;
     self.renderer = undefined;
     self.scene = undefined;
     self.camera = undefined;

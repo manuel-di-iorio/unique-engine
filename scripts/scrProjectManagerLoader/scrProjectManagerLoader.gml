@@ -255,6 +255,12 @@ function ProjectLoader() constructor {
         }
     }
 
+    // Also include standalone Object3D (library prefabs) so scene instances can resolve their prefab link
+    var objects3D = assetManager.getAssetsByType("Object3D");
+    for (var i = 0, il = array_length(objects3D); i < il; i++) {
+        objectsByUUID[$ objects3D[i].uuid] = objects3D[i];
+    }
+
     var materials = assetManager.getAssetsByType("Material");
     var materialsByUUID = {};
     for (var i = 0, il = array_length(materials); i < il; i++) {
@@ -315,6 +321,11 @@ function ProjectLoader() constructor {
       var editorManager = global.editor.editorManager;
 
       if (scene != undefined && scene.type == "Scene" && editorManager.activeScene != scene) {
+        // Unregister all instances in this scene from their prefab.instances[] before unloading
+        scene.traverse(function(obj) {
+            editorTreeviewUtil_unregisterInstance(obj);
+        });
+
         scene.__sceneJSON = scene.toJSON(true); // Serialize state recursively to memory before unloading
         scene.clear(true);
         treeviewItem.Items.clear(); 

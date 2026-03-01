@@ -257,6 +257,7 @@
     {"name":"sprUiPencil","order":30,"path":"sprites/sprUiPencil/sprUiPencil.yy",},
     {"name":"sprUiPointLight","order":8,"path":"sprites/sprUiPointLight/sprUiPointLight.yy",},
     {"name":"sprUiPointLight3D","order":9,"path":"sprites/sprUiPointLight3D/sprUiPointLight3D.yy",},
+    {"name":"sprUiRedo","order":37,"path":"sprites/sprUiRedo/sprUiRedo.yy",},
     {"name":"sprUiRotateModel","order":28,"path":"sprites/sprUiRotateModel/sprUiRotateModel.yy",},
     {"name":"sprUiSave","order":3,"path":"sprites/sprUiSave/sprUiSave.yy",},
     {"name":"sprUiScaleModel","order":29,"path":"sprites/sprUiScaleModel/sprUiScaleModel.yy",},
@@ -267,5 +268,6 @@
     {"name":"sprUiTrash","order":20,"path":"sprites/sprUiTrash/sprUiTrash.yy",},
     {"name":"sprUiTreeviewArrowDown","order":15,"path":"sprites/sprUiTreeviewArrowDown/sprUiTreeviewArrowDown.yy",},
     {"name":"sprUiTreeviewArrowRight","order":14,"path":"sprites/sprUiTreeviewArrowRight/sprUiTreeviewArrowRight.yy",},
+    {"name":"sprUiUndo","order":36,"path":"sprites/sprUiUndo/sprUiUndo.yy",},
   ],
 }

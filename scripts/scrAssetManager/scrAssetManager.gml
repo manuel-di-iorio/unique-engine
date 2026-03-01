@@ -270,22 +270,43 @@ function AssetManager() constructor {
     }
 
     /**
-     * Propagate changes from a prefab to all its instances in the scene
+     * Propagate changes from a prefab to all its registered instances.
+     * If changedField is specified, only that field is synced (if not overridden).
+     * Otherwise all non-overridden fields are synced.
      * @param {Struct} prefabSource - The prefab that was modified
+     * @param {String} [changedField] - Optional specific field that changed
      */
-    function propagatePrefabChanges(prefabSource) {
-        // Find all scenes
-        // @todo
-        // var scenes = self.getAssetsByType("Scene");
-        // for (var i = 0, il = array_length(scenes); i < il; i++) {
-        //     var scene = scenes[i];
+    function propagatePrefabChanges(prefabSource, changedField = undefined) {
+        var _instances = prefabSource[$ "instances"];
+        if (_instances == undefined || array_length(_instances) == 0) return;
 
-        // Traverse scene and find instances of this prefab
-        //     scene.traverse(method({ prefabSource }, function(obj) {
-        //         if (obj[$ "prefab"] == prefabSource) {
-        //             obj.syncFromPrefab(prefabSource);
-        //         }
-        //     }));
-        // }
+        for (var i = 0; i < array_length(_instances); i++) {
+            var inst = _instances[i];
+            if (inst == undefined) continue;
+
+            if (changedField != undefined) {
+                // Sync only this specific field if not overridden
+                if (inst[$ "isOverridden"] != undefined && !inst.isOverridden(changedField)) {
+                    inst.__syncField(changedField, prefabSource);
+                    inst.updateMatrix();
+                }
+            } else {
+                // Full sync of all non-overridden fields
+                if (inst[$ "syncFromPrefab"] != undefined) {
+                    inst.syncFromPrefab(prefabSource);
+                }
+            }
+
+            // Update rendering
+            if (inst.type == "Mesh" || inst.type == "Object3D") {
+                self.updateAssetMatrix(inst, false);
+            }
+
+            // Emit change event so UI reacts
+            global.editor.events.dispatch({ type: "assetChanged", data: inst });
+
+            // Mark the parent scene as edited
+            self.__trackChange("edit", inst);
+        }
     }
 }

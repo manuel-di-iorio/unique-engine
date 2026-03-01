@@ -33,6 +33,32 @@ function SceneManager() constructor {
             if (_selMgr != undefined && _selMgr.isMultiSelect()) {
                 _selMgr.storeTransformOffsets();
             }
+            
+            // Snapshot transforms for undo
+            var _snapshots = [];
+            var _gizmoAsset = global.editor.sceneManager.transformControls.object;
+            if (_gizmoAsset != undefined) {
+                array_push(_snapshots, {
+                    asset: _gizmoAsset,
+                    oldPos: vec3_clone(_gizmoAsset.position),
+                    oldRot: quat_clone(_gizmoAsset.rotation),
+                    oldScale: vec3_clone(_gizmoAsset.scale)
+                });
+            }
+            if (_selMgr != undefined && _selMgr.isMultiSelect()) {
+                for (var i = 0; i < array_length(_selMgr.selectedAssets); i++) {
+                    var _sa = _selMgr.selectedAssets[i];
+                    if (_sa != _gizmoAsset) {
+                        array_push(_snapshots, {
+                            asset: _sa,
+                            oldPos: vec3_clone(_sa.position),
+                            oldRot: quat_clone(_sa.rotation),
+                            oldScale: vec3_clone(_sa.scale)
+                        });
+                    }
+                }
+            }
+            global.editor.__undoDragSnapshots = _snapshots;
         },
         onDrag: function () {
             // Sync rotation euler ONLY during gizmo interaction to update the inspector
@@ -59,12 +85,44 @@ function SceneManager() constructor {
             global.UI.requestRedraw();
             global.editor.events.dispatch({ type: "assetChanged"/*, data: asset*/ });
             
+            // Mark the active gizmo object's transform as overridden (prefab instances)
+            var _gizmoAsset = global.editor.sceneManager.transformControls.object;
+            var _gizmoMode = global.editor.sceneManager.transformControls.mode;
+            if (_gizmoAsset != undefined && _gizmoAsset[$ "prefab"] != undefined && _gizmoAsset.prefab != undefined) {
+                var _overrideField = "position";
+                if (_gizmoMode == "rotate") _overrideField = "rotation";
+                else if (_gizmoMode == "scale") _overrideField = "scale";
+                _gizmoAsset.setOverride(_overrideField);
+            }
+            
             // Mark all selected assets as changed
             var _selMgr = global.editor.selectionManager;
             if (_selMgr != undefined && _selMgr.isMultiSelect()) {
                 for (var i = 0; i < array_length(_selMgr.selectedAssets); i++) {
-                    global.editor.assetManager.editAsset(_selMgr.selectedAssets[i]);
+                    var _secAsset = _selMgr.selectedAssets[i];
+                    // Also mark secondary selected instances' transforms as overridden
+                    if (_secAsset[$ "prefab"] != undefined && _secAsset.prefab != undefined) {
+                        var _secOverride = "position";
+                        if (_gizmoMode == "rotate") _secOverride = "rotation";
+                        else if (_gizmoMode == "scale") _secOverride = "scale";
+                        _secAsset.setOverride(_secOverride);
+                    }
+                    global.editor.assetManager.editAsset(_secAsset);
                 }
+            }
+            
+            // Push undo command for the gizmo transform
+            var _snapshots = global.editor[$ "__undoDragSnapshots"];
+            if (_snapshots != undefined && array_length(_snapshots) > 0) {
+                // Fill in new transforms
+                for (var i = 0; i < array_length(_snapshots); i++) {
+                    var _s = _snapshots[i];
+                    _s.newPos = vec3_clone(_s.asset.position);
+                    _s.newRot = quat_clone(_s.asset.rotation);
+                    _s.newScale = vec3_clone(_s.asset.scale);
+                }
+                global.editor.undoManager.push(new UndoCommandTransform(_snapshots));
+                global.editor.__undoDragSnapshots = undefined;
             }
         }
     });
@@ -125,7 +183,7 @@ function SceneManager() constructor {
     }
 
     /**
-     * Handle mesh picking - TRUE Unity-like behaviour
+     * Handle mesh picking
      * @returns {bool}
      */
     function handleMeshPicking() {

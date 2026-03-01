@@ -22,7 +22,7 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     self.ripples = [];
     
     self.onClick(function() {
-        if (!self.enableRipple) return;
+        if (!self.enabled || !self.enableRipple) return;
         
         var mx = window_mouse_get_x();
         var my = window_mouse_get_y();
@@ -89,6 +89,10 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     }
     
     function onDraw() {
+        if (!self.enabled) {
+            draw_set_alpha(0.4);
+        }
+
         if (self.selected && self.hovered) {
             draw_set_color(global.UI_COL_SELECTED_HOVER);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
@@ -96,7 +100,7 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
             draw_set_color(global.UI_COL_SELECTED);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
         }
-        else if (self.hovered) {
+        else if (self.hovered && self.enabled) {
             draw_set_color(global.UI_COL_BTN_HOVER);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
         }
@@ -142,14 +146,16 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
             var totalWidth = spriteWidth + string_width(self.label) + 8;
             var startX = self.x1 + (self.x2 - self.x1 - totalWidth) / 2;
             
-            draw_sprite(self.sprite, self.hovered ? 1 : 0, startX + spriteWidth / 2, ym);
+            draw_sprite(self.sprite, (self.hovered && self.enabled) ? 1 : 0, startX + spriteWidth / 2, ym);
             
             draw_set_font(fText); draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle);
             draw_text(startX + spriteWidth + 8, ym, self.label);
         } else if (self.sprite) {
             // Draw sprite only
-            draw_sprite(self.sprite, self.hovered ? 1 : 0, xm, ym);
+            draw_sprite(self.sprite, (self.hovered && self.enabled) ? 1 : 0, xm, ym);
         }
+        
+        draw_set_alpha(1);
     }
     
     // Set the text/sprite and resize the button if specified

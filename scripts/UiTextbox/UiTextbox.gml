@@ -135,7 +135,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                 self.selectionStart = state.selectionStart;
                 self.selectionEnd = state.selectionEnd;
                 
-                self.parent.onChange(self.parent.value);
+                self.parent.onChange(self.parent.value, self.parent); // Fixed arguments
                 self.updateScrollOffset();
             }
         };

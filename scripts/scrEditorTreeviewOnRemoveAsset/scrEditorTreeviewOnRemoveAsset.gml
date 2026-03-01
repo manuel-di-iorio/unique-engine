@@ -4,6 +4,16 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     var editorManager = global.editor.editorManager;
     var assetManager = global.editor.assetManager;
     
+    // === UNDO: Capture parent info BEFORE any removal ===
+    var _undoParentAsset = (asset != undefined && asset.parent != undefined) ? asset.parent : undefined;
+    var _undoParentTreeviewItem = undefined;
+    if (treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
+        var _containerParent = treeviewItem.parent.parent;
+        if (_containerParent[$ "assetType"] != undefined || _containerParent.type == "UiTreeview.Item") {
+            _undoParentTreeviewItem = _containerParent;
+        }
+    }
+    
     // === 1. CHIUSURA INSPECTOR SE ASSET SELEZIONATO ===
     if (isSelected || (asset != undefined && editorManager.activeAsset == asset)) {
         var keepScene = editorManager.activeScene != undefined;
@@ -17,6 +27,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     }
     
     // === 2. GESTIONE RIMOZIONE PER TIPO ===
+    // NOTE: dispose() is intentionally skipped for undoable deletes.
+    // Assets are kept alive for potential undo. Disposal happens when
+    // the undo entry is evicted from history via cleanup().
     
     // Texture: remove from AssetManager
     if (assetType == "Texture" && asset != undefined) {
@@ -35,6 +48,11 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         // Recursively remove children (if present in treeview)
         editorTreeviewUtil_removeChildrenRecursive(treeviewItem);
 
+        // Unregister from prefab instances list (if this is a scene instance)
+        editorTreeviewUtil_unregisterInstance(asset);
+        // If this is a library prefab, detach all its instances
+        if (asset[$ "prefab"] == undefined) editorTreeviewUtil_detachPrefabInstances(asset);
+
         // Se ha un parent, rimuovilo dal parent
         if (asset.parent != undefined) {
             asset.parent.remove(asset);
@@ -44,17 +62,17 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
             // Altrimenti rimuovi dalla lista globale
             assetManager.removeAsset("Mesh", asset);
         }
-        
-        // Dispose resources
-        if (asset != undefined && struct_exists(asset, "dispose")) {
-            asset.dispose(true);
-        }
     }
     
     // Object3D: remove from parent or global list
     else if (assetType == "Object3D" && asset != undefined) {
         // Recursively remove children (if present in treeview)
         editorTreeviewUtil_removeChildrenRecursive(treeviewItem);
+
+        // Unregister from prefab instances list (if this is a scene instance)
+        editorTreeviewUtil_unregisterInstance(asset);
+        // If this is a library prefab, detach all its instances
+        if (asset[$ "prefab"] == undefined) editorTreeviewUtil_detachPrefabInstances(asset);
 
         // Se ha un parent, rimuovilo dal parent
         if (asset.parent != undefined) {
@@ -64,11 +82,6 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         } else {
             // Altrimenti rimuovi dalla lista globale
             assetManager.removeAsset("Object3D", asset);
-        }
-        
-        // Dispose resources
-        if (asset != undefined && struct_exists(asset, "dispose")) {
-            asset.dispose(true);
         }
     }
     
@@ -86,11 +99,6 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
             // Altrimenti rimuovi dalla lista globale
             assetManager.removeAsset("Scene", asset);
         }
-        
-        // Dispose resources
-        if (asset != undefined && struct_exists(asset, "dispose")) {
-            asset.dispose(true);
-        }
     }
     
     // Folder: recursively remove all children
@@ -100,6 +108,21 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
         
         // Remove the folder from AssetManager
         assetManager.removeAsset("Folder", asset);
+    }
+    
+    // === UNDO: Push delete command ===
+    if (asset != undefined) {
+        var _undoCmd = new UndoCommandTreeview("delete", assetType, asset, _undoParentAsset, _undoParentTreeviewItem);
+        // Add cleanup callback for when the command is evicted from history
+        _undoCmd.cleanup = method(_undoCmd, function() {
+            // Only dispose if the asset is NOT currently in the scene
+            if (self.asset != undefined && self.asset.parent == undefined) {
+                if (struct_exists(self.asset, "dispose")) {
+                    self.asset.dispose(true);
+                }
+            }
+        });
+        global.editor.undoManager.push(_undoCmd);
     }
 }
 // Helper functions moved to scrEditorTreeviewUtils

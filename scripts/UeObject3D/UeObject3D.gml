@@ -21,10 +21,12 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     gmObject = data[$ "gmObject"] ?? undefined;
     gmLayer = data[$ "gmLayer"] ?? "Instances";
 
-    // /** @type {Struct} Map of properties that have been overridden locally on this instance */
-    // __localOverrides = data[$ "__localOverrides"] ?? {};
+    /** @type {Struct} Map of properties that have been overridden locally on this instance */
+    __localOverrides = data[$ "__localOverrides"] ?? {};
     /** @type {UeObject3D} Reference to the prefab this object is an instance of (Scene Editor) */
     prefab = data[$ "prefab"] ?? undefined;
+    /** @type {Array<UeObject3D>} List of scene instances linked to this prefab */
+    instances = [];
 
     /** @type {Array<UeAnimation>} List of animations associated with this node */
     animations = [];
@@ -40,42 +42,185 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
     function onBeforeShadow() { }
     function onAfterShadow() { }
 
-    // @todo
+    // =========================================================================
+    // PREFAB OVERRIDE SYSTEM
+    // =========================================================================
+
+    /// List of all syncable scalar fields (per-type extensions handled in syncFromPrefab)
+    static __syncableFields = ["name", "visible", "renderOrder", "frustumCulled", 
+        "castShadow", "receiveShadow", "selectable", "gmObject", "gmLayer"];
+
     /**
-     * Set a property and mark it as a local override if this is an instance
+     * Mark a property as overridden on this instance.
+     * Call this instead of directly setting the property so the override is tracked.
+     * @param {string} field The property name (e.g. "position", "castShadow", "material")
+     * @param {any} [value] Optional new value to set. For vec3/quat fields pass the array directly.
+     */
+    function setOverride(field, value = undefined) {
+        if (prefab == undefined) return; // Only instances can have overrides
+        __localOverrides[$ field] = true;
+        if (value != undefined) {
+            switch (field) {
+                case "position": vec3_copy(position, value); break;
+                case "rotation": quat_copy(rotation, value); break;
+                case "scale":    vec3_copy(scale, value); break;
+                case "up":       vec3_copy(up, value); break;
+                default:         self[$ field] = value; break;
+            }
+        }
+    }
+
+    /**
+     * Check whether a given property is locally overridden on this instance.
      * @param {string} field The property name
-     * @param {any} value The new value
+     * @return {bool} True if the field has a local override
      */
-    // function setOverride(field, value) {
-    //     self[$ field] = value;
-    //     if (prefab != undefined) {
-    //         __localOverrides[$ field] = true;
-    //     }
-    // }
+    function isOverridden(field) {
+        if (prefab == undefined) return false;
+        return __localOverrides[$ field] == true;
+    }
 
     /**
-     * Sync properties from a prefab, respecting local overrides
-     * @param {UeObject3D} prefabSource The source prefab
+     * Remove a local override and re-sync the property value from the prefab.
+     * @param {string} field The property name
      */
-    // function syncFromPrefab(prefabSource) {
-    //     if (prefabSource == undefined) return;
-        
-    //     var fields = ["name", "visible", "renderOrder", "frustumCulled", "castShadow", "receiveShadow", "gmObject", "gmLayer", "matrixAutoUpdate"];
-    //     for (var i = 0; i < array_length(fields); i++) {
-    //         var f = fields[i];
-    //         if (__localOverrides[$ f] == undefined) {
-    //             self[$ f] = prefabSource[$ f];
-    //         }
-    //     }
+    function clearOverride(field) {
+        if (prefab == undefined) return;
+        variable_struct_remove(__localOverrides, field);
+        // Re-sync this single field from prefab
+        __syncField(field, prefab);
+        updateMatrix();
+    }
 
-    //     // Sync transforms if not overridden
-    //     if (__localOverrides[$ "position"] == undefined) vec3_copy(position, prefabSource.position);
-    //     if (__localOverrides[$ "rotation"] == undefined) quat_copy(rotation, prefabSource.rotation);
-    //     if (__localOverrides[$ "scale"] == undefined) vec3_copy(scale, prefabSource.scale);
-        
-    //     // Update matrix after sync
-    //     updateMatrix();
-    // }
+    /**
+     * Remove all local overrides and fully re-sync from the prefab.
+     */
+    function clearAllOverrides() {
+        if (prefab == undefined) return;
+        __localOverrides = {};
+        syncFromPrefab(prefab);
+    }
+
+    /**
+     * Apply the current value of an overridden property to the prefab,
+     * then propagate the change to all other instances of the same prefab.
+     * After applying, the override is removed from this instance (it's now the base value).
+     * @param {string} field The property name
+     */
+    function applyOverride(field) {
+        if (prefab == undefined || !isOverridden(field)) return;
+        // Copy current instance value → prefab
+        switch (field) {
+            case "position": vec3_copy(prefab.position, position); break;
+            case "rotation": quat_copy(prefab.rotation, rotation); break;
+            case "scale":    vec3_copy(prefab.scale, scale); break;
+            case "up":       vec3_copy(prefab.up, up); break;
+            default:         prefab[$ field] = self[$ field]; break;
+        }
+        // Remove the override on this instance (it's no longer different)
+        variable_struct_remove(__localOverrides, field);
+        // Propagate from the prefab to all other instances
+        global.editor.assetManager.propagatePrefabChanges(prefab, field);
+        // Mark the prefab itself as edited
+        global.editor.assetManager.editAsset(prefab, false, true);
+    }
+
+    /**
+     * Apply all overridden properties to the prefab and propagate.
+     */
+    function applyAllOverrides() {
+        if (prefab == undefined) return;
+        var _keys = variable_struct_get_names(__localOverrides);
+        for (var i = 0; i < array_length(_keys); i++) {
+            applyOverride(_keys[i]);
+        }
+    }
+
+    /**
+     * Alias for clearOverride — restores a single property from the prefab.
+     * @param {string} field The property name
+     */
+    function revertOverride(field) {
+        clearOverride(field);
+    }
+
+    /**
+     * Alias for clearAllOverrides — restores all properties from the prefab.
+     */
+    function revertAllOverrides() {
+        clearAllOverrides();
+    }
+
+    /**
+     * Sync all non-overridden properties from a prefab source.
+     * Respects __localOverrides: any field marked as overridden is left untouched.
+     * @param {UeObject3D} prefabSource The source prefab to sync from
+     */
+    function syncFromPrefab(prefabSource) {
+        if (prefabSource == undefined) return;
+
+        // Scalar fields common to all Object3D
+        var _fields = __syncableFields;
+        for (var i = 0; i < array_length(_fields); i++) {
+            var f = _fields[i];
+            if (__localOverrides[$ f] != true) {
+                self[$ f] = prefabSource[$ f];
+            }
+        }
+
+        // Transform fields (vec3 / quaternion)
+        if (__localOverrides[$ "position"] != true) vec3_copy(position, prefabSource.position);
+        if (__localOverrides[$ "rotation"] != true) quat_copy(rotation, prefabSource.rotation);
+        if (__localOverrides[$ "scale"]    != true) vec3_copy(scale, prefabSource.scale);
+
+        // Mesh-specific: material (shared by reference)
+        if (struct_exists(self, "isMesh") && self.isMesh && struct_exists(prefabSource, "isMesh")) {
+            if (__localOverrides[$ "material"] != true && prefabSource[$ "material"] != undefined) {
+                self.material = prefabSource.material;
+            }
+        }
+
+        // Light-specific
+        if (struct_exists(self, "isLight") && self.isLight && struct_exists(prefabSource, "isLight")) {
+            var _lightFields = ["intensity", "color", "range", "enabled"];
+            for (var i = 0; i < array_length(_lightFields); i++) {
+                var lf = _lightFields[i];
+                if (__localOverrides[$ lf] != true && prefabSource[$ lf] != undefined) {
+                    self[$ lf] = prefabSource[$ lf];
+                }
+            }
+        }
+
+        // Sync __rotationEuler if it exists on both (editor-only)
+        if (self[$ "__rotationEuler"] != undefined && prefabSource[$ "__rotationEuler"] != undefined) {
+            if (__localOverrides[$ "rotation"] != true) {
+                euler_copy(self.__rotationEuler, prefabSource.__rotationEuler);
+            }
+        }
+
+        updateMatrix();
+    }
+
+    /**
+     * Internal: sync a single field from a prefab source (used by clearOverride)
+     * @param {string} field The field name
+     * @param {UeObject3D} src The prefab source
+     */
+    function __syncField(field, src) {
+        if (src == undefined) return;
+        switch (field) {
+            case "position": vec3_copy(position, src.position); break;
+            case "rotation":
+                quat_copy(rotation, src.rotation);
+                if (self[$ "__rotationEuler"] != undefined && src[$ "__rotationEuler"] != undefined) {
+                    euler_copy(self.__rotationEuler, src.__rotationEuler);
+                }
+                break;
+            case "scale": vec3_copy(scale, src.scale); break;
+            case "up":    vec3_copy(up, src.up); break;
+            default:      self[$ field] = src[$ field]; break;
+        }
+    }
 
     /**
      * Returns a clone of this object and optionally all descendants.
@@ -279,7 +424,7 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         matrixAutoUpdate = source.matrixAutoUpdate;
         matrixWorldAutoUpdate = source.matrixWorldAutoUpdate;
         prefab = source[$ "prefab"];
-        // __localOverrides = variable_clone(source[$ "__localOverrides"] ?? {});
+        __localOverrides = variable_clone(source[$ "__localOverrides"] ?? {});
 
         var _sourceGeometry = source[$ "geometry"];
         if (_sourceGeometry != undefined) {
@@ -307,6 +452,39 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
 
     function toJSON(recursive = false) {
         gml_pragma("forceinline");
+        
+        // If this is a prefab instance, use differential serialization:
+        // only save identification + overridden properties
+        if (prefab != undefined) {
+            var _result = {
+                uuid,
+                type,
+                name,
+                children: recursive 
+                    ? array_map(children, function (child) { return child.toJSON(true); })
+                    : array_map(children, function (child) { return child.uuid }),
+                parent: parent ? parent.uuid : undefined,
+                prefab: prefab.uuid,
+                __localOverrides,
+            };
+            // Only serialize overridden properties
+            if (__localOverrides[$ "visible"] == true)        _result.visible = visible;
+            if (__localOverrides[$ "renderOrder"] == true)     _result.renderOrder = renderOrder;
+            if (__localOverrides[$ "frustumCulled"] == true)   _result.frustumCulled = frustumCulled;
+            if (__localOverrides[$ "castShadow"] == true)      _result.castShadow = castShadow;
+            if (__localOverrides[$ "receiveShadow"] == true)   _result.receiveShadow = receiveShadow;
+            if (__localOverrides[$ "selectable"] == true)      _result.selectable = selectable;
+            if (__localOverrides[$ "gmObject"] == true)        _result.gmObject = gmObject;
+            if (__localOverrides[$ "gmLayer"] == true)         _result.gmLayer = gmLayer;
+            if (__localOverrides[$ "position"] == true)        _result.position = position;
+            if (__localOverrides[$ "rotation"] == true)        _result.rotation = rotation;
+            if (__localOverrides[$ "scale"] == true)           _result.scale = scale;
+            // Always include position/rotation/scale for instances (they nearly always differ)
+            // Actually, only save if overridden — syncFromPrefab handles the rest on load
+            return _result;
+        }
+        
+        // Standard full serialization (prefab source or standalone object)
         return {
             uuid,
             type,
@@ -325,8 +503,8 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
             selectable,
             gmObject,
             gmLayer,
-            prefab: prefab ? prefab.uuid : undefined,
-            // __localOverrides,
+            prefab: undefined,
+            __localOverrides,
 
             position,
             rotation,
@@ -358,12 +536,16 @@ function UeObject3D(data = {}): UeTransform(data) constructor {
         selectable = data[$ "selectable"] ?? true;
         gmObject = data[$ "gmObject"];
         gmLayer = data[$ "gmLayer"] ?? "Instances";
-        // __localOverrides = data[$ "__localOverrides"] ?? {};
+        __localOverrides = data[$ "__localOverrides"] ?? {};
 
         if (data[$ "prefab"] != undefined) {
             var prefabUuid = data.prefab;
             if (objectsByUUID[$ prefabUuid] != undefined) {
                 self.prefab = objectsByUUID[$ prefabUuid];
+                // Register this instance in the prefab's instances list
+                array_push(self.prefab.instances, self);
+                // Sync non-overridden properties from prefab
+                syncFromPrefab(self.prefab);
             }
         }
 

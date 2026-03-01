@@ -185,7 +185,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         self.updateSphericalCoordinates();
     }
     
-    /// Focus on an object (Unity-style F key functionality)
+    /// Focus on an object
     function focus(object) {
         if (!object) return;
         

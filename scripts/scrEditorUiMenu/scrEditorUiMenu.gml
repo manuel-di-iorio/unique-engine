@@ -35,4 +35,24 @@ function EditorUiMenu(ui) constructor {
             scrEditorLoadProject(selectedFile);
         }
     });
+    
+    // Undo Button
+    ui.Menu.UndoBtn = new UiButton(sprUiUndo, { padding: 10, marginLeft: 30, width: 15, height: 15 }, { tooltip: "Undo (Ctrl+Z)" });
+    ui.Menu.UndoBtn.onStep(method(ui.Menu.UndoBtn, function() {
+        self.setEnabled(global.editor.undoManager.canUndo());
+    }));
+    ui.Menu.UndoBtn.onClick(function() {
+        global.editor.undoManager.undo();
+    });
+    ui.Menu.add(ui.Menu.UndoBtn);
+    
+    // Redo Button
+    ui.Menu.RedoBtn = new UiButton(sprUiRedo, { padding: 10, marginLeft: 5, width: 15, height: 15 }, { tooltip: "Redo (Ctrl+Y)" });
+    ui.Menu.RedoBtn.onStep(method(ui.Menu.RedoBtn, function() {
+        self.setEnabled(global.editor.undoManager.canRedo());
+    }));
+    ui.Menu.RedoBtn.onClick(function() {
+        global.editor.undoManager.redo();
+    });
+    ui.Menu.add(ui.Menu.RedoBtn);
 }

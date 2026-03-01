@@ -34,6 +34,7 @@ function UiNode(style = {}, props = {}) constructor {
     self.pointerEvents = props[$ "pointerEvents"] ?? false;
     self.border = props[$ "border"] ?? false;
     self.visible = props[$ "visible"] ?? true;
+    self.enabled = props[$ "enabled"] ?? true;
     self.focusable = props[$ "focusable"] ?? false;
     self.focused = false;
     self.onFocus = props[$ "onFocus"] ?? undefined;
@@ -108,6 +109,18 @@ function UiNode(style = {}, props = {}) constructor {
         flexpanel_node_style_set_width(self.node, w, flexpanel_unit.point);
         flexpanel_node_style_set_height(self.node, h, flexpanel_unit.point);
         self.requestUpdate();
+        return self;
+    }
+    
+    // Set enabled state
+    function setEnabled(val) {
+        gml_pragma("forceinline");
+        if (self.enabled == val) return self;
+        
+        self.enabled = val;
+        self.pointerEvents = val;
+        self.requestUpdate();
+        self.requestRedraw();
         return self;
     }
     

@@ -70,6 +70,35 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
 
   function toJSON() {
     gml_pragma("forceinline");
+    
+    // If this is a prefab instance, use differential serialization
+    if (self[$ "prefab"] != undefined && self.prefab != undefined) {
+        var _result = {
+            uuid,
+            type,
+            name,
+            children: array_map(children, function (child) { return child.uuid }),
+            parent: parent ? parent.uuid : undefined,
+            geometry: self.geometry ? self.geometry.toJSON() : undefined,
+            prefab: self.prefab.uuid,
+            __localOverrides,
+        };
+        // Only serialize overridden properties
+        if (__localOverrides[$ "visible"] == true)        _result.visible = visible;
+        if (__localOverrides[$ "renderOrder"] == true)     _result.renderOrder = renderOrder;
+        if (__localOverrides[$ "frustumCulled"] == true)   _result.frustumCulled = frustumCulled;
+        if (__localOverrides[$ "castShadow"] == true)      _result.castShadow = castShadow;
+        if (__localOverrides[$ "receiveShadow"] == true)   _result.receiveShadow = receiveShadow;
+        if (__localOverrides[$ "gmObject"] == true)        _result.gmObject = gmObject;
+        if (__localOverrides[$ "gmLayer"] == true)         _result.gmLayer = gmLayer;
+        if (__localOverrides[$ "position"] == true)        _result.position = position;
+        if (__localOverrides[$ "rotation"] == true)        _result.rotation = rotation;
+        if (__localOverrides[$ "scale"] == true)           _result.scale = scale;
+        if (__localOverrides[$ "material"] == true)        _result.material = self.material ? self.material.uuid : undefined;
+        return _result;
+    }
+    
+    // Standard full serialization
     return {
       uuid,
       type,
@@ -87,7 +116,8 @@ function UeMesh(geometry = undefined, material = global.UE_DEFAULT_MATERIAL, dat
       receiveShadow,
       gmObject,
       gmLayer,
-      prefab: self[$ "prefab"] != undefined ? self.prefab.uuid : undefined,
+      prefab: undefined,
+      __localOverrides,
       position,
       rotation,
       scale,
