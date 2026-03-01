@@ -496,24 +496,22 @@ function EditorUiInspector(ui) constructor {
             var _fieldId = assetField[$ "field"];
             var _isFieldOverridden = _isInstance && _fieldId != undefined && _asset.isOverridden(_fieldId);
             
-            // Blue override bar on the left side
+            // Override bar gutter (always present to maintain alignment)
+            var _gutter = new UiNode({ width: 7, height: "100%" });
             if (_isFieldOverridden) {
-                var _overrideBar = new UiNode({ width: 3, height: "100%", marginRight: 4 }, {
-                    onDraw: function() {
-                        // Guard: layout may not have run yet on first frame
-                        if (self[$ "x2"] == undefined) exit;
-                        draw_set_color(#4488FF);
-                        draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
-                    }
-                });
-                _Container.add(_overrideBar);
+                _gutter.onDraw = function() {
+                    if (self[$ "x1"] == undefined) return;
+                    draw_set_color(#4488FF);
+                    draw_rectangle(self.x1, self.y1, self.x1 + 3, self.y2, false);
+                };
             }
+            _Container.add(_gutter);
     
             // Item label
             var _label = assetField[$ "label"];
             if (_label != undefined) {
                 var _tooltip = assetField[$ "tooltip"];
-                var _labelWidth = _isFieldOverridden ? labelWidth + 15 - 7 : labelWidth + 15;
+                var _labelWidth = labelWidth + 8; // Reserving consistent space
                 _Container.add(new UiText(assetField.label, { width: _labelWidth, height: 20 }, { 
                     tooltip: _tooltip,
                     pointerEvents: true 
