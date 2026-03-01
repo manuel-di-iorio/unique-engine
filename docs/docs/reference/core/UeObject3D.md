@@ -44,6 +44,8 @@ new UeObject3D(data = {})
 | `gmObject`    | `string`     | undefined        | GameMaker object name to instantiate with this 3D object |
 | `gmLayer`     | `string`     | "Instances"      | GameMaker layer name where the object will be instantiated |
 | `prefab`      | `UeObject3D` | undefined        | Reference to the source prefab/asset this instance belongs to (Scene Editor) |
+| `instances`   | `array`      | []               | List of all scene instances that reference this object as their prefab. Used for O(1) propagation |
+| `__localOverrides` | `struct` | {}              | Map of field names marked as locally overridden (`{ field: true }`). Fields in this map are not overwritten by `syncFromPrefab()` |
 | `sourcePath`  | `string`     | undefined        | The file path of the source asset (e.g. GLTF/OBJ path) |
 | `onBeforeRender` | `method`  | void method      | Function called before rendering this object |
 | `onAfterRender`  | `method`  | void method      | Function called after rendering this object  |
@@ -134,16 +136,60 @@ getObjectsByProperty(name, value, optionalTarget = [])`
 ```
 Same as getObjectByProperty, but collects all matching objects in the hierarchy. Optional array target can be passed for reuse.
 
-<!-- @todo -->
-<!-- ```js
-setOverride(field, value)
-```
-Sets a property and marks it as locally overridden, preventing future syncs from the prefab for this specific field.
+## Prefab & Override Methods
+
+These methods support the **Prefab Instance Override System**.
+When an object is an instance (`prefab != undefined`), individual properties can be overridden locally
+while still inheriting non-overridden values from the source prefab.
 
 ```js
-syncFromPrefab(source)
+setOverride(field)
 ```
-Synchronizes properties from the source prefab, respecting local overrides. -->
+Marks a field as locally overridden. The current value on the instance is kept, and future `syncFromPrefab()` calls will skip this field.
+
+```js
+isOverridden(field)
+```
+Returns `true` if the given field is marked as overridden on this instance.
+
+```js
+clearOverride(field)
+```
+Removes the override marker for a field without reverting its value.
+
+```js
+clearAllOverrides()
+```
+Removes all override markers from this instance.
+
+```js
+applyOverride(field)
+```
+Copies the instance's current value for `field` back onto the prefab source, then clears the override.
+Triggers `propagatePrefabChanges()` so all other instances of the same prefab are updated.
+
+```js
+applyAllOverrides()
+```
+Applies every overridden field back to the prefab, then clears all overrides and propagates.
+
+```js
+revertOverride(field)
+```
+Discards the instance's local value for `field` and restores it from the prefab source, then clears the override.
+
+```js
+revertAllOverrides()
+```
+Reverts every overridden field back to the prefab value and clears all overrides.
+
+```js
+syncFromPrefab(prefabSource)
+```
+Synchronizes all non-overridden properties from `prefabSource` onto this instance.
+Handles scalar fields, vec3 (`position`, `scale`), quaternion (`rotation`), material, and light-specific properties.
+
+---
 
 ```js
 traverseChildren(callback)

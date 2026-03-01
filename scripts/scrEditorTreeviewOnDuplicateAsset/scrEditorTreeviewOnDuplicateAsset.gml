@@ -87,6 +87,9 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
         clonedAsset.name = originalAsset.name + " (Copy)";
         clonedAsset.parent = undefined; // Root clone has no parent yet
     }
+    
+    // Register cloned prefab instances in the prefab's instances list
+    editorTreeviewUtil_registerInstance(clonedAsset);
 
     // 3. Determine Parent Treeview Item
     var targetParentItem = undefined;
@@ -112,6 +115,9 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
 
     // 6. Select
     treeview.__onItemSelected(newRootItem, false);
+    
+    // 7. Push undo command (duplicate = create action)
+    global.editor.undoManager.push(new UndoCommandTreeview("create", treeviewItem.assetType, clonedAsset, parentAsset, targetParentItem));
 }
 
 function __editorTreeviewOnDuplicateAsset__createUiRecursive(treeview, asset, parentUiItem) {

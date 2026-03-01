@@ -81,6 +81,52 @@ function EditorUiInspector(ui) constructor {
         var assetType = asset.type;
         var assetFields = fields[$ assetType];
         
+        // Check if this is an instance (has a prefab link)
+        var _isInstance = (asset[$ "prefab"] != undefined && asset.prefab != undefined);
+        
+        // If this is an instance, show Apply All / Revert All bar at the top
+        if (_isInstance) {
+            var _prefabName = asset.prefab[$ "name"] ?? "Unknown";
+            
+            // "Instance of: PrefabName" label
+            var _instanceLabel = new UiText("Instance of: " + _prefabName, { 
+                width: "100%", height: 20, marginBottom: 5
+            });
+            _Items.add(_instanceLabel);
+            
+            // Apply All / Revert All buttons row
+            var _actionsRow = new UiNode({ 
+                width: "100%", height: 28, marginBottom: 10,
+                flexDirection: "row", gap: 8
+            });
+            
+            var _applyAllBtn = new UiButton("Apply All", { flex: 1, height: 26 }, { 
+                outline: true, tooltip: "Apply all overrides to the prefab"
+            });
+            _applyAllBtn.onClick(method({ asset }, function() {
+                if (asset[$ "applyAllOverrides"] != undefined) {
+                    asset.applyAllOverrides();
+                    // Re-inspect to refresh override visuals
+                    global.editor.editorManager.inspector.inspect(asset);
+                }
+            }));
+            
+            var _revertAllBtn = new UiButton("Revert All", { flex: 1, height: 26 }, {
+               outline: true, tooltip: "Revert all overrides to prefab values"
+            });
+            _revertAllBtn.onClick(method({ asset }, function() {
+                if (asset[$ "revertAllOverrides"] != undefined) {
+                    asset.revertAllOverrides();
+                    global.editor.assetManager.editAsset(asset);
+                    // Re-inspect to refresh override visuals
+                    global.editor.editorManager.inspector.inspect(asset);
+                }
+            }));
+            
+            _actionsRow.add(_applyAllBtn, _revertAllBtn);
+            _Items.add(_actionsRow);
+        }
+        
         // First pass: calculate the max label width among all items (recursive)
         draw_set_font(fText);
         var _labelWidth = __getMaxLabelWidth(assetFields);
@@ -197,6 +243,11 @@ function EditorUiInspector(ui) constructor {
             var onChange = method(scope, onChangeFn != undefined ? onChangeFn : function(value, input) {
                 self.asset[$ self.assetField.field] = value;
                 
+                // Mark as override if this is a prefab instance
+                if (self.asset[$ "prefab"] != undefined && self.asset.prefab != undefined && self.assetField[$ "field"] != undefined) {
+                    self.asset.setOverride(self.assetField.field);
+                }
+                
                 // Track the change in asset manager
                 global.editor.assetManager.editAsset(self.asset);
                 
@@ -213,6 +264,11 @@ function EditorUiInspector(ui) constructor {
             var onBlur = onBlurFn != undefined ? method(scope, function(value, input) {
                 // Call the custom onBlur
                 method(self, self.assetField.onBlur)(value, input);
+                
+                // Mark as override if this is a prefab instance (e.g. transformXYZ position/rotation/scale)
+                if (self.asset[$ "prefab"] != undefined && self.asset.prefab != undefined && self.assetField[$ "field"] != undefined) {
+                    self.asset.setOverride(self.assetField.field);
+                }
                 
                 // Track the change in asset manager
                 global.editor.assetManager.editAsset(self.asset);
@@ -267,6 +323,11 @@ function EditorUiInspector(ui) constructor {
                         disabled: assetField[$ "disabled"],
                         value: assetField[$ "field"] != undefined && self.asset != undefined ? self.asset[$ assetField[$ "field"]] : undefined,
                         valueGetter,
+                        onFocus: method(scope, function(input) {
+                            var field = self.assetField[$ "field"];
+                            // Capture original value when focusing
+                            input.__originalValue = (field != undefined) ? self.asset[$ field] : undefined;
+                        }),
                         onBlur: method(scope, function(value, input) {
                             var field = self.assetField[$ "field"];
                             var format = self.assetField[$ "format"];
@@ -281,29 +342,58 @@ function EditorUiInspector(ui) constructor {
                                 }
                             }
                             
-                            // 2. Update field if it exists
-                            if (field != undefined) {
-                                self.asset[$ field] = finalValue;
+                            // 2. Retrieve the old value captured on focus
+                            var _oldValue = input[$ "__originalValue"];
+                            if (_oldValue == undefined && field != undefined) {
+                                _oldValue = self.asset[$ field]; // Fallback if never focused properly
                             }
                             
-                            // 3. Call custom onBlur if it exists
+                            // 3. Update field if it exists
+                            if (field != undefined) {
+                                self.asset[$ field] = finalValue;
+                                
+                                // Mark as override if this is a prefab instance
+                                if (self.asset[$ "prefab"] != undefined && self.asset.prefab != undefined) {
+                                    self.asset.setOverride(field);
+                                }
+                                
+                                // Push undo command
+                                if (_oldValue != finalValue) {
+                                    global.editor.undoManager.push(new UndoCommandPropertyChange(self.asset, field, _oldValue, finalValue));
+                                }
+                            }
+                            
+                            // 4. Call custom onBlur if it exists
                             var _onBlur = self.assetField[$ "onBlur"];
                             if (_onBlur != undefined) {
                                 method(self, _onBlur)(finalValue, input);
                             }
                             
-                            // 4. Track the change in asset manager
+                            // 5. Track the change in asset manager
                             global.editor.assetManager.editAsset(self.asset);
                         })
                     });
-                break; 
+                break;
                     
                 case "checkbox": 
                     input = new UiCheckbox({ flex: 1, }, {
                         value: assetField[$ "field"] != undefined && self.asset != undefined ? self.asset[$ assetField[$ "field"]] : undefined,
                         valueGetter,
                         onChange: method(scope, function(value) {
+                            // Capture old value for undo
+                            var _oldValue = self.asset[$ self.assetField.field];
+                            
                             self.asset[$ self.assetField.field] = value;
+                            
+                            // Mark as override if this is a prefab instance
+                            if (self.asset[$ "prefab"] != undefined && self.asset.prefab != undefined) {
+                                self.asset.setOverride(self.assetField.field);
+                            }
+                            
+                            // Push undo command
+                            if (_oldValue != value) {
+                                global.editor.undoManager.push(new UndoCommandPropertyChange(self.asset, self.assetField.field, _oldValue, value));
+                            }
                             
                             // Track the change in asset manager
                             global.editor.assetManager.editAsset(self.asset);
@@ -326,11 +416,32 @@ function EditorUiInspector(ui) constructor {
                         value: dropdownValue,
                         valueGetter,
                         onChange: method(scope, function(value, input) {
+                            // Capture old value for undo
+                            var _oldValue;
+                            if (self.assetField[$ "subKey"] != undefined) {
+                                _oldValue = self.asset[$ self.assetField.field][$ self.assetField.subKey];
+                            } else {
+                                _oldValue = self.asset[$ self.assetField.field];
+                            }
+                            
                             // If subKey is present, update the sub-property
                             if (self.assetField[$ "subKey"] != undefined) {
                                 self.asset[$ self.assetField.field][$ self.assetField.subKey] = value;
                             } else {
                                 self.asset[$ self.assetField.field] = value;
+                            }
+                            
+                            // Mark as override if this is a prefab instance
+                            if (self.asset[$ "prefab"] != undefined && self.asset.prefab != undefined) {
+                                self.asset.setOverride(self.assetField.field);
+                            }
+                            
+                            // Push undo command
+                            if (_oldValue != value) {
+                                var _undoField = self.assetField[$ "subKey"] != undefined 
+                                    ? self.assetField.field + "." + self.assetField.subKey
+                                    : self.assetField.field;
+                                global.editor.undoManager.push(new UndoCommandPropertyChange(self.asset, self.assetField.field, _oldValue, value));
                             }
                             
                             // Track the change in asset manager
@@ -355,12 +466,31 @@ function EditorUiInspector(ui) constructor {
             }
             
             var _Container = new UiNode({ marginTop, width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center" });
+            
+            // Check if this is an instance (has a prefab link)
+            var _isInstance = (_asset[$ "prefab"] != undefined && _asset.prefab != undefined);
+            var _fieldId = assetField[$ "field"];
+            var _isFieldOverridden = _isInstance && _fieldId != undefined && _asset.isOverridden(_fieldId);
+            
+            // Blue override bar on the left side
+            if (_isFieldOverridden) {
+                var _overrideBar = new UiNode({ width: 3, height: "100%", marginRight: 4 }, {
+                    onDraw: function() {
+                        // Guard: layout may not have run yet on first frame
+                        if (self[$ "x2"] == undefined) exit;
+                        draw_set_color(#4488FF);
+                        draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+                    }
+                });
+                _Container.add(_overrideBar);
+            }
     
             // Item label
             var _label = assetField[$ "label"];
             if (_label != undefined) {
                 var _tooltip = assetField[$ "tooltip"];
-                _Container.add(new UiText(assetField.label, { width: labelWidth + 15, height: 20 }, { 
+                var _labelWidth = _isFieldOverridden ? labelWidth + 15 - 7 : labelWidth + 15;
+                _Container.add(new UiText(assetField.label, { width: _labelWidth, height: 20 }, { 
                     tooltip: _tooltip,
                     pointerEvents: true 
                 }));
@@ -374,6 +504,41 @@ function EditorUiInspector(ui) constructor {
                     context.focused = true;
                     runLater(input.Input.focus);
                 }
+            }
+            
+            // Right-click context menu for override actions
+            if (_isInstance && _fieldId != undefined) {
+                _Container.pointerEvents = true;
+                _Container.onMouseUp(method({ asset: _asset, fieldId: _fieldId, assetField }, function() {
+                    if (mouse_lastbutton == mb_right) {
+                        var _items = [];
+                        if (asset.isOverridden(fieldId)) {
+                            array_push(_items, {
+                                label: "Apply '" + (assetField[$ "label"] ?? fieldId) + "' to Prefab",
+                                onClick: method({ asset, fieldId }, function() {
+                                    asset.applyOverride(fieldId);
+                                    global.editor.editorManager.inspector.inspect(asset);
+                                })
+                            });
+                            array_push(_items, {
+                                label: "Revert '" + (assetField[$ "label"] ?? fieldId) + "'",
+                                onClick: method({ asset, fieldId }, function() {
+                                    asset.revertOverride(fieldId);
+                                    global.editor.assetManager.editAsset(asset);
+                                    global.editor.editorManager.inspector.inspect(asset);
+                                })
+                            });
+                        } else {
+                            array_push(_items, {
+                                label: "No overrides on this field",
+                                onClick: function() {}
+                            });
+                        }
+                        new UiContextMenu(device_mouse_x_to_gui(0), device_mouse_y_to_gui(0), _items).show();
+                        return true;
+                    }
+                    return false;
+                }));
             }
             
             container.add(_Container);

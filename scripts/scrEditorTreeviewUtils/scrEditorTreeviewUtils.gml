@@ -101,6 +101,74 @@ function editorTreeviewUtil_removeFromParent(asset) {
 }
 
 // =============================================================================
+// PREFAB INSTANCE LIFECYCLE
+// =============================================================================
+
+/// Register an instance (and its children) in the respective prefab.instances[] lists
+/// @param {Struct} obj The instance root to register
+function editorTreeviewUtil_registerInstance(obj) {
+    if (obj == undefined) return;
+    if (obj[$ "prefab"] != undefined && obj.prefab != undefined) {
+        // Avoid duplicates
+        var _found = false;
+        for (var i = 0; i < array_length(obj.prefab.instances); i++) {
+            if (obj.prefab.instances[i] == obj) { _found = true; break; }
+        }
+        if (!_found) array_push(obj.prefab.instances, obj);
+    }
+    // Recurse children
+    if (obj[$ "children"] != undefined) {
+        for (var i = 0; i < array_length(obj.children); i++) {
+            editorTreeviewUtil_registerInstance(obj.children[i]);
+        }
+    }
+}
+
+/// Unregister an instance (and its children) from the respective prefab.instances[] lists
+/// @param {Struct} obj The instance root to unregister
+function editorTreeviewUtil_unregisterInstance(obj) {
+    if (obj == undefined) return;
+    if (obj[$ "prefab"] != undefined && obj.prefab != undefined) {
+        var _instances = obj.prefab.instances;
+        for (var i = array_length(_instances) - 1; i >= 0; i--) {
+            if (_instances[i] == obj) {
+                array_delete(_instances, i, 1);
+                break;
+            }
+        }
+    }
+    // Recurse children
+    if (obj[$ "children"] != undefined) {
+        for (var i = 0; i < array_length(obj.children); i++) {
+            editorTreeviewUtil_unregisterInstance(obj.children[i]);
+        }
+    }
+}
+
+/// Detach all instances from a prefab (when the prefab is destroyed)
+/// @param {Struct} prefabObj The prefab being destroyed
+function editorTreeviewUtil_detachPrefabInstances(prefabObj) {
+    if (prefabObj == undefined) return;
+    // Detach direct instances
+    var _instances = prefabObj[$ "instances"];
+    if (_instances != undefined) {
+        for (var i = 0; i < array_length(_instances); i++) {
+            var inst = _instances[i];
+            if (inst != undefined) {
+                inst.prefab = undefined;
+            }
+        }
+        prefabObj.instances = [];
+    }
+    // Recurse children (for sub-node prefab links)
+    if (prefabObj[$ "children"] != undefined) {
+        for (var i = 0; i < array_length(prefabObj.children); i++) {
+            editorTreeviewUtil_detachPrefabInstances(prefabObj.children[i]);
+        }
+    }
+}
+
+// =============================================================================
 // INSTANCE CREATION
 // =============================================================================
 
@@ -117,6 +185,12 @@ function editorTreeviewUtil_setInstanceTypeRecursive(obj, assetType, originalObj
     // Set metadata for the original asset
     if (originalObj != undefined) {
         obj.prefab = originalObj;
+        // Register in prefab's instances list (avoid duplicates)
+        var _found = false;
+        for (var i = 0; i < array_length(originalObj.instances); i++) {
+            if (originalObj.instances[i] == obj) { _found = true; break; }
+        }
+        if (!_found) array_push(originalObj.instances, obj);
     }
 
     // Set __parentUI for editor hierarchy tracking

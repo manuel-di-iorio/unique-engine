@@ -96,6 +96,19 @@ if (!uiHasFocus && !flythroughActive) {
        }
    }
    
+   // Undo (Ctrl+Z)
+   if (keyboard_check(vk_control) && !keyboard_check(vk_shift) && keyboard_check_pressed(ord("Z"))) {
+       global.editor.undoManager.undo();
+   }
+   
+   // Redo (Ctrl+Y or Ctrl+Shift+Z)
+   if (keyboard_check(vk_control) && keyboard_check_pressed(ord("Y"))) {
+       global.editor.undoManager.redo();
+   }
+   if (keyboard_check(vk_control) && keyboard_check(vk_shift) && keyboard_check_pressed(ord("Z"))) {
+       global.editor.undoManager.redo();
+   }
+   
    // Tool shortcuts
    if (keyboard_check_pressed(ord("Q"))) {
        editorManager.setTool(EDITOR_TOOL.View);

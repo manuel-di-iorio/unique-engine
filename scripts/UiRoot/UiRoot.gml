@@ -467,14 +467,18 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                     global.UI.dispatchEvent(UI_EVENT.click, self.deepestTarget);
                     
                     // Handle double click
-                    var now = current_time;
-                    if (self.lastClickTarget == self.deepestTarget && (now - self.lastClickTime) < self.doubleClickThreshold) {
-                        global.UI.dispatchEvent(UI_EVENT.doubleclick, self.deepestTarget);
-                        self.lastClickTime = -1; // Reset to avoid triple-click as double-click
-                        self.lastClickTarget = undefined;
-                    } else {
-                        self.lastClickTime = now;
-                        self.lastClickTarget = self.deepestTarget;
+                    // We must verify the target is still a valid struct and not destroyed
+                    // because the click handler above might have destroyed it (e.g. by rebuilding the UI).
+                    if (is_struct(self.deepestTarget) && !(self.deepestTarget[$ "destroyed"] ?? false)) {
+                        var now = current_time;
+                        if (self.lastClickTarget == self.deepestTarget && (now - self.lastClickTime) < self.doubleClickThreshold) {
+                            global.UI.dispatchEvent(UI_EVENT.doubleclick, self.deepestTarget);
+                            self.lastClickTime = -1; // Reset to avoid triple-click as double-click
+                            self.lastClickTarget = undefined;
+                        } else {
+                            self.lastClickTime = now;
+                            self.lastClickTarget = self.deepestTarget;
+                        }
                     }
                 }
             }
