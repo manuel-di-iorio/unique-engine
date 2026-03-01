@@ -394,12 +394,24 @@ function EditorSelectionManager() constructor {
         __clearBoxHelpers();
         
         var sm = global.editor.sceneManager;
-        
+        var scene = global.editor.editorManager.activeScene;
+        if (scene == undefined) return;
+
         for (var i = 0; i < array_length(self.selectedAssets); i++) {
             var asset = self.selectedAssets[i];
             if (asset == self.primaryAsset) continue; // primary uses EditorManager's boxHelper
             
             if (asset.type == "Mesh" || asset.type == "Object3D" || asset.type == "Bone") {
+                // Only show box helpers if the asset is actually in the active scene
+                var inScene = false;
+                var curr = asset;
+                while (curr != undefined) {
+                    if (curr == scene) { inScene = true; break; }
+                    curr = curr.parent;
+                }
+                
+                if (!inScene) continue;
+
                 var hasGeometry = asset[$ "geometry"] != undefined && asset.geometry[$ "vb"] != undefined;
                 var hasChildren = array_length(asset.children) > 0;
                 
@@ -412,9 +424,7 @@ function EditorSelectionManager() constructor {
                     }
                     
                     // Update matrix for accurate bbox
-                    if (global.editor.editorManager.activeScene != undefined) {
-                        global.editor.assetManager.updateAssetMatrix(asset);
-                    }
+                    global.editor.assetManager.updateAssetMatrix(asset);
                     
                     sm.scene.add(helper);
                     array_push(self.boxHelpers, { asset: asset, helper: helper });

@@ -66,18 +66,21 @@ function UiContextMenu(x, y, items) constructor {
                 
                 // Adjust position if menu goes off-screen
                 if (self.layout.height != undefined && !self[$ "positionAdjusted"]) {
+                    var guiW = display_get_gui_width();
+                    var guiH = display_get_gui_height();
+                    
                     var adjustedY = self.initialY;
-                    if (adjustedY + self.layout.height > oSceneEditor.winH) {
-                        adjustedY = oSceneEditor.winH - self.layout.height - 10;
-                        self.setTop(adjustedY);
+                    if (adjustedY + self.layout.height > guiH) {
+                        adjustedY = guiH - self.layout.height - 10;
                     }
                     
                     var adjustedX = self.initialX;
-                    if (adjustedX + self.layout.width > oSceneEditor.winW) {
-                        adjustedX = oSceneEditor.winW - self.layout.width - 10;
-                        self.setLeft(adjustedX);
+                    if (adjustedX + self.layout.width > guiW) {
+                        adjustedX = guiW - self.layout.width - 10;
                     }
                     
+                    self.setTop(max(10, adjustedY));
+                    self.setLeft(max(10, adjustedX));
                     self.positionAdjusted = true;
                 }
             });

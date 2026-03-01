@@ -102,12 +102,17 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
                 if (!_height) return;
                 
                 var Input = _Dropdown.Input;
-                if (abs(self.x1 - Input.x1) > 1) self.setLeft(Input.x1);
+                var guiW = display_get_gui_width();
+                var guiH = display_get_gui_height();
+                
+                var xx = Input.x1;
+                if (xx + self.width > guiW) xx = guiW - self.width - 5;
+                if (abs(self.x1 - xx) > 1) self.setLeft(xx);
                 if (abs(self.width - Input.width) > 1) self.setWidth(Input.width); 
                 
                 var yy = floor(Input.y1 + 30);
-                if (yy + _height > oSceneEditor.winH) {
-                    yy = floor(yy - 30 - self.layout.height);
+                if (yy + _height > guiH) {
+                    yy = floor(Input.y1 - 5 - _height);
                 }
                 if (abs(self.y1 - yy) > 1) self.setTop(yy);
             }

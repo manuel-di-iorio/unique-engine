@@ -84,47 +84,62 @@ function EditorUiInspector(ui) constructor {
         // Check if this is an instance (has a prefab link)
         var _isInstance = (asset[$ "prefab"] != undefined && asset.prefab != undefined);
         
-        // If this is an instance, show Apply All / Revert All bar at the top
+        // If this is an instance, show Prefab header with action icons
         if (_isInstance) {
             var _prefabName = asset.prefab[$ "name"] ?? "Unknown";
             
-            // "Instance of: PrefabName" label
-            var _instanceLabel = new UiText("Instance of: " + _prefabName, { 
-                width: "100%", height: 20, marginBottom: 5
+            var _prefabRow = new UiNode({ 
+                width: "100%", height: 24, marginBottom: 12,
+                flexDirection: "row", alignItems: "center", justifyContent: "flex-end"
             });
-            _Items.add(_instanceLabel);
+
+            with (_prefabRow) {
+                prefabLabel = "Prefab: " + _prefabName;
+                function onDraw() {
+                    if (self[$ "x1"] == undefined) return;
+                    draw_set_font(fText);
+                    draw_set_color(c_white);
+                    draw_set_halign(fa_left);
+                    draw_set_valign(fa_top);
+                    draw_text(self.x1, self.y1 + 2, self.prefabLabel);
+                };
+            }
+
+            // Icon: Inspect Prefab source
+            var _inspectPrefabBtn = new UiButton(sprUiObject, { 
+                width: 22, height: 22, marginLeft: 6 
+            }, { tooltip: "Inspect prefab source", outline: true });
+            _inspectPrefabBtn.onClick(method({ prefab: asset.prefab }, function() {
+                global.editor.editorManager.inspector.inspect(prefab);
+            }));
             
-            // Apply All / Revert All buttons row
-            var _actionsRow = new UiNode({ 
-                width: "100%", height: 28, marginBottom: 10,
-                flexDirection: "row", gap: 8
-            });
-            
-            var _applyAllBtn = new UiButton("Apply All", { flex: 1, height: 26 }, { 
-                outline: true, tooltip: "Apply all overrides to the prefab"
-            });
+            // Icon: Apply All overrides
+            var _applyAllBtn = new UiButton(sprUiDropdownArrow, { 
+                width: 22, height: 22, marginLeft: 4 
+            }, { tooltip: "Apply all overrides to prefab", outline: true });
             _applyAllBtn.onClick(method({ asset }, function() {
-                if (asset[$ "applyAllOverrides"] != undefined) {
+                if (asset[$ "applyAllOverrides"] != undefined && show_question("Are you sure you want to apply all overrides to prefab?")) {
                     asset.applyAllOverrides();
                     // Re-inspect to refresh override visuals
                     global.editor.editorManager.inspector.inspect(asset);
                 }
             }));
             
-            var _revertAllBtn = new UiButton("Revert All", { flex: 1, height: 26 }, {
-               outline: true, tooltip: "Revert all overrides to prefab values"
-            });
+            // Icon: Revert All overrides
+            var _revertAllBtn = new UiButton(sprUiUndo, { 
+                width: 22, height: 22, marginLeft: 4 
+            }, { tooltip: "Revert all overrides to prefab values", outline: true });
             _revertAllBtn.onClick(method({ asset }, function() {
-                if (asset[$ "revertAllOverrides"] != undefined) {
+                if (asset[$ "revertAllOverrides"] != undefined && show_question("Are you sure you want to revert all overrides to prefab values?")) {
                     asset.revertAllOverrides();
                     global.editor.assetManager.editAsset(asset);
                     // Re-inspect to refresh override visuals
                     global.editor.editorManager.inspector.inspect(asset);
                 }
             }));
-            
-            _actionsRow.add(_applyAllBtn, _revertAllBtn);
-            _Items.add(_actionsRow);
+
+            _prefabRow.add(_inspectPrefabBtn, _applyAllBtn, _revertAllBtn);
+            _Items.add(_prefabRow);
         }
         
         // First pass: calculate the max label width among all items (recursive)

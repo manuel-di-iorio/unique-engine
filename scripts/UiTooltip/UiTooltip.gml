@@ -27,13 +27,30 @@ function UiTooltip(): UiNode({
         self.textNode.text = text;
         self.textNode.computeSize();
         
-        // Force size update on tooltip itself to match text (plus padding)
+        // Calculate initial position based on cursor and screen bounds
+        var estimatedWidth = self.textNode.getWidth() + 12; // padding 6+6
+        var estimatedHeight = self.textNode.getHeight() + 6; // padding 3+3
         
-        // Calculate initial position based on cursor
-        var estimatedWidth = self.textNode.getWidth() + 16; // 8 padding left + 8 padding right
+        var guiW = display_get_gui_width();
+        var guiH = display_get_gui_height();
+        
         var tx = global.UI.mouseX + 15;
         var ty = global.UI.mouseY + 20;
         
+        // Flip to the left if it overflows the right side
+        if (tx + estimatedWidth > guiW) {
+            tx = global.UI.mouseX - estimatedWidth - 10;
+        }
+        
+        // Flip upwards if it overflows the bottom
+        if (ty + estimatedHeight > guiH) {
+            ty = global.UI.mouseY - estimatedHeight - 10;
+        }
+        
+        // Safety clamp to screen edges
+        tx = max(4, min(tx, guiW - estimatedWidth - 4));
+        ty = max(4, min(ty, guiH - estimatedHeight - 4));
+
         self.setLeft(tx);
         self.setTop(ty);
         
