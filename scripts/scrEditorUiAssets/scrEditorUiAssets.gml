@@ -9,6 +9,7 @@ function EditorUiAssets(ui) constructor {
         minWidth: 300, 
         width: "20%", 
         marginBottom: 62,
+        flexDirection: "column",
         // resizable: true,
         // resizableEdges: ["right"]
     }, { border: true });
@@ -17,21 +18,33 @@ function EditorUiAssets(ui) constructor {
       self.onDraw = method(self, function() {
             draw_set_color(global.UI_COL_INPUT_BG);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
-            
-            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
-            draw_text(self.x1 + 20, self.y1 + 8, "Scene");
         });
     }
+
+    // Header
+    ui.Assets.Header = new UiNode({
+        name: "Assets.Header",
+        width: "100%",
+        height: 36,
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 3,
+        paddingBottom: 5
+    });
+    
+    // Title
+    ui.Assets.Header.Title = new UiText("Scene", { marginLeft: 15 }, { color: c_white, font: fText });
+    ui.Assets.Header.add(ui.Assets.Header.Title);
 
     // Scene selector dropdown
     var _sceneDropdownItems = [];
     
     ui.Assets.SceneDropdown = new UiDropdown({
-        position: "absolute",
-        top: 4,
-        right: 5,
-        width: 250,
-        height: 28,
+        position: "relative",
+        marginLeft: 20,
+        marginRight: 5,
+        flex: 1,
+        height: 25,
     }, {
         name: "Assets.SceneDropdown",
         value: undefined,
@@ -42,7 +55,7 @@ function EditorUiAssets(ui) constructor {
             if (val == undefined) return;
             var assetManager = global.editor.assetManager;
             var scenes = assetManager.getAssetsByType("Scene");
-            for (var i = 0; i < array_length(scenes); i++) {
+            for (var i = 0, il = array_length(scenes); i < il; i++) {
                 if (scenes[i].uuid == val) {
                     global.editor.editorManager.setActiveAsset(scenes[i]);
                     break;
@@ -50,6 +63,9 @@ function EditorUiAssets(ui) constructor {
             }
         })
     });
+    
+    ui.Assets.Header.add(ui.Assets.SceneDropdown);
+    ui.Assets.add(ui.Assets.Header);
     
     // Update dropdown items dynamically
     // Track active scene to refresh treeview
@@ -69,7 +85,7 @@ function EditorUiAssets(ui) constructor {
     });
 
     with (ui.Assets.SceneDropdown) {
-        self.onStep(method(self, function() {
+        self.onStep(method({ dropdown: self, ui: ui }, function() {
             // Rebuild scene list each frame (cheap since scenes are few)
             var assetManager = global.editor.assetManager;
             var scenes = assetManager.getAssetsByType("Scene");
@@ -77,23 +93,21 @@ function EditorUiAssets(ui) constructor {
             for (var i = 0; i < array_length(scenes); i++) {
                 array_push(newItems, { label: scenes[i].name, value: scenes[i].uuid });
             }
-            self.items = newItems;
+            dropdown.items = newItems;
             
             // Sync dropdown value with active scene
             var activeScene = global.editor.editorManager.activeScene;
             if (activeScene != undefined) {
-                self.value = activeScene.uuid;
+                dropdown.value = activeScene.uuid;
             }
             
             // Refresh treeview if scene changed
-            if (activeScene != self.parent.lastActiveScene) {
-                self.parent.lastActiveScene = activeScene;
-                self.parent.refreshTreeview();
+            if (activeScene != ui.Assets.lastActiveScene) {
+                ui.Assets.lastActiveScene = activeScene;
+                ui.Assets.refreshTreeview();
             }
         }));
     }
-    
-    ui.Assets.add(ui.Assets.SceneDropdown);
 
     // Treeview
     ui.Assets.Treeview = new UiTreeview({ 
@@ -106,7 +120,7 @@ function EditorUiAssets(ui) constructor {
 
     // Tools container
     ui.Assets.ToolsContainer = new UiNode({
-      marginTop: 35,
+      // marginTop: 35,
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
