@@ -36,7 +36,7 @@ function EditorUiInspector(ui) constructor {
 
     with (ui.Inspector.Close) {
         self.onClick(function() {
-            global.editor.editorManager.clearActiveAsset();
+            global.editor.editorManager.clearActiveAsset(true); // keep scene
             self.hide();
         });
     }
@@ -164,6 +164,7 @@ function EditorUiInspector(ui) constructor {
         self.ui.Inspector.Content.Items.destroyChildren();
         self.asset = undefined;  // Reset asset to show default "Inspector" title
         self.multiSelectCount = 0;
+        self.ui.Inspector.Close.hide();
     }
     
     /// Show a multi-selection summary in the inspector

@@ -86,7 +86,8 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     }
     
     // Scene cannot be moved under another Scene or Object (no nesting)
-    else if (draggedItem.assetType == "Scene") {
+    // Also prevent dropping anything onto a Scene asset directly
+    else if (draggedItem.assetType == "Scene" || targetItem.assetType == "Scene") {
         return false;
     }
     

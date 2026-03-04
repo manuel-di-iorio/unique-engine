@@ -249,22 +249,13 @@ function SceneManager() constructor {
             }
 
             if (_editorManager.activeScene != undefined) {
-                _selMgr.clear();
-                _editorManager.setActiveAsset(
-                    _editorManager.activeScene,
-                    _editorManager.activeSceneTreeviewItem
-                );
-
-                var treeview = global.UI.Main.Assets.Treeview;
-                treeview.selectedItem = undefined;
-                treeview.Items.traverseChildren(
-                    function (child) {
-                        child.selected = false;
-                    }
-                );
+                _editorManager.clearActiveAsset(true, true);
             } else {
-                _selMgr.clear();
                 _editorManager.clearActiveAsset();
+                // Close inspector when clicking empty space in the scene
+                if (_editorManager.inspector != undefined) {
+                    _editorManager.inspector.close();
+                }
             }
 
             global.UI.requestRedraw();
@@ -362,8 +353,15 @@ function SceneManager() constructor {
                     }
                 }
             } else {
-                // Single select: normal flow through treeview
-                treeview.__onItemSelected(_finalSelection.__treeviewItem);
+                // Single select: ensure we have a treeview item for the selected instance
+                var tvItem = _finalSelection.__treeviewItem;
+                if (tvItem == undefined) {
+                    // Try to find the treeview item by UUID in the Assets treeview
+                    tvItem = editorTreeviewUtil_findTreeviewItemByAssetUuid(treeview, _finalSelection.uuid);
+                }
+                if (tvItem != undefined) {
+                    treeview.__onItemSelected(tvItem);
+                }
             }
         }
 

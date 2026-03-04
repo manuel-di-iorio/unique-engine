@@ -2,6 +2,35 @@
 /// These were previously scattered across scrEditorTreeviewOnAssetDrop, 
 /// scrEditorTreeviewOnRemoveAsset, and scrEditorTreeviewOnModelImport as __editorTreeview_* globals.
 
+/// Find a treeview item by its associated asset UUID in a specific treeview
+/// @param {Struct} treeview The treeview to search in
+/// @param {String} assetUuid The UUID of the asset to find
+/// @returns {Struct|Undefined} The treeview item if found
+function editorTreeviewUtil_findTreeviewItemByAssetUuid(treeview, assetUuid) {
+    if (treeview == undefined || assetUuid == undefined) return undefined;
+    if (treeview.Items == undefined || treeview.Items.children == undefined) return undefined;
+    
+    // Recursive search function
+    function searchInContainer(container) {
+        if (container.children == undefined) return undefined;
+        
+        for (var i = 0; i < array_length(container.children); i++) {
+            var child = container.children[i];
+            if (child[$ "asset"] != undefined && child.asset.uuid == assetUuid) {
+                return child;
+            }
+            // Recurse into child's Items if present
+            if (child[$ "Items"] != undefined) {
+                var found = searchInContainer(child.Items);
+                if (found != undefined) return found;
+            }
+        }
+        return undefined;
+    }
+    
+    return searchInContainer(treeview.Items);
+}
+
 // =============================================================================
 // HIERARCHY QUERIES
 // =============================================================================
@@ -263,6 +292,9 @@ function editorTreeviewUtil_createTreeviewItem(asset, parent, icon, expand = fal
 /// @param {Struct} parent The parent treeview item or treeview
 /// @param {Asset.GMSprite} icon The icon sprite for the children
 function editorTreeviewUtil_createTreeviewItemsForChildren(asset, parent, icon) {
+    // Do NOT expand Scene assets in Resources treeview (scenes are already shown in Assets panel)
+    if (asset.type == "Scene") return;
+    
     if (asset[$ "children"] == undefined) return;
     
     for (var i = 0; i < array_length(asset.children); i++) {

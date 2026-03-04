@@ -231,13 +231,12 @@ function EditorManager() constructor {
             global.editor.sceneManager.transformControls.detach();
             self.inspector.close();
         } else {
-            // Re-set the scene as the active asset to maintain consistency
-            self.setActiveAsset(oldScene, oldSceneItem);
-            
-            // Update inspector manually since we don't go through treeview callback
-            if (self.inspector != undefined) {
-                self.inspector.inspect(oldScene);
-            }
+            // Keep scene active but do NOT open its inspector
+            self.activeAsset = oldScene;
+            self.selectedTreeviewItem = oldSceneItem;
+            self.gizmoTarget = oldScene;
+            global.editor.sceneManager.transformControls.detach();
+            self.inspector.close();
         }
     }
     
