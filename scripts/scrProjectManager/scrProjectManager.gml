@@ -106,6 +106,7 @@ function ProjectManager() constructor {
                   scrEditorLoadProject(settings.lastProject);
               }
           } catch (e) {
+              show_error(e, false);
               show_debug_message("FAILED TO PARSE settings.json");
               show_debug_message("CONTENT: " + jsonString);
           }

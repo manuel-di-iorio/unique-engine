@@ -78,7 +78,14 @@ function ProjectLoader() constructor {
 
       if (parentUUID != undefined && struct_exists(self.treeviewItemsByUUID, parentUUID)) {
         var parentItem = self.treeviewItemsByUUID[$ parentUUID];
-        parentItem.addChild(tvItem, false);
+        
+        if (struct_exists(parentItem, "addChild")) {
+          parentItem.addChild(tvItem, false);
+        } else if (struct_exists(parentItem, "Items")) {
+          parentItem.Items.add(tvItem);
+        } else {
+          resourcesTreeview.Items.add(tvItem);
+        }
 
         var parentAsset = parentItem.asset;
         if (struct_exists(parentAsset, "children")) array_push(parentAsset.children, folder);
@@ -101,7 +108,13 @@ function ProjectLoader() constructor {
         // If parent is a Scene, we don't add the child treeview item yet.
         // It will be built dynamically when the Scene is expanded (lazy-load).
         if (parentAsset.type != "Scene") {
-          parentItem.addChild(tvItem, false);
+          if (struct_exists(parentItem, "addChild")) {
+            parentItem.addChild(tvItem, false);
+          } else if (struct_exists(parentItem, "Items")) {
+            parentItem.Items.add(tvItem);
+          } else {
+            resourcesTreeview.Items.add(tvItem);
+          }
         }
 
         if (parentAsset.type == "Folder") {
@@ -339,10 +352,13 @@ function ProjectLoader() constructor {
             self.__initEditorPropsRecursive(scene, sceneData);
 
             if (treeviewItem != undefined) {
-                treeviewItem.Items.clear();
-                self.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
-                treeviewItem.needsLoading = false;
-                treeviewItem.__updateArrowVisibility();
+                if (struct_exists(treeviewItem, "Items")) treeviewItem.Items.clear();
+                
+                var targetTreeview = treeviewItem[$ "treeview"] ?? global.UI.Main.Assets.Treeview;
+                self.__buildTreeviewForScene(scene, treeviewItem, targetTreeview);
+                
+                if (struct_exists(treeviewItem, "needsLoading")) treeviewItem.needsLoading = false;
+                if (struct_exists(treeviewItem, "__updateArrowVisibility")) treeviewItem.__updateArrowVisibility();
             }
             
             scene.forceUpdate();
@@ -450,7 +466,13 @@ function ProjectLoader() constructor {
       asset: asset
     });
 
-    parentItem.addChild(tvItem, false);
+    if (struct_exists(parentItem, "addChild")) {
+      parentItem.addChild(tvItem, false);
+    } else if (struct_exists(parentItem, "Items")) {
+      parentItem.Items.add(tvItem);
+    } else {
+      treeview.Items.add(tvItem);
+    }
 
     for (var i = 0, il = array_length(asset.children); i < il; i++) {
       var child = asset.children[i];
