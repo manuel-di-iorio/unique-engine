@@ -77,8 +77,8 @@ function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
     editorManager.inspector.inspect(treeviewItem.asset, focus);
   }
 
-  // Focus camera on the object if requested (only if it's in a scene)
-  if (focus && (treeviewItem.asset[$ "isObject3D"] || treeviewItem.asset[$ "isMesh"])) {
+  // Focus camera on the object if requested (only if it's in a scene and not a Scene itself)
+  if (focus && (treeviewItem.asset[$ "isObject3D"] || treeviewItem.asset[$ "isMesh"]) && !treeviewItem.asset[$ "isScene"]) {
     if (editorManager.activeScene != undefined) {
       global.editor.sceneManager.orbit.focus(treeviewItem.asset);
     }

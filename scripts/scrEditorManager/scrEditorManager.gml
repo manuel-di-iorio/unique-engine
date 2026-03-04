@@ -89,6 +89,24 @@ function EditorManager() constructor {
         self.activeScene = currentScene;
         self.activeSceneTreeviewItem = currentSceneItem;
 
+        // Notify listeners (UI, etc.) about scene/asset changes
+        // This is used to keep widgets (like the Scene dropdown) in sync even when the
+        // active scene changes due to loading/creation or selection outside the dropdown.
+        if (global.editor[$ "events"] != undefined) {
+            if (sceneChanged) {
+                global.editor.events.dispatch({
+                    type: "activeSceneChanged",
+                    data: { scene: currentScene, sceneItem: currentSceneItem }
+                });
+            }
+            if (assetChanged) {
+                global.editor.events.dispatch({
+                    type: "activeAssetChanged",
+                    data: { asset: asset, treeviewItem: treeviewItem, gizmoTarget: newGizmoTarget }
+                });
+            }
+        }
+
         // LOAD NEW SCENE IF NECESSARY
         if (currentScene != undefined && (sceneChanged || currentScene[$ "needsLoading"] == true)) {
             // If the scene item is the Scene Panel treeview, use it as the target

@@ -37,7 +37,15 @@ function EditorUiAssets(ui) constructor {
     ui.Assets.Header.add(ui.Assets.Header.Title);
 
     // Scene selector dropdown
-    var _sceneDropdownItems = [];
+    function __sceneDropdownItemsGetter(searchValue) {
+        var assetManager = global.editor.assetManager;
+        var scenes = assetManager.getAssetsByType("Scene");
+        var items = [];
+        for (var i = 0; i < array_length(scenes); i++) {
+            array_push(items, { label: scenes[i].name, value: scenes[i].uuid });
+        }
+        return items;
+    }
     
     ui.Assets.SceneDropdown = new UiDropdown({
         position: "relative",
@@ -48,8 +56,8 @@ function EditorUiAssets(ui) constructor {
     }, {
         name: "Assets.SceneDropdown",
         value: undefined,
-        items: _sceneDropdownItems,
-        label: "",
+        items: [], // Populated by itemsGetter
+        itemsGetter: __sceneDropdownItemsGetter,
         onChange: method({ ui: ui }, function(val) {
             // When user picks a scene from dropdown, change the active scene
             if (val == undefined) return;
@@ -84,29 +92,21 @@ function EditorUiAssets(ui) constructor {
         global.UI.requestRedraw();
     });
 
-    with (ui.Assets.SceneDropdown) {
-        self.onStep(method({ dropdown: self, ui: ui }, function() {
-            // Rebuild scene list each frame (cheap since scenes are few)
-            var assetManager = global.editor.assetManager;
-            var scenes = assetManager.getAssetsByType("Scene");
-            var newItems = [];
-            for (var i = 0; i < array_length(scenes); i++) {
-                array_push(newItems, { label: scenes[i].name, value: scenes[i].uuid });
-            }
-            dropdown.items = newItems;
-            
-            // Sync dropdown value with active scene
-            var activeScene = global.editor.editorManager.activeScene;
-            if (activeScene != undefined) {
-                dropdown.value = activeScene.uuid;
-            }
-            
-            // Refresh treeview if scene changed
-            if (activeScene != ui.Assets.lastActiveScene) {
-                ui.Assets.lastActiveScene = activeScene;
-                ui.Assets.refreshTreeview();
-            }
+    // Sync Scene dropdown + treeview when active scene changes globally
+    if (global.editor[$ "events"] != undefined) {
+        global.editor.events.on("activeSceneChanged", method({ ui: ui }, function(ev) {
+            var scene = ev.data[$ "scene"];
+            self.ui.Assets.SceneDropdown.value = (scene != undefined) ? scene.uuid : undefined;
+            self.ui.Assets.lastActiveScene = scene;
+            self.ui.Assets.refreshTreeview();
         }));
+    }
+
+    // Initial sync (in case a scene is already active when this UI is created)
+    var __initScene = global.editor.editorManager.activeScene;
+    if (__initScene != undefined) {
+        ui.Assets.SceneDropdown.value = __initScene.uuid;
+        ui.Assets.lastActiveScene = __initScene;
     }
 
     // Treeview

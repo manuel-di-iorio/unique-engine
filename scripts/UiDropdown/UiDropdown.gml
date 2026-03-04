@@ -16,7 +16,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
         }
 
         // Check if current value is still valid
-        if (self.value != undefined) {
+        if (self.value != undefined && array_length(self.items) > 0) {
             var found = false;
             for (var i = 0, l = array_length(self.items); i < l; i++) {
                 if (self.items[i].value == self.value) {
@@ -226,13 +226,14 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
             self.add(self.Items);
             
             // Create the initial items
-            if (_Dropdown.itemsGetter != undefined) _Dropdown.items = _Dropdown.itemsGetter(self.Search.value);
+            if (_Dropdown.itemsGetter != undefined) {
+                var searchValue = variable_struct_exists(self, "Search") ? self.Search.value : "";
+                _Dropdown.items = _Dropdown.itemsGetter(searchValue);
+            }
             self.createItems(); 
         }
         
         global.UI.Overlay.add(self.List);
-        // Don't call computePosition() here - layout isn't calculated yet!
-        // It will be called in the first onStep after layout is ready.
     }
     
     self.closeList = function() {

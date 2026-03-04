@@ -77,9 +77,11 @@ function AssetManager() constructor {
      */
     function getAssetsByType(type) {
         var result = [];
+        var _typeLower = string_lower(string(type));
         for (var i = 0; i < array_length(self.assets); i++) {
             var asset = self.assets[i];
-            if (asset[$ "type"] == type) {
+            var assetType = asset[$ "type"] ?? asset[$ "assetType"];
+            if (assetType != undefined && string_lower(string(assetType)) == _typeLower) {
                 array_push(result, asset);
             }
         }
