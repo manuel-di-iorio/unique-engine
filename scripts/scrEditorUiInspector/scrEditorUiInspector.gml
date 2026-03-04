@@ -3,7 +3,15 @@ function EditorUiInspector(ui) constructor {
     self.asset = undefined;
     self.multiSelectCount = 0;
 
-    ui.Inspector = new UiNode({ name: "Inspector", minWidth: 350, width: "21%", marginBottom: 62, flexDirection: "column" }, { border: true });
+    ui.Inspector = new UiNode({ 
+        name: "Inspector", 
+        minWidth: 350, 
+        width: "21%", 
+        marginBottom: 62, 
+        flexDirection: "column",
+        // resizable: true,
+        // resizableEdges: ["left"]
+    }, { border: true });
     ui.Inspector.owner = self;
 
     with (ui.Inspector) {

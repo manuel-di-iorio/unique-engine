@@ -4,7 +4,14 @@
 function EditorUiAssets(ui) constructor {
     self.ui = ui;
     
-    ui.Assets = new UiNode({ name: "Assets", minWidth: 300, width: "20%", marginBottom: 62 }, { border: true });
+    ui.Assets = new UiNode({ 
+        name: "Assets", 
+        minWidth: 300, 
+        width: "20%", 
+        marginBottom: 62,
+        // resizable: true,
+        // resizableEdges: ["right"]
+    }, { border: true });
 
     with (ui.Assets) {
       self.onDraw = method(self, function() {
@@ -22,7 +29,7 @@ function EditorUiAssets(ui) constructor {
     ui.Assets.SceneDropdown = new UiDropdown({
         position: "absolute",
         top: 4,
-        right: 10,
+        right: 5,
         width: 250,
         height: 28,
     }, {

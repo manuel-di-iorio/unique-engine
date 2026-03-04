@@ -158,6 +158,14 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.tooltipElement = undefined;
     self.tooltipTimer = -1;
     
+    // Resizing state
+    self.resizingElement = undefined;
+    self.resizeEdge = "";
+    self.resizeStartX = 0;
+    self.resizeStartY = 0;
+    self.resizeStartWidth = 0;
+    self.resizeStartHeight = 0;
+    
     // Set the size of the root node
     // @override
     function setSize(w, h) {
@@ -330,7 +338,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                     _currentlyHovered.hovered = false;
                     self.dispatchEvent(UI_EVENT.mouseleave, _currentlyHovered); 
                     self.dispatchEvent(UI_EVENT.mouseout, _currentlyHovered);
-                    self.previousTarget = undefined;
+            self.previousTarget = undefined;
                     self.requestRedraw();
                 }
                 
@@ -350,10 +358,60 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                     if (_elem.handpoint && self.currentCursor == cr_default && self.draggedElement == undefined) {
                         self.setCursor(cr_handpoint);
                     }
+                    
+                    // Resizing edge detection
+                    if (_elem.resizable && self.resizingElement == undefined) {
+                        var _edge = "";
+                        var _marginX = _elem.resizeThreshold;
+                        var _marginY = _elem.resizeThreshold;
+                        
+                        var _edges = _elem.resizableEdges;
+                        var _isLeft = array_contains(_edges, "left") && (self.mouseX <= _elem.x1 + _marginX);
+                        var _isRight = array_contains(_edges, "right") && (self.mouseX >= _elem.x2 - _marginX);
+                        var _isTop = array_contains(_edges, "top") && (self.mouseY <= _elem.y1 + _marginY);
+                        var _isBottom = array_contains(_edges, "bottom") && (self.mouseY >= _elem.y2 - _marginY);
+                        
+                        if (_isLeft) _edge += "left";
+                        else if (_isRight) _edge += "right";
+                        
+                        if (_isTop) _edge += "top";
+                        else if (_isBottom) _edge += "bottom";
+                        
+                        if (_edge != "") {
+                            self.resizeEdge = _edge;
+                            if (_isLeft || _isRight) self.setCursor(cr_size_we);
+                            if (_isTop || _isBottom) self.setCursor(cr_size_ns);
+                            // Corner cursors could be added here
+                        } else {
+                            self.resizeEdge = "";
+                        }
+                    } else if (self.resizingElement == undefined) {
+                        self.resizeEdge = "";
+                    }
+                } else if (self.resizingElement == undefined) {
+                    self.resizeEdge = "";
                 }
             }
             
             self.previousTarget = self.deepestTarget;
+            
+            // Handle resizing update
+            if (self.resizingElement != undefined) {
+                var _elem = self.resizingElement;
+                var _dx = self.mouseX - self.resizeStartX;
+                var _dy = self.mouseY - self.resizeStartY;
+                
+                var _newW = self.resizeStartWidth;
+                var _newH = self.resizeStartHeight;
+                
+                if (string_pos("right", self.resizeEdge)) _newW += _dx;
+                if (string_pos("left", self.resizeEdge)) _newW -= _dx;
+                if (string_pos("bottom", self.resizeEdge)) _newH += _dy;
+                if (string_pos("top", self.resizeEdge)) _newH -= _dy;
+                
+                _elem.setStyle({ width: max(10, _newW), height: max(10, _newH) });
+                self.requestUpdate();
+            }
             
             // Process drag detection if we have a potential drag element
             if (self.potentialDraggedElement != undefined && !self.potentialDraggedElement.dragging) {
@@ -413,6 +471,19 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                 global.UI_CLICK_START = _target;
                 global.UI.dispatchEvent(UI_EVENT.mousedown, _target);
 
+                // Handle resizing start
+                if (mouse_check_button_pressed(mb_left) && self.resizeEdge != "") {
+                    self.resizingElement = _target;
+                    _target.resizing = true;
+                    self.resizeStartX = self.mouseX;
+                    self.resizeStartY = self.mouseY;
+                    self.resizeStartWidth = _target.width;
+                    self.resizeStartHeight = _target.height;
+                    
+                    // Prevent normal drag if resizing
+                    self.potentialDraggedElement = undefined;
+                }
+
                 // We check for any button press (left, right, middle) to ensure focus is lost when clicking outside
                 if (self.focusedElement != undefined && !(_target[$ "focusable"] ?? false)) {
                     self.focusedElement.blur();
@@ -420,7 +491,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
 
                 // Check again if target is still valid after mousedown event
                 if (mouse_check_button_pressed(mb_left) && !(_target[$ "destroyed"] ?? false)) {
-                    if (_target[$ "draggable"] ?? false) {
+                    if ((_target[$ "draggable"] ?? false) && self.resizingElement == undefined) {
                         self.potentialDraggedElement = _target;
                         _target.dragStartX = self.mouseX;
                         _target.dragStartY = self.mouseY;
@@ -439,6 +510,14 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             if (device_mouse_check_button_released(0, mb_left)) releasedButton = mb_left;
             else if (device_mouse_check_button_released(0, mb_right)) releasedButton = mb_right;
             else if (device_mouse_check_button_released(0, mb_middle)) releasedButton = mb_middle;
+
+            // Handle resize end
+            if (self.resizingElement != undefined) {
+                self.resizingElement.resizing = false;
+                self.resizingElement = undefined;
+                self.resizeEdge = "";
+                self.setCursor(cr_default);
+            }
 
             // First, handle the drag end if we got a dragged element
             if (self.draggedElement != undefined) {

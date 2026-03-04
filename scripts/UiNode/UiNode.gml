@@ -87,6 +87,12 @@ function UiNode(style = {}, props = {}) constructor {
     self.onDragEnd = undefined;
     self.onDrop = undefined;
 
+    // Resizing props
+    self.resizable = props[$ "resizable"] ?? false;
+    self.resizableEdges = props[$ "resizableEdges"] ?? []; // ["left", "right", "top", "bottom"]
+    self.resizing = false;
+    self.resizeThreshold = 8; // Margin in pixels to detect edge
+
     
 
     /** Methods */

@@ -256,17 +256,14 @@ function SceneManager() constructor {
                 );
 
                 var treeview = global.UI.Main.Assets.Treeview;
-
-                if (_editorManager.activeSceneTreeviewItem != undefined) {
-                    treeview.selectedItem = _editorManager.activeSceneTreeviewItem;
-
-                    treeview.Items.traverseChildren(
-                        method({ treeview }, function (child) {
-                            child.selected = (child == treeview.selectedItem);
-                        })
-                    );
-                }
+                treeview.selectedItem = undefined;
+                treeview.Items.traverseChildren(
+                    function (child) {
+                        child.selected = false;
+                    }
+                );
             } else {
+                _selMgr.clear();
                 _editorManager.clearActiveAsset();
             }
 
