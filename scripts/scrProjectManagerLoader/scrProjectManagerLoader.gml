@@ -1,5 +1,8 @@
 function ProjectLoader() constructor {
   self.treeviewItemsByUUID = {};
+  self.objectsByUUID = {};
+  self.materialsByUUID = {};
+  self.geometriesByUUID = {};
 
   /**
    * Load project searching for assets in Assets/ folder
@@ -56,7 +59,7 @@ function ProjectLoader() constructor {
         if (directory_exists(fullPath) && file_exists(metaPath)) {
           var node = self.__readJson(metaPath);
           node[$ "uuid"] = a;
-          var targetTreeview = (types[i] == "Scenes") ? sceneTreeview : resourcesTreeview;
+          var targetTreeview = resourcesTreeview;
           self.__registerAssetFromNode(node, targetTreeview, assetTargets, projectDir);
         }
         a = file_find_next();
@@ -109,11 +112,7 @@ function ProjectLoader() constructor {
         asset.__parentUI = parentUUID;
       } else {
         // Determine which treeview to add to based on type
-        if (asset.type == "Scene") {
-            sceneTreeview.Items.add(tvItem);
-        } else {
-            resourcesTreeview.Items.add(tvItem);
-        }
+        resourcesTreeview.Items.add(tvItem);
       }
     }
 
@@ -137,6 +136,13 @@ function ProjectLoader() constructor {
     // Clear the cache
     self.treeviewItemsByUUID = {};
     projectManager.markAsSaved();
+
+    // 6. If there is only one scene, select it immediately
+    var assetManager = global.editor.assetManager;
+    var scenes = assetManager.getAssetsByType("Scene");
+    if (array_length(scenes) == 1) {
+      global.editor.editorManager.setActiveAsset(scenes[0]);
+    }
   };
 
   self.__createFolderItem = function (fData, treeview) {
@@ -245,39 +251,39 @@ function ProjectLoader() constructor {
 
   self.__linkNodes = function () {
     var assetManager = global.editor.assetManager;
-    var texturesByUUID = {};
-    var objectsByUUID = {};
+    self.texturesByUUID = {};
+    self.objectsByUUID = {};
+    self.geometriesByUUID = {};
+    self.materialsByUUID = {};
 
     var textures = assetManager.getAssetsByType("Texture");
     for (var i = 0, il = array_length(textures); i < il; i++) {
-        texturesByUUID[$ textures[i].uuid] = textures[i];
+        self.texturesByUUID[$ textures[i].uuid] = textures[i];
     }
 
     var meshes = assetManager.getAssetsByType("Mesh");
-    var geometriesByUUID = {};
     for (var i = 0, il = array_length(meshes); i < il; i++) {
-        objectsByUUID[$ meshes[i].uuid] = meshes[i];
+        self.objectsByUUID[$ meshes[i].uuid] = meshes[i];
         if (meshes[i].geometry != undefined) {
-             geometriesByUUID[$ meshes[i].geometry.uuid] = meshes[i].geometry;
+             self.geometriesByUUID[$ meshes[i].geometry.uuid] = meshes[i].geometry;
         }
     }
 
     // Also include standalone Object3D (library prefabs) so scene instances can resolve their prefab link
     var objects3D = assetManager.getAssetsByType("Object3D");
     for (var i = 0, il = array_length(objects3D); i < il; i++) {
-        objectsByUUID[$ objects3D[i].uuid] = objects3D[i];
+        self.objectsByUUID[$ objects3D[i].uuid] = objects3D[i];
     }
 
     var materials = assetManager.getAssetsByType("Material");
-    var materialsByUUID = {};
     for (var i = 0, il = array_length(materials); i < il; i++) {
-        materialsByUUID[$ materials[i].uuid] = materials[i];
+        self.materialsByUUID[$ materials[i].uuid] = materials[i];
     }
 
     for (var i = 0, il = array_length(materials); i < il; i++) {
       var material = materials[i];
       if (struct_exists(material, "__json") && material.__json != undefined) {
-        material.fromJSON(material.__json, texturesByUUID);
+        material.fromJSON(material.__json, self.texturesByUUID);
         delete material.__json;
       }
     }
@@ -285,8 +291,8 @@ function ProjectLoader() constructor {
     for (var i = 0, il = array_length(meshes); i < il; i++) {
       var mesh = meshes[i];
       var materialUUID = mesh[$ "materialUUID"];
-      if (materialUUID != undefined && materialsByUUID[$ materialUUID] != undefined) {
-        mesh.material = materialsByUUID[$ materialUUID];
+      if (materialUUID != undefined && self.materialsByUUID[$ materialUUID] != undefined) {
+        mesh.material = self.materialsByUUID[$ materialUUID];
       }
     }
 
@@ -295,39 +301,70 @@ function ProjectLoader() constructor {
 
     // Set up lazy loading callback for the treeview
     var loaderRef = self;
-    treeview.onExpand = method({ loader: loaderRef, objectsByUUID, materialsByUUID, geometriesByUUID }, function (treeviewItem) {
-      if (treeviewItem[$ "needsLoading"] == true) {
-        var scene = treeviewItem.asset;
-        if (scene != undefined && scene.type == "Scene") {
-          treeviewItem.Items.clear();
-
-          var sceneData = undefined;
-          if (struct_exists(scene, "__sceneJSON") && scene.__sceneJSON != undefined) {
+    
+    /**
+     * Load a scene asset from its JSON or file
+     */
+    self.loadScene = function (scene, treeviewItem = undefined) {
+        if (scene == undefined) return;
+        var type = struct_exists(scene, "type") ? scene.type : (struct_exists(scene, "assetType") ? scene.assetType : undefined);
+        if (type != "Scene") return;
+        
+        var sceneData = undefined;
+        if (struct_exists(scene, "__sceneJSON") && scene.__sceneJSON != undefined) {
             sceneData = scene.__sceneJSON;
-          } else if (struct_exists(scene, "__assetPath") && file_exists(scene.__assetPath)) {
-            sceneData = loader.__readJson(scene.__assetPath);
-          }
-
-          if (sceneData != undefined) {
-            scene.fromJSON(sceneData, objectsByUUID, materialsByUUID, geometriesByUUID);
-            loader.__initEditorPropsRecursive(scene, sceneData);
-
-            loader.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
-            scene.forceUpdate();
-          }
-
-          treeviewItem.needsLoading = false;
-          treeviewItem.__updateArrowVisibility();
-          if (struct_exists(scene, "__sceneJSON")) delete scene.__sceneJSON;
+        } else if (struct_exists(scene, "__assetPath") && file_exists(scene.__assetPath)) {
+            sceneData = self.__readJson(scene.__assetPath);
         }
-      }
-    });
 
-    treeview.onCollapse = method(self, function (treeviewItem) {
-      var scene = treeviewItem.asset;
-      var editorManager = global.editor.editorManager;
+        if (sceneData != undefined) {
+            // Keep lookups perfectly in sync with the current asset manager state
+            var allAssets = global.editor.assetManager.assets;
+            for (var i = 0, il = array_length(allAssets); i < il; i++) {
+                var ast = allAssets[i];
+                var at = struct_exists(ast, "type") ? ast.type : (struct_exists(ast, "assetType") ? ast.assetType : "");
+                if (at == "Mesh" || at == "Object3D") {
+                    self.objectsByUUID[$ ast.uuid] = ast;
+                    if (struct_exists(ast, "geometry") && ast.geometry != undefined) {
+                         self.geometriesByUUID[$ ast.geometry.uuid] = ast.geometry;
+                    }
+                } else if (at == "Material") {
+                    self.materialsByUUID[$ ast.uuid] = ast;
+                } else if (at == "Texture") {
+                    self.texturesByUUID[$ ast.uuid] = ast;
+                }
+            }
 
-      if (scene != undefined && scene.type == "Scene" && editorManager.activeScene != scene) {
+            scene.fromJSON(sceneData, self.objectsByUUID, self.materialsByUUID, self.geometriesByUUID);
+            self.__initEditorPropsRecursive(scene, sceneData);
+
+            if (treeviewItem != undefined) {
+                treeviewItem.Items.clear();
+                self.__buildTreeviewForScene(scene, treeviewItem, treeviewItem.treeview);
+                treeviewItem.needsLoading = false;
+                treeviewItem.__updateArrowVisibility();
+            }
+            
+            scene.forceUpdate();
+            if (struct_exists(scene, "__sceneJSON")) delete scene.__sceneJSON;
+            return true;
+        }
+        return false;
+    };
+
+    /**
+     * Unload a scene (serialize to memory and clear)
+     */
+    self.unloadScene = function (scene, treeviewItem = undefined) {
+        if (scene == undefined) return;
+        var type = struct_exists(scene, "type") ? scene.type : (struct_exists(scene, "assetType") ? scene.assetType : undefined);
+        if (type != "Scene") return;
+        
+        // Safety: don't unload the active scene if it's the only one
+        if (global.editor.editorManager.activeScene == scene && array_length(global.editor.assetManager.getAssetsByType("Scene")) > 1) {
+            // But we might need to unload it if we're switching away
+        }
+
         // Unregister all instances in this scene from their prefab.instances[] before unloading
         scene.traverse(function(obj) {
             editorTreeviewUtil_unregisterInstance(obj);
@@ -335,10 +372,29 @@ function ProjectLoader() constructor {
 
         scene.__sceneJSON = scene.toJSON(true); // Serialize state recursively to memory before unloading
         scene.clear(true);
-        treeviewItem.Items.clear(); 
-        treeviewItem.needsLoading = true;
-        treeviewItem.needsLoading = true;
-        treeviewItem.Arrow.visible = false;
+        
+        if (treeviewItem != undefined) {
+            treeviewItem.Items.clear(); 
+            treeviewItem.needsLoading = true;
+            if (treeviewItem[$ "Arrow"] != undefined) treeviewItem.Arrow.visible = false;
+        }
+    };
+
+    treeview.onExpand = method({ loader: loaderRef }, function (treeviewItem) {
+      if (treeviewItem[$ "needsLoading"] == true) {
+        loader.loadScene(treeviewItem.asset, treeviewItem);
+      }
+    });
+
+    treeview.onCollapse = method({ loader: loaderRef }, function (treeviewItem) {
+      var scene = treeviewItem.asset;
+      var editorManager = global.editor.editorManager;
+
+      if (scene != undefined) {
+          var type = struct_exists(scene, "type") ? scene.type : (struct_exists(scene, "assetType") ? scene.assetType : undefined);
+          if (type == "Scene" && editorManager.activeScene != scene) {
+              loader.unloadScene(scene, treeviewItem);
+          }
       }
     });
 

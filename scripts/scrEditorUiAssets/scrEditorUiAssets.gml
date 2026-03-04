@@ -21,9 +21,9 @@ function EditorUiAssets(ui) constructor {
     
     ui.Assets.SceneDropdown = new UiDropdown({
         position: "absolute",
-        top: 2,
+        top: 4,
         right: 10,
-        width: 150,
+        width: 250,
         height: 28,
     }, {
         name: "Assets.SceneDropdown",
@@ -31,16 +31,13 @@ function EditorUiAssets(ui) constructor {
         items: _sceneDropdownItems,
         label: "",
         onChange: method({ ui: ui }, function(val) {
-            // When user picks a scene from dropdown, select it in the treeview
+            // When user picks a scene from dropdown, change the active scene
             if (val == undefined) return;
             var assetManager = global.editor.assetManager;
             var scenes = assetManager.getAssetsByType("Scene");
             for (var i = 0; i < array_length(scenes); i++) {
                 if (scenes[i].uuid == val) {
-                    var tvItem = scenes[i][$ "__treeviewItem"];
-                    if (tvItem != undefined) {
-                        tvItem.treeview.__onItemSelected(tvItem, true);
-                    }
+                    global.editor.editorManager.setActiveAsset(scenes[i]);
                     break;
                 }
             }
@@ -48,6 +45,22 @@ function EditorUiAssets(ui) constructor {
     });
     
     // Update dropdown items dynamically
+    // Track active scene to refresh treeview
+    ui.Assets.lastActiveScene = undefined;
+    
+    ui.Assets.refreshTreeview = method(ui.Assets, function() {
+        var activeScene = global.editor.editorManager.activeScene;
+        self.Treeview.Items.destroyChildren(); // Properly destroy current items and their UI nodes
+        
+        if (activeScene != undefined) {
+            // Build the hierarchy (instances) directly into the treeview root
+            if (struct_exists(activeScene, "children")) {
+                editorTreeviewUtil_createTreeviewItemsForChildren(activeScene, self.Treeview, sprUiObject);
+            }
+        }
+        global.UI.requestRedraw();
+    });
+
     with (ui.Assets.SceneDropdown) {
         self.onStep(method(self, function() {
             // Rebuild scene list each frame (cheap since scenes are few)
@@ -63,6 +76,12 @@ function EditorUiAssets(ui) constructor {
             var activeScene = global.editor.editorManager.activeScene;
             if (activeScene != undefined) {
                 self.value = activeScene.uuid;
+            }
+            
+            // Refresh treeview if scene changed
+            if (activeScene != self.parent.lastActiveScene) {
+                self.parent.lastActiveScene = activeScene;
+                self.parent.refreshTreeview();
             }
         }));
     }
@@ -102,7 +121,7 @@ function EditorUiAssets(ui) constructor {
         flex: 1,
         height: 24,
     }, {
-        placeholder: "Filter assets...",
+        placeholder: "Filter instances...",
         onChange: method({ treeview: ui.Assets.Treeview }, function(val) {
              self.treeview.filter(val);
         }) 
@@ -199,9 +218,6 @@ function EditorUiAssets(ui) constructor {
         if (treeviewItem == undefined) {
             // Background click - show "Add" menu for scene objects
             items = [
-                { label: "New Scene", icon: sprUiScene, onClick: method({ treeview: self.treeview }, function() {
-                    editorTreeviewOnNewAsset(undefined, "Scene");
-                })},
                 { label: "New Object3D", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Object3D");
                 })}

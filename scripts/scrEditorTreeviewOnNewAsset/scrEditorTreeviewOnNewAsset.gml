@@ -77,7 +77,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   // Create treeview item
   // Determine which treeview to use based on asset type
   var defaultTreeview;
-  if (assetType == "Scene") {
+  if (assetType == "Object3D") {
       defaultTreeview = global.UI.Main.Assets.Treeview;
   } else {
       defaultTreeview = global.UI.Main.Resources.Treeview;
@@ -190,9 +190,11 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
 //       asset.render = UeMesh.render;
 //   }
   
-  // Select the new item
-  treeview.__onItemSelected(newTreeviewItem, true);
-  
   // Push undo command for asset creation
   global.editor.undoManager.push(new UndoCommandTreeview("create", assetType, asset, parentAsset, parentTreeviewItem));
+
+  // If we just created a scene, make it active
+  if (assetType == "Scene") {
+      global.editor.editorManager.setActiveAsset(asset);
+  }
 };

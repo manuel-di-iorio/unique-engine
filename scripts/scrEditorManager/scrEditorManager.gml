@@ -40,10 +40,7 @@ function EditorManager() constructor {
         var newGizmoTarget = gizmoTarget != undefined ? gizmoTarget : asset;
         var gizmoTargetChanged = self.gizmoTarget != newGizmoTarget;
         
-        // If neither the asset nor the gizmo target have changed, exit
-        if (!assetChanged && !gizmoTargetChanged) return;
-
-        // --- NEW: Scene Management Logic ---
+        // --- Scene Management Logic ---
         var oldScene = self.activeScene;
         var oldSceneItem = self.activeSceneTreeviewItem;
         
@@ -51,76 +48,70 @@ function EditorManager() constructor {
         var currentSceneItem = undefined;
 
         if (asset != undefined) {
-            // Find parent scene via treeview (recursive search)
-            var it = treeviewItem;
-            while (it != undefined) {
-                var itAsset = it[$ "asset"];
-                if (itAsset != undefined && itAsset.type == "Scene") {
-                    currentScene = itAsset;
-                    currentSceneItem = it;
-                    break;
-                }
-                // Note: itAsset.type is the engine-level string type ("Scene", "Mesh", etc.)
-                // set on the 3D objects themselves. ASSET_TYPE enums are used in editor-level code.
+            // 1. Determine the context scene
+            if ((asset[$ "type"] ?? asset[$ "assetType"]) == "Scene") {
+                currentScene = asset;
+                currentSceneItem = treeviewItem;
+            } else {
+                // Find parent scene via asset hierarchy (reliable)
+                currentScene = editorTreeviewUtil_getSceneOfAsset(asset);
                 
-                // Navigate up: Child Item -> Items Node -> Parent Item
-                var itParentItems = it[$ "parent"];
-                if (itParentItems != undefined) {
-                    var itParentItem = itParentItems[$ "parent"];
-                    if (itParentItem != undefined) {
-                        it = itParentItem;
-                        continue;
+                // If we have a treeview item, try to find a corresponding scene item in its hierarchy
+                // (Though now scenes aren't usually in the Scene treeview, they might be in Resources)
+                var it = treeviewItem;
+                while (it != undefined) {
+                    var itAsset = it[$ "asset"];
+                    if (itAsset == currentScene) {
+                        currentSceneItem = it;
+                        break;
+                    }
+                    if (it[$ "parent"] != undefined && it.parent[$ "parent"] != undefined) {
+                        it = it.parent.parent;
+                    } else {
+                        it = undefined;
                     }
                 }
-                it = undefined;
             }
         }
+        
+        var sceneChanged = self.activeScene != currentScene;
 
-        // Update active scene identity ONLY if we found a new scene
-        if (currentScene != undefined) {
-            self.activeScene = currentScene;
-            self.activeSceneTreeviewItem = currentSceneItem;
+        // If neither the asset nor the gizmo target nor the scene have changed, exit
+        // EXCEPT if we need to force a redraw/update
+        if (!assetChanged && !gizmoTargetChanged && !sceneChanged) return;
 
-            // Collapse previous scene if we switched to a different scene
-            if (oldScene != undefined && oldScene != currentScene) {
-                if (oldSceneItem != undefined) {
-                  oldSceneItem.collapseItem(); // This triggers onCollapse which unloads the scene
-                }
-            }
-
-            // Lazy loading: if the new scene item is not loaded, expand it now
-            if (currentSceneItem != undefined && currentSceneItem[$ "needsLoading"] == true) {
-                currentSceneItem.expandItem();
-            }
-        } else if (asset != undefined) {
-            // If the selected asset is NOT part of a scene (e.g., a standalone asset),
-            // we should also collapse/clear the previous active scene if it exists.
-            
-            self.activeScene = undefined;
-            self.activeSceneTreeviewItem = undefined;
-            
-            if (oldScene != undefined) {
-                if (oldSceneItem != undefined) {
-                    oldSceneItem.collapseItem();
-                }
-            }
+        // UNLOAD PREVIOUS SCENE IF NECESSARY
+        if (oldScene != undefined && sceneChanged) {
+            global.editor.projectManager.loader.unloadScene(oldScene, oldSceneItem);
         }
-        // ------------------------------------
+
+        // Update active scene identity
+        self.activeScene = currentScene;
+        self.activeSceneTreeviewItem = currentSceneItem;
+
+        // LOAD NEW SCENE IF NECESSARY
+        if (currentScene != undefined && (sceneChanged || currentScene[$ "needsLoading"] == true)) {
+            // If the scene item is the Scene Panel treeview, use it as the target
+            var scenePanelTreeview = global.UI.Main.Assets.Treeview;
+            var loadTarget = (currentSceneItem != undefined) ? currentSceneItem : scenePanelTreeview;
+            
+            global.editor.projectManager.loader.loadScene(currentScene, loadTarget);
+        }
 
         sm.boxHelper.dispose();
         self.activeAsset = asset;
         self.selectedTreeviewItem = treeviewItem;
 
-        // Add to objects for rendering only if the asset is changed
-        if (assetChanged) {
-            sm.objects.children = []; // Clear children without calling clear() to avoid parent issues
+        // Add to objects for rendering if asset or scene changed
+        if (assetChanged || sceneChanged) {
+            sm.objects.clear(false); // Properly clear current rendering objects
             
             // 1. Render active scene if present
             if (self.activeScene != undefined) {
-                array_push(sm.objects.children, self.activeScene);
+                sm.objects.add(self.activeScene);
             }
             
-            // 2. Render selected asset if it's not the scene itself and not inside it
+            // 2. Render selected asset if it's not the scene itself and not already in its hierarchy
             if (asset != undefined && asset != self.activeScene) {
                 // Check if the asset is already a descendant of the active scene
                 var isInScene = false;
@@ -131,12 +122,12 @@ function EditorManager() constructor {
                             isInScene = true;
                             break;
                         }
-                        curr = curr.parent;
+                        curr = curr[$ "parent"];
                     }
                 }
                 
                 if (!isInScene) {
-                    array_push(sm.objects.children, asset);
+                    sm.objects.add(asset);
                 }
             }
         }

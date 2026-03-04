@@ -230,35 +230,60 @@ function editorTreeviewUtil_setInstanceTypeRecursive(obj, assetType, originalObj
 // TREEVIEW ITEM CREATION
 // =============================================================================
 
-/// Create a UiTreeviewItem for an asset and add it to a parent item
+/// Create a UiTreeviewItem for an asset and add it to a parent (item or treeview)
 /// @param {Struct} asset The asset to create a treeview item for
-/// @param {Struct} parentTreeviewItem The parent treeview item
+/// @param {Struct} parent The parent (UiTreeviewItem or UiTreeview)
 /// @param {Asset.GMSprite} icon The icon sprite
 /// @param {Bool} expand Whether to expand the parent after adding
 /// @returns {Struct} The created UiTreeviewItem
-function editorTreeviewUtil_createTreeviewItem(asset, parentTreeviewItem, icon, expand = false) {
+function editorTreeviewUtil_createTreeviewItem(asset, parent, icon, expand = false) {
+    var treeview = parent[$ "treeview"] ?? parent;
+    
     var treeviewItem = new UiTreeviewItem({
         name: "UiTreeview.Item",
     }, {
-        treeview: parentTreeviewItem.treeview,
+        treeview: treeview,
         assetType: asset.type,
         type: asset.type,
         icon: icon,
         asset: asset
     });
-    parentTreeviewItem.addChild(treeviewItem, expand);
+
+    if (struct_exists(parent, "addChild")) {
+        parent.addChild(treeviewItem, expand);
+    } else if (struct_exists(parent, "Items")) {
+        parent.Items.add(treeviewItem);
+    }
+    
     return treeviewItem;
 }
 
 /// Recursively create UiTreeviewItems for all children of an asset
 /// @param {Struct} asset The parent asset whose children need treeview items
-/// @param {Struct} treeviewItem The parent treeview item
+/// @param {Struct} parent The parent treeview item or treeview
 /// @param {Asset.GMSprite} icon The icon sprite for the children
-function editorTreeviewUtil_createTreeviewItemsForChildren(asset, treeviewItem, icon) {
+function editorTreeviewUtil_createTreeviewItemsForChildren(asset, parent, icon) {
+    if (asset[$ "children"] == undefined) return;
+    
     for (var i = 0; i < array_length(asset.children); i++) {
         var child = asset.children[i];
-        var childTreeviewItem = editorTreeviewUtil_createTreeviewItem(child, treeviewItem, icon);
+        var childTreeviewItem = editorTreeviewUtil_createTreeviewItem(child, parent, icon);
         editorTreeviewUtil_createTreeviewItemsForChildren(child, childTreeviewItem, icon);
+    }
+}
+
+/// Get the appropriate icon for an asset type
+/// @param {String} type The asset type
+/// @returns {Asset.GMSprite}
+function editorTreeviewUtil_getIconForType(type) {
+    switch (type) {
+        case "Texture": return sprUiTexture;
+        case "Material": return sprUiMaterial;
+        case "Mesh": return sprUiMesh;
+        case "Bone": return sprUiBone;
+        case "Scene": return sprUiScene;
+        case "Folder": return sprUiFolder;
+        default: return sprUiObject;
     }
 }
 

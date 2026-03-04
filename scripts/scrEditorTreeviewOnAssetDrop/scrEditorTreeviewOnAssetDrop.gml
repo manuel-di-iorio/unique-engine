@@ -10,13 +10,14 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
     // Check if the drop is valid
     var isValidDrop = false;
     var dropAction = "";
+    var targetAssetOverride = undefined;
     
     // Validation rules
 
     // Check if target is Root (UiTreeview context)
     // The main Treeview (root) doesn't have an assetType property.
     // It's a UiTreeview instance.
-    var isTargetRoot = (targetItem[$ "assetType"] == undefined && targetItem[$ "Items"] != undefined);
+    var isTargetRoot = (!struct_exists(targetItem, "assetType") && struct_exists(targetItem, "Items"));
 
     if (isTargetRoot) {
         // We are dropping onto the root background
@@ -27,23 +28,18 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
         
         if (targetItem == sceneTreeview) {
             if (draggedInScene) {
-                // Move instance to scene root
                 var activeScene = global.editor.editorManager.activeScene;
                 if (activeScene != undefined && editorTreeviewUtil_getSceneOfAsset(draggedItem.asset) == activeScene) {
                     isValidDrop = true;
                     dropAction = "reparent";
-                    // Target root of active scene (the scene asset itself)
-                    targetItem = global.editor.editorManager.activeSceneTreeviewItem;
+                    targetAssetOverride = activeScene;
                 }
             } else {
                 // Instance project asset into active scene
                 if (draggedItem.assetType == "Mesh" || draggedItem.assetType == "Object3D") {
-                    var activeSceneItem = global.editor.editorManager.activeSceneTreeviewItem;
-                    if (activeSceneItem != undefined) {
-                        isValidDrop = true;
-                        dropAction = "instance";
-                        targetItem = activeSceneItem;
-                    }
+                    isValidDrop = true;
+                    dropAction = "instance";
+                    targetAssetOverride = activeScene;
                 }
             }
         } else if (targetItem == resourcesTreeview) {
@@ -142,7 +138,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
              editorTreeviewUtil_removeFromParent(draggedItem.asset);
              
              // Clear __parentUI since we're removing from hierarchy/folder
-             if (draggedItem.asset[$ "__parentUI"] != undefined) {
+             if (struct_exists(draggedItem.asset, "__parentUI")) {
                 draggedItem.asset.__parentUI = undefined; 
              }
              
@@ -176,15 +172,16 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             // Remove from the previous asset parent
             editorTreeviewUtil_removeFromParent(draggedItem.asset);
             
-            // Add to the new parent (only if target asset exists)
-            if (targetItem.asset != undefined) {
-                targetItem.asset.add(draggedItem.asset);
+            // Add to the new parent
+            var targetAsset = (targetAssetOverride != undefined) ? targetAssetOverride : targetItem.asset;
+            if (targetAsset != undefined) {
+                targetAsset.add(draggedItem.asset);
                 
                 // Update __parentUI for saving hierarchy
-                draggedItem.asset.__parentUI = targetItem.asset;
+                draggedItem.asset.__parentUI = targetAsset;
                 
                 // Track change on new parent
-                global.editor.assetManager.editAsset(targetItem.asset);
+                global.editor.assetManager.editAsset(targetAsset);
             }
             
             // Track change on dragged asset too (parent changed)
@@ -199,19 +196,22 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             instanceAsset.castShadow = true;
             instanceAsset.receiveShadow = true;
             
-            // Set type and __rotationEuler for all children recursively BEFORE adding to scene
-            // This ensures __rotationEuler exists before any inspector tries to access it
-            editorTreeviewUtil_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType, draggedItem.asset, targetItem.asset);
-            
-            // Add the instance to the target element (scene or sub-object)
-            targetItem.asset.add(instanceAsset);
-            
-            // Track change
-            global.editor.assetManager.editAsset(targetItem.asset);
+            var targetAsset = (targetAssetOverride != undefined) ? targetAssetOverride : targetItem.asset;
+            if (targetAsset != undefined) {
+                // Set type and __rotationEuler for all children recursively BEFORE adding to scene
+                editorTreeviewUtil_setInstanceTypeRecursive(instanceAsset, draggedItem.assetType, draggedItem.asset, targetAsset);
+                
+                // Add the instance to the target element (scene or sub-object)
+                targetAsset.add(instanceAsset);
+                
+                // Track change
+                global.editor.assetManager.editAsset(targetAsset);
+            }
 
             // If target is a scene and it's not loaded yet, don't create treeview items manually
             // expanding it will trigger the loader which builds the treeview
-            if (targetItem.assetType == "Scene" && targetItem[$ "needsLoading"] == true) {
+            var needsLoading = struct_exists(targetItem, "needsLoading") ? targetItem.needsLoading : false;
+            if (struct_exists(targetItem, "assetType") && targetItem.assetType == "Scene" && needsLoading) {
                 targetItem.expandItem();
             } else {
                 // Target is already loaded or is a regular object, create items manually
@@ -225,7 +225,10 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
                 global.editor.sceneManager.orbit.focus(instanceAsset);
 
                 // Only on the main parent call __onItemSelected
-                targetItem.treeview.__onItemSelected(instanceTreeviewItem);
+                var tv = struct_exists(targetItem, "treeview") ? targetItem.treeview : targetItem;
+                if (tv != undefined && struct_exists(tv, "__onItemSelected")) {
+                    tv.__onItemSelected(instanceTreeviewItem);
+                }
             }
         }
         else if (dropAction == "applyMaterial") {
