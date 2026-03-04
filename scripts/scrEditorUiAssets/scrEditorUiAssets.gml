@@ -1,3 +1,6 @@
+/// @description Editor UI Assets - Now the "Scene" panel showing only scene hierarchy
+/// Contains a scene selector dropdown and treeview for scene instances
+
 function EditorUiAssets(ui) constructor {
     self.ui = ui;
     
@@ -9,9 +12,62 @@ function EditorUiAssets(ui) constructor {
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
             
             draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
-            draw_text(self.x1 + 20, self.y1 + 8, "Assets");
+            draw_text(self.x1 + 20, self.y1 + 8, "Scene");
         });
     }
+
+    // Scene selector dropdown
+    var _sceneDropdownItems = [];
+    
+    ui.Assets.SceneDropdown = new UiDropdown({
+        position: "absolute",
+        top: 2,
+        right: 10,
+        width: 150,
+        height: 28,
+    }, {
+        name: "Assets.SceneDropdown",
+        value: undefined,
+        items: _sceneDropdownItems,
+        label: "",
+        onChange: method({ ui: ui }, function(val) {
+            // When user picks a scene from dropdown, select it in the treeview
+            if (val == undefined) return;
+            var assetManager = global.editor.assetManager;
+            var scenes = assetManager.getAssetsByType("Scene");
+            for (var i = 0; i < array_length(scenes); i++) {
+                if (scenes[i].uuid == val) {
+                    var tvItem = scenes[i][$ "__treeviewItem"];
+                    if (tvItem != undefined) {
+                        tvItem.treeview.__onItemSelected(tvItem, true);
+                    }
+                    break;
+                }
+            }
+        })
+    });
+    
+    // Update dropdown items dynamically
+    with (ui.Assets.SceneDropdown) {
+        self.onStep(method(self, function() {
+            // Rebuild scene list each frame (cheap since scenes are few)
+            var assetManager = global.editor.assetManager;
+            var scenes = assetManager.getAssetsByType("Scene");
+            var newItems = [];
+            for (var i = 0; i < array_length(scenes); i++) {
+                array_push(newItems, { label: scenes[i].name, value: scenes[i].uuid });
+            }
+            self.items = newItems;
+            
+            // Sync dropdown value with active scene
+            var activeScene = global.editor.editorManager.activeScene;
+            if (activeScene != undefined) {
+                self.value = activeScene.uuid;
+            }
+        }));
+    }
+    
+    ui.Assets.add(ui.Assets.SceneDropdown);
 
     // Treeview
     ui.Assets.Treeview = new UiTreeview({ 
@@ -102,7 +158,7 @@ function EditorUiAssets(ui) constructor {
         self.treeview.collapseAll();
     }));
 
-    // "Add button"
+    // "Add button" - Scene context: creates scene objects
     ui.Assets.ToolsContainer.AddBtn = new UiButton(sprUiCreateAsset, { 
         name: "Assets.AddBtn",
         marginLeft: 10,
@@ -110,7 +166,7 @@ function EditorUiAssets(ui) constructor {
         padding: 12,
     }, { 
         outline: true, 
-        tooltip: "Add new asset or folder" 
+        tooltip: "Add new scene object" 
     });
     
     ui.Assets.ToolsContainer.add(ui.Assets.ToolsContainer.AddBtn);
@@ -136,32 +192,19 @@ function EditorUiAssets(ui) constructor {
     // Store reference for context menu
     var currentMenu = undefined;
     
-    // Context menu handler
+    // Context menu handler - Scene-specific (scene objects, Object3D, etc.)
     Treeview.onContextMenu = method({ treeview: Treeview }, function(treeviewItem) {
         var items = [];
         
         if (treeviewItem == undefined) {
-            // Background click - show "Add" menu
+            // Background click - show "Add" menu for scene objects
             items = [
-                { label: "New Folder", icon: sprUiFolder, onClick: method({ treeview: self.treeview }, function() {
-                    editorTreeviewOnNewAsset(undefined, "Folder");
-                })},
-                { label: "New Texture", icon: sprUiTexture, onClick: method({ treeview: self.treeview }, function() {
-                    editorTreeviewOnNewAsset(undefined, "Texture");
-                })},
-                { label: "New Material", icon: sprUiMaterial, onClick: method({ treeview: self.treeview }, function() {
-                    editorTreeviewOnNewAsset(undefined, "Material");
-                })},
-                { label: "New Object3D", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
-                    editorTreeviewOnNewAsset(undefined, "Object3D");
-                })},
                 { label: "New Scene", icon: sprUiScene, onClick: method({ treeview: self.treeview }, function() {
                     editorTreeviewOnNewAsset(undefined, "Scene");
                 })},
-                { separator: true },
-                { label: "Import Model", icon: sprUiImportModel, onClick: function() {
-                    editorTreeviewOnModelImport(undefined);
-                }}
+                { label: "New Object3D", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
+                    editorTreeviewOnNewAsset(undefined, "Object3D");
+                })}
             ];
         } else {
             // Item click - show item actions
@@ -173,44 +216,14 @@ function EditorUiAssets(ui) constructor {
                      editorTreeviewOnNewAsset(self.item, "Object3D");
                  })});
                  array_push(items, { separator: true });
-              } else if (treeviewItem.assetType == "Folder") {
-                array_push(items, { label: "New Folder", icon: sprUiFolder, onClick: method({ item: treeviewItem }, function() {
-                    editorTreeviewOnNewAsset(self.item, "Folder");
-                })});
-                array_push(items, { label: "New Texture", icon: sprUiTexture, onClick: method({ item: treeviewItem }, function() {
-                    editorTreeviewOnNewAsset(self.item, "Texture");
-                })});
-                array_push(items, { label: "New Material", icon: sprUiMaterial, onClick: method({ item: treeviewItem }, function() {
-                    editorTreeviewOnNewAsset(self.item, "Material");
-                })});
+              } else if (treeviewItem.assetType == "Scene") {
                 array_push(items, { label: "New Object3D", icon: sprUiObject, onClick: method({ item: treeviewItem }, function() {
                     editorTreeviewOnNewAsset(self.item, "Object3D");
                 })});
-                array_push(items, { label: "New Scene", icon: sprUiScene, onClick: method({ item: treeviewItem }, function() {
-                    editorTreeviewOnNewAsset(self.item, "Scene");
-                })});
-                array_push(items, { separator: true });
-                array_push(items, { label: "Import Model", icon: sprUiImportModel, onClick: method({ item: treeviewItem }, function() {
-                    editorTreeviewOnModelImport(self.item);
-                })});
-                array_push(items, { separator: true });
-             } else if (treeviewItem.assetType == "Scene") {
-                // array_push(items, { label: "New Point Light", icon: sprUiPointLight, disabled: global.editor.editorManager.activeScene == undefined, onClick: method({ treeview: self.treeview }, function() {
-                //     editorTreeviewOnNewAsset(undefined, "PointLight");
-                // })});
-                
-                // array_push(items, { label: "New Directional Light", icon: sprUiDirectionalLight, disabled: global.editor.editorManager.activeScene == undefined, onClick: method({ treeview: self.treeview }, function() {
-                //     editorTreeviewOnNewAsset(undefined, "DirectionalLight");
-                // })});
 
                 array_push(items, { separator: true });
             }
             
-            // Edit action
-            //array_push(items, { label: "Edit", icon: sprUiPencil, onClick: method({ item: treeviewItem }, function() {
-                 //self.item.treeview.__onItemSelected(self.item, true);
-            //})});
-
             // Duplicate action
             array_push(items, { label: "Duplicate", shortcut: "Ctrl+D", icon: sprUiDuplicate, onClick: method({ item: treeviewItem }, function() {
                  editorTreeviewOnDuplicateAsset(self.item);

@@ -94,7 +94,7 @@ function editorTreeviewOnMultiItemSelected(treeviewItem, mode) {
 
   if (treeviewItem == undefined || treeviewItem.asset == undefined) return;
   
-  var treeview = global.UI.Main.Assets.Treeview;
+  var treeview = treeviewItem.treeview;
 
   if (mode == "toggle") {
     selMgr.toggle(treeviewItem.asset, treeviewItem);

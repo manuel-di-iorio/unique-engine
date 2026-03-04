@@ -208,7 +208,7 @@ function UndoCommandTreeview(action, assetType, asset, parentAsset, parentTreevi
     }
     
     function __addAsset() {
-        var treeview = global.UI.Main.Assets.Treeview;
+        var treeview = (self.assetType == "Scene") ? global.UI.Main.Assets.Treeview : global.UI.Main.Resources.Treeview;
         var assetManager = global.editor.assetManager;
         
         // Re-add to asset manager
@@ -223,7 +223,7 @@ function UndoCommandTreeview(action, assetType, asset, parentAsset, parentTreevi
     }
     
     function __removeAsset() {
-        var treeview = global.UI.Main.Assets.Treeview;
+        var treeview = (self.assetType == "Scene") ? global.UI.Main.Assets.Treeview : global.UI.Main.Resources.Treeview;
         var assetManager = global.editor.assetManager;
         var editorManager = global.editor.editorManager;
         

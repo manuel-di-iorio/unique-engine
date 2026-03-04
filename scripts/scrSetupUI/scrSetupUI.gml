@@ -66,7 +66,7 @@ function scrUiResizeViewports() {
         var containerX = uiScenePos.left;
         var containerY = uiScenePos.top;
         var containerW = uiScenePos.width;
-        var containerH = uiScenePos.height - uiScenePos.top - 1;
+        var containerH = uiScenePos.height;
 
         // Maintain the desired aspect ratio: 16:9
         // Available modes:

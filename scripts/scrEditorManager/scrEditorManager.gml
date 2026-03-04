@@ -11,6 +11,7 @@ function EditorManager() constructor {
     // UI References
     self.inspector = undefined;
     self.treeview = undefined;
+    self.resources = undefined;
     
     // Selection state
     self.selectedTreeviewItem = undefined;
@@ -187,6 +188,15 @@ function EditorManager() constructor {
                 child.selected = false;
             });
             treeview.selectedItem = undefined;
+            
+            // Also clear Resources treeview if it exists
+            if (global.UI.Main[$ "Resources"] != undefined) {
+                var resTv = global.UI.Main.Resources.Treeview;
+                resTv.Items.traverseChildren(function(child) {
+                    child.selected = false;
+                });
+                resTv.selectedItem = undefined;
+            }
         }
         
         var oldScene = self.activeScene;

@@ -85,7 +85,12 @@ function ProjectManager() constructor {
         global.editor.sceneManager.clear();
         ui.Inspector.destroy();
         ui.Assets.destroy();
-        ui.Scene.destroy();
+        if (ui[$ "Resources"] != undefined) ui.Resources.destroy();
+        if (ui[$ "CenterColumn"] != undefined) {
+            ui.CenterColumn.destroy();
+        } else {
+            ui.Scene.destroy();
+        }
     }
     
     function autoLoad() {

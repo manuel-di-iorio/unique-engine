@@ -15,7 +15,8 @@ function ProjectLoader() constructor {
     var settings = self.__readJson(editorJsonPath);
     self.__applyProjectSettings(settings);
 
-    var treeview = global.UI.Main.Assets.Treeview;
+    var resourcesTreeview = global.UI.Main.Resources.Treeview;
+    var sceneTreeview = global.UI.Main.Assets.Treeview;
     self.treeviewItemsByUUID = {};
 
     // 1. Load Folders from project.json
@@ -31,12 +32,12 @@ function ProjectLoader() constructor {
       var names = struct_get_names(foldersData);
       for (var i = 0; i < array_length(names); i++) {
         var fData = foldersData[$ names[i]];
-        array_push(folderTargets, self.__createFolderItem(fData, treeview));
+        array_push(folderTargets, self.__createFolderItem(fData, resourcesTreeview));
       }
     } else if (is_array(foldersData)) {
       for (var i = 0; i < array_length(foldersData); i++) {
         var fData = foldersData[i];
-        array_push(folderTargets, self.__createFolderItem(fData, treeview));
+        array_push(folderTargets, self.__createFolderItem(fData, resourcesTreeview));
       }
     }
 
@@ -55,7 +56,8 @@ function ProjectLoader() constructor {
         if (directory_exists(fullPath) && file_exists(metaPath)) {
           var node = self.__readJson(metaPath);
           node[$ "uuid"] = a;
-          self.__registerAssetFromNode(node, treeview, assetTargets, projectDir);
+          var targetTreeview = (types[i] == "Scenes") ? sceneTreeview : resourcesTreeview;
+          self.__registerAssetFromNode(node, targetTreeview, assetTargets, projectDir);
         }
         a = file_find_next();
       }
@@ -79,7 +81,7 @@ function ProjectLoader() constructor {
         if (struct_exists(parentAsset, "children")) array_push(parentAsset.children, folder);
         folder.__parentUI = parentAsset;
       } else {
-        treeview.Items.add(tvItem);
+        resourcesTreeview.Items.add(tvItem);
       }
     }
 
@@ -106,7 +108,12 @@ function ProjectLoader() constructor {
         }
         asset.__parentUI = parentUUID;
       } else {
-        treeview.Items.add(tvItem);
+        // Determine which treeview to add to based on type
+        if (asset.type == "Scene") {
+            sceneTreeview.Items.add(tvItem);
+        } else {
+            resourcesTreeview.Items.add(tvItem);
+        }
       }
     }
 
@@ -284,7 +291,7 @@ function ProjectLoader() constructor {
     }
 
     var scenes = assetManager.getAssetsByType("Scene");
-    var treeview = global.UI.Main.Assets.Treeview;
+    var treeview = global.UI.Main.Assets.Treeview;  // Scene treeview for lazy loading
 
     // Set up lazy loading callback for the treeview
     var loaderRef = self;

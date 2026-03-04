@@ -278,6 +278,7 @@
     {"id":{"name":"scrEditorUiAssets","path":"scripts/scrEditorUiAssets/scrEditorUiAssets.yy",},},
     {"id":{"name":"scrEditorUiInspector","path":"scripts/scrEditorUiInspector/scrEditorUiInspector.yy",},},
     {"id":{"name":"scrEditorUiMenu","path":"scripts/scrEditorUiMenu/scrEditorUiMenu.yy",},},
+    {"id":{"name":"scrEditorUiResources","path":"scripts/scrEditorUiResources/scrEditorUiResources.yy",},},
     {"id":{"name":"scrEditorUiSceneTools","path":"scripts/scrEditorUiSceneTools/scrEditorUiSceneTools.yy",},},
     {"id":{"name":"scrEditorUndoManager","path":"scripts/scrEditorUndoManager/scrEditorUndoManager.yy",},},
     {"id":{"name":"scrProjectManager","path":"scripts/scrProjectManager/scrProjectManager.yy",},},

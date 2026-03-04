@@ -20,13 +20,38 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
 
     if (isTargetRoot) {
         // We are dropping onto the root background
+        var sceneTreeview = global.UI.Main.Assets.Treeview;
+        var resourcesTreeview = global.UI.Main.Resources.Treeview;
         
-        // Instances cannot be at root (must be in a Scene or under a Mesh)
         var draggedInScene = editorTreeviewUtil_isAssetInScene(draggedItem.asset);
         
-        if (!draggedInScene) {
-            isValidDrop = true;
-            dropAction = "moveToRoot";
+        if (targetItem == sceneTreeview) {
+            if (draggedInScene) {
+                // Move instance to scene root
+                var activeScene = global.editor.editorManager.activeScene;
+                if (activeScene != undefined && editorTreeviewUtil_getSceneOfAsset(draggedItem.asset) == activeScene) {
+                    isValidDrop = true;
+                    dropAction = "reparent";
+                    // Target root of active scene (the scene asset itself)
+                    targetItem = global.editor.editorManager.activeSceneTreeviewItem;
+                }
+            } else {
+                // Instance project asset into active scene
+                if (draggedItem.assetType == "Mesh" || draggedItem.assetType == "Object3D") {
+                    var activeSceneItem = global.editor.editorManager.activeSceneTreeviewItem;
+                    if (activeSceneItem != undefined) {
+                        isValidDrop = true;
+                        dropAction = "instance";
+                        targetItem = activeSceneItem;
+                    }
+                }
+            }
+        } else if (targetItem == resourcesTreeview) {
+            // Drop onto Resources panel root
+            if (!draggedInScene) {
+                isValidDrop = true;
+                dropAction = "moveToRoot";
+            }
         }
     }
     // Allow dropping anything into a Folder

@@ -21,8 +21,18 @@ function scrEditorLoadProject(projectPath) {
     // Store project paths in ProjectManager
     pm.setProjectPath(projectPath);
 
-    // Recreate the UI elements
-    ui.Scene = new UiNode({ name: "Scene", height: "100%", flex: 1, marginLeft: 5, marginRight: 5 }, { border: true, pointerEvents: true, dropzone: true });
+    // Create the center column container (Scene View + Resources stacked vertically)
+    ui.CenterColumn = new UiNode({ 
+        name: "CenterColumn", 
+        height: "100%", 
+        flex: 1, 
+        flexDirection: "column",
+        marginLeft: 5, 
+        marginRight: 5 
+    });
+    
+    // Scene View (upper part of center column)
+    ui.Scene = new UiNode({ name: "Scene", flex: 1, minHeight: 200 }, { border: true, pointerEvents: true, dropzone: true });
     
     // Update orbit controls with the UI Scene reference
     global.editor.sceneManager.orbit.uiSceneNode = ui.Scene;
@@ -31,14 +41,11 @@ function scrEditorLoadProject(projectPath) {
     ui.Scene.onDrop = function(draggedNode) {
         var draggedItem = draggedNode.parent;
         if (draggedItem != undefined && draggedItem[$ "assetType"] != undefined) {
-            // Only allow dropping assets that are already in a scene (instances)
-            if (!editorTreeviewUtil_isAssetInScene(draggedItem.asset)) {
-                 return false;
-            }
-
+            // Allow dropping resources (not in scene) to instance them
             if (draggedItem.assetType == "Mesh" || draggedItem.assetType == "Object3D") {
                 var activeSceneItem = global.editor.editorManager.activeSceneTreeviewItem;
                 if (activeSceneItem != undefined) {
+                    // If asset is already in a scene, move it; otherwise instance it
                     return editorTreeviewOnAssetDrop(draggedItem, activeSceneItem);
                 }
             }
@@ -48,9 +55,14 @@ function scrEditorLoadProject(projectPath) {
 
     em.treeview = new EditorUiAssets(ui);
     em.inspector = new EditorUiInspector(ui);
+    em.resources = new EditorUiResources(ui);
     em.sceneTools = new EditorUiSceneTools(global.UI.Overlay);
 
-    ui.add(ui.Assets, ui.Scene, ui.Inspector);
+    // Add Scene View and Resources to center column
+    ui.CenterColumn.add(ui.Scene, ui.Resources);
+    
+    // Add the three main panels
+    ui.add(ui.Assets, ui.CenterColumn, ui.Inspector);
 
     pm.loaded = true;
     pm.load();

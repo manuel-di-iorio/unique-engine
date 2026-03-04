@@ -4,7 +4,7 @@ function editorTreeviewOnModelImport(treeviewItem) {
 
     var ui = oSceneEditor.ui;
     var assimp = global.editor.sceneManager.assimp;
-    var treeview = ui.Assets.Treeview;
+    var treeview = ui.Resources.Treeview;
 
     // Load the model
     var modelContainer = assimp.load(path);

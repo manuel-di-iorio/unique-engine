@@ -5,7 +5,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   
   // Handle folder creation
   if (assetType == "Folder") {
-      var treeview = global.UI.Main.Assets.Treeview;
+      var treeview = global.UI.Main.Resources.Treeview;
       var folderId = global.UI_ASSETS_FOLDERS_ID++;
       
       // Create folder asset object
@@ -75,7 +75,14 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   }
   
   // Create treeview item
-  var treeview = treeviewItem != undefined ? treeviewItem.treeview : global.UI.Main.Assets.Treeview;
+  // Determine which treeview to use based on asset type
+  var defaultTreeview;
+  if (assetType == "Scene") {
+      defaultTreeview = global.UI.Main.Assets.Treeview;
+  } else {
+      defaultTreeview = global.UI.Main.Resources.Treeview;
+  }
+  var treeview = treeviewItem != undefined ? treeviewItem.treeview : defaultTreeview;
   var icon = undefined;
   
   switch (assetType) {
