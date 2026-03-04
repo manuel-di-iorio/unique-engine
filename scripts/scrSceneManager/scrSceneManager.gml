@@ -3,17 +3,18 @@ function SceneManager() constructor {
     self.renderer = new UeRenderer({
         toneMapping: UE_TONE_MAPPING.REINHARD,
         shadowMap: {
-            enabled: true
+            enabled: true,
+            autoUpdate: false
         }
     });
     self.camera = new UePerspectiveCamera({ x: 100, y: -300, z: 70, far: 10000, view: 1 }).use();
-    // Note: UI.Main.Scene doesn't exist yet at this point, will be set later
     self.orbit = new UeOrbitControls(self.camera, undefined, {
         shouldHandleInput: function () {
             return global.UI.Main.Scene != undefined && global.UI.Main.Scene.hovered;
         },
         onChange: function () {
             global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
+            global.editor.sceneManager.renderer.shadowMap.needsUpdate = true;
         }
     });
     self.scene = new UeScene();
@@ -61,6 +62,8 @@ function SceneManager() constructor {
             global.editor.__undoDragSnapshots = _snapshots;
         },
         onDrag: function () {
+            self.renderer.shadowMap.needsUpdate = true;
+            
             // Sync rotation euler ONLY during gizmo interaction to update the inspector
             var asset = global.editor.sceneManager.transformControls.object;
             if (global.editor.sceneManager.transformControls.mode == "rotate" && asset != undefined && variable_struct_exists(asset, "__rotationEuler")) {

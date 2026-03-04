@@ -13,6 +13,7 @@
 function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) constructor {
     self.camera = camera;
     self.uiSceneNode = uiSceneNode; // Reference to ui.Main.Scene for bounds checking
+    self.onChange = data[$ "onChange"];
     
     // Target settings
     var _initialTarget = data[$ "target"] ?? vec3_create(data[$ "xt"] ?? 0, data[$ "yt"] ?? 0, data[$ "zt"] ?? 0);
@@ -471,7 +472,6 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
             // Update camera target based on look direction
             var targetDist = self.radius; // Use current radius as distance for look-at point
             vec3_add_scaled_vector(vec3_copy(self.camera.target, camPos), forward, targetDist);
-            // We DON'T update self.target here to avoid orbit drifting during flight
         } else {
             // === ORBIT MODE ===
             
@@ -610,6 +610,10 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         if (!warped) {
             self._prevMouseX = mx;
             self._prevMouseY = my;
+        }
+        
+        if (self.onChange != undefined && (self.transforming || isDamping || self.autoRotate)) {
+            self.onChange();
         }
     }
     

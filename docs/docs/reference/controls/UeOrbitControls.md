@@ -30,6 +30,7 @@ new UeOrbitControls(camera, uiSceneNode = undefined, data = {})
 | `screenSpacePanning` | `boolean`   | `false`      | Whether pan is screen-space aligned |
 | `enableFlythrough`   | `boolean`   | `true`       | Enables FPS-style flythrough mode   |
 | `flythroughSpeed`    | `number`    | `5.0`       | Base speed for flythrough movement  |
+| `onChange`          | `function`  | `undefined` | Callback triggered when the camera is transformed |
 
 ### Properties
 
@@ -50,6 +51,7 @@ new UeOrbitControls(camera, uiSceneNode = undefined, data = {})
 | `mouseButtonPan`    | `number`    | Mouse button for panning          |
 | `keys`              | `object`    | Directional keyboard key mappings |
 | `transforming`      | `boolean`   | Whether the camera is being orbited with the mouse (read-only) |
+| `onChange`          | `function`  | The callback triggered on camera transformation |
 
 ## 🧩 Methods
 

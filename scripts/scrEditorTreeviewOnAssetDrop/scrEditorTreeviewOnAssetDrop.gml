@@ -70,6 +70,7 @@ function editorTreeviewOnAssetDrop(draggedTreeviewItem, targetTreeviewItem) {
             var material = targetItem.asset;
             var texture = draggedItem.asset;
             material.setTexture("map", texture);
+            material.build();
             
             // Refresh inspector if this material is the one currently edited
             if (global.editor.editorManager.activeAsset == material) {

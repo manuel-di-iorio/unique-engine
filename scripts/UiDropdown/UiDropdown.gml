@@ -10,11 +10,11 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
     self.List = undefined;
     self.search = props[$ "search"];
 
-    self.onStep(function() {
-        if (self.itemsGetter != undefined) {
-            self.items = self.itemsGetter("");
-        }
+    if (self.itemsGetter != undefined) {
+        self.items = self.itemsGetter("");
+    }
 
+    self.onStep(function() {
         // Check if current value is still valid
         if (self.value != undefined && array_length(self.items) > 0) {
             var found = false;

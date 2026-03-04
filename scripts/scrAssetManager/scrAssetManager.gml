@@ -217,6 +217,7 @@ function AssetManager() constructor {
         // Update the box helper to match the new transform
         global.editor.sceneManager.boxHelper.update();
         global.editor.sceneManager.transformControls.updateGizmo();
+        global.editor.sceneManager.renderer.shadowMap.needsUpdate = true;
     }
 
     /**
