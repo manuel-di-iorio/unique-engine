@@ -147,6 +147,7 @@ function EditorUiSceneTools(ui) constructor {
             }
             global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         }
+        sm.needsUpdate = true;
     });
 
     // Toggle grid
