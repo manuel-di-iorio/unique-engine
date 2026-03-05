@@ -39,6 +39,7 @@ function AssetManager() constructor {
 
         // Track creation
         __trackChange("create", asset);
+        global.editor.sceneManager.needsUpdate = true;
     }
 
     /**
@@ -68,6 +69,7 @@ function AssetManager() constructor {
 
         // Track removal
         __trackChange("delete", asset);
+        global.editor.sceneManager.needsUpdate = true;
     }
 
     /**
@@ -108,6 +110,8 @@ function AssetManager() constructor {
         if (asset.type == "Mesh" || asset.type == "Object3D") {
             self.updateAssetMatrix(asset, recursive);
         }
+        
+        global.editor.sceneManager.needsUpdate = true;
 
         // Also notify the global editor manager so UI components can react
         if (emitEvent) {
@@ -218,6 +222,7 @@ function AssetManager() constructor {
         global.editor.sceneManager.boxHelper.update();
         global.editor.sceneManager.transformControls.updateGizmo();
         global.editor.sceneManager.renderer.shadowMap.needsUpdate = true;
+        global.editor.sceneManager.needsUpdate = true;
     }
 
     /**

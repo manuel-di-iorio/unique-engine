@@ -7,6 +7,25 @@ function SceneManager() constructor {
             autoUpdate: false
         }
     });
+    
+    self.needsUpdate = true;
+    self.autoUpdate = false;
+    self.surface = -1;
+
+    /**
+     * @returns {bool} Whether the scene is currently being manipulated (orbit, gizmo, etc.)
+     */
+    function isTransforming() {
+        var _orbit = self.orbit;
+        var _isDamping = false;
+        if (_orbit != undefined && _orbit.enableDamping && !_orbit.flythroughActive) {
+            _isDamping = abs(_orbit._deltaAzimuth) > 0.0001 || 
+                         abs(_orbit._deltaElevation) > 0.0001 || 
+                         vec3_length_sq(_orbit._deltaPan) > 0.0001;
+        }
+        return (_orbit != undefined && _orbit.transforming) || _isDamping || self.transformControls.dragging;
+    }
+    
     self.camera = new UePerspectiveCamera({ x: 100, y: -300, z: 70, far: 10000, view: 1 }).use();
     self.orbit = new UeOrbitControls(self.camera, undefined, {
         shouldHandleInput: function () {
@@ -15,6 +34,7 @@ function SceneManager() constructor {
         onChange: function () {
             global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
             global.editor.sceneManager.renderer.shadowMap.needsUpdate = true;
+            global.editor.sceneManager.needsUpdate = true;
         }
     });
     self.scene = new UeScene();
@@ -63,6 +83,7 @@ function SceneManager() constructor {
         },
         onDrag: function () {
             self.renderer.shadowMap.needsUpdate = true;
+            global.editor.sceneManager.needsUpdate = true;
             
             // Sync rotation euler ONLY during gizmo interaction to update the inspector
             var asset = global.editor.sceneManager.transformControls.object;

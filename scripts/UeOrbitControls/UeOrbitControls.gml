@@ -135,6 +135,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         }
         
         self._needsUpdate = true;
+        if (self.onChange != undefined) self.onChange();
     }
     
     /// Update spherical coordinates from current camera position
@@ -184,6 +185,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
             }
         }
         self.updateSphericalCoordinates();
+        if (self.onChange != undefined) self.onChange();
     }
     
     /// Focus on an object
@@ -231,6 +233,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         vec3_set(self._deltaPan, 0, 0, 0);
         self.updateSphericalCoordinates();
         self._needsUpdate = true;
+        if (self.onChange != undefined) self.onChange();
     }
     
     /// Check if mouse is inside UI scene bounds

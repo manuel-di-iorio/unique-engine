@@ -148,6 +148,8 @@ function scrUiResizeViewports() {
         if (viewW > 0 && viewH > 0) {
             sceneManager.camera.aspect = viewW / viewH;
             sceneManager.camera.updateProjectionMatrix();
+            // sceneManager.renderer.setSize(viewW, viewH);
+            sceneManager.needsUpdate = true;
         }
     }
 }
