@@ -532,14 +532,17 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
                 
                 if (wheelUp) {
                     self.radius *= (1 - zoomFactor);
+                    self._needsUpdate = true;
                 }
                 if (wheelDown) {
                     self.radius *= (1 + zoomFactor);
+                    self._needsUpdate = true;
                 }
                 if (self._altZoomActive) {
                     // Continuous zoom via mouse drag
                     var dragFactor = dy * 0.005 * self.zoomSpeed;
                     self.radius *= (1 + dragFactor);
+                    self._needsUpdate = true;
                 }
             }
             

@@ -223,6 +223,12 @@ function EditorSelectionManager() constructor {
         self.primaryTreeviewItem = undefined;
         self.transformOffsets = [];
         
+        // Force scene update when clearing selection to remove bbox
+        var sm = global.editor.sceneManager;
+        if (sm != undefined) {
+            sm.needsUpdate = true;
+        }
+        
         __dispatchSelectionChanged();
     }
     
