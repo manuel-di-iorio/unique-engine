@@ -82,8 +82,11 @@ function SceneManager() constructor {
             global.editor.__undoDragSnapshots = _snapshots;
         },
         onDrag: function () {
-            self.renderer.shadowMap.needsUpdate = true;
-            global.editor.sceneManager.needsUpdate = true;
+            var sm = global.editor.sceneManager;
+            if (sm.renderer != undefined && sm.renderer.shadowMap != undefined) {
+                sm.renderer.shadowMap.needsUpdate = true;
+            }
+            sm.needsUpdate = true;
             
             // Sync rotation euler ONLY during gizmo interaction to update the inspector
             var asset = global.editor.sceneManager.transformControls.object;

@@ -1,7 +1,7 @@
 {
   "children": [
     {
-      "__localOverrides": {},
+      "__localOverrides": { "position": true },
       "children": [],
       "geometry": {
         "boneIndices": null,
@@ -35,13 +35,14 @@
       "matrixAutoUpdate": false,
       "name": "mSnowmanHat",
       "parent": "f19cc000-5be7-40bc-9a05-33a5b20f1146",
+      "position": [ -301.04, -104.92, 0 ],
       "prefab": "77e9dae7-fa5c-4239-9538-dc7747019eb4",
       "rotationEuler": [ 90, 49.59, 0 ],
       "type": "Mesh",
       "uuid": "2a5233dd-4eed-4059-8c46-22543db7f91a"
     },
     {
-      "__localOverrides": {},
+      "__localOverrides": { "position": true },
       "children": [],
       "geometry": {
         "boneIndices": null,
@@ -75,13 +76,14 @@
       "matrixAutoUpdate": false,
       "name": "mTreeDecoratedSnow",
       "parent": "f19cc000-5be7-40bc-9a05-33a5b20f1146",
+      "position": [ 6.68, 9.20, 0 ],
       "prefab": "a071a0e1-4c18-4b5f-b1cc-77d3adc54431",
       "rotationEuler": [ 90, 0, 0 ],
       "type": "Mesh",
       "uuid": "0dc0fa14-e5d3-46e9-9169-8051b2cb5fba"
     },
     {
-      "__localOverrides": {},
+      "__localOverrides": { "position": true },
       "children": [],
       "geometry": {
         "boneIndices": null,
@@ -115,6 +117,7 @@
       "matrixAutoUpdate": false,
       "name": "mTree",
       "parent": "f19cc000-5be7-40bc-9a05-33a5b20f1146",
+      "position": [ 569.82, 160.22, 0 ],
       "prefab": "73b0eba7-a4ef-46d2-9681-5a0ccaf16bd8",
       "rotationEuler": [ 270, 0, 0 ],
       "type": "Mesh",
@@ -287,7 +290,7 @@
       "uuid": "6618fe18-9408-43f6-8214-059f667c2954"
     },
     {
-      "__localOverrides": {},
+      "__localOverrides": { "position": true, "rotation": true },
       "children": [],
       "geometry": {
         "boneIndices": null,
@@ -321,8 +324,10 @@
       "matrixAutoUpdate": false,
       "name": "mReindeer",
       "parent": "f19cc000-5be7-40bc-9a05-33a5b20f1146",
+      "position": [ 450.14, 430.32, 0 ],
       "prefab": "9735591a-e78e-48e3-882c-5f9330ad8250",
-      "rotationEuler": [ 90, -73.32, 0 ],
+      "rotation": [ -0.68, -0.20, -0.20, -0.68 ],
+      "rotationEuler": [ 90, 33.56, 0 ],
       "type": "Mesh",
       "uuid": "656e20a5-6bfe-4ac0-81b1-2f3a7ee41746"
     },
