@@ -52,6 +52,12 @@ function EditorManager() constructor {
             if ((asset[$ "type"] ?? asset[$ "assetType"]) == "Scene") {
                 currentScene = asset;
                 currentSceneItem = treeviewItem;
+                // Scenes can be selected from the Resources panel, but their instances must
+                // only be shown in the Assets (left) treeview. Never use the Resources item
+                // as a load target for building the scene hierarchy UI.
+                if (currentSceneItem != undefined && currentSceneItem[$ "treeview"] == global.UI.Main.Resources.Treeview) {
+                    currentSceneItem = undefined;
+                }
             } else {
                 // Find parent scene via asset hierarchy (reliable)
                 currentScene = editorTreeviewUtil_getSceneOfAsset(asset);

@@ -148,6 +148,15 @@ function __editorTreeviewOnDuplicateAsset__createUiRecursive(treeview, asset, pa
     } else {
       treeview.Items.add(newItem);
     }
+
+    // Scenes are project assets: they must NOT show their instances/children in the Resources treeview.
+    if (type == "Scene") {
+      newItem.needsLoading = true;
+      if (newItem[$ "Arrow"] != undefined) {
+        newItem.Arrow.visible = false;
+      }
+      return newItem;
+    }
     
     if (variable_struct_exists(asset, "children")) {
       for (var i = 0; i < array_length(asset.children); i++) {
