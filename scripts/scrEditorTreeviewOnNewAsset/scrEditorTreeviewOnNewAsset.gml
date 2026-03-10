@@ -77,11 +77,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   // Create treeview item
   // Determine which treeview to use based on asset type
   var defaultTreeview;
-  if (assetType == "Object3D") {
-      defaultTreeview = global.UI.Main.Assets.Treeview;
-  } else {
-      defaultTreeview = global.UI.Main.Resources.Treeview;
-  }
+  defaultTreeview = global.UI.Main.Resources.Treeview;
   var treeview = treeviewItem != undefined ? treeviewItem.treeview : defaultTreeview;
   var icon = undefined;
   

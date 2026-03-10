@@ -8,6 +8,7 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
     self.__contentHeight = undefined;
     self.__maxThumbPosition = undefined;
     self.__maxScroll = undefined;
+    self.__lastChildrenLength = -1;
     self.thumbColor = props[$ "thumbColor"] ?? global.UI_COL_BOX;
     
     // Create the thumb
@@ -31,13 +32,30 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
     
     self.onStep(function(layoutUpdated) {
         var layoutHeight = self.layout.height;
+
+        var childrenChanged = (self.parent != undefined && self.parent.childrenLength != self.__lastChildrenLength);
+        var shouldRecalc = layoutUpdated || childrenChanged;
+        if (!shouldRecalc) {
+            // Layout might have been resolved on children after we already handled layoutUpdated.
+            // If we still don't have a valid content height, keep trying until it stabilizes.
+            shouldRecalc = (layoutHeight > 0 && (self.__contentHeight == undefined || self.__contentHeight <= 0));
+        }
         
-        if (layoutUpdated) {
+        if (shouldRecalc) {
+            if (self.parent != undefined) {
+                self.__lastChildrenLength = self.parent.childrenLength;
+            }
             // Height calculation
             self.__contentHeight = self.parent.reduceChildren(function(height, child) {
                 if (child.isScrollbar) return height;
                 return height + child.layout.height;
             }, 0, false);
+
+            // If the layout hasn't resolved child sizes yet, retry next frame
+            if (self.__contentHeight <= 0 && layoutHeight > 0) {
+                self.__contentHeight = undefined;
+                return;
+            }
            
             var _thumbHeight = ~~(max(10, min(layoutHeight, layoutHeight * (layoutHeight / __contentHeight))));
             

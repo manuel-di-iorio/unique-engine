@@ -247,7 +247,12 @@ function EditorUiAssets(ui) constructor {
             // Background click - show "Add" menu for scene objects
             items = [
                 { label: "New Object3D", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
-                    editorTreeviewOnNewAsset(undefined, "Object3D");
+                    var em = global.editor.editorManager;
+                    var sceneItem = (em != undefined) ? em.activeSceneTreeviewItem : undefined;
+                    if (sceneItem == undefined && em != undefined && em.activeScene != undefined) {
+                        sceneItem = em.activeScene[$ "__treeviewItem"];
+                    }
+                    editorTreeviewOnNewAsset(sceneItem, "Object3D");
                 })}
             ];
         } else {
