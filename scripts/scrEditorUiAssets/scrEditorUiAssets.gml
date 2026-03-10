@@ -82,6 +82,9 @@ function EditorUiAssets(ui) constructor {
     ui.Assets.refreshTreeview = method(ui.Assets, function() {
         var activeScene = global.editor.editorManager.activeScene;
         self.Treeview.Items.destroyChildren(); // Properly destroy current items and their UI nodes
+        if (self.Treeview.Items[$ "__UiScrollbar"] == undefined) {
+            self.Treeview.Items.enableScrollbar();
+        }
         
         if (activeScene != undefined) {
             // Build the hierarchy (instances) directly into the treeview root
@@ -105,8 +108,10 @@ function EditorUiAssets(ui) constructor {
     // Initial sync (in case a scene is already active when this UI is created)
     var __initScene = global.editor.editorManager.activeScene;
     if (__initScene != undefined) {
+        ui.Assets.SceneDropdown.items = __sceneDropdownItemsGetter("");
         ui.Assets.SceneDropdown.value = __initScene.uuid;
         ui.Assets.lastActiveScene = __initScene;
+        global.UI.requestRedraw();
     }
 
     // Treeview

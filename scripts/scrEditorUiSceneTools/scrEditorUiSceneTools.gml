@@ -143,8 +143,11 @@ function EditorUiSceneTools(ui) constructor {
             sm.camera.lookAt(0, 0, 0);
             if (sm.orbit != undefined) {
                 vec3_set(sm.orbit.target, 0, 0, 0);
-                sm.orbit.reset(); 
+                sm.orbit.reset();
+                sm.orbit._needsUpdate = true;
+                sm.orbit.update();
             }
+            sm.camera.updateMatrixWorld();
             global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         }
         sm.needsUpdate = true;
@@ -159,6 +162,7 @@ function EditorUiSceneTools(ui) constructor {
             sm.grid.visible = !sm.grid.visible;
             sm.gridEnabled = sm.grid.visible;
             self.selected = sm.grid.visible;
+            sm.needsUpdate = true;
             global.UI.requestRedraw();
             global.editor.projectManager.saver.saveEditorSettings(global.editor.projectManager);
         });

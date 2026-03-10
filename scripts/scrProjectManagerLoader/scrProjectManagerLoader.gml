@@ -222,6 +222,7 @@ function ProjectLoader() constructor {
       if (sm.camera != undefined && c[$ "position"] != undefined) {
         sm.camera.setPosition(c.position[0], c.position[1], c.position[2]);
       }
+      sm.needsUpdate = true;
       if (sm.orbit != undefined) {
         if (c[$ "target"] != undefined) vec3_set(sm.orbit.target, c.target[0], c.target[1], c.target[2]);
         // if (c[$ "dampingFactor"] != undefined) sm.orbit.dampingFactor = c.dampingFactor;
@@ -230,7 +231,11 @@ function ProjectLoader() constructor {
         if (c[$ "rotateSpeed"] != undefined) sm.orbit.rotateSpeed = c.rotateSpeed;
         
         sm.orbit.updateSphericalCoordinates();
+        sm.orbit._needsUpdate = true;
         sm.orbit.update();
+      }
+      if (sm.camera != undefined) {
+        sm.camera.updateMatrixWorld();
       }
       // global.editor.editorManager.sceneTools.updateDampingButton();
     }
@@ -249,6 +254,7 @@ function ProjectLoader() constructor {
       }
       
       global.editor.editorManager.sceneTools.updateGridButton();
+      sm.needsUpdate = true;
     }
 
     if (settings[$ "gizmos"] != undefined) {
@@ -259,6 +265,7 @@ function ProjectLoader() constructor {
         sm.boxHelper.visible = sm.showBoxColliders;
       }
       global.editor.editorManager.sceneTools.updateBoxCollidersButton();
+      sm.needsUpdate = true;
     }
   };
 
