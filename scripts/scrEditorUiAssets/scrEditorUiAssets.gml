@@ -248,11 +248,9 @@ function EditorUiAssets(ui) constructor {
             items = [
                 { label: "New Object3D", icon: sprUiObject, onClick: method({ treeview: self.treeview }, function() {
                     var em = global.editor.editorManager;
-                    var sceneItem = (em != undefined) ? em.activeSceneTreeviewItem : undefined;
-                    if (sceneItem == undefined && em != undefined && em.activeScene != undefined) {
-                        sceneItem = em.activeScene[$ "__treeviewItem"];
-                    }
-                    editorTreeviewOnNewAsset(sceneItem, "Object3D");
+                    var activeScene = (em != undefined) ? em.activeScene : undefined;
+                    // Create instance under activeScene, but show it in the Assets panel treeview
+                    editorTreeviewOnNewAsset(undefined, "Object3D", self.treeview, activeScene);
                 })}
             ];
         } else {

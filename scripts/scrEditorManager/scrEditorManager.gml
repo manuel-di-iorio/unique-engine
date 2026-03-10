@@ -221,6 +221,13 @@ function EditorManager() constructor {
         if (sceneToKeep == undefined) {
             self.activeScene = undefined;
             self.activeSceneTreeviewItem = undefined;
+
+            if (oldScene != undefined && global.editor[$ "events"] != undefined) {
+                global.editor.events.dispatch({
+                    type: "activeSceneChanged",
+                    data: { scene: undefined, sceneItem: undefined }
+                });
+            }
             
             // Collapse old scene if it was active to trigger unloading
             if (oldSceneItem != undefined) {

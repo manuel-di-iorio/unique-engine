@@ -1,5 +1,5 @@
 //* Create a new asset when clicking the + icon button on the Treeview */
-function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
+function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined, treeviewOverride = undefined, parentAssetOverride = undefined) {
   // In free mode, assetType might not be set, so we use the override or prompt
   var assetType = assetTypeOverride ?? (treeviewItem != undefined ? treeviewItem.assetType : undefined);
   
@@ -78,7 +78,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   // Determine which treeview to use based on asset type
   var defaultTreeview;
   defaultTreeview = global.UI.Main.Resources.Treeview;
-  var treeview = treeviewItem != undefined ? treeviewItem.treeview : defaultTreeview;
+  var treeview = treeviewOverride != undefined ? treeviewOverride : (treeviewItem != undefined ? treeviewItem.treeview : defaultTreeview);
   var icon = undefined;
   
   switch (assetType) {
@@ -105,7 +105,7 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
   asset.name = _assetTypeName + string(assetId);
   
   // Determine the parent asset (only for 3D hierarchy, not folders)
-  var parentAsset = undefined;
+  var parentAsset = parentAssetOverride;
   var parentTreeviewItem = treeviewItem;
 
   // Special case for lights: they must be children of a scene
@@ -146,11 +146,17 @@ function editorTreeviewOnNewAsset(treeviewItem, assetTypeOverride = undefined) {
               }
           }
       }
-  } else */if (treeviewItem != undefined && treeviewItem.asset != undefined) {
+  } else */if (parentAssetOverride == undefined && treeviewItem != undefined && treeviewItem.asset != undefined) {
       // Only set parent if it's NOT a folder (folders are UI organization only)
       if (treeviewItem.asset[$ "type"] != "Folder") {
           parentAsset = treeviewItem.asset;
       }
+  }
+
+  // If we are overriding the target treeview (e.g. show instance in Assets panel),
+  // do not force the UI to be parented under the original treeview item.
+  if (treeviewOverride != undefined && treeviewItem != undefined && treeviewItem.treeview != treeviewOverride) {
+      parentTreeviewItem = undefined;
   }
 
   // Add to treeview

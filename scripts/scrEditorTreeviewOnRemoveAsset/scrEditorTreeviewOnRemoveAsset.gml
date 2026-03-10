@@ -5,7 +5,10 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     var assetManager = global.editor.assetManager;
     
     // === UNDO: Capture parent info BEFORE any removal ===
-    var _undoParentAsset = (asset != undefined && asset.parent != undefined) ? asset.parent : undefined;
+    var _undoParentAsset = undefined;
+    if (asset != undefined && variable_struct_exists(asset, "parent") && asset.parent != undefined) {
+        _undoParentAsset = asset.parent;
+    }
     var _undoParentTreeviewItem = undefined;
     if (treeviewItem.parent != undefined && treeviewItem.parent.parent != undefined) {
         var _containerParent = treeviewItem.parent.parent;
@@ -15,7 +18,9 @@ function editorTreeviewOnRemoveAsset(treeviewItem, isSelected) {
     }
     
     // === 1. CHIUSURA INSPECTOR SE ASSET SELEZIONATO ===
-    if (isSelected || (asset != undefined && editorManager.activeAsset == asset)) {
+    // Also clear if we are deleting the currently active scene (even if it's not selected)
+    var _isDeletingActiveScene = (assetType == "Scene" && asset != undefined && editorManager.activeScene == asset);
+    if (isSelected || (asset != undefined && editorManager.activeAsset == asset) || _isDeletingActiveScene) {
         var keepScene = editorManager.activeScene != undefined;
         
         // If we are deleting the active scene itself, don't keep it
