@@ -31,6 +31,10 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
     _recursionScope.updateIdentifiers = method(_recursionScope, function(asset, originalSource = undefined) {
         if (!is_struct(asset)) return;
 
+        if (asset[$ "type"] == undefined && asset[$ "assetType"] != undefined) {
+            asset.type = asset.assetType;
+        }
+
         asset.uuid = ueUuid();
         
         // Preserve __instanceOf if it exists on original
@@ -84,6 +88,9 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
     
     _recursionScope.updateIdentifiers(clonedAsset, originalAsset);
     if (is_struct(clonedAsset)) {
+        if (clonedAsset[$ "type"] == undefined && clonedAsset[$ "assetType"] != undefined) {
+            clonedAsset.type = clonedAsset.assetType;
+        }
         clonedAsset.name = originalAsset.name + " (Copy)";
         clonedAsset.parent = undefined; // Root clone has no parent yet
     }
@@ -115,6 +122,15 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
 
     // 6. Select
     treeview.__onItemSelected(newRootItem, false);
+
+    // 6b. Force matrices/render update for newly duplicated scenes
+    var _clonedType = clonedAsset[$ "type"] ?? clonedAsset[$ "assetType"];
+    if (_clonedType == "Scene") {
+        assetManager.updateAssetMatrix(clonedAsset, true);
+        if (variable_struct_exists(clonedAsset, "forceUpdate")) {
+            clonedAsset.forceUpdate();
+        }
+    }
     
     // 7. Push undo command (duplicate = create action)
     global.editor.undoManager.push(new UndoCommandTreeview("create", treeviewItem.assetType, clonedAsset, parentAsset, targetParentItem));
@@ -122,7 +138,7 @@ function editorTreeviewOnDuplicateAsset(treeviewItem) {
 
 function __editorTreeviewOnDuplicateAsset__createUiRecursive(treeview, asset, parentUiItem) {
     var icon = undefined;
-    var type = asset[$ "type"] ?? "Object3D"; 
+    var type = asset[$ "type"] ?? asset[$ "assetType"] ?? "Object3D"; 
     
     // Map type to icon (simple heuristic)
     if (type == "Folder") icon = sprUiFolder;

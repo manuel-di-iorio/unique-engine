@@ -20,12 +20,14 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
     
     function onMount() {
         self.parent.onWheelUp(function(ev) {
-            self.parent.scrollTop = max(0, self.parent.scrollTop - 30);
+            var _maxScroll = (self.__maxScroll != undefined) ? self.__maxScroll : 0;
+            self.parent.scrollTop = clamp(self.parent.scrollTop - 30, 0, _maxScroll);
             global.UI.requestRedraw();
         });
         
         self.parent.onWheelDown(function(ev) {
-            self.parent.scrollTop = min(self.__maxScroll, self.parent.scrollTop + 30);
+            var _maxScroll = (self.__maxScroll != undefined) ? self.__maxScroll : 0;
+            self.parent.scrollTop = clamp(self.parent.scrollTop + 30, 0, _maxScroll);
             global.UI.requestRedraw();
         });
     }

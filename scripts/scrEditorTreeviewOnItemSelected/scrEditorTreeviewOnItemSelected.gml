@@ -11,7 +11,8 @@ function editorTreeviewOnItemSelected(treeviewItem, focus = false) {
   // Single select: clear SelectionManager and set the one item
   selMgr.select(treeviewItem.asset, treeviewItem);
 
-  switch (treeviewItem.asset.type) {
+  var _type = treeviewItem.asset[$ "type"] ?? treeviewItem.asset[$ "assetType"];
+  switch (_type) {
     case "Mesh":
     case "Bone":
     case "Object3D":

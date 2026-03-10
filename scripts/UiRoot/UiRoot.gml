@@ -703,6 +703,18 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         }
     } 
     
+    /// @desc Add an element to Overlay with highest drawIndex to ensure it's always on top
+    /// @param {Struct} element The UI element to add to overlay
+    function addToOverlayOnTop(element) {
+        gml_pragma("forceinline");
+        self.Overlay.add(element);
+        
+        // Force highest drawIndex to ensure element is always on top
+        element.__drawIndex = self.__layoutDrawIndex++;
+        if (element.__spatialProxyId != undefined) {
+            self.spatialTree.updateDrawIndex(element.__spatialProxyId, element.__drawIndex);
+        }
+    }
     
     setName("UniqueUI");
 }

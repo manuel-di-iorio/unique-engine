@@ -233,7 +233,7 @@ function UiDropdown(style = {}, props = {}) : UiNode(style, props) constructor {
             self.createItems(); 
         }
         
-        global.UI.Overlay.add(self.List);
+        global.UI.addToOverlayOnTop(self.List);
     }
     
     self.closeList = function() {

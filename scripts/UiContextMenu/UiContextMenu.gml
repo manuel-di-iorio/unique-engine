@@ -182,7 +182,7 @@ function UiContextMenu(x, y, items) constructor {
             }
         }
         
-        global.UI.Overlay.add(self.Menu);
+        global.UI.addToOverlayOnTop(self.Menu);
     }
     
     /**

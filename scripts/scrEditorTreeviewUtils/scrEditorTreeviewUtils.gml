@@ -293,7 +293,8 @@ function editorTreeviewUtil_createTreeviewItem(asset, parent, icon, expand = fal
 /// @param {Asset.GMSprite} icon The icon sprite for the children
 function editorTreeviewUtil_createTreeviewItemsForChildren(asset, parent, icon) {
     // Do NOT expand Scene assets in Resources treeview (scenes are already shown in Assets panel)
-    if (asset.type == "Scene") return;
+    var _treeview = parent[$ "treeview"] ?? parent;
+    if ((asset[$ "type"] ?? asset[$ "assetType"]) == "Scene" && _treeview == global.UI.Main.Resources.Treeview) return;
     
     if (asset[$ "children"] == undefined) return;
     
