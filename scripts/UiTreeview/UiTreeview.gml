@@ -60,22 +60,12 @@ function UiTreeview(style = {}, props = {}): UiNode(style, props) constructor {
         }
         
         if (keyboard_check(vk_control) && keyboard_check_pressed(ord("D"))) {
-            // Multi-duplicate: if SelectionManager has multiple items, duplicate them all
+            // Duplicate only the last (primary) selected treeview item.
+            // This prevents duplicating items from multiple treeviews when both panels have selection.
             var _selMgr = global.editor.selectionManager;
-            if (_selMgr != undefined && _selMgr.count() > 1) {
-                // Collect treeview items to duplicate (copy array to avoid mutation during iteration)
-                var _items = [];
-                array_copy(_items, 0, _selMgr.selectedTreeviewItems, 0, array_length(_selMgr.selectedTreeviewItems));
-                
-                // Duplicate each item
-                for (var i = 0; i < array_length(_items); i++) {
-                    var _tvItem = _items[i];
-                    if (_tvItem != undefined) {
-                        editorTreeviewOnDuplicateAsset(_tvItem);
-                    }
-                }
-            } else if (self.selectedItem != undefined) {
-                editorTreeviewOnDuplicateAsset(self.selectedItem);
+            var _primaryTvItem = (_selMgr != undefined) ? _selMgr.primaryTreeviewItem : undefined;
+            if (_primaryTvItem != undefined && _primaryTvItem[$ "treeview"] == self) {
+                editorTreeviewOnDuplicateAsset(_primaryTvItem);
             }
         }
         

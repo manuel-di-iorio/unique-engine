@@ -92,6 +92,7 @@ function EditorUiAssets(ui) constructor {
                 editorTreeviewUtil_createTreeviewItemsForChildren(activeScene, self.Treeview, sprUiObject);
             }
         }
+        global.UI.requestUpdate();
         global.UI.requestRedraw();
     });
 
@@ -99,6 +100,7 @@ function EditorUiAssets(ui) constructor {
     if (global.editor[$ "events"] != undefined) {
         global.editor.events.on("activeSceneChanged", method({ ui: ui }, function(ev) {
             var scene = ev.data[$ "scene"];
+            self.ui.Assets.SceneDropdown.items = __sceneDropdownItemsGetter("");
             self.ui.Assets.SceneDropdown.value = (scene != undefined) ? scene.uuid : undefined;
             self.ui.Assets.lastActiveScene = scene;
             self.ui.Assets.refreshTreeview();
