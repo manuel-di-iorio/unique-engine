@@ -329,6 +329,12 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
             wheelDown = mouse_wheel_down();
         }
         
+        var hasKeyboardInput = allowInteractions && !global.UI.hasAnyFocus() && (
+            keyboard_check(self.keys.FORWARD) || keyboard_check(self.keys.BACKWARD) ||
+            keyboard_check(self.keys.LEFT_STRAFE) || keyboard_check(self.keys.RIGHT_STRAFE) ||
+            keyboard_check(self.keys.UP_MOVE) || keyboard_check(self.keys.DOWN_MOVE)
+        );
+        
         // Mouse button states
         var leftMouse = mouse_check_button(mb_left);
         var middleMouse = mouse_check_button(mb_middle);
@@ -380,7 +386,7 @@ function UeOrbitControls(camera, uiSceneNode, data = {}): UeControls(data) const
         self._altZoomActive = altZoomMode;
         
         var wasTransforming = self.transforming;
-        self.transforming = self._orbitActive || self._panActive || self._altZoomActive || self.flythroughActive;
+        self.transforming = self._orbitActive || self._panActive || self._altZoomActive || self.flythroughActive || wheelUp || wheelDown || hasKeyboardInput;
         
         // Check if we should perform early exit (no input, no damping, no auto-rotate)
         var isDamping = false;

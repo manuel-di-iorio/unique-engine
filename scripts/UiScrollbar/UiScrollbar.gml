@@ -49,22 +49,29 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         });
     }
     
-    /// @desc Calculate total content height from parent's children (excluding scrollbar)
+    /// @desc Calculate total content height based on children's layout bounds and parent padding
     function __calcContentHeight() {
-        var _total = 0;
+        var _maxBottom = 0;
         var _parent = self.parent;
         var _children = _parent.children;
         var _len = _parent.childrenLength;
+        var _found = false;
         
         for (var i = 0; i < _len; i++) {
             var _child = _children[i];
             // Skip the scrollbar itself and hidden children
             if (_child.isScrollbar) continue;
             if (!_child.display) continue;
-            _total += _child.layout.height;
+            
+            // The content height is determined by the bottom-most edge of all children
+            _maxBottom = max(_maxBottom, _child.layout.top + _child.layout.height);
+            _found = true;
         }
         
-        return _total;
+        if (!_found) return 0;
+
+        // Use relative height within the parent container
+        return (_maxBottom - _parent.layout.top) + _parent.layout.paddingBottom;
     }
     
     self.onStep(function(layoutUpdated) {
@@ -75,47 +82,38 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         var _viewportHeight = _parent.layout.height;
         if (_viewportHeight <= 0) return;
         
-        // Detect if we need to recalculate
+        // Always check content height and children length (cheap comparison)
+        var _newContentHeight = self.__calcContentHeight();
         var _childrenChanged = (_parent.childrenLength != self.__lastChildrenLength);
-        var _shouldRecalc = layoutUpdated || _childrenChanged;
+        var _contentChanged = (abs(_newContentHeight - self.__contentHeight) > 0.5);
         
-        // Also recalc if content height was never computed
-        if (!_shouldRecalc && self.__contentHeight <= 0) {
-            _shouldRecalc = true;
-        }
+        var _shouldRecalc = layoutUpdated || _childrenChanged || _contentChanged || (abs(_viewportHeight - self.__viewportHeight) > 0.5);
         
         if (_shouldRecalc) {
             self.__lastChildrenLength = _parent.childrenLength;
             self.__viewportHeight = _viewportHeight;
-            
-            // Calculate content height
-            self.__contentHeight = self.__calcContentHeight();
-            
-            // Skip if content hasn't resolved yet
-            if (self.__contentHeight <= 0 && _viewportHeight > 0) {
-                return;
-            }
+            self.__contentHeight = _newContentHeight;
             
             // Calculate max scroll
             self.__maxScroll = max(0, self.__contentHeight - _viewportHeight);
             
-            // Clamp scrollTop — critical fix for stale scroll position
+            // Clamp scrollTop — critical fix for stale scroll position when content shrinks
             if (_parent.scrollTop > self.__maxScroll) {
                 _parent.scrollTop = self.__maxScroll;
                 self.__scrollTarget = self.__maxScroll;
                 global.UI.requestRedraw();
             }
             
-            // Sync scroll target if not smoothing
+            // Sync scroll target if not currently smoothing
             if (!self.__isSmoothing) {
                 self.__scrollTarget = _parent.scrollTop;
             }
             
             // Calculate thumb size proportional to viewport/content ratio
-            if (self.__maxScroll > 0) {
-                var _ratio = _viewportHeight / self.__contentHeight;
+            // Use 1px epsilon to avoid showing scrollbar for negligible overflow
+            if (self.__maxScroll > 1) {
+                var _ratio = clamp(_viewportHeight / self.__contentHeight, 0.05, 1);
                 var _thumbHeight = max(self.__MIN_THUMB_HEIGHT, floor(_viewportHeight * _ratio));
-                // Ensure thumb doesn't exceed viewport
                 _thumbHeight = min(_thumbHeight, _viewportHeight);
                 
                 if (_thumbHeight != self.Thumb.getHeight()) {
@@ -136,7 +134,6 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         if (self.__isSmoothing) {
             var _diff = self.__scrollTarget - _parent.scrollTop;
             if (abs(_diff) < 0.5) {
-                // Snap when close enough
                 _parent.scrollTop = self.__scrollTarget;
                 self.__isSmoothing = false;
             } else {
@@ -161,13 +158,15 @@ function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
         }
         
         // Update thumb position based on current scrollTop
-        if (self.__maxScroll > 0 && self.__maxThumbPosition > 0) {
+        if (self.__maxScroll > 1 && self.__maxThumbPosition > 0) {
             var _thumbPos = floor((_parent.scrollTop / self.__maxScroll) * self.__maxThumbPosition);
             if (self.Thumb.getTop() != _thumbPos) {
                 self.Thumb.setTop(_thumbPos);
             }
-            // Show thumb when scrollable
+            // Logic for thumb alpha
             self.__thumbAlphaTarget = (self.dragged || self.Thumb.hovered || self.__isSmoothing) ? 1 : 0.6;
+        } else {
+            self.__thumbAlphaTarget = 0;
         }
         
         // Thumb alpha fade animation
