@@ -59,11 +59,10 @@ function EditorManager() constructor {
                     currentSceneItem = undefined;
                 }
             } else {
-                // Find parent scene via asset hierarchy (reliable)
+                // Find parent scene via asset hierarchy
                 currentScene = editorTreeviewUtil_getSceneOfAsset(asset);
                 
                 // If we have a treeview item, try to find a corresponding scene item in its hierarchy
-                // (Though now scenes aren't usually in the Scene treeview, they might be in Resources)
                 var it = treeviewItem;
                 while (it != undefined) {
                     var itAsset = it[$ "asset"];
