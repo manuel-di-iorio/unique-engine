@@ -598,7 +598,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         gml_pragma("forceinline");
         if (!elem.isVisible() || !elem.mounted) return;
 
-        elem.__drawIndex = self.rootDrawIndex++;
+
         var _scissor = inheritedScissor;
         var _ownScissor = false;
 
@@ -654,7 +654,6 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                 gpu_set_scissor(0, 0, self.width, self.height);
             }
             self.__renderChild(elem.__UiScrollbar, debug, inheritedScissor);
-            elem.__UiScrollbar.Thumb.__drawIndex = self.rootDrawIndex++;
             elem.__UiScrollbar.Thumb.onDraw();
         }
         
@@ -682,7 +681,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             self.requestRedraw();
         }
         
-        self.rootDrawIndex = 0; 
+
         
         if (self.layoutUpdated || self.needsRedraw) {
             self.needsRedraw = false;
@@ -708,12 +707,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     function addToOverlayOnTop(element) {
         gml_pragma("forceinline");
         self.Overlay.add(element);
-        
-        // Force highest drawIndex to ensure element is always on top
-        element.__drawIndex = self.__layoutDrawIndex++;
-        if (element.__spatialProxyId != undefined) {
-            self.spatialTree.updateDrawIndex(element.__spatialProxyId, element.__drawIndex);
-        }
+        self.requestUpdate();
     }
     
     setName("UniqueUI");

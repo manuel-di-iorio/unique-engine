@@ -28,7 +28,6 @@ function EditorUiResources(ui) constructor {
     // Treeview for resources
     ui.Resources.Treeview = new UiTreeview({
         flex: 1,
-        height: "85%",
         flexDirection: "column",
     }, {
         dropzone: true
