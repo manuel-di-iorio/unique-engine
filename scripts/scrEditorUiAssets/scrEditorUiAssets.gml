@@ -72,8 +72,8 @@ function EditorUiAssets(ui) constructor {
         })
     });
     
-    ui.Assets.Header.add(ui.Assets.SceneDropdown);
-    ui.Assets.add(ui.Assets.Header);
+    // ui.Assets.Header.add(ui.Assets.SceneDropdown);
+    // ui.Assets.add(ui.Assets.Header);
     
     // Update dropdown items dynamically
     // Track active scene to refresh treeview
@@ -119,6 +119,8 @@ function EditorUiAssets(ui) constructor {
     // Treeview
     ui.Assets.Treeview = new UiTreeview({ 
         flex: 1, 
+        marginTop: 6,
+        marginBottom: 15,
         flexDirection: "column",
     }, {
         dropzone: true
@@ -126,7 +128,6 @@ function EditorUiAssets(ui) constructor {
 
     // Tools container
     ui.Assets.ToolsContainer = new UiNode({
-      // marginTop: 35,
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
@@ -140,7 +141,7 @@ function EditorUiAssets(ui) constructor {
         }   
     }
 
-    ui.Assets.add(ui.Assets.ToolsContainer);
+    // ui.Assets.add(ui.Assets.ToolsContainer);
 
     ui.Assets.ToolsContainer.Search = new UiTextbox({
         position: "relative",
@@ -228,7 +229,7 @@ function EditorUiAssets(ui) constructor {
     
     /** Events */
     var Treeview = ui.Assets.Treeview;
-    Treeview.Items.enableScrollbar();
+    Treeview.Items.enableScrollbar();   
         
     Treeview.onItemSelected = editorTreeviewOnItemSelected;
     Treeview.onMultiItemSelected = editorTreeviewOnMultiItemSelected;

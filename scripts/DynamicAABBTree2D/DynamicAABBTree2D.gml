@@ -443,10 +443,10 @@ function DynamicAABBTree2D(capacity = 1024) constructor {
                     // Leaf node - check exact element bounds (not fattened AABB)
                     var elem = self.userData[nodeId];
                     if (px >= elem.x1 && px <= elem.x2 && py >= elem.y1 && py <= elem.y2) {
-                        var drawIdx = self.maxDrawIndex[nodeId];
-                        if (drawIdx > bestDrawIndex) {
-                            bestDrawIndex = drawIdx;
-                            bestElem = elem;
+                            var drawIdx = self.maxDrawIndex[nodeId];
+                            if (drawIdx > bestDrawIndex) {
+                                bestDrawIndex = drawIdx;
+                                bestElem = elem;
                         }
                     }
                 } else {
