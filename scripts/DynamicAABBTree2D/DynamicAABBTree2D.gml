@@ -1,5 +1,6 @@
 /// @description Dynamic AABB Tree 2D for high-performance spatial partitioning
 /// Based on Box2D's b2DynamicTree
+/// This script is part of UniqueMath library - https://github.com/manuel-di-iorio/unique-math
 
 function DynamicAABBTree2D(capacity = 1024) constructor {
     self.capacity = capacity;
@@ -440,14 +441,11 @@ function DynamicAABBTree2D(capacity = 1024) constructor {
                 py >= self.minY[nodeId] && py <= self.maxY[nodeId]) {
                 
                 if (self.left[nodeId] == -1) {
-                    // Leaf node - check exact element bounds (not fattened AABB)
-                    var elem = self.userData[nodeId];
-                    if (px >= elem.x1 && px <= elem.x2 && py >= elem.y1 && py <= elem.y2) {
-                            var drawIdx = self.maxDrawIndex[nodeId];
-                            if (drawIdx > bestDrawIndex) {
-                                bestDrawIndex = drawIdx;
-                                bestElem = elem;
-                        }
+                    // Leaf node
+                    var drawIdx = self.maxDrawIndex[nodeId];
+                    if (drawIdx > bestDrawIndex) {
+                        bestDrawIndex = drawIdx;
+                        bestElem = self.userData[nodeId];
                     }
                 } else {
                     // Ensure stack has space for 2 more entries

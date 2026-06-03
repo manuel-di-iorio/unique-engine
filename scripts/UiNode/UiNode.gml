@@ -13,6 +13,7 @@ enum UI_EVENT {
     // enter/leave do not bubble
     mouseenter,
     mouseleave,
+    contextmenu,
 }
 
 global.UI_ID = 0;
@@ -29,12 +30,37 @@ function UiNode(style = {}, props = {}) constructor {
     self.__drawIndex = 0;
     self.destroyed = false;
     self.onMount = undefined;
-    self.onDraw = props[$ "onDraw"] ?? undefined;
+    
+    // Visual properties
+    self.backgroundColor = props[$ "backgroundColor"] ?? undefined;
+    self.borderRadius = props[$ "borderRadius"] ?? 0;
+    self.borderColor = props[$ "borderColor"] ?? #191A21;
+    self.borderWidth = props[$ "borderWidth"] ?? 1;
+
+    self.onDraw = props[$ "onDraw"] ?? function() {
+        if (self.backgroundColor != undefined) {
+            draw_set_color(self.backgroundColor);
+            if (self.borderRadius > 0) {
+                draw_roundrect_ext(self.x1, self.y1, self.x2, self.y2, self.borderRadius, self.borderRadius, false);
+            } else {
+                draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+            }
+        }
+        
+        if (self.border) {
+            draw_set_color(self.borderColor);
+            if (self.borderRadius > 0) {
+                draw_roundrect_ext(self.x1, self.y1, self.x2, self.y2, self.borderRadius, self.borderRadius, true);
+            } else {
+                draw_rectangle(self.x1, self.y1, self.x2, self.y2, true);
+            }
+        }
+    };
+    
     self.onDestroy = props[$ "onDestroy"] ?? undefined;
     self.pointerEvents = props[$ "pointerEvents"] ?? false;
     self.border = props[$ "border"] ?? false;
     self.visible = props[$ "visible"] ?? true;
-    self.enabled = props[$ "enabled"] ?? true;
     self.focusable = props[$ "focusable"] ?? false;
     self.focused = false;
     self.onFocus = props[$ "onFocus"] ?? undefined;
@@ -59,6 +85,7 @@ function UiNode(style = {}, props = {}) constructor {
     self.hovered = false;
     self.eventListeners = {};
     self.scrollTop = 0;
+    self.scrollLeft = 0;
     self.isScrollbar = props[$ "isScrollbar"] ?? false;
     self.mounted = false;
     self.scrollableParent = undefined;
@@ -66,9 +93,9 @@ function UiNode(style = {}, props = {}) constructor {
     self.handpoint = props[$ "handpoint"] ?? false;
     self.hasStepEvent = false;
     self.__UiScrollbar = undefined;
+    self.__UiScrollbarH = undefined;
     self.__scrollBoundsCachedScrollTop = undefined;
-    self.__scrollBoundsCachedValue = undefined;
-    self.__spatialProxyId = undefined;
+    self.__scrollBoundsCachedResult = undefined;
     self.borderColor = #191A21;
 
     // Tooltip props
@@ -87,14 +114,7 @@ function UiNode(style = {}, props = {}) constructor {
     self.onDragEnd = undefined;
     self.onDrop = undefined;
 
-    // Resizing props
-    self.resizable = props[$ "resizable"] ?? false;
-    self.resizableEdges = props[$ "resizableEdges"] ?? []; // ["left", "right", "top", "bottom"]
-    self.resizing = false;
-    self.resizeThreshold = 8; // Margin in pixels to detect edge
-
     
-
     /** Methods */
     
     // Request a layout update
@@ -115,18 +135,6 @@ function UiNode(style = {}, props = {}) constructor {
         flexpanel_node_style_set_width(self.node, w, flexpanel_unit.point);
         flexpanel_node_style_set_height(self.node, h, flexpanel_unit.point);
         self.requestUpdate();
-        return self;
-    }
-    
-    // Set enabled state
-    function setEnabled(val) {
-        gml_pragma("forceinline");
-        if (self.enabled == val) return self;
-        
-        self.enabled = val;
-        self.pointerEvents = val;
-        self.requestUpdate();
-        self.requestRedraw();
         return self;
     }
     
@@ -184,7 +192,7 @@ function UiNode(style = {}, props = {}) constructor {
         }
         
         // Remove this element from spatial tree
-        if (elem.__spatialProxyId != undefined) {
+        if (variable_struct_exists(elem, "__spatialProxyId") && elem.__spatialProxyId != undefined) {
             global.UI.spatialTree.remove(elem.__spatialProxyId);
             elem.__spatialProxyId = undefined;
         }
@@ -197,8 +205,11 @@ function UiNode(style = {}, props = {}) constructor {
         }
         
         // Also handle scrollbar if present
-        if (elem.__UiScrollbar != undefined) {
+        if (variable_struct_exists(elem, "__UiScrollbar") && elem.__UiScrollbar != undefined) {
             __removeFromSpatialTree(elem.__UiScrollbar);
+        }
+        if (variable_struct_exists(elem, "__UiScrollbarH") && elem.__UiScrollbarH != undefined) {
+            __removeFromSpatialTree(elem.__UiScrollbarH);
         }
     };
     
@@ -224,6 +235,9 @@ function UiNode(style = {}, props = {}) constructor {
     
     // Delete this node and optionally also its children from memory
     function destroy() {
+        if (self.destroyed) return self;
+        self.destroyed = true;
+        
         gml_pragma("forceinline");
         self.requestUpdate();
         
@@ -240,11 +254,13 @@ function UiNode(style = {}, props = {}) constructor {
             self.children[i].destroy();
         }
         
-        self.parent.remove(self);
+        if (self.parent != undefined) {
+            self.parent.remove(self);
+        }
+        
         flexpanel_delete_node(self.node, false);
         self.children = [];
         self.childrenLength = 0;
-        self.destroyed = true;
         self.__removeStepHandler();
         
         return self; 
@@ -265,16 +281,17 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     // Delete the node's children from memory but not the node itself
-    function destroyChildren() {
+    function destroyChildren(preserveOwnScrollbars = false) {
         gml_pragma("forceinline");
         
         for (var i = self.childrenLength - 1; i >= 0; i--) {
             var elem = self.children[i];
+            if (preserveOwnScrollbars && elem.isScrollbar) continue;
             
             // Remove from spatial tree first (recursively for all descendants)
             __removeFromSpatialTree(elem);
             
-            elem.destroyChildren();
+            elem.destroyChildren(false); // Descendants' scrollbars are always destroyed
             
             var elemOnDestroy = elem[$ "onDestroy"];
             if (elemOnDestroy != undefined) elemOnDestroy(); 
@@ -283,15 +300,22 @@ function UiNode(style = {}, props = {}) constructor {
             elem.childrenLength = 0;
             elem.__removeStepHandler();
             elem.destroyed = true;
-            flexpanel_delete_node(elem.node, false);
+            
+            if (self.node != -1 && elem.node != -1) {
+                flexpanel_node_remove_child(self.node, elem.node);
+                flexpanel_delete_node(elem.node, false);
+            }
+            
+            array_delete(self.children, i, 1);
+            self.childrenLength--;
         }
         
-        flexpanel_node_remove_all_children(self.node);
-        self.__UiScrollbar = undefined;
-         
+        if (!preserveOwnScrollbars) {
+            self.__UiScrollbar = undefined;
+            self.__UiScrollbarH = undefined;
+        }
+        
         self.requestUpdate();
-        self.children = [];
-        self.childrenLength = 0;
         return self; 
     }
     
@@ -344,9 +368,11 @@ function UiNode(style = {}, props = {}) constructor {
             if (global.UI.focusedElement[$ "onBlur"] != undefined) {
                 global.UI.focusedElement.onBlur();
             }
+            global.UI.focusedElement.focused = false;
         }
         
         global.UI.focusedElement = self;
+        self.focused = true;
         
         if (self[$ "onFocus"] != undefined) {
             self.onFocus();
@@ -363,6 +389,7 @@ function UiNode(style = {}, props = {}) constructor {
                 self.onBlur();
             }
             
+            self.focused = false;
             global.UI.focusedElement = undefined;
             global.UI.requestRedraw();
         }
@@ -418,25 +445,33 @@ function UiNode(style = {}, props = {}) constructor {
         
         // Use parent's scrollTop for cache check (not self.scrollTop which is always 0 for non-scrollable elements)
         var _parentScrollTop = _scrollableParent.scrollTop;
+        var _parentScrollLeft = _scrollableParent.scrollLeft;
         if (self.__scrollBoundsCachedScrollTop == _parentScrollTop && 
+            self.__scrollBoundsCachedScrollLeft == _parentScrollLeft &&
             self.__scrollBoundsCachedValue != undefined && 
             !global.UI.layoutUpdated) {
             return self.__scrollBoundsCachedValue;
         }
         
         self.__scrollBoundsCachedScrollTop = _parentScrollTop;
+        self.__scrollBoundsCachedScrollLeft = _parentScrollLeft;
     
         // Use absolute coordinates (y1/y2) which are already calculated
         // These account for scroll offset and absolute positioning
         var elemTop = self.y1;
         var elemBottom = self.y2;
+        var elemLeft = self.x1;
+        var elemRight = self.x2;
     
         // Parent's visible area in absolute coordinates
         var visibleTop = _scrollableParent.y1;
         var visibleBottom = _scrollableParent.y2;
+        var visibleLeft = _scrollableParent.x1;
+        var visibleRight = _scrollableParent.x2;
 
         // If fully outside then it is invisible
-        if (elemBottom < visibleTop || elemTop > visibleBottom) {
+        if (elemBottom < visibleTop || elemTop > visibleBottom || 
+            elemRight < visibleLeft || elemLeft > visibleRight) {
             self.__scrollBoundsCachedValue = false;
             return false;
         }
@@ -620,6 +655,9 @@ function UiNode(style = {}, props = {}) constructor {
     // Scrollbar
     function enableScrollbar(thumbColor = undefined) {
         gml_pragma("forceinline");
+        if (self.__UiScrollbar != undefined) return self.__UiScrollbar;
+        self.pointerEvents = true; // Ensure wheel events can target the scroll container
+        
         self.__UiScrollbar = new UiScrollbar({
             position: "absolute",
             top: 0,
@@ -628,14 +666,31 @@ function UiNode(style = {}, props = {}) constructor {
             width: 11
         }, { isScrollbar: true, thumbColor });
         self.add(self.__UiScrollbar);
+        return self.__UiScrollbar;
+    }
+    
+    function enableHorizontalScrollbar(thumbColor = undefined) {
+        gml_pragma("forceinline");
+        if (self.__UiScrollbarH != undefined) return self.__UiScrollbarH;
+        self.pointerEvents = true; // Ensure wheel events can target the scroll container
+
+        self.__UiScrollbarH = new UiScrollbar({
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 11
+        }, { isScrollbar: true, thumbColor, orientation: "horizontal" });
+        self.add(self.__UiScrollbarH);
+        return self.__UiScrollbarH;
     }
     
     function disableScrollbar() {
         gml_pragma("forceinline");
-        if (self.__UiScrollbar != undefined) {
-            self.__UiScrollbar.destroy();
-        }
+        if (self.__UiScrollbar != undefined) self.__UiScrollbar.destroy();
+        if (self.__UiScrollbarH != undefined) self.__UiScrollbarH.destroy();
         self.__UiScrollbar = undefined;
+        self.__UiScrollbarH = undefined;
     }
     
     // Events
@@ -699,6 +754,12 @@ function UiNode(style = {}, props = {}) constructor {
         return self;
     }
     
+    function onContextMenu(cb) {
+        gml_pragma("forceinline");
+        self.addEventListener(UI_EVENT.contextmenu, cb);
+        return self;
+    }
+    
     function addEventListener(eventType, callback, useCapture = false) {
         gml_pragma("forceinline");
         if (self.eventListeners[$ eventType] == undefined) {
@@ -735,23 +796,21 @@ function UiNode(style = {}, props = {}) constructor {
     }
     
     function dispatchEvent(event, target) {
+        if (target == undefined) return self;
         gml_pragma("forceinline");
         
-        // Build path from target to root (reverse order), then iterate backwards for capture phase.
-        // Uses a pre-allocated static array to avoid per-event allocations.
-        static path = array_create(64, undefined);
-        var pathLen = 0;
+        // Build path from root to target
+        var path = [];
         var current = target;
         while (current != undefined) {
-            path[pathLen++] = current;
+            array_insert(path, 0, current); // Insert at beginning
             current = current.parent;
         }
         
         // CAPTURE PHASE - from root to target (excluding target)
-        // path is [target, parent, ..., root], so iterate from pathLen-1 down to 1
         var _stopped = false;
         
-        for (var i = pathLen - 1; i >= 1; i--) {
+        for (var i = 0; i < array_length(path) - 1; i++) {
             current = path[i];
             
             if (current.eventListeners[$ event] != undefined) {
@@ -792,19 +851,20 @@ function UiNode(style = {}, props = {}) constructor {
         }
         
         // BUBBLE PHASE - from target parent to root
-        // path is [target, parent, ..., root], so iterate from 1 to pathLen-1
         if (!_stopped && event != UI_EVENT.mouseenter && event != UI_EVENT.mouseleave) {
-            for (var i = 1; i < pathLen; i++) {
+            for (var i = array_length(path) - 2; i >= 0; i--) {
                 current = path[i];
                 
                 if (current.eventListeners[$ event] != undefined) {
                     var bubbleListeners = current.eventListeners[$ event].bubble;
                     for (var j = 0, jl = array_length(bubbleListeners); j < jl; j++) {
                         if (bubbleListeners[j](current)) {
+                            _stopped = true;
                             break;
                         }
                     }
                 }
+                if (_stopped) break;
             }
         }
         

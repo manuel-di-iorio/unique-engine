@@ -1,4 +1,3 @@
-// @todo doc: report fix on drag selection
 #macro TEXTBOX_INITIAL_DELAY 400    /* ms before starting key repeat */
 #macro TEXTBOX_REPEAT_DELAY 50      /* ms between each repeat */
 #macro TEXTBOX_CURSOR_BLINK 500     /* ms for cursor blinking */
@@ -11,6 +10,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     self.valueGetter = props[$ "valueGetter"] ?? undefined;
     self.onChange = props[$ "onChange"] ?? function(value, input) {};
     self.maxLength = props[$ "maxLength"] ?? 255;
+    draw_set_font(fText);
     var marginLeft = self.label == undefined ? 0 : string_width(self.label) + 15;
     self.onBlur = props[$ "onBlur"] ?? function(value, input) {};
     self.format = props[$ "format"] ?? "string"; // string, float, integer
@@ -18,20 +18,51 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     self.max = props[$ "max"];
     self.placeholder = props[$ "placeholder"];
     self.negative = props[$ "negative"] ?? false;
+    self.iconLeft = props[$ "iconLeft"];
+    self.iconRight = props[$ "iconRight"];
     
-    self.Input = new UiNode({ 
-      name: "UiTextbox.Input", 
-      marginLeft,
-      paddingLeft: 5, 
-      paddingRight: 5, 
-      flex: 1,
-      height: "100%" 
-    }, {
-      focusable: true,
-      border: true
-    });
-
+    flexpanel_node_style_set_flex_direction(self.node, flexpanel_flex_direction.row);
+    flexpanel_node_style_set_align_items(self.node, flexpanel_align.center);
+    
+    if (self.label != undefined) {
+        self.LabelNode = new UiText(self.label, { marginRight: 15 }, { color: global.UI_COL_TEXT_MAIN });
+        self.add(self.LabelNode);
+    }
+    
+        // Visual container (the box)
+    self.Input = new UiNode({
+        name: "UiTextbox.Input", 
+        flexGrow: 1,
+        height: "100%",
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 12
+    }, { pointerEvents: true, focusable: true, border: true });
     self.add(self.Input);
+    
+    // Fallback focus: if click lands on textbox wrapper, forward focus to inner input.
+    self.pointerEvents = true;
+    self.onMouseDown(function() {
+        self.Input.focus();
+    });
+    
+    // Draw label if present
+    self.onDraw = function() { };
+    
+    // Label and icons should not block pointer events
+    if (self.iconLeft != undefined) {
+        self.IconL = new UiSprite(self.iconLeft, { width: 16, height: 16, marginRight: 8 }, { pointerEvents: false, color: function() { return global.UI_COL_TEXT_DIM; } });
+        self.Input.add(self.IconL);
+    }
+    
+    if (self.iconRight != undefined) {
+        if (is_numeric(self.iconRight)) {
+            self.IconR = new UiSprite(self.iconRight, { position: "absolute", right: 12, width: 16, height: 16 }, { pointerEvents: false, color: function() { return global.UI_COL_TEXT_DIM; } });
+        } else {
+            self.IconR = self.iconRight;
+        }
+        self.Input.add(self.IconR);
+    }
 
     with (self.Input) {
         self.pointerEvents = true;
@@ -135,7 +166,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                 self.selectionStart = state.selectionStart;
                 self.selectionEnd = state.selectionEnd;
                 
-                self.parent.onChange(self.parent.value, self.parent); // Fixed arguments
+                self.parent.onChange(self.parent.value);
                 self.updateScrollOffset();
             }
         };
@@ -170,6 +201,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         self.getMouseCursorPos = function(mouseX) {
             // Calculate text starting X position (including scroll)
             var textX = self.x1 + self.layout.paddingLeft - self.scrollOffset;
+            if (self.parent.iconLeft != undefined) textX += 24;
             
             // Calculate mouse position relative to the start of the text
             var relativeX = mouseX - textX;
@@ -239,6 +271,16 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                     self.updateScrollOffset(); // Just to place the cursor, not for the drag
                     self.cursorBlinkTime = current_time;
                     self.showCursor = true;
+                } else {
+                    // Double-click didn't find a word: allow drag-selection from this position
+                    self.cursorPos = clickPos;
+                    self.isDragging = true;
+                    self.dragStartPos = self.cursorPos;
+                    self.selectionStart = self.cursorPos;
+                    self.selectionEnd = self.cursorPos;
+                    self.updateScrollOffset();
+                    self.cursorBlinkTime = current_time;
+                    self.showCursor = true;
                 }
             } else {
                 // Single click
@@ -267,17 +309,14 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         self.updateScrollOffset = function() {
             global.UI.requestRedraw();
             var text = self.parent.value;
-            var cursorX = 0;
             
-            // Calcola posizione X del cursore
+            // Use substring width for proper kerning support
             draw_set_font(fText);
-            for (var i = 0; i < self.cursorPos; i++) {
-                if (i < string_length(text)) {
-                    cursorX += string_width(string_char_at(text, i + 1));
-                }
-            }
+            var cursorX = string_width(string_copy(text, 1, self.cursorPos));
             
             var textboxWidth = self.x2 - self.x1 - 10; // Margini più stretti
+            if (self.parent.iconLeft != undefined) textboxWidth -= 24;
+            if (self.parent.iconRight != undefined) textboxWidth -= 28;
             var margin = 5;
             
             // Scroll a destra se il cursore esce dalla vista
@@ -387,6 +426,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             
             self.parent.value = newValue;
             self.parent.onChange(self.parent.value, self.parent);
+            self.redoStack = [];
             self.cursorPos += string_length(filteredText);
             self.selectionStart = self.cursorPos;
             self.selectionEnd = self.cursorPos;
@@ -401,6 +441,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             var ctrl = keyboard_check(vk_control);
             var shift = keyboard_check(vk_shift);
             var alt = keyboard_check(vk_alt);
+            var handledTextInput = false;
             
             // Undo/Redo handling
             if (ctrl && (keyboard_check_pressed(ord("Z")) && !shift || (self.keyRepeat.key == ord("Z") && self.handleKeyRepeat()))) {
@@ -576,11 +617,56 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                 return;
             }
             
-            // Character input
-            var inputChar = keyboard_lastchar;
-            if (inputChar != "" && ord(inputChar) >= 32 && ord(inputChar) <= 126) {
+            // Character input using GameMaker's keyboard_string
+            if (keyboard_string != "") {
+                var newText = keyboard_string;
+                keyboard_string = ""; 
+                for (var i = 1; i <= string_length(newText); i++) {
+                    var inputChar = string_char_at(newText, i);
+                    if (ord(inputChar) >= 32 && ord(inputChar) != 127) { 
+                        self.insertText(inputChar);
+                        handledTextInput = true;
+                    }
+                }
+                keyboard_lastchar = ""; // Clear lastchar to avoid duplicate from fallback
+            } 
+            
+            // Handle key repeat OR immediate press for printable characters (fallback)
+            var isInitialPress = false;
+            var isRepeatPress = (!handledTextInput && self.keyRepeat.pressed && self.keyRepeat.key >= 32 && self.handleKeyRepeat());
+            
+            // If not handled by keyboard_string, check if a printable key was JUST pressed
+            if (!handledTextInput && !isRepeatPress && keyboard_key >= 32) {
+                if (keyboard_check_pressed(keyboard_key)) isInitialPress = true;
+            }
+
+            if (isInitialPress || isRepeatPress) {
+                var inputChar = keyboard_lastchar;
+                // If lastchar is empty or doesn't match the held key, try to derive it
+                if (inputChar == "" || ord(string_upper(inputChar)) != self.keyRepeat.key) {
+                    if (self.keyRepeat.key >= 65 && self.keyRepeat.key <= 90) { // A-Z
+                        inputChar = chr(self.keyRepeat.key);
+                        if (!keyboard_check(vk_shift)) inputChar = string_lower(inputChar);
+                    } else if (self.keyRepeat.key >= 48 && self.keyRepeat.key <= 57) { // 0-9
+                        inputChar = chr(self.keyRepeat.key);
+                    } else if (self.keyRepeat.key == vk_space) {
+                        inputChar = " ";
+                    }
+                }
+                
+                if (inputChar != "" && ord(inputChar) >= 32 && ord(inputChar) != 127) {
+                    self.insertText(inputChar);
+                    handledTextInput = true;
+                    keyboard_lastchar = ""; // Clear after use
+                }
+            }
+
+            // Final fallback for single characters (only if not already handled)
+            if (!handledTextInput && keyboard_lastchar != "" && ord(keyboard_lastchar) >= 32 && ord(keyboard_lastchar) != 127) {
+                var inputChar = keyboard_lastchar;
                 self.insertText(inputChar);
                 keyboard_lastchar = "";
+                handledTextInput = true;
             }
         };
         
@@ -645,14 +731,15 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             var ctrl = keyboard_check(vk_control);
             var shift = keyboard_check(vk_shift);
             
-            // Check which repeatable key is currently pressed
+            // Check for repeatable keys
             if (keyboard_check(vk_left)) currentKey = vk_left;
             else if (keyboard_check(vk_right)) currentKey = vk_right;
             else if (keyboard_check(vk_backspace)) currentKey = vk_backspace;
             else if (keyboard_check(vk_delete)) currentKey = vk_delete;
             else if (ctrl && keyboard_check(ord("Z")) && !shift) currentKey = ord("Z"); // Undo
             else if (ctrl && (keyboard_check(ord("Y")) || (keyboard_check(ord("Z")) && shift))) currentKey = ord("Y"); // Redo
-            else if (ctrl && keyboard_check(ord("V"))) currentKey = ord("V"); // Paste with repeat
+            else if (ctrl && keyboard_check(ord("V"))) currentKey = ord("V"); // Paste
+            else if (keyboard_key >= 32) currentKey = keyboard_key; // Any printable character
             
             if (currentKey != self.keyRepeat.key) {
                 self.keyRepeat.key = currentKey;
@@ -687,27 +774,35 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
     
         // Draw the textbox
         self.onDraw = function() {
-            // Background
-            draw_set_color(global.UI_COL_INPUT_BG);
-            draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+            // Background with border if focused
+            draw_set_color(global.UI_COL_BG_CARD);
+            draw_roundrect_ext(self.x1, self.y1, self.x2, self.y2, 6, 6, false);
+            
+            draw_set_color(self.focused ? global.UI_COL_PRIMARY : global.UI_COL_BORDER);
+            draw_roundrect_ext(self.x1, self.y1, self.x2, self.y2, 6, 6, true);
             
             // Set clipping region to prevent text overflow
             var _scissor = gpu_get_scissor();
-
-            var _scrollableParent = self.scrollableParent;
-            if (_scrollableParent == undefined) { 
-                gpu_set_scissor(self.x1, self.y1, self.x2 - self.x1, self.y2 - self.y1);
-            } else {
-                gpu_set_scissor(self.x1, max(_scrollableParent.y1, self.y1), self.x2 - self.x1, min(_scrollableParent.y2 - _scrollableParent.y1, self.y2 - self.y1));
-            }
+            var sx = self.x1;
+            var sy = self.y1;
+            var sw = self.x2 - self.x1;
+            var sh = self.y2 - self.y1;
+            // Intersect with inherited parent scissor to clip inside scrollable ancestors
+            var _ix1 = max(sx, _scissor.x);
+            var _iy1 = max(sy, _scissor.y);
+            var _ix2 = min(sx + sw, _scissor.x + _scissor.w);
+            var _iy2 = min(sy + sh, _scissor.y + _scissor.h);
+            __uui_set_scissor(_ix1, _iy1, max(0, _ix2 - _ix1), max(0, _iy2 - _iy1));
             
             // Text drawing settings
-            draw_set_color(c_white);
+            draw_set_color(global.UI_COL_TEXT_MAIN);
+            draw_set_font(fText);
             draw_set_halign(fa_left);
             draw_set_valign(fa_middle);
             
             var text = self.parent.value;
             var textX = self.x1 + self.layout.paddingLeft - self.scrollOffset;
+            if (self.parent.iconLeft != undefined) textX += 24;
             var textY = floor(mean(self.y1, self.y2));
             
             // Draw selection highlight (only when focused)
@@ -715,21 +810,9 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
                 var start = min(self.selectionStart, self.selectionEnd);
                 var ended = max(self.selectionStart, self.selectionEnd);
                 
-                var startX = textX;
-                var endX = textX;
-                
-                // Calculate X positions for selection start and end
-                for (var i = 0; i < start; i++) {
-                    if (i < string_length(text)) {
-                        startX += string_width(string_char_at(text, i + 1));
-                    }
-                }
-                
-                for (var i = 0; i < ended; i++) {
-                    if (i < string_length(text)) {
-                        endX += string_width(string_char_at(text, i + 1));
-                    }
-                }
+                // Use substring width for proper kerning support
+                var startX = textX + string_width(string_copy(text, 1, start));
+                var endX = textX + string_width(string_copy(text, 1, ended));
                 
                 // Draw selection rectangle
                 draw_set_color(global.UI_COL_SELECTION);
@@ -739,9 +822,9 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             }
             
             // Draw text (always visible)
-            draw_set_color(c_white); draw_set_font(fText);
+            draw_set_color(global.UI_COL_TEXT_MAIN);
             
-            if (text == "" && !self.focused && self.parent.placeholder != undefined) {
+            if (text == "" && self.parent.placeholder != undefined) {
                 // Draw placeholder text
                 draw_set_alpha(0.5); // Make placeholder semi-transparent
                 draw_text(textX, textY, self.parent.placeholder);
@@ -753,16 +836,9 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             
             // Draw cursor (only when focused and no selection)
             if (self.focused && self.showCursor && self.selectionStart == self.selectionEnd) {
-                var cursorX = textX;
+                var cursorX = textX + string_width(string_copy(text, 1, self.cursorPos));
                 
-                // Calculate cursor X position
-                for (var i = 0; i < self.cursorPos; i++) {
-                    if (i < string_length(text)) {
-                        cursorX += string_width(string_char_at(text, i + 1));
-                    }
-                }
-                
-                draw_set_color(c_white);
+                draw_set_color(global.UI_COL_PRIMARY);
                 draw_line(cursorX, self.y1 + 5, cursorX, self.y2 - 5);
             }
             
@@ -842,6 +918,7 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
             self.focused = true;
             self.cursorBlinkTime = current_time;
             self.showCursor = true;
+            keyboard_string = ""; // Reset string buffer on focus
             keyboard_lastchar = "";
         };
 
@@ -909,11 +986,4 @@ function UiTextbox(style = {}, props = {}): UiNode(style, props) constructor {
         if (self.valueGetter != undefined && !self.Input.focused) self.value = self.valueGetter();
     });
     
-    // Draw label if present
-    function onDraw() {
-        if (self.label != undefined) {
-            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle);
-            draw_text(self.x1 + 3, ~~mean(self.y1, self.y2), self.label);
-        }
-    }
 }

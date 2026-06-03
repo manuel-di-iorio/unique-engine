@@ -11,15 +11,15 @@ function EditorUiInspector(ui) constructor {
         flexDirection: "column",
         // resizable: true,
         // resizableEdges: ["left"]
-    }, { border: true });
+    }, { border: true, borderColor: global.UI_COL_BORDER });
     ui.Inspector.owner = self;
 
     with (ui.Inspector) {
         function onDraw() {
-            draw_set_color(global.UI_COL_INPUT_BG);
+            draw_set_color(global.UI_COL_BG_CARD);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
             
-            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
+            draw_set_color(global.UI_COL_TEXT_MAIN); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
             
             var title = "Inspector";
             if (self.owner[$ "multiSelectCount"] != undefined && self.owner.multiSelectCount > 1) {
@@ -106,7 +106,7 @@ function EditorUiInspector(ui) constructor {
                 function onDraw() {
                     if (self[$ "x1"] == undefined) return;
                     draw_set_font(fText);
-                    draw_set_color(c_white);
+                    draw_set_color(global.UI_COL_TEXT_MAIN);
                     draw_set_halign(fa_left);
                     draw_set_valign(fa_top);
                     draw_text(self.x1, self.y1 + 2, self.prefabLabel);

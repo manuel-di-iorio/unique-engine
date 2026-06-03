@@ -12,15 +12,15 @@ function EditorUiResources(ui) constructor {
         flexDirection: "column",
         // resizable: true,
         // resizableEdges: ["top"]
-    }, { border: true });
+    }, { border: true, borderColor: global.UI_COL_BORDER });
 
     // Draw background and title
     with (ui.Resources) {
         self.onDraw = method(self, function () {
-            draw_set_color(global.UI_COL_INPUT_BG);
+            draw_set_color(global.UI_COL_BG_CARD);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
 
-            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
+            draw_set_color(global.UI_COL_TEXT_MAIN); draw_set_halign(fa_left); draw_set_valign(fa_top); draw_set_font(fText);
             draw_text(self.x1 + 20, self.y1 + 8, "Resources");
         });
     }

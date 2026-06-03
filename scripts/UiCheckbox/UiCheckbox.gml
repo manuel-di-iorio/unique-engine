@@ -1,64 +1,87 @@
 function UiCheckbox(style = {}, props = {}) : UiNode(style, props) constructor {
+    self.flexDirection = "row";
+    flexpanel_node_style_set_flex_direction(self.node, flexpanel_flex_direction.row);
+    self.alignItems = "center";
+    
     setName(props[$ "name"] ?? "UiCheckbox");
     self.value = props[$ "value"] ?? false;
     self.label = props[$ "label"] ?? undefined;
-    self.onChange = props[$ "onChange"] ?? function(input, value) {};
+    self.onChange = props[$ "onChange"] ?? function(value, input) {};
     self.valueGetter = props[$ "valueGetter"] ?? undefined;
+    self.variant = props[$ "variant"] ?? "checkbox";
+    self.group = props[$ "group"];
     
-    var _marginLeft = self.label == undefined ? 0 : 3 + string_width(self.label) + 20;
+    self.pointerEvents = true;
+    self.handpoint = true;
     
+    // Input node first (the visual box/circle)
     self.Input = new UiNode({
         name: "UiCheckbox.Input", 
-        marginLeft: _marginLeft,
-        width: 18,
-        height: 18
-    });
+        width: 20,
+        height: 20,
+        marginRight: 10
+    }, { pointerEvents: true, handpoint: true });
     self.add(self.Input);
     
+    // Label node second
+    if (self.label != undefined) {
+        self.Label = new UiText(self.label, {}, { color: global.UI_COL_TEXT_MAIN });
+        self.add(self.Label);
+    }
+    
     with (self.Input) {
-        self.pointerEvents = true;
-        self.handpoint = true;
-        
-        self.onMouseEnter(function() {
-            global.UI.requestRedraw();
-        });
-        
-        self.onMouseLeave(function() {
-            global.UI.requestRedraw();
-        });
-        
         self.onDraw = function() {
-            draw_set_color(global.UI_COL_BOX);
-            draw_rectangle(self.x1, self.y1, self.x2, self.y2, true);
+            var isChecked = self.parent.value;
+            var isRadio = (self.parent.variant == "radio");
+            var _checkedSprite = isRadio ? sprUiIconRadio : sprUiIconCheckbox;
+            var _uncheckedSprite = isRadio ? sprUiIconRadioUnchecked : sprUiIconCheckboxUnchecked;
+            var _sprite = isChecked ? _checkedSprite : _uncheckedSprite;
+            var _col = isChecked ? global.UI_COL_PRIMARY : global.UI_COL_TEXT_DIM;
             
-            if (self.hovered) {
-                draw_set_color(global.UI_COL_CHECKBOX_HOVER);
-                draw_rectangle(self.x1-1, self.y1-1, self.x2+1, self.y2+1, true);
+            if (self.parent.hovered && !isChecked) {
+                draw_set_color(global.UI_COL_BTN_HOVER);
+                draw_roundrect_ext(self.x1 - 1, self.y1 - 1, self.x2 + 1, self.y2 + 1, 6, 6, false);
             }
             
-            if (self.parent.value) {
-                draw_sprite(sprUiCheckTick, 0, ~~mean(self.x1, self.x2), ~~mean(self.y1, self.y2));
+            if (sprite_exists(_sprite)) {
+                var _sw = sprite_get_width(_sprite);
+                var _sh = sprite_get_height(_sprite);
+                var _scale = min((self.x2 - self.x1) / _sw, (self.y2 - self.y1) / _sh);
+                var _ox = sprite_get_xoffset(_sprite);
+                var _oy = sprite_get_yoffset(_sprite);
+                var _mx = mean(self.x1, self.x2);
+                var _my = mean(self.y1, self.y2);
+                draw_sprite_ext(_sprite, 0, _mx - (_sw / 2 - _ox) * _scale, _my - (_sh / 2 - _oy) * _scale, _scale, _scale, 0, _col, 1);
             }
         };
     }
     
-    // Update value from external source
     self.onStep(function() {
         if (self.valueGetter != undefined) self.value = self.valueGetter();
     });
     
     self.onClick(function() {
+        if (self.variant == "radio" && self.value) return true; 
+        
         self.value = !self.value;
+        
+        // Radio group logic
+        if (self.variant == "radio" && self.value && self.parent != undefined) {
+            var myGroup = self.group;
+            if (myGroup != undefined) {
+                var siblings = self.parent.children;
+                for (var i = 0; i < array_length(siblings); i++) {
+                    var s = siblings[i];
+                    if (s != self && s[$ "variant"] == "radio" && s[$ "group"] == myGroup) {
+                        s.value = false;
+                        if (s[$ "onChange"] != undefined) s.onChange(false, s);
+                    }
+                }
+            }
+        }
+        
         self.onChange(self.value, self);
         global.UI.requestRedraw();
         return true;
     });
-    
-    // Draw label if present
-    function onDraw() {
-        if (self.label != undefined) {
-            draw_set_color(c_white); draw_set_halign(fa_left); draw_set_valign(fa_middle);
-            draw_text(self.x1 + 3, ~~mean(self.y1, self.y2), self.label);
-        }
-    }
 }

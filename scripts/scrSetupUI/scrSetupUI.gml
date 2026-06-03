@@ -28,7 +28,7 @@ function scrSetupUI() {
 
     with (ui.Center) {
         function onDraw() {
-            draw_set_color(global.UI_COL_BOX);
+            draw_set_color(global.UI_COL_BG_MAIN);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
         }
     }

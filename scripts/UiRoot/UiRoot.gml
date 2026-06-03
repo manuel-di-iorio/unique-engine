@@ -9,6 +9,25 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.needsRedraw = true;
     self.currentCursor = cr_default;
     self.isScrolling = false;
+    self.Overlay = undefined;
+    self.Tooltip = undefined;
+
+    self.getOverlay = function() {
+        if (self.Overlay == undefined) {
+            self.Overlay = new UiNode({ name: "Overlay", position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }, { pointerEvents: false });
+            self.add(self.Overlay);
+        }
+        return self.Overlay;
+    }
+
+    self.getTooltip = function() {
+        if (self.Tooltip == undefined) {
+            var overlay = self.getOverlay();
+            self.Tooltip = new UiTooltip();
+            overlay.add(self.Tooltip);
+        }
+        return self.Tooltip;
+    }
 
     // Track modified elements for optimization/debugging
     self.dirtyElements = [];
@@ -52,24 +71,19 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.focusableElements = [];
     
     // Register an element as focusable
-    // Helper: find element index in focusableElements using a simple loop (avoids method() allocation)
-    function __findFocusableIndex(element) {
-        var _arr = self.focusableElements;
-        for (var i = array_length(_arr) - 1; i >= 0; i--) {
-            if (_arr[i] == element) return i;
-        }
-        return -1;
-    }
-    
     function __registerFocus(element) {
-        if (__findFocusableIndex(element) == -1) {
+        if (array_find_index(self.focusableElements, method({ element }, function(item) {
+            return item == element;
+        })) == -1) {
             array_insert(self.focusableElements, 0, element);
         }
     }
     
     // Unregister an element from being focusable
     function __unregisterFocus(element) {
-        var index = __findFocusableIndex(element);
+        var index = array_find_index(self.focusableElements, method({ element }, function(item) {
+            return item == element;
+        }));
         
         if (index != -1) {
             array_delete(self.focusableElements, index, 1);
@@ -91,7 +105,10 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         var currentIndex = -1;
         if (self.focusedElement != undefined) {
-            currentIndex = __findFocusableIndex(self.focusedElement);
+            var _focused = self.focusedElement;
+            currentIndex = array_find_index(self.focusableElements, method({ el: _focused }, function(item) {
+                return item == el;
+            }));
         }
         
         var nextIndex = (currentIndex + 1) % array_length(self.focusableElements);
@@ -116,7 +133,10 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         var currentIndex = -1;
         if (self.focusedElement != undefined) {
-            currentIndex = __findFocusableIndex(self.focusedElement);
+            var _focused = self.focusedElement;
+            currentIndex = array_find_index(self.focusableElements, method({ el: _focused }, function(item) {
+                return item == el;
+            }));
         }
         
         var prevIndex = currentIndex - 1;
@@ -158,14 +178,6 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     self.tooltipElement = undefined;
     self.tooltipTimer = -1;
     
-    // Resizing state
-    self.resizingElement = undefined;
-    self.resizeEdge = "";
-    self.resizeStartX = 0;
-    self.resizeStartY = 0;
-    self.resizeStartWidth = 0;
-    self.resizeStartHeight = 0;
-    
     // Set the size of the root node
     // @override
     function setSize(w, h) {
@@ -187,30 +199,18 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             elem.scrollableParent = _scrollableParent;
         }
         
-        // Store the layout position data of this element (reuse existing struct to avoid GC pressure)
-        var _newLayout = flexpanel_node_layout_get_position(elem.node, false);
-        var _layout = elem.layout;
-        _layout.left = _newLayout.left;
-        _layout.top = _newLayout.top;
-        _layout.right = _newLayout.right;
-        _layout.bottom = _newLayout.bottom;
-        _layout.width = _newLayout.width;
-        _layout.height = _newLayout.height;
-        _layout.paddingLeft = _newLayout.paddingLeft;
-        _layout.paddingTop = _newLayout.paddingTop;
-        _layout.paddingRight = _newLayout.paddingRight;
-        _layout.paddingBottom = _newLayout.paddingBottom;
-        
-        elem.width = _layout.width;
-        elem.height = _layout.height;
-        elem.x1 = _layout.left; 
-        elem.y1 = _layout.top - (elem.scrollableParent ? elem.scrollableParent.scrollTop : 0);
-        elem.x2 = _layout.left + elem.width; 
+        // Store the layout position data of this element
+        elem.layout = flexpanel_node_layout_get_position(elem.node, false);
+        elem.width = elem.layout.width;
+        elem.height = elem.layout.height;
+        elem.x1 = elem.layout.left - (elem.scrollableParent ? elem.scrollableParent.scrollLeft : 0); 
+        elem.y1 = elem.layout.top - (elem.scrollableParent ? elem.scrollableParent.scrollTop : 0);
+        elem.x2 = elem.x1 + elem.width; 
         elem.y2 = elem.y1 + elem.height;
-        elem.xp1 = elem.x1 + _layout.paddingLeft;
-        elem.yp1 = elem.y1 + _layout.paddingTop;
-        elem.xp2 = elem.x2 - _layout.paddingRight;
-        elem.yp2 = elem.y2 - _layout.paddingBottom;
+        elem.xp1 = elem.x1 + elem.layout.paddingLeft;
+        elem.yp1 = elem.y1 + elem.layout.paddingTop;
+        elem.xp2 = elem.x2 - elem.layout.paddingRight;
+        elem.yp2 = elem.y2 - elem.layout.paddingBottom;
         
         // Check visibility AFTER coordinates are updated (isVisible uses y1/y2 for scroll bounds check)
         var _isVisible = _inheritedVisibility && elem.isVisible();
@@ -220,21 +220,34 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
 
         // Update element in the spatial partition tree (incremental - no clear!)
         if (_isVisible && elem.pointerEvents) {
+            // Clip bounds to scroll parent's visible area so partially-scrolled-out
+            // elements cannot be clicked in their invisible overflow region.
+            var _treeX1 = elem.x1;
+            var _treeY1 = elem.y1;
+            var _treeX2 = elem.x2;
+            var _treeY2 = elem.y2;
+            if (!elem.isScrollbar && _scrollableParent != undefined) {
+                _treeX1 = max(_treeX1, _scrollableParent.x1);
+                _treeY1 = max(_treeY1, _scrollableParent.y1);
+                _treeX2 = min(_treeX2, _scrollableParent.x2);
+                _treeY2 = min(_treeY2, _scrollableParent.y2);
+            }
+            
             // Check if element already has a valid proxy
-            var hasProxy = elem.__spatialProxyId != undefined;
+            var hasProxy = variable_struct_exists(elem, "__spatialProxyId") && elem.__spatialProxyId != undefined;
             
             if (hasProxy) {
                 // Update existing proxy position
-                self.spatialTree.move(elem.__spatialProxyId, elem.x1, elem.y1, elem.x2, elem.y2);
+                self.spatialTree.move(elem.__spatialProxyId, _treeX1, _treeY1, _treeX2, _treeY2);
                 // Update the drawIndex in the tree node
                 self.spatialTree.updateDrawIndex(elem.__spatialProxyId, elem.__drawIndex);
             } else {
                 // Insert new proxy
-                elem.__spatialProxyId = self.spatialTree.insert(elem, elem.x1, elem.y1, elem.x2, elem.y2);
+                elem.__spatialProxyId = self.spatialTree.insert(elem, _treeX1, _treeY1, _treeX2, _treeY2);
             }
         } else {
             // Element is not visible/interactive - remove from tree if present
-            if (elem.__spatialProxyId != undefined) {
+            if (variable_struct_exists(elem, "__spatialProxyId") && elem.__spatialProxyId != undefined) {
                 self.spatialTree.remove(elem.__spatialProxyId);
                 elem.__spatialProxyId = undefined;
             }
@@ -254,7 +267,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Determine next scrollable parent to pass to children
         var _nextScrollableParent = _scrollableParent;
-        if (elem.__UiScrollbar != undefined) {
+        if (elem.__UiScrollbar != undefined || elem.__UiScrollbarH != undefined) {
             _nextScrollableParent = elem;
         }
         
@@ -262,14 +275,29 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         var _children = elem.children;
         var _len = elem.childrenLength;
         for (var i = 0; i < _len; i++) {
-            self.__updateElemLayout(_children[i], _nextScrollableParent, _isVisible);
+            var child = _children[i];
+            if (elem.root && (child == elem.Overlay || child == elem.Tooltip)) continue;
+            self.__updateElemLayout(child, _nextScrollableParent, _isVisible);
         }
         
         // Special case for scrollbars: they are drawn after children
         if (elem.__UiScrollbar != undefined) {
             self.__updateElemLayout(elem.__UiScrollbar, _nextScrollableParent, _isVisible);
             elem.__UiScrollbar.Thumb.__drawIndex = self.__layoutDrawIndex++;
-            // Thumb doesn't need to be in the spatial tree as it's part of the scrollbar interaction
+        }
+        if (elem.__UiScrollbarH != undefined) {
+            self.__updateElemLayout(elem.__UiScrollbarH, _nextScrollableParent, _isVisible);
+            elem.__UiScrollbarH.Thumb.__drawIndex = self.__layoutDrawIndex++;
+        }
+
+        // Run layout updates on Overlay and Tooltip last if this is root
+        if (elem.root) {
+            if (elem.Overlay != undefined) {
+                self.__updateElemLayout(elem.Overlay, _nextScrollableParent, _isVisible);
+            }
+            if (elem.Tooltip != undefined) {
+                self.__updateElemLayout(elem.Tooltip, _nextScrollableParent, _isVisible);
+            }
         }
     }
     
@@ -278,16 +306,26 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
     ///       The element must already have a __spatialProxyId from a previous layout.
     /// @param {Struct} elem The UI element to update
     function updateElementPosition(elem) {
+        // Clip bounds to scroll parent's visible area
+        var _x1 = elem.x1, _y1 = elem.y1, _x2 = elem.x2, _y2 = elem.y2;
+        var _sp = elem[$ "scrollableParent"];
+        if (!elem.isScrollbar && _sp != undefined) {
+            _x1 = max(_x1, _sp.x1);
+            _y1 = max(_y1, _sp.y1);
+            _x2 = min(_x2, _sp.x2);
+            _y2 = min(_y2, _sp.y2);
+        }
+        
         if (!variable_struct_exists(elem, "__spatialProxyId") || elem.__spatialProxyId == undefined) {
             // Element not in tree yet, insert it
             if (elem.pointerEvents && elem.visible) {
-                elem.__spatialProxyId = self.spatialTree.insert(elem, elem.x1, elem.y1, elem.x2, elem.y2);
+                elem.__spatialProxyId = self.spatialTree.insert(elem, _x1, _y1, _x2, _y2);
             }
             return;
         }
         
         // Move existing proxy
-        self.spatialTree.move(elem.__spatialProxyId, elem.x1, elem.y1, elem.x2, elem.y2);
+        self.spatialTree.move(elem.__spatialProxyId, _x1, _y1, _x2, _y2);
     }
     
     /// @desc Remove a single element from the spatial tree (for elements going invisible)
@@ -299,20 +337,29 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         }
     }
     
+    function __processLayout() {
+        gml_pragma("forceinline");
+        self.needsUpdate = false;
+        self.layoutUpdated = true;
+        flexpanel_calculate_layout(self.node, "100%", "100%", flexpanel_direction.LTR);
+        
+        self.__layoutDrawIndex = 0;
+        
+        // Update the elements position when the layout changes
+        self.__updateElemLayout(self);
+    }
+
     // Calculate the layout of this node and its children
     function update() {
         gml_pragma("forceinline"); 
         self.layoutUpdated = false;
         
+        // Lazy initialize Overlay and Tooltip layers
+        self.getOverlay();
+        self.getTooltip();
+        
         if (self.needsUpdate) {
-            self.needsUpdate = false;
-            self.layoutUpdated = true;
-            flexpanel_calculate_layout(self.node, undefined, undefined, flexpanel_direction.LTR);
-            
-            self.__layoutDrawIndex = 0;
-            
-            // Update the elements position when the layout changes
-            self.__updateElemLayout(self);
+            self.__processLayout();
         }
         
         // Cache mouse vars
@@ -338,7 +385,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                     _currentlyHovered.hovered = false;
                     self.dispatchEvent(UI_EVENT.mouseleave, _currentlyHovered); 
                     self.dispatchEvent(UI_EVENT.mouseout, _currentlyHovered);
-            self.previousTarget = undefined;
+                    self.previousTarget = undefined;
                     self.requestRedraw();
                 }
                 
@@ -358,60 +405,10 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                     if (_elem.handpoint && self.currentCursor == cr_default && self.draggedElement == undefined) {
                         self.setCursor(cr_handpoint);
                     }
-                    
-                    // Resizing edge detection
-                    if (_elem.resizable && self.resizingElement == undefined) {
-                        var _edge = "";
-                        var _marginX = _elem.resizeThreshold;
-                        var _marginY = _elem.resizeThreshold;
-                        
-                        var _edges = _elem.resizableEdges;
-                        var _isLeft = array_contains(_edges, "left") && (self.mouseX <= _elem.x1 + _marginX);
-                        var _isRight = array_contains(_edges, "right") && (self.mouseX >= _elem.x2 - _marginX);
-                        var _isTop = array_contains(_edges, "top") && (self.mouseY <= _elem.y1 + _marginY);
-                        var _isBottom = array_contains(_edges, "bottom") && (self.mouseY >= _elem.y2 - _marginY);
-                        
-                        if (_isLeft) _edge += "left";
-                        else if (_isRight) _edge += "right";
-                        
-                        if (_isTop) _edge += "top";
-                        else if (_isBottom) _edge += "bottom";
-                        
-                        if (_edge != "") {
-                            self.resizeEdge = _edge;
-                            if (_isLeft || _isRight) self.setCursor(cr_size_we);
-                            if (_isTop || _isBottom) self.setCursor(cr_size_ns);
-                            // Corner cursors could be added here
-                        } else {
-                            self.resizeEdge = "";
-                        }
-                    } else if (self.resizingElement == undefined) {
-                        self.resizeEdge = "";
-                    }
-                } else if (self.resizingElement == undefined) {
-                    self.resizeEdge = "";
                 }
             }
             
             self.previousTarget = self.deepestTarget;
-            
-            // Handle resizing update
-            if (self.resizingElement != undefined) {
-                var _elem = self.resizingElement;
-                var _dx = self.mouseX - self.resizeStartX;
-                var _dy = self.mouseY - self.resizeStartY;
-                
-                var _newW = self.resizeStartWidth;
-                var _newH = self.resizeStartHeight;
-                
-                if (string_pos("right", self.resizeEdge)) _newW += _dx;
-                if (string_pos("left", self.resizeEdge)) _newW -= _dx;
-                if (string_pos("bottom", self.resizeEdge)) _newH += _dy;
-                if (string_pos("top", self.resizeEdge)) _newH -= _dy;
-                
-                _elem.setStyle({ width: max(10, _newW), height: max(10, _newH) });
-                self.requestUpdate();
-            }
             
             // Process drag detection if we have a potential drag element
             if (self.potentialDraggedElement != undefined && !self.potentialDraggedElement.dragging) {
@@ -444,6 +441,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             // Waiting for timer
             if (current_time >= self.tooltipTimer) {
                 if (global.UI.Tooltip != undefined) {
+                    // feather ignore GM1019
                     global.UI.Tooltip.show(self.tooltipElement, self.tooltipElement.tooltip);
                 }
                 self.tooltipTimer = -1; // Tooltip shown
@@ -454,6 +452,34 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         // Click event handled only on root
         // Cache target and check if valid (not destroyed) - target might be destroyed during event dispatch
         var _target = self.deepestTarget;
+        
+        if (mouse_check_button_pressed(mb_any)) {
+             // We check for any button press (left, right, middle) to ensure focus is lost when clicking outside
+             if (self.focusedElement != undefined) {
+                 var _shouldBlur = true;
+                 
+                 if (_target != undefined) {
+                     if (_target[$ "focusable"] ?? false) {
+                         _shouldBlur = false;
+                     } else {
+                         // Check if target is a descendant of the focused element
+                         var _curr = _target;
+                         while (_curr != undefined) {
+                             if (_curr == self.focusedElement) {
+                                 _shouldBlur = false;
+                                 break;
+                             }
+                             _curr = _curr.parent;
+                         }
+                     }
+                 }
+                 
+                 if (_shouldBlur) {
+                     self.focusedElement.blur();
+                 }
+             }
+         }
+
         if (_target != undefined && !(_target[$ "destroyed"] ?? false)) {
             // Wheel events
             if (mouse_wheel_up()) {
@@ -471,30 +497,18 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                 global.UI_CLICK_START = _target;
                 global.UI.dispatchEvent(UI_EVENT.mousedown, _target);
 
-                // Handle resizing start
-                if (mouse_check_button_pressed(mb_left) && self.resizeEdge != "") {
-                    self.resizingElement = _target;
-                    _target.resizing = true;
-                    self.resizeStartX = self.mouseX;
-                    self.resizeStartY = self.mouseY;
-                    self.resizeStartWidth = _target.width;
-                    self.resizeStartHeight = _target.height;
-                    
-                    // Prevent normal drag if resizing
-                    self.potentialDraggedElement = undefined;
-                }
-
-                // We check for any button press (left, right, middle) to ensure focus is lost when clicking outside
-                if (self.focusedElement != undefined && !(_target[$ "focusable"] ?? false)) {
-                    self.focusedElement.blur();
-                }
-
                 // Check again if target is still valid after mousedown event
                 if (mouse_check_button_pressed(mb_left) && !(_target[$ "destroyed"] ?? false)) {
-                    if ((_target[$ "draggable"] ?? false) && self.resizingElement == undefined) {
-                        self.potentialDraggedElement = _target;
-                        _target.dragStartX = self.mouseX;
-                        _target.dragStartY = self.mouseY;
+                    // Search for the nearest draggable element in the hierarchy
+                    var dragSearch = _target;
+                    while (dragSearch != undefined) {
+                        if (dragSearch[$ "draggable"] ?? false) {
+                            self.potentialDraggedElement = dragSearch;
+                            dragSearch.dragStartX = self.mouseX;
+                            dragSearch.dragStartY = self.mouseY;
+                            break;
+                        }
+                        dragSearch = dragSearch.parent;
                     }
                 }
             }
@@ -510,14 +524,6 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             if (device_mouse_check_button_released(0, mb_left)) releasedButton = mb_left;
             else if (device_mouse_check_button_released(0, mb_right)) releasedButton = mb_right;
             else if (device_mouse_check_button_released(0, mb_middle)) releasedButton = mb_middle;
-
-            // Handle resize end
-            if (self.resizingElement != undefined) {
-                self.resizingElement.resizing = false;
-                self.resizingElement = undefined;
-                self.resizeEdge = "";
-                self.setCursor(cr_default);
-            }
 
             // First, handle the drag end if we got a dragged element
             if (self.draggedElement != undefined) {
@@ -546,19 +552,17 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
                     global.UI.dispatchEvent(UI_EVENT.click, self.deepestTarget);
                     
                     // Handle double click
-                    // We must verify the target is still a valid struct and not destroyed
-                    // because the click handler above might have destroyed it (e.g. by rebuilding the UI).
-                    if (is_struct(self.deepestTarget) && !(self.deepestTarget[$ "destroyed"] ?? false)) {
-                        var now = current_time;
-                        if (self.lastClickTarget == self.deepestTarget && (now - self.lastClickTime) < self.doubleClickThreshold) {
-                            global.UI.dispatchEvent(UI_EVENT.doubleclick, self.deepestTarget);
-                            self.lastClickTime = -1; // Reset to avoid triple-click as double-click
-                            self.lastClickTarget = undefined;
-                        } else {
-                            self.lastClickTime = now;
-                            self.lastClickTarget = self.deepestTarget;
-                        }
+                    var now = current_time;
+                    if (self.lastClickTarget == self.deepestTarget && (now - self.lastClickTime) < self.doubleClickThreshold) {
+                        global.UI.dispatchEvent(UI_EVENT.doubleclick, self.deepestTarget);
+                        self.lastClickTime = -1; // Reset to avoid triple-click as double-click
+                        self.lastClickTarget = undefined;
+                    } else {
+                        self.lastClickTime = now;
+                        self.lastClickTarget = self.deepestTarget;
                     }
+                } else if (releasedButton == mb_right) {
+                    global.UI.dispatchEvent(UI_EVENT.contextmenu, self.deepestTarget);
                 }
             }
             
@@ -575,21 +579,33 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             }
         }
         
-        // Run the step handlers (skip elements hidden via hide(), but NOT merely invisible ones
-        // since some handlers need to run to restore visibility after layout updates)
-        for (var i = array_length(self.stepHandlers) - 1; i >= 0; i--) {
-            var _handler = self.stepHandlers[i];
-            if (_handler[1].display) {
-                _handler[0](self.layoutUpdated);
-            }
+        // Final layout pass: if event handlers (like onClick) modified the UI structure,
+        // recalculate layout immediately to avoid a blank frame (flash) in the Draw event.
+        if (self.needsUpdate) {
+            self.__processLayout();
+        }
+
+        // Run step handlers from a stable snapshot so handlers can safely unregister during callbacks.
+        var _stepHandlersLength = array_length(self.stepHandlers);
+        var _stepHandlers = [];
+        array_copy(_stepHandlers, 0, self.stepHandlers, 0, _stepHandlersLength);
+        for (var i = _stepHandlersLength - 1; i >= 0; i--) {
+            var _entry = _stepHandlers[i];
+            if (_entry == undefined) continue;
+            if (_entry[0] == undefined) continue;
+
+            var _owner = _entry[1];
+            if (_owner != undefined && (_owner.destroyed || _owner.hasStepEvent != true)) continue;
+
+            _entry[0](self.layoutUpdated);
         }
         
         self.mouseXPrev = self.mouseX;
         self.mouseYPrev = self.mouseY;
-        
+
         // Clear dirty elements list for the next frame
         if (array_length(self.dirtyElements) > 0) {
-            array_resize(self.dirtyElements, 0);
+            self.dirtyElements = [];
         }
     }
     
@@ -598,18 +614,12 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         gml_pragma("forceinline");
         if (!elem.isVisible() || !elem.mounted) return;
 
-
+        elem.__drawIndex = self.rootDrawIndex++;
         var _scissor = inheritedScissor;
         var _ownScissor = false;
-
-        // Draw the border if enabled
-        if (elem.border) {
-            draw_set_color(elem.borderColor);
-            draw_rectangle(elem.x1, elem.y1, elem.x2, elem.y2, true);
-        }
         
         // Set up scissor for scrollable elements
-        if (elem.__UiScrollbar != undefined) {
+        if (elem.__UiScrollbar != undefined || elem.__UiScrollbarH != undefined) {
             _ownScissor = true;
             var _prevScissor = gpu_get_scissor();
             
@@ -632,7 +642,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             }
             
             _scissor = [sx1, sy1, sw, sh];
-            gpu_set_scissor(sx1, sy1, sw, sh);
+            __uui_set_scissor(sx1, sy1, sw, sh);
         }
 
         // Run the draw method of the element
@@ -642,6 +652,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         for (var i = 0; i < elem.childrenLength; i++) {
             var child = elem.children[i];
             if (child.isScrollbar) continue;
+            if (elem.root && (child == elem.Overlay || child == elem.Tooltip)) continue;
             self.__renderChild(child, debug, _scissor);
         }
         
@@ -649,12 +660,30 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         if (_ownScissor) {
             // Restore to inherited scissor or no scissor
             if (inheritedScissor != undefined) {
-                gpu_set_scissor(inheritedScissor[0], inheritedScissor[1], inheritedScissor[2], inheritedScissor[3]);
+                __uui_set_scissor(inheritedScissor[0], inheritedScissor[1], inheritedScissor[2], inheritedScissor[3]);
             } else {
-                gpu_set_scissor(0, 0, self.width, self.height);
+                __uui_set_scissor(0, 0, self.width, self.height);
             }
-            self.__renderChild(elem.__UiScrollbar, debug, inheritedScissor);
-            elem.__UiScrollbar.Thumb.onDraw();
+            if (elem.__UiScrollbar != undefined) {
+                self.__renderChild(elem.__UiScrollbar, debug, inheritedScissor);
+                elem.__UiScrollbar.Thumb.__drawIndex = self.rootDrawIndex++;
+                elem.__UiScrollbar.Thumb.onDraw();
+            }
+            if (elem.__UiScrollbarH != undefined) {
+                self.__renderChild(elem.__UiScrollbarH, debug, inheritedScissor);
+                elem.__UiScrollbarH.Thumb.__drawIndex = self.rootDrawIndex++;
+                elem.__UiScrollbarH.Thumb.onDraw();
+            }
+        }
+
+        // Draw Overlay and Tooltip last if this is root
+        if (elem.root) {
+            if (elem.Overlay != undefined) {
+                self.__renderChild(elem.Overlay, debug, _scissor);
+            }
+            if (elem.Tooltip != undefined) {
+                self.__renderChild(elem.Tooltip, debug, _scissor);
+            }
         }
         
         // Draw the debug element bounds
@@ -676,13 +705,24 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         gml_pragma("forceinline");
         if (!self.width) return;
         
+        if (surface_exists(self.surface)) {
+            if (surface_get_width(self.surface) != self.width || surface_get_height(self.surface) != self.height) {
+                surface_free(self.surface);
+            }
+        }
+        
         if (!surface_exists(self.surface)) {
             self.surface = surface_create(self.width, self.height);
             self.requestRedraw();
         }
         
-
+        self.rootDrawIndex = 0; 
         
+        // Ensure layout is up to date before rendering to prevent flashes
+        if (self.needsUpdate) {
+            self.__processLayout();
+        }
+
         if (self.layoutUpdated || self.needsRedraw) {
             self.needsRedraw = false;
             var currentBlendMode = gpu_get_blendmode_ext_sepalpha();
@@ -691,6 +731,7 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
             draw_clear_alpha(c_black, 0);
             self.__renderChild(self, debug);
             surface_reset_target();
+            // feather ignore GM1020
             gpu_set_blendmode_ext_sepalpha(currentBlendMode);
         }
         
@@ -698,17 +739,10 @@ function UiRoot(style = {}, props = {}): UiNode(style, props) constructor {
         
         // Clear redraw elements list for the next frame
         if (array_length(self.redrawElements) > 0) {
-            array_resize(self.redrawElements, 0);
+            self.redrawElements = [];
         }
     } 
     
-    /// @desc Add an element to Overlay with highest drawIndex to ensure it's always on top
-    /// @param {Struct} element The UI element to add to overlay
-    function addToOverlayOnTop(element) {
-        gml_pragma("forceinline");
-        self.Overlay.add(element);
-        self.requestUpdate();
-    }
     
     setName("UniqueUI");
 }

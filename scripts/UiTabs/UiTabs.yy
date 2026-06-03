@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"UiTabs",
   "parent":{
-    "name":"Unique UI",
-    "path":"folders/Packages/Unique UI.yy",
+    "name":"UniqueUI",
+    "path":"folders/Packages/UniqueUI.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

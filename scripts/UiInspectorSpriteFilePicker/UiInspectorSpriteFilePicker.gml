@@ -33,7 +33,7 @@ function UiInspectorSpriteFilePicker(style = {}, props = {}): UiNode(style, prop
                 gpu_set_texfilter(_oldFilter);
             }
             
-            draw_set_color(global.UI_COL_BOX);
+            draw_set_color(global.UI_COL_BORDER);
             draw_rectangle(self.x1, self.y1, self.x1 + 255, self.y1 + 255, true);
         }
     }

@@ -1,202 +1,174 @@
 function UiScrollbar(style = {}, props = {}): UiNode(style, props) constructor {
     setName(style[$ "name"] ?? "__UiScrollbar");
-    self.pointerEvents = true;
-    self.isScrollbar = true;
-    self.thumbColor = props[$ "thumbColor"] ?? global.UI_COL_BOX;
-    
-    // Internal state
     self.dragged = false;
-    self.dragStartY = undefined;
-    self.dragStartScrollTop = undefined;
+    self.dragStartMouse = undefined;
+    self.dragStartScroll = undefined; 
+    self.maxScroll = 0;
+    self.pointerEvents = true;
     self.__contentHeight = 0;
-    self.__viewportHeight = 0;
-    self.__maxScroll = 0;
     self.__maxThumbPosition = 0;
-    self.__lastChildrenLength = -1;
-    self.__thumbAlpha = 0;         // For fade animation
-    self.__thumbAlphaTarget = 0;   // Target alpha
-    self.__scrollTarget = 0;       // Smooth scroll target
-    self.__isSmoothing = false;    // Whether we're mid-smooth-scroll
-    
-    // Constants
-    self.__MIN_THUMB_HEIGHT = 24;
-    self.__SCROLL_SPEED = 40;
-    self.__SMOOTH_FACTOR = 0.25;   // Lerp factor for smooth scroll (higher = snappier)
-    self.__FADE_SPEED = 0.12;      // Alpha lerp speed for thumb fade
+    self.__maxScroll = 0;
+    self.thumbColor = props[$ "thumbColor"] ?? global.UI_COL_BG_CARD;
+    self.orientation = props[$ "orientation"] ?? "vertical";
+    self.isVertical = self.orientation == "vertical";
     
     // Create the thumb
-    self.Thumb = new UiScrollbarThumb({ position: "absolute", left: 0, right: 0, top: 0, height: 0 }, {
+    var thumbStyle = self.isVertical ? 
+        { position: "absolute", left: 0, right: 0, top: 0, height: 0 } :
+        { position: "absolute", top: 0, bottom: 0, left: 0, width: 0 };
+        
+    self.Thumb = new UiScrollbarThumb(thumbStyle, {
         isScrollbar: true, 
         thumbColor: self.thumbColor 
     });
     self.add(self.Thumb);
     
     function onMount() {
-        self.parent.onWheelUp(function(ev) {
-            if (self.__maxScroll <= 0) return;
-            self.__scrollTarget = clamp(self.__scrollTarget - self.__SCROLL_SPEED, 0, self.__maxScroll);
-            self.__isSmoothing = true;
-            self.__thumbAlphaTarget = 1;
-            global.UI.requestRedraw();
-        });
-        
-        self.parent.onWheelDown(function(ev) {
-            if (self.__maxScroll <= 0) return;
-            self.__scrollTarget = clamp(self.__scrollTarget + self.__SCROLL_SPEED, 0, self.__maxScroll);
-            self.__isSmoothing = true;
-            self.__thumbAlphaTarget = 1;
-            global.UI.requestRedraw();
-        });
-    }
-    
-    /// @desc Calculate total content height based on children's layout bounds and parent padding
-    function __calcContentHeight() {
-        var _maxBottom = 0;
-        var _parent = self.parent;
-        var _children = _parent.children;
-        var _len = _parent.childrenLength;
-        var _found = false;
-        
-        for (var i = 0; i < _len; i++) {
-            var _child = _children[i];
-            // Skip the scrollbar itself and hidden children
-            if (_child.isScrollbar) continue;
-            if (!_child.display) continue;
-            
-            // The content height is determined by the bottom-most edge of all children
-            _maxBottom = max(_maxBottom, _child.layout.top + _child.layout.height);
-            _found = true;
-        }
-        
-        if (!_found) return 0;
-
-        // Use relative height within the parent container
-        return (_maxBottom - _parent.layout.top) + _parent.layout.paddingBottom;
-    }
-    
-    self.onStep(function(layoutUpdated) {
-        var _parent = self.parent;
-        if (_parent == undefined) return;
-        
-        // Viewport = parent's layout height (the visible area)
-        var _viewportHeight = _parent.layout.height;
-        if (_viewportHeight <= 0) return;
-        
-        // Always check content height and children length (cheap comparison)
-        var _newContentHeight = self.__calcContentHeight();
-        var _childrenChanged = (_parent.childrenLength != self.__lastChildrenLength);
-        var _contentChanged = (abs(_newContentHeight - self.__contentHeight) > 0.5);
-        
-        var _shouldRecalc = layoutUpdated || _childrenChanged || _contentChanged || (abs(_viewportHeight - self.__viewportHeight) > 0.5);
-        
-        if (_shouldRecalc) {
-            self.__lastChildrenLength = _parent.childrenLength;
-            self.__viewportHeight = _viewportHeight;
-            self.__contentHeight = _newContentHeight;
-            
-            // Calculate max scroll
-            self.__maxScroll = max(0, self.__contentHeight - _viewportHeight);
-            
-            // Clamp scrollTop — critical fix for stale scroll position when content shrinks
-            if (_parent.scrollTop > self.__maxScroll) {
-                _parent.scrollTop = self.__maxScroll;
-                self.__scrollTarget = self.__maxScroll;
-                global.UI.requestRedraw();
-            }
-            
-            // Sync scroll target if not currently smoothing
-            if (!self.__isSmoothing) {
-                self.__scrollTarget = _parent.scrollTop;
-            }
-            
-            // Calculate thumb size proportional to viewport/content ratio
-            // Use 1px epsilon to avoid showing scrollbar for negligible overflow
-            if (self.__maxScroll > 1) {
-                var _ratio = clamp(_viewportHeight / self.__contentHeight, 0.05, 1);
-                var _thumbHeight = max(self.__MIN_THUMB_HEIGHT, floor(_viewportHeight * _ratio));
-                _thumbHeight = min(_thumbHeight, _viewportHeight);
+        if (self.isVertical) {
+            self.parent.onWheelUp(method(self, function(ev) {
+                if (self.parent == undefined) return;
+                var _prevTop = self.parent.scrollTop;
+                var _prevLeft = self.parent.scrollLeft;
                 
-                if (_thumbHeight != self.Thumb.getHeight()) {
-                    self.Thumb.setHeight(_thumbHeight);
+                // Shift + wheel => horizontal scrolling when available
+                if (keyboard_check(vk_shift) && self.parent.__UiScrollbarH != undefined) {
+                    var hScrollbar = self.parent.__UiScrollbarH;
+                    self.parent.scrollLeft = max(0, self.parent.scrollLeft - 60);
+                    if (self.parent.scrollLeft > hScrollbar.__maxScroll) self.parent.scrollLeft = hScrollbar.__maxScroll;
+                } else {
+                    self.parent.scrollTop = max(0, self.parent.scrollTop - 60);
+                }
+
+                if (self.parent.scrollTop != _prevTop || self.parent.scrollLeft != _prevLeft) {
+                    global.UI.requestUpdate();
+                    global.UI.requestRedraw();
+                    return true;
                 }
                 
-                self.__maxThumbPosition = _viewportHeight - _thumbHeight;
-            } else {
-                // Content fits — no scrolling needed
-                _parent.scrollTop = 0;
-                self.__scrollTarget = 0;
-                if (self.Thumb.getTop() != 0) self.Thumb.setTop(0);
-                self.__thumbAlphaTarget = 0;
-            }
-        }
-        
-        // Smooth scrolling interpolation
-        if (self.__isSmoothing) {
-            var _diff = self.__scrollTarget - _parent.scrollTop;
-            if (abs(_diff) < 0.5) {
-                _parent.scrollTop = self.__scrollTarget;
-                self.__isSmoothing = false;
-            } else {
-                _parent.scrollTop = _parent.scrollTop + _diff * self.__SMOOTH_FACTOR;
-            }
-            global.UI.requestRedraw();
-            global.UI.requestUpdate();
-        }
-        
-        // Thumb dragging
-        if (self.dragged) {
-            var _currentMouseY = global.UI.mouseY;
-            var _deltaY = _currentMouseY - self.dragStartY;
+                // Nothing moved: allow event bubbling to parent scroll containers.
+                return false;
+            }));
             
-            if (self.__maxScroll > 0 && self.__maxThumbPosition > 0) {
-                var _scrollDelta = (_deltaY / self.__maxThumbPosition) * self.__maxScroll;
-                var _newScroll = clamp(self.dragStartScrollTop + _scrollDelta, 0, self.__maxScroll);
-                _parent.scrollTop = _newScroll;
-                self.__scrollTarget = _newScroll;
+            self.parent.onWheelDown(method(self, function(ev) {
+                if (self.parent == undefined) return;
+                var _prevTop = self.parent.scrollTop;
+                var _prevLeft = self.parent.scrollLeft;
+                
+                // Shift + wheel => horizontal scrolling when available
+                if (keyboard_check(vk_shift) && self.parent.__UiScrollbarH != undefined) {
+                    var hScrollbar = self.parent.__UiScrollbarH;
+                    self.parent.scrollLeft = min(hScrollbar.__maxScroll, self.parent.scrollLeft + 60);
+                } else {
+                    self.parent.scrollTop = min(self.__maxScroll, self.parent.scrollTop + 60);
+                }
+
+                if (self.parent.scrollTop != _prevTop || self.parent.scrollLeft != _prevLeft) {
+                    global.UI.requestUpdate();
+                    global.UI.requestRedraw();
+                    return true;
+                }
+
+                // Nothing moved: allow event bubbling to parent scroll containers.
+                return false;
+            }));
+        } else {
+            // Horizontal wheel
+        }
+    }
+    
+    self.__contentSize = 0;
+    self.__sizeInitialized = false;
+
+    self.onStep(function(layoutUpdated) {
+        var layoutSize = self.isVertical ? self.layout.height : self.layout.width;
+        var parentSize = self.isVertical ? self.parent.layout.height : self.parent.layout.width;
+        
+        // Always recalculate content size: wrapped text (UiText with wrap:true)
+        // adjusts its height one frame after layout, so a single layoutUpdated check
+        // would miss deferred size changes.
+        {
+            self.__sizeInitialized = true;
+            // Content size calculation
+            var propName = self.isVertical ? "height" : "width";
+            var posName = self.isVertical ? "top" : "left";
+            var scrollName = self.isVertical ? "scrollTop" : "scrollLeft";
+            var marginName = self.isVertical ? "getMarginBottom" : "getMarginRight";
+            var paddingName = self.isVertical ? "getPaddingBottom" : "getPaddingRight";
+
+            var _parent = self.parent;
+            var _newContentSize = self.parent.reduceChildren(method({ scrollableParent: _parent, propName, posName, marginName }, function(maxS, child) {
+                if (child.isScrollbar) return maxS;
+                var m = child[$ marginName]();
+                if (is_undefined(m) || is_nan(m)) m = 0;
+                var childEdge = (child.layout[$ posName] + child.layout[$ propName]) - scrollableParent.layout[$ posName] + m;
+                return max(maxS, childEdge);
+            }), 0, false);
+            
+            var pPad = self.parent[$ paddingName]();
+            if (is_undefined(pPad) || is_nan(pPad)) pPad = 0;
+            _newContentSize += pPad;
+            
+            // Only update thumb and maxScroll if content size or layout actually changed
+            if (_newContentSize != self.__contentSize || layoutUpdated) {
+                self.__contentSize = _newContentSize;
+           
+                var _thumbSize = ~~(max(10, min(layoutSize, layoutSize * (layoutSize / max(1, self.__contentSize)))));
+                
+                if (self.isVertical) {
+                    if (_thumbSize != self.Thumb.getHeight()) self.Thumb.setHeight(_thumbSize);
+                } else {
+                    if (_thumbSize != self.Thumb.getWidth()) self.Thumb.setWidth(_thumbSize);
+                }
+            
+                self.__maxThumbPosition = layoutSize - _thumbSize;
+                self.__maxScroll = max(0, self.__contentSize - parentSize);
+
+                // Reset if content fits
+                if (self.__maxScroll <= 0) {
+                    self.parent[$ scrollName] = 0;
+                    var thumbPosName = self.isVertical ? "getTop" : "getLeft";
+                    var thumbSetPosName = self.isVertical ? "setTop" : "setLeft";
+                    if (self.Thumb[$ thumbPosName]() != 0) self.Thumb[$ thumbSetPosName](0);
+                }
+                
                 global.UI.requestRedraw();
             }
         }
         
-        // Update thumb position based on current scrollTop
-        if (self.__maxScroll > 1 && self.__maxThumbPosition > 0) {
-            var _thumbPos = floor((_parent.scrollTop / self.__maxScroll) * self.__maxThumbPosition);
-            if (self.Thumb.getTop() != _thumbPos) {
-                self.Thumb.setTop(_thumbPos);
+        // Dragging
+        if (self.dragged) {
+            var mousePos = self.isVertical ? global.UI.mouseY : global.UI.mouseX;
+            var delta = mousePos - self.dragStartMouse;
+            var scrollName = self.isVertical ? "scrollTop" : "scrollLeft";
+            
+            if (self.__maxScroll > 0) {
+                if (self.__maxThumbPosition > 0) {
+                    var scrollDelta = (delta / self.__maxThumbPosition) * self.__maxScroll;
+                    self.parent[$ scrollName] = clamp(self.dragStartScroll + scrollDelta, 0, self.__maxScroll);
+                    global.UI.requestUpdate();
+                    global.UI.requestRedraw();
+                }
             }
-            // Logic for thumb alpha
-            self.__thumbAlphaTarget = (self.dragged || self.Thumb.hovered || self.__isSmoothing) ? 1 : 0.6;
-        } else {
-            self.__thumbAlphaTarget = 0;
         }
         
-        // Thumb alpha fade animation
-        if (self.__thumbAlpha != self.__thumbAlphaTarget) {
-            var _alphaDiff = self.__thumbAlphaTarget - self.__thumbAlpha;
-            if (abs(_alphaDiff) < 0.02) {
-                self.__thumbAlpha = self.__thumbAlphaTarget;
-            } else {
-                self.__thumbAlpha += _alphaDiff * self.__FADE_SPEED;
+        // Update thumb position
+        if (self.__maxScroll > 0) {
+            var scrollName = self.isVertical ? "scrollTop" : "scrollLeft";
+            var thumbSetPosName = self.isVertical ? "setTop" : "setLeft";
+            var thumbPosName = self.isVertical ? "getTop" : "getLeft";
+            
+            var thumbPosition = floor((self.parent[$ scrollName] / self.__maxScroll) * self.__maxThumbPosition); 
+            if (self.Thumb[$ thumbPosName]() != thumbPosition) {
+                self.Thumb[$ thumbSetPosName](thumbPosition);
             }
-            global.UI.requestRedraw();
         }
-    });
-
-    // Track click-to-scroll: clicking on the scrollbar (not on the thumb) jumps to that position
-    self.onMouseDown(function(ev) {
-        if (self.__maxScroll <= 0) return false;
         
-        // Calculate the target scroll ratio based on click position
-        var _clickY = global.UI.mouseY - self.y1;
-        var _ratio = clamp(_clickY / self.layout.height, 0, 1);
-        
-        // Jump scrollTop to match the clicked position
-        var _newScroll = _ratio * self.__maxScroll;
-        self.parent.scrollTop = _newScroll;
-        self.__scrollTarget = _newScroll;
-        self.__thumbAlphaTarget = 1;
-        global.UI.requestRedraw();
-        
-        return false; // Don't stop propagation — thumb mousedown can still fire
+        // Ensure scroll is within bounds (e.g. after items destroyed)
+        var scrollName = self.isVertical ? "scrollTop" : "scrollLeft";
+        if (self.parent[$ scrollName] > self.__maxScroll) {
+            self.parent[$ scrollName] = self.__maxScroll;
+            global.UI.requestUpdate();
+        }
     });
 }
 
@@ -205,58 +177,50 @@ function UiScrollbarThumb(style = {}, props = {}): UiNode(style, props) construc
     setName(style[$ "name"] ?? "__UiScrollbar.Thumb");
     self.thumbColor = props[$ "thumbColor"];
     
-    self.onMouseDown(function(ev) {
+    self.onMouseDown(method(self, function(ev) {
         self.parent.dragged = true;
-        self.parent.dragStartY = global.UI.mouseY;
-        self.parent.dragStartScrollTop = self.parent.parent.scrollTop;
-        self.parent.__thumbAlphaTarget = 1;
+        self.parent.dragStartMouse = self.parent.isVertical ? global.UI.mouseY : global.UI.mouseX;
+        self.parent.dragStartScroll = self.parent.isVertical ? self.parent.parent.scrollTop : self.parent.parent.scrollLeft;
         global.UI.isScrolling = true;
         
-        self.setWidth(17);
-        self.setLeft(-3);
-        return true; // Stop propagation so track click doesn't also fire
-    });
+        if (self.parent.isVertical) {
+            self.setWidth(17);
+            self.setLeft(-3);
+        } else {
+            self.setHeight(17);
+            self.setTop(-3);
+        }
+        return true;
+    }));
     
-    self.onStep(function() {
+    self.onStep(method(self, function() {
         if (global.UI.mouseReleased) {
             if (self.parent.dragged) {
                 self.parent.dragged = false;
                 global.UI.isScrolling = false;
-                self.setWidth(11);
-                self.setLeft(0);
+                if (self.parent.isVertical) {
+                    self.setWidth(11);
+                    self.setLeft(0);
+                } else {
+                    self.setHeight(11);
+                    self.setTop(0);
+                }
             }
         }
-    });
+    }));
     
     function onDraw() {
-        // Don't draw if content fits (no scrolling needed)
         if (self.parent.__maxScroll <= 0) return;
-        // Don't draw if thumb fills the entire track
-        if (getHeight() >= self.parent.layout.height) return;
         
-        var _alpha = self.parent.__thumbAlpha;
-        if (_alpha <= 0.01) return;
-        
-        draw_set_alpha(_alpha);
-        draw_set_color(self.thumbColor);
-        
-        // Draw rounded-ish thumb (main body + rounded caps)
-        var _x1 = self.x1 + 2;
-        var _x2 = self.x2 - 5;
-        var _y1 = self.y1 + 1;
-        var _y2 = self.y2 - 1;
-        var _radius = min(3, (_x2 - _x1) / 2, (_y2 - _y1) / 2);
-        
-        // Simple rectangle with slight inset for cleaner look
-        draw_rectangle(_x1, _y1 + _radius, _x2, _y2 - _radius, false);
-        draw_rectangle(_x1 + _radius, _y1, _x2 - _radius, _y2, false);
-        
-        // Fill corners
-        draw_rectangle(_x1, _y1, _x1 + _radius, _y1 + _radius, false);
-        draw_rectangle(_x2 - _radius, _y1, _x2, _y1 + _radius, false);
-        draw_rectangle(_x1, _y2 - _radius, _x1 + _radius, _y2, false);
-        draw_rectangle(_x2 - _radius, _y2 - _radius, _x2, _y2, false);
-        
+        var layoutSize = self.parent.isVertical ? self.parent.layout.height : self.parent.layout.width;
+        var col = (typeof(self.thumbColor) == "method") ? self.thumbColor() : self.thumbColor;
+        draw_set_color(col);
+        draw_set_alpha(0.4);
+        if (self.parent.isVertical) {
+            draw_roundrect_ext(self.x1 + 3, self.y1 + 4, self.x2 - 3, self.y2 - 4, 4, 4, false);
+        } else {
+            draw_roundrect_ext(self.x1 + 4, self.y1 + 3, self.x2 - 4, self.y2 - 3, 4, 4, false);
+        }
         draw_set_alpha(1);
     }
 }

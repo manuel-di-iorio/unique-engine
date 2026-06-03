@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"UiTextarea",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"UiTextarea",
+  "parent":{
+    "name":"UniqueUI",
+    "path":"folders/Packages/UniqueUI.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

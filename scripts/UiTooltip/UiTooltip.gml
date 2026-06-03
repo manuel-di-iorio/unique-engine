@@ -8,7 +8,7 @@ function UiTooltip(): UiNode({
     left: -9999, 
     top: -9999,
     display: "none" // Hidden by default
-}) constructor {
+}, { visible: false }) constructor {
     self.backgroundColor = #282a36;
     self.borderColor = #44475a;
     self.borderRadius = 4;
@@ -19,49 +19,26 @@ function UiTooltip(): UiNode({
     self.target = undefined;
     self.isPositioned = false;
     
-    // Override show to accept target and text
     self.show = function(target, text) {
-        self.isPositioned = false;
-        self.visible = false;
         self.target = target;
         self.textNode.text = text;
         self.textNode.computeSize();
         
-        // Calculate initial position based on cursor and screen bounds
-        var estimatedWidth = self.textNode.getWidth() + 12; // padding 6+6
-        var estimatedHeight = self.textNode.getHeight() + 6; // padding 3+3
-        
-        var guiW = display_get_gui_width();
-        var guiH = display_get_gui_height();
-        
+        // Calculate initial position based on cursor
         var tx = global.UI.mouseX + 15;
         var ty = global.UI.mouseY + 20;
         
-        // Flip to the left if it overflows the right side
-        if (tx + estimatedWidth > guiW) {
-            tx = global.UI.mouseX - estimatedWidth - 10;
-        }
-        
-        // Flip upwards if it overflows the bottom
-        if (ty + estimatedHeight > guiH) {
-            ty = global.UI.mouseY - estimatedHeight - 10;
-        }
-        
-        // Safety clamp to screen edges
-        tx = max(4, min(tx, guiW - estimatedWidth - 4));
-        ty = max(4, min(ty, guiH - estimatedHeight - 4));
-
         self.setLeft(tx);
         self.setTop(ty);
         
-        // Show logic (inlined from UiNode)
+        // Show logic
         flexpanel_node_style_set_display(self.node, flexpanel_display.flex);
         self.display = true;
+        self.visible = true; // Show immediately
         global.UI.requestUpdate();
     };
     
     self.hide = function() {
-        // Move offscreen without triggering layout update
         self.layout.left = -9999;
         self.layout.top = -9999;
         self.x1 = -9999;
@@ -69,22 +46,13 @@ function UiTooltip(): UiNode({
         self.x2 = -9999;
         self.y2 = -9999;
         
-        // Remove from spatial tree using the standard proxyId
         global.UI.removeElementFromTree(self);
 
-        // Hide logic (inlined from UiNode)
         flexpanel_node_style_set_display(self.node, flexpanel_display.none);
         self.display = false;
-        
+        self.visible = false;
         self.target = undefined;
     };
-    
-    // Make tooltip visible after layout is calculated
-    self.onStep(function(layoutUpdated) {
-        if (layoutUpdated && self.display && self.target != undefined) {
-            self.visible = true;
-        }
-    });
     
     // Custom draw to handle background and text
     self.onDraw = function() {

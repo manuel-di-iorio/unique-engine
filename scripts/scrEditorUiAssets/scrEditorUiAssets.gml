@@ -12,11 +12,11 @@ function EditorUiAssets(ui) constructor {
         flexDirection: "column",
         // resizable: true,
         // resizableEdges: ["right"]
-    }, { border: true });
+    }, { border: true, borderColor: global.UI_COL_BORDER });
 
     with (ui.Assets) {
       self.onDraw = method(self, function() {
-            draw_set_color(global.UI_COL_INPUT_BG);
+            draw_set_color(global.UI_COL_BG_SIDEBAR);
             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
         });
     }
@@ -33,7 +33,7 @@ function EditorUiAssets(ui) constructor {
     });
     
     // Title
-    ui.Assets.Header.Title = new UiText("Scene", { marginLeft: 15 }, { color: c_white, font: fText });
+    ui.Assets.Header.Title = new UiText("Scene", { marginLeft: 15 }, { color: global.UI_COL_TEXT_MAIN, font: fText });
     ui.Assets.Header.add(ui.Assets.Header.Title);
 
     // Scene selector dropdown

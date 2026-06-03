@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"UiStore",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"UiStore",
+  "parent":{
+    "name":"UniqueUI",
+    "path":"folders/Packages/UniqueUI.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

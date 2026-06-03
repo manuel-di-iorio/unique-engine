@@ -5,8 +5,10 @@ function EditorUiMenu(ui) constructor {
     paddingHorizontal: 10, paddingVertical: 20, marginBottom: 0  });
 
     ui.Menu.onDraw = method(ui.Menu, function() {
-        draw_set_color(global.UI_COL_INPUT_BG);
+        draw_set_color(global.UI_COL_BG_CARD);
         draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
+        draw_set_color(global.UI_COL_BORDER);
+        draw_line(self.x1, self.y2 - 1, self.x2, self.y2 - 1);
         
         draw_sprite_ext(sprLogoIcon, 0, 35, round((self.y1 + self.y2) / 2), .12, .12, 0, c_white, 1);
     });

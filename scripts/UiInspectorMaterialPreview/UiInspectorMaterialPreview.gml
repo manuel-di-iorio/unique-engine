@@ -74,7 +74,7 @@ function UiInspectorMaterialPreview(style = {}, props = {}): UiNode(style, props
     // Clear surface
     if (!surface_exists(self.renderTarget.surface)) self.renderTarget.create();
     surface_set_target(self.renderTarget.surface);
-    draw_clear_alpha(global.UI_COL_INPUT_BG, 1);
+    draw_clear_alpha(global.UI_COL_INSPECTOR_BG, 1);
 
     // Apply camera matrices
     camera_apply(self.camera.camera);
@@ -173,7 +173,7 @@ function UiInspectorMaterialPreview(style = {}, props = {}): UiNode(style, props
     var _h = self.y2 - self.y1;
 
     // Background box
-    draw_set_color(global.UI_COL_INPUT_BG);
+    draw_set_color(global.UI_COL_INSPECTOR_BG);
     draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
 
     if (self.previewSprite != undefined) {
@@ -187,7 +187,7 @@ function UiInspectorMaterialPreview(style = {}, props = {}): UiNode(style, props
       draw_sprite_ext(self.previewSprite, 0, _drawX, _drawY, _scale, _scale, 0, c_white, 1);
     }
 
-    draw_set_color(global.UI_COL_BOX);
+    draw_set_color(global.UI_COL_BORDER);
     draw_rectangle(self.x1, self.y1, self.x2, self.y2, true);
   }
 

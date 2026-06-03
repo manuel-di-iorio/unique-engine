@@ -3,12 +3,22 @@
  * Usage: var menu = new UiContextMenu(x, y, items);
  * items = [{ label: "Action", onClick: function() {}, icon: sprite }]
  */
-function UiContextMenu(x, y, items) constructor {
+function UiContextMenu(x, y, items = []) constructor {
     var _this = self;
     self.x = x;
     self.y = y;
     self.items = items;
     self.Menu = undefined;
+    
+    function addItem(label, onClick = undefined, icon = undefined) {
+        array_push(self.items, { label: label, onClick: onClick, icon: icon });
+        return self;
+    }
+    
+    function addSeparator() {
+        array_push(self.items, { separator: true });
+        return self;
+    }
     
     /**
      * Show the context menu at the specified position
@@ -66,21 +76,18 @@ function UiContextMenu(x, y, items) constructor {
                 
                 // Adjust position if menu goes off-screen
                 if (self.layout.height != undefined && !self[$ "positionAdjusted"]) {
-                    var guiW = display_get_gui_width();
-                    var guiH = display_get_gui_height();
-                    
                     var adjustedY = self.initialY;
-                    if (adjustedY + self.layout.height > guiH) {
-                        adjustedY = guiH - self.layout.height - 10;
+                    if (adjustedY + self.layout.height > display_get_gui_height()) {
+                        adjustedY = display_get_gui_height() - self.layout.height - 10;
+                        self.setTop(adjustedY);
                     }
                     
                     var adjustedX = self.initialX;
-                    if (adjustedX + self.layout.width > guiW) {
-                        adjustedX = guiW - self.layout.width - 10;
+                    if (adjustedX + self.layout.width > display_get_gui_width()) {
+                        adjustedX = display_get_gui_width() - self.layout.width - 10;
+                        self.setLeft(adjustedX);
                     }
                     
-                    self.setTop(max(10, adjustedY));
-                    self.setLeft(max(10, adjustedX));
                     self.positionAdjusted = true;
                 }
             });
@@ -101,7 +108,7 @@ function UiContextMenu(x, y, items) constructor {
                         marginVertical: 3,
                     });
                     separator.onDraw = method(separator, function() {
-                         draw_set_color(global.UI_COL_INSPECTOR_BG);
+                         draw_set_color(#334155);
                          var _y = floor(mean(self.y1, self.y2));
                          draw_line(self.x1, _y, self.x2, _y);
                     });
@@ -148,7 +155,7 @@ function UiContextMenu(x, y, items) constructor {
                     
                     self.onDraw = function() {
                         if (self.hovered) {
-                            draw_set_color(global.UI_COL_INSPECTOR_BG);
+                            draw_set_color(global.UI_COL_PRIMARY);
                             draw_rectangle(self.x1, self.y1, self.x2, self.y2, false);
                         }
                         
@@ -162,7 +169,8 @@ function UiContextMenu(x, y, items) constructor {
                         }
                         
                         // Draw label
-                        draw_set_color(c_white);
+                        var labelCol = self.hovered ? c_white : #F8FAFC;
+                        draw_set_color(labelCol);
                         draw_set_halign(fa_left);
                         draw_set_valign(fa_middle);
                         draw_set_font(fText);
@@ -170,7 +178,8 @@ function UiContextMenu(x, y, items) constructor {
 
                         // Draw shortcut
                         if (self.shortcut != undefined) {
-                            draw_set_color(c_gray);
+                            var shortcutCol = self.hovered ? c_ltgray : #CBD5E1;
+                            draw_set_color(shortcutCol);
                             draw_set_halign(fa_right);
                             draw_text(self.x2 - 15, yy, self.shortcut);
                             draw_set_halign(fa_left);
@@ -182,7 +191,7 @@ function UiContextMenu(x, y, items) constructor {
             }
         }
         
-        global.UI.addToOverlayOnTop(self.Menu);
+        global.UI.getOverlay().add(self.Menu);
     }
     
     /**

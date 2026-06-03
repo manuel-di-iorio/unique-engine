@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"UiToast",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"UiToast",
+  "parent":{
+    "name":"UniqueUI",
+    "path":"folders/Packages/UniqueUI.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

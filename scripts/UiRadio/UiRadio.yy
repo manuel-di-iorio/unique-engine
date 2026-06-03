@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"UiRadio",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"UiRadio",
+  "parent":{
+    "name":"UniqueUI",
+    "path":"folders/Packages/UniqueUI.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"UiAlert",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"UiAlert",
+  "parent":{
+    "name":"UniqueUI",
+    "path":"folders/Packages/UniqueUI.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
