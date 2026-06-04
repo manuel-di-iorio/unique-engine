@@ -13,6 +13,8 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     self.enabled = true;
     self.enableRipple = props[$ "enableRipple"] ?? true;
     self.variant = props[$ "variant"] ?? "secondary"; // primary, secondary, outline, ghost, danger
+    self.spriteWidth = props[$ "spriteWidth"]; // Custom sprite width
+    self.spriteHeight = props[$ "spriteHeight"]; // Custom sprite height
     
     self.onMouseEnter(function() {
         global.UI.requestRedraw();
@@ -47,17 +49,21 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
     
     function resize() {
         var _w = 0, _h = 0;
+        // Calculate actual sprite dimensions
+        var actualSpriteWidth = self.spriteWidth != undefined ? self.spriteWidth : (self.sprite != undefined ? sprite_get_width(self.sprite) : 0);
+        var actualSpriteHeight = self.spriteHeight != undefined ? self.spriteHeight : (self.sprite != undefined ? sprite_get_height(self.sprite) : 0);
+        
         if (self.text != undefined) {
             draw_set_font(fText);
             _w = string_width(self.text) + 24;
             _h = string_height(self.text) + 12;
         } else if (self.sprite != undefined && self.label != undefined) {
             draw_set_font(fText);
-            _w = sprite_get_width(self.sprite) + string_width(self.label) + 30;
-            _h = max(sprite_get_height(self.sprite), string_height(self.label)) + 12;
+            _w = actualSpriteWidth + string_width(self.label) + 30;
+            _h = max(actualSpriteHeight, string_height(self.label)) + 12;
         } else if (self.sprite != undefined) {
-            _w = sprite_get_width(self.sprite) + 16;
-            _h = sprite_get_height(self.sprite) + 16;
+            _w = actualSpriteWidth + 16;
+            _h = actualSpriteHeight + 16;
         } else {
             _w = 32;
             _h = 32;
@@ -182,14 +188,27 @@ function UiButton(textOrImage, style = {}, props = {}): UiNode(style, props) con
             draw_set_font(fText); draw_set_color(text_color); draw_set_halign(self.halign); draw_set_valign(fa_middle);
             draw_text(xm, ym, self.text);
         } else if (self.sprite != undefined && self.label != undefined) {
-            var spriteWidth = sprite_get_width(self.sprite);
-            var totalWidth = spriteWidth + string_width(self.label) + 8;
+            // Calculate actual sprite dimensions and scale
+            var originalSpriteW = sprite_get_width(self.sprite);
+            var originalSpriteH = sprite_get_height(self.sprite);
+            var actualSpriteW = self.spriteWidth != undefined ? self.spriteWidth : originalSpriteW;
+            var actualSpriteH = self.spriteHeight != undefined ? self.spriteHeight : originalSpriteH;
+            var xscale = actualSpriteW / originalSpriteW;
+            var yscale = actualSpriteH / originalSpriteH;
+            
+            var totalWidth = actualSpriteW + string_width(self.label) + 8;
             var startX = self.x1 + (self.x2 - self.x1 - totalWidth) / 2;
-            draw_sprite_ext(self.sprite, self.hovered ? 1 : 0, startX + spriteWidth / 2, ym, 1, 1, 0, text_color, 1);
+            draw_sprite_ext(self.sprite, self.hovered ? 1 : 0, startX + actualSpriteW / 2, ym, xscale, yscale, 0, text_color, 1);
             draw_set_font(fText); draw_set_color(text_color); draw_set_halign(fa_left); draw_set_valign(fa_middle);
-            draw_text(startX + spriteWidth + 8, ym, self.label);
+            draw_text(startX + actualSpriteW + 8, ym, self.label);
         } else if (self.sprite) {
-            draw_sprite_ext(self.sprite, self.hovered ? 1 : 0, xm, ym, 1, 1, 0, text_color, 1);
+            // Calculate actual sprite dimensions and scale
+            var originalSpriteW = sprite_get_width(self.sprite);
+            var originalSpriteH = sprite_get_height(self.sprite);
+            var xscale = self.spriteWidth != undefined ? (self.spriteWidth / originalSpriteW) : 1;
+            var yscale = self.spriteHeight != undefined ? (self.spriteHeight / originalSpriteH) : 1;
+            
+            draw_sprite_ext(self.sprite, self.hovered ? 1 : 0, xm, ym, xscale, yscale, 0, text_color, 1);
         }
 
         draw_set_alpha(1);
